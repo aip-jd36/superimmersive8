@@ -15,7 +15,9 @@ function validGuidedBody(): TurnRequestBody {
     guidedInit: {
       guidedEntryInitId: VALID_ID,
       definitionId: 'agency-producing-for-client',
-      definitionVersion: 'v1',
+      // CRC-GE-MULTITOOL-1 (2026-09-22): bumped v1 -> v2 alongside the
+      // production definitions (guided-entry-definitions.ts).
+      definitionVersion: 'v2',
       fields: [{ fieldId: 'workflow_role', value: 'agency, producing for a client' }],
       concern: 'Can I use this commercially?',
     },

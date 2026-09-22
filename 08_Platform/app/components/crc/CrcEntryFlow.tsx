@@ -56,7 +56,8 @@ export interface GuidedSubmission {
   guidedEntryInitId: string
   definitionId: string
   definitionVersion: string
-  fields: { fieldId: string; value: string }[]
+  /** CRC-GE-MULTITOOL-1: a multi-select field entry carries `values` (never `value`); every single-select field entry carries `value` (never `values`), exactly as before. */
+  fields: { fieldId: string; value?: string; values?: string[] }[]
   concern: string
 }
 
@@ -99,6 +100,10 @@ export function CrcEntryFlow({ onFreeFormSubmit, onGuidedSubmit, submitting, err
 
   function setFieldAnswer(field: GuidedFieldSpec, value: string) {
     dispatch({ type: 'SET_FIELD_ANSWER', fieldId: field.fieldId, value })
+  }
+
+  function toggleFieldValue(field: GuidedFieldSpec, value: string) {
+    dispatch({ type: 'TOGGLE_FIELD_VALUE', fieldId: field.fieldId, value })
   }
 
   function skipField(field: GuidedFieldSpec) {
@@ -187,8 +192,9 @@ export function CrcEntryFlow({ onFreeFormSubmit, onGuidedSubmit, submitting, err
             {currentField && (
               <FieldStep
                 field={currentField}
-                value={answers[currentField.fieldId] ?? ''}
+                value={answers[currentField.fieldId] ?? (currentField.cardinality === 'multiple' ? [] : '')}
                 onChange={(value) => setFieldAnswer(currentField, value)}
+                onToggle={(value) => toggleFieldValue(currentField, value)}
                 onSkip={() => skipField(currentField)}
                 onContinue={() => continueFromField(currentField)}
                 locale={locale}
@@ -283,41 +289,81 @@ function FieldStep({
   field,
   value,
   onChange,
+  onToggle,
   onSkip,
   onContinue,
   locale,
   copy,
 }: {
   field: GuidedFieldSpec
-  value: string
+  /** A single-select field's current draft value (string) or a multi-select field's current selection (string[]) — which shape applies is read from `field.cardinality`, never guessed from the runtime value. */
+  value: string | string[]
+  /** Single-select fields only. */
   onChange: (value: string) => void
+  /** Multi-select fields only — toggles one value's membership in the current selection. */
+  onToggle: (value: string) => void
   onSkip: () => void
   onContinue: () => void
   locale: CrcLocale
   copy: CrcUiCopy
 }) {
   const prompt = getFieldPrompt(locale, field.kind, field.prompt)
+  const isMultiSelect = field.cardinality === 'multiple'
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold leading-snug text-foreground sm:text-2xl">{prompt}</h2>
-      <div className="space-y-1.5">
-        <label htmlFor={`guided-field-${field.fieldId}`} className="sr-only">
-          {prompt}
-        </label>
-        <select
-          id={`guided-field-${field.fieldId}`}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        >
-          <option value="">{field.kind === 'tool' ? copy.selectTool : copy.selectJurisdiction}</option>
-          {field.options.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {getOptionDisplayLabel(locale, field.kind, opt.value, opt.label)}
-            </option>
-          ))}
-        </select>
-      </div>
+      {isMultiSelect ? (
+        // CRC-GE-MULTITOOL-1: mobile-first checkbox/toggle list — native
+        // HTML only, no new dependency. Each option is independently
+        // tappable (min 48px touch target), selected state is visually
+        // obvious (border + background change, on top of the native
+        // checkbox's own check mark), keyboard-accessible via ordinary
+        // Tab/Space (no Ctrl/Cmd-click), and free to select/deselect
+        // repeatedly before Continue. No tool-category/modality grouping
+        // and no "Other"/free-text entry — options render in the field's
+        // own declared order, unmodified.
+        <div className="space-y-2" role="group" aria-label={prompt}>
+          {field.options.map((opt) => {
+            const selectedValues = value as string[]
+            const checked = selectedValues.includes(opt.value)
+            return (
+              <label
+                key={opt.value}
+                className={`flex min-h-[48px] cursor-pointer items-center gap-3 rounded-md border px-3 py-2.5 text-base transition-colors focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 ${
+                  checked ? 'border-primary bg-accent' : 'border-input bg-background'
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={() => onToggle(opt.value)}
+                  className="h-5 w-5 shrink-0 accent-primary"
+                />
+                <span>{getOptionDisplayLabel(locale, field.kind, opt.value, opt.label)}</span>
+              </label>
+            )
+          })}
+        </div>
+      ) : (
+        <div className="space-y-1.5">
+          <label htmlFor={`guided-field-${field.fieldId}`} className="sr-only">
+            {prompt}
+          </label>
+          <select
+            id={`guided-field-${field.fieldId}`}
+            value={value as string}
+            onChange={(e) => onChange(e.target.value)}
+            className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <option value="">{field.kind === 'tool' ? copy.selectTool : copy.selectJurisdiction}</option>
+            {field.options.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {getOptionDisplayLabel(locale, field.kind, opt.value, opt.label)}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       <div className="flex flex-col gap-2">
         <Button type="button" size="lg" className="h-12 w-full text-base" onClick={onContinue}>
           {copy.continueLabel}

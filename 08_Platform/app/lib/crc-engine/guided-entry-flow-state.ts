@@ -18,11 +18,25 @@ import type { GuidedSubmission } from '@/components/crc/CrcEntryFlow'
 
 export type GuidedEntryFlowScreen = 'choice' | 'guided_step' | 'free_form'
 
+/**
+ * CRC-GE-MULTITOOL-1 (2026-09-22): a per-key union, not a full restructure
+ * into a discriminated-per-field-kind shape. `answers` is this reducer's
+ * pre-existing, deliberately generic-across-field-kinds flat dictionary
+ * (keyed by fieldId, read/written the same way regardless of which field
+ * kind owns a given key) -- the smallest safe change that lets it hold a
+ * `string[]` for the one multi-select field (`tool`) while every
+ * single-select field (`workflow_role`, `jurisdiction`) keeps storing a
+ * plain `string` exactly as before. This is CLIENT-side draft UI state,
+ * never trusted/validated data crossing an API boundary (that boundary is
+ * `GuidedFieldAnswer`, types/guided-entry.ts, a real discriminated union) --
+ * the stricter "invalid states impossible to construct" property matters
+ * most there, not here.
+ */
 export interface GuidedEntryFlowState {
   screen: GuidedEntryFlowScreen
   selectedDefinition: GuidedEntryDefinition | null
   stepIndex: number
-  answers: Record<string, string>
+  answers: Record<string, string | string[]>
   concern: string
   freeFormText: string
 }
@@ -32,6 +46,8 @@ export type GuidedEntryFlowAction =
   | { type: 'SELECT_FREE_FORM' }
   | { type: 'GO_BACK' }
   | { type: 'SET_FIELD_ANSWER'; fieldId: string; value: string }
+  /** CRC-GE-MULTITOOL-1: toggles ONE value's membership in a multi-select field's current selection array (add if absent, remove if present) -- the caller never needs to read the current array itself. Only dispatched for `cardinality: 'multiple'` fields; SET_FIELD_ANSWER remains the only action single-select fields ever dispatch, completely unchanged. */
+  | { type: 'TOGGLE_FIELD_VALUE'; fieldId: string; value: string }
   | { type: 'SKIP_FIELD'; fieldId: string }
   | { type: 'ADVANCE_STEP' }
   | { type: 'SET_CONCERN'; value: string }
@@ -67,7 +83,7 @@ export function guidedEntryFlowReducer(state: GuidedEntryFlowState, action: Guid
       // must never leak into a submission for a role the user only later
       // settled on (Phase 16 test 14's own requirement).
       const roleField = action.definition.fields.find((f) => f.kind === 'workflow_role')
-      const answers: Record<string, string> = {}
+      const answers: Record<string, string | string[]> = {}
       if (roleField?.options[0]) answers[roleField.fieldId] = roleField.options[0].value
       return { screen: 'guided_step', selectedDefinition: action.definition, stepIndex: 0, answers, concern: '', freeFormText: state.freeFormText }
     }
@@ -86,6 +102,22 @@ export function guidedEntryFlowReducer(state: GuidedEntryFlowState, action: Guid
     }
     case 'SET_FIELD_ANSWER':
       return { ...state, answers: { ...state.answers, [action.fieldId]: action.value } }
+    case 'TOGGLE_FIELD_VALUE': {
+      const current = state.answers[action.fieldId]
+      const currentValues = Array.isArray(current) ? current : []
+      const next = currentValues.includes(action.value) ? currentValues.filter((v) => v !== action.value) : [...currentValues, action.value]
+      const answers = { ...state.answers }
+      // An empty selection is removed entirely, never stored as `[]` --
+      // matches SKIP_FIELD's own "never leaves a stale/empty value behind"
+      // discipline immediately below, and keeps buildGuidedSubmission's
+      // Object.entries loop naturally omitting an untouched/emptied field.
+      if (next.length === 0) {
+        delete answers[action.fieldId]
+      } else {
+        answers[action.fieldId] = next
+      }
+      return { ...state, answers }
+    }
     case 'SKIP_FIELD': {
       // Skip removes any prior answer for this field (never leaves a
       // stale value behind) and advances -- it never substitutes a
@@ -119,7 +151,11 @@ export function buildGuidedSubmission(state: GuidedEntryFlowState, guidedEntryIn
     guidedEntryInitId,
     definitionId: state.selectedDefinition.definitionId,
     definitionVersion: state.selectedDefinition.version,
-    fields: Object.entries(state.answers).map(([fieldId, value]) => ({ fieldId, value })),
+    // CRC-GE-MULTITOOL-1: a multi-select field's draft state is a
+    // `string[]` -> emits `{fieldId, values}`; every single-select field's
+    // draft state is a plain `string`, unchanged -> emits `{fieldId,
+    // value}`, byte-identical to this function's pre-existing behavior.
+    fields: Object.entries(state.answers).map(([fieldId, value]) => (Array.isArray(value) ? { fieldId, values: value } : { fieldId, value })),
     concern,
   }
 }

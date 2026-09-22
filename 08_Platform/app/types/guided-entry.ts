@@ -55,6 +55,17 @@ export interface GuidedFieldSpec {
   /** Rendered directly next to the field — see Phase 5's own disclosure requirement: what this field establishes must be visible to the user before they answer it, never hidden in a bundled card assertion. */
   prompt: string
   options: GuidedFieldOption[]
+  /**
+   * CRC-GE-MULTITOOL-1 (2026-09-22). Explicit on every field, never
+   * inferred/defaulted — the validator and UI both branch on this rather
+   * than guessing a field's own cardinality from its `kind`. 'single'
+   * matches every pre-existing field's behavior exactly (workflow_role,
+   * jurisdiction). 'multiple' (currently only the `tool` field) means the
+   * user may select zero or more canonical identities; each selected
+   * identity becomes its own ordinary mention downstream (see
+   * guided-entry-init.ts) — never a synthetic combined value.
+   */
+  cardinality: 'single' | 'multiple'
 }
 
 /**
@@ -87,11 +98,24 @@ export interface GuidedEntryDefinition {
  * unvalidated client input — this type is the OUTPUT of validation, not a
  * request DTO.
  */
+/**
+ * CRC-GE-MULTITOOL-1 (2026-09-22). A discriminated union, not `value:
+ * string | string[]` — the `cardinality` tag makes "an array where a
+ * single-select field expected one string" and "a single string where a
+ * multi-select field expected an array" both impossible to construct, not
+ * merely wrong at runtime. Mirrors the field's own `cardinality` exactly
+ * (validateGuidedEntryRequest is the one place that ties them together —
+ * see guided-entry-init.ts).
+ */
+export type GuidedFieldAnswer =
+  | { fieldId: string; kind: GuidedFieldKind; cardinality: 'single'; value: string }
+  | { fieldId: string; kind: GuidedFieldKind; cardinality: 'multiple'; values: string[] }
+
 export interface GuidedEntrySelection {
   definitionId: string
   definitionVersion: string
-  /** One entry per field the user actually answered — a required field the user skipped is absent, never a placeholder value (skip is a legitimate answer for a non-required field only; see guided-entry-init.ts). */
-  answers: { fieldId: string; kind: GuidedFieldKind; value: string }[]
+  /** One entry per field the user actually answered — a required field the user skipped is absent, never a placeholder value (skip is a legitimate answer for a non-required field only; see guided-entry-init.ts). A 'multiple' entry's `values` is never empty — an empty multi-select is the same as skipping the field entirely (no entry at all), matching 'single' fields' existing "absent, not a placeholder" convention. */
+  answers: GuidedFieldAnswer[]
   /** The user's own free-text concern — untouched, handed to normal extraction exactly as any conversational turn's text would be (Phase 7). Never parsed, classified, or mapped to a goal category here. */
   concern: string
 }

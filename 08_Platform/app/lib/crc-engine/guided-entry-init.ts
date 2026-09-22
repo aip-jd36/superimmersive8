@@ -43,6 +43,22 @@ import { findGuidedEntryDefinition } from './guided-entry-definitions'
 import type { GuidedEntryDefinition, GuidedEntrySelection, GuidedFieldKind } from '@/types/guided-entry'
 
 /**
+ * CRC-GE-MULTITOOL-1 (2026-09-22). A field's `cardinality` (types/guided-
+ * entry.ts) now determines whether its raw wire representation is the
+ * original scalar `value` or a new `values` array -- validated generically
+ * below by branching on `spec.cardinality`, never on `spec.kind === 'tool'`
+ * specifically (a future multi-select field of any other kind would work
+ * identically, with zero new code here). Selecting N canonical tools still
+ * produces N ordinary ToolMentions via the same, completely unmodified
+ * addToolMention() this module has always used -- see applyOneGuidedField's
+ * 'tool' case below. ARCHITECTURAL CONTRACT (restated, unchanged): a
+ * selected tool remains a ProjectFact only -- it never implies CRC has
+ * substantive Living Knowledge for it, commercial permission, clearance,
+ * evidence, plan/account status, claim applicability, CRC eligibility of
+ * any claim, or any Bounded Interpretation conclusion.
+ */
+
+/**
  * Duplicated from lib/crc-engine/run-turn.ts's own private
  * `emptyStructuredUnderstanding()`, NOT imported from
  * lib/interview-engine/eval/empty-structured-understanding.ts (production
@@ -99,7 +115,10 @@ export function isValidGuidedEntryInitId(value: unknown): value is string {
 
 export interface RawGuidedFieldAnswer {
   fieldId: unknown
-  value: unknown
+  /** Single-select fields only (cardinality: 'single'). Mutually exclusive with `values` -- both present, or neither matching the field's own declared cardinality, is rejected (see validateGuidedEntryRequest). */
+  value?: unknown
+  /** Multi-select fields only (cardinality: 'multiple', e.g. `tool`, CRC-GE-MULTITOOL-1). */
+  values?: unknown
 }
 
 export interface RawGuidedEntryInit {
@@ -150,9 +169,9 @@ export function validateGuidedEntryRequest(raw: RawGuidedEntryInit): ValidateGui
     if (typeof rawField !== 'object' || rawField === null) {
       return { ok: false, error: 'Each guidedInit.fields entry must be an object.' }
     }
-    const { fieldId, value } = rawField as RawGuidedFieldAnswer
-    if (typeof fieldId !== 'string' || typeof value !== 'string') {
-      return { ok: false, error: 'Each guidedInit.fields entry must have string fieldId and value.' }
+    const { fieldId, value, values } = rawField as RawGuidedFieldAnswer
+    if (typeof fieldId !== 'string') {
+      return { ok: false, error: 'Each guidedInit.fields entry must have a string fieldId.' }
     }
     if (seenFieldIds.has(fieldId)) {
       return { ok: false, error: `Duplicate guidedInit.fields entry for fieldId: ${fieldId}.` }
@@ -163,20 +182,74 @@ export function validateGuidedEntryRequest(raw: RawGuidedEntryInit): ValidateGui
     if (!spec) {
       return { ok: false, error: `Unknown field for this definition: ${fieldId}.` }
     }
-    const option = spec.options.find((o) => o.value === value)
-    if (!option) {
-      return { ok: false, error: `Unknown option value for field ${fieldId}: ${value}.` }
+
+    if (spec.cardinality === 'multiple') {
+      // CRC-GE-MULTITOOL-1: a multi-select field must use "values" (an
+      // array), never the scalar "value" -- a malformed mixed state is
+      // rejected explicitly rather than silently coerced into a
+      // one-element array, so a stale/incorrect client fails loudly.
+      if (value !== undefined) {
+        return { ok: false, error: `Field ${fieldId} is multi-select and must use "values", not "value".` }
+      }
+      if (!Array.isArray(values) || values.some((v) => typeof v !== 'string')) {
+        return { ok: false, error: `Field ${fieldId} must provide "values" as an array of strings.` }
+      }
+      const stringValues = values as string[]
+      if (stringValues.length === 0) {
+        // Empty multi-selection is the same as omitting the field entirely
+        // (no answer entry recorded) -- matches every existing optional
+        // single-select field's own "skipped, not a placeholder"
+        // convention. A required multi-select field (none exists today)
+        // must reject this explicitly rather than silently pass the
+        // generic end-of-function required-field check, which only sees
+        // `seenFieldIds`, not whether any value was actually selected.
+        if (spec.required) {
+          return { ok: false, error: `Field ${fieldId} is required and must include at least one value.` }
+        }
+        continue
+      }
+      const seenValues = new Set<string>()
+      for (const v of stringValues) {
+        if (seenValues.has(v)) {
+          return { ok: false, error: `Field ${fieldId} contains a duplicate selection: ${v}.` }
+        }
+        seenValues.add(v)
+        const option = spec.options.find((o) => o.value === v)
+        if (!option) {
+          return { ok: false, error: `Unknown option value for field ${fieldId}: ${v}.` }
+        }
+        // Same defense-in-depth registry re-check every canonical tool
+        // value has always required (Diagnostic Phase 6), now applied to
+        // every value in the array, not just a single scalar. Invalid
+        // selection of any one tool fails the complete initialization --
+        // nothing is mutated until every value in every field passes.
+        if (spec.kind === 'tool' && !isCanonicalToolIdentity(v)) {
+          return { ok: false, error: `Field ${fieldId} value is not a current canonical tool identity: ${v}.` }
+        }
+      }
+      answers.push({ fieldId, kind: spec.kind, cardinality: 'multiple', values: stringValues })
+    } else {
+      if (values !== undefined) {
+        return { ok: false, error: `Field ${fieldId} is single-select and must use "value", not "values".` }
+      }
+      if (typeof value !== 'string') {
+        return { ok: false, error: 'Each guidedInit.fields entry must have string fieldId and value.' }
+      }
+      const option = spec.options.find((o) => o.value === value)
+      if (!option) {
+        return { ok: false, error: `Unknown option value for field ${fieldId}: ${value}.` }
+      }
+      // Server-side, independent re-validation against the authoritative
+      // registry — the definition's own option list is UI content, never
+      // trusted as validation on its own (Diagnostic Phase 6). A canonical
+      // tool id that existed when this definition was authored but was later
+      // retired from the registry fails closed here even though it's still
+      // listed in guided-entry-definitions.ts.
+      if (spec.kind === 'tool' && !isCanonicalToolIdentity(value)) {
+        return { ok: false, error: `Field ${fieldId} value is not a current canonical tool identity: ${value}.` }
+      }
+      answers.push({ fieldId, kind: spec.kind, cardinality: 'single', value })
     }
-    // Server-side, independent re-validation against the authoritative
-    // registry — the definition's own option list is UI content, never
-    // trusted as validation on its own (Diagnostic Phase 6). A canonical
-    // tool id that existed when this definition was authored but was later
-    // retired from the registry fails closed here even though it's still
-    // listed in guided-entry-definitions.ts.
-    if (spec.kind === 'tool' && !isCanonicalToolIdentity(value)) {
-      return { ok: false, error: `Field ${fieldId} value is not a current canonical tool identity: ${value}.` }
-    }
-    answers.push({ fieldId, kind: spec.kind, value })
   }
 
   const missingRequired = definition.fields.filter((f) => f.required && !seenFieldIds.has(f.fieldId))
@@ -190,9 +263,29 @@ export function validateGuidedEntryRequest(raw: RawGuidedEntryInit): ValidateGui
   }
 }
 
-/** Deterministic per (token, fieldId) — a defensive, secondary idempotency property (see guided-entry-route-support.ts for the primary mechanism, the single atomic session-creation INSERT). Not random: a retry that reaches this function again with the same token/fieldId produces the identical id, so if it were ever re-applied to the SAME already-seeded StructuredUnderstanding, mutations.ts's own "id already exists" guard would reject the duplicate rather than silently double-adding it. */
+/** Deterministic per (token, fieldId) — a defensive, secondary idempotency property (see guided-entry-route-support.ts for the primary mechanism, the single atomic session-creation INSERT). Not random: a retry that reaches this function again with the same token/fieldId produces the identical id, so if it were ever re-applied to the SAME already-seeded StructuredUnderstanding, mutations.ts's own "id already exists" guard would reject the duplicate rather than silently double-adding it. Used for every single-cardinality field (workflow_role produces no mention at all; jurisdiction is the only mention-producing single-cardinality field) — untouched by CRC-GE-MULTITOOL-1. */
 function guidedMentionId(token: string, fieldId: string): string {
   return `ge-${token}-${fieldId}`
+}
+
+/**
+ * CRC-GE-MULTITOOL-1 (2026-09-22). guidedMentionId(token, fieldId) alone
+ * cannot safely identify N mentions produced from ONE multi-select field —
+ * reusing it per selected value would collide on the second call
+ * (mutations.ts's addToolMention throws on a duplicate mention_id). Keying
+ * on the selected VALUE too gives exactly the properties a multi-select
+ * field needs: unique per selected canonical identity (two different
+ * values always differ), deterministic across retries (the same value
+ * always produces the same id, preserving guidedMentionId's own
+ * idempotency guarantee), and order-independent (the id depends only on
+ * which value was selected, never on its position in the array) — with no
+ * random UUID and no synthetic combined "multi-tool" identity encoded
+ * anywhere. Canonical tool identifiers are a closed, lowercase/hyphen-only
+ * slug set (CANONICAL_TOOL_IDS) with no character that could make this
+ * id's own `-`-delimited shape ambiguous.
+ */
+function guidedMultiMentionId(token: string, fieldId: string, value: string): string {
+  return `ge-${token}-${fieldId}-${value}`
 }
 
 /**
@@ -207,8 +300,24 @@ export function applyGuidedEntrySelection(selection: GuidedEntrySelection, token
   let su = emptyStructuredUnderstanding()
 
   for (const answer of selection.answers) {
-    const sourceStatement = buildGuidedEntrySourceStatement(selection.definitionId, selection.definitionVersion, answer.fieldId, answer.value)
-    su = applyOneGuidedField(su, answer.kind, answer.value, token, answer.fieldId, sourceStatement)
+    if (answer.cardinality === 'multiple') {
+      // CRC-GE-MULTITOOL-1: N selected canonical identities -> N ordinary
+      // applyOneGuidedField calls, each independently producing one
+      // ordinary mention via the same unmodified mutations.ts export as
+      // every single-cardinality field already uses. Order in `values`
+      // carries no meaning (Phase 3's own "prefer semantic set behavior");
+      // this loop's iteration order has no effect on the resulting
+      // StructuredUnderstanding beyond tool_mentions array order, which no
+      // downstream consumer treats as meaningful (Retrieval already
+      // evaluates active tool mentions as a set, not a sequence).
+      for (const value of answer.values) {
+        const sourceStatement = buildGuidedEntrySourceStatement(selection.definitionId, selection.definitionVersion, answer.fieldId, value)
+        su = applyOneGuidedField(su, answer.kind, value, token, answer.fieldId, sourceStatement)
+      }
+    } else {
+      const sourceStatement = buildGuidedEntrySourceStatement(selection.definitionId, selection.definitionVersion, answer.fieldId, answer.value)
+      su = applyOneGuidedField(su, answer.kind, answer.value, token, answer.fieldId, sourceStatement)
+    }
   }
 
   return su
@@ -227,7 +336,7 @@ function applyOneGuidedField(
       return setWorkflowRole(su, { state: 'confirmed', value }, GUIDED_ENTRY_INIT_TURN, sourceStatement)
     case 'tool': {
       const mention: ToolMention = {
-        mention_id: guidedMentionId(token, fieldId),
+        mention_id: guidedMultiMentionId(token, fieldId, value),
         resolution: { kind: 'canonical', identifier: value },
         access_surface: { state: 'unknown' },
         plan_tier: { state: 'unknown' },

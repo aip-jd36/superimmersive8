@@ -69,12 +69,52 @@ describe('field answers and skip (test 7, 8, 12)', () => {
     return guidedEntryFlowReducer(initialGuidedEntryFlowState(), { type: 'SELECT_ROLE', definition: AGENCY })
   }
 
-  test('SET_FIELD_ANSWER records a tool answer (test 7: no stronger status implied, plain value stored)', () => {
+  test('CRC-GE-MULTITOOL-1: TOGGLE_FIELD_VALUE records a tool selection (test 7: no stronger status implied, plain value stored in an array)', () => {
     const s0 = afterSelectAgency()
     const toolField = currentField(s0)!
     expect(toolField.kind).toBe('tool')
-    const s1 = guidedEntryFlowReducer(s0, { type: 'SET_FIELD_ANSWER', fieldId: toolField.fieldId, value: 'runway-gen3' })
-    expect(s1.answers[toolField.fieldId]).toBe('runway-gen3')
+    expect(toolField.cardinality).toBe('multiple')
+    const s1 = guidedEntryFlowReducer(s0, { type: 'TOGGLE_FIELD_VALUE', fieldId: toolField.fieldId, value: 'runway-gen3' })
+    expect(s1.answers[toolField.fieldId]).toEqual(['runway-gen3'])
+  })
+
+  test('CRC-GE-MULTITOOL-1: TOGGLE_FIELD_VALUE select/deselect multiple tools freely (test 20)', () => {
+    const s0 = afterSelectAgency()
+    const toolField = currentField(s0)!
+    let state = guidedEntryFlowReducer(s0, { type: 'TOGGLE_FIELD_VALUE', fieldId: toolField.fieldId, value: 'kling' })
+    state = guidedEntryFlowReducer(state, { type: 'TOGGLE_FIELD_VALUE', fieldId: toolField.fieldId, value: 'elevenlabs' })
+    state = guidedEntryFlowReducer(state, { type: 'TOGGLE_FIELD_VALUE', fieldId: toolField.fieldId, value: 'suno' })
+    expect((state.answers[toolField.fieldId] as string[]).slice().sort()).toEqual(['elevenlabs', 'kling', 'suno'])
+    // Toggling an already-selected value again deselects it.
+    state = guidedEntryFlowReducer(state, { type: 'TOGGLE_FIELD_VALUE', fieldId: toolField.fieldId, value: 'elevenlabs' })
+    expect((state.answers[toolField.fieldId] as string[]).slice().sort()).toEqual(['kling', 'suno'])
+  })
+
+  test('CRC-GE-MULTITOOL-1: deselecting the last selected tool removes the field entirely, mirroring Skip semantics', () => {
+    const s0 = afterSelectAgency()
+    const toolField = currentField(s0)!
+    let state = guidedEntryFlowReducer(s0, { type: 'TOGGLE_FIELD_VALUE', fieldId: toolField.fieldId, value: 'kling' })
+    expect(toolField.fieldId in state.answers).toBe(true)
+    state = guidedEntryFlowReducer(state, { type: 'TOGGLE_FIELD_VALUE', fieldId: toolField.fieldId, value: 'kling' })
+    expect(toolField.fieldId in state.answers).toBe(false)
+  })
+
+  test('CRC-GE-MULTITOOL-1: buildGuidedSubmission emits {fieldId, values} for the multi-select tool field, {fieldId, value} for every single-select field, unchanged', () => {
+    let state = guidedEntryFlowReducer(initialGuidedEntryFlowState(), { type: 'SELECT_ROLE', definition: AGENCY })
+    const toolField = currentField(state)!
+    state = guidedEntryFlowReducer(state, { type: 'TOGGLE_FIELD_VALUE', fieldId: toolField.fieldId, value: 'kling' })
+    state = guidedEntryFlowReducer(state, { type: 'TOGGLE_FIELD_VALUE', fieldId: toolField.fieldId, value: 'pika' })
+    state = guidedEntryFlowReducer(state, { type: 'ADVANCE_STEP' })
+    const jurisdictionField = currentField(state)!
+    state = guidedEntryFlowReducer(state, { type: 'SET_FIELD_ANSWER', fieldId: jurisdictionField.fieldId, value: 'United States' })
+    state = { ...state, concern: 'Can I use this commercially?' }
+    const submission = buildGuidedSubmission(state, 'test-id-multi')!
+    const toolEntry = submission.fields.find((f) => f.fieldId === toolField.fieldId)!
+    expect(toolEntry.value).toBeUndefined()
+    expect((toolEntry.values as string[]).slice().sort()).toEqual(['kling', 'pika'])
+    const jurisdictionEntry = submission.fields.find((f) => f.fieldId === jurisdictionField.fieldId)!
+    expect(jurisdictionEntry.values).toBeUndefined()
+    expect(jurisdictionEntry.value).toBe('United States')
   })
 
   test('SET_FIELD_ANSWER records a jurisdiction answer (test 8)', () => {
@@ -99,7 +139,7 @@ describe('field answers and skip (test 7, 8, 12)', () => {
   test('skipping after having answered removes the prior answer entirely (never a stale/placeholder value)', () => {
     const s0 = afterSelectAgency()
     const toolField = currentField(s0)!
-    const s1 = guidedEntryFlowReducer(s0, { type: 'SET_FIELD_ANSWER', fieldId: toolField.fieldId, value: 'kling' })
+    const s1 = guidedEntryFlowReducer(s0, { type: 'TOGGLE_FIELD_VALUE', fieldId: toolField.fieldId, value: 'kling' })
     const s2 = guidedEntryFlowReducer(s1, { type: 'SKIP_FIELD', fieldId: toolField.fieldId })
     expect(toolField.fieldId in s2.answers).toBe(false)
   })
@@ -133,15 +173,15 @@ describe('reaching and submitting the concern step (test 9)', () => {
 })
 
 describe('Back navigation preserves prior answers (test 13)', () => {
-  test('Back from jurisdiction to tool keeps the tool answer intact', () => {
+  test('Back from jurisdiction to tool keeps the tool selection intact', () => {
     let state = guidedEntryFlowReducer(initialGuidedEntryFlowState(), { type: 'SELECT_ROLE', definition: AGENCY })
     const toolField = currentField(state)!
-    state = guidedEntryFlowReducer(state, { type: 'SET_FIELD_ANSWER', fieldId: toolField.fieldId, value: 'luma' })
+    state = guidedEntryFlowReducer(state, { type: 'TOGGLE_FIELD_VALUE', fieldId: toolField.fieldId, value: 'luma' })
     state = guidedEntryFlowReducer(state, { type: 'ADVANCE_STEP' }) // now on jurisdiction
     expect(currentField(state)!.kind).toBe('jurisdiction')
     state = guidedEntryFlowReducer(state, { type: 'GO_BACK' }) // back to tool
     expect(currentField(state)!.kind).toBe('tool')
-    expect(state.answers[toolField.fieldId]).toBe('luma')
+    expect(state.answers[toolField.fieldId]).toEqual(['luma'])
   })
 
   test('Back from the first guided step returns to the choice screen and clears the role selection', () => {
@@ -162,7 +202,7 @@ describe('changing role before initialization never leaves stale facts (test 14)
   test('selecting Independent after having answered fields under Agency starts answers fresh, with only the new role auto-answered', () => {
     let state = guidedEntryFlowReducer(initialGuidedEntryFlowState(), { type: 'SELECT_ROLE', definition: AGENCY })
     const agencyToolField = currentField(state)!
-    state = guidedEntryFlowReducer(state, { type: 'SET_FIELD_ANSWER', fieldId: agencyToolField.fieldId, value: 'pika' })
+    state = guidedEntryFlowReducer(state, { type: 'TOGGLE_FIELD_VALUE', fieldId: agencyToolField.fieldId, value: 'pika' })
     state = guidedEntryFlowReducer(state, { type: 'GO_BACK' }) // back to choice
     state = guidedEntryFlowReducer(state, { type: 'SELECT_ROLE', definition: INDEPENDENT })
 

@@ -242,7 +242,10 @@ export function getRoleDisplay(
 }
 
 const FIELD_PROMPT_ZH_TW: Record<string, string> = {
-  tool: '您使用哪個工具生成這支 AI 影片？',
+  // CRC-GE-MULTITOOL-1 (2026-09-22). PM-approved wording for the broadened,
+  // multi-select "which AI tools did you use for this production" question
+  // (replaces the prior singular "which tool generated the video" wording).
+  tool: '您這個製作使用了哪些 AI 工具？',
   jurisdiction: '我們應考量哪個司法管轄區？',
 }
 
@@ -255,10 +258,11 @@ export function getFieldPrompt(locale: CrcLocale, kind: string, fallbackPrompt: 
   return fallbackPrompt
 }
 
-// Third-party tool names (Runway Gen-3, Kling, Google Veo, Pika, Luma) are
-// deliberately NOT translated (product decision, CRC-UI-1) -- no lookup
-// table exists for `kind: 'tool'` option labels; English `label` is always
-// returned unchanged for tool options regardless of locale.
+// Third-party tool names are deliberately NOT translated (product decision,
+// CRC-UI-1, reconfirmed unchanged by CRC-GE-MULTITOOL-1's 13-tool
+// catalogue expansion) -- no lookup table exists for `kind: 'tool'` option
+// labels; English `label` is always returned unchanged for tool options
+// regardless of locale.
 const JURISDICTION_OPTION_LABEL_ZH_TW: Record<string, string> = {
   'United States': '美國',
   'European Union': '歐盟',

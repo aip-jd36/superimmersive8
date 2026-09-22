@@ -64,7 +64,12 @@ describe('5/9. selecting Taiwan produces the same existing jurisdiction mutation
     return {
       guidedEntryInitId: '11111111-1111-4111-8111-111111111111',
       definitionId: 'independent-own-work',
-      definitionVersion: 'v1',
+      // CRC-GE-MULTITOOL-1 (2026-09-22): bumped v1 -> v2 alongside the
+      // production definitions -- see guided-entry-definitions.ts's own
+      // version-bump rationale. Unrelated to this test's own subject
+      // (jurisdiction), but the literal must match a real, resolvable
+      // definition version.
+      definitionVersion: 'v2',
       concern: 'Can I use this commercially?',
       fields: [
         { fieldId: 'workflow_role', value: 'independent creator, my own work' },
@@ -80,9 +85,12 @@ describe('5/9. selecting Taiwan produces the same existing jurisdiction mutation
     expect(usResult.ok).toBe(true)
     if (taiwanResult.ok && usResult.ok) {
       // Identical shape, differing only in the jurisdiction value itself.
-      const workflowRoleAnswer = { fieldId: 'workflow_role', kind: 'workflow_role', value: 'independent creator, my own work' }
-      expect(taiwanResult.selection.answers).toEqual([workflowRoleAnswer, { fieldId: 'jurisdiction', kind: 'jurisdiction', value: 'Taiwan' }])
-      expect(usResult.selection.answers).toEqual([workflowRoleAnswer, { fieldId: 'jurisdiction', kind: 'jurisdiction', value: 'United States' }])
+      // `cardinality: 'single'` (CRC-GE-MULTITOOL-1) is present on both --
+      // jurisdiction remains single-select, completely unaffected by that
+      // milestone's own multi-select extension to the `tool` field.
+      const workflowRoleAnswer = { fieldId: 'workflow_role', kind: 'workflow_role', cardinality: 'single', value: 'independent creator, my own work' }
+      expect(taiwanResult.selection.answers).toEqual([workflowRoleAnswer, { fieldId: 'jurisdiction', kind: 'jurisdiction', cardinality: 'single', value: 'Taiwan' }])
+      expect(usResult.selection.answers).toEqual([workflowRoleAnswer, { fieldId: 'jurisdiction', kind: 'jurisdiction', cardinality: 'single', value: 'United States' }])
     }
   })
 
@@ -124,7 +132,7 @@ describe('6/7. UI locale and jurisdiction remain fully independent (critical inv
     const result = validateGuidedEntryRequest({
       guidedEntryInitId: '22222222-2222-4222-8222-222222222222',
       definitionId: 'independent-own-work',
-      definitionVersion: 'v1',
+      definitionVersion: 'v2',
       concern: 'Can I use this commercially?',
       fields: [
         { fieldId: 'workflow_role', value: 'independent creator, my own work' },
@@ -150,7 +158,7 @@ describe('6/7. UI locale and jurisdiction remain fully independent (critical inv
 
 describe('findGuidedEntryDefinition -- Taiwan is available under every role, unchanged progression', () => {
   test.each(['agency-producing-for-client', 'independent-own-work', 'in-house-own-organization'])('%s definition includes Taiwan in its jurisdiction options', (definitionId) => {
-    const def = findGuidedEntryDefinition(definitionId, 'v1')
+    const def = findGuidedEntryDefinition(definitionId, 'v2')
     expect(def).not.toBeNull()
     const jurisdictionField = def!.fields.find((f) => f.kind === 'jurisdiction')!
     expect(jurisdictionField.options.map((o) => o.value)).toContain('Taiwan')

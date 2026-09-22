@@ -19,7 +19,7 @@ import {
   isValidGuidedEntryInitId,
   type RawGuidedEntryInit,
 } from '../../lib/crc-engine/guided-entry-init'
-import { supersedeToolMention, supersedeAssessmentJurisdictionMention } from '../../lib/interview-engine/mutations'
+import { addToolMention, supersedeToolMention, supersedeAssessmentJurisdictionMention } from '../../lib/interview-engine/mutations'
 import { GUIDED_ENTRY_DEFINITIONS } from '../../lib/crc-engine/guided-entry-definitions'
 import { isCanonicalToolIdentity } from '../../lib/tool-identity/registry'
 import type { ToolMention, AssessmentJurisdictionMention } from '../../types/interview-engine'
@@ -85,10 +85,61 @@ describe('validateGuidedEntryRequest — fail-closed', () => {
 
   test('rejects an option value not offered by this field', () => {
     const result = validateGuidedEntryRequest(
-      baseRaw({ fields: [{ fieldId: 'workflow_role', value: 'agency, producing for a client' }, { fieldId: 'tool', value: 'some-made-up-tool' }] }),
+      baseRaw({ fields: [{ fieldId: 'workflow_role', value: 'agency, producing for a client' }, { fieldId: 'tool', values: ['some-made-up-tool'] }] }),
     )
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.error).toMatch(/Unknown option value/)
+  })
+
+  test('rejects a multi-select field submitted with "value" instead of "values" (malformed mixed state)', () => {
+    const result = validateGuidedEntryRequest(
+      baseRaw({ fields: [{ fieldId: 'workflow_role', value: 'agency, producing for a client' }, { fieldId: 'tool', value: 'kling' }] }),
+    )
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error).toMatch(/multi-select and must use "values"/)
+  })
+
+  test('rejects a single-select field submitted with "values" instead of "value" (malformed mixed state)', () => {
+    const result = validateGuidedEntryRequest(
+      baseRaw({ fields: [{ fieldId: 'workflow_role', values: ['agency, producing for a client'] }] }),
+    )
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error).toMatch(/single-select and must use "value"/)
+  })
+
+  test('rejects a duplicate selection within one multi-select field', () => {
+    const result = validateGuidedEntryRequest(
+      baseRaw({
+        fields: [
+          { fieldId: 'workflow_role', value: 'agency, producing for a client' },
+          { fieldId: 'tool', values: ['kling', 'kling'] },
+        ],
+      }),
+    )
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error).toMatch(/duplicate selection/)
+  })
+
+  test('one invalid identity among several valid ones fails the entire multi-select field', () => {
+    const result = validateGuidedEntryRequest(
+      baseRaw({
+        fields: [
+          { fieldId: 'workflow_role', value: 'agency, producing for a client' },
+          { fieldId: 'tool', values: ['kling', 'some-made-up-tool', 'pika'] },
+        ],
+      }),
+    )
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error).toMatch(/Unknown option value/)
+  })
+
+  test('an empty "values" array for an optional multi-select field is accepted and treated as omitted (Skip-equivalent)', () => {
+    const result = validateGuidedEntryRequest(
+      baseRaw({ fields: [{ fieldId: 'workflow_role', value: 'agency, producing for a client' }, { fieldId: 'tool', values: [] }] }),
+    )
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.selection.answers.find((a) => a.fieldId === 'tool')).toBeUndefined()
   })
 
   test('rejects duplicate entries for the same fieldId', () => {
@@ -141,7 +192,7 @@ describe('applyGuidedEntrySelection — allow-listed mutation mapping', () => {
     const raw = baseRaw({
       fields: [
         { fieldId: 'workflow_role', value: 'agency, producing for a client' },
-        { fieldId: 'tool', value: 'runway-gen3' },
+        { fieldId: 'tool', values: ['runway-gen3'] },
       ],
     })
     const result = validateGuidedEntryRequest(raw)
@@ -156,6 +207,57 @@ describe('applyGuidedEntrySelection — allow-listed mutation mapping', () => {
     expect(mention.account_status).toEqual({ state: 'unknown' })
     expect(mention.confidence).toBe('confirmed')
     expect(mention.superseded_by).toBeNull()
+  })
+
+  test('CRC-GE-MULTITOOL-1: N selected canonical tools produce N ordinary ToolMentions, each with distinct deterministic ids and preserved per-value provenance', () => {
+    const raw = baseRaw({
+      fields: [
+        { fieldId: 'workflow_role', value: 'agency, producing for a client' },
+        { fieldId: 'tool', values: ['kling', 'elevenlabs', 'suno'] },
+      ],
+    })
+    const result = validateGuidedEntryRequest(raw)
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    const su = applyGuidedEntrySelection(result.selection, 'tok-multi')
+    expect(su.tool_mentions).toHaveLength(3)
+    const identifiers = su.tool_mentions.map((m) => (m.resolution.kind === 'canonical' ? m.resolution.identifier : null)).sort()
+    expect(identifiers).toEqual(['elevenlabs', 'kling', 'suno'])
+    // Distinct ids -- no collision from reusing the same (token, fieldId) id for every value.
+    const ids = su.tool_mentions.map((m) => m.mention_id)
+    expect(new Set(ids).size).toBe(3)
+    for (const mention of su.tool_mentions) {
+      expect(mention.access_surface).toEqual({ state: 'unknown' })
+      expect(mention.plan_tier).toEqual({ state: 'unknown' })
+      expect(mention.account_status).toEqual({ state: 'unknown' })
+      expect(mention.confidence).toBe('confirmed')
+      expect(mention.superseded_by).toBeNull()
+      expect(mention.source_turn).toBe(GUIDED_ENTRY_INIT_TURN)
+      expect(mention.source_statement.startsWith(GUIDED_ENTRY_SOURCE_PREFIX)).toBe(true)
+      // Each mention's own provenance names its OWN value, never a combined/synthetic one.
+      if (mention.resolution.kind === 'canonical') {
+        expect(mention.source_statement).toContain(`value="${mention.resolution.identifier}"`)
+      }
+    }
+  })
+
+  test('CRC-GE-MULTITOOL-1: selection order does not alter the resulting set of mention ids (semantic set behavior)', () => {
+    const forward = baseRaw({
+      fields: [{ fieldId: 'workflow_role', value: 'agency, producing for a client' }, { fieldId: 'tool', values: ['kling', 'pika', 'luma'] }],
+    })
+    const reversed = baseRaw({
+      fields: [{ fieldId: 'workflow_role', value: 'agency, producing for a client' }, { fieldId: 'tool', values: ['luma', 'pika', 'kling'] }],
+    })
+    const forwardResult = validateGuidedEntryRequest(forward)
+    const reversedResult = validateGuidedEntryRequest(reversed)
+    expect(forwardResult.ok).toBe(true)
+    expect(reversedResult.ok).toBe(true)
+    if (!forwardResult.ok || !reversedResult.ok) return
+    const suForward = applyGuidedEntrySelection(forwardResult.selection, 'same-multi-token')
+    const suReversed = applyGuidedEntrySelection(reversedResult.selection, 'same-multi-token')
+    const idsForward = new Set(suForward.tool_mentions.map((m) => m.mention_id))
+    const idsReversed = new Set(suReversed.tool_mentions.map((m) => m.mention_id))
+    expect(idsForward).toEqual(idsReversed)
   })
 
   test('jurisdiction field produces a real AssessmentJurisdictionMention, confidence "confirmed"', () => {
@@ -178,7 +280,7 @@ describe('applyGuidedEntrySelection — allow-listed mutation mapping', () => {
     const raw = baseRaw({
       fields: [
         { fieldId: 'workflow_role', value: 'agency, producing for a client' },
-        { fieldId: 'tool', value: 'runway-gen3' },
+        { fieldId: 'tool', values: ['runway-gen3'] },
         { fieldId: 'jurisdiction', value: 'United States' },
       ],
     })
@@ -207,11 +309,11 @@ describe('applyGuidedEntrySelection — allow-listed mutation mapping', () => {
     expect(su.asset_provider_mentions).toEqual([])
   })
 
-  test('deterministic mention ids: same token + fieldId always produces the same id', () => {
+  test('deterministic mention ids: same token + fieldId + value always produces the same id', () => {
     const raw = baseRaw({
       fields: [
         { fieldId: 'workflow_role', value: 'agency, producing for a client' },
-        { fieldId: 'tool', value: 'runway-gen3' },
+        { fieldId: 'tool', values: ['runway-gen3'] },
       ],
     })
     const result = validateGuidedEntryRequest(raw)
@@ -246,7 +348,7 @@ describe('correction — a guided-origin fact uses the exact same, unmodified co
     const raw = baseRaw({
       fields: [
         { fieldId: 'workflow_role', value: 'agency, producing for a client' },
-        { fieldId: 'tool', value: 'runway-gen3' },
+        { fieldId: 'tool', values: ['runway-gen3'] },
       ],
     })
     const result = validateGuidedEntryRequest(raw)
@@ -270,6 +372,69 @@ describe('correction — a guided-origin fact uses the exact same, unmodified co
     const priorNow = corrected.tool_mentions.find((m) => m.mention_id === original.mention_id)!
     expect(priorNow.superseded_by).toBe('conv-correction-1')
     expect(corrected.tool_mentions.find((m) => m.mention_id === 'conv-correction-1')?.resolution).toEqual({ kind: 'canonical', identifier: 'kling' })
+  })
+
+  test('CRC-GE-MULTITOOL-1 (Phase 8): a multi-tool Guided Entry init (Runway + ElevenLabs + Suno) produces three independently addressable active mentions — no special Guided Entry correction logic, the same generic mutations.ts functions used everywhere else', () => {
+    const raw = baseRaw({
+      fields: [
+        { fieldId: 'workflow_role', value: 'agency, producing for a client' },
+        { fieldId: 'tool', values: ['runway-gen3', 'elevenlabs', 'suno'] },
+      ],
+    })
+    const result = validateGuidedEntryRequest(raw)
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    const su = applyGuidedEntrySelection(result.selection, 'tok-multi-correction')
+    expect(su.tool_mentions).toHaveLength(3)
+    const runway = su.tool_mentions.find((m) => m.resolution.kind === 'canonical' && m.resolution.identifier === 'runway-gen3')!
+    const elevenlabs = su.tool_mentions.find((m) => m.resolution.kind === 'canonical' && m.resolution.identifier === 'elevenlabs')!
+    const suno = su.tool_mentions.find((m) => m.resolution.kind === 'canonical' && m.resolution.identifier === 'suno')!
+    expect(runway).toBeDefined()
+    expect(elevenlabs).toBeDefined()
+    expect(suno).toBeDefined()
+
+    // "It wasn't Runway, it was Kling" -- correct exactly one mention; the other two are completely untouched.
+    const runwayCorrected: ToolMention = { ...runway, mention_id: 'conv-runway-correction', resolution: { kind: 'canonical', identifier: 'kling' }, source_turn: 2, source_statement: "It wasn't Runway, it was Kling.", superseded_by: null }
+    let su2 = supersedeToolMention(su, runway.mention_id, runwayCorrected)
+    expect(su2.tool_mentions.find((m) => m.mention_id === runway.mention_id)!.superseded_by).toBe('conv-runway-correction')
+    expect(su2.tool_mentions.find((m) => m.mention_id === elevenlabs.mention_id)!.superseded_by).toBeNull()
+    expect(su2.tool_mentions.find((m) => m.mention_id === suno.mention_id)!.superseded_by).toBeNull()
+
+    // "Actually I didn't use Suno" -- confirmed_absent supersession, existing precedent, no dedicated retract function needed.
+    const sunoRetracted: ToolMention = { ...suno, mention_id: 'conv-suno-retraction', confidence: 'confirmed_absent', source_turn: 2, source_statement: "Actually I didn't use Suno.", superseded_by: null }
+    const su3 = supersedeToolMention(su2, suno.mention_id, sunoRetracted)
+    expect(su3.tool_mentions.find((m) => m.mention_id === suno.mention_id)!.superseded_by).toBe('conv-suno-retraction')
+    expect(su3.tool_mentions.find((m) => m.mention_id === 'conv-suno-retraction')!.confidence).toBe('confirmed_absent')
+    expect(su3.tool_mentions.find((m) => m.mention_id === elevenlabs.mention_id)!.superseded_by).toBeNull()
+
+    // "I also used Pika" -- plain addToolMention, no interaction with any existing mention.
+    const pikaAddition: ToolMention = {
+      mention_id: 'conv-pika-addition',
+      resolution: { kind: 'canonical', identifier: 'pika' },
+      access_surface: { state: 'unknown' },
+      plan_tier: { state: 'unknown' },
+      account_status: { state: 'unknown' },
+      confidence: 'confirmed',
+      source_turn: 2,
+      source_statement: 'I also used Pika.',
+      superseded_by: null,
+    }
+    const su4 = addToolMention(su3, pikaAddition)
+    // 6 rows total: runway(superseded) + elevenlabs + suno(superseded) + kling + suno-retraction + pika.
+    expect(su4.tool_mentions).toHaveLength(6)
+    // "Active" (non-superseded) is not the same as "affirmatively present" --
+    // the suno-retraction mention IS the active head of that chain; it just
+    // carries confidence 'confirmed_absent' rather than 'confirmed'. The
+    // meaningful query is the AFFIRMATIVELY active set.
+    const affirmativelyActive = su4.tool_mentions.filter((m) => m.superseded_by === null && m.confidence === 'confirmed')
+    const affirmativeIdentifiers = affirmativelyActive.map((m) => (m.resolution.kind === 'canonical' ? m.resolution.identifier : null)).sort()
+    expect(affirmativeIdentifiers).toEqual(['elevenlabs', 'kling', 'pika'])
+    // The retraction is still the active (non-superseded) head of the Suno
+    // chain -- superseded_by null, confirmed_absent -- distinct from being
+    // "gone": it is CRC's current, correct understanding, not a supersede target.
+    const activeSunoRow = su4.tool_mentions.find((m) => m.mention_id === 'conv-suno-retraction')!
+    expect(activeSunoRow.superseded_by).toBeNull()
+    expect(activeSunoRow.confidence).toBe('confirmed_absent')
   })
 
   test('supersedeAssessmentJurisdictionMention works identically on a guided-origin mention', () => {
