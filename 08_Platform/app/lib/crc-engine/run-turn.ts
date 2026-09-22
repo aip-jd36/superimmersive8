@@ -146,8 +146,6 @@ import {
   buildJurisdictionClarificationRetryProposal,
   evaluateJurisdictionClarificationEligibility,
   evaluateJurisdictionClarificationRetryEligibility,
-  JURISDICTION_CLARIFICATION_QUESTION,
-  JURISDICTION_CLARIFICATION_RETRY_QUESTION,
 } from './jurisdiction-clarification'
 import { deriveAssessmentJurisdictionFacts } from './assessment-jurisdiction-scope'
 import { buildHumanContributionClarificationProposal, evaluateHumanContributionClarificationEligibility } from './human-contribution-clarification'
@@ -395,7 +393,24 @@ export interface RunTurnInput {
 type CandidateRejectionReason = 'no_proposal' | 'invalid' | 'rejected_by_a' | 'rejected_by_b'
 
 type CandidateAttemptResult =
-  | { status: 'approved'; outcome: TurnOutcome; nextBoundaryState: BoundaryState; pendingClarification: PendingClarification | null }
+  | {
+      status: 'approved'
+      outcome: TurnOutcome
+      nextBoundaryState: BoundaryState
+      pendingClarification: PendingClarification | null
+      /**
+       * Jurisdiction-Clarification Prose-Coupling Fix (2026-09-21). The
+       * exact proposal that was actually approved and delivered as
+       * `outcome` -- threaded through so the caller can inspect its
+       * structural `question_kind`/`target_signal_id` (via
+       * `isJurisdictionQuestionProposal`) without depending on
+       * `outcome.message`'s rendered prose, which `TurnOutcome` never
+       * carried question-shape metadata for. Additive: every existing
+       * reader of `CandidateAttemptResult.approved` that ignores this field
+       * is unaffected.
+       */
+      proposal: CandidateQuestionProposal
+    }
   /**
    * `exclusion` is null when nothing legitimate was actually proposed
    * this attempt (generator returned null, or the proposal failed
@@ -468,6 +483,38 @@ function targetsConfirmedJurisdiction(signalId: string | undefined, su: Structur
   return facts.included.length > 0 || facts.excluded.length > 0
 }
 
+/**
+ * Jurisdiction-Clarification Prose-Coupling Fix (2026-09-21). Structural
+ * (proposal-shape) identity for "this proposal is an assessment-jurisdiction
+ * question," replacing the exact-string-equality check this function's own
+ * former call site (the `jurisdictionQuestionJustAsked` computation, below)
+ * used to perform against `outcome.message`. Covers BOTH ways a proposal can
+ * be a genuine jurisdiction question:
+ *
+ *   1. The two deterministic catalog proposals
+ *      (buildJurisdictionClarificationProposal/_RetryProposal,
+ *      jurisdiction-clarification.ts) -- always `target_signal_id: null`,
+ *      identified here by their own fixed `question_kind` values.
+ *   2. An ORGANIC proposal (the ordinary LLM generator) that happens to
+ *      target the jurisdiction project fact directly -- always
+ *      `target_signal_id: PROJECT_FACT_SIGNAL_IDS.jurisdiction`, regardless
+ *      of which SIGNAL_REQUIRED_KINDS `question_kind` it used
+ *      (`follow_up_on_signal`/`uncertainty_clarification` --
+ *      candidate-question.ts) or what prose it rendered.
+ *
+ * No prose/substring/regex matching, no new fixed question strings, no
+ * language inference -- purely the same structured `question_kind`/
+ * `target_signal_id` fields eligibility, validation, and Constraint B
+ * already treat as authoritative for this proposal.
+ */
+function isJurisdictionQuestionProposal(proposal: CandidateQuestionProposal): boolean {
+  return (
+    proposal.question_kind === 'jurisdiction_clarification' ||
+    proposal.question_kind === 'jurisdiction_clarification_retry' ||
+    proposal.target_signal_id === PROJECT_FACT_SIGNAL_IDS.jurisdiction
+  )
+}
+
 async function tryCandidate(
   suAfter: StructuredUnderstanding,
   eligible: EligibleSignal[],
@@ -516,6 +563,7 @@ async function tryCandidate(
     outcome: { kind: 'question', message: proposal.question_text },
     nextBoundaryState: boundaryResult.next_state,
     pendingClarification: buildPendingClarification(proposal, suAfter),
+    proposal,
   }
 }
 
@@ -743,6 +791,14 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   let nextBoundaryState = boundaryStateForTurn
   let pendingClarification: PendingClarification | null = null
   let outcome: TurnOutcome = { kind: 'acknowledgment', message: ACKNOWLEDGMENT_COPY }
+  // Jurisdiction-Clarification Prose-Coupling Fix (2026-09-21). The exact
+  // proposal actually approved and delivered as `outcome` this turn, if
+  // any -- set alongside `outcome`/`nextBoundaryState`/`pendingClarification`
+  // at every one of this function's own approval points (decline branch,
+  // attempt1-4). Consumed only by `jurisdictionQuestionJustAsked` below, via
+  // `isJurisdictionQuestionProposal`, in place of the former exact-string
+  // comparison against `outcome.message`.
+  let askedProposal: CandidateQuestionProposal | undefined
   // Commercial Readiness Discovery Catalog integration, 2026-08-12: set
   // only when THIS turn approves a FRESH discovery candidate; null
   // (consumed) otherwise -- including when a discovery candidate was
@@ -789,6 +845,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
           if (boundaryResult.allowed) {
             outcome = { kind: 'question', message: proposal.question_text }
             pendingClarification = buildPendingClarification(proposal, suAfter)
+            askedProposal = proposal
           }
         } else {
           const boundaryResult = evaluateBoundary(boundaryStateForTurn, { kind: 'other', phase }, declineSignal)
@@ -1059,6 +1116,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
       outcome = attempt1.outcome
       nextBoundaryState = attempt1.nextBoundaryState
       pendingClarification = attempt1.pendingClarification
+      askedProposal = attempt1.proposal
       if (forcedProposal === discoveryProposal && discoveryProposal) {
         // discoveryCategory is guaranteed non-null here (discoveryProposal
         // was only built from a non-null category). Never set when
@@ -1087,6 +1145,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
         outcome = attempt2.outcome
         nextBoundaryState = attempt2.nextBoundaryState
         pendingClarification = attempt2.pendingClarification
+        askedProposal = attempt2.proposal
         // attempt2 is always the ordinary generator -- never sets
         // nextPendingTakeawayCategory.
       } else {
@@ -1123,6 +1182,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
           outcome = attempt3.outcome
           nextBoundaryState = attempt3.nextBoundaryState
           pendingClarification = attempt3.pendingClarification
+          askedProposal = attempt3.proposal
         } else {
           // Selector Opportunity at questioning_exhausted milestone
           // (2026-08-25), same slot/reasoning as the Track B readiness
@@ -1163,6 +1223,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
             outcome = attempt4.outcome
             nextBoundaryState = attempt4.nextBoundaryState
             pendingClarification = attempt4.pendingClarification
+            askedProposal = attempt4.proposal
           } else {
             // Bounded search exhausted (including the readiness and
             // selector checks above, if either was even eligible) --
@@ -1214,17 +1275,27 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   }
 
   // Second-Jurisdiction UX milestone (2026-08-20), J1. Computed directly
-  // from the FINAL outcome/text -- exact-string comparison against the two
-  // fixed, catalog-owned question constants (never LLM-rewritten, per their
-  // own module header), never text similarity/fuzzy matching. Explicitly
-  // overwrites whatever nextBoundaryState's own value happened to be
-  // (evaluateBoundary has no opinion on this field at all, so it always
-  // just carries forward whatever boundaryStateForTurn already had) -- this
-  // is the one deliberate place that field is allowed to change, consumed
-  // by the very next turn's `answeringJurisdictionQuestion` read above.
+  // from the FINAL outcome, via the exact proposal that produced it
+  // (`askedProposal`) -- structural (`question_kind`/`target_signal_id`)
+  // identity, never text similarity/fuzzy matching, and, as of the
+  // Jurisdiction-Clarification Prose-Coupling Fix (2026-09-21), no longer
+  // exact-string comparison against `outcome.message` either. That
+  // comparison covered only the two fixed catalog constants
+  // (JURISDICTION_CLARIFICATION_QUESTION/_RETRY_QUESTION,
+  // jurisdiction-clarification.ts) -- an organically-worded-but-
+  // semantically-identical jurisdiction question (the ordinary generator
+  // targeting `project:jurisdiction`) rendered different prose and was
+  // silently never armed, even though it is exactly as much "the user is
+  // now answering a pending jurisdiction question" as the deterministic
+  // wording is. `isJurisdictionQuestionProposal` (above) recognizes BOTH
+  // shapes generically -- see its own header. Explicitly overwrites
+  // whatever nextBoundaryState's own value happened to be (evaluateBoundary
+  // has no opinion on this field at all, so it always just carries forward
+  // whatever boundaryStateForTurn already had) -- this is the one
+  // deliberate place that field is allowed to change, consumed by the very
+  // next turn's `answeringJurisdictionQuestion` read above.
   const jurisdictionQuestionJustAsked =
-    outcome.kind === 'question' &&
-    (outcome.message === JURISDICTION_CLARIFICATION_QUESTION || outcome.message === JURISDICTION_CLARIFICATION_RETRY_QUESTION)
+    outcome.kind === 'question' && askedProposal !== undefined && isJurisdictionQuestionProposal(askedProposal)
 
   // CRC Global User-Facing Question Budget milestone (2026-08-26). Computed
   // directly from the FINAL outcome, same discipline as
