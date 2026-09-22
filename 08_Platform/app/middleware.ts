@@ -1,48 +1,7 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { PILOT_ACCESS_COOKIE_NAME, PILOT_ACCESS_COOKIE_VALUE } from '@/lib/crc-engine/pilot-access'
 
 export async function middleware(request: NextRequest) {
-  // CRC Limited Pilot, Part 6 -- shared-code gate, checked before the
-  // Supabase auth setup below since it doesn't need it at all. Exempts the
-  // access page itself and its own validation route, or no one could ever
-  // pass the gate.
-  const pathname = request.nextUrl.pathname
-  const isCrcPath = pathname.startsWith('/crc')
-  const isCrcApiPath = pathname.startsWith('/api/crc')
-  const isPilotAccessExempt = pathname === '/crc/access' || pathname === '/api/crc/pilot-access'
-
-  if ((isCrcPath || isCrcApiPath) && !isPilotAccessExempt) {
-    const pilotCookie = request.cookies.get(PILOT_ACCESS_COOKIE_NAME)?.value
-    if (pilotCookie !== PILOT_ACCESS_COOKIE_VALUE) {
-      if (isCrcApiPath) {
-        return NextResponse.json({ status: 'pilot_access_required' }, { status: 401 })
-      }
-      const redirectUrl = request.nextUrl.clone()
-      redirectUrl.pathname = '/crc/access'
-      redirectUrl.searchParams.set('redirectedFrom', pathname)
-      return NextResponse.redirect(redirectUrl)
-    }
-  }
-
-  // CRC API namespace bypass (P0 timeout diagnostic, 2026-08-21): reached
-  // only once the pilot-access gate above has already been fully evaluated
-  // -- either this path was exempt from it, or the pilot cookie matched.
-  // Every /api/crc/* route reads/writes through supabaseAdmin (the
-  // service-role client) exclusively; none constructs a Supabase user
-  // session or depends on one. The Supabase server-client construction and
-  // supabase.auth.getSession() call below exist only for the authenticated
-  // application paths (/dashboard, /submit, /record, /certify) and were
-  // running unconditionally for /api/crc/* too, at the cost of a real
-  // network call (a session-refresh request) on an expired/near-expiry
-  // Supabase cookie -- diagnosed as the likely cause of a production
-  // MIDDLEWARE_INVOCATION_TIMEOUT. This short-circuit removes that
-  // unnecessary work for the CRC API namespace only; /crc/:path* page
-  // requests and the four protected app namespaces are untouched below.
-  if (isCrcApiPath) {
-    return NextResponse.next()
-  }
-
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -117,5 +76,15 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/submit/:path*', '/record/:path*', '/certify/:path*', '/crc/:path*', '/api/crc/:path*'],
+  // CRC-ACCESS-1 (2026-09-22): '/crc/:path*' and '/api/crc/:path*' removed.
+  // They existed here only to carry the pilot-access-code gate (and, for
+  // the API namespace, a bypass working around that gate's own Supabase
+  // session-check overhead) -- neither CRC page nor CRC API paths are
+  // subject to the Supabase-auth protection below (they were never in the
+  // /dashboard|/submit|/record|/certify list), so once the gate is gone
+  // there is no remaining reason for this middleware to run on them at
+  // all. Rate limiting/abuse prevention (lib/crc-engine/abuse-prevention.ts)
+  // and Results Gate are independent, route-layer mechanisms untouched by
+  // this matcher and remain fully authoritative.
+  matcher: ['/dashboard/:path*', '/submit/:path*', '/record/:path*', '/certify/:path*'],
 }
