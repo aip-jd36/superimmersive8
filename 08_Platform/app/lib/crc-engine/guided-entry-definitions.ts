@@ -49,6 +49,22 @@ const GUIDED_ENTRY_JURISDICTION_FIELD: GuidedFieldSpec = {
   options: [
     { value: 'United States', label: 'United States' },
     { value: 'European Union', label: 'European Union' },
+    // CRC-GE-TW-1 (2026-09-22). 'Taiwan' is the SAME canonical jurisdiction
+    // string already used by the adopted, CRC-Eligible
+    // CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1 TopicClaim
+    // (lib/retrieval-engine/topic-claims-fixture.ts, applicability_requirements:
+    // [{fact:'jurisdiction', operator:'equals', value:'Taiwan'}]) and the
+    // pre-existing worked example in types/interview-engine.ts's own
+    // ProjectFacts.jurisdiction doc comment ('e.g. "United States", "Taiwan"')
+    // -- not a newly-invented identifier. This is the ONLY line this
+    // milestone adds here; validateGuidedEntryRequest (guided-entry-init.ts)
+    // already validates submitted values against this same options array
+    // generically, with no jurisdiction-specific allow-list to separately
+    // extend, and applyOneGuidedField's own 'jurisdiction' case already
+    // accepts any string as an AssessmentJurisdictionMention value with no
+    // canonical-registry check (unlike 'tool') -- so adding this one option
+    // is sufficient, end to end, with zero other code change required.
+    { value: 'Taiwan', label: 'Taiwan' },
   ],
 }
 

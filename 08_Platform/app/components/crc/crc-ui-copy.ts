@@ -262,6 +262,13 @@ export function getFieldPrompt(locale: CrcLocale, kind: string, fallbackPrompt: 
 const JURISDICTION_OPTION_LABEL_ZH_TW: Record<string, string> = {
   'United States': '美國',
   'European Union': '歐盟',
+  // CRC-GE-TW-1 (2026-09-22). '台灣' (not '臺灣') -- follows the existing,
+  // already-established SI8 repository convention: every occurrence of
+  // Taiwan in the marketing site's own zh-TW content
+  // (07_Website/zh/rights-verified/{chain-of-title,playbook}/index.html)
+  // uses 台灣, so this display label matches existing SI8 usage rather
+  // than introducing a second, inconsistent rendering.
+  Taiwan: '台灣',
 }
 
 /** `value` is the option's semantic value (e.g. 'United States') -- read-only, never altered or returned as a new value; only ever used as a lookup KEY into a presentation-only label table. */
