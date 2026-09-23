@@ -498,6 +498,77 @@ describe('Multi-Jurisdiction-Topic Correction: generic N-jurisdiction regression
   })
 })
 
+// ── Real production regression: trademark topic (Taiwan Trademark Act
+// Article 68 CRC Production Representation milestone, 2026-09-23/24) ──
+//
+// The generic N-jurisdiction matrix above (synthetic Ruritania/Wakanda
+// claims) already proves the underlying `goalHasUnresolvedJurisdictionValue`
+// invariant is generic. This block re-proves the SAME invariant against the
+// REAL, committed `trademark` topic -- now, for the first time, a second
+// live jurisdiction-specific pair under one topic besides `copyrightability`
+// -- without adding any trademark-specific questioning code. Once the user
+// supplies ONE definitive jurisdiction, questioning treats it as answered;
+// Retrieval (not this module) separately determines which claim applies.
+describe('real production regression: trademark topic (CLAIM-TRADEMARK-TW-ART68-INFRINGEMENT-001-v1 + CLAIM-TRADEMARK-US-LANHAM-CONFUSION-001-v1)', () => {
+  const trademarkGoal: UserGoal = {
+    goal_id: 'g-tm', state: 'confirmed', raw_text: 'Can I use this brand name in my video?', category: 'trademark',
+    scope: 'informational', superseded_by: null, source_turn: 1, source_statement: 'Can I use this brand name in my video?',
+  }
+
+  test('jurisdiction unresolved -> legitimately eligible (real fixture, real relationships)', () => {
+    const su = baseSU({ user_goals: [trademarkGoal] })
+    const result = evaluateJurisdictionClarificationEligibility(su, TOPIC_CLAIMS_FIXTURE, false, TOPIC_RELATIONSHIPS_FIXTURE)
+    expect(result.needs_jurisdiction).toBe(true)
+    expect(result.jurisdiction_unresolved).toBe(true)
+    expect(result.eligible).toBe(true)
+  })
+
+  test('Taiwan confirmed -> resolved, no re-ask, even though the sibling US Lanham claim remains unresolved under that same jurisdiction value', () => {
+    const su = baseSU({
+      user_goals: [trademarkGoal],
+      project_facts: {
+        intended_use: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+        workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+        jurisdiction: { attestation: { state: 'confirmed', value: 'Taiwan' }, source_turn: 2, source_statement: 'Taiwan' },
+        human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+      },
+    })
+    const result = evaluateJurisdictionClarificationEligibility(su, TOPIC_CLAIMS_FIXTURE, false, TOPIC_RELATIONSHIPS_FIXTURE)
+    expect(result.jurisdiction_unresolved).toBe(false)
+    expect(result.eligible).toBe(false)
+  })
+
+  test('United States confirmed -> resolved, no re-ask (symmetric), even though the sibling Taiwan claim remains unresolved under that jurisdiction value', () => {
+    const su = baseSU({
+      user_goals: [trademarkGoal],
+      project_facts: {
+        intended_use: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+        workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+        jurisdiction: { attestation: { state: 'confirmed', value: 'United States' }, source_turn: 2, source_statement: 'United States' },
+        human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+      },
+    })
+    const result = evaluateJurisdictionClarificationEligibility(su, TOPIC_CLAIMS_FIXTURE, false, TOPIC_RELATIONSHIPS_FIXTURE)
+    expect(result.jurisdiction_unresolved).toBe(false)
+    expect(result.eligible).toBe(false)
+  })
+
+  test('a third, ungoverned jurisdiction confirmed (Ruritania) -> still resolved, not an endless re-ask merely because no trademark claim actually applies (Case G, real fixture)', () => {
+    const su = baseSU({
+      user_goals: [trademarkGoal],
+      project_facts: {
+        intended_use: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+        workflow_role: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+        jurisdiction: { attestation: { state: 'confirmed', value: 'Ruritania' }, source_turn: 2, source_statement: 'Ruritania' },
+        human_contribution_description: { attestation: { state: 'unknown' }, source_turn: 0, source_statement: '' },
+      },
+    })
+    const result = evaluateJurisdictionClarificationEligibility(su, TOPIC_CLAIMS_FIXTURE, false, TOPIC_RELATIONSHIPS_FIXTURE)
+    expect(result.jurisdiction_unresolved).toBe(false)
+    expect(result.eligible).toBe(false)
+  })
+})
+
 // ── Other-goal regression (Interview Engine Diagnostic Slice 1, 2026-08-19) ──
 
 describe('other-goal regression: unrelated categories, stock claims, and provider mentions are unaffected', () => {

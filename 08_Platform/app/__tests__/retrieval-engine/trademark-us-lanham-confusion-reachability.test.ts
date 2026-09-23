@@ -159,10 +159,23 @@ describe('CLAIM-TRADEMARK-US-LANHAM-CONFUSION-001-v1 -- production TopicClaim re
     expect((GOAL_CATEGORIES as readonly string[]).includes(TOPIC)).toBe(true)
   })
 
-  // ── H. no other trademark-adjacent claim exists ─────────────────────────
-  test('H. no registration/ownership/validity/authorization-specific trademark claim exists anywhere in the production fixture', () => {
+  // ── H. no UNEXPECTED trademark-adjacent claim exists ────────────────────
+  // Updated 2026-09-23/24 (Taiwan Trademark Act Article 68 CRC Production
+  // Representation milestone): this test originally asserted zero other
+  // TRADEMARK-named claims existed at all. That invariant is now
+  // deliberately superseded by an intentional, governed second entry --
+  // CLAIM-TRADEMARK-TW-ART68-INFRINGEMENT-001-v1, a jurisdiction-split
+  // sibling under the SAME `trademark` topic (CPR_030), not a registration/
+  // ownership/validity/authorization-specific claim of a different kind.
+  // The guard is preserved in spirit -- catch an UNEXPECTED trademark claim
+  // slipping in -- by naming the exact, closed set of two known trademark
+  // claims rather than asserting none exist. See the dedicated
+  // trademark-tw-art68-infringement-reachability.test.ts for that claim's
+  // own full reachability/BI/multi-jurisdiction proof.
+  test('H. exactly the two known trademark claims exist in the production fixture -- this one and its Taiwan Article 68 sibling -- no other, unexpected TRADEMARK-named claim', () => {
     const ids = TOPIC_CLAIMS_FIXTURE.map((c) => c.claim_id)
-    expect(ids.some((id) => id !== CLAIM_ID && /TRADEMARK/i.test(id))).toBe(false)
+    const trademarkIds = ids.filter((id) => /TRADEMARK/i.test(id))
+    expect(trademarkIds.sort()).toEqual([CLAIM_ID, 'CLAIM-TRADEMARK-TW-ART68-INFRINGEMENT-001-v1'].sort())
   })
 
   // ── I. no TopicRelationship targets trademark -- explicit-goal-only, no relationship authored ──

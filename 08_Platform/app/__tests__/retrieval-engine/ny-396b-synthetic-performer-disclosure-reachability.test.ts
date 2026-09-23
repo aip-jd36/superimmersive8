@@ -505,8 +505,8 @@ describe('Copyright (provider_scope: null) claims unaffected by this activation'
 // ── §16: total reachable population sanity ──────────────────────────────────
 
 describe('total fixture population sanity', () => {
-  test('exactly thirty-five Adopted + CRC-eligible claims exist as of 2026-09-21 (see topic-claims-fixture-consistency.test.ts for the authoritative, itemized manifest assertion -- the 34th is CLAIM-COPYRIGHT-US-THIRD-PARTY-OUTPUT-001-v1 (Third-Party Copyright CRC Production Representation milestone), the 35th is CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1 (Taiwan AI-Assisted Copyrightability CRC Production Representation milestone))', () => {
+  test('exactly thirty-six Adopted + CRC-eligible claims exist as of 2026-09-23/24 (see topic-claims-fixture-consistency.test.ts for the authoritative, itemized manifest assertion -- the 35th is CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1 (Taiwan AI-Assisted Copyrightability CRC Production Representation milestone), the 36th is CLAIM-TRADEMARK-TW-ART68-INFRINGEMENT-001-v1 (Taiwan Trademark Act Article 68 CRC Production Representation milestone))', () => {
     const live = TOPIC_CLAIMS_FIXTURE.filter((c) => c.lifecycle === 'Adopted' && c.crc_eligible === 'Yes')
-    expect(live).toHaveLength(35)
+    expect(live).toHaveLength(36)
   })
 })

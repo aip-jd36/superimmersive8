@@ -1753,4 +1753,82 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     last_verified: '2026-09-21',
     superseded_by: null,
   },
+  {
+    // Taiwan Trademark Act, Article 68 Items 1-3, Registered-Mark
+    // Infringement -- Production Representation (2026-09-23/24). Adopted
+    // (GOVERNED-CLAIMS.md, adoption commit 2036e9f), Formal Governance
+    // Review FGR_024, CRC Publication Review CPR_030. Second Taiwan-
+    // jurisdiction Living Knowledge claim in this corpus (after
+    // CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1), and the second
+    // trademark-domain claim (after CLAIM-TRADEMARK-US-LANHAM-CONFUSION-
+    // 001-v1, above). Reuses the existing `trademark` GoalCategory/
+    // KnowledgeTopic verbatim -- already live in GOAL_CATEGORIES
+    // (types/interview-engine.ts), added by the U.S. Lanham milestone and
+    // reused unmodified here. No new GoalCategory, no new KnowledgeTopic,
+    // no TopicRelationship, no ContentPresenceCategory, no Track A trigger
+    // -- explicit-goal-reachable only, via the existing, unmodified
+    // exact-topic `lookupTopicClaims` path, identical in shape to the
+    // sibling U.S. Lanham entry.
+    //
+    // Final dependency model is D0 (`[]`), per FGR_024 Sec.10-REVISED-2
+    // (the SECOND Narrow Governance Reconsideration, controlling) --
+    // correcting an original D2 (`mark_and_goods_identity_or_similarity`,
+    // `consumer_confusion_likelihood`) and an intermediate D1
+    // (`mark_and_goods_identity_or_similarity` alone). Neither survives
+    // independent re-derivation: `unresolved_project_dependencies` is a
+    // flat, claim-wide `string[]` with no mechanism to scope a dependency
+    // to a subset of a claim's own statutory branches, and the confusion
+    // element is present only in items 2-3 (absent from item 1), while
+    // "mark and goods identity-or-similarity" itself bundles two
+    // categorically distinct comparative judgment types whose required
+    // threshold (identity vs. similarity) varies by item. Registration
+    // status and consumer confusion are instead captured in the
+    // proposition's own conditional wording, not as dependency metadata.
+    // `crc_publication_scope`/`crc_candidate_statement` are copied
+    // verbatim from GOVERNED-CLAIMS.md's own `CRC Publication Scope:`/`CRC
+    // Candidate Statement:` fields (CPR_030, 2026-09-23) -- not
+    // paraphrased, strengthened, or reconstructed -- except that
+    // `crc_publication_scope` omits that field's own trailing
+    // implementation-status sentence ("Not yet runtime-reachable... a
+    // separate, later, explicitly-authorized milestone"), mirroring
+    // CLAIM-COPYRIGHT-US-THIRD-PARTY-OUTPUT-001-v1's own precedent exactly
+    // (that sentence describes production-representation status, not
+    // governed CRC-facing content, and this fixture entry IS that
+    // separate, later, explicitly-authorized milestone).
+    claim_id: 'CLAIM-TRADEMARK-TW-ART68-INFRINGEMENT-001-v1',
+    topic: 'trademark',
+    claim_character: 'established',
+    jurisdiction: 'Taiwan',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      "APPROVED FOR CRC PUBLICATION (2026-09-23, CRC Approver: JD (PM) -- see CRC Approver/CRC Decision Date below; CRC Publication Review #30 complete at governance-reviews/CPR_030_CLAIM-TRADEMARK-TW-ART68-INFRINGEMENT-001-v1_2026-09-23.md, APPROVE, no wording edit required -- independently re-verified against the Adopted governance record (anchored to FGR_024's final, `§10-REVISED-2`-controlled D0 dependency state, not the original D2 or intermediate D1 findings), the evidence manifest, and current production source (not inherited from FGR_024 alone) -- source fidelity, goal/topic identity, jurisdiction semantics, applicability, zero-dependency Bounded Interpretation safety (re-confirmed directly against `build-bounded-interpretation.ts`'s own `needsApplicabilityHedge`/`hasGovernedProjectDependencies`), Composition compatibility (re-confirmed `directlyRelevantSummary` quotes the governed proposition verbatim, so item 1's distinct no-confusion structure is preserved by the proposition's own wording rather than any Composition-layer confusion-rule templating), askability (re-confirmed directly against `dependency-askability.ts`: no registry entry exists, moot by design given zero dependencies), the registration and Article 36 boundaries (both remain proposition-scope conditional predicates, never a dependency or self-attestation question), the Commercial Assurance boundary (Reviewer Workbook Domain I, control I03, re-confirmed strictly observational note-taking, never a legal trademark-infringement or registration adjudication), and CRC-PUBLICATION-POLICY.md Principle 3's subject-sensitivity gate (explicitly tested and found inapplicable -- Principle 3's own text names its boundaries as \"likeness, voice cloning, deepfakes, political persuasion\" only, none of which this claim's topic is) all independently re-checked and found sound; no substantive publication risk identified. CRC may state that, under Taiwan Trademark Act Article 2 and Article 68 as currently in force, using a mark identical or similar to another party's registered trademark, without the trademark owner's consent and for a marketing purpose, can create civil trademark-infringement liability under any of three distinct statutory branches -- identical mark/identical goods or services (no separate confusion requirement stated in the statute), identical mark/similar goods or services (confusion required), or similar mark/identical-or-similar goods or services (confusion required) -- that statutory limitations and exceptions exist under Article 36, and that this is a separate legal question from Article 70's own well-known-mark dilution provisions. CRC must not state or imply: that a particular mark is registered in Taiwan, that registration is valid, or that a particular person or entity owns the mark; that particular content constitutes statutory trademark use under Article 5; that a specific mark is legally identical or similar to a specific registered mark, or that specific goods/services are legally identical or similar; that consumer confusion is or is not likely; that any Article 36 limitation or exception applies or does not apply; that authorization or consent is sufficient; that infringement occurred or did not occur; that Taiwan law definitively governs the project, including merely because the user selected Taiwan as the assessment jurisdiction; or that satisfying or avoiding this rule establishes broader legal compliance or overall commercial readiness. This is educational workflow guidance, not legal advice. A human-reviewed Commercial Assurance Assessment (Reviewer Workbook Domain I, control I03 -- human observation and evidentiary note-taking, never a legal infringement or registration adjudication) remains the higher-assurance path for the project-specific facts this claim leaves open.",
+    // Verbatim from GOVERNED-CLAIMS.md's own CRC Candidate Statement field.
+    crc_candidate_statement:
+      "Under Taiwan Trademark Act Article 68, using a mark identical or similar to someone else's registered trademark -- without the trademark owner's consent and for a marketing purpose -- can create civil trademark-infringement liability, with the specific rule depending on how similar the marks and the goods/services are: an identical mark on identical goods/services is infringement outright, while an identical mark on similar goods/services, or a similar mark on identical-or-similar goods/services, is infringement only where there's a likelihood of consumer confusion. Statutory exceptions (e.g. good-faith descriptive use) can apply, and this is a separate question from Article 70's well-known-mark dilution provisions.",
+    // Mirrors CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1's and
+    // CLAIM-TRADEMARK-US-LANHAM-CONFUSION-001-v1's own precedent exactly:
+    // AssessmentJurisdictionMention represents only that the user asked
+    // CRC to consider Taiwan law -- never proof that Taiwan law actually
+    // governs the project, that a Taiwan court has jurisdiction, that the
+    // mark is registered in Taiwan, or that infringement occurred there.
+    // Explicit-goal-reachable only, so no Article-50-style unrestricted-
+    // reach exposure exists to solve.
+    applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'Taiwan' }],
+    // D0 (FGR_024 Sec.10-REVISED-2, final and controlling) -- see this
+    // entry's own header comment above for the full withdrawal reasoning.
+    // Registration status and consumer confusion are represented in the
+    // proposition's own conditional wording, not as dependency metadata.
+    unresolved_project_dependencies: [],
+    // Statutory, tool-independent, and not a third-party asset-provider-
+    // scoped claim.
+    provider_scope: null,
+    tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
+    // geographic_relevance_scope deliberately omitted (opt-out by this
+    // field's own inverted default polarity) -- no discovered relevance is
+    // activated by this milestone; this claim is explicit-goal-only.
+    last_verified: '2026-09-23',
+    superseded_by: null,
+  },
 ]
