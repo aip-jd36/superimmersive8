@@ -22,11 +22,18 @@
  * function does not itself know whether the session is genuinely new;
  * route.ts's own established gating (creation.outcome === 'created',
  * isNewSession && parsed.kind !== 'guided_entry_init') already guarantees
- * that. The one thing this predicate adds is the internal_test exclusion,
- * which neither of those existing gates applies on its own.
+ * that. The two things this predicate adds are the internal_test and
+ * automated_eval exclusions, which neither of those existing gates applies
+ * on its own. automated_eval excluded per PM decision (2026-09-23): CRC-OPS-
+ * NOTIFY-1 exists for operational awareness of real external usage --
+ * scripted evaluation traffic is not real-user adoption and would produce
+ * false operational alerts. This does not touch traffic classification
+ * itself (classifyTraffic/TrafficType, traffic-classification.ts) or
+ * automated-eval behavior anywhere else -- it only widens this module's own
+ * notification exclusion by one already-existing TrafficType value.
  */
 export function shouldNotifyCrcSessionStarted(trafficType: string): boolean {
-  return trafficType !== 'internal_test'
+  return trafficType !== 'internal_test' && trafficType !== 'automated_eval'
 }
 
 /**
@@ -47,7 +54,10 @@ export function shouldNotifyCrcSessionStarted(trafficType: string): boolean {
  * session already had a genuine first acceptance before this request, so
  * a 'sent' result is necessarily a later, legitimate resend -- per PM
  * clarification, not another CRC completion.
+ *
+ * automated_eval excluded per PM decision (2026-09-23) -- same reasoning as
+ * shouldNotifyCrcSessionStarted above.
  */
 export function shouldNotifyCrcResultsEmailCaptured(deliveryKind: string, wasAlreadyAcceptedBeforeThisCall: boolean, trafficType: string): boolean {
-  return deliveryKind === 'sent' && !wasAlreadyAcceptedBeforeThisCall && trafficType !== 'internal_test'
+  return deliveryKind === 'sent' && !wasAlreadyAcceptedBeforeThisCall && trafficType !== 'internal_test' && trafficType !== 'automated_eval'
 }

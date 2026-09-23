@@ -16,6 +16,15 @@ describe('shouldNotifyCrcSessionStarted', () => {
   test('internal_test traffic => false, never notifies', () => {
     expect(shouldNotifyCrcSessionStarted('internal_test')).toBe(false)
   })
+
+  // PM decision, 2026-09-23: automated_eval is not real-user adoption and
+  // must not generate a CRC STARTED notification -- covers both a
+  // genuine new free-form session and a genuine new Guided Entry session
+  // (this predicate has no separate branch for either -- one function,
+  // one traffic-type check, called identically from both route.ts hooks).
+  test('automated_eval traffic => false, never notifies (free-form and Guided Entry both call this same predicate)', () => {
+    expect(shouldNotifyCrcSessionStarted('automated_eval')).toBe(false)
+  })
 })
 
 describe('shouldNotifyCrcResultsEmailCaptured', () => {
@@ -34,6 +43,13 @@ describe('shouldNotifyCrcResultsEmailCaptured', () => {
 
   test('internal_test traffic => false even on a genuine first acceptance', () => {
     expect(shouldNotifyCrcResultsEmailCaptured('sent', false, 'internal_test')).toBe(false)
+  })
+
+  // PM decision, 2026-09-23: automated_eval must not generate a CRC
+  // COMPLETED notification either, even on a genuine first successful
+  // results-email acceptance.
+  test('automated_eval traffic => false even on a genuine first acceptance', () => {
+    expect(shouldNotifyCrcResultsEmailCaptured('sent', false, 'automated_eval')).toBe(false)
   })
 
   test('every non-"sent" delivery kind => false', () => {
