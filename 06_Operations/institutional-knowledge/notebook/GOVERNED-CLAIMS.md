@@ -4983,17 +4983,66 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-09-23
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  PENDING — CRC Publication Review not yet performed as of this Adoption
-  (2026-09-23). Per this document's own governance-discipline note (top of
-  file): a claim can be `Adopted` with `Adoption Approver` recorded while
-  `CRC Approver` remains `PENDING` indefinitely -- this is the expected,
-  intentional state for reviewer/internal-only knowledge, not a gap. A
-  separate, later CRC Publication Review (CPR) is required before any
-  `CRC Eligible` status is set; this Adoption decision does not itself
-  authorize, imply, or schedule that review.
+  APPROVED FOR CRC PUBLICATION (2026-09-23, CRC Approver: JD (PM) -- see
+  CRC Approver/CRC Decision Date below; CRC Publication Review #30 complete
+  at governance-reviews/CPR_030_CLAIM-TRADEMARK-TW-ART68-INFRINGEMENT-001-v1_
+  2026-09-23.md, APPROVE, no wording edit required --
+  independently re-verified against the Adopted governance record (anchored
+  to FGR_024's final, `§10-REVISED-2`-controlled D0 dependency state, not
+  the original D2 or intermediate D1 findings), the evidence manifest, and
+  current production source (not inherited from FGR_024 alone) -- source
+  fidelity, goal/topic identity, jurisdiction semantics, applicability,
+  zero-dependency Bounded Interpretation safety (re-confirmed directly
+  against `build-bounded-interpretation.ts`'s own `needsApplicabilityHedge`/
+  `hasGovernedProjectDependencies`), Composition compatibility (re-confirmed
+  `directlyRelevantSummary` quotes the governed proposition verbatim, so
+  item 1's distinct no-confusion structure is preserved by the proposition's
+  own wording rather than any Composition-layer confusion-rule templating),
+  askability (re-confirmed directly against `dependency-askability.ts`: no
+  registry entry exists, moot by design given zero dependencies), the
+  registration and Article 36 boundaries (both remain proposition-scope
+  conditional predicates, never a dependency or self-attestation question),
+  the Commercial Assurance boundary (Reviewer Workbook Domain I, control
+  I03, re-confirmed strictly observational note-taking, never a legal
+  trademark-infringement or registration adjudication), and
+  CRC-PUBLICATION-POLICY.md Principle 3's subject-sensitivity gate
+  (explicitly tested and found inapplicable -- Principle 3's own text names
+  its boundaries as "likeness, voice cloning, deepfakes, political
+  persuasion" only, none of which this claim's topic is) all independently
+  re-checked and found sound; no substantive publication risk identified.
+  CRC may state that, under Taiwan Trademark Act Article 2 and Article 68 as
+  currently in force, using a mark identical or similar to another party's
+  registered trademark, without the trademark owner's consent and for a
+  marketing purpose, can create civil trademark-infringement liability under
+  any of three distinct statutory branches -- identical mark/identical
+  goods or services (no separate confusion requirement stated in the
+  statute), identical mark/similar goods or services (confusion required),
+  or similar mark/identical-or-similar goods or services (confusion
+  required) -- that statutory limitations and exceptions exist under
+  Article 36, and that this is a separate legal question from Article 70's
+  own well-known-mark dilution provisions. CRC must not state or imply:
+  that a particular mark is registered in Taiwan, that registration is
+  valid, or that a particular person or entity owns the mark; that
+  particular content constitutes statutory trademark use under Article 5;
+  that a specific mark is legally identical or similar to a specific
+  registered mark, or that specific goods/services are legally identical or
+  similar; that consumer confusion is or is not likely; that any Article 36
+  limitation or exception applies or does not apply; that authorization or
+  consent is sufficient; that infringement occurred or did not occur; that
+  Taiwan law definitively governs the project, including merely because the
+  user selected Taiwan as the assessment jurisdiction; or that satisfying or
+  avoiding this rule establishes broader legal compliance or overall
+  commercial readiness. This is educational workflow guidance, not legal
+  advice. A human-reviewed Commercial Assurance Assessment (Reviewer
+  Workbook Domain I, control I03 -- human observation and evidentiary
+  note-taking, never a legal infringement or registration adjudication)
+  remains the higher-assurance path for the project-specific facts this
+  claim leaves open. Not yet runtime-reachable by any CRC user -- no
+  second `trademark`-topic `TopicClaim` fixture entry exists in production
+  yet; production representation is a separate, later, explicitly-
+  authorized milestone.
 
 CRC Candidate Statement: >
-  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
   Under Taiwan Trademark Act Article 68, using a mark identical or similar
   to someone else's registered trademark -- without the trademark owner's
   consent and for a marketing purpose -- can create civil trademark-
@@ -5015,10 +5064,10 @@ Effective date: >
   between the old-law and current-promulgated texts (no substantive change
   to the operative infringement rule is pending -- only the chapeau's
   qualifier placement and an unrelated new second paragraph).
-Last reviewed: 2026-09-23 (Formal Governance Review, FGR_024)
+Last reviewed: 2026-09-23 (CRC Publication Review, following FGR_024)
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING
-CRC Decision Date: PENDING
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-09-23
 Related: [[CLAIM-TRADEMARK-US-LANHAM-CONFUSION-001-v1]] (structurally analogous sibling -- shared `trademark` GoalCategory, different jurisdiction, different statute, materially different item-level structure), [[CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1]] (same Taiwan jurisdiction, distinct legal domain -- copyright vs. trademark, no shared dependency or applicability mechanism). A future Art. 70 well-known-mark/dilution candidate is recorded as future scope only, not developed here. The not-yet-effective 2022 Art. 68 amendment is a refresh-trigger watchlist item only (see FGR_024 §20), not a related claim.
 
 Refresh triggers (recorded per FGR_024 §20; no refresh machinery created):
@@ -5045,4 +5094,5 @@ migration or `.gitattributes` repair was performed by this Adoption
 either.
 
 Full Formal Governance Review artifact: `governance-reviews/FGR_024_CAND-TRADEMARK-TW-ART68-INFRINGEMENT-001_2026-09-23.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_030_CLAIM-TRADEMARK-TW-ART68-INFRINGEMENT-001-v1_2026-09-23.md`
 Full evidence manifest: `evidence-captures/taiwan-trademark/MANIFEST.md`
