@@ -199,19 +199,6 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  // TEMPORARY -- CRC-OPS-GEO-1A Production diagnostic (2026-09-23). Proves
-  // (or disproves) whether Vercel injects a trustworthy x-vercel-ip-country
-  // header on the real CRC request path before CRC-OPS-GEO-1 implements
-  // anything against it. Logs ONLY the fixed event name and this one header
-  // value -- no IP, no other header, no session/user/CRC data of any kind.
-  // No behavioral effect, no persistence, no email, no external request, no
-  // influence on traffic classification/rate limiting/CRC reasoning. Placed
-  // as the very first statement so it fires for every POST that reaches
-  // this handler, before any parsing/validation/branching could prevent the
-  // observation. REMOVE after the PM reports the observed Production value
-  // -- must never remain part of the eventual CRC-OPS-GEO-1 feature.
-  console.log('CRC_GEO_DIAGNOSTIC', { country: request.headers.get('x-vercel-ip-country') })
-
   let body: TurnRequestBody
   try {
     body = await request.json()
