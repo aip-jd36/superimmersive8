@@ -363,6 +363,88 @@ export async function sendMaterialDemandAdminNotification(observations: Material
   }
 }
 
+// ── CRC-OPS-NOTIFY-1 (2026-09-23): admin usage notifications ────────────────
+// Two purpose-specific, best-effort operational notifications -- NOT a
+// generic notification platform, and NOT an overload of
+// sendMaterialDemandAdminNotification above (different event, different
+// payload shape, different subject line; that function's own contract stays
+// Material-Demand-specific). Reuse only: the shared `resend` client,
+// ADMIN_EMAIL/FROM_EMAIL, escapeHtml, and the identical fail-open pattern
+// (try/catch, console.error, never throws/rejects) already established by
+// every admin-notification function in this file. Deliberately minimal
+// payloads -- no transcript, no raw IP, no abuse key, no
+// StructuredUnderstanding/RetrievalResult/BoundedInterpretation/Living
+// Knowledge content of any kind. Caller (app/api/crc/turn/route.ts) is
+// responsible for deciding WHEN to call these (traffic-type exclusion,
+// genuine-new-session/first-acceptance gating) -- this module only composes
+// and sends.
+
+export interface CrcSessionStartedNotification {
+  sessionId: string
+  initializationSource: 'free_form' | 'guided'
+  attributionToken?: string | null
+}
+
+export async function sendCrcSessionStartedAdminNotification(payload: CrcSessionStartedNotification): Promise<void> {
+  try {
+    const timestamp = new Date().toISOString()
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
+      subject: 'New CRC session started',
+      html: `
+        <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 560px; margin: 0 auto; padding: 20px;">
+          <h2 style="margin-top: 0;">New CRC session started</h2>
+          <div style="background: white; padding: 12px 16px; border-radius: 6px; margin: 10px 0; border: 1px solid #eee;">
+            <p style="margin: 4px 0;"><strong>Event:</strong> crc_session_started</p>
+            <p style="margin: 4px 0;"><strong>Time:</strong> ${escapeHtml(timestamp)}</p>
+            <p style="margin: 4px 0;"><strong>Session:</strong> ${escapeHtml(payload.sessionId)}</p>
+            <p style="margin: 4px 0;"><strong>Initialization source:</strong> ${escapeHtml(payload.initializationSource)}</p>
+            ${payload.attributionToken ? `<p style="margin: 4px 0;"><strong>Attribution token:</strong> ${escapeHtml(payload.attributionToken)}</p>` : ''}
+          </div>
+        </div>
+      `,
+    })
+  } catch (error) {
+    console.error('Error sending CRC session started admin notification email:', error)
+  }
+}
+
+export interface CrcResultsEmailCapturedNotification {
+  sessionId: string
+  turnCount: number
+  initializationSource: 'free_form' | 'guided' | null
+  email: string
+  attributionToken?: string | null
+}
+
+export async function sendCrcResultsEmailCapturedAdminNotification(payload: CrcResultsEmailCapturedNotification): Promise<void> {
+  try {
+    const timestamp = new Date().toISOString()
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
+      subject: 'CRC results email captured',
+      html: `
+        <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 560px; margin: 0 auto; padding: 20px;">
+          <h2 style="margin-top: 0;">CRC results email captured</h2>
+          <div style="background: white; padding: 12px 16px; border-radius: 6px; margin: 10px 0; border: 1px solid #eee;">
+            <p style="margin: 4px 0;"><strong>Event:</strong> crc_results_email_captured</p>
+            <p style="margin: 4px 0;"><strong>Time:</strong> ${escapeHtml(timestamp)}</p>
+            <p style="margin: 4px 0;"><strong>Session:</strong> ${escapeHtml(payload.sessionId)}</p>
+            <p style="margin: 4px 0;"><strong>Turn count:</strong> ${escapeHtml(String(payload.turnCount))}</p>
+            <p style="margin: 4px 0;"><strong>Initialization source:</strong> ${escapeHtml(payload.initializationSource ?? 'unknown')}</p>
+            <p style="margin: 4px 0;"><strong>Email:</strong> ${escapeHtml(payload.email)}</p>
+            ${payload.attributionToken ? `<p style="margin: 4px 0;"><strong>Attribution token:</strong> ${escapeHtml(payload.attributionToken)}</p>` : ''}
+          </div>
+        </div>
+      `,
+    })
+  } catch (error) {
+    console.error('Error sending CRC results email captured admin notification email:', error)
+  }
+}
+
 export async function sendInfoRequestEmail(
   creatorName: string,
   filmTitle: string,

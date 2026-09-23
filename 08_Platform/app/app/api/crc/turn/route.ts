@@ -71,6 +71,8 @@ import { buildCompleteResponseFields } from '@/lib/crc-engine/complete-response'
 import { recordCrcCompletionTrace } from '@/lib/crc-engine/turn-traces'
 import { recordAndNotifyMaterialDemandEvidence } from '@/lib/crc-engine/material-demand-notification-trigger'
 import { deliverCrcResultsEmail } from '@/lib/crc-engine/results-email-delivery'
+import { sendCrcSessionStartedAdminNotification, sendCrcResultsEmailCapturedAdminNotification } from '@/lib/emails'
+import { shouldNotifyCrcSessionStarted, shouldNotifyCrcResultsEmailCaptured } from '@/lib/crc-engine/crc-usage-notification-trigger'
 import { getResultsEmailErrorMessage, type ResultsEmailClaimReason } from '@/lib/crc-engine/results-gate-copy'
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
 import type { ConsultativeNote } from '@/lib/crc-engine/unresolved-applicability-realization'
@@ -452,6 +454,18 @@ export async function POST(request: NextRequest) {
         return NextResponse.json<TurnResponseBody>({ status: 'invalid_request', error: 'No recipient to resend to yet.' }, { status: 400 })
       }
 
+      // CRC-OPS-NOTIFY-1 (2026-09-23): captured BEFORE the delivery call,
+      // never after -- results_email_accepted_at is written ONLY on an
+      // accepted send and is never cleared afterward (see
+      // record_crc_result_send_outcome's own CASE in the Results Gate
+      // migration), unlike results_email_status, which an email
+      // CORRECTION resets to 'pending' regardless of prior acceptance
+      // history. Non-null here means this session already had a genuine
+      // first acceptance before this request -- so a 'sent' outcome below
+      // is necessarily a later (legitimate) resend, per the PM's explicit
+      // "a later explicit resend is NOT another CRC completion" clarification.
+      const wasAlreadyAcceptedBeforeThisCall = (productState?.results_email_accepted_at ?? null) !== null
+
       const delivery = await deliverCrcResultsEmail(supabaseAdmin, {
         sessionId: token,
         email: targetEmail,
@@ -465,6 +479,30 @@ export async function POST(request: NextRequest) {
 
       if (delivery.kind === 'lead_persistence_failed') {
         return NextResponse.json<TurnResponseBody>({ status: 'retry', message: "We couldn't save your email right now. Please try again." }, { status: 503 })
+      }
+
+      // CRC-OPS-NOTIFY-1: best-effort admin notification for a genuine
+      // FIRST successful results-email acceptance only -- 'sent' plus
+      // "not already accepted before this call" together exclude both an
+      // idempotent retry (delivery.kind would be 'already_sent', never
+      // 'sent', per claim_crc_result_send's own atomic claim) and a later
+      // legitimate resend (delivery.kind is 'sent' again, but
+      // wasAlreadyAcceptedBeforeThisCall is true). internal_test excluded
+      // explicitly, matching the STARTED notifications above. Own
+      // try/catch, independent of every other branch here -- never allowed
+      // to affect what the user is told.
+      if (shouldNotifyCrcResultsEmailCaptured(delivery.kind, wasAlreadyAcceptedBeforeThisCall, trafficType)) {
+        try {
+          await sendCrcResultsEmailCapturedAdminNotification({
+            sessionId: token,
+            turnCount: productState?.turn_count ?? 0,
+            initializationSource: productState?.initialization_source ?? null,
+            email: targetEmail,
+            attributionToken: productState?.attribution_token,
+          })
+        } catch (err) {
+          console.error('[api/crc/turn] sendCrcResultsEmailCapturedAdminNotification failed', err)
+        }
       }
 
       // Re-read -- delivery may have mutated email/crc_lead_id/results_email_*.
@@ -576,6 +614,23 @@ export async function POST(request: NextRequest) {
     // Distinct from guided_entry_submitted above (that only means the
     // session row was created; this means the first real turn worked).
     await logAnalyticsEvent(supabaseAdmin, { session_id: token, event_type: 'guided_entry_crc_initialized' })
+
+    // CRC-OPS-NOTIFY-1 (2026-09-23): best-effort admin notification for a
+    // genuine new EXTERNAL CRC session -- the exact same one-time gate as
+    // guided_entry_crc_initialized above (never fires on an
+    // already_initialized retry, since isFreshGuidedInit is only true for
+    // creation.outcome === 'created'), plus an explicit internal_test
+    // exclusion the existing analytics event does not itself apply.
+    // Wrapped in its own try/catch as a redundant safety net (the function
+    // is already internally fail-open) -- never allowed to affect this
+    // request either way.
+    if (shouldNotifyCrcSessionStarted(trafficType)) {
+      try {
+        await sendCrcSessionStartedAdminNotification({ sessionId: token, initializationSource: 'guided', attributionToken: existingAttributionToken })
+      } catch (err) {
+        console.error('[api/crc/turn] sendCrcSessionStartedAdminNotification (guided) failed', err)
+      }
+    }
   }
 
   let attributionToken: string | undefined
@@ -617,6 +672,22 @@ export async function POST(request: NextRequest) {
       // succeeded). Matches the fail-open discipline for analytics
       // failures throughout this milestone.
       console.error('[api/crc/turn] saveCrcSessionCreationMeta failed', err)
+    }
+
+    // CRC-OPS-NOTIFY-1 (2026-09-23): best-effort admin notification for a
+    // genuine new EXTERNAL free-form CRC session -- same one-time gate as
+    // free_form_crc_initialized immediately above (this whole block only
+    // runs once, for a genuinely new session whose first runTurn() call
+    // just succeeded), plus an explicit internal_test exclusion. Kept in
+    // its own try/catch, deliberately outside the saveCrcSessionCreationMeta
+    // try above -- a notification failure must never be conflated with, or
+    // suppress logging for, an identity/analytics persistence failure.
+    if (shouldNotifyCrcSessionStarted(trafficType)) {
+      try {
+        await sendCrcSessionStartedAdminNotification({ sessionId: token, initializationSource: 'free_form', attributionToken })
+      } catch (err) {
+        console.error('[api/crc/turn] sendCrcSessionStartedAdminNotification (free_form) failed', err)
+      }
     }
   }
 

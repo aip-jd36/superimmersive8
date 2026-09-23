@@ -160,6 +160,23 @@ export interface CrcSessionProductState {
   results_email_status: string | null
   results_email_last_recipient: string | null
   /**
+   * CRC-OPS-NOTIFY-1 (2026-09-23). Already durable (set by
+   * record_crc_result_send_outcome() in the Results Gate migration,
+   * 2026-08-14) but not previously selected here. Unlike
+   * results_email_status -- which claim_crc_result_send() resets to
+   * 'pending' on an email CORRECTION regardless of prior acceptance
+   * history, then possibly to 'failed' if that retry fails -- this column
+   * is written ONLY on an accepted send and is never cleared afterward
+   * (see that RPC's own CASE: `WHEN p_status = 'accepted' THEN ... ELSE
+   * results_email_accepted_at`). That makes it, and not
+   * results_email_status, the safe existing-state signal for "has this
+   * session ever had a first successful results-email acceptance" --
+   * read it BEFORE calling deliverCrcResultsEmail(); non-null already
+   * means any subsequent 'sent' outcome this turn is a later resend, not
+   * a first acceptance.
+   */
+  results_email_accepted_at: string | null
+  /**
    * Guided Entry Foundation (GE-1). `null` for every session created
    * before this milestone, and for any future code path this milestone
    * doesn't cover — deliberately NOT backfilled to 'free_form' (an
@@ -186,7 +203,7 @@ export async function loadCrcSessionProductState(client: SupabaseClient, token: 
   const { data, error } = await client
     .from(TABLE)
     .select(
-      'turn_count, transcript, updated_at, email, traffic_type, abuse_key, attribution_token, product_stop_reason, created_at, crc_lead_id, capture_notice_version, results_email_status, results_email_last_recipient, initialization_source, guided_entry_definition_id, guided_entry_definition_version',
+      'turn_count, transcript, updated_at, email, traffic_type, abuse_key, attribution_token, product_stop_reason, created_at, crc_lead_id, capture_notice_version, results_email_status, results_email_last_recipient, results_email_accepted_at, initialization_source, guided_entry_definition_id, guided_entry_definition_version',
     )
     .eq('id', token)
     .maybeSingle()
@@ -209,6 +226,7 @@ export async function loadCrcSessionProductState(client: SupabaseClient, token: 
     capture_notice_version: (data.capture_notice_version as string | null) ?? null,
     results_email_status: (data.results_email_status as string | null) ?? null,
     results_email_last_recipient: (data.results_email_last_recipient as string | null) ?? null,
+    results_email_accepted_at: (data.results_email_accepted_at as string | null) ?? null,
     initialization_source: (data.initialization_source as CrcSessionProductState['initialization_source']) ?? null,
     guided_entry_definition_id: (data.guided_entry_definition_id as string | null) ?? null,
     guided_entry_definition_version: (data.guided_entry_definition_version as string | null) ?? null,

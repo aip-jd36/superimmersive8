@@ -295,6 +295,9 @@ describe('product-layer helpers (turn_count/transcript, not part of SessionStore
       capture_notice_version: null,
       results_email_status: null,
       results_email_last_recipient: null,
+      // CRC-OPS-NOTIFY-1: additive field, defaults to null the same way
+      // results_email_status does when absent from the fake select payload.
+      results_email_accepted_at: null,
       // Guided Entry Foundation (GE-1): additive fields, default to null
       // when the underlying columns are absent from the row (a
       // pre-migration/historical row, or -- as in this fixture -- simply
@@ -303,6 +306,35 @@ describe('product-layer helpers (turn_count/transcript, not part of SessionStore
       guided_entry_definition_id: null,
       guided_entry_definition_version: null,
     })
+  })
+
+  test('CRC-OPS-NOTIFY-1: loadCrcSessionProductState reads a real, non-null results_email_accepted_at verbatim', async () => {
+    const { client } = fakeClient({
+      selectResult: {
+        data: {
+          turn_count: 6,
+          transcript: [],
+          updated_at: '2026-09-23T00:00:00.000Z',
+          email: 'partner@example.com',
+          traffic_type: 'pilot',
+          abuse_key: null,
+          attribution_token: null,
+          product_stop_reason: null,
+          created_at: '2026-09-20T00:00:00.000Z',
+          crc_lead_id: null,
+          capture_notice_version: null,
+          results_email_status: 'accepted',
+          results_email_last_recipient: 'partner@example.com',
+          results_email_accepted_at: '2026-09-20T01:00:00.000Z',
+          initialization_source: 'free_form',
+          guided_entry_definition_id: null,
+          guided_entry_definition_version: null,
+        },
+        error: null,
+      },
+    })
+    const result = await loadCrcSessionProductState(client, 'token')
+    expect(result?.results_email_accepted_at).toBe('2026-09-20T01:00:00.000Z')
   })
 
   test('saveCrcSessionProductState writes only turn_count/transcript via update(), never the engine-state columns', async () => {
