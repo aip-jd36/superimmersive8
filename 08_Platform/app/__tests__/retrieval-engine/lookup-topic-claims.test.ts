@@ -180,13 +180,13 @@ describe('evaluateApplicabilityDetailed (Piece 1, CRC Narrow Governed Selector Q
   test('all requirements met -> every outcome is "met"', () => {
     const req: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }]
     const outcomes = evaluateApplicabilityDetailed(req, facts({ jurisdiction: { included: ['United States'], excluded: [] } }))
-    expect(outcomes).toEqual([{ requirement: req[0], status: 'met' }])
+    expect(outcomes).toEqual([{ requirement: req[0], status: 'met', unresolved_reason: null }])
   })
 
   test('unresolved requirement (unconfirmed fact) -> "unresolved", never "not_met"', () => {
     const req: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }]
     const outcomes = evaluateApplicabilityDetailed(req, facts({ jurisdiction: { included: [], excluded: [] } }))
-    expect(outcomes).toEqual([{ requirement: req[0], status: 'unresolved' }])
+    expect(outcomes).toEqual([{ requirement: req[0], status: 'unresolved', unresolved_reason: null }])
   })
 
   test('known nonmatching requirement -> "not_met", never "unresolved"', () => {
@@ -197,7 +197,7 @@ describe('evaluateApplicabilityDetailed (Piece 1, CRC Narrow Governed Selector Q
     // with nothing said about the US) is unresolved, not not_met; see the
     // "unresolved requirement" test immediately above for that case.
     const outcomes = evaluateApplicabilityDetailed(req, facts({ jurisdiction: { included: [], excluded: ['United States'] } }))
-    expect(outcomes).toEqual([{ requirement: req[0], status: 'not_met' }])
+    expect(outcomes).toEqual([{ requirement: req[0], status: 'not_met', unresolved_reason: null }])
   })
 
   test('mixed unresolved + not_met -> each requirement keeps its own independent status', () => {
@@ -208,8 +208,8 @@ describe('evaluateApplicabilityDetailed (Piece 1, CRC Narrow Governed Selector Q
     const tm = toolMention({ mention_id: 'm1', resolution: { kind: 'canonical', identifier: 'kling' }, plan_tier: { state: 'confirmed', value: 'free' } })
     const outcomes = evaluateApplicabilityDetailed(req, facts({ jurisdiction: { included: [], excluded: [] }, toolMentions: [tm] }))
     expect(outcomes).toEqual([
-      { requirement: req[0], status: 'unresolved' },
-      { requirement: req[1], status: 'not_met' },
+      { requirement: req[0], status: 'unresolved', unresolved_reason: null },
+      { requirement: req[1], status: 'not_met', unresolved_reason: null },
     ])
   })
 
@@ -220,8 +220,8 @@ describe('evaluateApplicabilityDetailed (Piece 1, CRC Narrow Governed Selector Q
     ]
     const outcomes = evaluateApplicabilityDetailed(req, facts({ jurisdiction: { included: [], excluded: [] }, toolMentions: [] }))
     expect(outcomes).toEqual([
-      { requirement: req[0], status: 'unresolved' },
-      { requirement: req[1], status: 'unresolved' },
+      { requirement: req[0], status: 'unresolved', unresolved_reason: null },
+      { requirement: req[1], status: 'unresolved', unresolved_reason: null },
     ])
   })
 
@@ -317,7 +317,7 @@ describe('lookupTopicClaims -- topic matching + eligibility gates', () => {
       {
         identifier: 'copyright_ownership',
         reason: 'applicability_unmet',
-        unmet_applicability: [{ claim_id: 'C-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+        unmet_applicability: [{ claim_id: 'C-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved', unresolved_reason: null }],
       },
     ])
   })
@@ -365,7 +365,13 @@ describe('lookupTopicClaims -- topic matching + eligibility gates', () => {
       {
         identifier: 'copyright_ownership',
         reason: 'applicability_unmet',
-        unmet_applicability: [{ claim_id: 'C-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+        // CRC-CC-SCOPE-3 (2026-09-23): Taiwan is established above and the
+        // requirement is for United States -- this is exactly the
+        // "established-elsewhere" case the new evaluator-owned reason
+        // exists to describe. Status remains unresolved, unchanged.
+        unmet_applicability: [
+          { claim_id: 'C-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved', unresolved_reason: 'value_not_among_established_values' },
+        ],
       },
     ])
   })
@@ -415,7 +421,7 @@ describe('lookupTopicClaims -- mixed-resolution diagnostic parity (CRC Generic A
       {
         identifier: 'commercial_use',
         reason: 'applicability_unmet',
-        unmet_applicability: [{ claim_id: 'UNRESOLVED', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+        unmet_applicability: [{ claim_id: 'UNRESOLVED', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved', unresolved_reason: null }],
       },
     ])
   })
@@ -486,7 +492,7 @@ describe('lookupTopicClaims -- mixed-resolution diagnostic parity (CRC Generic A
     // `unresolved`) remains. See test B's own comment (above) for the full
     // rationale; every real consumer already filtered `not_met` away.
     const detail = result.diagnostics[0].unmet_applicability
-    expect(detail).toEqual([{ claim_id: 'UNRESOLVED', requirement: { fact: 'tool_plan_tier', tool: 'test-tool', operator: 'equals', value: 'pro' }, status: 'unresolved' }])
+    expect(detail).toEqual([{ claim_id: 'UNRESOLVED', requirement: { fact: 'tool_plan_tier', tool: 'test-tool', operator: 'equals', value: 'pro' }, status: 'unresolved', unresolved_reason: null }])
   })
 
   // D. two met + one unresolved
@@ -505,7 +511,7 @@ describe('lookupTopicClaims -- mixed-resolution diagnostic parity (CRC Generic A
       {
         identifier: 'commercial_use',
         reason: 'applicability_unmet',
-        unmet_applicability: [{ claim_id: 'UNRESOLVED', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+        unmet_applicability: [{ claim_id: 'UNRESOLVED', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved', unresolved_reason: null }],
       },
     ])
   })
@@ -524,7 +530,7 @@ describe('lookupTopicClaims -- mixed-resolution diagnostic parity (CRC Generic A
       {
         identifier: 'commercial_use',
         reason: 'applicability_unmet',
-        unmet_applicability: [{ claim_id: 'UNRESOLVED', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+        unmet_applicability: [{ claim_id: 'UNRESOLVED', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved', unresolved_reason: null }],
       },
     ])
   })

@@ -117,7 +117,7 @@ describe('V: applicability gating, attributed to the originating goal category',
       {
         identifier: 'commercial_use',
         reason: 'applicability_unmet',
-        unmet_applicability: [{ claim_id: 'C-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+        unmet_applicability: [{ claim_id: 'C-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved', unresolved_reason: null }],
       },
     ])
   })
@@ -195,7 +195,7 @@ describe('lookupDiscoveredTopicClaims -- applicability diagnostic parity (CRC Ge
       {
         identifier: 'commercial_use',
         reason: 'applicability_unmet',
-        unmet_applicability: [{ claim_id: 'C-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+        unmet_applicability: [{ claim_id: 'C-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved', unresolved_reason: null }],
       },
     ])
   })
@@ -259,7 +259,7 @@ describe('lookupDiscoveredTopicClaims -- applicability diagnostic parity (CRC Ge
       {
         identifier: 'commercial_use',
         reason: 'applicability_unmet',
-        unmet_applicability: [{ claim_id: 'UNRESOLVED', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+        unmet_applicability: [{ claim_id: 'UNRESOLVED', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved', unresolved_reason: null }],
       },
     ])
   })

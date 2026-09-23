@@ -191,7 +191,12 @@ export function retrieve(
         continue
       }
       if (result.status !== 'met') {
-        const unmetDetail: UnmetApplicabilityDetail[] = result.material_unresolved.map((o) => ({ claim_id: claim.claim_id, requirement: o.requirement, status: o.status }))
+        const unmetDetail: UnmetApplicabilityDetail[] = result.material_unresolved.map((o) => ({
+          claim_id: claim.claim_id,
+          requirement: o.requirement,
+          status: o.status,
+          unresolved_reason: o.unresolved_reason,
+        }))
         diagnostics.push({ identifier: claim.topic ?? 'unknown', reason: 'applicability_unmet', unmet_applicability: unmetDetail })
         continue
       }

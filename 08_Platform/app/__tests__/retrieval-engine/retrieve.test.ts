@@ -312,7 +312,7 @@ describe('retrieve -- Topic Retrieval integration (CRC Living Knowledge Phase 1,
     expect(out.diagnostics).toContainEqual({
       identifier: 'copyright_ownership',
       reason: 'applicability_unmet',
-      unmet_applicability: [{ claim_id: 'CLAIM-COPY-001-v1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+      unmet_applicability: [{ claim_id: 'CLAIM-COPY-001-v1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved', unresolved_reason: null }],
     })
   })
 
@@ -581,7 +581,7 @@ describe('retrieve -- Matrix applicability (CRC Narrow Matrix Applicability mile
       {
         identifier: 'unknown',
         reason: 'applicability_unmet',
-        unmet_applicability: [{ claim_id: 'test-matrix-jurisdiction', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+        unmet_applicability: [{ claim_id: 'test-matrix-jurisdiction', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved', unresolved_reason: null }],
       },
     ])
   })

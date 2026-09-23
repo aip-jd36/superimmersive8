@@ -357,9 +357,9 @@ describe('CC-3A -- CASE 8: ambiguous unresolved ordering', () => {
     status: 'directly_relevant',
     supporting_claim_ids: ['c1'],
     unresolved_relevant_claims: [
-      { claim_id: 'z-claim', fact: null, tool: null },
-      { claim_id: 'a-claim', fact: null, tool: null },
-      { claim_id: 'm-claim', fact: null, tool: null },
+      { claim_id: 'z-claim', fact: null, tool: null, unresolved_reason: null },
+      { claim_id: 'a-claim', fact: null, tool: null, unresolved_reason: null },
+      { claim_id: 'm-claim', fact: null, tool: null, unresolved_reason: null },
     ],
   })
   const results = [result({ claim_id: 'c1', matched_goal_category: 'commercial_use' })]
@@ -372,20 +372,22 @@ describe('CC-3A -- CASE 8: ambiguous unresolved ordering', () => {
 
   test('order is deterministic and stable (kind, then identity) -- not a materiality rank', () => {
     expect(items).toEqual([
-      { kind: 'withheld_relevant_claim', claim_id: 'a-claim', fact: null, tool: null },
-      { kind: 'withheld_relevant_claim', claim_id: 'm-claim', fact: null, tool: null },
-      { kind: 'withheld_relevant_claim', claim_id: 'z-claim', fact: null, tool: null },
+      { kind: 'withheld_relevant_claim', claim_id: 'a-claim', fact: null, tool: null, unresolved_reason: null },
+      { kind: 'withheld_relevant_claim', claim_id: 'm-claim', fact: null, tool: null, unresolved_reason: null },
+      { kind: 'withheld_relevant_claim', claim_id: 'z-claim', fact: null, tool: null, unresolved_reason: null },
     ])
     // rebuilding yields the identical order
     expect(buildConsultativeAnswerPlan([g], results, []).explicit_sections[0].unresolved_items).toEqual(items)
   })
 
-  // CC-4C.2D (2026-09-19): fact/tool are now legitimate fields on this
-  // variant (the bounded applicability-fact passthrough) -- still no rank/
-  // priority/severity field, which is what this test actually guards.
+  // CC-4C.2D (2026-09-19): fact/tool are legitimate fields on this variant
+  // (the bounded applicability-fact passthrough). CRC-CC-SCOPE-3
+  // (2026-09-23): unresolved_reason is a third legitimate, bounded,
+  // evaluator-owned field, propagated data-only -- still no rank/priority/
+  // severity field, which is what this test actually guards.
   test('no item carries a rank / priority / severity field', () => {
     for (const it of items) {
-      expect(Object.keys(it).sort()).toEqual(['claim_id', 'fact', 'kind', 'tool'])
+      expect(Object.keys(it).sort()).toEqual(['claim_id', 'fact', 'kind', 'tool', 'unresolved_reason'])
       expect(it).not.toHaveProperty('rank')
       expect(it).not.toHaveProperty('priority')
       expect(it).not.toHaveProperty('severity')
@@ -417,7 +419,11 @@ describe('CC-3A -- determination_declined and outside_coverage carry no derived 
   const oc = interp({ goal_id: 'g2', category: 'copyright_ownership', status: 'outside_current_coverage' })
   // a stray diagnostic for the same category must NOT leak into these sections
   const diags: RetrievalDiagnostic[] = [
-    { identifier: 'commercial_use', reason: 'applicability_unmet', unmet_applicability: [{ claim_id: 'x', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'US' }, status: 'unresolved' }] },
+    {
+      identifier: 'commercial_use',
+      reason: 'applicability_unmet',
+      unmet_applicability: [{ claim_id: 'x', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'US' }, status: 'unresolved', unresolved_reason: null }],
+    },
   ]
   const plan = buildConsultativeAnswerPlan([dd, oc], [], diags)
 
@@ -445,8 +451,8 @@ describe('CC-3A -- not_met applicability is never an open item', () => {
       identifier: 'commercial_use',
       reason: 'applicability_unmet',
       unmet_applicability: [
-        { claim_id: 'not-met-claim', requirement: { fact: 'tool_plan_tier', tool: 'x', operator: 'equals', value: 'paid' }, status: 'not_met' },
-        { claim_id: 'unresolved-claim', requirement: { fact: 'tool_account_status', tool: 'y', operator: 'equals', value: 'Member Account' }, status: 'unresolved' },
+        { claim_id: 'not-met-claim', requirement: { fact: 'tool_plan_tier', tool: 'x', operator: 'equals', value: 'paid' }, status: 'not_met', unresolved_reason: null },
+        { claim_id: 'unresolved-claim', requirement: { fact: 'tool_account_status', tool: 'y', operator: 'equals', value: 'Member Account' }, status: 'unresolved', unresolved_reason: null },
       ],
     },
   ]
@@ -454,13 +460,13 @@ describe('CC-3A -- not_met applicability is never an open item', () => {
   const items = plan.explicit_sections[0].unresolved_items
 
   test('only the unresolved applicability appears; the not_met one is a settled exclusion', () => {
-    expect(items).toEqual([{ kind: 'unresolved_applicability', claim_id: 'unresolved-claim', fact: 'tool_account_status', tool: 'y' }])
+    expect(items).toEqual([{ kind: 'unresolved_applicability', claim_id: 'unresolved-claim', fact: 'tool_account_status', tool: 'y', unresolved_reason: null }])
   })
 })
 
 describe('CC-3A -- purity / no mutation of inputs', () => {
   test('inputs are not mutated', () => {
-    const interps = [interp({ goal_id: 'g1', category: 'commercial_use', status: 'directly_relevant', supporting_claim_ids: ['c1'], unresolved_relevant_claims: [{ claim_id: 'b', fact: null, tool: null }, { claim_id: 'a', fact: null, tool: null }] })]
+    const interps = [interp({ goal_id: 'g1', category: 'commercial_use', status: 'directly_relevant', supporting_claim_ids: ['c1'], unresolved_relevant_claims: [{ claim_id: 'b', fact: null, tool: null, unresolved_reason: null }, { claim_id: 'a', fact: null, tool: null, unresolved_reason: null }] })]
     const results = [result({ claim_id: 'c1', matched_goal_category: 'commercial_use' })]
     const diags: RetrievalDiagnostic[] = []
     const snapshotInterps = JSON.stringify(interps)

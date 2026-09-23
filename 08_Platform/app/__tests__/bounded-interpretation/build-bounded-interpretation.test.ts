@@ -318,7 +318,7 @@ describe('buildBoundedInterpretations -- Case 3A / Case 3B relevant_applicabilit
     expect(out.diagnostics).toContainEqual({
       identifier: 'copyrightability',
       reason: 'applicability_unmet',
-      unmet_applicability: [{ claim_id: 'TEST-3A', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+      unmet_applicability: [{ claim_id: 'TEST-3A', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved', unresolved_reason: null }],
     })
 
     const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
@@ -1135,7 +1135,7 @@ describe('buildBoundedInterpretations -- Case 3A reuse for a Matrix-origin appli
     expect(out.diagnostics).toContainEqual({
       identifier: 'commercial_use',
       reason: 'applicability_unmet',
-      unmet_applicability: [{ claim_id: 'test-matrix-gated', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+      unmet_applicability: [{ claim_id: 'test-matrix-gated', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved', unresolved_reason: null }],
     })
 
     const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
@@ -1276,7 +1276,7 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
     expect(interp.summary).not.toContain('Unresolved substantive text that must never leak.')
     // CC-4C.2D: fact/tool are now carried through -- the withheld claim's
     // fixture gates on jurisdiction only, unambiguous.
-    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'UNRESOLVED', fact: 'jurisdiction', tool: null }])
+    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'UNRESOLVED', fact: 'jurisdiction', tool: null, unresolved_reason: null }])
   })
 
   // B. matched + known-not-applicable
@@ -1329,7 +1329,7 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
     expect(interp.summary).toContain('Second matched statement.')
     expect(interp.supporting_claim_ids.sort()).toEqual(['MATCHED-A', 'MATCHED-B'])
     // CC-4C.2D: fact/tool are now carried through -- unambiguous, jurisdiction only.
-    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'UNRESOLVED', fact: 'jurisdiction', tool: null }])
+    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'UNRESOLVED', fact: 'jurisdiction', tool: null, unresolved_reason: null }])
   })
 
   // D. zero matches + unresolved applicability -- existing Case 3A must remain unchanged
@@ -1381,7 +1381,7 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
     const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
     expect(interp.status).toBe('directly_relevant')
     // CC-4C.2D: fact/tool are now carried through -- unambiguous, tool_plan_tier/test-tool.
-    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'UNRESOLVED', fact: 'tool_plan_tier', tool: 'test-tool' }])
+    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'UNRESOLVED', fact: 'tool_plan_tier', tool: 'test-tool', unresolved_reason: null }])
   })
 
   // F. multiple unresolved claims -> deterministic, deduplicated identities
@@ -1403,7 +1403,18 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
       }),
     ]
     const facts: ApplicabilityFacts = {
-      jurisdiction: { included: [], excluded: [] },
+      // CRC-CC-SCOPE-3 (2026-09-23): Taiwan established (not United States)
+      // -- the jurisdiction leaf below now ALSO carries `unresolved_reason:
+      // 'value_not_among_established_values'` (SCOPE-3 Part 12), alongside
+      // the pre-existing tool_plan_tier leaf carrying none. Deliberately
+      // chosen so this one fixture exercises BOTH the pre-existing
+      // fact/tool ambiguity AND the new reason field's own fail-closed
+      // aggregation at the same time, rather than adding a second,
+      // structurally-unreachable "same fact/tool, different reason" case
+      // (see this file's own SCOPE-3 CASE-3 note below for why that shape
+      // cannot exist with the current, deterministic single-evaluator-pass
+      // design).
+      jurisdiction: { included: ['Taiwan'], excluded: [] },
       toolMentions: [
         toolMention({ mention_id: 'tm-1', resolution: { kind: 'canonical', identifier: 'test-tool' } }),
         toolMention({ mention_id: 'tm-2', resolution: { kind: 'canonical', identifier: 'test-tool-2' } }),
@@ -1425,10 +1436,48 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
     // "most specific wins" rule -- see collectUnresolvedRelevantClaimIds's
     // own header). UNRESOLVED-OTHER has exactly one requirement and
     // correctly carries it through unambiguously.
+    //
+    // CRC-CC-SCOPE-3 (2026-09-23), Part 12: `unresolved_reason` fails
+    // closed to `null` ALONGSIDE `fact`/`tool` for UNRESOLVED-MULTI-REQ --
+    // the SAME ambiguity entry, never a partial fallback that keeps
+    // fact/tool null but still leaks a reason (or vice versa). The
+    // jurisdiction leaf alone, evaluated in isolation, WOULD carry
+    // 'value_not_among_established_values' (Taiwan is established above) --
+    // this proves that information is correctly discarded once ambiguity
+    // is detected, not merely never computed.
     const multi = interp.unresolved_relevant_claims.find((c) => c.claim_id === 'UNRESOLVED-MULTI-REQ')
     const other = interp.unresolved_relevant_claims.find((c) => c.claim_id === 'UNRESOLVED-OTHER')
-    expect(multi).toEqual({ claim_id: 'UNRESOLVED-MULTI-REQ', fact: null, tool: null })
-    expect(other).toEqual({ claim_id: 'UNRESOLVED-OTHER', fact: 'tool_plan_tier', tool: 'test-tool-2' })
+    expect(multi).toEqual({ claim_id: 'UNRESOLVED-MULTI-REQ', fact: null, tool: null, unresolved_reason: null })
+    expect(other).toEqual({ claim_id: 'UNRESOLVED-OTHER', fact: 'tool_plan_tier', tool: 'test-tool-2', unresolved_reason: null })
+  })
+
+  // CRC-CC-SCOPE-3 (2026-09-23), Part 12/20: a claim with a SINGLE
+  // jurisdiction requirement, unambiguous fact/tool, correctly carries the
+  // new reason through this same aggregation path end-to-end. The
+  // structurally-symmetric "CASE 3" (same fact/tool, disagreeing reason)
+  // the milestone asked to test if reachable does NOT exist with this
+  // representation: `unresolved_reason` is a deterministic function of the
+  // exact same `(requirement, facts)` pair that already determines
+  // `fact`/`tool` (both computed in one evaluator pass -- see
+  // `evaluateJurisdictionRequirementStatus`) so two details sharing an
+  // identical `(fact, tool)` for one claim_id, within one turn, cannot
+  // disagree on the reason. Documented here rather than a fabricated
+  // conflicting-reason fixture, per this milestone's own instruction not to
+  // invent a production reason value merely to test a hypothetical.
+  test('unresolved_reason: an unambiguous single-jurisdiction-requirement claim carries the reason through claim-level aggregation unchanged', () => {
+    const matrix = [
+      matrixRow({ claim_id: 'MATCHED', topic: 'commercial_use', crc_candidate_statement: 'Matched governed statement.' }),
+      matrixRow({
+        claim_id: 'UNRESOLVED-SCOPED',
+        topic: 'commercial_use',
+        applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }],
+      }),
+    ]
+    const facts: ApplicabilityFacts = { jurisdiction: { included: ['Taiwan'], excluded: [] }, toolMentions: [] }
+    const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
+    const out = retrieve(handoff({ tools: [tool('MATCHED'), tool('UNRESOLVED-SCOPED')] }), matrix, [g], [], facts)
+    const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
+    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'UNRESOLVED-SCOPED', fact: 'jurisdiction', tool: null, unresolved_reason: 'value_not_among_established_values' }])
   })
 
   // G. Topic matched + Matrix unresolved
@@ -1458,7 +1507,7 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
     expect(interp.summary).toContain('Topic-matched governed statement.')
     expect(interp.summary).not.toContain('Matrix substantive text that must never leak while unresolved.')
     // CC-4C.2D: fact/tool are now carried through -- unambiguous, jurisdiction only.
-    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'MATRIX-UNRESOLVED', fact: 'jurisdiction', tool: null }])
+    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'MATRIX-UNRESOLVED', fact: 'jurisdiction', tool: null, unresolved_reason: null }])
   })
 
   // H. Matrix matched + Topic unresolved
@@ -1513,7 +1562,7 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
     expect(out.diagnostics).toContainEqual({
       identifier: 'commercial_use',
       reason: 'applicability_unmet',
-      unmet_applicability: [{ claim_id: 'DISCOVERED-UNRESOLVED', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+      unmet_applicability: [{ claim_id: 'DISCOVERED-UNRESOLVED', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved', unresolved_reason: null }],
     })
 
     const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
@@ -1522,7 +1571,7 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
     expect(interp.supporting_claim_ids).toEqual(['MATCHED'])
     // BI's own, unmodified logic now correctly preserves the discovered-origin unresolved claim, with zero BI code change.
     // CC-4C.2D: fact/tool are now carried through -- unambiguous, jurisdiction only.
-    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'DISCOVERED-UNRESOLVED', fact: 'jurisdiction', tool: null }])
+    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'DISCOVERED-UNRESOLVED', fact: 'jurisdiction', tool: null, unresolved_reason: null }])
   })
 
   // M. CRC Generic Applicability Diagnostic Parity milestone (2026-08-24):
@@ -1548,14 +1597,14 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
     expect(out.diagnostics).toContainEqual({
       identifier: 'commercial_use',
       reason: 'applicability_unmet',
-      unmet_applicability: [{ claim_id: 'TOPIC-UNRESOLVED', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }],
+      unmet_applicability: [{ claim_id: 'TOPIC-UNRESOLVED', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved', unresolved_reason: null }],
     })
 
     const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
     expect(interp.status).toBe('directly_relevant')
     expect(interp.summary).toContain('Topic-matched governed statement.')
     // CC-4C.2D: fact/tool are now carried through -- unambiguous, jurisdiction only.
-    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'TOPIC-UNRESOLVED', fact: 'jurisdiction', tool: null }])
+    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'TOPIC-UNRESOLVED', fact: 'jurisdiction', tool: null, unresolved_reason: null }])
   })
 
   // J. unresolved, evidence-only-shaped -- askability must never be consulted
@@ -1579,7 +1628,7 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
     const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
     // CC-4C.2D: fact/tool are now carried through -- unambiguous, jurisdiction only. This
     // proves fact/tool passthrough is unaffected by askability shape too (same test intent).
-    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'EVIDENCE-ONLY-SHAPED', fact: 'jurisdiction', tool: null }])
+    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: 'EVIDENCE-ONLY-SHAPED', fact: 'jurisdiction', tool: null, unresolved_reason: null }])
   })
 
   // K. correction-style recomputation: unresolved -> met
@@ -1600,7 +1649,7 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
     const interpN = buildBoundedInterpretations([g], turnN.results, turnN.diagnostics)[0]
     expect(interpN.supporting_claim_ids).toEqual(['MATCHED'])
     // CC-4C.2D: fact/tool are now carried through -- unambiguous, jurisdiction only.
-    expect(interpN.unresolved_relevant_claims).toEqual([{ claim_id: 'CORRECTABLE', fact: 'jurisdiction', tool: null }])
+    expect(interpN.unresolved_relevant_claims).toEqual([{ claim_id: 'CORRECTABLE', fact: 'jurisdiction', tool: null, unresolved_reason: null }])
 
     const turnNPlus1 = retrieve(h, matrix, [g], [], usFacts)
     const interpNPlus1 = buildBoundedInterpretations([g], turnNPlus1.results, turnNPlus1.diagnostics)[0]
@@ -1626,7 +1675,7 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
     const turnN = retrieve(h, matrix, [g], [], unknownFacts)
     const interpN = buildBoundedInterpretations([g], turnN.results, turnN.diagnostics)[0]
     // CC-4C.2D: fact/tool are now carried through -- unambiguous, jurisdiction only.
-    expect(interpN.unresolved_relevant_claims).toEqual([{ claim_id: 'CORRECTABLE', fact: 'jurisdiction', tool: null }])
+    expect(interpN.unresolved_relevant_claims).toEqual([{ claim_id: 'CORRECTABLE', fact: 'jurisdiction', tool: null, unresolved_reason: null }])
 
     const turnNPlus1 = retrieve(h, matrix, [g], [], mismatchedFacts)
     const interpNPlus1 = buildBoundedInterpretations([g], turnNPlus1.results, turnNPlus1.diagnostics)[0]

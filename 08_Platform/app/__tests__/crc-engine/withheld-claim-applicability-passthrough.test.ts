@@ -125,7 +125,7 @@ describe('CC-4C.2D -- F/G: Plan and Realization copy verbatim', () => {
   test('F: Plan copies claim_id + fact + tool exactly from BI, no lookups back into Retrieval', () => {
     const planItem = plan.explicit_sections[0].unresolved_items.find((i) => i.kind === 'withheld_relevant_claim')
     const biItem = interp.unresolved_relevant_claims.find((c) => c.claim_id === 'WITHHELD')
-    expect(planItem).toEqual({ kind: 'withheld_relevant_claim', claim_id: 'WITHHELD', fact: biItem?.fact, tool: biItem?.tool })
+    expect(planItem).toEqual({ kind: 'withheld_relevant_claim', claim_id: 'WITHHELD', fact: biItem?.fact, tool: biItem?.tool, unresolved_reason: biItem?.unresolved_reason })
   })
 
   // CC-4C.2F (2026-09-19): this fixture's WITHHELD claim is EXACTLY the
@@ -403,7 +403,7 @@ describe('CC-4C.2D -- U: multiple unresolved facts / claim ambiguity fails close
     const facts: ApplicabilityFacts = { jurisdiction: { included: [], excluded: [] }, toolMentions: [toolMention('synthtool')] }
     const { interps, plan, realization, email } = fullPipeline(handoff({ tools: [tool('MATCHED'), tool('AMBIGUOUS')] }), [g], matrix, facts)
     const item = interps[0].unresolved_relevant_claims.find((c) => c.claim_id === 'AMBIGUOUS')
-    expect(item).toEqual({ claim_id: 'AMBIGUOUS', fact: null, tool: null })
+    expect(item).toEqual({ claim_id: 'AMBIGUOUS', fact: null, tool: null, unresolved_reason: null })
 
     // NOTE: the SAME claim's two `unmet_applicability` diagnostic entries
     // ALSO, independently, each produce their own `unresolved_applicability`
@@ -416,7 +416,7 @@ describe('CC-4C.2D -- U: multiple unresolved facts / claim ambiguity fails close
     // What THIS test must isolate and prove is the `withheld_relevant_claim`
     // item specifically, at the Plan/Realization level, structurally.
     const withheldItem = plan.explicit_sections[0].unresolved_items.find((i) => i.kind === 'withheld_relevant_claim')
-    expect(withheldItem).toEqual({ kind: 'withheld_relevant_claim', claim_id: 'AMBIGUOUS', fact: null, tool: null })
+    expect(withheldItem).toEqual({ kind: 'withheld_relevant_claim', claim_id: 'AMBIGUOUS', fact: null, tool: null, unresolved_reason: null })
     const withheldRealizationItem = realization.unresolved_groups[0].items.find((i) => i.kind === 'withheld_relevant_claim')
     expect(withheldRealizationItem).toEqual(withheldItem)
     expect(email.text).toContain("An additional governed consideration for this topic hasn't been confirmed.")

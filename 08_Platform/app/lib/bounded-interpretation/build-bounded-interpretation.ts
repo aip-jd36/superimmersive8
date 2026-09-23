@@ -44,7 +44,7 @@
  * `results`.
  */
 
-import type { ApplicabilityFact, RetrievalDiagnostic } from '@/lib/retrieval-engine/types'
+import type { ApplicabilityFact, ApplicabilityUnresolvedReason, RetrievalDiagnostic } from '@/lib/retrieval-engine/types'
 import type { Attested } from '@/types/interview-engine'
 import type { BiIntent, BiResult, BoundedInterpretation, UnresolvedRelevantClaim } from './types'
 import {
@@ -217,29 +217,46 @@ function shouldIncludeHumanContributionSentence(
  * preserved exactly as the prior `Set<string>`-based implementation
  * produced it (first-seen claim_id order), so `PlanUnresolvedItem`
  * ordering downstream (CC-3A's own stable sort) is unaffected.
+ *
+ * CRC-CC-SCOPE-3 (2026-09-23): `unresolved_reason` is tracked and
+ * fail-closed exactly like `fact`/`tool` -- part of the SAME per-claim_id
+ * key, not a separate map/pass. Two details for one claim_id that agree on
+ * `(fact, tool)` but disagree on `unresolved_reason` (not currently
+ * reachable -- `unresolved_reason` is a deterministic function of the same
+ * `(requirement, facts)` inputs that already produced `fact`/`tool`, so two
+ * details sharing a `(fact, tool)` pair within one turn cannot disagree on
+ * the reason -- but this function must not assume that forever either) fail
+ * the WHOLE entry closed to `{fact: null, tool: null, unresolved_reason:
+ * null}`, never a partial fallback that keeps `fact`/`tool` while nulling
+ * only the reason.
  */
 function collectUnresolvedRelevantClaimIds(category: BiIntent['category'], diagnostics: RetrievalDiagnostic[], matchedClaimIds: Set<string>): UnresolvedRelevantClaim[] {
-  type FactToolPair = { fact: ApplicabilityFact; tool: string | null }
-  const byClaimId = new Map<string, FactToolPair | 'ambiguous'>()
+  type FactToolReason = { fact: ApplicabilityFact; tool: string | null; unresolved_reason: ApplicabilityUnresolvedReason | null }
+  const byClaimId = new Map<string, FactToolReason | 'ambiguous'>()
   const order: string[] = []
   for (const diagnostic of diagnostics) {
     if (diagnostic.identifier !== category || diagnostic.reason !== 'applicability_unmet' || !diagnostic.unmet_applicability) continue
     for (const detail of diagnostic.unmet_applicability) {
       if (detail.status !== 'unresolved') continue
       if (matchedClaimIds.has(detail.claim_id)) continue
-      const current: FactToolPair = { fact: detail.requirement.fact, tool: detail.requirement.tool ?? null }
+      const current: FactToolReason = { fact: detail.requirement.fact, tool: detail.requirement.tool ?? null, unresolved_reason: detail.unresolved_reason }
       const existing = byClaimId.get(detail.claim_id)
       if (existing === undefined) {
         byClaimId.set(detail.claim_id, current)
         order.push(detail.claim_id)
-      } else if (existing !== 'ambiguous' && (existing.fact !== current.fact || existing.tool !== current.tool)) {
+      } else if (
+        existing !== 'ambiguous' &&
+        (existing.fact !== current.fact || existing.tool !== current.tool || existing.unresolved_reason !== current.unresolved_reason)
+      ) {
         byClaimId.set(detail.claim_id, 'ambiguous')
       }
     }
   }
   return order.map((claim_id) => {
     const entry = byClaimId.get(claim_id)
-    return entry && entry !== 'ambiguous' ? { claim_id, fact: entry.fact, tool: entry.tool } : { claim_id, fact: null, tool: null }
+    return entry && entry !== 'ambiguous'
+      ? { claim_id, fact: entry.fact, tool: entry.tool, unresolved_reason: entry.unresolved_reason }
+      : { claim_id, fact: null, tool: null, unresolved_reason: null }
   })
 }
 

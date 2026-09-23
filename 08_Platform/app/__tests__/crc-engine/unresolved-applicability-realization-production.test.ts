@@ -34,7 +34,7 @@ function qualifyingSection(): PlanGoalSection {
     disposition: 'governed_guidance_available_with_open_items',
     supported_claim_refs: [claimRef({ claim_id: 'BASELINE-CLAIM' })],
     summary_claim_refs: [claimRef({ claim_id: 'BASELINE-CLAIM' })],
-    unresolved_items: [{ kind: 'unresolved_applicability', claim_id: 'MEMBER-CLAIM', fact: 'tool_account_status', tool: SYNTH_TOOL }],
+    unresolved_items: [{ kind: 'unresolved_applicability', claim_id: 'MEMBER-CLAIM', fact: 'tool_account_status', tool: SYNTH_TOOL, unresolved_reason: null }],
     missing_evidence: [],
     boundary_ref: 'case_3b_unresolved',
     bi_summary_blocks: [
@@ -75,12 +75,12 @@ describe('realizeUnresolvedApplicability -- production registry path (no mocks)'
 describe('activating tool_account_status does not affect other facts/cases (production registries)', () => {
   test('tool_plan_tier unresolved -> zero notes (unregistered in production -- also covers the generic requires_documentary_evidence/applicability_unresolved fail-closed branch)', () => {
     expect(getApplicabilityFactLabel('tool_plan_tier')).toBeUndefined()
-    const s = { ...qualifyingSection(), unresolved_items: [{ kind: 'unresolved_applicability' as const, claim_id: 'X', fact: 'tool_plan_tier' as const, tool: SYNTH_TOOL }] }
+    const s = { ...qualifyingSection(), unresolved_items: [{ kind: 'unresolved_applicability' as const, claim_id: 'X', fact: 'tool_plan_tier' as const, tool: SYNTH_TOOL, unresolved_reason: null }] }
     expect(realizeUnresolvedApplicability([s])).toEqual([])
   })
 
   test('jurisdiction unresolved -> zero notes (dedicated path guard, regardless of registry content)', () => {
-    const s = { ...qualifyingSection(), unresolved_items: [{ kind: 'unresolved_applicability' as const, claim_id: 'X', fact: 'jurisdiction' as const, tool: null }] }
+    const s = { ...qualifyingSection(), unresolved_items: [{ kind: 'unresolved_applicability' as const, claim_id: 'X', fact: 'jurisdiction' as const, tool: null, unresolved_reason: null }] }
     expect(realizeUnresolvedApplicability([s])).toEqual([])
   })
 
@@ -88,8 +88,8 @@ describe('activating tool_account_status does not affect other facts/cases (prod
     const s = {
       ...qualifyingSection(),
       unresolved_items: [
-        { kind: 'unresolved_applicability' as const, claim_id: 'A', fact: 'tool_account_status' as const, tool: SYNTH_TOOL },
-        { kind: 'unresolved_applicability' as const, claim_id: 'B', fact: 'tool_plan_tier' as const, tool: SYNTH_TOOL },
+        { kind: 'unresolved_applicability' as const, claim_id: 'A', fact: 'tool_account_status' as const, tool: SYNTH_TOOL, unresolved_reason: null },
+        { kind: 'unresolved_applicability' as const, claim_id: 'B', fact: 'tool_plan_tier' as const, tool: SYNTH_TOOL, unresolved_reason: null },
       ],
     }
     expect(realizeUnresolvedApplicability([s])).toEqual([])

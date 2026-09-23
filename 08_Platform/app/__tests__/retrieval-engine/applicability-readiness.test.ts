@@ -60,7 +60,7 @@ describe('deriveApplicabilityReadinessGaps -- Matrix-origin gaps', () => {
     expect(gaps[0]).toEqual({
       identifier: 'commercial_use',
       reason: 'applicability_unmet',
-      unmet_applicability: [{ claim_id: 'kling', requirement: { fact: 'tool_plan_tier', tool: 'kling', operator: 'equals', value: 'paid' }, status: 'unresolved' }],
+      unmet_applicability: [{ claim_id: 'kling', requirement: { fact: 'tool_plan_tier', tool: 'kling', operator: 'equals', value: 'paid' }, status: 'unresolved', unresolved_reason: null }],
     })
   })
 
@@ -183,7 +183,7 @@ describe('deriveApplicabilityReadinessGaps -- TopicClaim-origin gaps, provider-s
     const gaps = deriveApplicabilityReadinessGaps(h, [], [goal({ category: 'third_party_source_rights' })], [claim], facts())
     expect(gaps).toHaveLength(1)
     expect(gaps[0].identifier).toBe('third_party_source_rights')
-    expect(gaps[0].unmet_applicability).toEqual([{ claim_id: 'CLAIM-ISTOCK-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }])
+    expect(gaps[0].unmet_applicability).toEqual([{ claim_id: 'CLAIM-ISTOCK-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved', unresolved_reason: null }])
   })
 
   test('F: same claim, no matching canonical provider in handoff.asset_providers -> no gap (claim never even a candidate, exact parity with final Retrieval)', () => {
@@ -246,7 +246,7 @@ describe('deriveApplicabilityReadinessGaps -- TopicClaim-origin gaps, tool-scope
     expect(gaps).toHaveLength(1)
     expect(gaps[0].identifier).toBe('commercial_use')
     expect(gaps[0].unmet_applicability).toEqual([
-      { claim_id: 'CLAIM-SYNTH-TOOLSCOPE-1', requirement: { fact: 'tool_account_status', tool: SYNTH_TOOL, operator: 'equals', value: 'Member Account' }, status: 'unresolved' },
+      { claim_id: 'CLAIM-SYNTH-TOOLSCOPE-1', requirement: { fact: 'tool_account_status', tool: SYNTH_TOOL, operator: 'equals', value: 'Member Account' }, status: 'unresolved', unresolved_reason: null },
     ])
   })
 
@@ -323,7 +323,7 @@ describe('deriveApplicabilityReadinessGaps -- TopicClaim-origin gaps, tool-scope
     expect(gapsNoTools).toHaveLength(1)
     expect(gapsWithTool).toEqual(gapsNoTools)
     expect(gapsNoTools[0].unmet_applicability).toEqual([
-      { claim_id: 'CLAIM-GENERIC-1', requirement: { fact: 'tool_account_status', tool: SYNTH_TOOL, operator: 'equals', value: 'Member Account' }, status: 'unresolved' },
+      { claim_id: 'CLAIM-GENERIC-1', requirement: { fact: 'tool_account_status', tool: SYNTH_TOOL, operator: 'equals', value: 'Member Account' }, status: 'unresolved', unresolved_reason: null },
     ])
   })
 })

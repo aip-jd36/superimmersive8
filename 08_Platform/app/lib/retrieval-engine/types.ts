@@ -177,6 +177,39 @@ export const APPLICABILITY_FACTS = ['jurisdiction', 'tool_plan_tier', 'tool_acco
 export type ApplicabilityFact = (typeof APPLICABILITY_FACTS)[number]
 
 /**
+ * CRC-CC-SCOPE-3 (2026-09-23) -- a bounded, evaluator-owned technical reason
+ * attachable to an `unresolved` applicability requirement outcome, beyond
+ * the bare `status` itself. Single-literal union, matching this module's
+ * own `MaterialUnresolvedOutcome.status: 'unresolved'` precedent exactly
+ * (add a second literal only when a second, genuinely distinct, evaluator-
+ * proven reason exists -- never speculatively).
+ *
+ * `value_not_among_established_values` means ONLY: for this requirement's
+ * cardinality-many fact dimension, one or more OTHER values are already
+ * established (non-empty `included[]`), but this requirement's own
+ * required value is not among them. Produced only by an evaluator that
+ * explicitly supports this reason (today: jurisdiction, `operator:
+ * 'equals'` only -- see `evaluateJurisdictionRequirementStatus` in
+ * `lookup-topic-claims.ts`). Absent (never a second "unknown" literal) for
+ * every other case: no established values at all, explicit exclusion
+ * (already `not_met`, never reaches this field), `not_equals`, a scalar
+ * fact (`tool_plan_tier`/`tool_account_status`), or any future fact/
+ * operator that has not explicitly opted in.
+ *
+ * Does NOT change `status` (still exactly `'unresolved'`, computed
+ * identically with or without this field). Does NOT mean: `not_met`; the
+ * claim is outside legal scope; the claim is irrelevant; the claim is
+ * immaterial; the claim should be hidden or de-emphasized; the user is
+ * commercially cleared; any legal conclusion. It is bounded technical
+ * context produced by applicability evaluation, transported unchanged by
+ * every downstream layer -- not a presentation directive, not a
+ * materiality signal, not authority to suppress anything. Presentation
+ * consumption is explicitly a separate, not-yet-authorized future
+ * milestone.
+ */
+export type ApplicabilityUnresolvedReason = 'value_not_among_established_values'
+
+/**
  * `tool` is only meaningful (and only read) when `fact === 'tool_plan_tier'`
  * -- scopes the plan-tier check to one specific canonical tool identifier,
  * since plan_tier is attested per-tool, not project-wide (ToolMention's own
@@ -1060,6 +1093,16 @@ export interface UnmetApplicabilityDetail {
   requirement: ApplicabilityRequirement
   /** `'met'` is deliberately excluded from this union -- see this field's own header. */
   status: 'unresolved' | 'not_met'
+  /**
+   * CRC-CC-SCOPE-3 (2026-09-23) -- verbatim passthrough of
+   * `MaterialUnresolvedOutcome.unresolved_reason` (lookup-topic-claims.ts),
+   * the single evaluator-owned source of truth. `null` for every `not_met`
+   * outcome (see `ApplicabilityUnresolvedReason`'s own doc comment for why)
+   * and for any `unresolved` outcome no evaluator has opted into annotating.
+   * See `ApplicabilityUnresolvedReason`'s own header (this file) for the
+   * full authority argument -- this field never changes `status`.
+   */
+  unresolved_reason: ApplicabilityUnresolvedReason | null
 }
 
 /**

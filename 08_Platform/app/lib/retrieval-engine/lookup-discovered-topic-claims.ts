@@ -175,7 +175,8 @@ export function lookupDiscoveredTopicClaims(
 
       if (result.status !== 'met') {
         anyNonMet = true
-        for (const o of result.material_unresolved) unmetDetail.push({ claim_id: claim.claim_id, requirement: o.requirement, status: o.status })
+        for (const o of result.material_unresolved)
+          unmetDetail.push({ claim_id: claim.claim_id, requirement: o.requirement, status: o.status, unresolved_reason: o.unresolved_reason })
         continue
       }
 

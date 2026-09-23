@@ -76,10 +76,10 @@ function projectionOutput(overrides: Partial<ProjectionOutput> = {}): Projection
   }
 }
 function withheld(overrides: Partial<Extract<PlanUnresolvedItem, { kind: 'withheld_relevant_claim' }>> = {}): PlanUnresolvedItem {
-  return { kind: 'withheld_relevant_claim', claim_id: 'CLAIM-X', fact: 'tool_account_status', tool: 'kling', ...overrides }
+  return { kind: 'withheld_relevant_claim', claim_id: 'CLAIM-X', fact: 'tool_account_status', tool: 'kling', unresolved_reason: null, ...overrides }
 }
 function applicability(overrides: Partial<Extract<PlanUnresolvedItem, { kind: 'unresolved_applicability' }>> = {}): PlanUnresolvedItem {
-  return { kind: 'unresolved_applicability', claim_id: 'CLAIM-X', fact: 'tool_account_status', tool: 'kling', ...overrides }
+  return { kind: 'unresolved_applicability', claim_id: 'CLAIM-X', fact: 'tool_account_status', tool: 'kling', unresolved_reason: null, ...overrides }
 }
 function openDependency(overrides: Partial<Extract<PlanUnresolvedItem, { kind: 'open_project_dependency' }>> = {}): PlanUnresolvedItem {
   return { kind: 'open_project_dependency', source_claim_id: 'STOCK-1', dependency_id: 'editorial_designation_confirmed', ...overrides }

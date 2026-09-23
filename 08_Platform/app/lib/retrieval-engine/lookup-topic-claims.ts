@@ -19,7 +19,7 @@
  */
 
 import type { GoalCategory, ToolMention, UserGoal } from '@/types/interview-engine'
-import type { ApplicabilityRequirement, RetrievalDiagnostic, TopicClaim, UnmetApplicabilityDetail } from './types'
+import type { ApplicabilityRequirement, ApplicabilityUnresolvedReason, RetrievalDiagnostic, TopicClaim, UnmetApplicabilityDetail } from './types'
 import { validateApplicabilityAnyOf, type ApplicabilityAnyOfViolation } from './applicability-any-of-structural-validation'
 
 /**
@@ -128,9 +128,24 @@ export function canonicalizeJurisdictionValue(value: string): string {
  */
 export type ApplicabilityRequirementStatus = 'met' | 'unresolved' | 'not_met'
 
+/**
+ * CRC-CC-SCOPE-3 (2026-09-23) -- the evaluator's own internal result shape,
+ * computed together in one pass so `status` and `unresolved_reason` can
+ * never drift apart or be derived by two independent code paths (see
+ * `ApplicabilityUnresolvedReason`'s own header, types.ts, for the full
+ * authority argument). `unresolved_reason` is `null` whenever `status` is
+ * not `'unresolved'`, and remains `null` for any `'unresolved'` outcome no
+ * evaluator branch below has opted into annotating.
+ */
+interface RequirementStatusOutcome {
+  status: ApplicabilityRequirementStatus
+  unresolved_reason: ApplicabilityUnresolvedReason | null
+}
+
 export interface ApplicabilityRequirementOutcome {
   requirement: ApplicabilityRequirement
   status: ApplicabilityRequirementStatus
+  unresolved_reason: ApplicabilityUnresolvedReason | null
 }
 
 /**
@@ -150,30 +165,64 @@ export interface ApplicabilityRequirementOutcome {
  * expected): fail closed to `unresolved`, never guess by picking whichever
  * list happens to be checked first. A requirement is `met` only when the
  * required value is included AND not also excluded.
+ *
+ * CRC-CC-SCOPE-3 (2026-09-23): also computes `unresolved_reason` in the
+ * SAME pass, from the SAME `includedMatch`/`isIncluded` already derived
+ * above -- never a second, independent re-derivation (see
+ * `ApplicabilityUnresolvedReason`'s own header, types.ts). Populated only
+ * for `operator === 'equals'` (the sole operator this reason is authorized
+ * for -- `not_equals` is explicitly out of scope and always gets `null`
+ * here) when the requirement is genuinely `'unresolved'` AND at least one
+ * OTHER value is already established (`facts.included.length > 0`, and by
+ * construction this requirement's own value is not among them, since
+ * `isIncluded` is false whenever this branch is reached). Explicit
+ * exclusion already resolves to `not_met` above and never reaches this
+ * field (see `ApplicabilityUnresolvedReason`'s own header for why
+ * `excluded[]` needs no separate representation here).
  */
-function evaluateJurisdictionRequirementStatus(req: ApplicabilityRequirement, facts: AssessmentJurisdictionFacts): ApplicabilityRequirementStatus {
+function evaluateJurisdictionRequirementStatus(req: ApplicabilityRequirement, facts: AssessmentJurisdictionFacts): RequirementStatusOutcome {
   const canonicalRequired = canonicalizeJurisdictionValue(req.value)
   const includedMatch = facts.included.some((v) => canonicalizeJurisdictionValue(v) === canonicalRequired)
   const excludedMatch = facts.excluded.some((v) => canonicalizeJurisdictionValue(v) === canonicalRequired)
 
-  if (includedMatch && excludedMatch) return 'unresolved' // conflicting current state -- fail closed, never guess
+  if (includedMatch && excludedMatch) return { status: 'unresolved', unresolved_reason: null } // conflicting current state -- fail closed, never guess
   const isIncluded = includedMatch
   const isExcluded = excludedMatch
 
   if (req.operator === 'equals') {
-    if (isIncluded) return 'met'
-    if (isExcluded) return 'not_met' // explicit exclusion -- silence is never treated this way, only a real confirmed_absent mention
-    return 'unresolved' // never addressed at all -- not established, not the same as excluded
+    if (isIncluded) return { status: 'met', unresolved_reason: null }
+    if (isExcluded) return { status: 'not_met', unresolved_reason: null } // explicit exclusion -- silence is never treated this way, only a real confirmed_absent mention
+    // never addressed at all -- not established, not the same as excluded.
+    // `unresolved_reason` distinguishes "nothing established for this
+    // dimension at all" (facts.included.length === 0) from "other value(s)
+    // are established, just not this one" (facts.included.length > 0) --
+    // status stays `'unresolved'` either way; only this additive, bounded
+    // technical context differs.
+    const unresolved_reason: ApplicabilityUnresolvedReason | null = facts.included.length > 0 ? 'value_not_among_established_values' : null
+    return { status: 'unresolved', unresolved_reason }
   }
 
   // operator === 'not_equals': met when explicitly excluded, unresolved when
-  // never addressed (never guessed from silence), not_met when explicitly included.
-  if (isExcluded) return 'met'
-  if (isIncluded) return 'not_met'
-  return 'unresolved'
+  // never addressed (never guessed from silence), not_met when explicitly
+  // included. `unresolved_reason` is deliberately NEVER populated here --
+  // `not_equals` is not authorized for this reason (an established OTHER
+  // value says nothing about whether THIS value is excluded, unlike the
+  // `equals` case -- see ApplicabilityUnresolvedReason's own header).
+  if (isExcluded) return { status: 'met', unresolved_reason: null }
+  if (isIncluded) return { status: 'not_met', unresolved_reason: null }
+  return { status: 'unresolved', unresolved_reason: null }
 }
 
-function evaluateRequirementStatus(req: ApplicabilityRequirement, facts: ApplicabilityFacts): ApplicabilityRequirementStatus {
+/**
+ * CRC-CC-SCOPE-3 (2026-09-23): `unresolved_reason` is `null` for both
+ * scalar branches below (`tool_plan_tier`/`tool_account_status`) in every
+ * case -- neither evaluator has opted into producing it, and a scalar
+ * fact's own "confirmed but different value" case already resolves to
+ * `'not_met'` (see the `matches` check below), never `'unresolved'`, so
+ * the ambiguity this reason exists to describe cannot arise for a scalar
+ * fact today regardless.
+ */
+function evaluateRequirementStatus(req: ApplicabilityRequirement, facts: ApplicabilityFacts): RequirementStatusOutcome {
   if (req.fact === 'jurisdiction') return evaluateJurisdictionRequirementStatus(req, facts.jurisdiction)
 
   let actual: string | undefined
@@ -202,15 +251,18 @@ function evaluateRequirementStatus(req: ApplicabilityRequirement, facts: Applica
   // purposes (both fail the overall gate) while still being distinguishable
   // for selector-questioning purposes (one is worth asking about, the other
   // never is).
-  if (actual === undefined) return 'unresolved'
+  if (actual === undefined) return { status: 'unresolved', unresolved_reason: null }
 
   const matches = req.operator === 'equals' ? actual === req.value : actual !== req.value
-  return matches ? 'met' : 'not_met'
+  return matches ? { status: 'met', unresolved_reason: null } : { status: 'not_met', unresolved_reason: null }
 }
 
 /** Piece 1: every requirement's outcome, in array order. Never filters -- callers needing only the unmet subset (e.g. diagnostic population below) filter this output themselves, so there is exactly one evaluation pass regardless of caller. */
 export function evaluateApplicabilityDetailed(requirements: ApplicabilityRequirement[], facts: ApplicabilityFacts): ApplicabilityRequirementOutcome[] {
-  return requirements.map((requirement) => ({ requirement, status: evaluateRequirementStatus(requirement, facts) }))
+  return requirements.map((requirement) => {
+    const outcome = evaluateRequirementStatus(requirement, facts)
+    return { requirement, status: outcome.status, unresolved_reason: outcome.unresolved_reason }
+  })
 }
 
 /**
@@ -275,10 +327,22 @@ function evaluateGroup(group: ApplicabilityRequirement[], facts: ApplicabilityFa
  * mandatory group first, then each alternative group in order) -- no
  * downstream consumer may rescan it to (re)derive `status` or materiality.
  */
-/** A material-unresolved entry's status is always `'unresolved'` by construction (see `evaluateApplicabilityExpression`'s own materiality derivation) -- narrowed here, not just at the value level, so a caller converting this into an `UnmetApplicabilityDetail` (whose own `status` excludes `'met'`) never needs an unsound cast. */
+/**
+ * A material-unresolved entry's status is always `'unresolved'` by
+ * construction (see `evaluateApplicabilityExpression`'s own materiality
+ * derivation) -- narrowed here, not just at the value level, so a caller
+ * converting this into an `UnmetApplicabilityDetail` (whose own `status`
+ * excludes `'met'`) never needs an unsound cast.
+ *
+ * `unresolved_reason` (CRC-CC-SCOPE-3, 2026-09-23): verbatim passthrough of
+ * the same field on the leaf `ApplicabilityRequirementOutcome` this entry
+ * was derived from -- see `ApplicabilityUnresolvedReason`'s own header
+ * (types.ts) for the full authority argument.
+ */
 export interface MaterialUnresolvedOutcome {
   requirement: ApplicabilityRequirement
   status: 'unresolved'
+  unresolved_reason: ApplicabilityUnresolvedReason | null
 }
 
 export interface ApplicabilityExpressionOutcome {
@@ -349,11 +413,13 @@ export function evaluateApplicabilityExpression(
   const material_unresolved: MaterialUnresolvedOutcome[] = []
   if (status === 'unresolved') {
     if (mandatoryGroup.status !== 'not_met') {
-      for (const o of mandatoryGroup.outcomes) if (o.status === 'unresolved') material_unresolved.push({ requirement: o.requirement, status: 'unresolved' })
+      for (const o of mandatoryGroup.outcomes)
+        if (o.status === 'unresolved') material_unresolved.push({ requirement: o.requirement, status: 'unresolved', unresolved_reason: o.unresolved_reason })
     }
     for (const g of alternativeGroups) {
       if (g.status === 'not_met') continue
-      for (const o of g.outcomes) if (o.status === 'unresolved') material_unresolved.push({ requirement: o.requirement, status: 'unresolved' })
+      for (const o of g.outcomes)
+        if (o.status === 'unresolved') material_unresolved.push({ requirement: o.requirement, status: 'unresolved', unresolved_reason: o.unresolved_reason })
     }
   }
 
@@ -603,7 +669,8 @@ export function lookupTopicClaims(
 
       if (result.status !== 'met') {
         anyNonMet = true
-        for (const o of result.material_unresolved) unmetDetail.push({ claim_id: claim.claim_id, requirement: o.requirement, status: o.status })
+        for (const o of result.material_unresolved)
+          unmetDetail.push({ claim_id: claim.claim_id, requirement: o.requirement, status: o.status, unresolved_reason: o.unresolved_reason })
         continue
       }
 

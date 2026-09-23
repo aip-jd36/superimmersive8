@@ -84,11 +84,11 @@ function note(overrides: Partial<ConsultativeNote> & Pick<ConsultativeNote, 'goa
 }
 
 function unresolvedApplicabilityItem(overrides: Partial<Extract<PlanUnresolvedItem, { kind: 'unresolved_applicability' }>> = {}): PlanUnresolvedItem {
-  return { kind: 'unresolved_applicability', claim_id: 'CLAIM-A', fact: 'tool_account_status', tool: 'synthtool', ...overrides }
+  return { kind: 'unresolved_applicability', claim_id: 'CLAIM-A', fact: 'tool_account_status', tool: 'synthtool', unresolved_reason: null, ...overrides }
 }
 
 function withheldClaimItem(overrides: Partial<Extract<PlanUnresolvedItem, { kind: 'withheld_relevant_claim' }>> = {}): PlanUnresolvedItem {
-  return { kind: 'withheld_relevant_claim', claim_id: 'CLAIM-B', fact: null, tool: null, ...overrides }
+  return { kind: 'withheld_relevant_claim', claim_id: 'CLAIM-B', fact: null, tool: null, unresolved_reason: null, ...overrides }
 }
 
 function openDependencyItem(overrides: Partial<Extract<PlanUnresolvedItem, { kind: 'open_project_dependency' }>> = {}): PlanUnresolvedItem {

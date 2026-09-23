@@ -135,7 +135,7 @@ describe('Answered-but-Unresolved Applicability -- empirical canary (real pipeli
     const diag = result.diagnostics.retrieval.find((d) => d.reason === 'applicability_unmet' && d.unmet_applicability?.some((u) => u.claim_id === MEMBER_ID))
     expect(diag).toBeDefined()
     expect(diag?.unmet_applicability).toEqual([
-      { claim_id: MEMBER_ID, requirement: { fact: 'tool_account_status', tool: 'kling', operator: 'equals', value: 'Member Account' }, status: 'unresolved' },
+      { claim_id: MEMBER_ID, requirement: { fact: 'tool_account_status', tool: 'kling', operator: 'equals', value: 'Member Account' }, status: 'unresolved', unresolved_reason: null },
     ])
     // The Member claim never entered results -- withheld, not guessed applicable.
     expect(result.trace.retrieval_results.map((r) => r.claim_id)).not.toContain(MEMBER_ID)
@@ -157,7 +157,7 @@ describe('Answered-but-Unresolved Applicability -- empirical canary (real pipeli
     expect(interp.status).toBe('directly_relevant')
     // CC-4C.2D (2026-09-19): fact/tool are now carried through -- unambiguous
     // for this real governed claim (gated on tool_account_status/kling).
-    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: MEMBER_ID, fact: 'tool_account_status', tool: 'kling' }])
+    expect(interp.unresolved_relevant_claims).toEqual([{ claim_id: MEMBER_ID, fact: 'tool_account_status', tool: 'kling', unresolved_reason: null }])
     expect(interp.summary_blocks[interp.summary_blocks.length - 1]).toBe(
       "There's additional governed guidance relevant to this topic that hasn't been confirmed as applicable based on what's been described here — it may or may not apply, and CRC can't determine that from this conversation.",
     )

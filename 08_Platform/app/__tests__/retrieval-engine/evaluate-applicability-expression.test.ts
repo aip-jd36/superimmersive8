@@ -9,7 +9,7 @@
  * lookup-topic-claims.test.ts.
  */
 
-import { evaluateApplicabilityExpression, type ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
+import { evaluateApplicabilityExpression, type ApplicabilityFacts, type ApplicabilityRequirementStatus } from '@/lib/retrieval-engine/lookup-topic-claims'
 import type { ApplicabilityRequirement } from '@/lib/retrieval-engine/types'
 import type { ToolMention } from '@/types/interview-engine'
 
@@ -115,14 +115,14 @@ describe('evaluateApplicabilityExpression -- backward compatibility (ADR-001 §K
   test('field absent: mandatory met alone drives the aggregate, identical to isApplicable([...]) today', () => {
     const g = group(leaf('a', 'met'))
     const r = evaluateApplicabilityExpression(g.requirements, undefined, g.facts)
-    expect(r).toEqual({ valid: true, status: 'met', material_unresolved: [], all_outcomes: [{ requirement: g.requirements[0], status: 'met' }] })
+    expect(r).toEqual({ valid: true, status: 'met', material_unresolved: [], all_outcomes: [{ requirement: g.requirements[0], status: 'met', unresolved_reason: null }] })
   })
 
   test('field absent: mandatory unresolved alone', () => {
     const g = group(leaf('a', 'unresolved'))
     const r = evaluateApplicabilityExpression(g.requirements, undefined, g.facts)
     expect(r.valid && r.status).toBe('unresolved')
-    expect(r.valid && r.material_unresolved).toEqual([{ requirement: g.requirements[0], status: 'unresolved' }])
+    expect(r.valid && r.material_unresolved).toEqual([{ requirement: g.requirements[0], status: 'unresolved', unresolved_reason: null }])
   })
 
   test('field absent: mandatory not_met alone', () => {
@@ -138,7 +138,7 @@ describe('evaluateApplicabilityExpression -- backward compatibility (ADR-001 §K
     const f = mergeFacts(group(met).facts, group(unresolved).facts)
     const r = evaluateApplicabilityExpression([met.requirement, unresolved.requirement], undefined, f)
     expect(r.valid && r.status).toBe('unresolved')
-    expect(r.valid && r.material_unresolved).toEqual([{ requirement: unresolved.requirement, status: 'unresolved' }])
+    expect(r.valid && r.material_unresolved).toEqual([{ requirement: unresolved.requirement, status: 'unresolved', unresolved_reason: null }])
   })
 
   test('jurisdiction requirement, unchanged behavior', () => {
@@ -187,7 +187,7 @@ describe('evaluateApplicabilityExpression -- the eight architecture acceptance c
     const f = mergeFacts(group(A).facts, group(B).facts)
     const r = evaluateApplicabilityExpression([], [[A.requirement], [B.requirement]], f)
     expect(r.valid && r.status).toBe('unresolved')
-    expect(r.valid && r.material_unresolved).toEqual([{ requirement: B.requirement, status: 'unresolved' }])
+    expect(r.valid && r.material_unresolved).toEqual([{ requirement: B.requirement, status: 'unresolved', unresolved_reason: null }])
   })
 
   test('CASE 3: alternatives = [A unresolved] OR [B unresolved] => aggregate unresolved, material=[A, B]', () => {
@@ -197,8 +197,8 @@ describe('evaluateApplicabilityExpression -- the eight architecture acceptance c
     const r = evaluateApplicabilityExpression([], [[A.requirement], [B.requirement]], f)
     expect(r.valid && r.status).toBe('unresolved')
     expect(r.valid && r.material_unresolved).toEqual([
-      { requirement: A.requirement, status: 'unresolved' },
-      { requirement: B.requirement, status: 'unresolved' },
+      { requirement: A.requirement, status: 'unresolved', unresolved_reason: null },
+      { requirement: B.requirement, status: 'unresolved', unresolved_reason: null },
     ])
   })
 
@@ -209,7 +209,7 @@ describe('evaluateApplicabilityExpression -- the eight architecture acceptance c
     const f = mergeFacts(group(A).facts, group(B).facts, group(C).facts)
     const r = evaluateApplicabilityExpression([], [[A.requirement, B.requirement], [C.requirement]], f)
     expect(r.valid && r.status).toBe('unresolved')
-    expect(r.valid && r.material_unresolved).toEqual([{ requirement: B.requirement, status: 'unresolved' }])
+    expect(r.valid && r.material_unresolved).toEqual([{ requirement: B.requirement, status: 'unresolved', unresolved_reason: null }])
   })
 
   test('CASE 5: alternatives = [A not_met AND B unresolved] OR [C not_met] => aggregate not_met, material=[]', () => {
@@ -229,7 +229,7 @@ describe('evaluateApplicabilityExpression -- the eight architecture acceptance c
     const f = mergeFacts(group(A).facts, group(B).facts, group(C).facts)
     const r = evaluateApplicabilityExpression([A.requirement, B.requirement], [[C.requirement]], f)
     expect(r.valid && r.status).toBe('unresolved')
-    expect(r.valid && r.material_unresolved).toEqual([{ requirement: A.requirement, status: 'unresolved' }])
+    expect(r.valid && r.material_unresolved).toEqual([{ requirement: A.requirement, status: 'unresolved', unresolved_reason: null }])
   })
 
   test('CASE 7: mandatory=[A unresolved, B not_met] ; alternatives=[C met] => aggregate not_met, material=[]', () => {
@@ -250,7 +250,7 @@ describe('evaluateApplicabilityExpression -- the eight architecture acceptance c
     const f = mergeFacts(group(A).facts, group(B).facts, group(C).facts, group(D).facts)
     const r = evaluateApplicabilityExpression([A.requirement], [[B.requirement, C.requirement], [D.requirement]], f)
     expect(r.valid && r.status).toBe('unresolved')
-    expect(r.valid && r.material_unresolved).toEqual([{ requirement: D.requirement, status: 'unresolved' }])
+    expect(r.valid && r.material_unresolved).toEqual([{ requirement: D.requirement, status: 'unresolved', unresolved_reason: null }])
   })
 })
 
@@ -314,5 +314,138 @@ describe('evaluateApplicabilityExpression -- invalid-governance defense-in-depth
     const okMandatory: ApplicabilityRequirement = { fact: 'jurisdiction', operator: 'equals', value: 'United States' }
     const r = evaluateApplicabilityExpression([okMandatory], [], facts())
     expect(r.valid).toBe(false)
+  })
+})
+
+/**
+ * CRC-CC-SCOPE-3 (2026-09-23) -- `unresolved_reason` production/consumption
+ * matrix. Exercises `evaluateApplicabilityExpression` (the evaluator-owned
+ * producer) directly, using the real `jurisdiction` cardinality-many fact
+ * and the real `tool_account_status` scalar fact -- no synthetic fact
+ * types. Mirrors CRC-CC-SCOPE-1's own empirically-validated scenario
+ * lettering (A/B/C/D) plus the scalar/not_equals/exclusion controls
+ * required by this milestone's own test matrix.
+ */
+describe('evaluateApplicabilityExpression -- unresolved_reason (CRC-CC-SCOPE-3)', () => {
+  const usEquals: ApplicabilityRequirement = { fact: 'jurisdiction', operator: 'equals', value: 'United States' }
+  const twEquals: ApplicabilityRequirement = { fact: 'jurisdiction', operator: 'equals', value: 'Taiwan' }
+
+  test('A: Taiwan only established, requirement jurisdiction equals United States -> status unresolved, reason PRESENT', () => {
+    const r = evaluateApplicabilityExpression([usEquals], undefined, facts({ jurisdiction: { included: ['Taiwan'], excluded: [] } }))
+    expect(r.valid && r.status).toBe('unresolved')
+    expect(r.valid && r.material_unresolved).toEqual([{ requirement: usEquals, status: 'unresolved', unresolved_reason: 'value_not_among_established_values' }])
+  })
+
+  test('B: United States only established, requirement jurisdiction equals Taiwan -> status unresolved, reason PRESENT (symmetric)', () => {
+    const r = evaluateApplicabilityExpression([twEquals], undefined, facts({ jurisdiction: { included: ['United States'], excluded: [] } }))
+    expect(r.valid && r.status).toBe('unresolved')
+    expect(r.valid && r.material_unresolved).toEqual([{ requirement: twEquals, status: 'unresolved', unresolved_reason: 'value_not_among_established_values' }])
+  })
+
+  test('C: Taiwan + United States both established, requirement jurisdiction equals United States -> status met, reason ABSENT (not unresolved at all)', () => {
+    const r = evaluateApplicabilityExpression([usEquals], undefined, facts({ jurisdiction: { included: ['Taiwan', 'United States'], excluded: [] } }))
+    expect(r.valid && r.status).toBe('met')
+    expect(r.valid && r.material_unresolved).toEqual([])
+  })
+
+  test('D: no jurisdiction established, requirement jurisdiction equals United States -> status unresolved, reason ABSENT (scope not known, not "known outside scope")', () => {
+    const r = evaluateApplicabilityExpression([usEquals], undefined, facts({ jurisdiction: { included: [], excluded: [] } }))
+    expect(r.valid && r.status).toBe('unresolved')
+    expect(r.valid && r.material_unresolved).toEqual([{ requirement: usEquals, status: 'unresolved', unresolved_reason: null }])
+  })
+
+  test('E: United States explicitly excluded -> status not_met, reason ABSENT (not_met is never a material_unresolved entry at all)', () => {
+    const r = evaluateApplicabilityExpression([usEquals], undefined, facts({ jurisdiction: { included: [], excluded: ['United States'] } }))
+    expect(r.valid && r.status).toBe('not_met')
+    expect(r.valid && r.material_unresolved).toEqual([])
+  })
+
+  test('F: scalar tool_account_status, confirmed DIFFERENT value -> existing not_met, reason ABSENT (not even an unresolved outcome)', () => {
+    const req: ApplicabilityRequirement = { fact: 'tool_account_status', tool: 'synthtool', operator: 'equals', value: 'Member Account' }
+    const mention: ToolMention = {
+      mention_id: 'm-1',
+      resolution: { kind: 'canonical', identifier: 'synthtool' },
+      access_surface: { state: 'unknown' },
+      plan_tier: { state: 'unknown' },
+      account_status: { state: 'confirmed', value: 'Regular Account' },
+      confidence: 'confirmed',
+      source_turn: 1,
+      source_statement: 'placeholder',
+      superseded_by: null,
+    }
+    const r = evaluateApplicabilityExpression([req], undefined, facts({ toolMentions: [mention] }))
+    expect(r.valid && r.status).toBe('not_met')
+    expect(r.valid && r.material_unresolved).toEqual([])
+  })
+
+  test('G: scalar tool_account_status, unknown -> existing unresolved, reason ABSENT (scalar facts never produce this reason)', () => {
+    const req: ApplicabilityRequirement = { fact: 'tool_account_status', tool: 'synthtool', operator: 'equals', value: 'Member Account' }
+    const r = evaluateApplicabilityExpression([req], undefined, facts())
+    expect(r.valid && r.status).toBe('unresolved')
+    expect(r.valid && r.material_unresolved).toEqual([{ requirement: req, status: 'unresolved', unresolved_reason: null }])
+  })
+
+  test('H: not_equals negative control -- superficially similar included-value shape, reason ABSENT regardless (not_equals is never authorized for this reason)', () => {
+    // required-to-be-excluded value is 'United States'; Taiwan is established (a similarly-shaped
+    // "other value present" state to test A above) -- but operator is not_equals, not equals.
+    const notEqualsUs: ApplicabilityRequirement = { fact: 'jurisdiction', operator: 'not_equals', value: 'United States' }
+    const r = evaluateApplicabilityExpression([notEqualsUs], undefined, facts({ jurisdiction: { included: ['Taiwan'], excluded: [] } }))
+    expect(r.valid && r.status).toBe('unresolved') // never addressed either way
+    expect(r.valid && r.material_unresolved).toEqual([{ requirement: notEqualsUs, status: 'unresolved', unresolved_reason: null }])
+  })
+
+  test('conflicting included+excluded (malformed/defensive state) -> status unresolved, reason ABSENT (fail closed, never guess)', () => {
+    const r = evaluateApplicabilityExpression([usEquals], undefined, facts({ jurisdiction: { included: ['United States'], excluded: ['United States'] } }))
+    expect(r.valid && r.status).toBe('unresolved')
+    expect(r.valid && r.material_unresolved).toEqual([{ requirement: usEquals, status: 'unresolved', unresolved_reason: null }])
+  })
+
+  test('does not change status for any scenario above relative to the pre-SCOPE-3 evaluator -- reason is purely additive', () => {
+    // Re-derive status alone (ignoring unresolved_reason) for every scenario and confirm it matches
+    // what SCOPE-1's own empirical execution already proved on the unmodified evaluator.
+    const scenarios: Array<[string, ApplicabilityFacts, ApplicabilityRequirementStatus]> = [
+      ['A: Taiwan only established, requirement is for United States', facts({ jurisdiction: { included: ['Taiwan'], excluded: [] } }), 'unresolved'],
+      ['B: United States established, requirement is for United States -> met', facts({ jurisdiction: { included: ['United States'], excluded: [] } }), 'met'],
+      ['D: nothing established', facts({ jurisdiction: { included: [], excluded: [] } }), 'unresolved'],
+      ['E: United States explicitly excluded', facts({ jurisdiction: { included: [], excluded: ['United States'] } }), 'not_met'],
+    ]
+    for (const [, f, expected] of scenarios) {
+      const r = evaluateApplicabilityExpression([usEquals], undefined, f)
+      expect(r.valid && r.status).toBe(expected)
+    }
+  })
+})
+
+/**
+ * CRC-CC-SCOPE-3 Part 12 -- multiple-requirement fail-closed aggregation.
+ * Production governed data does not currently exercise multiple
+ * `applicability_requirements` on one claim (confirmed, CC-4C.2D/SCOPE-2) --
+ * this is the smallest synthetic UNIT-TEST fixture necessary to exercise
+ * `evaluateApplicabilityExpression`'s own multi-leaf `material_unresolved`
+ * shape. No production governed claim is added anywhere by this file.
+ */
+describe('evaluateApplicabilityExpression -- unresolved_reason multi-requirement aggregation (CRC-CC-SCOPE-3, Part 12)', () => {
+  const usEquals: ApplicabilityRequirement = { fact: 'jurisdiction', operator: 'equals', value: 'United States' }
+
+  test('CASE 1: two leaves on one mandatory group, one carries the reason, one is ordinary unknown -- both remain distinct material_unresolved entries (requirement-level, not claim-level, at the producer)', () => {
+    const scalarReq: ApplicabilityRequirement = { fact: 'tool_account_status', tool: 'synthtool', operator: 'equals', value: 'Member Account' }
+    const f = facts({ jurisdiction: { included: ['Taiwan'], excluded: [] } })
+    const r = evaluateApplicabilityExpression([usEquals, scalarReq], undefined, f)
+    expect(r.valid && r.status).toBe('unresolved')
+    expect(r.valid && r.material_unresolved).toEqual([
+      { requirement: usEquals, status: 'unresolved', unresolved_reason: 'value_not_among_established_values' },
+      { requirement: scalarReq, status: 'unresolved', unresolved_reason: null },
+    ])
+  })
+
+  test('CASE 2: two alternative groups, each a single jurisdiction leaf, both carrying the SAME reason unambiguously -- both survive as distinct entries (aggregation ambiguity only arises downstream, at BI, not at this producer)', () => {
+    const twEquals: ApplicabilityRequirement = { fact: 'jurisdiction', operator: 'equals', value: 'Taiwan' }
+    const f = facts({ jurisdiction: { included: ['Japan'], excluded: [] } })
+    const r = evaluateApplicabilityExpression([], [[usEquals], [twEquals]], f)
+    expect(r.valid && r.status).toBe('unresolved')
+    expect(r.valid && r.material_unresolved).toEqual([
+      { requirement: usEquals, status: 'unresolved', unresolved_reason: 'value_not_among_established_values' },
+      { requirement: twEquals, status: 'unresolved', unresolved_reason: 'value_not_among_established_values' },
+    ])
   })
 })

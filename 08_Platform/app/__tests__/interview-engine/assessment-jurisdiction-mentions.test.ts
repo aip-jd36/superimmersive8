@@ -401,13 +401,13 @@ describe('evaluateApplicabilityDetailed -- conflicting-state fail-closed behavio
     const req: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }]
     const facts: ApplicabilityFacts = { jurisdiction: { included: ['US'], excluded: ['United States'] }, toolMentions: [] }
     const outcomes = evaluateApplicabilityDetailed(req, facts)
-    expect(outcomes).toEqual([{ requirement: req[0], status: 'unresolved' }])
+    expect(outcomes).toEqual([{ requirement: req[0], status: 'unresolved', unresolved_reason: null }])
   })
 
   test('existing Copyright-shaped behavior stays safe: a single confirmed United States value (legacy-fallback-derived shape) still satisfies a United States requirement exactly as before', () => {
     const req: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }]
     const facts: ApplicabilityFacts = { jurisdiction: { included: ['United States'], excluded: [] }, toolMentions: [] }
     const outcomes = evaluateApplicabilityDetailed(req, facts)
-    expect(outcomes).toEqual([{ requirement: req[0], status: 'met' }])
+    expect(outcomes).toEqual([{ requirement: req[0], status: 'met', unresolved_reason: null }])
   })
 })

@@ -434,7 +434,7 @@ describe('11. Applicability isolation', () => {
     // No jurisdiction fact supplied -- applicability remains unresolved, not satisfied by France.
     const result = lookupDiscoveredTopicClaims(occs, [c], facts())
     expect(result.matches).toEqual([]) // unresolved applicability withholds the claim from matches
-    expect(result.diagnostics).toEqual([{ identifier: 'commercial_use', reason: 'applicability_unmet', unmet_applicability: [{ claim_id: 'SYNTHETIC-APPLIC-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'European Union' }, status: 'unresolved' }] }])
+    expect(result.diagnostics).toEqual([{ identifier: 'commercial_use', reason: 'applicability_unmet', unmet_applicability: [{ claim_id: 'SYNTHETIC-APPLIC-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'European Union' }, status: 'unresolved', unresolved_reason: null }] }])
   })
 
   test('the distribution territory fact itself never satisfies a jurisdiction applicability requirement -- France does not silently become "European Union"', () => {

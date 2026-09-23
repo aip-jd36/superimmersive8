@@ -109,7 +109,12 @@ function deriveMatrixApplicabilityGaps(handoff: RetrievalHandoff, matrix: Matrix
       if (result.status === 'met') continue
       if (result.material_unresolved.length === 0) continue
 
-      const unmetDetail: UnmetApplicabilityDetail[] = result.material_unresolved.map((o) => ({ claim_id: claim.claim_id, requirement: o.requirement, status: o.status }))
+      const unmetDetail: UnmetApplicabilityDetail[] = result.material_unresolved.map((o) => ({
+        claim_id: claim.claim_id,
+        requirement: o.requirement,
+        status: o.status,
+        unresolved_reason: o.unresolved_reason,
+      }))
       diagnostics.push({ identifier: topic, reason: 'applicability_unmet', unmet_applicability: unmetDetail })
     }
   }

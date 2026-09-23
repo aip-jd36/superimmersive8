@@ -30,7 +30,7 @@
  */
 
 import type { GoalCategory, GoalScope } from '@/types/interview-engine'
-import type { ApplicabilityFact, ApplicabilityRequirement, MatchOrigin, RetrievalSourceFactKind } from '@/lib/retrieval-engine/types'
+import type { ApplicabilityFact, ApplicabilityRequirement, ApplicabilityUnresolvedReason, MatchOrigin, RetrievalSourceFactKind } from '@/lib/retrieval-engine/types'
 
 /**
  * BiIntent — the generic, deliberately minimal input contract for
@@ -297,6 +297,20 @@ export interface UnresolvedRelevantClaim {
   claim_id: string
   fact: ApplicabilityFact | null
   tool: string | null
+  /**
+   * CRC-CC-SCOPE-3 (2026-09-23) -- the SAME bounded, evaluator-owned
+   * `ApplicabilityUnresolvedReason` (lib/retrieval-engine/types.ts) `fact`/
+   * `tool` above already carry from `UnmetApplicabilityDetail.requirement`,
+   * extended by the same `null`-fails-closed discipline: `null` when no
+   * evaluator supplied a reason, or when this claim_id's diagnostics
+   * disagree across multiple details (see build-bounded-interpretation.ts's
+   * own `collectUnresolvedRelevantClaimIds` comment -- the identical
+   * aggregation rule already governing `fact`/`tool` is reused verbatim,
+   * never a new precedence rule). Does not change `status`, does not
+   * authorize suppression -- see `ApplicabilityUnresolvedReason`'s own
+   * header for the full prohibited-meaning list.
+   */
+  unresolved_reason: ApplicabilityUnresolvedReason | null
 }
 
 export interface BoundedInterpretation {

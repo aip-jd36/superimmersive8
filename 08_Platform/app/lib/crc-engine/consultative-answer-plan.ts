@@ -57,7 +57,7 @@
  */
 
 import type { BoundedInterpretation, InterpretationStatus } from '@/lib/bounded-interpretation/types'
-import type { ApplicabilityFact, MatchOrigin, RetrievalDiagnostic, RetrievalResult } from '@/lib/retrieval-engine/types'
+import type { ApplicabilityFact, ApplicabilityUnresolvedReason, MatchOrigin, RetrievalDiagnostic, RetrievalResult } from '@/lib/retrieval-engine/types'
 import type { GoalCategory } from '@/types/interview-engine'
 import { getAskabilityEntry } from './dependency-askability'
 import { getSelectorAskabilityEntry } from './selector-askability'
@@ -127,10 +127,19 @@ export interface PlanClaimRef {
  * `candidate_statement`/proposition -- only the bounded category of missing
  * project information, identical in kind to `unresolved_applicability`'s
  * own `fact` field on the sibling variant below.
+ *
+ * `unresolved_reason` (CRC-CC-SCOPE-3, 2026-09-23), on both variants below:
+ * verbatim passthrough of the same bounded, evaluator-owned
+ * `ApplicabilityUnresolvedReason` carried on `UnresolvedRelevantClaim`
+ * (`withheld_relevant_claim`) or read directly off the diagnostic detail
+ * (`unresolved_applicability`) -- see that type's own header
+ * (lib/retrieval-engine/types.ts) for the full authority argument. Data
+ * availability only: no rendering, sorting, deduplication, missing-evidence
+ * classification, or item-inclusion logic in this module reads it.
  */
 export type PlanUnresolvedItem =
-  | { kind: 'withheld_relevant_claim'; claim_id: string; fact: ApplicabilityFact | null; tool: string | null }
-  | { kind: 'unresolved_applicability'; claim_id: string; fact: ApplicabilityFact; tool: string | null }
+  | { kind: 'withheld_relevant_claim'; claim_id: string; fact: ApplicabilityFact | null; tool: string | null; unresolved_reason: ApplicabilityUnresolvedReason | null }
+  | { kind: 'unresolved_applicability'; claim_id: string; fact: ApplicabilityFact; tool: string | null; unresolved_reason: ApplicabilityUnresolvedReason | null }
   | { kind: 'open_project_dependency'; source_claim_id: string; dependency_id: string }
 
 export const MISSING_EVIDENCE_CLASSIFICATIONS = [
@@ -366,8 +375,8 @@ export function buildConsultativeAnswerPlan(
     //    about, and BI itself never gives those a category-specific answer). ──
     const unresolvedItems: PlanUnresolvedItem[] = []
     if (!isDeterminationDeclined && !isOutsideCoverage) {
-      for (const { claim_id, fact, tool } of interp.unresolved_relevant_claims) {
-        unresolvedItems.push({ kind: 'withheld_relevant_claim', claim_id, fact, tool })
+      for (const { claim_id, fact, tool, unresolved_reason } of interp.unresolved_relevant_claims) {
+        unresolvedItems.push({ kind: 'withheld_relevant_claim', claim_id, fact, tool, unresolved_reason })
       }
       for (const d of diagnostics) {
         if (d.reason !== 'applicability_unmet' || d.identifier !== interp.category || !d.unmet_applicability) continue
@@ -378,6 +387,7 @@ export function buildConsultativeAnswerPlan(
             claim_id: detail.claim_id,
             fact: detail.requirement.fact,
             tool: detail.requirement.tool ?? null,
+            unresolved_reason: detail.unresolved_reason,
           })
         }
       }

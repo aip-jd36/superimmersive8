@@ -67,7 +67,7 @@ function claimRef(overrides: Partial<PlanClaimRef> & Pick<PlanClaimRef, 'claim_i
 }
 
 function unresolvedApplicabilityItem(overrides: Partial<Extract<PlanUnresolvedItem, { kind: 'unresolved_applicability' }>> = {}): PlanUnresolvedItem {
-  return { kind: 'unresolved_applicability', claim_id: 'MEMBER-CLAIM', fact: 'tool_account_status', tool: SYNTH_TOOL, ...overrides }
+  return { kind: 'unresolved_applicability', claim_id: 'MEMBER-CLAIM', fact: 'tool_account_status', tool: SYNTH_TOOL, unresolved_reason: null, ...overrides }
 }
 
 /** A section shaped like the mixed case (BI's own generic hedge already appended -- see realization module's own gating comment). */
@@ -156,7 +156,7 @@ describe('realizeUnresolvedApplicability -- fail-closed', () => {
   test('5: not_met (no unresolved_applicability item, mirroring CC-3A\'s own not_met exclusion) -> zero notes', () => {
     mockedAskability.mockImplementation(() => askableEntry())
     mockedLabel.mockImplementation(() => TEST_LABEL)
-    expect(realizeUnresolvedApplicability([section({ unresolved_items: [{ kind: 'withheld_relevant_claim', claim_id: 'X', fact: null, tool: null }] })])).toEqual([])
+    expect(realizeUnresolvedApplicability([section({ unresolved_items: [{ kind: 'withheld_relevant_claim', claim_id: 'X', fact: null, tool: null, unresolved_reason: null }] })])).toEqual([])
   })
 
   // 9/10: requires_documentary_evidence / evidence-only -> zero note.

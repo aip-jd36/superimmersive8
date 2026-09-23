@@ -96,10 +96,10 @@ describe('Track A route invariance -- same expression, same aggregate, ordinary 
     const discovered = lookupDiscoveredTopicClaims([occurrence({ topic: 'third_party_source_rights', source_goal_category: 'commercial_use' })], [c], f)
 
     expect(ordinary.matches).toEqual([])
-    expect(ordinary.diagnostics).toEqual([{ identifier: 'third_party_source_rights', reason: 'applicability_unmet', unmet_applicability: [{ claim_id: 'C-1', requirement: B.requirement, status: 'unresolved' }] }])
+    expect(ordinary.diagnostics).toEqual([{ identifier: 'third_party_source_rights', reason: 'applicability_unmet', unmet_applicability: [{ claim_id: 'C-1', requirement: B.requirement, status: 'unresolved', unresolved_reason: null }] }])
 
     expect(discovered.matches).toEqual([])
-    expect(discovered.diagnostics).toEqual([{ identifier: 'commercial_use', reason: 'applicability_unmet', unmet_applicability: [{ claim_id: 'C-1', requirement: B.requirement, status: 'unresolved' }] }])
+    expect(discovered.diagnostics).toEqual([{ identifier: 'commercial_use', reason: 'applicability_unmet', unmet_applicability: [{ claim_id: 'C-1', requirement: B.requirement, status: 'unresolved', unresolved_reason: null }] }])
   })
 
   test('3: A not_met OR B not_met => aggregate NOT_MET on both routes -- Track A preserves its own existing not_met diagnostic policy', () => {
@@ -129,13 +129,13 @@ describe('Track A route invariance -- same expression, same aggregate, ordinary 
     // Ground truth from the evaluator directly.
     const direct = evaluateApplicabilityExpression([], [[A.requirement, B.requirement], [C.requirement]], f)
     expect(direct.valid && direct.status).toBe('unresolved')
-    expect(direct.valid && direct.material_unresolved).toEqual([{ requirement: B.requirement, status: 'unresolved' }])
+    expect(direct.valid && direct.material_unresolved).toEqual([{ requirement: B.requirement, status: 'unresolved', unresolved_reason: null }])
 
     const ordinary = lookupTopicClaims([goal({ category: 'third_party_source_rights' })], [c], f)
     const discovered = lookupDiscoveredTopicClaims([occurrence({ topic: 'third_party_source_rights', source_goal_category: 'commercial_use' })], [c], f)
 
-    expect(ordinary.diagnostics).toEqual([{ identifier: 'third_party_source_rights', reason: 'applicability_unmet', unmet_applicability: [{ claim_id: 'C-1', requirement: B.requirement, status: 'unresolved' }] }])
-    expect(discovered.diagnostics).toEqual([{ identifier: 'commercial_use', reason: 'applicability_unmet', unmet_applicability: [{ claim_id: 'C-1', requirement: B.requirement, status: 'unresolved' }] }])
+    expect(ordinary.diagnostics).toEqual([{ identifier: 'third_party_source_rights', reason: 'applicability_unmet', unmet_applicability: [{ claim_id: 'C-1', requirement: B.requirement, status: 'unresolved', unresolved_reason: null }] }])
+    expect(discovered.diagnostics).toEqual([{ identifier: 'commercial_use', reason: 'applicability_unmet', unmet_applicability: [{ claim_id: 'C-1', requirement: B.requirement, status: 'unresolved', unresolved_reason: null }] }])
   })
 
   test('5: (A not_met AND B unresolved) OR C not_met => aggregate NOT_MET, B not material, on both routes', () => {
@@ -161,7 +161,7 @@ describe('Track A route invariance -- same expression, same aggregate, ordinary 
     const result = lookupDiscoveredTopicClaims([occurrence({ topic: 'third_party_source_rights', source_goal_category: 'commercial_use' })], [c], facts())
     expect(result.matches).toEqual([])
     expect(result.diagnostics).toEqual([
-      { identifier: 'commercial_use', reason: 'applicability_unmet', unmet_applicability: [{ claim_id: 'C-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved' }] },
+      { identifier: 'commercial_use', reason: 'applicability_unmet', unmet_applicability: [{ claim_id: 'C-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved', unresolved_reason: null }] },
     ])
   })
 })

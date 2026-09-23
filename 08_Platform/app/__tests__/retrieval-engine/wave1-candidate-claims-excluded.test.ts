@@ -336,6 +336,7 @@ describe('CLAIM-COPY-001/002/003 -- reachable through exact Topic Retrieval for 
           claim_id,
           requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' },
           status: 'unresolved',
+          unresolved_reason: null,
         })),
       ),
     )
@@ -343,6 +344,7 @@ describe('CLAIM-COPY-001/002/003 -- reachable through exact Topic Retrieval for 
       claim_id: 'CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1',
       requirement: { fact: 'jurisdiction', operator: 'equals', value: 'Taiwan' },
       status: 'unresolved',
+      unresolved_reason: null,
     })
     expect(diagnostic!.unmet_applicability).toHaveLength(4)
   })
