@@ -64,6 +64,7 @@ import { parseRequest, type TurnRequestBody, type TurnResponseBody, type Session
 import { logPilotEvent } from '@/lib/crc-engine/pilot-events'
 import { logAnalyticsEvent } from '@/lib/crc-engine/analytics-events'
 import { resolveClientIp, normalizeIp, deriveAbuseKey } from '@/lib/crc-engine/abuse-key'
+import { resolveApproximateCountryDisplayName } from '@/lib/crc-engine/request-geography'
 import { classifyTraffic, shouldApplyRateLimiting } from '@/lib/crc-engine/traffic-classification'
 import { checkSessionCreationRate, checkBurst, checkTurnCeiling, logRateLimitedEvent } from '@/lib/crc-engine/abuse-prevention'
 import { getRuntimeCommit, getModelConfig } from '@/lib/crc-engine/runtime-metadata'
@@ -239,6 +240,15 @@ export async function POST(request: NextRequest) {
   // internal_test/automated_eval all need to run repeatedly without
   // tripping the same limits real anonymous users are bounded by.
   const rateLimitingApplies = shouldApplyRateLimiting(trafficType, abuseKey)
+
+  // CRC-OPS-GEO-1 (2026-09-23): computed once per request, reused wherever
+  // this request happens to trigger a usage notification below (STARTED or
+  // COMPLETED, never both -- a single request is exactly one of a guided
+  // init, a free-form message, or an email/resend). Operational display
+  // metadata only, never persisted, never threaded into anything CRC-
+  // semantic -- see request-geography.ts's own header for the full
+  // architectural boundary.
+  const approximateCountry = resolveApproximateCountryDisplayName(request)
 
   const isNewSession = !existingToken || parsed.restart
 
@@ -499,6 +509,7 @@ export async function POST(request: NextRequest) {
             initializationSource: productState?.initialization_source ?? null,
             email: targetEmail,
             attributionToken: productState?.attribution_token,
+            approximateCountry,
           })
         } catch (err) {
           console.error('[api/crc/turn] sendCrcResultsEmailCapturedAdminNotification failed', err)
@@ -626,7 +637,7 @@ export async function POST(request: NextRequest) {
     // request either way.
     if (shouldNotifyCrcSessionStarted(trafficType)) {
       try {
-        await sendCrcSessionStartedAdminNotification({ sessionId: token, initializationSource: 'guided', attributionToken: existingAttributionToken })
+        await sendCrcSessionStartedAdminNotification({ sessionId: token, initializationSource: 'guided', attributionToken: existingAttributionToken, approximateCountry })
       } catch (err) {
         console.error('[api/crc/turn] sendCrcSessionStartedAdminNotification (guided) failed', err)
       }
@@ -684,7 +695,7 @@ export async function POST(request: NextRequest) {
     // suppress logging for, an identity/analytics persistence failure.
     if (shouldNotifyCrcSessionStarted(trafficType)) {
       try {
-        await sendCrcSessionStartedAdminNotification({ sessionId: token, initializationSource: 'free_form', attributionToken })
+        await sendCrcSessionStartedAdminNotification({ sessionId: token, initializationSource: 'free_form', attributionToken, approximateCountry })
       } catch (err) {
         console.error('[api/crc/turn] sendCrcSessionStartedAdminNotification (free_form) failed', err)
       }

@@ -76,6 +76,19 @@ describe('sendCrcSessionStartedAdminNotification', () => {
     expect(call.html).not.toContain('Attribution token')
   })
 
+  test('CRC-OPS-GEO-1: renders "Approximate country: Taiwan" when present', async () => {
+    await sendCrcSessionStartedAdminNotification(startedPayload({ approximateCountry: 'Taiwan' }))
+    const call = mockSend.mock.calls[0][0]
+    expect(call.html).toContain('<strong>Approximate country:</strong> Taiwan')
+  })
+
+  test('CRC-OPS-GEO-1: omits the approximate-country line entirely when absent -- never renders "Unknown"', async () => {
+    await sendCrcSessionStartedAdminNotification(startedPayload({ approximateCountry: null }))
+    const call = mockSend.mock.calls[0][0]
+    expect(call.html).not.toContain('Approximate country')
+    expect(call.html).not.toContain('Unknown')
+  })
+
   test('data minimization: contains no transcript, IP, or abuse-key-shaped content', async () => {
     await sendCrcSessionStartedAdminNotification(startedPayload())
     const call = mockSend.mock.calls[0][0]
@@ -145,6 +158,17 @@ describe('sendCrcResultsEmailCapturedAdminNotification', () => {
     await sendCrcResultsEmailCapturedAdminNotification(completedPayload({ attributionToken: null }))
     const withoutToken = mockSend.mock.calls[0][0].html as string
     expect(withoutToken).not.toContain('Attribution token')
+  })
+
+  test('CRC-OPS-GEO-1: renders "Approximate country: Taiwan" when present, omits the line entirely when absent (never "Unknown")', async () => {
+    await sendCrcResultsEmailCapturedAdminNotification(completedPayload({ approximateCountry: 'Taiwan' }))
+    const withCountry = mockSend.mock.calls[0][0].html as string
+    expect(withCountry).toContain('<strong>Approximate country:</strong> Taiwan')
+    mockSend.mockClear()
+    await sendCrcResultsEmailCapturedAdminNotification(completedPayload({ approximateCountry: null }))
+    const withoutCountry = mockSend.mock.calls[0][0].html as string
+    expect(withoutCountry).not.toContain('Approximate country')
+    expect(withoutCountry).not.toContain('Unknown')
   })
 
   test('data minimization: contains no transcript, IP, abuse-key, or StructuredUnderstanding-shaped content', async () => {

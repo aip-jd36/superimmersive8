@@ -383,6 +383,15 @@ export interface CrcSessionStartedNotification {
   sessionId: string
   initializationSource: 'free_form' | 'guided'
   attributionToken?: string | null
+  /**
+   * CRC-OPS-GEO-1 (2026-09-23). Already-resolved, already-formatted
+   * display name (e.g. 'Taiwan') -- this module never resolves/formats a
+   * raw header itself, matching every other field in this payload (the
+   * caller always supplies presentation-ready values). Describes coarse
+   * NETWORK/egress geography only, never a verified physical location;
+   * omitted entirely (never rendered as "Unknown") when absent/invalid.
+   */
+  approximateCountry?: string | null
 }
 
 export async function sendCrcSessionStartedAdminNotification(payload: CrcSessionStartedNotification): Promise<void> {
@@ -401,6 +410,7 @@ export async function sendCrcSessionStartedAdminNotification(payload: CrcSession
             <p style="margin: 4px 0;"><strong>Session:</strong> ${escapeHtml(payload.sessionId)}</p>
             <p style="margin: 4px 0;"><strong>Initialization source:</strong> ${escapeHtml(payload.initializationSource)}</p>
             ${payload.attributionToken ? `<p style="margin: 4px 0;"><strong>Attribution token:</strong> ${escapeHtml(payload.attributionToken)}</p>` : ''}
+            ${payload.approximateCountry ? `<p style="margin: 4px 0;"><strong>Approximate country:</strong> ${escapeHtml(payload.approximateCountry)}</p>` : ''}
           </div>
         </div>
       `,
@@ -416,6 +426,8 @@ export interface CrcResultsEmailCapturedNotification {
   initializationSource: 'free_form' | 'guided' | null
   email: string
   attributionToken?: string | null
+  /** CRC-OPS-GEO-1 (2026-09-23). Same contract as CrcSessionStartedNotification's own field above. */
+  approximateCountry?: string | null
 }
 
 export async function sendCrcResultsEmailCapturedAdminNotification(payload: CrcResultsEmailCapturedNotification): Promise<void> {
@@ -436,6 +448,7 @@ export async function sendCrcResultsEmailCapturedAdminNotification(payload: CrcR
             <p style="margin: 4px 0;"><strong>Initialization source:</strong> ${escapeHtml(payload.initializationSource ?? 'unknown')}</p>
             <p style="margin: 4px 0;"><strong>Email:</strong> ${escapeHtml(payload.email)}</p>
             ${payload.attributionToken ? `<p style="margin: 4px 0;"><strong>Attribution token:</strong> ${escapeHtml(payload.attributionToken)}</p>` : ''}
+            ${payload.approximateCountry ? `<p style="margin: 4px 0;"><strong>Approximate country:</strong> ${escapeHtml(payload.approximateCountry)}</p>` : ''}
           </div>
         </div>
       `,
