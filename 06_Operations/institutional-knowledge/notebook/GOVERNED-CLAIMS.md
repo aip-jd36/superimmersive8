@@ -4865,3 +4865,184 @@ Related: [[CLAIM-COPY-001-v1]] (same KnowledgeTopic, U.S. jurisdiction -- struct
 Full Formal Governance Review artifact: `governance-reviews/FGR_023_CAND-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001_2026-09-21.md`
 Full CRC Publication Review artifact: `governance-reviews/CPR_029_CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1_2026-09-21.md`
 Full evidence manifest: `evidence-captures/taiwan-copyrightability/MANIFEST.md`
+
+### CLAIM-TRADEMARK-TW-ART68-INFRINGEMENT-001-v1
+Domain: Taiwan Trademark Act (商標法) — Article 68 Items 1–3, Registered-Mark Infringement
+Topic: trademark
+Subtopic: article-68-items-1-3-registered-mark-infringement
+
+GOVERNANCE TREATMENT (2026-09-23, PM adoption decision, FGR #24): Second Taiwan-jurisdiction Living Knowledge claim adopted in this corpus (after `CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1`, FGR_023), and the second Trademark-domain claim (after `CLAIM-TRADEMARK-US-LANHAM-CONFUSION-001-v1`, FGR_021). Reuses the existing `trademark` `GoalCategory`/`KnowledgeTopic` verbatim — unlike the U.S. Lanham milestone, which proposed `trademark` as a new category, `trademark` is already live in `GOAL_CATEGORIES` (`08_Platform/app/types/interview-engine.ts` line 826, independently re-confirmed present at this Adoption review) — no new category, no new topic, no new `TopicRelationship`. Explicit-goal-reachable via the existing, unmodified exact-topic `lookupTopicClaims` path, identical in shape to the already-adopted U.S. Lanham claim. Durable claim identifier uses the current corpus-wide descriptive-ID convention (`CLAIM-<DOMAIN>-<JURISDICTION>-<CONCEPT>-NNN-v1`), matching `CLAIM-TRADEMARK-US-LANHAM-CONFUSION-001-v1`'s and `CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1`'s own convention. **Dependency history, preserved rather than collapsed:** FGR_024 §10 originally re-derived TWO dependencies (`mark_and_goods_identity_or_similarity`, `consumer_confusion_likelihood`) from the pre-FGR brief's mistaken zero-dependency premise; a same-day Narrow Governance Reconsideration (§10-REVISED) withdrew `consumer_confusion_likelihood` (claim-wide dependency metadata cannot accurately represent an element present in only two of the claim's own three statutory branches); a same-day Second Narrow Governance Reconsideration (§10-REVISED-2) independently re-tested and also withdrew `mark_and_goods_identity_or_similarity` (an SI8-authored composite bundling two categorically distinct comparative judgment types — mark-similarity and goods/services-similarity — never stated by any single clause of Art. 68 as one indivisible test, and the identity-vs-similarity threshold it demands varies materially by item even though some form of it is nominally present in every item). **§10-REVISED-2 is controlling: final dependency set is `[]` (D0), and the Bounded Interpretation ceiling is `directly_relevant`, not `relevant_applicability_unresolved` (Case 3B).** §9's own draft proposition wording already states the mark/goods identity-or-similarity and confusion requirements precisely, per item, without relying on either withdrawn dependency.
+
+Claim character: established
+Jurisdiction: Taiwan
+Context: commercial AI-generated video/image content that visibly uses or depicts a mark identical or similar to a registered Taiwan trademark, on goods/services identical or similar to those covered by that registration
+
+Claim proposition: >
+  Under Taiwan Trademark Act Article 2 (trademark rights are acquired
+  through registration) and Article 68 as currently in force (the
+  pre-2022-amendment text; a 2022 amendment to Article 68 has been
+  promulgated but its effective date has not yet been fixed by the
+  Executive Yuan — see Evidence limitations below), using, without the
+  trademark owner's consent and for a marketing purpose, a mark identical
+  or similar to another party's registered trademark can create civil
+  trademark-infringement liability under any of the following, which are
+  not equivalent to one another: (1) using a mark identical to the
+  registered mark on identical goods or services is infringement, with no
+  separate likelihood-of-confusion requirement stated in the statute; (2)
+  using a mark identical to the registered mark on similar goods or
+  services is infringement where there is a likelihood of causing relevant
+  consumers to be confused or mistaken; and (3) using a mark similar to the
+  registered mark on identical or similar goods or services is infringement
+  where there is a likelihood of causing relevant consumers to be confused
+  or mistaken. These acts are subject to statutory limitations and
+  exceptions under Article 36 (including good-faith nominative/descriptive
+  use, referential fair use, functional necessity, prior good-faith use,
+  and exhaustion of rights), and are a structurally separate legal question
+  from Article 70's own well-known-mark dilution provisions, which require
+  the actor's actual knowledge of the mark's fame and are not addressed
+  here.
+
+Source references:
+  - primary (Class A, Ministry of Justice 全國法規資料庫, current-promulgated text, raw HTML `curl` capture, SHA-256-verified, independently re-fetched and byte-diffed a second time ~29 minutes later): `evidence-captures/taiwan-trademark/moj-trademark-act-current_20260923T073620Z_fc7518e5.html`.
+  - primary (Class A, same database's own "舊法規內容" old-law view, generated specifically because Arts. 68/70/95–97's 2022 amendment is promulgated but not yet effective): `evidence-captures/taiwan-trademark/moj-trademark-act-oldlaw-arts68-70-95-97_20260923T073622Z_57f094ba.html`.
+  - primary (Class A, same database's own "沿革" legislative-history view, full 17-entry amendment history 1930–2023 with presidential promulgation and Executive Yuan effective-date order numbers/dates): `evidence-captures/taiwan-trademark/moj-trademark-act-history_20260923T073623Z_efe93aab.html`.
+Source authority/type: Primary legal/official authority (Ministry of Justice Laws & Regulations Database of the Republic of China) — Class A
+Source fact: >
+  Independently re-verified against the raw HTML at both evidence capture
+  and this Adoption review. Art. 68's OLD-LAW text (currently in force):
+  "未經商標權人同意，為行銷目的而有下列情形之一，為侵害商標權" plus items
+  1–3, quoted verbatim in the Claim proposition above. The CURRENT-
+  PROMULGATED text (chapeau "未得商標權人同意，有下列情形之一" plus items
+  1–3 unchanged plus a new labels/tags/packaging second paragraph) is NOT
+  YET IN FORCE: the statute's own live "生效狀態" banner states "本法規部分
+  或全部條文尚未生效...一百十一年五月四日修正之第 68、70、95～97 條條文，
+  施行日期由行政院定之" (the 2022-05-04 amendment's effective date is to be
+  determined by the Executive Yuan — not yet fixed), independently
+  corroborated by amendment-history entry 16 (no effective-date order
+  recorded for that entry, contrasting entry 17, which does have one). The
+  separate May 2024 Executive Yuan order (院臺經字第1131006860號, effective
+  2024-05-01) is confirmed, directly from history entry 17, to apply only
+  to the distinct 2023-05-24 amendment's own article list (Arts. 6, 12, 13,
+  19, 30, 36, 75, 94, 99, 104, 106, 107, 98-1, 109-1) — Art. 68 does not
+  appear in that list. Items 1–3 themselves are byte-identical,
+  character-for-character, between the old-law and current-promulgated
+  texts (evidence Finding I) — only the chapeau's marketing-purpose
+  qualifier placement and the not-yet-effective second paragraph differ.
+  Art. 5 independently corroborates the marketing-purpose ("為行銷之目的")
+  trademark-use condition; Art. 35's own items 1–3 are word-for-word
+  identical to Art. 68's items 1–3 (the same three acts done *with*
+  consent, i.e. the affirmative rights Art. 68 protects); Art. 36 states
+  five categories of limitation/exception; Art. 70 is confirmed a
+  structurally separate regime (well-known-mark dilution, requiring the
+  actor's actual knowledge of fame — an element wholly absent from Art. 68
+  items 1–3).
+
+SI8 interpretation: >
+  A commercial AI-generated video/image project that visibly uses or
+  depicts a mark identical or similar to a registered Taiwan trademark
+  should not be represented to a client, buyer, or platform as clear of
+  Taiwan Trademark Act Article 68 considerations without confirming
+  whether the specific use is, in fact, identical or similar to a specific
+  registered mark, on goods/services identical or similar to that
+  registration, and (for items 2–3) whether a likelihood of consumer
+  confusion exists — legal/factual characterizations this claim does not
+  resolve and CRC cannot establish from conversation alone.
+
+Applicability requirements:
+  - fact: jurisdiction
+    operator: equals
+    value: Taiwan
+  <!-- Mirrors CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1's and CLAIM-TRADEMARK-US-LANHAM-CONFUSION-001-v1's own precedent exactly: AssessmentJurisdictionMention represents only that the user asked CRC to consider Taiwan law -- never proof that Taiwan law actually governs the project, that a Taiwan court has jurisdiction, that the mark is registered in Taiwan, that infringement occurred there, or that distribution/territorial scope attaches. Explicit-goal-reachable only (§13/§19), so no Article-50-style unrestricted-reach exposure exists to solve. -->
+Unresolved project dependencies: []   <!-- D0 (FGR_024 §10-REVISED-2, final and controlling), correcting an initial D1/D2 re-derivation at §10/§10-REVISED. Neither `mark_and_goods_identity_or_similarity` nor `consumer_confusion_likelihood` survives independent re-derivation: `unresolved_project_dependencies` is a flat, claim-wide `string[]` with no mechanism anywhere in lib/retrieval-engine/ or lib/bounded-interpretation/ to scope a dependency to a subset of a claim's own statutory branches (independently re-confirmed at this Adoption review by direct inspection of build-bounded-interpretation.ts/assemble-result.ts/types.ts, matching FGR_024's own trace). `consumer_confusion_likelihood` failed because the confusion element is present only in items 2-3 and absent from item 1. `mark_and_goods_identity_or_similarity` failed for the same class of defect one level deeper: it bundles two categorically distinct comparative judgment types (mark-similarity assessment; goods/services-similarity assessment) that no single item of Art. 68 states as one indivisible test, and the identity-vs-similarity threshold it demands varies materially by item (item 1: identity required on both axes; item 3: similarity permitted on the mark axis). Registration status (§5) and consumer confusion (§10-REVISED) are both instead captured in the proposition's own conditional wording rather than represented as dependency metadata -- nothing is lost by this representation choice. -->
+Tool scope: null                 <!-- tool-independent; the statute is technology-neutral and does not depend on whether a mark was produced by manual design or AI generation --> Provider scope (asset-provider sense): null.
+Prohibited conclusions: >
+  Does not establish that a particular mark is registered in Taiwan, that
+  registration is valid, or that a particular person or entity owns the
+  mark. Does not establish that particular content constitutes statutory
+  trademark use under Art. 5. Does not establish that a specific mark is
+  legally identical or similar to a specific registered mark, or that
+  specific goods/services are legally identical or similar. Does not
+  establish that consumer confusion is or is not likely. Does not
+  establish that any Art. 36 limitation or exception applies or does not
+  apply. Does not establish that authorization or consent is sufficient.
+  Does not establish that infringement occurred or did not occur. Does not
+  establish that Taiwan law definitively governs the project, including
+  merely because the user selected Taiwan as the assessment jurisdiction.
+  Does not establish that the project is commercially cleared, legally
+  compliant, or ready for commercial use. Does not constitute legal
+  advice, a compliance determination, or a certification of commercial
+  readiness -- a human-reviewed Commercial Assurance Assessment (Reviewer
+  Workbook Domain I) remains the higher-assurance path for the
+  project-specific facts this claim leaves open. Art. 70 (well-known-mark
+  dilution), the not-yet-effective 2022 Art. 68 amendment, Fair Trade Act
+  provisions, criminal liability, and remedies are explicitly excluded
+  regimes, not incorporated by omission.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-09-23
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  PENDING — CRC Publication Review not yet performed as of this Adoption
+  (2026-09-23). Per this document's own governance-discipline note (top of
+  file): a claim can be `Adopted` with `Adoption Approver` recorded while
+  `CRC Approver` remains `PENDING` indefinitely -- this is the expected,
+  intentional state for reviewer/internal-only knowledge, not a gap. A
+  separate, later CRC Publication Review (CPR) is required before any
+  `CRC Eligible` status is set; this Adoption decision does not itself
+  authorize, imply, or schedule that review.
+
+CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
+  Under Taiwan Trademark Act Article 68, using a mark identical or similar
+  to someone else's registered trademark -- without the trademark owner's
+  consent and for a marketing purpose -- can create civil trademark-
+  infringement liability, with the specific rule depending on how similar
+  the marks and the goods/services are: an identical mark on identical
+  goods/services is infringement outright, while an identical mark on
+  similar goods/services, or a similar mark on identical-or-similar
+  goods/services, is infringement only where there's a likelihood of
+  consumer confusion. Statutory exceptions (e.g. good-faith descriptive
+  use) can apply, and this is a separate question from Article 70's
+  well-known-mark dilution provisions.
+
+Effective date: >
+  The currently EFFECTIVE text is the pre-2022-amendment ("old-law")
+  chapeau ("未經商標權人同意，為行銷目的而有下列情形之一，為侵害商標權")
+  plus items 1-3 -- in force because the 2022-05-04 promulgated amendment
+  to Arts. 68/70/95-97 has no Executive Yuan effective-date order as of
+  evidence capture (2026-09-23). Items 1-3 themselves are byte-identical
+  between the old-law and current-promulgated texts (no substantive change
+  to the operative infringement rule is pending -- only the chapeau's
+  qualifier placement and an unrelated new second paragraph).
+Last reviewed: 2026-09-23 (Formal Governance Review, FGR_024)
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: [[CLAIM-TRADEMARK-US-LANHAM-CONFUSION-001-v1]] (structurally analogous sibling -- shared `trademark` GoalCategory, different jurisdiction, different statute, materially different item-level structure), [[CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1]] (same Taiwan jurisdiction, distinct legal domain -- copyright vs. trademark, no shared dependency or applicability mechanism). A future Art. 70 well-known-mark/dilution candidate is recorded as future scope only, not developed here. The not-yet-effective 2022 Art. 68 amendment is a refresh-trigger watchlist item only (see FGR_024 §20), not a related claim.
+
+Refresh triggers (recorded per FGR_024 §20; no refresh machinery created):
+  - The 2022 amendment to Art. 68 enters into force (an Executive Yuan
+    effective-date order is issued) -- a GOVERNED PROPOSITION CHANGED
+    event, not merely a source change.
+  - Art. 68 is amended again by any future legislative action.
+  - Art. 5's trademark-use definition materially changes.
+  - Any Art. 36 limitation/exception category materially changes.
+  - A superseding authoritative interpretation (e.g. a TIPO letter or
+    judicial precedent addressing items 1-3 specifically) materially
+    changes the proposition.
+
+Historical debt, recorded not remediated (FGR_024 §21): the evidence-
+capture milestone underlying this claim found and fixed a
+`core.autocrlf=true` byte-normalization issue for this Taiwan Trademark
+capture specifically (scoped `.gitattributes`, commit `5344309`). Whether
+`TW-COPY-1` (the Taiwan Copyright evidence capture underlying
+`CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1`) is affected by the same
+class of issue was explicitly out of scope for FGR_024 and remains
+untouched -- recorded here only as historical evidence-integrity debt for
+a future, separate, explicitly-authorized task. No corpus-wide dependency
+migration or `.gitattributes` repair was performed by this Adoption
+either.
+
+Full Formal Governance Review artifact: `governance-reviews/FGR_024_CAND-TRADEMARK-TW-ART68-INFRINGEMENT-001_2026-09-23.md`
+Full evidence manifest: `evidence-captures/taiwan-trademark/MANIFEST.md`
