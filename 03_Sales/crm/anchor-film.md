@@ -6,12 +6,12 @@ contacts:
 slug: anchor-film
 stage: evaluating
 source: event
-next_action: "Awaiting Alice's reply with the full/current October cross-domain grant RFP (slides remain 草案/draft even in the Sept 16 'latest' version). Before any application design: (1) run SI8's non-PRC AI-model/API/dependency + SBOM-readiness audit against the newly-surfaced supply-chain requirement — see `01_Business/research/TAIWAN-CROSSDOMAIN-AI-GRANT-2026-SMEA.md` §7; (2) reconcile JD's 'US/Europe primary market since the start' framing against claude.md's own Geographic Strategy section (active geos = UK/Netherlands/Dubai/Singapore — no US line); (3) confirm whether the Sept MODA grant (九月標案) is still live or superseded — still unanswered by Alice; (4) identify who 'Kay' is (source of the Sept 16 materials, unconfirmed identity/relationship)."
-next_action_date: 2026-09-22
-last_contacted: 2026-09-16
-blocked: false
-blocked_reason: null
-review_date: null
+next_action: "Once the conversation resumes (2026-09-30 is an internal review date, not a promised outreach date): schedule an Anchor × SI8 working session: define the system Alice still wants built, Anchor vs SI8 product boundaries and interface (creation-record/workflow → SI8 Commercial Assurance is a working hypothesis, not agreed), and IP — fitting the October grant around the product, not the product around the grant. Alongside: (1) obtain the complete/latest October grant RFP/application package (only 草案 slides so far); (2) consortium economics + grant administrative obligations — see the 2026-09-22/23 log entry for the full list; (3) collect Alice/Anchor feedback on the zh-TW CRC; (4) carried over, still open: Sept MODA grant (九月標案) status, who 'Kay' is, reconcile JD's 'US/Europe' framing against claude.md's Geographic Strategy; (5) non-PRC AI-model/API/SBOM audit only if SI8 decides to pursue — already tracked in `01_Business/research/TAIWAN-CROSSDOMAIN-AI-GRANT-2026-SMEA.md` §7."
+next_action_date: 2026-09-30
+last_contacted: 2026-09-23
+blocked: true
+blocked_reason: "Awaiting Alice's response / next movement on the October grant collaboration and CRC feedback."
+review_date: 2026-09-30
 billing_summary: null
 created: 2026-08-15
 ---
@@ -21,6 +21,60 @@ created: 2026-08-15
 Graduated from `03_Sales/CRM.md` (row B164) on 2026-08-15 — an active, developing strategic-partnership discovery conversation, well past a reply-only signal.
 
 ## Interaction log (reverse-chronological)
+
+### 2026-09-22/23 — updated CRC (Traditional Chinese UI) sent; Alice invited to share it with Anchor colleagues/partners
+
+**Sep 22, LINE:** JD sent Alice the updated CRC (https://app.superimmersive8.com/crc), noting additional development updates had shipped, the Traditional Chinese UI is now available (some system answers may still contain English), and inviting her to try it and give feedback. Alice replied: "好棒！" ("That's great!").
+
+**Sep 23, LINE:** JD followed up: "😊 也歡迎分享給 Anchor 的同事或合作夥伴玩玩看，目前都是免費使用的。我們最近也加入了一些台灣相關的法律跟規範。很希望聽聽大家實際使用後的 feedback！" (feel free to share with Anchor colleagues or partners to try — it's currently free; SI8 recently added some Taiwan-related laws/regulations; would love real-usage feedback). No reply recorded yet as of this entry.
+
+**Evidence boundaries:**
+- CURRENT FACT: Alice has been re-invited to use the current zh-TW CRC and explicitly invited to share it with Anchor teammates and partners. She responded positively to the product update.
+- Do NOT read "好棒！" as willingness to pay, product validation, or commercial intent — it's a friendly acknowledgment.
+- WORKING HYPOTHESIS: usage/feedback from Alice, Anchor staff, or Anchor partners could become useful design-partner evidence — particularly how CRC relates to the creation-record/workflow system Anchor wants to establish. Sharing alone is not conversion; log only substantive usage/feedback if received.
+
+**What to watch for in any CRC feedback:** Taiwan-specific gaps; unclear outputs; enterprise-client requirements; evidence users wish CRC already had; how Alice/Anchor naturally expects CRC to connect to creation records/workflow.
+
+**Relationship read (Aug 21 → Sep 23):** the evidence has moved past a single exploratory conversation — substantive Aug 21 problem/product call; government-funding collaboration discussion; Alice independently surfaced the October program; she called SI8's overseas orientation advantageous; she kept supplying the latest draft materials; she confirmed she still wants the discussed system built; she requested SI8's Taiwan legal-entity/UBN; she remains engaged with CRC updates. Best current interpretation: **strong strategic/design-partner relationship with active exploration of a joint funded R&D/commercialization project.** It is NOT a committed grant consortium, signed pilot, paying customer, confirmed partnership, or validated SaaS willingness-to-pay. Stage stays `evaluating`.
+
+**SI8 has NOT agreed to apply.** Strategic guardrail: pursue the grant only if it accelerates R&D/commercialization SI8 already has strategic reason to do — grant availability is not a reason to expand SI8 into a generic AI-production workflow platform.
+
+**Open follow-ups (reconciled against prior next_action; supersedes it):**
+
+*High priority*
+1. **Anchor × SI8 working session** — define the system Alice wants built; Anchor vs SI8 product boundaries; whether the architecture remains creation-record/workflow → SI8 Commercial Assurance; how the October grant fits around the product rather than the product around the grant.
+2. **Complete/latest October grant materials** — full draft/RFP/application package, not just screenshots. (Continues the prior "awaiting full RFP" action — not new.)
+3. **Consortium economics** — Anchor work package/budget; SI8 work package/budget; matching-fund allocation; SI8's actual cash requirement; whether/how paid-in-capital limits (補助款≤自籌款≤實收資本額 in the draft) apply to each member.
+4. **Grant optionality/administrative obligations** — reporting/accounting burden; amendment rules; withdrawal/termination consequences; closeout; post-project obligations.
+5. **IP/commercialization structure** — ownership of Anchor's workflow/capture technology; of SI8's Commercial Assurance technology; of jointly developed integration IP; whether Anchor gets proprietary/exclusive rights; whether SI8 can commercialize the assurance layer broadly.
+
+*Product/design-partner*
+6. **Collect CRC feedback from Alice/Anchor** (watch list above).
+7. **Track any Anchor teammate/partner CRC usage or introductions** — sharing alone is not conversion.
+
+*Carried over from the prior next_action, still open*
+8. Sept MODA grant (九月標案) — still live, abandoned, or superseded by October? Still unanswered by Alice.
+9. Who "Kay" is (source of the Sep 16 materials) — unconfirmed.
+10. Reconcile JD's "US/Europe" market framing against claude.md's Geographic Strategy before it goes into any written proposal (see 2026-09-16 accuracy flags).
+
+*Conditional technical diligence*
+11. **Only if SI8 decides the grant is worth pursuing:** route a separate engineering diligence task — AI model/API origins, open-source AI dependencies, cloud/compute, SBOM readiness, non-PRC supply-chain compliance. Already tracked in `01_Business/research/TAIWAN-CROSSDOMAIN-AI-GRANT-2026-SMEA.md` §7 (and its OQ #9); not performed as part of CRM logging.
+
+### 2026-09-16 (after 13:40; exact time not captured) — Alice confirms she still wants "the system" built; requests SI8's Taiwan UBN
+
+Continuing the same LINE thread after the "最新草案" slides (logged below), JD asked Alice directly what partnership/product structure she now envisions — whether it's still the system discussed in her office (Anchor: AI-production workflow / creation-record system capturing and organizing production-process evidence; SI8: Commercial Assurance / CRC, downstream commercial-risk assessment and assurance), or something different.
+
+Alice replied: "對阿我應該還是希望可以把系統架起來" ("Yeah, I think I'd still like to actually get the system built/set up.")
+
+- CURRENT FACT: Alice still wants to get the previously discussed system established/built.
+- CURRENT FACT: the October subsidy is being considered as a possible vehicle for an Anchor × SI8 joint project.
+- WORKING HYPOTHESIS (not agreed design): Anchor production workflow / creation-record layer → evidence/data → SI8 Commercial Assurance / CRC / assessment layer. Alice's short reply confirms continued intent to build "the system" but does not specify its components or boundaries.
+- OPEN QUESTION: what exactly Anchor builds, what exactly SI8 provides, where the interface sits, and who owns the resulting IP.
+
+Alice then asked: "拍謝我確認一下貴司統編～～" ("Sorry, let me confirm your company's Unified Business Number"). JD supplied: 沉浸科技顧問有限公司, 83067478.
+
+- CURRENT FACT: Alice requested SI8's Taiwan legal-entity/UBN information during the grant/system discussion.
+- Her reason was not stated. Preliminary eligibility/consortium diligence is plausible but is **inference only** — do not record it as fact unless she explains.
 
 ### 2026-09-16 — JD pitches a role split; Alice agrees on the international angle and sends newer draft slides (non-PRC supply-chain requirement surfaces)
 
