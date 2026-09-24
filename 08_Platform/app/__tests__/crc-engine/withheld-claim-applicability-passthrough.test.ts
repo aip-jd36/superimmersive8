@@ -189,7 +189,16 @@ describe('CC-4C.2D -- H: registered tool_account_status label, full pipeline', (
   })
 })
 
-describe('CC-4C.2D -- I: unregistered ApplicabilityFact fails closed, full pipeline', () => {
+// CRC-CC-SCOPE-6B (2026-09-24): jurisdiction is now a REGISTERED
+// ApplicabilityFact ('assessment jurisdiction') -- this describe block
+// originally used jurisdiction as its example of an UNregistered fact
+// (fail-closed to the generic fallback). That premise no longer holds for
+// jurisdiction specifically; the two tests below are updated to assert the
+// new, correct, now-labeled behavior. `tool_plan_tier` remains the real
+// unregistered-fact example, covered directly in
+// applicability-fact-display.test.ts ("tool_plan_tier remains unregistered
+// -- fail closed") -- not duplicated here.
+describe('CC-4C.2D/SCOPE-6B -- jurisdiction is now registered; passthrough + collapse still hold', () => {
   const matrix = [
     matrixRow({ claim_id: 'MATCHED', topic: 'commercial_use', crc_candidate_statement: 'Matched governed statement.' }),
     matrixRow({
@@ -201,27 +210,28 @@ describe('CC-4C.2D -- I: unregistered ApplicabilityFact fails closed, full pipel
   const g = goal({ goal_id: 'g-1', raw_text: 'Can I use this commercially?', category: 'commercial_use' })
   const { interps, email } = fullPipeline(handoff({ tools: [tool('MATCHED'), tool('WITHHELD')] }), [g], matrix, unknownFacts)
 
-  test('getApplicabilityFactLabel is undefined for jurisdiction (not registered) -- reconfirmed, not assumed', () => {
+  test('getApplicabilityFactLabel now resolves the SCOPE-6B governed label for jurisdiction', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { getApplicabilityFactLabel } = require('@/lib/crc-engine/applicability-fact-display')
-    expect(getApplicabilityFactLabel('jurisdiction')).toBeUndefined()
+    expect(getApplicabilityFactLabel('jurisdiction')).toBe('assessment jurisdiction')
   })
 
-  test('BI still carries the fact (jurisdiction) even though no label is registered for it', () => {
+  test('BI still carries the fact (jurisdiction) unchanged -- BI itself never reads the display registry', () => {
     expect(interps[0].unresolved_relevant_claims.find((c: { claim_id: string }) => c.claim_id === 'WITHHELD')?.fact).toBe('jurisdiction')
   })
 
   // CC-4C.2F (2026-09-19): this WITHHELD/jurisdiction fixture is ALSO the
   // exact same-claim collapse-eligible shape (non-null fact, matching
-  // unresolved_applicability sibling) -- so it now collapses to ONE
+  // unresolved_applicability sibling) -- so it still collapses to ONE
   // "Still open" line, surviving as `unresolved_applicability`'s own
-  // fallback sentence ("A related condition..."), not
-  // `withheld_relevant_claim`'s own ("An additional governed
-  // consideration..."). Fail-closed behavior (no label fabricated) is
-  // still fully intact -- this test now also proves the duplicate is gone.
-  test('email retains the existing generic fallback sentence, now exactly once -- fail-closed behavior is a PASS, no label is fabricated', () => {
-    expect(email.text).toContain("A related condition hasn't been confirmed in this conversation.")
-    expect(email.text).not.toContain('jurisdiction')
+  // sentence. SCOPE-6B (2026-09-24): that surviving sentence now uses the
+  // real governed Level-1 label instead of the generic fallback -- this
+  // test now proves BOTH that the duplicate is gone AND that the new label
+  // renders exactly once, with no raw enum/value leakage.
+  test('email now uses the governed "assessment jurisdiction" sentence, exactly once -- label renders, no leakage', () => {
+    expect(email.text).toContain("Your assessment jurisdiction hasn't been confirmed in this conversation.")
+    expect(email.text).not.toContain('A related condition')
+    expect(email.text).not.toMatch(/united states/i) // the governed requirement's own required value must never leak
     const stillOpenLines = (email.text.match(/hasn't been confirmed in this conversation\./g) || []).length
     expect(stillOpenLines).toBe(1)
   })

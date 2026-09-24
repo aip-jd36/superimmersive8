@@ -84,6 +84,20 @@ describe('activating tool_account_status does not affect other facts/cases (prod
     expect(realizeUnresolvedApplicability([s])).toEqual([])
   })
 
+  // CRC-CC-SCOPE-6B (2026-09-24): jurisdiction now HAS a real, production
+  // label ('assessment jurisdiction') -- the test immediately above already
+  // proves zero notes against the real registry, but this test makes the
+  // "regardless of registry content" claim concrete rather than merely
+  // asserted: it confirms in the SAME test that (a) the label now resolves,
+  // and (b) the dedicated-path guard in realizeUnresolvedApplicability
+  // still fires anyway, proving the guard is evaluated independently of
+  // registry content, not merely coincidentally still empty.
+  test('jurisdiction is now labeled in production, and the dedicated-path guard STILL produces zero notes', () => {
+    expect(getApplicabilityFactLabel('jurisdiction')).toBe('assessment jurisdiction')
+    const s = { ...qualifyingSection(), unresolved_items: [{ kind: 'unresolved_applicability' as const, claim_id: 'X', fact: 'jurisdiction' as const, tool: null, unresolved_reason: null }] }
+    expect(realizeUnresolvedApplicability([s])).toEqual([])
+  })
+
   test('multiple distinct unresolved facts (tool_account_status + tool_plan_tier) -> zero notes, even though one of them IS labeled', () => {
     const s = {
       ...qualifyingSection(),

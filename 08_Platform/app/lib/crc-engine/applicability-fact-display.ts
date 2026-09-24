@@ -63,8 +63,47 @@
  * legal/commercial conclusion, an evidence requirement, materiality/risk,
  * or any Commercial Assurance wording -- see this module's own header
  * above for the complete, unchanged list of what a label must never
- * encode. No other `ApplicabilityFact` is activated by this change --
- * `tool_plan_tier` and `jurisdiction` remain unregistered (fail-closed).
+ * encode.
+ *
+ * `jurisdiction` ACTIVATED (CRC-CC-SCOPE-6B, 2026-09-24, following the
+ * CRC-CC-SCOPE-6A read-only governance diagnostic) -- second real entry,
+ * following the SAME narrow M2B.1 discipline: the neutral lexical alias
+ * "assessment jurisdiction" and nothing else. Deliberately reuses the
+ * EXACT existing, already-governed project term (`AssessmentJurisdictionMention`,
+ * types/interview-engine.ts; `deriveAssessmentJurisdictionFacts`,
+ * assessment-jurisdiction-scope.ts; `JURISDICTION_CLARIFICATION_QUESTION`'s
+ * own "...for this assessment?" framing, jurisdiction-clarification.ts) --
+ * not a newly-invented phrase, and not the raw `jurisdiction` enum
+ * literal. This is Level 1 (fact-category) authority only, identical in
+ * kind to `tool_account_status` above -- it identifies ONLY that the
+ * assessment-jurisdiction dimension is unconfirmed for this item; it does
+ * NOT name which jurisdiction is required, which jurisdiction (if any) is
+ * already established, that an established jurisdiction differs from what
+ * this item requires, or any legal/commercial conclusion. It is also
+ * deliberately DISTINCT from, and must never be conflated with,
+ * `DistributionTerritoryMention` (a separate, independently-governed
+ * project concept -- see that type's own header, types/interview-engine.ts)
+ * -- "assessment jurisdiction" names which jurisdiction CRC should consider
+ * for the assessment itself, never where the finished work is or will be
+ * distributed.
+ *
+ * This entry activates ONLY the per-item "Still Open" category sentence
+ * (`unresolvedItemSentence`/`boundedFactCategorySentence`,
+ * results-email-template.ts) -- the SEPARATE, more narrowly-gated M2B
+ * per-goal `ConsultativeNote` sentence
+ * (unresolved-applicability-realization.ts's `realizeUnresolvedApplicability`)
+ * carries its OWN independent, hardcoded `if (fact === 'jurisdiction')
+ * return` exclusion, deliberately preserved unchanged by this milestone --
+ * that module still defers entirely to jurisdiction's own dedicated
+ * clarification path and BI's own content-free Case-3A template, and does
+ * NOT begin producing a jurisdiction note merely because this registry now
+ * resolves a label. These two consumers remain intentionally asymmetric;
+ * see each module's own header for why.
+ *
+ * No other `ApplicabilityFact` is activated by this change -- `tool_plan_tier`
+ * remains unregistered (fail-closed); see the CRC-CC-SCOPE-6A diagnostic for
+ * why it carries a separate, unresolved commercial-entanglement governance
+ * question and must not be registered opportunistically alongside this entry.
  *
  * Adding any FUTURE real entry remains a governance decision this file
  * does not make on its own authority; it requires the same explicit
@@ -91,16 +130,19 @@ export interface ApplicabilityFactDisplayEntry {
 }
 
 /**
- * One entry (M2B.1, 2026-09-05, human/PM-approved). `tool_plan_tier` and
- * `jurisdiction` are deliberately NOT entries here -- see module header --
- * and must not be added without their own separate governance sign-off. Do
- * not populate any future entry from informal wording found in
- * governance-review markdown, PLATFORM-RIGHTS-MATRIX.md column headers, or
- * an existing selector question's own text -- none of those are an
- * approved display label on their own.
+ * Two entries: `tool_account_status` (M2B.1, 2026-09-05) and `jurisdiction`
+ * (CRC-CC-SCOPE-6B, 2026-09-24), both human/PM-approved -- see this
+ * module's own header for the full authority/scope of each. `tool_plan_tier`
+ * is deliberately NOT an entry here -- see module header -- and must not be
+ * added without its own separate governance sign-off. Do not populate any
+ * future entry from informal wording found in governance-review markdown,
+ * PLATFORM-RIGHTS-MATRIX.md column headers, or an existing selector
+ * question's own text -- none of those are an approved display label on
+ * their own.
  */
 const APPLICABILITY_FACT_DISPLAY: Partial<Record<ApplicabilityFact, ApplicabilityFactDisplayEntry>> = {
   tool_account_status: { label: 'account or membership status' },
+  jurisdiction: { label: 'assessment jurisdiction' },
 }
 
 /**

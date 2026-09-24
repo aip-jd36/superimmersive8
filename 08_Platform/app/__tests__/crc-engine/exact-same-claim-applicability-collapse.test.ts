@@ -367,7 +367,15 @@ describe('CC-4C.2F -- O: registered-label email, real pipeline, duplicate -> one
   })
 })
 
-describe('CC-4C.2F -- P: unregistered-label email, real pipeline, collapse still occurs structurally', () => {
+// CRC-CC-SCOPE-6B (2026-09-24): jurisdiction is now a REGISTERED
+// ApplicabilityFact ('assessment jurisdiction') -- this describe block
+// originally used jurisdiction as its example of an UNregistered fact to
+// prove the CC-4C.2F collapse is label-independent (collapses whether or
+// not a label exists). That collapse-is-structural claim still holds and
+// is still proven by the first test below, unchanged; only the second
+// test's content assertion is updated to reflect the new, correct,
+// now-labeled rendered text.
+describe('CC-4C.2F -- P: labeled-fact email (jurisdiction, SCOPE-6B), real pipeline, collapse still occurs structurally', () => {
   const matrix = [
     matrixRow({ claim_id: 'MATCHED', topic: 'commercial_use', crc_candidate_statement: "Under this platform's terms, commercial output is permitted on paid plans." }),
     matrixRow({ claim_id: 'WITHHELD', topic: 'commercial_use', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'United States' }] }),
@@ -380,8 +388,9 @@ describe('CC-4C.2F -- P: unregistered-label email, real pipeline, collapse still
     expect(realization.unresolved_groups[0].items[0].kind).toBe('unresolved_applicability')
   })
 
-  test('email shows exactly ONE generic fallback line, no label fabricated, no "jurisdiction" leaked', () => {
-    expect(email.text).not.toContain('jurisdiction')
+  test('email shows exactly ONE labeled "assessment jurisdiction" line -- no raw required value leaked, collapse still exactly one line', () => {
+    expect(email.text).toContain('assessment jurisdiction')
+    expect(email.text).not.toContain('United States') // the governed requirement's own required value must never leak
     const stillOpenBullets = email.text.slice(email.text.indexOf('STILL OPEN')).split('WHAT\'S STILL NEEDED')[0].match(/^- /gm) || []
     expect(stillOpenBullets).toHaveLength(1)
   })
