@@ -147,6 +147,7 @@ import type {
 import type { ConsultativeNote } from './unresolved-applicability-realization'
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
 import type { GoalCategory } from '@/types/interview-engine'
+import type { ApplicabilityUnresolvedReason } from '@/lib/retrieval-engine/types'
 
 /**
  * One explicit goal's realized answer. `goal_index` is the identity every
@@ -230,6 +231,139 @@ export interface ConsultativeCommercialAssurance {
   closing_cta: string
 }
 
+/**
+ * CRC-CC-SCOPE-5 (2026-09-24) -- the smallest structural vocabulary for how
+ * an already-authorized unresolved item MAY later be organized for
+ * presentation. `'primary'` is the existing/default treatment (byte-
+ * identical to all pre-SCOPE-5 behavior); `'scoped_context'` is the one
+ * currently-authorized non-default treatment, reserved for the single
+ * explicitly-approved case (see `presentationRoleForUnresolvedReason`
+ * below). Structural only -- does NOT mean, and must never be read to
+ * imply: material/immaterial, important/unimportant, high/low priority,
+ * risk, blocker/non-blocker, relevant/irrelevant, applicable/not
+ * applicable, inside/outside legal scope, safe to ignore, or commercial
+ * clearance. Does NOT modify `PlanUnresolvedItem`, `BoundedInterpretation`
+ * disposition, or applicability status -- those remain exactly as computed
+ * upstream, in `unresolved_groups`/`missing_evidence_groups`, unchanged by
+ * this milestone. This milestone is propagation/organization data only --
+ * no renderer reads this value.
+ */
+export type ConsultativeUnresolvedPresentationRole = 'primary' | 'scoped_context'
+
+/**
+ * CRC-CC-SCOPE-5 (2026-09-24) -- the ONLY currently-authorized mapping from
+ * an evaluator-owned `ApplicabilityUnresolvedReason` to a non-default
+ * presentation role. Deliberately an exhaustive `Record` over
+ * `ApplicabilityUnresolvedReason`, NOT a `reason !== null` / `reason ?
+ * ... : ...` test -- adding a second literal to that union without adding a
+ * corresponding entry here is a TypeScript compile error, forcing conscious
+ * human review before any future reason can acquire non-default
+ * presentation behavior (human-review correction, SCOPE-5 milestone
+ * instructions -- a prior `!== null` design was explicitly rejected as too
+ * broad). No new future reason may be added to this table by this
+ * milestone.
+ */
+const AUTHORIZED_SCOPED_CONTEXT_REASONS: Record<ApplicabilityUnresolvedReason, boolean> = {
+  value_not_among_established_values: true,
+}
+
+/**
+ * CRC-CC-SCOPE-5 (2026-09-24) -- Realization-owned, the sole function
+ * translating a bounded technical reason into a presentation role. `null`
+ * (scope dimension unknown, or no evaluator-supplied reason at all) ->
+ * `'primary'`, always. A non-null reason -> `'scoped_context'` ONLY when
+ * explicitly present (and `true`) in `AUTHORIZED_SCOPED_CONTEXT_REASONS`;
+ * `=== true` (not merely truthy) is a deliberate defensive runtime check --
+ * an unrecognized string that somehow bypasses the compile-time
+ * `ApplicabilityUnresolvedReason` type (a malformed/adversarial runtime
+ * value) looks up as `undefined` in the Record and therefore fails closed
+ * to `'primary'` here too, with no special-casing required. Reads no
+ * project fact, no `ApplicabilityRequirement`, no jurisdiction/tool/claim
+ * category value, no `UserGoal` text -- the technical reason is the only
+ * input, per this milestone's own explicit prohibition on reconstructing
+ * or inspecting evaluator semantics here.
+ */
+function presentationRoleForUnresolvedReason(reason: ApplicabilityUnresolvedReason | null): ConsultativeUnresolvedPresentationRole {
+  if (reason === null) return 'primary'
+  return AUTHORIZED_SCOPED_CONTEXT_REASONS[reason] === true ? 'scoped_context' : 'primary'
+}
+
+/**
+ * CRC-CC-SCOPE-5 (2026-09-24) -- the single place presentation role is
+ * derived for an unresolved item of ANY kind. `open_project_dependency`
+ * items carry no `unresolved_reason` field at all (a structurally distinct
+ * mechanism from applicability -- see `PlanUnresolvedItem`'s own header,
+ * consultative-answer-plan.ts) and therefore always resolve to `'primary'`,
+ * exactly like a `null` reason on the other two kinds -- never a special
+ * case, just the natural consequence of that kind never producing a
+ * reason to look up.
+ */
+function roleForUnresolvedItem(item: PlanUnresolvedItem): ConsultativeUnresolvedPresentationRole {
+  if (item.kind === 'open_project_dependency') return 'primary'
+  return presentationRoleForUnresolvedReason(item.unresolved_reason)
+}
+
+/**
+ * One `PlanUnresolvedItem`, annotated with its Realization-derived
+ * presentation role. `item` is the EXACT, unmutated Plan item -- full
+ * semantic provenance (claim_id, fact, tool, unresolved_reason, dependency
+ * fields) is preserved verbatim; this wrapper adds metadata, it never
+ * replaces or narrows the underlying item. Goal-local only, exactly like
+ * `ConsultativeUnresolvedGroup` -- never correlated across goals.
+ */
+export interface ConsultativeUnresolvedItemPresentation {
+  goal_index: number
+  category: GoalCategory
+  item: PlanUnresolvedItem
+  presentation_role: ConsultativeUnresolvedPresentationRole
+}
+
+/**
+ * One `PlanMissingEvidenceRef`, annotated with a presentation role
+ * INHERITED from its exactly-correlated originating `PlanUnresolvedItem`
+ * (see `findCorrelatedUnresolvedItem`'s own header) -- never independently
+ * derived from `dependency_id`, `applicability_fact`, `classification`, or
+ * any other evidence-shaped field. `item` is the exact, unmutated
+ * `PlanMissingEvidenceRef` -- evidence classification, askability
+ * treatment, and presence are entirely unaffected by this annotation.
+ */
+export interface ConsultativeMissingEvidencePresentation {
+  goal_index: number
+  category: GoalCategory
+  item: PlanMissingEvidenceRef
+  presentation_role: ConsultativeUnresolvedPresentationRole
+}
+
+/**
+ * CRC-CC-SCOPE-5 (2026-09-24) -- exact-correlation only, fail-closed.
+ * Matches a `PlanMissingEvidenceRef` back to the single `PlanUnresolvedItem`
+ * (within the SAME already-2F-collapsed goal-local item list) that caused
+ * it, using only the identity-field pairing `consultative-answer-plan.ts`'s
+ * own `missing_evidence` construction already establishes as 1:1:
+ *   - a ref with `dependency_id === null` (applicability-shaped) can only
+ *     have been produced from an `unresolved_applicability` item, by
+ *     `source_claim_id === claim_id` + `applicability_fact === fact`;
+ *   - a ref with `dependency_id !== null` (dependency-shaped) can only have
+ *     been produced from an `open_project_dependency` item, by
+ *     `source_claim_id === source_claim_id` + `dependency_id === dependency_id`.
+ * `withheld_relevant_claim` items are NEVER candidates -- Plan's own
+ * `missing_evidence` derivation never produces a ref for that kind ("Nothing
+ * to classify from the bare claim_id alone -- do not invent one"). Returns
+ * `undefined` (never guesses, never picks a "closest" match) unless EXACTLY
+ * ONE candidate matches -- covering zero matches, and the multi-requirement/
+ * multi-claim ambiguous cases this milestone's own instructions require to
+ * fail closed.
+ */
+function findCorrelatedUnresolvedItem(ref: PlanMissingEvidenceRef, items: PlanUnresolvedItem[]): PlanUnresolvedItem | undefined {
+  const candidates = items.filter((item) => {
+    if (ref.dependency_id === null) {
+      return ref.applicability_fact !== null && item.kind === 'unresolved_applicability' && item.claim_id === ref.source_claim_id && item.fact === ref.applicability_fact
+    }
+    return item.kind === 'open_project_dependency' && item.source_claim_id === ref.source_claim_id && item.dependency_id === ref.dependency_id
+  })
+  return candidates.length === 1 ? candidates[0] : undefined
+}
+
 export interface ConsultativeRealization {
   /** One entry per `plan.explicit_sections` entry, same order, same count. */
   goal_answers: ConsultativeGoalAnswer[]
@@ -237,6 +371,23 @@ export interface ConsultativeRealization {
   unresolved_groups: ConsultativeUnresolvedGroup[]
   /** One entry per goal with >=1 missing-evidence item. Ordered by goal_index. */
   missing_evidence_groups: ConsultativeMissingEvidenceGroup[]
+  /**
+   * CRC-CC-SCOPE-5 (2026-09-24) -- additive, propagation/organization data
+   * only; no renderer reads this yet. One entry per item in
+   * `unresolved_groups` (same items, same 2F-collapsed set, same order,
+   * flattened across goals) -- never a filtered or narrowed view. Full
+   * semantic provenance is preserved verbatim inside each `item`.
+   */
+  unresolved_item_presentation: ConsultativeUnresolvedItemPresentation[]
+  /**
+   * CRC-CC-SCOPE-5 (2026-09-24) -- additive, propagation/organization data
+   * only; no renderer reads this yet. One entry per item in
+   * `missing_evidence_groups` (same items, same order, flattened across
+   * goals) -- never a filtered or narrowed view. `presentation_role` is
+   * `'primary'` whenever exact correlation to an originating unresolved
+   * item is not possible (see `findCorrelatedUnresolvedItem`).
+   */
+  missing_evidence_presentation: ConsultativeMissingEvidencePresentation[]
   /** Verbatim `plan.discovered_context`, unchanged. */
   discovered_context: PlanDiscoveredContextItem[]
   commercial_assurance: ConsultativeCommercialAssurance
@@ -363,14 +514,38 @@ export function buildConsultativeRealization(
   // never across goals (this .map() runs once per section, already
   // goal-scoped). Plan itself (`section.unresolved_items`) is never mutated
   // or reassigned -- see collapseExactSameClaimApplicabilityDuplicates's
-  // own header.
-  const unresolved_groups: ConsultativeUnresolvedGroup[] = plan.explicit_sections
-    .map((section, goal_index) => ({ goal_index, category: section.category, items: collapseExactSameClaimApplicabilityDuplicates(section.unresolved_items) }))
-    .filter((group) => group.items.length > 0)
+  // own header. CRC-CC-SCOPE-5 (2026-09-24): computed ONCE per goal here
+  // and reused for both `unresolved_groups` and `unresolved_item_presentation`
+  // below -- never re-collapsed independently, so the two can never diverge.
+  const unresolvedByGoal = plan.explicit_sections.map((section, goal_index) => ({
+    goal_index,
+    category: section.category,
+    items: collapseExactSameClaimApplicabilityDuplicates(section.unresolved_items),
+  }))
+
+  const unresolved_groups: ConsultativeUnresolvedGroup[] = unresolvedByGoal.filter((group) => group.items.length > 0)
 
   const missing_evidence_groups: ConsultativeMissingEvidenceGroup[] = plan.explicit_sections
     .map((section, goal_index) => ({ goal_index, category: section.category, items: section.missing_evidence }))
     .filter((group) => group.items.length > 0)
+
+  // CRC-CC-SCOPE-5 (2026-09-24): additive presentation-role annotation,
+  // flattened across goals, one entry per already-2F-collapsed unresolved
+  // item -- see ConsultativeUnresolvedItemPresentation's own header.
+  const unresolved_item_presentation: ConsultativeUnresolvedItemPresentation[] = unresolvedByGoal.flatMap((group) =>
+    group.items.map((item) => ({ goal_index: group.goal_index, category: group.category, item, presentation_role: roleForUnresolvedItem(item) })),
+  )
+
+  // CRC-CC-SCOPE-5 (2026-09-24): additive presentation-role annotation for
+  // missing evidence, inherited from the exactly-correlated originating
+  // unresolved item (fails closed to 'primary' otherwise) -- see
+  // findCorrelatedUnresolvedItem's own header.
+  const missing_evidence_presentation: ConsultativeMissingEvidencePresentation[] = plan.explicit_sections.flatMap((section, goal_index) =>
+    section.missing_evidence.map((ref) => {
+      const correlated = findCorrelatedUnresolvedItem(ref, unresolvedByGoal[goal_index].items)
+      return { goal_index, category: section.category, item: ref, presentation_role: correlated ? roleForUnresolvedItem(correlated) : ('primary' as const) }
+    }),
+  )
 
   const commercial_assurance: ConsultativeCommercialAssurance = {
     applies: plan.commercial_assurance_refs.length > 0 || output.closing_cta !== '',
@@ -381,6 +556,8 @@ export function buildConsultativeRealization(
     goal_answers,
     unresolved_groups,
     missing_evidence_groups,
+    unresolved_item_presentation,
+    missing_evidence_presentation,
     discovered_context: plan.discovered_context,
     commercial_assurance,
   }

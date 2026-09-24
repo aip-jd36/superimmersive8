@@ -224,8 +224,19 @@ describe('CC-4C.2A -- CASE E: multiple explicit goals', () => {
   test('NO answer-level boundary field exists anywhere on the realization', () => {
     expect(result).not.toHaveProperty('answer_level_boundary')
     expect(result).not.toHaveProperty('boundary')
+    // CRC-CC-SCOPE-5 (2026-09-24): unresolved_item_presentation /
+    // missing_evidence_presentation are the two new additive fields -- still
+    // no answer-level boundary/materiality/priority field of any kind.
     expect(Object.keys(result).sort()).toEqual(
-      ['commercial_assurance', 'discovered_context', 'goal_answers', 'missing_evidence_groups', 'unresolved_groups'].sort(),
+      [
+        'commercial_assurance',
+        'discovered_context',
+        'goal_answers',
+        'missing_evidence_groups',
+        'missing_evidence_presentation',
+        'unresolved_groups',
+        'unresolved_item_presentation',
+      ].sort(),
     )
   })
 
