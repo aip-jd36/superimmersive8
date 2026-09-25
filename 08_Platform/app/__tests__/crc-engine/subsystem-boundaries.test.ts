@@ -351,9 +351,21 @@ describe('subsystem boundaries -- Consultative Realization Contract (CC-4C.2A)',
     expect(importText).not.toMatch(/lib\/emails|results-email-delivery|results-email-template/i)
   })
 
-  test('every import is type-only -- the module is pure reshaping with zero value-level dependencies', () => {
-    for (const line of importLinesOf(FILE)) {
-      expect(line).toMatch(/^import type /)
+  // CRC-CC-SCOPE-6F (2026-09-25): the module's own first, explicitly
+  // authorized value import -- the standalone governed dependency-display
+  // registry, mirroring the Plan-level (CC-3A) precedent immediately above
+  // ("its only value (non-type) imports are the two crc-engine askability
+  // registries") exactly: a single, pure, static-registry lookup, never an
+  // I/O boundary, never BI/Retrieval/Interview/Projection logic. Realization
+  // remains "pure reshaping" in the sense this module's own header cares
+  // about (no LLM, no I/O, no mutation of plan/output/notes) -- "zero
+  // value-level dependencies" was simply never tested against a governed
+  // registry call before this milestone gave Realization its first display-
+  // vocabulary-resolution responsibility.
+  test('its only value (non-type) import is the governed dependency-display registry', () => {
+    const valueImports = importLinesOf(FILE).filter((line) => !/^import type /.test(line))
+    for (const line of valueImports) {
+      expect(line).toMatch(/\.\/dependency-fact-display/)
     }
   })
 

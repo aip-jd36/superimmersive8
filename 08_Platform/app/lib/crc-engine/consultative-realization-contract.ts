@@ -148,6 +148,7 @@ import type { ConsultativeNote } from './unresolved-applicability-realization'
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
 import type { GoalCategory } from '@/types/interview-engine'
 import type { ApplicabilityUnresolvedReason } from '@/lib/retrieval-engine/types'
+import { getDependencyDisplayLabel } from './dependency-fact-display'
 
 /**
  * One explicit goal's realized answer. `goal_index` is the identity every
@@ -304,18 +305,50 @@ function roleForUnresolvedItem(item: PlanUnresolvedItem): ConsultativeUnresolved
 }
 
 /**
+ * CRC-CC-SCOPE-6F (2026-09-25) -- the single place a governed dependency
+ * display label is resolved for an unresolved item of ANY kind. Reads only
+ * `dependency_id`, and only for `kind === 'open_project_dependency'` --
+ * `unresolved_applicability`/`withheld_relevant_claim` items always resolve
+ * to `null` here, unaffected; their own display resolution (the
+ * `ApplicabilityFact` registry, `applicability-fact-display.ts`) remains
+ * exactly where it already was, in `results-email-template.ts`, untouched
+ * by this milestone (SCOPE-6F's own narrow scope -- see that milestone's
+ * own architectural-requirement section for why this is deliberate, not an
+ * oversight: moving the ALREADY-WORKING applicability lookup into
+ * Realization is explicitly out of scope here). `getDependencyDisplayLabel`
+ * is fail-closed by construction (`undefined` for any unregistered/unknown
+ * ID) -- `?? null` narrows that to the fixed `string | null` contract this
+ * field promises; no fallback text, no mechanical derivation from the ID,
+ * ever originates here.
+ */
+function dependencyDisplayLabelForUnresolvedItem(item: PlanUnresolvedItem): string | null {
+  if (item.kind !== 'open_project_dependency') return null
+  return getDependencyDisplayLabel(item.dependency_id) ?? null
+}
+
+/**
  * One `PlanUnresolvedItem`, annotated with its Realization-derived
  * presentation role. `item` is the EXACT, unmutated Plan item -- full
  * semantic provenance (claim_id, fact, tool, unresolved_reason, dependency
  * fields) is preserved verbatim; this wrapper adds metadata, it never
  * replaces or narrows the underlying item. Goal-local only, exactly like
  * `ConsultativeUnresolvedGroup` -- never correlated across goals.
+ *
+ * `display_label` (CRC-CC-SCOPE-6F, 2026-09-25) -- additive. The governed,
+ * already-resolved dependency display label for this item, or `null` when
+ * none is authorized (every kind other than `open_project_dependency`;
+ * every unregistered dependency ID; every evidence-only dependency that has
+ * not been separately, explicitly labeled). A renderer consuming this field
+ * never inspects `dependency_id`, never derives wording, and never learns
+ * WHY the label is absent -- absence is uniformly "no governed vocabulary
+ * exists for this item," the same fail-closed signal regardless of cause.
  */
 export interface ConsultativeUnresolvedItemPresentation {
   goal_index: number
   category: GoalCategory
   item: PlanUnresolvedItem
   presentation_role: ConsultativeUnresolvedPresentationRole
+  display_label: string | null
 }
 
 /**
@@ -532,8 +565,17 @@ export function buildConsultativeRealization(
   // CRC-CC-SCOPE-5 (2026-09-24): additive presentation-role annotation,
   // flattened across goals, one entry per already-2F-collapsed unresolved
   // item -- see ConsultativeUnresolvedItemPresentation's own header.
+  // CRC-CC-SCOPE-6F (2026-09-25): `display_label` resolved here too, from
+  // the SAME item, in the SAME pass -- never a second, independently-timed
+  // lookup.
   const unresolved_item_presentation: ConsultativeUnresolvedItemPresentation[] = unresolvedByGoal.flatMap((group) =>
-    group.items.map((item) => ({ goal_index: group.goal_index, category: group.category, item, presentation_role: roleForUnresolvedItem(item) })),
+    group.items.map((item) => ({
+      goal_index: group.goal_index,
+      category: group.category,
+      item,
+      presentation_role: roleForUnresolvedItem(item),
+      display_label: dependencyDisplayLabelForUnresolvedItem(item),
+    })),
   )
 
   // CRC-CC-SCOPE-5 (2026-09-24): additive presentation-role annotation for

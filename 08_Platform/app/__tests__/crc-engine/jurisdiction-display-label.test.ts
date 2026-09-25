@@ -143,8 +143,17 @@ describe('SCOPE-6B -- UAT-D1 representative reproduction (mixed role, jurisdicti
     expect(new Set(lines.slice(0, 3)).size).toBe(1) // all 3 Copyright lines are the SAME string
   })
 
-  test('the Trademark dependency fallback line is completely unchanged by this milestone', () => {
-    expect(email.text).toContain("An additional governed consideration for this topic hasn't been confirmed.")
+  // CRC-CC-SCOPE-6F (2026-09-25): this fixture's Trademark item uses
+  // `openDependency()`'s own default dependency_id, which happens to be
+  // `human_contribution_description` -- the exact dependency SCOPE-6F
+  // activates a governed label for. This is a legitimate, expected
+  // behavior change to this SCOPE-6B-authored fixture, not a regression:
+  // the line now renders the new governed label instead of the old fully
+  // generic fallback, exactly mirroring how SCOPE-6B itself changed
+  // jurisdiction's own fallback in this same test file.
+  test('the Trademark dependency line now uses the SCOPE-6F governed dependency label (this fixture happens to use human_contribution_description)', () => {
+    expect(email.text).toContain("Your human contribution to the finished work hasn't been confirmed in this conversation.")
+    expect(email.text).not.toContain("An additional governed consideration for this topic hasn't been confirmed.")
   })
 
   test('no claim identity (claim_id) or claim substance ever appears in the rendered text', () => {

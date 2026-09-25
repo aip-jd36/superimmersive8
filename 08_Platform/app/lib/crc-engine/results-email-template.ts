@@ -93,6 +93,7 @@ import type {
   ConsultativeMissingEvidenceGroup,
   ConsultativeRealization,
   ConsultativeUnresolvedGroup,
+  ConsultativeUnresolvedItemPresentation,
 } from './consultative-realization-contract'
 import type { MissingEvidenceClassification, PlanUnresolvedItem } from './consultative-answer-plan'
 import type { ApplicabilityFact } from '@/lib/retrieval-engine/types'
@@ -170,13 +171,32 @@ const MISSING_EVIDENCE_LABELS: Record<MissingEvidenceClassification, string> = {
  * -- that overlap is reported, not hidden or suppressed by paraphrasing/
  * deleting BI content.
  */
+/** Shared fixed sentence shape for ANY governed Level-1 category label (fact or dependency) -- one template, one place, so the two callers below can never drift apart. */
+function categoryLabelSentence(label: string): string {
+  return `Your ${label} hasn't been confirmed in this conversation.`
+}
+
 function boundedFactCategorySentence(fact: ApplicabilityFact | null): string | null {
   if (!fact) return null
   const label = getApplicabilityFactLabel(fact)
-  return label ? `Your ${label} hasn't been confirmed in this conversation.` : null
+  return label ? categoryLabelSentence(label) : null
 }
 
-function unresolvedItemSentence(item: PlanUnresolvedItem): string {
+/**
+ * CRC-CC-SCOPE-6F (2026-09-25). `displayLabel` is the ALREADY-RESOLVED
+ * governed dependency label for this exact item (or `null`), read straight
+ * off `ConsultativeUnresolvedItemPresentation.display_label` -- this
+ * function never looks up `item.dependency_id` itself, never imports the
+ * dependency registry, and has no branch on `item.kind` beyond what already
+ * existed. Scoped narrowly: `displayLabel` is non-null today only for
+ * `human_contribution_description`-shaped items (the one registered
+ * dependency) -- this does not assume every future registered dependency
+ * automatically reuses this same sentence template; that remains a
+ * separate governance question for whenever a second dependency is
+ * registered (SCOPE-6E §Y/§13).
+ */
+function unresolvedItemSentence(item: PlanUnresolvedItem, displayLabel: string | null): string {
+  if (displayLabel) return categoryLabelSentence(displayLabel)
   if (item.kind === 'unresolved_applicability') {
     return boundedFactCategorySentence(item.fact) ?? "A related condition hasn't been confirmed in this conversation."
   }
@@ -292,18 +312,31 @@ export function buildResultsEmailContent(
   }
 
   /**
-   * CC-4C.2B, Part 4. "Still open" -- driven only by
-   * `realization.unresolved_groups`. Neutral, non-ranked, deterministic
-   * existing order (group order = goal_index order, already established by
-   * CC-4C.2A; item order within a group is CC-3A's own existing stable
-   * order, unchanged). Goal attribution uses the user's own `goal_text`
-   * (never an internal GoalCategory/goal_index), and is shown ONLY when
-   * more than one goal has open items -- for the common single-goal case,
-   * omitting a redundant "You asked: ..." repeat is unambiguous (there is
-   * only one candidate goal), never a provenance loss (the underlying
-   * `goal_index` is still correct internally, simply not re-printed).
+   * CC-4C.2B, Part 4. "Still open" -- driven by `realization.unresolved_groups`
+   * for structure (which items exist, how they're grouped by goal) exactly
+   * as before. Neutral, non-ranked, deterministic existing order (group
+   * order = goal_index order, already established by CC-4C.2A; item order
+   * within a group is CC-3A's own existing stable order, unchanged). Goal
+   * attribution uses the user's own `goal_text` (never an internal
+   * GoalCategory/goal_index), and is shown ONLY when more than one goal has
+   * open items -- for the common single-goal case, omitting a redundant
+   * "You asked: ..." repeat is unambiguous (there is only one candidate
+   * goal), never a provenance loss (the underlying `goal_index` is still
+   * correct internally, simply not re-printed).
+   *
+   * CRC-CC-SCOPE-6F (2026-09-25): `presentation` is the ALREADY-RESOLVED
+   * `realization.unresolved_item_presentation` array, consulted ONLY to
+   * read an item's already-computed `display_label` (by exact object
+   * reference -- `unresolved_groups` and `unresolved_item_presentation` are
+   * both built from the SAME `unresolvedByGoal` pass in Realization, so
+   * `item` is the identical object in both, never re-matched by field
+   * equality). This function does not import the dependency registry, does
+   * not read `dependency_id`/`fact`/any semantic field to derive wording --
+   * it asks only "did Realization already resolve a label for this exact
+   * item," and falls through to the pre-existing generic logic when it
+   * did not, exactly as before this milestone.
    */
-  const renderUnresolved = (groups: ConsultativeUnresolvedGroup[], goalAnswers: ConsultativeGoalAnswer[]) => {
+  const renderUnresolved = (groups: ConsultativeUnresolvedGroup[], goalAnswers: ConsultativeGoalAnswer[], presentation: ConsultativeUnresolvedItemPresentation[]) => {
     if (groups.length === 0) return
     const multiGoal = goalAnswers.length > 1
     htmlParts.push('<p style="font-size:14px;font-weight:600;margin:24px 0 10px;color:#111;border-top:1px solid #eee;padding-top:20px;">Still open</p>')
@@ -315,7 +348,8 @@ export function buildResultsEmailContent(
         textParts.push(`For: "${goalText}"\n`)
       }
       for (const item of group.items) {
-        const sentence = unresolvedItemSentence(item)
+        const displayLabel = presentation.find((p) => p.item === item)?.display_label ?? null
+        const sentence = unresolvedItemSentence(item, displayLabel)
         htmlParts.push(`<p style="font-size:14px;color:#222;margin:0 0 8px;">${escapeHtml(sentence)}</p>`)
         textParts.push(`- ${sentence}\n`)
       }
@@ -405,7 +439,7 @@ export function buildResultsEmailContent(
       // sections, then the existing footer block below.
       renderGoalAnswers(realization.goal_answers)
       renderKnowledgeItems()
-      renderUnresolved(realization.unresolved_groups, realization.goal_answers)
+      renderUnresolved(realization.unresolved_groups, realization.goal_answers, realization.unresolved_item_presentation)
       renderMissingEvidence(realization.missing_evidence_groups, realization.goal_answers)
       renderCommercialAssurance(realization.commercial_assurance)
     } else if (plan) {
