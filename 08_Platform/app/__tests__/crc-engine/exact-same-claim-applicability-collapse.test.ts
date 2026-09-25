@@ -359,9 +359,17 @@ describe('CC-4C.2F -- O: registered-label email, real pipeline, duplicate -> one
     expect(realization.unresolved_groups[0].items).toHaveLength(1)
   })
 
-  test('email: exactly one "Still open" bullet, the per-goal note still present -- total 2 occurrences of the labeled fact text, not 3, not 1', () => {
+  // CRC-CC-SCOPE-6D.1 (2026-09-25): the single surviving unresolved item
+  // forms its own dimension-presentation group with a governed heading
+  // ("account or membership status", the SAME already-approved label) --
+  // the occurrence count legitimately grows from 2 to 3 (goal-local note +
+  // NEW group heading + Still Open bullet line), while the BULLET count
+  // (the thing CC-4C.2F's own collapse behavior is actually about) remains
+  // exactly 1, unchanged. This is the expected, intended SCOPE-6D.1 effect,
+  // not a collapse regression.
+  test('email: exactly one "Still open" bullet, the per-goal note and the new group heading both present -- total 3 occurrences of the labeled fact text, not 4, not 2, not 1', () => {
     const occurrences = (email.text.match(/account or membership status/g) || []).length
-    expect(occurrences).toBe(2) // one goal-local note + one answer-level Still Open line
+    expect(occurrences).toBe(3) // one goal-local note + one group heading + one answer-level Still Open bullet
     const stillOpenBullets = email.text.slice(email.text.indexOf('STILL OPEN')).split('WHAT\'S STILL NEEDED')[0].match(/^- /gm) || []
     expect(stillOpenBullets).toHaveLength(1)
   })

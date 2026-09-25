@@ -362,10 +362,20 @@ describe('subsystem boundaries -- Consultative Realization Contract (CC-4C.2A)',
   // value-level dependencies" was simply never tested against a governed
   // registry call before this milestone gave Realization its first display-
   // vocabulary-resolution responsibility.
-  test('its only value (non-type) import is the governed dependency-display registry', () => {
+  //
+  // CRC-CC-SCOPE-6D.1 (2026-09-25): a second, equally narrow, equally pure
+  // governed-registry value import -- applicability-fact-display.ts -- is
+  // now authorized too, for the SAME reason and at the SAME governance
+  // level: SCOPE-6D.1's own group-heading resolution (`headingForDimensionIdentity`)
+  // reuses the existing, already-approved applicability-fact registry
+  // verbatim, exactly as it already reuses the dependency-display registry.
+  // Both remain pure static-registry lookups; neither is BI/Retrieval/
+  // Interview/Projection logic, an I/O boundary, or a new vocabulary
+  // source.
+  test('its only value (non-type) imports are the two governed display registries', () => {
     const valueImports = importLinesOf(FILE).filter((line) => !/^import type /.test(line))
     for (const line of valueImports) {
-      expect(line).toMatch(/\.\/dependency-fact-display/)
+      expect(line).toMatch(/\.\/(dependency-fact-display|applicability-fact-display)/)
     }
   })
 

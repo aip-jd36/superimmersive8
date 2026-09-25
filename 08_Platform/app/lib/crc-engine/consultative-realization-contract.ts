@@ -147,8 +147,9 @@ import type {
 import type { ConsultativeNote } from './unresolved-applicability-realization'
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
 import type { GoalCategory } from '@/types/interview-engine'
-import type { ApplicabilityUnresolvedReason } from '@/lib/retrieval-engine/types'
+import type { ApplicabilityFact, ApplicabilityUnresolvedReason } from '@/lib/retrieval-engine/types'
 import { getDependencyDisplayLabel } from './dependency-fact-display'
+import { getApplicabilityFactLabel } from './applicability-fact-display'
 
 /**
  * One explicit goal's realized answer. `goal_index` is the identity every
@@ -327,6 +328,86 @@ function dependencyDisplayLabelForUnresolvedItem(item: PlanUnresolvedItem): stri
 }
 
 /**
+ * CRC-CC-SCOPE-6D.1 (2026-09-25) -- the internal, never-rendered identity a
+ * goal-local unresolved presentation item is grouped by. A discriminated
+ * union, not a raw string, deliberately -- a caller cannot accidentally
+ * stringify-and-display this without actively defeating its own type (see
+ * `ConsultativeUnresolvedPresentationGroup.dimension_identity`'s own doc
+ * comment for the render prohibition).
+ *
+ *   - `applicability_fact`: the accepted SCOPE-6D grouping key for
+ *     `unresolved_applicability` AND `withheld_relevant_claim` items that
+ *     carry a non-null `fact` -- `fact + tool`, NEVER bare `fact` (two
+ *     `tool_account_status` items naming different tools must never share a
+ *     group merely because the fact enum matches -- SCOPE-6D §6/§V's own
+ *     adversarial finding). `withheld_relevant_claim` is included here
+ *     deliberately: when it carries a real `fact`, it represents the SAME
+ *     missing-information dimension as a sibling `unresolved_applicability`
+ *     item (exactly the relationship CC-4C.2F's own collapse predicate
+ *     already recognizes for the narrower same-claim case) -- grouping two
+ *     items across these two kinds when their fact+tool genuinely match is
+ *     organizational, not a new equivalence claim.
+ *   - `dependency`: the accepted SCOPE-6D grouping key for
+ *     `open_project_dependency` items -- exact `dependency_id`, nothing
+ *     added to the key (no claim_id, no source_claim_id, no provider, no
+ *     jurisdiction, no presentation_role -- SCOPE-6D §7 found no evidence
+ *     requiring any of those, and none is added here).
+ *   - `ungrouped`: the fail-closed case for any item with no safe shared-
+ *     dimension basis -- today, exactly `withheld_relevant_claim` with
+ *     `fact === null` (BI's own fail-closed ambiguous-aggregation shape,
+ *     CC-4C.2D). `ordinal` (this item's position within its goal's own
+ *     already-2F-collapsed item list) makes every such item's key unique,
+ *     so it can never accidentally group with another item -- it forms its
+ *     own singleton group, heading always null (see
+ *     `headingForDimensionIdentity` below), preserving the item without
+ *     inventing a shared relationship that does not exist.
+ */
+export type UnresolvedDimensionIdentity =
+  | { kind: 'applicability_fact'; fact: ApplicabilityFact; tool: string | null }
+  | { kind: 'dependency'; dependency_id: string }
+  | { kind: 'ungrouped'; ordinal: number }
+
+/** Internal grouping-equality key only -- never exposed, never rendered. A private serialization of `UnresolvedDimensionIdentity` used solely to bucket items inside `buildConsultativeRealization` below. */
+function dimensionIdentityGroupingKey(identity: UnresolvedDimensionIdentity): string {
+  if (identity.kind === 'applicability_fact') return `applicability_fact:${identity.fact}:${identity.tool ?? ''}`
+  if (identity.kind === 'dependency') return `dependency:${identity.dependency_id}`
+  return `ungrouped:${identity.ordinal}`
+}
+
+/**
+ * CRC-CC-SCOPE-6D.1 (2026-09-25) -- the single place an unresolved
+ * presentation item's dimension identity is derived. `ordinal` is this
+ * item's position within its own goal's already-2F-collapsed item list --
+ * used ONLY for the `ungrouped` fallback (see `UnresolvedDimensionIdentity`
+ * header), never as part of any real shared-dimension key.
+ */
+function dimensionIdentityForUnresolvedItem(item: PlanUnresolvedItem, ordinal: number): UnresolvedDimensionIdentity {
+  if (item.kind === 'open_project_dependency') return { kind: 'dependency', dependency_id: item.dependency_id }
+  if (item.kind === 'unresolved_applicability') return { kind: 'applicability_fact', fact: item.fact, tool: item.tool }
+  // withheld_relevant_claim
+  if (item.fact !== null) return { kind: 'applicability_fact', fact: item.fact, tool: item.tool }
+  return { kind: 'ungrouped', ordinal }
+}
+
+/**
+ * CRC-CC-SCOPE-6D.1 (2026-09-25) -- the single place a group heading is
+ * resolved from an already-authorized governed display registry. Reuses
+ * `getApplicabilityFactLabel` (`applicability-fact-display.ts`, SCOPE-6B)
+ * and `getDependencyDisplayLabel` (`dependency-fact-display.ts`, SCOPE-6F)
+ * verbatim -- no new registry, no new vocabulary source, no literal label
+ * text duplicated here. `ungrouped` never resolves a heading -- there is no
+ * shared dimension for it to name. Fails closed to `null` for any
+ * unregistered fact/dependency, exactly mirroring each registry's own
+ * fail-closed contract (never a fallback to the raw fact enum or
+ * dependency-ID string, never a generated/generic heading).
+ */
+function headingForDimensionIdentity(identity: UnresolvedDimensionIdentity): string | null {
+  if (identity.kind === 'applicability_fact') return getApplicabilityFactLabel(identity.fact) ?? null
+  if (identity.kind === 'dependency') return getDependencyDisplayLabel(identity.dependency_id) ?? null
+  return null
+}
+
+/**
  * One `PlanUnresolvedItem`, annotated with its Realization-derived
  * presentation role. `item` is the EXACT, unmutated Plan item -- full
  * semantic provenance (claim_id, fact, tool, unresolved_reason, dependency
@@ -365,6 +446,61 @@ export interface ConsultativeMissingEvidencePresentation {
   category: GoalCategory
   item: PlanMissingEvidenceRef
   presentation_role: ConsultativeUnresolvedPresentationRole
+}
+
+/**
+ * CRC-CC-SCOPE-6D.1 (2026-09-25) -- goal-local, render-oriented grouping of
+ * already-realized unresolved presentation items sharing an internal
+ * `dimension_identity`. Additive: `unresolved_groups`, `missing_evidence_
+ * groups`, `unresolved_item_presentation`, and `missing_evidence_
+ * presentation` are all unchanged, byte-for-byte, by this structure's
+ * existence -- this is a further, optional projection built FROM the same
+ * already-computed data, never a replacement.
+ *
+ * THIS IS ORGANIZATION, NOT COLLAPSE: every `ConsultativeUnresolvedItemPresentation`
+ * that exists in `unresolved_item_presentation` for this goal appears in
+ * exactly one group's `items` array here, unmodified, in its original
+ * relative order -- no item is merged, deduplicated, replaced with a count,
+ * or given invented claim-specific text. A group's mere existence, its
+ * `heading`, and its position all carry no materiality/priority/risk/
+ * readiness signal -- see `dimensionIdentityForUnresolvedItem`/
+ * `headingForDimensionIdentity`'s own headers for the full authority
+ * argument.
+ *
+ * `dimension_identity` (`UnresolvedDimensionIdentity`) is INTERNAL
+ * PRESENTATION METADATA ONLY -- included on this type for
+ * traceability/testing, exactly like `PlanUnresolvedItem`'s own
+ * `claim_id`/`fact`/`tool`/`dependency_id` fields are already present on
+ * items without being renderer-facing text. A renderer MUST NEVER stringify,
+ * log-to-user, or otherwise surface this field's contents; it exists so a
+ * consumer (or a test) can prove which items share a group and why, never
+ * so the value itself becomes visible copy. `heading` -- and ONLY
+ * `heading` -- is the field a renderer may ever turn into user-facing text,
+ * and only when non-null.
+ *
+ * `missing_evidence_items`: populated by reusing the EXISTING, unmodified,
+ * exact-one-candidate `findCorrelatedUnresolvedItem` correlation (SCOPE-5)
+ * -- an evidence ref is placed here only after it has already been
+ * correlated to exactly one unresolved item BY THAT EXISTING RULE, and then
+ * placed alongside that item's own group. No new, weaker, dimension-level
+ * evidence correlation is introduced anywhere in this milestone. An evidence
+ * ref that fails to correlate (ambiguous or zero candidates, the existing
+ * fail-closed outcome) is never guessed into a group merely because its own
+ * `dependency_id`/`applicability_fact` happens to match the group's
+ * dimension -- it simply does not appear in any group's `missing_evidence_
+ * items` here, while remaining fully present, unaffected, in the flat
+ * `missing_evidence_presentation`/`missing_evidence_groups` structures (no
+ * evidence item ever disappears from the Realization as a whole).
+ */
+export interface ConsultativeUnresolvedPresentationGroup {
+  goal_index: number
+  category: GoalCategory
+  /** Internal only -- see this interface's own header. Never rendered. */
+  dimension_identity: UnresolvedDimensionIdentity
+  /** Non-null ONLY when independently governed Level-1 display vocabulary already exists for this exact dimension (SCOPE-6B/SCOPE-6F registries). Never generated, never a fallback string. */
+  heading: string | null
+  items: ConsultativeUnresolvedItemPresentation[]
+  missing_evidence_items: ConsultativeMissingEvidencePresentation[]
 }
 
 /**
@@ -421,6 +557,18 @@ export interface ConsultativeRealization {
    * item is not possible (see `findCorrelatedUnresolvedItem`).
    */
   missing_evidence_presentation: ConsultativeMissingEvidencePresentation[]
+  /**
+   * CRC-CC-SCOPE-6D.1 (2026-09-25) -- additive, render-oriented grouping of
+   * `unresolved_item_presentation`, organized goal-locally by internal
+   * dimension identity -- see `ConsultativeUnresolvedPresentationGroup`'s
+   * own header for the full authority contract. Every item present in
+   * `unresolved_item_presentation` for a given goal appears in exactly one
+   * entry here; nothing is filtered, merged, or replaced. Ordered by
+   * goal_index, then by first occurrence of each dimension within that
+   * goal -- never re-sorted by role, claim identity, or any notion of
+   * importance.
+   */
+  unresolved_presentation_groups: ConsultativeUnresolvedPresentationGroup[]
   /** Verbatim `plan.discovered_context`, unchanged. */
   discovered_context: PlanDiscoveredContextItem[]
   commercial_assurance: ConsultativeCommercialAssurance
@@ -568,26 +716,67 @@ export function buildConsultativeRealization(
   // CRC-CC-SCOPE-6F (2026-09-25): `display_label` resolved here too, from
   // the SAME item, in the SAME pass -- never a second, independently-timed
   // lookup.
-  const unresolved_item_presentation: ConsultativeUnresolvedItemPresentation[] = unresolvedByGoal.flatMap((group) =>
-    group.items.map((item) => ({
-      goal_index: group.goal_index,
-      category: group.category,
-      item,
-      presentation_role: roleForUnresolvedItem(item),
-      display_label: dependencyDisplayLabelForUnresolvedItem(item),
-    })),
-  )
+  // CRC-CC-SCOPE-6D.1 (2026-09-25): `unresolved_item_presentation` and
+  // `unresolved_presentation_groups` are now built together, in ONE
+  // single-pass loop per goal -- the exact same per-item
+  // `presentation_role`/`display_label` computation as before (byte-
+  // identical output, proven by every pre-existing test on this array,
+  // unchanged), simply ALSO appended to its goal-local dimension-identity
+  // bucket as it is computed, rather than looked up a second time by object
+  // reference afterward. `missing_evidence_presentation` is built in the
+  // SAME per-goal pass immediately below, reusing the EXISTING, unmodified
+  // `findCorrelatedUnresolvedItem` correlation -- an evidence ref's
+  // resulting presentation entry is placed into its correlated item's own
+  // bucket (never a new, dimension-level correlation) when correlation
+  // succeeds, and appears only in the flat array (never guessed into any
+  // group) when it does not -- see `ConsultativeUnresolvedPresentationGroup`'s
+  // own header for the full authority contract.
+  const unresolved_item_presentation: ConsultativeUnresolvedItemPresentation[] = []
+  const unresolved_presentation_groups: ConsultativeUnresolvedPresentationGroup[] = []
+  const missing_evidence_presentation: ConsultativeMissingEvidencePresentation[] = []
 
-  // CRC-CC-SCOPE-5 (2026-09-24): additive presentation-role annotation for
-  // missing evidence, inherited from the exactly-correlated originating
-  // unresolved item (fails closed to 'primary' otherwise) -- see
-  // findCorrelatedUnresolvedItem's own header.
-  const missing_evidence_presentation: ConsultativeMissingEvidencePresentation[] = plan.explicit_sections.flatMap((section, goal_index) =>
-    section.missing_evidence.map((ref) => {
-      const correlated = findCorrelatedUnresolvedItem(ref, unresolvedByGoal[goal_index].items)
-      return { goal_index, category: section.category, item: ref, presentation_role: correlated ? roleForUnresolvedItem(correlated) : ('primary' as const) }
-    }),
-  )
+  for (const { goal_index, category, items } of unresolvedByGoal) {
+    const groupsByKey = new Map<string, ConsultativeUnresolvedPresentationGroup>()
+    const bucketForItem = new Map<PlanUnresolvedItem, ConsultativeUnresolvedPresentationGroup>()
+
+    items.forEach((item, ordinal) => {
+      const presentationItem: ConsultativeUnresolvedItemPresentation = {
+        goal_index,
+        category,
+        item,
+        presentation_role: roleForUnresolvedItem(item),
+        display_label: dependencyDisplayLabelForUnresolvedItem(item),
+      }
+      unresolved_item_presentation.push(presentationItem)
+
+      const identity = dimensionIdentityForUnresolvedItem(item, ordinal)
+      const key = dimensionIdentityGroupingKey(identity)
+      let bucket = groupsByKey.get(key)
+      if (!bucket) {
+        bucket = { goal_index, category, dimension_identity: identity, heading: headingForDimensionIdentity(identity), items: [], missing_evidence_items: [] }
+        groupsByKey.set(key, bucket)
+        unresolved_presentation_groups.push(bucket)
+      }
+      bucket.items.push(presentationItem)
+      bucketForItem.set(item, bucket)
+    })
+
+    const section = plan.explicit_sections[goal_index]
+    for (const ref of section.missing_evidence) {
+      const correlated = findCorrelatedUnresolvedItem(ref, items)
+      const evidencePresentation: ConsultativeMissingEvidencePresentation = {
+        goal_index,
+        category,
+        item: ref,
+        presentation_role: correlated ? roleForUnresolvedItem(correlated) : ('primary' as const),
+      }
+      missing_evidence_presentation.push(evidencePresentation)
+      if (correlated) {
+        const bucket = bucketForItem.get(correlated)
+        if (bucket) bucket.missing_evidence_items.push(evidencePresentation)
+      }
+    }
+  }
 
   const commercial_assurance: ConsultativeCommercialAssurance = {
     applies: plan.commercial_assurance_refs.length > 0 || output.closing_cta !== '',
@@ -600,6 +789,7 @@ export function buildConsultativeRealization(
     missing_evidence_groups,
     unresolved_item_presentation,
     missing_evidence_presentation,
+    unresolved_presentation_groups,
     discovered_context: plan.discovered_context,
     commercial_assurance,
   }

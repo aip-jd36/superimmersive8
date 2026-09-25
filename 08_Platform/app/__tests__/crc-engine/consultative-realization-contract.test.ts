@@ -225,8 +225,10 @@ describe('CC-4C.2A -- CASE E: multiple explicit goals', () => {
     expect(result).not.toHaveProperty('answer_level_boundary')
     expect(result).not.toHaveProperty('boundary')
     // CRC-CC-SCOPE-5 (2026-09-24): unresolved_item_presentation /
-    // missing_evidence_presentation are the two new additive fields -- still
-    // no answer-level boundary/materiality/priority field of any kind.
+    // missing_evidence_presentation are additive fields. CRC-CC-SCOPE-6D.1
+    // (2026-09-25): unresolved_presentation_groups is the third -- still no
+    // answer-level boundary/materiality/priority field of any kind (the new
+    // field is goal-local render organization only, per its own header).
     expect(Object.keys(result).sort()).toEqual(
       [
         'commercial_assurance',
@@ -236,6 +238,7 @@ describe('CC-4C.2A -- CASE E: multiple explicit goals', () => {
         'missing_evidence_presentation',
         'unresolved_groups',
         'unresolved_item_presentation',
+        'unresolved_presentation_groups',
       ].sort(),
     )
   })

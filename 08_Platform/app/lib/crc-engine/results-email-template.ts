@@ -92,8 +92,7 @@ import type {
   ConsultativeGoalAnswer,
   ConsultativeMissingEvidenceGroup,
   ConsultativeRealization,
-  ConsultativeUnresolvedGroup,
-  ConsultativeUnresolvedItemPresentation,
+  ConsultativeUnresolvedPresentationGroup,
 } from './consultative-realization-contract'
 import type { MissingEvidenceClassification, PlanUnresolvedItem } from './consultative-answer-plan'
 import type { ApplicabilityFact } from '@/lib/retrieval-engine/types'
@@ -312,44 +311,57 @@ export function buildResultsEmailContent(
   }
 
   /**
-   * CC-4C.2B, Part 4. "Still open" -- driven by `realization.unresolved_groups`
-   * for structure (which items exist, how they're grouped by goal) exactly
-   * as before. Neutral, non-ranked, deterministic existing order (group
-   * order = goal_index order, already established by CC-4C.2A; item order
-   * within a group is CC-3A's own existing stable order, unchanged). Goal
-   * attribution uses the user's own `goal_text` (never an internal
-   * GoalCategory/goal_index), and is shown ONLY when more than one goal has
-   * open items -- for the common single-goal case, omitting a redundant
-   * "You asked: ..." repeat is unambiguous (there is only one candidate
-   * goal), never a provenance loss (the underlying `goal_index` is still
-   * correct internally, simply not re-printed).
+   * CC-4C.2B, Part 4. "Still open" -- neutral, non-ranked, deterministic
+   * order. Goal attribution uses the user's own `goal_text` (never an
+   * internal GoalCategory/goal_index), and is shown ONLY when more than one
+   * goal has open items -- for the common single-goal case, omitting a
+   * redundant "You asked: ..." repeat is unambiguous (there is only one
+   * candidate goal), never a provenance loss (the underlying `goal_index`
+   * is still correct internally, simply not re-printed).
    *
-   * CRC-CC-SCOPE-6F (2026-09-25): `presentation` is the ALREADY-RESOLVED
-   * `realization.unresolved_item_presentation` array, consulted ONLY to
-   * read an item's already-computed `display_label` (by exact object
-   * reference -- `unresolved_groups` and `unresolved_item_presentation` are
-   * both built from the SAME `unresolvedByGoal` pass in Realization, so
-   * `item` is the identical object in both, never re-matched by field
-   * equality). This function does not import the dependency registry, does
-   * not read `dependency_id`/`fact`/any semantic field to derive wording --
-   * it asks only "did Realization already resolve a label for this exact
-   * item," and falls through to the pre-existing generic logic when it
-   * did not, exactly as before this milestone.
+   * CRC-CC-SCOPE-6D.1 (2026-09-25): now driven by
+   * `realization.unresolved_presentation_groups` directly -- each entry is
+   * an already-fully-resolved `ConsultativeUnresolvedPresentationGroup`
+   * (goal_index, optional governed `heading`, and its own `items` array of
+   * already-built `ConsultativeUnresolvedItemPresentation` children,
+   * `display_label` and all). This REPLACES the SCOPE-6F-era
+   * `presentation.find((p) => p.item === item)` object-reference
+   * correlation entirely -- the accepted, explicitly-non-durable coupling
+   * that milestone flagged -- because the new structure already carries
+   * each child pre-attached to its group; no renderer-level re-matching is
+   * needed at all. `groups` is goal-major, dimension-minor ordered
+   * (Realization's own construction, per-goal outer loop, first-occurrence
+   * inner order) -- `multiGoal`'s "For: ..." line is emitted once per
+   * goal-index TRANSITION (tracked via `lastGoalIndex` below), reproducing
+   * exactly the same "once per goal, at the top of that goal's items"
+   * placement the old per-goal-group loop already had, now correct across
+   * however many dimension-groups a single goal contributes. A non-null
+   * `heading` renders as one more structural line, using the SAME governed
+   * Level-1 label Realization already resolved -- no new prose, no
+   * "Main issue"/"Material"/"Risk" framing, ever. A `null` heading renders
+   * nothing extra -- children still render via the unchanged
+   * `unresolvedItemSentence`, producing output visually identical to the
+   * pre-grouping flat rendering for any unlabeled/ungrouped dimension.
    */
-  const renderUnresolved = (groups: ConsultativeUnresolvedGroup[], goalAnswers: ConsultativeGoalAnswer[], presentation: ConsultativeUnresolvedItemPresentation[]) => {
+  const renderUnresolved = (groups: ConsultativeUnresolvedPresentationGroup[], goalAnswers: ConsultativeGoalAnswer[]) => {
     if (groups.length === 0) return
     const multiGoal = goalAnswers.length > 1
     htmlParts.push('<p style="font-size:14px;font-weight:600;margin:24px 0 10px;color:#111;border-top:1px solid #eee;padding-top:20px;">Still open</p>')
     textParts.push('\nSTILL OPEN\n')
+    let lastGoalIndex: number | null = null
     for (const group of groups) {
-      if (multiGoal) {
+      if (multiGoal && group.goal_index !== lastGoalIndex) {
         const goalText = goalAnswers[group.goal_index]?.goal_text ?? ''
         htmlParts.push(`<p style="font-size:13px;font-style:italic;color:#555;margin:12px 0 6px;">For: &ldquo;${escapeHtml(goalText)}&rdquo;</p>`)
         textParts.push(`For: "${goalText}"\n`)
+        lastGoalIndex = group.goal_index
       }
-      for (const item of group.items) {
-        const displayLabel = presentation.find((p) => p.item === item)?.display_label ?? null
-        const sentence = unresolvedItemSentence(item, displayLabel)
+      if (group.heading) {
+        htmlParts.push(`<p style="font-size:13px;font-weight:600;margin:10px 0 4px;color:#333;">${escapeHtml(group.heading)}</p>`)
+        textParts.push(`${group.heading}\n`)
+      }
+      for (const child of group.items) {
+        const sentence = unresolvedItemSentence(child.item, child.display_label)
         htmlParts.push(`<p style="font-size:14px;color:#222;margin:0 0 8px;">${escapeHtml(sentence)}</p>`)
         textParts.push(`- ${sentence}\n`)
       }
@@ -439,7 +451,7 @@ export function buildResultsEmailContent(
       // sections, then the existing footer block below.
       renderGoalAnswers(realization.goal_answers)
       renderKnowledgeItems()
-      renderUnresolved(realization.unresolved_groups, realization.goal_answers, realization.unresolved_item_presentation)
+      renderUnresolved(realization.unresolved_presentation_groups, realization.goal_answers)
       renderMissingEvidence(realization.missing_evidence_groups, realization.goal_answers)
       renderCommercialAssurance(realization.commercial_assurance)
     } else if (plan) {
