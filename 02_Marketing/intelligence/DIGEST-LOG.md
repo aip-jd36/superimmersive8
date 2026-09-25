@@ -9,6 +9,36 @@ To mark an article as acted on (posted/doc updated), change `☐` → `☑` in t
 
 ---
 
+## Week of September 25, 2026
+*Run: 2026-09-25 · 10 high · 5 monitor · lookback 7 days*
+
+### 🔴 High Relevance (7–10)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 9 | post+update | [California Enacts SB 1050, Requiring AI ‘Synthetic Performers’ Disclosures in Advertising](https://news.google.com/rss/articles/CBMivAFBVV95cUxQZFN2dndGMGVnenVLTVgwdmUtcVpvaVB5djBMdFBYUzRDT1ZDSzF0Y25naWhWX1o0ZjFIRUJTOGp0YlVSUXMzTWhWVm16YmdpRC1meU1RZEFEcmxWOEJ1c0tyNVFDRGhQdy1KQjh6WHREeFpHOXBMWTlqTWwxS0pOblpMX0xRTjFiOFA1YVNhT1lVOTU1ZGdhWlNhXzZTYU1xMkhVUlp6UUtxRXRMOXVKTkZBdDB0a1dVeEE4adIBvAFBVV95cUxQZFN2dndGMGVnenVLTVgwdmUtcVpvaVB5djBMdFBYUzRDT1ZDSzF0Y25naWhWX1o0ZjFIRUJTOGp0YlVSUXMzTWhWVm16YmdpRC1meU1RZEFEcmxWOEJ1c0tyNVFDRGhQdy1KQjh6WHREeFpHOXBMWTlqTWwxS0pOblpMX0xRTjFiOFA1YVNhT1lVOTU1ZGdhWlNhXzZTYU1xMkhVUlp6UUtxRXRMOXVKTkZBdDB0a1dVeEE4aQ?oc=5) | The National Law Review | Thu, 24 Sep 2026 | ☐ |
+| 9 | post+update | [California Requires Disclosure of AI-Generated People in Advertising](https://news.google.com/rss/articles/CBMi5wFBVV95cUxNekRyYUc4T1FYUF9vTUVMeHdXemk0YWdZdDMyNUc0ZTBvWGdTNVFwWHRHYWp5QmlhaXdfWHRaZVo5eXotOExReDRnMnBScHpZS2hyZHdIRVBzZnV0cTlrOWtLeWUxbkI2aWx6TTlaX2dNX241MWZPOVZkQ3U3Vi1mZEZyS2lCMHZyamIxODRqY1lwZjhFcGxkQUVQNDVoMzM4ZWJkT2ViSXdyNmUxbjltN0J5NmtTMHJkenR1MENhQ3Yza1ZTbXNxYnFYSllOVm1OR0YwNndtTzUxcmhPUjUxWjRWYXNIejg?oc=5) | Foley Hoag | Thu, 24 Sep 2026 | ☐ |
+| 9 | post+update | [California Enacts SB 1050: New Disclosure Requirement for Synthetic Digital Performers in Advertising](https://news.google.com/rss/articles/CBMitAFBVV95cUxOVlhJX2VnMnBOS0xlaUY5ekxSbjJpWEVjQ2lZRkR0cTJQUDVBQ0xPcDA3cGJwTWlvUkhtam1vVTU2OEJoNF9uVUFNMkJ6TkVUd0NxcXZJSXpOWTVkRjBDWjkybEE0ZVFmZ1ZFN3M3S0VidkNTd1RJZkRkbVdJOXNpdEVHeHpaTFdoS0ZoVWV4SjFPN1NiN2E1d1NqeXRYMU9GY2RPVndOMVVYS2RIMGlfcVRKa3HSAboBQVVfeXFMT1JqNEZnMHE0aG1pT1ROaXdTYUFJVmR0ZWpKRHdySTRnb1FubF93dHYwNzRJaFhtaWRtWHl6c2cwaVQwNkVSUHJDOGYzZWMyUTQ5MnVmYjhYNExVTjJTZUZhTl9CV1pKM1REbDh6a2JVYWdXOFZjR3dSMEJlcDNBckZhMEZtN0FwUVg5UWxZc2stRENuSW9XaGtLcG9tOTF3T2N6V3hKbHhMQVhNM3p2S19mbnBoSk5DV2Z3?oc=5) | The National Law Review | Mon, 21 Sep 2026 | ☐ |
+| 9 | post+update | [Fake performer, more penalties: California’s synthetic performer law enters the chat](https://news.google.com/rss/articles/CBMi2wFBVV95cUxPeUVPcjVNLWp2andPTllEUXRqVzVTTjhCQjdhcldySzhIU3BlQUk5YkRpUXBRVEhmSHlodXBzckk1WVh4X1BZVDIwUk42MFdPSjI5VmZOZVl6eUlqM2gyd0QzNGI5UF9rd1A0NVdJVWRCNGR4S3l3N0hpM0NzaE5hM0NfOUw2OFJzV0hIV1pGRlRnajVhOFNaS2Y1YVBDSTY1TXhTR3g4NzhuYUNEclhybGM4NFg0UDhaLWVxV1pZalVqM21OaXpkc3BKV0ZsQ0dYMzF3dTVYV2FaU00?oc=5) | Reed Smith LLP | Mon, 21 Sep 2026 | ☐ |
+| 9 | post+update | [California SB 1050: AI actor ad rules](https://news.google.com/rss/articles/CBMie0FVX3lxTE52N1ZkOUpyTWNSVm42VDZ5YmFZS1ktdUhHaVQzU0h4bEVPX0NsMmVOQkxBSTcyai13ZGJ2MUFiNVlxSWhjOE1LVi0zaHBVVnVfWWdmRmFHUHpNOTNfTUJYRzZraU56RTRXLUxnU0FaSkN1Y091YmpZTmdSZw?oc=5) | ContentGrip | Sat, 19 Sep 2026 | ☐ |
+| 9 | post+update | [California Passes New Synthetic Performer Law](https://news.google.com/rss/articles/CBMif0FVX3lxTE5pLVNacGFQc0JXNDV2dmlmMVFoRk50b0lGYnZRLUxVRTNUTVlpRW1VUThoR2FLdHZyMWQtMjZjREhLVmNEWUZUTk9aeTVvT0dKTHI0UXRzRU9FMEdoNWpnOS1xX0czU1liVFp1UUVlUV9JS2F1S2hzLU11UzZDSVE?oc=5) | JD Supra | Fri, 18 Sep 2026 | ☐ |
+| 8 | post+update | [The EU AI Act: Key Dates for Compliance (UPDATED)](https://news.google.com/rss/articles/CBMiiAFBVV95cUxQTTVuU21jWnZiMHYzRlJvTG1zaU5RN3V6Q1hERlktNVhDbnJfdFFPdjFDYkpwLUFCUDFqc1ZvZHl2UVVXbnFFZUVmUjRzY1FINkNEWFBGQnFQWk5aWTJJdFBMTXlDN0JGdVJrdTAxcVBaZFpSdk9taW5vcEY3bHk2ckdYYk04NHdw?oc=5) | JD Supra | Thu, 24 Sep 2026 | ☐ |
+| 8 | post+update | [Think-tank warns brokers against assuming AI is covered](https://news.google.com/rss/articles/CBMiuAFBVV95cUxNbUxiYTZsRTZCWDJfbmpmN3ZZNGhCOXJHYzZNaGRBREtyUXh0YU1vbE5OZnczaW1CRDNhSzdfMjNCYl9jOC1qOFFEU1VhZ2UzV0RKb3FoTFpMLWZzTGdkazJLUmpBbTdwTHhHY0dMRnltaHJZMWZQZGdJMnowbjY5cGJOcS1FMFhlTVYwUTR6eVdlRzRZc1NyTHd3STdLMW5hQ09tVkM4VloyWkxLTzVMV1R0eDVGLWw4?oc=5) | Insurance Business | Fri, 18 Sep 2026 | ☐ |
+| 7 | post | [The Top 3 AI Regulations Every Brand Must Know in 2026](https://news.google.com/rss/articles/CBMiekFVX3lxTFBGOEVKOHU4aE9UNkJ6SWFfOVhLdmNwSWc5aE1wM1Z2eDQ5Z2lWeEdvdUpwMHlmNVVwdTJnYjRUNXNXOW1PQzlranY0dFpSWTNTazhiS0JxT0daLTd6TTRyWFBoaEhZV3h4MTJFZkg2MktyeElicE5HdDhB?oc=5) | RETAILBOSS \| Substack | Wed, 23 Sep 2026 | ☐ |
+| 7 | post+update | [Oversight Board: Meta Deepfake Protections 'Inadequate' 09/18/2026](https://news.google.com/rss/articles/CBMivwFBVV95cUxONzlNbUdTTVROcDFFd1QyNXl1NDZpWTZlV0JiMXV6RmFqby1QVWpjNThsNnpmcmlaZ3pHMzhLRnhVa3ZpNmVLUFJwQkxicXFLd1lYY1Z2ZFV6LTYweXR5YTRXWHItUVN2bzZPOHEtcDE3SkJEb0YzVlNsYjRjQ05hbzN3eWlqbEsteUtkRjZOZzB6ZDlnVGdtMjhLbFZCOUpXcWxqZDBqbEtBTGJ4ZDJmdVZzN2lGa09JUmpNZ1FYRQ?oc=5) | MediaPost | Fri, 18 Sep 2026 | ☐ |
+
+### 🟡 Monitor (4–6)
+
+| Score | Action | Title | Source | Date | Acted On |
+|-------|--------|-------|--------|------|----------|
+| 6 | monitor | [Insurers Split Over AI Coverage As Misinformation And Deepfakes Drive Most Reported Harms](https://news.google.com/rss/articles/CBMiuwFBVV95cUxQOHk5c0E0dlY0b2hQN0R3VnczemIwdlJwZ1kyZEVGQXpDVmlLTWVELWdzaGFfa1hhcUhVM0RwNVR0QTZVamdVc29WTnV0WEpWMEVCanpaV2cwd3hVNzhkUjZlbTd0a2dVLUR3NU5aczJZYy1lQ0xPdmhScFNCbWhYN1FNQVl0R2ZrZmxyZERFSWQxVUEybmcySkFPMEMwX0ZFbkVLa1NzTUVJTU9zbzRONkF2YnpJSHFQbEpn?oc=5) | Risk & Insurance | Thu, 24 Sep 2026 | ☐ |
+| 6 | monitor | [Key Takeaways from Navigating the Current U.S. IP Landscape: Key Legal Developments for Korean Companies (Session 3)](https://news.google.com/rss/articles/CBMiggFBVV95cUxPNEtta09zNWRLVGZMZ3RZa0VGWGpHYUt0QVdHQV9LUkJSd2p2eEZfOVBxVXptVE9lUzd3NjlLUncyZ3dvN29oSVlwcTJjNUVGUFRDaC1vMTdKeXpWbjRXeGhLTDB2NERNSWdUVTFoa3Q0a3JDM01fNTRSelRfMXcyUEFn?oc=5) | JD Supra | Wed, 23 Sep 2026 | ☐ |
+| 5 | monitor | [Artificial intelligence: key updates and developments (10 – 23 Sep)](https://news.google.com/rss/articles/CBMioAFBVV95cUxNQXNhV1hnUmNWamdGSGV2ZDNVQ1ZjczM3cVJSTW5aV1h4TUtiVlVGY25iZkFncmFhUGZYcGpTblBxSHNTNnFTYktNZGx0N0hVY0dBRVhUbFB2aUJjNkZVUnJIMHlQV01yNGZFZ2xKX21BbDFSY29nRTlVSEl4WDdUSU82YkN4MHRFY1JaODZVMmdVdHRvYU1fVGRzeW9KMEl5?oc=5) | Lexology | Thu, 24 Sep 2026 | ☐ |
+| 5 | monitor | [The EU AI Act Deadline Moved. Your Meeting Room Didn’t.](https://news.google.com/rss/articles/CBMilgFBVV95cUxPaFR6cnBSd3pOWTQ2UEV2ODJWR254alFvblFtbmswLWRGMG9wbS1GS3dyRTZlME1HYmU5d3NmdVA5eWMzZGY4Q2RWckozVWRBNnlHZENqdGdOc3diNllIMEh3X2drVkliR2J3Q3RjZzF2dU9aZndyWkNNanhRb2NCNzVKcDRIS29FU2RHeHFFb3JmUmNJOWc?oc=5) | avixa.org | Wed, 23 Sep 2026 | ☐ |
+| 5 | monitor | [IN-HOUSE ROUNDTABLE: Wired for Risk](https://news.google.com/rss/articles/CBMifEFVX3lxTE9VSXM5eG9TdFBCT2tNZEdPREhkWm0yeGNDV1FReGxkMGNTRnktOTJ0SUx4dFFPSWNuc2ZuXzJLQkRKTHZ5a0lDWmdVbFR2WldIcU1PSlYtSXNmV1lRMHZjMDRBTzRmQXphNE5rV0M3d1RSZjBpN25hMVNnSkc?oc=5) | \| Asian Legal Business | Sun, 20 Sep 2026 | ☐ |
+
+---
+
 ## Week of September 22, 2026
 *Run: 2026-09-22 · 29 high · 7 monitor · lookback 7 days*
 
