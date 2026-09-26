@@ -515,6 +515,40 @@ function isJurisdictionQuestionProposal(proposal: CandidateQuestionProposal): bo
   )
 }
 
+/**
+ * CRC-QA-5 -- Next Deterministic Candidate Progression (2026-09-26). Pure,
+ * reference-identity-only selection over the SAME four already-computed
+ * proposal variables `forcedProposal`'s own `??` chain (below) expresses --
+ * deliberately never re-derives eligibility, never infers a source from
+ * question text/kind, never uses a claim id or Constraint A's own rationale
+ * as identity. `rejected` is compared by object reference against each of
+ * the four: each proposal is constructed at most once per turn, by its own
+ * `buildXProposal()` call, so reference equality is a safe, exact way to
+ * know which one occupied attempt #1 without inventing a new "source" enum
+ * or persisting anything. Kept as a separate small function, rather than
+ * folded into `forcedProposal`'s own expression, so "who is next after X is
+ * rejected" has one obvious, directly-testable answer instead of a second,
+ * hand-written copy of the same precedence to keep in sync.
+ *
+ * Selection only -- this function never grants permission, never changes
+ * askability, never changes what made any of the four proposals eligible in
+ * the first place. A proposal that was never independently eligible this
+ * turn is simply `undefined` here exactly as it already is at the call
+ * site; this function cannot and does not make it eligible.
+ */
+function nextDeterministicProposal(
+  rejected: CandidateQuestionProposal,
+  jurisdictionProposal: CandidateQuestionProposal | undefined,
+  humanContributionProposal: CandidateQuestionProposal | undefined,
+  discoveryProposal: CandidateQuestionProposal | undefined,
+  selectorProposal: CandidateQuestionProposal | undefined,
+): CandidateQuestionProposal | undefined {
+  if (rejected === jurisdictionProposal) return humanContributionProposal ?? discoveryProposal ?? selectorProposal
+  if (rejected === humanContributionProposal) return discoveryProposal ?? selectorProposal
+  if (rejected === discoveryProposal) return selectorProposal
+  return undefined
+}
+
 async function tryCandidate(
   suAfter: StructuredUnderstanding,
   eligible: EligibleSignal[],
@@ -1125,29 +1159,88 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
         nextPendingTakeawayCategory = discoveryCategory
       }
     } else {
-      // The ONE bounded alternative attempt (Model 4) is ALWAYS the
-      // ordinary candidate pool -- never a second forced/deterministic
-      // proposal (neither jurisdiction nor discovery), per
-      // the approved integration spec ("If Model 4 attempt #1 proposes a
-      // commercial-readiness discovery question and it is rejected, do
-      // not use attempt #2 to try a second commercial-readiness
-      // category") -- extended identically to jurisdiction (PM SS6: "if
-      // the jurisdiction proposal fails Constraint A/B, do not
-      // automatically give it another attempt; follow existing Model 4
-      // behavior"). No exclusion is threaded from a rejected forced
-      // attempt into this call either: exclusion only means something
-      // within the SAME generator's own search space, and the ordinary
-      // generator was never even called on attempt #1 when attempt #1 was
-      // a forced (jurisdiction or discovery) candidate.
+      // `[CHANGED 2026-09-26 -- CRC-QA-5, Next Deterministic Candidate
+      // Progression]` Previously: "The ONE bounded alternative attempt
+      // (Model 4) is ALWAYS the ordinary candidate pool -- never a second
+      // forced/deterministic proposal." That rule is now narrowed, not
+      // removed: if ANOTHER already-independently-eligible, lower-
+      // precedence deterministic proposal was already computed this same
+      // turn (per `nextDeterministicProposal`'s own reuse of the exact
+      // `forcedProposal` precedence above), it gets exactly ONE chance to
+      // occupy attempt #2 -- through the identical validate -> Constraint A
+      // -> Constraint B pipeline as every other candidate, no privileged
+      // pass. Only when no such candidate exists does attempt #2 fall back
+      // to the ordinary generator, exactly as before this milestone. This
+      // never creates a second forced attempt for the SAME class
+      // (jurisdiction never retries into its own attempt #2 slot -- see
+      // `nextDeterministicProposal`'s own precedence, which only ever
+      // returns a LOWER-precedence proposal than `rejected`), and never
+      // adds a third bounded-search attempt -- attempts #3/#4 (Track B
+      // readiness, selector-at-exhaustion) below are entirely unchanged
+      // except for the same-turn selector duplicate guard their own
+      // comments now document. No exclusion is threaded into the ordinary
+      // generator's own call either, for the same reason as before:
+      // exclusion only means something within that generator's own search
+      // space, and it was never even called on attempt #1 when attempt #1
+      // was a forced candidate.
+      const nextProposal = forcedProposal
+        ? nextDeterministicProposal(forcedProposal, jurisdictionProposal, humanContributionProposal, discoveryProposal, selectorProposal)
+        : undefined
       const excluded = !forcedProposal && attempt1.exclusion ? [attempt1.exclusion] : undefined
-      const attempt2 = await tryCandidate(suAfter, eligible, phase, boundaryStateForTurn, deps, excluded)
+      const attempt2 = nextProposal
+        ? await tryCandidate(suAfter, eligible, phase, boundaryStateForTurn, deps, undefined, nextProposal)
+        : await tryCandidate(suAfter, eligible, phase, boundaryStateForTurn, deps, excluded)
+
+      // CRC-QA-5 diagnostics correction. When `nextProposal` is defined, the
+      // signal computed further above (from `attempt1` alone, before this
+      // candidate was ever actually attempted) recorded it as merely
+      // `preempted_by_*` -- true when this milestone shipped, no longer
+      // true now that it may go on to be genuinely attempted this same
+      // turn. Corrected here, using only this turn's own already-resolved
+      // `attempt2` result -- never a new field, never persisted, never a
+      // new analytics framework. `humanContributionSignal`/`discoverySignal`
+      // collapse any non-approval to their own pre-existing `'rejected_by_a'`
+      // catch-all (their type never carried the finer distinction --
+      // unchanged by this milestone); `selectorSignal` already carries the
+      // full `CandidateRejectionReason` shape, so it is corrected precisely.
+      // `nextProposal !== undefined` is checked FIRST and separately from
+      // each reference-equality branch below -- without it, an `undefined
+      // === undefined` comparison (e.g. `nextProposal === discoveryProposal`
+      // when progression did NOT occur this turn and Discovery was ALSO
+      // never eligible) would spuriously match and corrupt an unrelated,
+      // already-correct signal. Caught by CASE 11's own regression coverage
+      // (no-deterministic-candidate turns) during implementation.
+      if (nextProposal !== undefined) {
+        if (nextProposal === humanContributionProposal && humanContributionSignal) {
+          humanContributionSignal = { ...humanContributionSignal, outcome: attempt2.status === 'approved' ? 'asked' : 'rejected_by_a' }
+        } else if (nextProposal === discoveryProposal && discoverySignal) {
+          discoverySignal = { ...discoverySignal, outcome: attempt2.status === 'approved' ? 'asked' : 'rejected_by_a' }
+        } else if (nextProposal === selectorProposal && selectorSignal) {
+          selectorSignal = {
+            ...selectorSignal,
+            outcome:
+              attempt2.status === 'approved'
+                ? 'asked'
+                : attempt2.reason === 'no_proposal'
+                  ? 'invalid' // Unreachable in practice for a deterministic proposalOverride -- mirrors the same defensive mapping the attempt-#1 selectorSignal computation above already uses.
+                  : attempt2.reason,
+          }
+        }
+      }
+
       if (attempt2.status === 'approved') {
         outcome = attempt2.outcome
         nextBoundaryState = attempt2.nextBoundaryState
         pendingClarification = attempt2.pendingClarification
         askedProposal = attempt2.proposal
-        // attempt2 is always the ordinary generator -- never sets
-        // nextPendingTakeawayCategory.
+        // Discovery's own takeaway must still only ever be set when
+        // Discovery is what was actually delivered -- now possibly via
+        // progression's own `nextProposal` slot rather than attempt #1's
+        // `forcedProposal` slot. The ordinary generator itself never sets
+        // this (unchanged).
+        if (nextProposal === discoveryProposal && discoveryProposal) {
+          nextPendingTakeawayCategory = discoveryCategory
+        }
       } else {
         // Track B — Generic Living-Knowledge Readiness/Askability
         // milestone (2026-08-20). LAST-RESORT check, right at the exact
@@ -1215,8 +1308,33 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
           // consumed, non-askable, discovered-only, or genuinely none),
           // exhaustion proceeds exactly as before this milestone -- no
           // retry, no fallback to a second forced candidate, no loop.
+          // `[CHANGED 2026-09-26 -- CRC-QA-5]` Same-turn selector duplicate-
+          // evaluation guard. A rejection never consumes the selector cap
+          // (only `evaluateBoundary`'s own "allowed" branch does, unchanged
+          // by this milestone) -- so if progression's own attempt #2
+          // (above) was ALSO this exact selector need and was rejected,
+          // `deriveSelectorNeeds` would otherwise still return the
+          // identical need here, sending the identical proposal through
+          // Constraint A / `tryCandidate` a second time this same turn.
+          // Suppressed here only, using local same-turn information already
+          // in scope (`nextProposal`'s own `target_selector_dedupe_key`,
+          // set only by `buildSelectorNeedProposal` -- see that function's
+          // own header) compared against the stable `dedupe_key` identity
+          // `SelectorNeed` already uses for its own cap (never a mention_id,
+          // claim_id, or question text). Never persisted past this turn,
+          // never a new cap, never a change to SelectorNeed/selector-
+          // askability/eligibility themselves. A DIFFERENT selector need
+          // (a different dedupe_key -- e.g. a different tool, or a
+          // different applicability fact) is never suppressed by this
+          // check, and is unaffected if progression's own attempt #2 was
+          // some other class (jurisdiction/human-contribution/discovery) or
+          // never occurred at all this turn (`nextProposal` undefined).
           const exhaustionSelectorNeeds = deriveSelectorNeeds(suAfter, deps.matrix, topicClaims, boundaryStateForTurn)
-          const exhaustionSelectorProposal = exhaustionSelectorNeeds[0] ? buildSelectorNeedProposal(exhaustionSelectorNeeds[0], phase) : undefined
+          const exhaustionSelectorNeed =
+            exhaustionSelectorNeeds[0] && exhaustionSelectorNeeds[0].dedupe_key === nextProposal?.target_selector_dedupe_key
+              ? undefined
+              : exhaustionSelectorNeeds[0]
+          const exhaustionSelectorProposal = exhaustionSelectorNeed ? buildSelectorNeedProposal(exhaustionSelectorNeed, phase) : undefined
           const attempt4 = exhaustionSelectorProposal ? await tryCandidate(suAfter, eligible, phase, boundaryStateForTurn, deps, undefined, exhaustionSelectorProposal) : undefined
 
           if (attempt4 && attempt4.status === 'approved') {

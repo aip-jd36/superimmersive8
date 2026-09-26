@@ -239,11 +239,32 @@ describe('Jurisdiction-clarification prose-coupling regression (Production UAT D
       phase: 1,
     }
 
+    // `[CHANGED 2026-09-26 -- CRC-QA-5, Next Deterministic Candidate
+    // Progression]` deliberately OMITS `toolCandidate()`, unlike the CONTROL
+    // test above. This file's own `copyrightabilityGoalCandidate()` also
+    // happens to satisfy `human_contribution_clarification`'s own
+    // eligibility (same claim set jurisdiction itself needs) -- WITH a tool
+    // mention present, `hasMinimalWorkflowAnchor` would be true, making
+    // human-contribution clarification independently eligible this same
+    // turn, so once the deterministic jurisdiction candidate is rejected
+    // above, CRC-QA-5's progression would correctly give that already-
+    // eligible, genuinely-governed candidate attempt #2's slot BEFORE the
+    // ordinary generator -- exactly the intended, approved behavior, but
+    // not this reproduction vehicle's subject. Omitting the tool mention
+    // (the CONTROL test above still has it -- irrelevant there, since
+    // jurisdiction wins and is approved outright, attempt #2 never runs)
+    // makes `hasMinimalWorkflowAnchor` false, so human-contribution stays
+    // ineligible here, cleanly isolating this file's own subject (the
+    // jurisdiction prose-coupling arming defect) from CRC-QA-5's own,
+    // separate, later-added behavior. Verified this does not affect
+    // jurisdiction's own eligibility, which depends only on goals/claims/
+    // relationships (evaluateJurisdictionClarificationEligibility's own
+    // signature), never tool_mentions.
     const turn1 = await runTurn(
       { token: 'regress-1', turnNumber: 1, userText: 'I made an AI-generated video using Kling AI. Do I own the copyright?' },
       deps(
         {
-          extractor: constantExtractor([toolCandidate(), copyrightabilityGoalCandidate(), intendedUseCandidate()]),
+          extractor: constantExtractor([copyrightabilityGoalCandidate(), intendedUseCandidate()]),
           generator: constantCandidateQuestionGenerator(organicProposal),
           decider,
         },
