@@ -20,6 +20,7 @@ import type { ConsultativeNote } from './unresolved-applicability-realization'
 import type { SessionCreationRateResult, BurstResult } from './abuse-prevention'
 import { validateGuidedEntryRequest, type RawGuidedEntryInit } from './guided-entry-init'
 import type { GuidedEntrySelection } from '@/types/guided-entry'
+import { ACQUISITION_PARAM_KEYS, sanitizeAcquisition, type CrcAcquisition } from './acquisition'
 
 /**
  * The two rate-limit reasons a client can ever actually receive (CRC
@@ -58,6 +59,14 @@ export interface TurnRequestBody {
    * request is this," not "is this guided payload well-formed."
    */
   guidedInit?: unknown
+  /**
+   * Acquisition attribution (2026-09-29). NOT one of the mutually-exclusive
+   * action fields above -- it rides along on ordinary turn requests and is
+   * deliberately excluded from the `providedCount` check. Sanitized here
+   * (server-authoritative, see acquisition.ts); route.ts persists it only
+   * when the request actually creates a session.
+   */
+  acquisition?: unknown
 }
 
 /**
@@ -67,9 +76,14 @@ export interface TurnRequestBody {
  * accessible without narrowing gymnastics at every call site that only
  * cares about the message/decline branches.
  */
+/**
+ * `acquisition` is present on the three session-creating kinds ONLY when at
+ * least one approved value survived sanitization -- an untagged request
+ * parses exactly as it did before acquisition existed.
+ */
 export type ParsedRequest =
-  | { kind: 'message'; text: string; restart: boolean }
-  | { kind: 'decline'; action: DeclineAction; restart: boolean }
+  | { kind: 'message'; text: string; restart: boolean; acquisition?: CrcAcquisition }
+  | { kind: 'decline'; action: DeclineAction; restart: boolean; acquisition?: CrcAcquisition }
   | { kind: 'email'; email: string; restart: false }
   | { kind: 'resend_result_email'; restart: false }
   /**
@@ -80,10 +94,15 @@ export type ParsedRequest =
    * `restart` flag to discard; the concept doesn't apply here any more
    * than it does to email/resend_result_email above.
    */
-  | { kind: 'guided_entry_init'; selection: GuidedEntrySelection; guidedEntryInitId: string; restart: false }
+  | { kind: 'guided_entry_init'; selection: GuidedEntrySelection; guidedEntryInitId: string; restart: false; acquisition?: CrcAcquisition }
 
 /** Deliberately simple format validation, not verification -- see design report §1 ("not for v1"). */
 const EMAIL_FORMAT = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function parseAcquisition(raw: unknown): { acquisition?: CrcAcquisition } {
+  const acquisition = sanitizeAcquisition(raw)
+  return ACQUISITION_PARAM_KEYS.some((key) => acquisition[key] !== null) ? { acquisition } : {}
+}
 
 export function parseRequest(body: TurnRequestBody): ParsedRequest | { error: string } {
   const restart = body.restart === true
@@ -114,7 +133,7 @@ export function parseRequest(body: TurnRequestBody): ParsedRequest | { error: st
     if (!result.ok) {
       return { error: result.error }
     }
-    return { kind: 'guided_entry_init', selection: result.selection, guidedEntryInitId: raw.guidedEntryInitId, restart: false }
+    return { kind: 'guided_entry_init', selection: result.selection, guidedEntryInitId: raw.guidedEntryInitId, restart: false, ...parseAcquisition(body.acquisition) }
   }
   if (hasEmail) {
     const trimmed = (body.email as string).trim().toLowerCase()
@@ -130,10 +149,10 @@ export function parseRequest(body: TurnRequestBody): ParsedRequest | { error: st
     if (!DECLINE_ACTIONS.includes(body.declineAction as DeclineAction)) {
       return { error: `declineAction must be one of: ${DECLINE_ACTIONS.join(', ')}.` }
     }
-    return { kind: 'decline', action: body.declineAction as DeclineAction, restart }
+    return { kind: 'decline', action: body.declineAction as DeclineAction, restart, ...parseAcquisition(body.acquisition) }
   }
   if (hasMessage) {
-    return { kind: 'message', text: (body.message as string).trim(), restart }
+    return { kind: 'message', text: (body.message as string).trim(), restart, ...parseAcquisition(body.acquisition) }
   }
   return { error: 'Request must include a non-empty message, a valid declineAction, an email, resendResultEmail, or guidedInit.' }
 }

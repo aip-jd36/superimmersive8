@@ -33,6 +33,7 @@ import type { PendingClarification } from '@/lib/interview-engine/pending-clarif
 import type { CRCSessionState } from './types'
 import type { CommercialReadinessCategory } from './commercial-readiness-catalog'
 import type { SessionStore } from './session-store'
+import type { CrcAcquisitionColumns } from './acquisition'
 
 const TABLE = 'crc_sessions'
 
@@ -245,7 +246,14 @@ export async function loadCrcSessionProductState(client: SupabaseClient, token: 
  * dependency saveCrcSessionProductState already has on runTurn(), see
  * route.ts.
  */
-export interface CrcSessionCreationMeta {
+/**
+ * Extends CrcAcquisitionColumns (2026-09-29): first-touch acquisition
+ * attribution is written in this same one-time creation update. Callers
+ * pass toAcquisitionColumns(...), which OMITS null fields, so an untagged
+ * session's update is byte-identical to before. This function is the ONLY
+ * free-form writer of those columns, and it runs once per new session.
+ */
+export interface CrcSessionCreationMeta extends CrcAcquisitionColumns {
   traffic_type: string
   abuse_key: string | null
   runtime_commit: string
@@ -375,6 +383,8 @@ export interface GuidedEntrySessionCreationInput {
   runtime_commit: string
   model_config: Record<string, unknown>
   attribution_token: string
+  /** First-touch acquisition attribution (2026-09-29) -- see CrcSessionCreationMeta. Null fields omitted by the caller. */
+  acquisition?: CrcAcquisitionColumns
 }
 
 /** `true` when a row for this token already exists and was genuinely created by this same function with the same definition id/version (a legitimate retry, per guided-entry-init.ts's provenance/atomicity header) -- `false` when the row exists but was NOT created by createGuidedEntrySession() with matching data (a real id collision, or an in-flight/failed partial creation by something else -- callers must fail closed, never silently proceed). */
@@ -431,6 +441,10 @@ export async function createGuidedEntrySession(client: SupabaseClient, input: Gu
     runtime_commit: input.runtime_commit,
     model_config: input.model_config,
     attribution_token: input.attribution_token,
+    // Part of the same atomic insert. On a duplicate-key retry the insert
+    // fails and nothing here is written, so a retry can never overwrite
+    // an existing session's first-touch attribution.
+    ...input.acquisition,
   })
 
   if (!insertError) {

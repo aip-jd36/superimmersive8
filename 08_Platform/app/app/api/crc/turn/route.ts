@@ -61,6 +61,7 @@ import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixtur
 import { TOPIC_RELATIONSHIPS_FIXTURE } from '@/lib/retrieval-engine/topic-relationships-fixture'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { parseRequest, type TurnRequestBody, type TurnResponseBody, type SessionStatusResponseBody } from '@/lib/crc-engine/api-contract'
+import { toAcquisitionColumns } from '@/lib/crc-engine/acquisition'
 import { logPilotEvent } from '@/lib/crc-engine/pilot-events'
 import { logAnalyticsEvent } from '@/lib/crc-engine/analytics-events'
 import { resolveClientIp, normalizeIp, deriveAbuseKey } from '@/lib/crc-engine/abuse-key'
@@ -215,6 +216,13 @@ export async function POST(request: NextRequest) {
   const cookieStore = cookies()
   const existingToken = cookieStore.get(COOKIE_NAME)?.value
 
+  // First-touch acquisition attribution (2026-09-29), already sanitized by
+  // parseRequest(). Consumed ONLY by the two session-creation writes below
+  // (createGuidedEntrySession / saveCrcSessionCreationMeta) -- never by the
+  // existing-session branch, so a resumed session is never re-attributed.
+  // Null fields are omitted: an untagged request writes no acquisition keys.
+  const creationAcquisitionColumns = 'acquisition' in parsed && parsed.acquisition ? toAcquisitionColumns(parsed.acquisition) : {}
+
   const sessionStore = createSupabaseSessionStore(supabaseAdmin)
 
   // ── Abuse key + traffic classification (design report §4/§5/§15) ───────
@@ -333,6 +341,7 @@ export async function POST(request: NextRequest) {
         runtime_commit: getRuntimeCommit(),
         model_config: getModelConfig(),
         attribution_token: guidedAttributionToken,
+        acquisition: creationAcquisitionColumns,
       })
     } catch (err) {
       console.error('[api/crc/turn] createGuidedEntrySession failed', err)
@@ -669,6 +678,7 @@ export async function POST(request: NextRequest) {
         model_config: getModelConfig(),
         attribution_token: attributionToken,
         initialization_source: 'free_form',
+        ...creationAcquisitionColumns,
       })
       // GE-2: the Free Form equivalent of guided_entry_crc_initialized --
       // a brand-new session's first runTurn() call just succeeded. Placed

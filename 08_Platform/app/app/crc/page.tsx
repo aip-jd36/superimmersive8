@@ -38,6 +38,7 @@ import type { ConsultativeNote } from '@/lib/crc-engine/unresolved-applicability
 import { shouldShowAcknowledgmentGuidance, type CrcPagePhase as Phase } from '@/lib/crc-engine/acknowledgment-guidance'
 import { startElapsedSecondsTicker } from '@/lib/crc-engine/wait-indicator'
 import { buildCalendlyUrl } from '@/lib/crc-engine/calendly-attribution'
+import { readAcquisitionFromSearch } from '@/lib/crc-engine/acquisition'
 import { CrcEntryFlow, type GuidedSubmission } from '@/components/crc/CrcEntryFlow'
 import { CrcLocaleProvider, useCrcLocale } from '@/components/crc/CrcLocaleProvider'
 import { CrcLanguageControl } from '@/components/crc/CrcLanguageControl'
@@ -264,7 +265,12 @@ function CrcPageContent() {
       res = await fetch('/api/crc/turn', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        // Acquisition attribution rides along on every turn request; the
+        // server alone decides whether this request creates a session and
+        // persists it only then (first touch). Read at send time from this
+        // page's own URL -- /crc is statically prerendered, so no
+        // useSearchParams/Suspense boundary is involved.
+        body: JSON.stringify({ ...body, acquisition: readAcquisitionFromSearch(window.location.search) }),
       })
     } catch {
       if (fromEntryFlow) {
