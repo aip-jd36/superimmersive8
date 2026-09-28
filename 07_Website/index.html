@@ -74,6 +74,16 @@
   .btn-primary:hover{background:var(--accent-deep)}
   .btn-ghost{font-family:var(--sans);font-size:15px;font-weight:500;color:var(--ink);padding:15px 4px}
   .btn-ghost:hover{color:var(--accent)}
+  .bridge{padding:64px 0;background:var(--raised)}
+  .bridge-inner{display:grid;grid-template-columns:1.4fr 1fr;gap:48px;align-items:end}
+  .bridge .eyebrow{margin-bottom:16px}
+  .bridge h2{font-size:clamp(25px,3.2vw,33px);max-width:24ch;margin-bottom:18px}
+  .bridge p{font-size:16px}
+  .bridge p+p{margin-top:12px}
+  .bridge-action{border-left:1px solid var(--line);padding-left:36px}
+  .btn-line{display:inline-block;font-family:var(--sans);font-size:15px;font-weight:600;color:var(--accent);border:1px solid var(--accent);padding:13px 24px;border-radius:2px;transition:background .2s,color .2s}
+  .btn-line:hover{background:var(--accent);color:#fff}
+  .bridge-note{margin-top:16px;font-size:13px;color:var(--ink-soft)}
   .verdict{margin-top:80px;border:1px solid var(--line);border-radius:3px;background:var(--raised);padding:38px 42px;max-width:580px;box-shadow:0 1px 0 rgba(0,0,0,0.02),0 18px 40px -28px rgba(35,63,102,0.35)}
   .verdict-q{font-family:var(--serif);font-size:22px;font-style:italic;color:var(--muted);margin-bottom:20px}
   .verdict-arrow{color:var(--line);font-size:19px;margin-bottom:20px}
@@ -136,7 +146,9 @@
     section{padding:76px 0}.wrap{padding:0 22px}
     .doors,.split,.domains,.receive,.not-grid,.founder{grid-template-columns:1fr}
     .split .col:first-child{border-right:none;border-bottom:1px solid var(--line)}
-    .hero{padding:72px 0 84px}.founder{gap:22px}.nav-cta{display:none}
+    .hero{padding:72px 0 84px}.founder{gap:22px}.nav-cta{white-space:nowrap;padding:8px 14px}
+    .bridge{padding:52px 0}.bridge-inner{grid-template-columns:1fr;gap:28px}
+    .bridge-action{border-left:none;padding-left:0;border-top:1px solid var(--line);padding-top:26px}
   }
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -156,7 +168,7 @@
     <h1>Your team made it with AI. Now someone needs to know it's <em>safe to use</em>.</h1>
     <p class="hero-sub">When a brand's legal team asks how an AI-generated campaign was made — which tools, which rights, whose likeness — the agency that made it often has no structured answer. SI8 is the independent third party that reviews the evidence and issues a commercial assurance opinion both sides can rely on.</p>
     <div class="hero-actions">
-      <a href="https://calendly.com/aipenguins/superimmersive8" target="_blank" rel="noopener" class="btn-primary">Book a call</a>
+      <a href="https://app.superimmersive8.com/crc" class="btn-primary">Check your project's commercial readiness →</a>
       <a href="#how" class="btn-ghost">See how the assessment works →</a>
     </div>
     <div class="verdict">
@@ -170,6 +182,21 @@
     </div>
   </div>
 </header>
+
+<section id="readiness" class="bridge" aria-labelledby="readiness-heading">
+  <div class="wrap bridge-inner">
+    <div>
+      <div class="eyebrow">Not ready for an assessment yet?</div>
+      <h2 id="readiness-heading">Start with the Commercial Readiness Check.</h2>
+      <p>Answer a series of questions about your AI-generated project — how it was made, the tools and assets involved, likeness and IP issues, and the evidence you have available.</p>
+      <p>You'll get an educational readiness result showing where your project appears well-supported and where you may need more documentation before commercial use.</p>
+    </div>
+    <div class="bridge-action">
+      <a href="https://app.superimmersive8.com/crc" class="btn-line">Start the Commercial Readiness Check →</a>
+      <p class="bridge-note">Online check · No legal advice · Not a Commercial Assurance Assessment</p>
+    </div>
+  </div>
+</section>
 
 <section id="who">
   <div class="wrap">
