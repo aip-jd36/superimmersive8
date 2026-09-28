@@ -50,10 +50,16 @@ jobs:
           fi
           python digest.py --lookback $LOOKBACK_DAYS $DRY_RUN_FLAG
 
-      - name: Commit digest log to repository
+      - name: Commit and push digest log (race-safe)
+        # SI8-INTEL-NEWS-4B1: the digest run above can take several
+        # minutes; origin/main may advance during that window. A plain
+        # `git push` here would be rejected (non-fast-forward) whenever
+        # that happens -- observed in Production 2026-09-28. This script
+        # fetches, rebases onto the current origin/main, and retries a
+        # bounded number of times; it never force-pushes and fails
+        # visibly (no push) if a concurrent change genuinely conflicts.
+        # See tools/news-digest/push_digest_log.sh for full detail.
         run: |
           git config user.name "SI8 Digest Bot"
           git config user.email "digest@superimmersive8.com"
-          git add 02_Marketing/intelligence/DIGEST-LOG.md
-          git diff --staged --quiet || git commit -m "digest: weekly article log $(date +%Y-%m-%d)"
-          git push
+          bash tools/news-digest/push_digest_log.sh
