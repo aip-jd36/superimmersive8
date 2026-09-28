@@ -1,96 +1,137 @@
 # SI8 News Intelligence — Keyword Clusters
 # Each cluster has a name and a list of Google News search queries.
 # Add/remove queries here to tune coverage without touching the main script.
+#
+# Taxonomy replaced 2026-09-28 per SI8-INTEL-NEWS-2A (PM-approved repair of
+# SI8-INTEL-NEWS-2's design-only proposal) and implemented under
+# SI8-INTEL-NEWS-3. 9 clusters / 43 queries, discovery-config-only change —
+# see 06_Operations/DECISION-QUALITY-STANDARDS.md-style rigor in the design
+# thread for the full rationale (litigation retrieval-quality repair via
+# parenthetical OR-groups, provider/LK-signal clusters marked transitional).
+# This file has no test suite; verify structurally after any edit (cluster
+# count, query count, no duplicate queries, no stray hardcoded year).
 
 KEYWORD_CLUSTERS = [
     {
-        "name": "AI Video Rights & Clearance",
+        # Evergreen. Every query wraps a shared procedural-stage OR-group so a
+        # single legal theory isn't missed just because an article says
+        # "settlement" instead of "ruling" (SI8-INTEL-NEWS-2A retrieval-quality
+        # repair; smoke-tested live 2026-09-28 against news.google.com/rss/search
+        # before this taxonomy was made load-bearing).
+        "name": "litigation_commercial_media_core",
         "queries": [
-            "AI video rights clearance commercial use",
-            "AI generated video copyright commercial campaign",
-            "AI video chain of title documentation",
-            "AI content rights documentation agency",
-            "AI video indemnification commercial production",
-            "right of publicity AI generated video advertising",
+            "AI video copyright (lawsuit OR sues OR ruling OR settlement OR injunction OR appeal OR verdict OR judgment)",
+            "generative AI training data (lawsuit OR sues OR ruling OR settlement OR appeal OR judgment)",
+            "right of publicity AI (lawsuit OR sues OR ruling OR settlement OR judgment)",
+            "AI deepfake false endorsement (lawsuit OR sues OR ruling OR judgment)",
+            "AI voice clone (lawsuit OR sues OR ruling OR settlement OR judgment)",
+            "AI video trademark (lawsuit OR sues OR ruling OR judgment)",
         ],
     },
     {
-        "name": "AI Lawsuits & Legal Cases",
+        # Explicitly a human-maintained rotating watchlist, not evergreen.
+        # Adding/retiring a named case is a deliberate manual edit (quarterly
+        # review) — no automatic promotion/removal logic exists or is proposed.
+        "name": "litigation_named_case_tracker",
         "queries": [
-            "generative AI copyright lawsuit 2026",
-            "AI video copyright infringement lawsuit",
-            "AI training data lawsuit settlement commercial",
-            "right of publicity AI synthetic performer lawsuit",
-            "Getty Stability AI lawsuit UK court",
-            "GEMA OpenAI Munich court training data",
-            "AI likeness infringement advertising brand",
+            "Getty Images Stability AI (ruling OR appeal OR settlement OR judgment)",
+            "GEMA OpenAI Munich (ruling OR appeal OR settlement OR judgment)",
         ],
     },
     {
-        "name": "Brand Legal & Campaign Blocking",
+        # Evergreen. No hardcoded year/jurisdiction — recency is governed by
+        # digest.py's own --lookback parameter, not query text.
+        "name": "regulation_policy_commercial_media",
         "queries": [
-            "brand legal team AI video campaign approval",
-            "AI video advertising campaign blocked rejected brand",
-            "agency AI content legal review approval",
-            "IP counsel AI generated content commercial",
-            "brand marketing AI video legal compliance",
-            "holdco AI governance policy agency network",
-            "advertising legal AI content documentation requirement",
+            "AI synthetic performer disclosure law",
+            "state AI advertising disclosure law",
+            "AI content disclosure law advertising",
+            "EU AI Act Article 50 transparency requirement",
+            "FTC AI advertising enforcement",
+            "ASA UK AI advertising ruling",
         ],
     },
     {
-        "name": "E&O Insurance & Production",
+        # TRANSITIONAL named-provider seed coverage, not a generic monitor.
+        # Deliberately NOT derived from lib/tool-identity/registry.ts's
+        # CANONICAL_TOOL_IDS in this milestone — that registry has no
+        # display-name or GTM-relevance field yet (SI8-INTEL-NEWS-2A, Part O).
+        # Query #10 is a generic catch-all, the one partial mitigation for
+        # "the named list can't cover every provider."
+        "name": "provider_commercial_terms",
         "queries": [
+            "Runway AI commercial terms",
+            "Kling AI commercial terms",
+            "Pika AI commercial terms",
+            "Google Veo commercial terms",
+            "Adobe Firefly commercial terms indemnification",
+            "ElevenLabs commercial terms voice cloning",
+            "Synthesia commercial terms license",
+            "Luma AI commercial terms license",
+            "Stability AI commercial license terms",
+            "AI video provider enterprise indemnification terms",
+        ],
+    },
+    {
+        # TRANSITIONAL discovery seeds bridging toward a future generic
+        # governed-jurisdiction/domain registry that does not exist yet
+        # (jurisdiction is plain free text today, by deliberate PM decision,
+        # LK Phase 1 2026-08-16). This cluster NEVER creates or mutates
+        # governed Living Knowledge — a discovered article is, at most, a
+        # candidate signal for a human to route into the existing
+        # tools/lk-source-monitor/ review-package workflow. The Taiwan query
+        # runs through the current US-English Google News configuration
+        # (hl=en-US&gl=US&ceid=US:en, unchanged by this milestone) and
+        # therefore gives opportunistic English-language discovery only — it
+        # is NOT comprehensive Taiwan-market monitoring.
+        "name": "living_knowledge_domain_signals",
+        "queries": [
+            "US Copyright Office AI (guidance OR registration OR report)",
+            "state right of publicity AI law",
+            "Taiwan copyright AI generated content law",
+        ],
+    },
+    {
+        # Evergreen.
+        "name": "buyer_risk_governance_signals",
+        "queries": [
+            "brand AI campaign approval process",
+            "agency AI content policy governance",
+            "holdco AI governance policy",
             "AI content errors omissions insurance exclusion",
-            "E&O insurance AI generated video production",
-            "AI video production insurance coverage",
-            "line producer executive producer AI content insurance",
-            "production house AI video E&O coverage",
-            "media liability insurance AI generated content",
+            "media liability insurer AI generated content",
+            "brand AI campaign withdrawn controversy",
         ],
     },
     {
-        "name": "Synthetic Performers & Right of Publicity",
+        # Probationary / highest-noise-risk cluster (SI8-INTEL-NEWS-2A Part G).
+        # Narrowed to 2 queries deliberately. Email priority is NOT set here —
+        # that belongs to a later classification/composition milestone.
+        "name": "commercial_adoption_validation",
         "queries": [
-            "synthetic performer AI advertising disclosure law",
-            "New York synthetic performer disclosure law 2026",
-            "AI synthetic performer advertiser liability",
-            "right of publicity AI video commercial",
-            "AI likeness performer consent advertising",
-            "deepfake synthetic performer ad law",
+            "agency AI generated video campaign client",
+            "brand AI video advertising campaign results",
         ],
     },
     {
-        "name": "Regulation & Policy",
+        # Evergreen. New cluster — no prior coverage existed for this category.
+        "name": "provenance_authenticity_infrastructure",
         "queries": [
-            "EU AI Act Article 50 enforcement August 2026",
-            "ASA AI advertising ruling UK 2026",
-            "UAE AI Act advertising compliance 2026",
-            "AI content disclosure law brand advertiser liability",
-            "AI labeling requirement advertising brand agency",
-            "FTC AI enforcement advertising 2026",
+            "C2PA content credentials adoption",
+            "AI content provenance metadata standard",
+            "synthetic content watermarking commercial",
+            "content authenticity infrastructure platform adoption",
         ],
     },
     {
-        "name": "AI Tool Commercial Terms",
+        # Evergreen. Narrowly scoped to named capability classes, not a
+        # generic "new AI model" feed.
+        "name": "material_capability_changes",
         "queries": [
-            "Runway AI commercial license terms",
-            "Kling AI commercial use rights",
-            "Pika AI terms of service commercial",
-            "Veo AI commercial content rights",
-            "AI video tool training data commercial production",
-            "Runway Kling Pika liability indemnification",
-        ],
-    },
-    {
-        "name": "Market & Competitor Intelligence",
-        "queries": [
-            "Adobe Firefly commercial indemnification",
-            "AI content rights management platform",
-            "AI video verification compliance service",
-            "Getty Images AI video licensing",
-            "AI media rights startup funding",
-            "advertising agency AI policy WPP Publicis IPG Omnicom",
+            "AI digital human realistic commercial",
+            "AI voice cloning commercial product launch",
+            "AI performer replacement technology",
+            "AI character consistency commercial video",
         ],
     },
 ]
