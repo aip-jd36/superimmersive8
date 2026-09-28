@@ -111,7 +111,7 @@
  * signal (that would be the rejected Candidate C).
  */
 
-import { runExtractionPipeline, type CandidateExtractor, type RawUserTurn } from '@/lib/interview-engine/extraction'
+import { runExtractionPipeline, type CandidateExtractor, type RawUserTurn, type ExtractionDiagnostic } from '@/lib/interview-engine/extraction'
 import { evaluateGate1, evaluateGate2 } from '@/lib/interview-engine/gates'
 import { computePhase } from '@/lib/interview-engine/phase'
 import { createInitialBoundaryState, evaluateBoundary, type BoundaryState, type CandidateQuestion } from '@/lib/interview-engine/boundaries'
@@ -242,6 +242,32 @@ export type TurnOutcome = (
    * (types/interview-engine.ts) for the full boundary.
    */
   knowledgeDemandOccurrences?: KnowledgeDemandOccurrence[]
+  /**
+   * CRC-EXTRACTION-OBS-2 (2026-09-28). Whatever `runExtractionPipeline`
+   * (extraction.ts) computed as this turn's own `diagnostics` -- additive,
+   * rides along with whatever this turn's own outcome already is, exactly
+   * like `precedingTakeaway`/`knowledgeDemandOccurrences` above. Unlike
+   * `knowledgeDemandOccurrences`, this field is NOT gated on `.length > 0`:
+   * it is always present whenever extraction actually ran this turn (every
+   * return point in this function from the `runExtractionPipeline` call
+   * onward), including the ordinary case of zero candidates -- that is
+   * itself a real, observable value ("extraction ran, found nothing"), not
+   * an absence. It is only ever absent when extraction did not run at all
+   * this turn, i.e. the §7 "a completed session never re-enters the loop"
+   * recovery short-circuit at the top of this function, which returns
+   * before `runExtractionPipeline` is ever called. Consumed downstream
+   * ONLY by app/api/crc/turn/route.ts's own best-effort, fail-open call to
+   * `recordCrcExtractionTrace` (the trace-persistence module) -- never by questioning,
+   * gates, phase, completion, correction/supersession, Retrieval, BI,
+   * Composition, or Projection, none of which read this field. This is raw
+   * pipeline diagnostic data (candidate + normalization + proposed_fact +
+   * decision, per candidate), not a reduced DTO -- the reduction to a
+   * storage-minimal, PII-conscious payload happens only at the persistence
+   * boundary in the trace-persistence module (buildExtractionTracePayload), mirroring
+   * exactly how CRCPipelineResult flows into `TurnOutcome.result` untouched
+   * and is only reduced by buildCompletionPayload at that same boundary.
+   */
+  extractionDiagnostics?: ExtractionDiagnostic[]
   /**
    * CRC Identity + Abuse Prevention + Analytics milestone -- discovery
    * analytics instrumentation (design report §11). Surfaces the SAME
@@ -678,7 +704,21 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   // for why: it must never participate in Gate 1/Gate 2 diffing, phase
   // computation, or completion, and this capture point changes nothing
   // about how `extracted` itself is used below.
-  const { updated: extracted, knowledgeDemandOccurrences } = await runExtractionPipeline(suLoaded, rawTurn, deps.extractor)
+  // CRC-EXTRACTION-OBS-2 (2026-09-28): `diagnostics` captured here alongside
+  // `knowledgeDemandOccurrences` -- same capture point, same "additive
+  // TurnOutcome metadata only" discipline (see this destructure's own
+  // pre-existing comment above). Threaded, unconditionally, into every one
+  // of this function's own return points below (never gated on
+  // `.length > 0` the way `knowledgeDemandOccurrences` is -- a genuinely
+  // empty result is itself a real, meaningful value here: "extraction ran
+  // and found zero candidates this turn" must remain distinguishable from
+  // "extraction never ran this turn," which only the §7 recovery
+  // short-circuit above produces, before this line is ever reached). Never
+  // merged into `extracted`/`suAfter`/StructuredUnderstanding, never read by
+  // questioning/gates/phase/completion/Retrieval/BI/Projection -- consumed
+  // downstream ONLY by app/api/crc/turn/route.ts's own best-effort,
+  // fail-open call to `recordCrcExtractionTrace` (the trace-persistence module).
+  const { updated: extracted, diagnostics, knowledgeDemandOccurrences } = await runExtractionPipeline(suLoaded, rawTurn, deps.extractor)
 
   // Decline pre-processing BEFORE gate evaluation -- Phase 7's own shipped
   // bugfix (evaluateGate1's decline branch, and evaluateGate2's decline
@@ -806,7 +846,8 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
       })
       const completeOutcome: TurnOutcome = { kind: 'complete', result: runCRCConversation(suAfter, deps.matrix, topicClaims, relationships) }
       const withTakeaway = precedingTakeaway ? { ...completeOutcome, precedingTakeaway } : completeOutcome
-      return knowledgeDemandOccurrences.length > 0 ? { ...withTakeaway, knowledgeDemandOccurrences } : withTakeaway
+      const withKnowledgeDemand = knowledgeDemandOccurrences.length > 0 ? { ...withTakeaway, knowledgeDemandOccurrences } : withTakeaway
+      return { ...withKnowledgeDemand, extractionDiagnostics: diagnostics }
     }
     // Else: at least one governed selector need is still live and
     // un-consumed -- fall through to the ordinary candidate-generation
@@ -913,7 +954,8 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
       })
       const budgetExhaustedOutcome: TurnOutcome = { kind: 'complete', result: runCRCConversation(suBudgetExhausted, deps.matrix, topicClaims, relationships) }
       const withTakeaway = precedingTakeaway ? { ...budgetExhaustedOutcome, precedingTakeaway } : budgetExhaustedOutcome
-      return knowledgeDemandOccurrences.length > 0 ? { ...withTakeaway, knowledgeDemandOccurrences } : withTakeaway
+      const withKnowledgeDemand = knowledgeDemandOccurrences.length > 0 ? { ...withTakeaway, knowledgeDemandOccurrences } : withTakeaway
+      return { ...withKnowledgeDemand, extractionDiagnostics: diagnostics }
     }
 
     // CRC Limited Pilot -- Model 4 (bounded alternative-question search),
@@ -1385,7 +1427,8 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
               selectorSignal,
             }
             const withTakeaway = precedingTakeaway ? { ...exhaustedOutcome, precedingTakeaway } : exhaustedOutcome
-            return knowledgeDemandOccurrences.length > 0 ? { ...withTakeaway, knowledgeDemandOccurrences } : withTakeaway
+            const withKnowledgeDemand = knowledgeDemandOccurrences.length > 0 ? { ...withTakeaway, knowledgeDemandOccurrences } : withTakeaway
+      return { ...withKnowledgeDemand, extractionDiagnostics: diagnostics }
           }
         }
       }
@@ -1445,5 +1488,6 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   finalOutcome = humanContributionSignal ? { ...finalOutcome, humanContributionSignal } : finalOutcome
   finalOutcome = selectorSignal ? { ...finalOutcome, selectorSignal } : finalOutcome
   const withTakeaway = precedingTakeaway ? { ...finalOutcome, precedingTakeaway } : finalOutcome
-  return knowledgeDemandOccurrences.length > 0 ? { ...withTakeaway, knowledgeDemandOccurrences } : withTakeaway
+  const withKnowledgeDemand = knowledgeDemandOccurrences.length > 0 ? { ...withTakeaway, knowledgeDemandOccurrences } : withTakeaway
+  return { ...withKnowledgeDemand, extractionDiagnostics: diagnostics }
 }

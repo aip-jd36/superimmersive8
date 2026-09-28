@@ -103,7 +103,7 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
         store,
       ),
     )
-    expect(outcome).toEqual({
+    expect(outcome).toMatchObject({
       kind: 'question',
       message: 'Ordinary question.',
       discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
@@ -125,7 +125,7 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
         store,
       ),
     )
-    expect(outcome).toEqual({
+    expect(outcome).toMatchObject({
       kind: 'question',
       message: 'Ordinary question.',
       discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
@@ -142,7 +142,7 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
       { token: 'crd-client', turnNumber: 1, userText: 'x' },
       eligibleTurnDeps('made the video for a client', { generator: throwingGenerator, decider: sequencedDecider([askDecision()]) }, store),
     )
-    expect(outcome).toEqual({
+    expect(outcome).toMatchObject({
       kind: 'question',
       message: COMMERCIAL_READINESS_DISCOVERY_QUESTIONS.client_provided_source_assets,
       discoverySignal: { eligible_categories: ['client_provided_source_assets'], selected_category: 'client_provided_source_assets', outcome: 'asked' },
@@ -159,7 +159,7 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
       { token: 'crd-person', turnNumber: 1, userText: 'x' },
       eligibleTurnDeps('the video shows my face talking to the camera', { decider: sequencedDecider([askDecision()]) }, store),
     )
-    expect(outcome).toEqual({
+    expect(outcome).toMatchObject({
       kind: 'question',
       message: COMMERCIAL_READINESS_DISCOVERY_QUESTIONS.likeness_publicity_rights,
       discoverySignal: { eligible_categories: ['likeness_publicity_rights'], selected_category: 'likeness_publicity_rights', outcome: 'asked' },
@@ -173,7 +173,7 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
       { token: 'crd-ref', turnNumber: 1, userText: 'x' },
       eligibleTurnDeps('I used a reference image to guide the generation', { decider: sequencedDecider([askDecision()]) }, store),
     )
-    expect(outcome).toEqual({
+    expect(outcome).toMatchObject({
       kind: 'question',
       message: COMMERCIAL_READINESS_DISCOVERY_QUESTIONS.third_party_visual_assets,
       discoverySignal: { eligible_categories: ['third_party_visual_assets'], selected_category: 'third_party_visual_assets', outcome: 'asked' },
@@ -187,7 +187,7 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
       { token: 'crd-multi', turnNumber: 1, userText: 'x' },
       eligibleTurnDeps('I made this for a client and it shows my face on camera.', { decider: sequencedDecider([askDecision()]) }, store),
     )
-    expect(outcome).toEqual({
+    expect(outcome).toMatchObject({
       kind: 'question',
       message: COMMERCIAL_READINESS_DISCOVERY_QUESTIONS.client_provided_source_assets,
       discoverySignal: {
@@ -206,7 +206,7 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
       { token: 'crd-unknown', turnNumber: 1, userText: 'x' },
       eligibleTurnDeps('a short promotional video', { generator: sequencedGenerator([ordinary]), decider: sequencedDecider([askDecision()]) }, store),
     )
-    expect(outcome).toEqual({
+    expect(outcome).toMatchObject({
       kind: 'question',
       message: 'What platform did you use?',
       discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
@@ -262,7 +262,7 @@ describe('Commercial Readiness Discovery -- eligibility gating', () => {
         store,
       ),
     )
-    expect(outcome).toEqual({
+    expect(outcome).toMatchObject({
       kind: 'question',
       message: 'Anything else about the workflow?',
       discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
@@ -287,7 +287,7 @@ describe('Commercial Readiness Discovery -- Constraint A / Constraint B interact
         store,
       ),
     )
-    expect(outcome).toEqual({
+    expect(outcome).toMatchObject({
       kind: 'question',
       message: 'Ordinary fallback question.',
       discoverySignal: { eligible_categories: ['client_provided_source_assets'], selected_category: 'client_provided_source_assets', outcome: 'rejected_by_a' },
@@ -324,7 +324,7 @@ describe('Commercial Readiness Discovery -- Model 4 interaction', () => {
         store,
       ),
     )
-    expect(outcome).toEqual({
+    expect(outcome).toMatchObject({
       kind: 'question',
       message: 'Ordinary fallback question.',
       discoverySignal: {
@@ -358,7 +358,7 @@ describe('Commercial Readiness Discovery -- cap persistence + Educational Takeaw
       { token: 'crd-persist', turnNumber: 1, userText: 'x' },
       eligibleTurnDeps('made the video for a client', { decider: sequencedDecider([askDecision()]) }, store),
     )
-    expect(turn1).toEqual({
+    expect(turn1).toMatchObject({
       kind: 'question',
       message: COMMERCIAL_READINESS_DISCOVERY_QUESTIONS.client_provided_source_assets,
       discoverySignal: { eligible_categories: ['client_provided_source_assets'], selected_category: 'client_provided_source_assets', outcome: 'asked' },
@@ -390,7 +390,7 @@ describe('Commercial Readiness Discovery -- cap persistence + Educational Takeaw
         store,
       ),
     )
-    expect(turn2).toEqual({
+    expect(turn2).toMatchObject({
       kind: 'question',
       message: 'Anything else?',
       precedingTakeaway: COMMERCIAL_READINESS_TAKEAWAYS.client_provided_source_assets,
@@ -416,7 +416,7 @@ describe('Commercial Readiness Discovery -- cap persistence + Educational Takeaw
         store,
       ),
     )
-    expect(turn3).toEqual({
+    expect(turn3).toMatchObject({
       kind: 'question',
       message: 'One more thing.',
       discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },

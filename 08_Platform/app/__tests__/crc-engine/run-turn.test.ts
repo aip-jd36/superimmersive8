@@ -88,7 +88,7 @@ describe('runTurn -- single-turn cases', () => {
       { token: 't2', turnNumber: 2, userText: 'A social campaign.' },
       deps({ generator: constantCandidateQuestionGenerator(questionProposal), decider: constantConstraintADecider({ should_ask: true, reason_code: 'MATERIALLY_IMPROVES_UNDERSTANDING', rationale: 'x' }) }, store),
     )
-    expect(outcome).toEqual({
+    expect(outcome).toMatchObject({
       kind: 'question',
       message: 'What was this project for?',
       discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
@@ -107,7 +107,7 @@ describe('runTurn -- single-turn cases', () => {
       { token: 't3', turnNumber: 2, userText: 'Not sure yet.' },
       deps({ generator: constantCandidateQuestionGenerator(clarifyingProposal), decider: constantConstraintADecider({ should_ask: true, reason_code: 'MATERIALLY_IMPROVES_UNDERSTANDING', rationale: 'x' }) }, store),
     )
-    expect(outcome).toEqual({
+    expect(outcome).toMatchObject({
       kind: 'question',
       message: 'Which specific plan?',
       discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },

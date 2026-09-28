@@ -69,7 +69,7 @@ import { classifyTraffic, shouldApplyRateLimiting } from '@/lib/crc-engine/traff
 import { checkSessionCreationRate, checkBurst, checkTurnCeiling, logRateLimitedEvent } from '@/lib/crc-engine/abuse-prevention'
 import { getRuntimeCommit, getModelConfig } from '@/lib/crc-engine/runtime-metadata'
 import { buildCompleteResponseFields } from '@/lib/crc-engine/complete-response'
-import { recordCrcCompletionTrace } from '@/lib/crc-engine/turn-traces'
+import { recordCrcCompletionTrace, recordCrcExtractionTrace } from '@/lib/crc-engine/turn-traces'
 import { recordAndNotifyMaterialDemandEvidence } from '@/lib/crc-engine/material-demand-notification-trigger'
 import { deliverCrcResultsEmail } from '@/lib/crc-engine/results-email-delivery'
 import { sendCrcSessionStartedAdminNotification, sendCrcResultsEmailCapturedAdminNotification } from '@/lib/emails'
@@ -769,6 +769,20 @@ export async function POST(request: NextRequest) {
     // trigger.ts's own header for why persistence and notification are
     // sequenced there rather than inline here.
     await recordAndNotifyMaterialDemandEvidence(supabaseAdmin, { sessionId: token, occurrences: outcome.knowledgeDemandOccurrences })
+  }
+
+  // CRC-EXTRACTION-OBS-2 (2026-09-28): observational pipeline trace,
+  // best-effort, after the turn's own authoritative persistence has already
+  // succeeded -- same fail-open placement/ordering discipline as
+  // recordAndNotifyMaterialDemandEvidence immediately above. Unconditional
+  // on outcome.kind (extraction runs on every turn that reaches this point,
+  // completing or not) -- present on every branch of runTurn() except its
+  // own §7 recovery replay short-circuit (which never calls
+  // runExtractionPipeline at all; see run-turn.ts's own
+  // `extractionDiagnostics` field header). A no-op re: CRC semantics either
+  // way -- see turn-traces.ts's own header.
+  if (outcome.extractionDiagnostics) {
+    await recordCrcExtractionTrace(supabaseAdmin, { sessionId: token, turnNumber, diagnostics: outcome.extractionDiagnostics })
   }
 
   // Discovery analytics instrumentation (design report §11) -- logged

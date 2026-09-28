@@ -1,20 +1,27 @@
 /**
- * crc_turn_traces authority-firewall guarantee (CRC-PILOT-OBS-3). Same
+ * crc_turn_traces authority-firewall guarantee (CRC-PILOT-OBS-3; extended by
+ * CRC-EXTRACTION-OBS-2 for the new trace_kind = 'extraction'). Same
  * file-tree-scanning discipline as subsystem-boundaries.test.ts: proves,
  * structurally, that the new observational trace table can never become
  * authority for CRC behavior.
  *
- * The intended invariant (CRC-PILOT-OBS-2/2A/3 design):
+ * The intended invariant (CRC-PILOT-OBS-2/2A/3 design, unchanged by
+ * CRC-EXTRACTION-OBS-2):
  *   CRC runtime WRITES a trace -> later humans/analytics may inspect it
  * NOT:
  *   CRC runtime READS the trace -> the trace influences Retrieval/BI/
  *   Projection/questioning
  *
  * Two things prove this: (1) lib/crc-engine/turn-traces.ts exports no read
- * function at all -- only recordCrcCompletionTrace(), a write-only helper --
- * so there is nothing for any authoritative module to even call; (2) no
- * authoritative subsystem file imports turn-traces.ts or mentions
- * crc_turn_traces by name.
+ * function at all -- only recordCrcCompletionTrace() and
+ * recordCrcExtractionTrace(), both write-only helpers -- so there is
+ * nothing for any authoritative module to even call; (2) no authoritative
+ * subsystem file imports turn-traces.ts or mentions crc_turn_traces by
+ * name. Every test below already scans generically for `crc_turn_traces`/
+ * `turn-traces` by name/pattern, not by trace_kind -- so the existing
+ * assertions already cover trace_kind = 'extraction' for free; the
+ * dedicated 'extraction'-kind tests at the bottom of this file exist to
+ * make that coverage explicit, not to add new invariants.
  */
 
 import * as fs from 'fs'
@@ -49,13 +56,19 @@ function sourceOf(relativeFile: string): string {
 }
 
 describe('crc_turn_traces authority firewall', () => {
-  test('turn-traces.ts exports exactly one function, and it is a writer -- no read/query function exists for any CRC runtime module to consume', () => {
+  test('turn-traces.ts exports exactly two functions, both writers -- no read/query function exists for any CRC runtime module to consume', () => {
     const exportedNames = Object.keys(turnTraces)
-    expect(exportedNames.sort()).toEqual(['TRACE_SCHEMA_VERSION', 'recordCrcCompletionTrace'].sort())
+    expect(exportedNames.sort()).toEqual(['TRACE_SCHEMA_VERSION', 'recordCrcCompletionTrace', 'recordCrcExtractionTrace'].sort())
     // Defensive: the module source itself never calls .select( on the client
     // -- it is structurally write-only, not merely write-only "by convention."
     const source = sourceOf('lib/crc-engine/turn-traces.ts')
     expect(source).not.toMatch(/\.select\(/)
+  })
+
+  test("CRC-EXTRACTION-OBS-2: recordCrcExtractionTrace is a writer too -- its own insert call is the only place trace_kind = 'extraction' is constructed", () => {
+    const source = sourceOf('lib/crc-engine/turn-traces.ts')
+    expect(source).toMatch(/recordCrcExtractionTrace/)
+    expect(source).toMatch(/trace_kind:\s*'extraction'/)
   })
 
   test('no file under lib/interview-engine/, lib/retrieval-engine/, lib/projection-layer/, or lib/bounded-interpretation/ imports turn-traces.ts or mentions crc_turn_traces', () => {
@@ -81,9 +94,10 @@ describe('crc_turn_traces authority firewall', () => {
     }
   })
 
-  test('the one legitimate writer (app/api/crc/turn/route.ts) only calls recordCrcCompletionTrace -- it does not query crc_turn_traces back', () => {
+  test('the one legitimate writer (app/api/crc/turn/route.ts) only calls recordCrcCompletionTrace/recordCrcExtractionTrace -- it does not query crc_turn_traces back', () => {
     const source = sourceOf(path.join('app', 'api', 'crc', 'turn', 'route.ts'))
     expect(source).toMatch(/recordCrcCompletionTrace/)
+    expect(source).toMatch(/recordCrcExtractionTrace/)
     expect(source).not.toMatch(/from\(['"]crc_turn_traces['"]\)\s*\.\s*select/)
   })
 })

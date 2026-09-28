@@ -149,7 +149,7 @@ describe('B: exactly six', () => {
     const q = proposal({ question_text: 'The sixth question.' })
     const outcome = await runTurn({ token: 'budget-six', turnNumber: 2, userText: 'x' }, deps({ generator: sequencedGenerator([q]), decider: sequencedDecider([askDecision()]) }, store))
 
-    expect(outcome).toEqual({
+    expect(outcome).toMatchObject({
       kind: 'question',
       message: 'The sixth question.',
       discoverySignal: { eligible_categories: [], selected_category: null, outcome: 'never_eligible' },
