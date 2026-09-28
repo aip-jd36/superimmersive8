@@ -57,7 +57,9 @@ import type { CrcLocale } from './crc-locale'
 // ── Static UI-shell dictionary ──────────────────────────────────────────
 
 export interface CrcUiCopy {
+  /** CrcIdentityMark's product line. */
   productName: string
+  /** CrcIdentityMark's parent-brand line. Must contain `{brand}` exactly once -- CrcIdentityMark splits on it to render the (never-localized) linked brand name in place. */
   productSubtitle: string
   languageControlLabel: string
   languageNameEnglish: string
@@ -104,11 +106,14 @@ export interface CrcUiCopy {
   changeEmail: string
   resendEmail: string
   networkErrorGeneric: string
+  assuranceBridgeHeading: string
+  assuranceBridgeBody: string
+  assuranceBridgeLearnMore: string
 }
 
 const EN: CrcUiCopy = {
-  productName: 'SI8',
-  productSubtitle: 'CRC',
+  productName: 'Commercial Readiness Check',
+  productSubtitle: 'by {brand}',
   languageControlLabel: 'Language',
   languageNameEnglish: 'English',
   languageNameTraditionalChinese: '繁體中文',
@@ -155,11 +160,15 @@ const EN: CrcUiCopy = {
   changeEmail: 'Wrong email? Change it',
   resendEmail: "Didn't get it? Resend",
   networkErrorGeneric: "That didn't go through. You can try again.",
+  assuranceBridgeHeading: 'Need independent commercial assurance?',
+  assuranceBridgeBody:
+    "The Commercial Readiness Check is an educational self-guided workflow. SI8's Commercial Assurance Assessment goes further: an independent human review of your project and supporting evidence, producing a structured assessment report for commercial decision-makers.",
+  assuranceBridgeLearnMore: 'Learn about the Commercial Assurance Assessment →',
 }
 
 const ZH_TW: CrcUiCopy = {
-  productName: 'SI8',
-  productSubtitle: 'CRC',
+  productName: '商業就緒度檢查',
+  productSubtitle: '由 {brand} 提供',
   languageControlLabel: '語言',
   languageNameEnglish: 'English',
   languageNameTraditionalChinese: '繁體中文',
@@ -206,6 +215,10 @@ const ZH_TW: CrcUiCopy = {
   changeEmail: '信箱填錯了嗎？點此修改',
   resendEmail: '沒收到嗎？重新寄送',
   networkErrorGeneric: '傳送失敗，請再試一次。',
+  assuranceBridgeHeading: '需要獨立的商業保證嗎？',
+  assuranceBridgeBody:
+    '「商業就緒度檢查」是一項自助式的教育工具。SI8 的「商業保證評估」則進一步由獨立人員審查您的專案及相關佐證資料，並提供一份結構化的評估報告，供商業決策者參考。',
+  assuranceBridgeLearnMore: '了解商業保證評估 →',
 }
 
 const CRC_UI_COPY: Record<CrcLocale, CrcUiCopy> = { en: EN, 'zh-TW': ZH_TW }

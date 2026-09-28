@@ -51,11 +51,35 @@ describe('getCrcUiCopy -- dictionary completeness', () => {
     }
   })
 
-  test('SI8 and CRC product names remain unchanged across locales', () => {
-    expect(getCrcUiCopy('en').productName).toBe('SI8')
-    expect(getCrcUiCopy('zh-TW').productName).toBe('SI8')
-    expect(getCrcUiCopy('en').productSubtitle).toBe('CRC')
-    expect(getCrcUiCopy('zh-TW').productSubtitle).toBe('CRC')
+  test('identity lockup: product name uses the canonical per-locale CRC name', () => {
+    expect(getCrcUiCopy('en').productName).toBe('Commercial Readiness Check')
+    expect(getCrcUiCopy('zh-TW').productName).toBe('商業就緒度檢查')
+    // Same canonical name the chat header already uses -- no second, divergent translation.
+    for (const locale of CRC_LOCALES) {
+      expect(getCrcUiCopy(locale).productName).toBe(getCrcUiCopy(locale).headerTitle)
+    }
+  })
+
+  test('identity lockup: parent-brand name is never translated -- every locale carries exactly one {brand} placeholder', () => {
+    expect(getCrcUiCopy('en').productSubtitle).toBe('by {brand}')
+    expect(getCrcUiCopy('zh-TW').productSubtitle).toBe('由 {brand} 提供')
+    for (const locale of CRC_LOCALES) {
+      expect(getCrcUiCopy(locale).productSubtitle.split('{brand}')).toHaveLength(2)
+    }
+  })
+
+  test('results-confirmation assurance bridge copy exists in both locales and keeps the product boundary explicit', () => {
+    const en = getCrcUiCopy('en')
+    const zh = getCrcUiCopy('zh-TW')
+    expect(en.assuranceBridgeHeading).toBe('Need independent commercial assurance?')
+    expect(en.assuranceBridgeBody).toContain('educational self-guided workflow')
+    expect(en.assuranceBridgeBody).toContain('independent human review')
+    expect(en.assuranceBridgeLearnMore).toBe('Learn about the Commercial Assurance Assessment →')
+    expect(zh.assuranceBridgeHeading).toBe('需要獨立的商業保證嗎？')
+    // Canonical zh-TW product terminology, matching existing CRC copy.
+    expect(zh.assuranceBridgeBody).toContain('商業就緒度檢查')
+    expect(zh.assuranceBridgeBody).toContain('商業保證評估')
+    expect(zh.assuranceBridgeLearnMore).toBe('了解商業保證評估 →')
   })
 })
 

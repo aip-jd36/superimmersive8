@@ -42,6 +42,7 @@ import { CrcEntryFlow, type GuidedSubmission } from '@/components/crc/CrcEntryFl
 import { CrcLocaleProvider, useCrcLocale } from '@/components/crc/CrcLocaleProvider'
 import { CrcLanguageControl } from '@/components/crc/CrcLanguageControl'
 import { CrcIdentityMark } from '@/components/crc/CrcIdentityMark'
+import { CrcAssuranceBridge } from '@/components/crc/CrcAssuranceBridge'
 import { CrcZhLocaleNotice } from '@/components/crc/CrcZhLocaleNotice'
 import { shouldSubmitOnEnter } from '@/components/crc/ime-safe-enter'
 import {
@@ -674,12 +675,6 @@ function CrcPageContent() {
                       <p className="text-sm text-muted-foreground">{confirmationCopy.body}</p>
                       <p className="text-sm text-muted-foreground">{confirmationCopy.body2}</p>
 
-                      <Button asChild variant="outline" size="sm">
-                        <a href={buildCalendlyUrl(attributionToken)} target="_blank" rel="noopener noreferrer" onClick={handleCommercialAssuranceCtaClick}>
-                          {copy.commercialAssuranceCta}
-                        </a>
-                      </Button>
-
                       <div className="flex gap-4 text-sm text-muted-foreground">
                         <button type="button" className="underline" onClick={handleChangeEmailClick} disabled={resultsEmailSubmitting}>
                           {copy.changeEmail}
@@ -689,6 +684,16 @@ function CrcPageContent() {
                         </button>
                       </div>
                       {resultsEmailError && <p className="text-sm text-red-600">{resultsEmailError}</p>}
+
+                      <CrcAssuranceBridge
+                        primaryAction={
+                          <Button asChild variant="outline" size="sm" className="h-auto min-h-9 whitespace-normal py-1.5 text-left">
+                            <a href={buildCalendlyUrl(attributionToken)} target="_blank" rel="noopener noreferrer" onClick={handleCommercialAssuranceCtaClick}>
+                              {copy.commercialAssuranceCta}
+                            </a>
+                          </Button>
+                        }
+                      />
                     </div>
                   )}
 
