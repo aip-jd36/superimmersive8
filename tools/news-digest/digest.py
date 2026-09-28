@@ -14,6 +14,7 @@ Usage:
 
 import os
 import sys
+import re
 import json
 import time
 import argparse
@@ -119,27 +120,66 @@ def fetch_google_news(query: str, lookback_days: int) -> list[dict]:
         return []
 
 
+def _title_dedup_key(title: str) -> str:
+    """Same normalized-title key the dedup step has always used. Pulled out
+    as its own function (SI8-INTEL-NEWS-4A) purely so provenance-merge
+    behavior can be unit tested without a network call -- the key itself is
+    unchanged from the original NEWS-3-era behavior."""
+    return re.sub(r"[^a-z0-9]", "", title.lower())[:80]
+
+
+def dedupe_and_merge_provenance(articles: list[dict]) -> list[dict]:
+    """Deduplicate by normalized title key, exactly as before -- but where
+    NEWS-3-era code silently dropped every duplicate, this merges each
+    duplicate's `clusters`/`queries` provenance into the first-seen article
+    instead of discarding it (SI8-INTEL-NEWS-4A, Phase 1). No article's
+    clusters/queries are ever narrowed to a single arbitrary value: when the
+    same underlying title-key is found via more than one cluster or query,
+    the surviving article carries the UNION.
+
+    Pure function, no network access -- the caller (fetch_all_articles) is
+    responsible for attaching each article's originating `clusters`/`queries`
+    sets before calling this."""
+    seen: dict[str, dict] = {}
+    order: list[str] = []
+    for a in articles:
+        key = _title_dedup_key(a["title"])
+        if not key:
+            continue
+        if key not in seen:
+            # Defensive copy of the provenance sets so later mutation of one
+            # article's set can never retroactively affect another.
+            a = {**a, "clusters": set(a.get("clusters", set())), "queries": set(a.get("queries", set()))}
+            seen[key] = a
+            order.append(key)
+        else:
+            existing = seen[key]
+            existing["clusters"] |= set(a.get("clusters", set()))
+            existing["queries"] |= set(a.get("queries", set()))
+    return [seen[k] for k in order]
+
+
 def fetch_all_articles(lookback_days: int) -> list[dict]:
-    """Fetch and deduplicate articles across all keyword clusters."""
+    """Fetch and deduplicate articles across all keyword clusters.
+
+    SI8-INTEL-NEWS-4A: each article dict now also carries `clusters` and
+    `queries` (sets of the NEWS-3 taxonomy identifiers that surfaced it) so
+    downstream code (development.py) never has to reconstruct provenance by
+    keyword-guessing. This is purely additive -- no existing key is removed
+    or renamed, so the legacy email/log rendering path is unaffected."""
     all_articles = []
 
     for cluster in KEYWORD_CLUSTERS:
         print(f"  Fetching: {cluster['name']}")
         for query in cluster["queries"]:
             articles = fetch_google_news(query, lookback_days)
+            for a in articles:
+                a["clusters"] = {cluster["name"]}
+                a["queries"] = {query}
             all_articles.extend(articles)
             time.sleep(0.3)  # Polite delay between requests
 
-    # Deduplicate by normalized title hash (same article surfaces via multiple queries)
-    seen = set()
-    unique = []
-    for a in all_articles:
-        # Normalize title for dedup: lowercase, strip punctuation
-        import re
-        key = re.sub(r"[^a-z0-9]", "", a["title"].lower())[:80]
-        if key and key not in seen:
-            seen.add(key)
-            unique.append(a)
+    unique = dedupe_and_merge_provenance(all_articles)
 
     # Sort by date descending
     unique.sort(key=lambda x: x.get("pub_date", datetime.min.replace(tzinfo=timezone.utc)), reverse=True)
