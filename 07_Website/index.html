@@ -346,6 +346,30 @@
   </div>
 </footer>
 
+<!-- Forward approved campaign parameters to the Commercial Readiness Check links.
+     Only utm_source/utm_medium/utm_campaign/utm_content/ref are forwarded; nothing
+     else. With none present the links stay untouched. Fail-safe: this only ever
+     rewrites hrefs, so any error leaves the plain CRC links working. -->
+<script>
+  (function() {
+    try {
+      var CRC_URL = 'https://app.superimmersive8.com/crc';
+      var KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'ref'];
+      var current = new URLSearchParams(window.location.search);
+      var forward = new URLSearchParams();
+      KEYS.forEach(function(key) {
+        var value = current.get(key);
+        if (value) forward.set(key, value);
+      });
+      var query = forward.toString();
+      if (!query) return;
+      document.querySelectorAll('a[href="' + CRC_URL + '"]').forEach(function(el) {
+        el.setAttribute('href', CRC_URL + '?' + query);
+      });
+    } catch (e) {}
+  })();
+</script>
+
 <!-- Calendly CTA click tracking -->
 <script>
   document.querySelectorAll('a[href*="calendly.com"]').forEach(function(el) {
