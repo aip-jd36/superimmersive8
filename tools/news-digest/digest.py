@@ -28,6 +28,18 @@ from pathlib import Path
 from anthropic import Anthropic
 from keywords import KEYWORD_CLUSTERS, SI8_CONTEXT
 
+# SI8-INTEL-NEWS-4B: the Development-centric pipeline. None of these
+# modules construct their own model/network client -- each receives the
+# module-level `client` below via dependency injection, keeping every real
+# network/DB touchpoint in this codebase visible at the call site (see
+# tests/test_boundary.py).
+from development import build_developments
+from interpretation import interpret_development
+from triage import triage_developments
+from prioritization import prioritize_developments
+from composition import build_intelligence_digest, IntelligenceDigest
+from email_renderer import build_intelligence_email_html
+
 # Path to the digest log relative to this script (tools/news-digest/ → repo root)
 REPO_ROOT = Path(__file__).parent.parent.parent
 DIGEST_LOG_PATH = REPO_ROOT / "02_Marketing" / "intelligence" / "DIGEST-LOG.md"
@@ -188,48 +200,34 @@ def fetch_all_articles(lookback_days: int) -> list[dict]:
 
 
 # ---------------------------------------------------------------------------
-# 2. Score articles with Claude
+# 2. Coarse relevance triage-scoring with Claude (SI8-INTEL-NEWS-4B)
 # ---------------------------------------------------------------------------
+#
+# SI8-INTEL-NEWS-4B retired this stage's former role as the live email's
+# authoritative judgment (it never was semantically fit for that -- see the
+# NEWS-4B Pre-Implementation Architecture Repair, Task 1: its own action
+# vocabulary was calibrated around "would this make a good LinkedIn post,"
+# not "how material is this to SI8"). It survives, trimmed, ONLY as a
+# cheap, in-domain/off-topic screen feeding triage.py's admission decision
+# -- never as a Development-level materiality judgment. Marketing-copy
+# generation (LinkedIn/Instagram/carousel) has been removed from this
+# prompt entirely, not merely left unrendered -- the live workflow no
+# longer spends tokens generating content it doesn't use.
 
-SCORE_PROMPT = """You are an intelligence analyst for SuperImmersive 8 (SI8).
+SCORE_PROMPT = """You are an intelligence triage analyst for SuperImmersive 8 (SI8).
 
 {context}
 
-## SI8 BRAND VOICE SPECIFICATION
-{si8_voice}
+Assess the following {n} news articles ONLY for whether they are plausibly relevant to SI8's business domain. This is a coarse relevance screen, not a final importance judgment -- a later stage makes the actual materiality determination with full context. For each article, return:
 
-Assess the following {n} news articles for relevance to SI8's business. For each article, return:
-
-- relevance_score: integer 1–10 (10 = directly impacts SI8's positioning or validates its pain point)
-- relevance_reason: 1–2 sentences explaining why this matters (or doesn't) to SI8 specifically
-- action: one of:
-    "post_linkedin"   — score 7+, has a timely angle JD can post about on LinkedIn
-    "update_docs"     — should update SI8's internal research/competitive docs
-    "post_and_update" — both of the above
-    "monitor"         — relevant context, no immediate action needed (score 4–6)
-    "skip"            — not relevant to SI8 (score 1–3)
-- doc_to_update: if action includes update_docs, name the specific SI8 file (e.g., "COMPETITIVE_ANALYSIS_CAAS_2026.md", "BUSINESS_PLAN_v4.md", "COMPETITOR-FADEL-ANALYSIS.md") — null if not applicable
-- linkedin_post: if action includes post_linkedin, a ready-to-post LinkedIn update for the SI8 company page (not JD personally). 3–5 sentences. Lead with the news signal. Connect it to the compliance/documentation gap SI8 solves. End with a direct implication written for the ICP most relevant to this article — choose one: (A) Creative Directors / Senior Production Specialists at agencies with finserv-exposed clients who get blocked at brand legal approval; (B) BA/Broadcast Affairs / Line Producers / Executive Producers who face a clearance gate before broadcast/platform delivery or need E&O coverage for AI content; (C) Brand Legal / IP Counsel / Agency GC at advertisers who are setting the documentation standard that flows to agencies. Match the ICP to the article angle. Direct, no fluff, no hashtags in the body, no em-dashes. Suitable to copy/paste with minimal editing. null if not applicable.
-
-CRITICAL — do not conflate disclosure labeling laws with Chain of Title documentation in any generated content. EU AI Act Article 50 requires disclosure LABELS embedded in content (tool providers embed C2PA marks; deployers label deepfakes). NY S.8420-A requires a disclosure notice in ads. Platform policies require disclosure labels. These are all about a label IN the creative. Chain of Title is a separate backend IP provenance document covering copyright, right of publicity, and trademark — used for brand legal campaign approval, E&O underwriting, and litigation defense. When writing posts about disclosure laws, position Chain of Title as the companion document that answers the IP provenance questions BEHIND the disclosure, not as the disclosure mechanism itself. Never write that disclosure laws "require Chain of Title" or that Article 50 mandates IP provenance documentation. The correct framing: "The disclosure law tells you to put a label in the ad. Chain of Title proves the content behind the label is IP-clean."
-- linkedin_hashtags: if action includes post_linkedin, 3–5 hashtags for the LinkedIn post. Always include: #AIVideo #ChainOfTitle #ContentCompliance. Add 0–2 from this pool based on article content: #AIRegulation #BrandSafety #GenerativeAI #AIMarketing #EUAIAct #DigitalRights #AIRights #EOInsurance. Return as a single space-separated string. null if not applicable.
-- instagram_caption: if action includes post_linkedin, a ready-to-post Instagram caption. Structure: hook line (1 sentence, same idea as Slide 1) → 2–3 expanding lines → 1 line connecting to SI8 or Chain of Title → "→ Link in bio." → hashtags on new line (always #AIVideo #ChainOfTitle #ContentCompliance plus 0–2 dynamic from the same pool above, max 5 total). null if not applicable.
-- carousel_slides: if action includes post_linkedin, a 6-slide carousel breakdown as a JSON array. Write for Instagram carousel cards at 1080x1080px — punchy phrases, not prose sentences. Strict word limits per slide: S1 hook (max 8 words), S2–S5 content (max 20 words each, 2–3 short punchy lines), S6 CTA (max 6 words). Format: [{{"slide":1,"type":"hook","text":"max 8 word hook"}},{{"slide":2,"type":"content","label":"THE SIGNAL","text":"max 20 words"}},{{"slide":3,"type":"content","label":"THE GAP","text":"max 20 words"}},{{"slide":4,"type":"content","label":"THE IMPACT","text":"max 20 words"}},{{"slide":5,"type":"si8_angle","label":"WHY THIS MATTERS","text":"max 20 words connecting to Chain of Title"}},{{"slide":6,"type":"cta","text":"max 6 words"}}]. null if not applicable.
+- relevance_score: integer 1-10 (1-3 = not relevant to SI8's business domain at all; 4-10 = plausibly in SI8's domain, worth a closer look -- do not attempt a fine-grained importance ranking here)
+- relevance_reason: one short sentence explaining the score
 
 Return ONLY a valid JSON array with exactly {n} objects in the same order as the input. No prose, no markdown fences.
 
 Example:
 [
-  {{
-    "relevance_score": 9,
-    "relevance_reason": "E&O insurers adding AI video exclusions directly validates SI8's core pain point and gives JD a timely hook.",
-    "action": "post_and_update",
-    "doc_to_update": "COMPETITIVE_ANALYSIS_CAAS_2026.md",
-    "linkedin_post": "E&O insurers are now excluding AI-generated video from standard media liability policies. The reason is straightforward: there is no documented Chain of Title proving who owns what. SI8 Certified provides exactly that documentation -- a structured 90-minute audit that gives insurers and brand legal teams what they need to approve campaigns. If your agency is producing AI video for clients, this is the moment to get documentation in place before your insurer does it for you.",
-    "linkedin_hashtags": "#AIVideo #ChainOfTitle #ContentCompliance #EOInsurance #BrandSafety",
-    "instagram_caption": "E&O insurers are now excluding AI-generated video from standard media liability policies.\n\nThe reason is simple: no Chain of Title means no proof of what was used to make the content. Brand legal teams and underwriters are asking the same question.\n\nChain of Title documentation is what closes that gap.\n\n→ Link in bio.\n\n#AIVideo #ChainOfTitle #ContentCompliance #EOInsurance #BrandSafety",
-    "carousel_slides": [{{"slide":1,"type":"hook","text":"E&O insurers are now excluding AI video"}},{{"slide":2,"type":"content","label":"THE SIGNAL","text":"Standard E&O policies now exclude AI video.\nReason: no proof of what tools made it."}},{{"slide":3,"type":"content","label":"THE GAP","text":"Most agencies can't answer the first question.\nWhich tools? Was training data cleared?"}},{{"slide":4,"type":"content","label":"THE IMPACT","text":"No documentation. No insurance.\nNo insurance. No brand approval."}},{{"slide":5,"type":"si8_angle","label":"WHY THIS MATTERS","text":"Chain of Title closes that gap.\n90-minute review. One PDF. Legal says yes."}},{{"slide":6,"type":"cta","text":"Get your AI video documented"}}]
-  }}
+  {{"relevance_score": 8, "relevance_reason": "Directly concerns AI video commercial licensing terms, squarely in SI8's domain."}}
 ]
 
 Articles:
@@ -266,7 +264,11 @@ def sanitize_json(text: str) -> str:
 
 
 def score_batch(articles: list[dict]) -> list[dict]:
-    """Score a batch of articles with Claude haiku. Returns articles with score fields added."""
+    """Coarse in-domain relevance triage-scoring for a batch of articles
+    (SI8-INTEL-NEWS-4B). Returns articles with `relevance_score`/
+    `relevance_reason` added -- a triage INPUT signal only, never a
+    Development-level materiality judgment (see triage.py's own module
+    docstring for the full distinction)."""
     articles_text = "\n\n".join(
         f"[{i+1}] Title: {a['title']}\nSource: {a['source']}\nDate: {a['published']}\nSummary: {a['summary'] or '(no summary)'}"
         for i, a in enumerate(articles)
@@ -274,7 +276,6 @@ def score_batch(articles: list[dict]) -> list[dict]:
 
     prompt = SCORE_PROMPT.format(
         context=SI8_CONTEXT,
-        si8_voice=load_voice_spec(),
         n=len(articles),
         articles=articles_text,
     )
@@ -282,7 +283,7 @@ def score_batch(articles: list[dict]) -> list[dict]:
     try:
         response = client.messages.create(
             model="claude-haiku-4-5-20251001",
-            max_tokens=8000,
+            max_tokens=2000,
             messages=[{"role": "user", "content": prompt}],
         )
 
@@ -302,14 +303,8 @@ def score_batch(articles: list[dict]) -> list[dict]:
 
         for article, score_data in zip(articles, scores):
             article.update({
-                "relevance_score":   score_data.get("relevance_score", 0),
-                "relevance_reason":  score_data.get("relevance_reason", ""),
-                "action":            score_data.get("action", "skip"),
-                "doc_to_update":     score_data.get("doc_to_update"),
-                "linkedin_post":     score_data.get("linkedin_post"),
-                "linkedin_hashtags": score_data.get("linkedin_hashtags"),
-                "instagram_caption": score_data.get("instagram_caption"),
-                "carousel_slides":   score_data.get("carousel_slides"),
+                "relevance_score":  score_data.get("relevance_score", 0),
+                "relevance_reason": score_data.get("relevance_reason", ""),
             })
 
         return articles
@@ -320,9 +315,6 @@ def score_batch(articles: list[dict]) -> list[dict]:
             article.update({
                 "relevance_score": 0,
                 "relevance_reason": "Scoring unavailable",
-                "action": "skip",
-                "doc_to_update": None,
-                "draft_hook": None,
             })
         return articles
 
@@ -345,7 +337,20 @@ def score_articles(articles: list[dict], batch_size: int = 8) -> list[dict]:
 
 
 # ---------------------------------------------------------------------------
-# 3. Build HTML email
+# LEGACY (dormant) -- article-centric HTML email + DIGEST-LOG rendering.
+#
+# SI8-INTEL-NEWS-4B retired this section as the live workflow's authoritative
+# output. main() no longer calls any function below this point -- see "3.
+# Development-centric composition + rendering" further down for what main()
+# actually calls now. Kept, not deleted, per NEWS-4B's own instruction not
+# to remove reusable code without a tightly-scoped reason: (a) NEWS-4A's own
+# tests/test_legacy_compatibility.py exercises these functions directly to
+# prove the earlier provenance-enrichment change didn't break them, and (b)
+# nothing about them is unsafe to leave dormant -- they render whatever
+# dict shape they're given and are simply never invoked in the live path.
+# They still tolerate the trimmed article dict shape gracefully (they
+# `.get()` every legacy field that no longer gets populated, e.g.
+# `linkedin_post`, and simply omit that block when absent).
 # ---------------------------------------------------------------------------
 
 ACTION_BADGES = {
@@ -551,15 +556,17 @@ def send_email(html: str, week_str: str, dry_run: bool = False) -> bool:
     )
 
     if response.status_code in (200, 201):
-        print(f"✓ Digest sent to {TO_EMAIL}")
+        print(f"Digest sent to {TO_EMAIL}")
         return True
     else:
-        print(f"✗ Email failed: {response.status_code} {response.text}", file=sys.stderr)
+        print(f"Email failed: {response.status_code} {response.text}", file=sys.stderr)
         return False
 
 
 # ---------------------------------------------------------------------------
-# 5. Write digest log to repo
+# LEGACY (dormant) -- article-centric DIGEST-LOG writer. See the "LEGACY
+# (dormant)" comment above article_card/build_email_html -- same rationale.
+# main() now calls update_development_digest_log() instead (below).
 # ---------------------------------------------------------------------------
 
 ACTION_LABELS = {
@@ -648,20 +655,137 @@ def update_digest_log(all_scored: list[dict], week_str: str, lookback_days: int)
 
 
 # ---------------------------------------------------------------------------
-# 6. Main
+# 6. Development-level DIGEST-LOG (SI8-INTEL-NEWS-4B)
 # ---------------------------------------------------------------------------
+#
+# Same file, same mechanics (weekly section, prepended, git-committed by
+# the workflow) as the legacy log above -- only the row granularity changes,
+# from article to Development. Nothing in this repository parses
+# DIGEST-LOG.md back in (confirmed by repository-wide search during the
+# NEWS-4B investigation), so this remains a disposable, human-readable,
+# append-only ledger -- explicitly NOT cross-run machine memory. No model
+# chain-of-thought is logged, only the already-bounded rationale strings.
+
+def _dev_log_row(development, interp, priority=None) -> str:
+    title = development.canonical_title.replace("|", "\\|")
+    url = _primary_dev_url(development)
+    clusters = ", ".join(sorted(development.clusters)).replace("|", "\\|")
+    sources = f"{development.source_count} ({', '.join(development.sources)})".replace("|", "\\|")
+    rationale = (priority.rationale if priority else interp.action).replace("|", "\\|")
+    return f"| [{title}]({url}) | {clusters} | {sources} | {rationale} | ☐ |"
+
+
+def _primary_dev_url(development) -> str:
+    ordered = sorted(development.articles, key=lambda a: a.get("pub_date") or "")
+    return ordered[0].get("url", "#") if ordered else "#"
+
+
+def build_development_log_entry(digest: IntelligenceDigest, run_date: str) -> str:
+    """Build a markdown section for this run's Development-centric digest,
+    to prepend to DIGEST-LOG.md."""
+    header = (
+        f"## Week of {digest.date}\n"
+        f"*Run: {run_date} · {len(digest.high)} high · {len(digest.monitor)} monitor · "
+        f"{digest.deferred_count} deferred · lookback {LAST_LOOKBACK_DAYS} days*\n"
+    )
+
+    high_section = ""
+    if digest.high:
+        rows = "\n".join(_dev_log_row(d, interp, p) for d, interp, p in digest.high)
+        high_section = (
+            "\n### Material Developments (HIGH)\n\n"
+            "| Development | Cluster(s) | Sources | Rationale | Acted On |\n"
+            "|-------------|------------|---------|-----------|----------|\n"
+            + rows + "\n"
+        )
+
+    monitor_section = ""
+    if digest.monitor:
+        rows = "\n".join(_dev_log_row(d, interp, p) for d, interp, p in digest.monitor)
+        monitor_section = (
+            "\n### Monitor\n\n"
+            "| Development | Cluster(s) | Sources | Rationale | Acted On |\n"
+            "|-------------|------------|---------|-----------|----------|\n"
+            + rows + "\n"
+        )
+
+    degraded_section = ""
+    if digest.degraded_notes:
+        degraded_section = (
+            "\n**Degraded this run:** " + "; ".join(digest.degraded_notes) + "\n"
+        )
+
+    return header + high_section + monitor_section + degraded_section + "\n---\n"
+
+
+def update_development_digest_log(digest: "IntelligenceDigest") -> None:
+    """Prepend this run's Development-centric entry to DIGEST-LOG.md,
+    preserving existing (article-shaped, historical) content untouched."""
+    run_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    new_entry = build_development_log_entry(digest, run_date)
+
+    DIGEST_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+    if DIGEST_LOG_PATH.exists():
+        existing = DIGEST_LOG_PATH.read_text(encoding="utf-8")
+        divider = "---\n\n"
+        if divider in existing:
+            header, rest = existing.split(divider, 1)
+            updated = header + divider + new_entry + "\n" + rest
+        else:
+            updated = existing.rstrip() + "\n\n---\n\n" + new_entry
+    else:
+        header = (
+            "# SI8 Intelligence — Digest Development Log\n\n"
+            "Material developments surfaced by the News Intelligence pipeline, "
+            "grouped from source articles into Developments (SI8-INTEL-NEWS-4B). "
+            "Entries before this line's introduction are article-level, from the "
+            "legacy pipeline, and are historical record only.\n"
+            "**Auto-updated** by the digest script via GitHub Actions.\n\n"
+            "To mark a Development as acted on, change `☐` → `☑` in the last column.\n\n"
+            "---\n\n"
+        )
+        updated = header + new_entry
+
+    DIGEST_LOG_PATH.write_text(updated, encoding="utf-8")
+    print(f"Digest log updated: {DIGEST_LOG_PATH}")
+
+
+# ---------------------------------------------------------------------------
+# 7. Main (SI8-INTEL-NEWS-4B production cutover)
+# ---------------------------------------------------------------------------
+#
+# Authoritative live pipeline:
+#   fetch_all_articles (provenance-enriched)
+#     -> score_articles (coarse in-domain triage input only)
+#     -> build_developments (grouping)
+#     -> triage_developments (resource-allocation admission)
+#     -> interpret_development, per admitted Development (bounded interpretation)
+#     -> prioritize_developments (authoritative, post-interpretation priority)
+#     -> build_intelligence_digest (composition, incl. Executive Summary)
+#     -> build_intelligence_email_html (rendering)
+#     -> send_email
+#     -> update_development_digest_log
+#
+# No automatic LinkedIn/Instagram/carousel generation occurs anywhere in
+# this path. No Living Knowledge or CRC system is imported or called
+# anywhere in this module or any module it imports.
+
+LAST_LOOKBACK_DAYS = 7  # set by main() each run; read by build_development_log_entry
+
 
 def main():
-    parser = argparse.ArgumentParser(description="SI8 Weekly News Intelligence Digest")
-    parser.add_argument("--dry-run", action="store_true", help="Score articles but don't send email")
+    global LAST_LOOKBACK_DAYS
+    parser = argparse.ArgumentParser(description="SI8 News Intelligence Digest")
+    parser.add_argument("--dry-run", action="store_true", help="Build the digest but don't send email")
     parser.add_argument("--lookback", type=int, default=7, help="Days to look back (default: 7)")
     args = parser.parse_args()
+    LAST_LOOKBACK_DAYS = args.lookback
 
     week_str = datetime.now().strftime("%B %d, %Y")
-    print(f"\nSI8 Intelligence Digest — {week_str}")
+    print(f"\nSI8 News Intelligence — {week_str}")
     print(f"Lookback: {args.lookback} days | Dry run: {args.dry_run}\n")
 
-    # Step 1: Fetch
     print("Step 1: Fetching articles...")
     articles = fetch_all_articles(args.lookback)
     print(f"  → {len(articles)} unique articles\n")
@@ -670,39 +794,65 @@ def main():
         print("No articles found. Check network or keyword queries.")
         return
 
-    # Step 2: Score
-    print("Step 2: Scoring with Claude (claude-haiku-4-5)...")
+    print("Step 2: Coarse relevance triage-scoring...")
     scored = score_articles(articles)
-    relevant = [a for a in scored if a.get("action", "skip") != "skip"]
-    print(f"  → {len(relevant)} relevant (of {len(scored)} scored)\n")
+    print(f"  → scored {len(scored)} articles\n")
 
-    # Step 3: Build email
-    print("Step 3: Building email...")
-    html = build_email_html(relevant, week_str, args.lookback)
+    print("Step 3: Grouping articles into Developments...")
+    developments = build_developments(scored, client=client)
+    print(f"  → {len(developments)} Developments\n")
 
-    # Step 4: Send
-    print("Step 4: Sending email...")
+    print("Step 4: Triage (resource-allocation admission, not materiality)...")
+    triage_results = triage_developments(developments)
+    admitted_ids = {t.development_id for t in triage_results if t.admitted}
+    admitted_developments = [d for d in developments if d.id in admitted_ids]
+    print(f"  → {len(admitted_developments)} admitted, "
+          f"{len(developments) - len(admitted_developments)} deferred/excluded\n")
+
+    print("Step 5: Bounded interpretation of admitted Developments...")
+    interpreted = [
+        (d, interpret_development(d, client=client))
+        for d in admitted_developments
+    ]
+    print(f"  → {len(interpreted)} interpreted\n")
+
+    print("Step 6: Authoritative Development priority classification...")
+    priorities = prioritize_developments(interpreted, client=client)
+    print(f"  → {len(priorities)} classified\n")
+
+    print("Step 7: Composing intelligence digest...")
+    digest = build_intelligence_digest(
+        developments, triage_results, interpreted, priorities,
+        client=client, date_str=week_str,
+    )
+    print(f"  → {len(digest.high)} HIGH, {len(digest.monitor)} MONITOR, "
+          f"{len(digest.lk_product_signals)} LK/product signal(s), "
+          f"{len(digest.marketing_opportunities)} marketing opportunity(ies)\n")
+
+    print("Step 8: Rendering email...")
+    html = build_intelligence_email_html(digest)
+
+    print("Step 9: Sending email...")
     send_email(html, week_str, dry_run=args.dry_run)
 
-    # Step 5: Update digest log
-    print("Step 5: Updating digest log...")
-    update_digest_log(scored, week_str, args.lookback)
-
-    # Summary
-    high = [a for a in relevant if a.get("relevance_score", 0) >= 7]
-    mid = [a for a in relevant if 4 <= a.get("relevance_score", 0) <= 6]
+    print("Step 10: Updating Development-level digest log...")
+    update_development_digest_log(digest)
 
     print(f"\n{'='*60}")
-    print(f"DIGEST SUMMARY")
+    print("DIGEST SUMMARY")
     print(f"{'='*60}")
-    print(f"High relevance (7-10): {len(high)}")
-    print(f"Monitor (4-6):         {len(mid)}")
+    print(f"HIGH:      {len(digest.high)}")
+    print(f"MONITOR:   {len(digest.monitor)}")
+    print(f"Deferred:  {digest.deferred_count}")
+    if digest.degraded_notes:
+        print(f"Degraded:  {len(digest.degraded_notes)} note(s) -- see email/log")
     print()
 
-    if high:
-        print("Top articles:")
-        for a in high[:10]:
-            print(f"  [{a['relevance_score']}] {a['action']:<18} {a['title'][:60]}")
+    if digest.high:
+        print("HIGH developments:")
+        for d, _interp, p in digest.high[:10]:
+            flag = " [DEGRADED]" if p.degraded else ""
+            print(f"  [HIGH{flag}] {d.canonical_title[:70]}")
 
 
 if __name__ == "__main__":
