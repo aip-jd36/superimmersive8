@@ -219,6 +219,55 @@ assert_true "the single new commit's diff touches exactly both files, nothing el
   "[ \"\$(git -C '$origin' show --stat --format= main | grep -c 'DIGEST-')\" -eq 2 ]"
 
 echo ""
+echo "=== Case F (SI8-INTEL-NEWS-5B2): DIGEST-LOG.md, DIGEST-AUDIT.md, and RETRIEVAL-LOG.jsonl persist atomically, in one commit ==="
+REL_RETRIEVAL_PATH="02_Marketing/intelligence/RETRIEVAL-LOG.jsonl"
+origin="$(new_origin)"
+checkout="$(new_workflow_checkout "$origin")"
+awk '1; /^---$/ && !done {print ""; while ((getline line < "/tmp/newentry_a.txt") > 0) print line; done=1}' "$checkout/$REL_LOG_PATH" > "$checkout/$REL_LOG_PATH.new"
+mv "$checkout/$REL_LOG_PATH.new" "$checkout/$REL_LOG_PATH"
+mkdir -p "$checkout/$(dirname "$REL_AUDIT_PATH")"
+cat > "$checkout/$REL_AUDIT_PATH" <<'EOF'
+# SI8 News Intelligence -- Run Audit Log
+
+---
+
+## Week of September 29, 2026
+*Run: 2026-09-29 · 1 HIGH · 14 MONITOR · 4 OMIT · 24 excluded · 0 admission-capacity deferred · 43 total candidates*
+
+---
+EOF
+mkdir -p "$checkout/$(dirname "$REL_RETRIEVAL_PATH")"
+printf '{"run_date": "2026-09-29", "lookback_days": 7, "queries": []}\n' > "$checkout/$REL_RETRIEVAL_PATH"
+before_commit_count="$(git -C "$origin" log --oneline main | wc -l)"
+( cd "$checkout" && bash "$SCRIPT_UNDER_TEST" )
+after_commit_count="$(git -C "$origin" log --oneline main | wc -l)"
+assert_true "exactly one new commit landed (all three files committed together, not separately)" \
+  "[ $((after_commit_count - before_commit_count)) -eq 1 ]"
+assert_true "DIGEST-LOG.md update is present on origin/main" \
+  "git -C '$origin' show main:$REL_LOG_PATH | grep -q 'September 28, 2026'"
+assert_true "DIGEST-AUDIT.md is present on origin/main" \
+  "git -C '$origin' show main:$REL_AUDIT_PATH | grep -q 'Run Audit Log'"
+assert_true "RETRIEVAL-LOG.jsonl is present on origin/main" \
+  "git -C '$origin' show main:$REL_RETRIEVAL_PATH | grep -q '2026-09-29'"
+assert_true "the single new commit's diff touches exactly all three files, nothing else" \
+  "[ \"\$(git -C '$origin' show --stat --format= main | grep -cE 'DIGEST-|RETRIEVAL-LOG')\" -eq 3 ]"
+
+echo ""
+echo "=== Case G (SI8-INTEL-NEWS-5B2): RETRIEVAL-LOG.jsonl absent -> script still succeeds with just the other two files ==="
+origin="$(new_origin)"
+checkout="$(new_workflow_checkout "$origin")"
+awk '1; /^---$/ && !done {print ""; while ((getline line < "/tmp/newentry_a.txt") > 0) print line; done=1}' "$checkout/$REL_LOG_PATH" > "$checkout/$REL_LOG_PATH.new"
+mv "$checkout/$REL_LOG_PATH.new" "$checkout/$REL_LOG_PATH"
+# Deliberately do NOT create RETRIEVAL-LOG.jsonl -- mirrors a run where
+# retrieval-log persistence failed (fail-open) but DIGEST-LOG.md still
+# updated normally.
+( cd "$checkout" && bash "$SCRIPT_UNDER_TEST" )
+assert_true "DIGEST-LOG.md update still lands on origin/main" \
+  "git -C '$origin' show main:$REL_LOG_PATH | grep -q 'September 28, 2026'"
+assert_true "no RETRIEVAL-LOG.jsonl path was ever staged (absent file never blocks the commit)" \
+  "! git -C '$origin' show main:$REL_RETRIEVAL_PATH >/dev/null 2>&1"
+
+echo ""
 echo "============================================================"
 echo "push_digest_log.sh regression results: $pass_count passed, $fail_count failed"
 echo "============================================================"

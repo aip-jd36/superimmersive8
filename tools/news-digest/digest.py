@@ -21,6 +21,7 @@ import argparse
 import hashlib
 import feedparser
 import requests
+from dataclasses import asdict
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
@@ -40,11 +41,13 @@ from prioritization import prioritize_developments
 from composition import build_intelligence_digest, IntelligenceDigest
 from email_renderer import build_intelligence_email_html
 from audit import build_run_audit, RunAudit
+from retrieval_observability import CandidateRecord, QueryRetrievalRecord, RunRetrievalRecord
 
 # Path to the digest log relative to this script (tools/news-digest/ → repo root)
 REPO_ROOT = Path(__file__).parent.parent.parent
 DIGEST_LOG_PATH = REPO_ROOT / "02_Marketing" / "intelligence" / "DIGEST-LOG.md"
 AUDIT_LOG_PATH = REPO_ROOT / "02_Marketing" / "intelligence" / "DIGEST-AUDIT.md"
+RETRIEVAL_LOG_PATH = REPO_ROOT / "02_Marketing" / "intelligence" / "RETRIEVAL-LOG.jsonl"
 VOICE_SPEC_PATH = REPO_ROOT / "02_Marketing" / "brand" / "SI8_VOICE.md"
 
 def load_voice_spec() -> str:
@@ -78,34 +81,71 @@ client = Anthropic(api_key=ANTHROPIC_API_KEY)
 # 1. Fetch articles from Google News RSS
 # ---------------------------------------------------------------------------
 
-def fetch_google_news(query: str, lookback_days: int) -> list[dict]:
-    """Fetch recent articles from Google News RSS for a search query."""
+def _split_title_source(raw_title: str) -> tuple[str, str]:
+    """Extract source name from a Google News RSS title (format
+    "Title - Source"). Pulled out as its own function (SI8-INTEL-
+    NEWS-5B2) purely so the SAME title/source parsing can be applied to
+    every raw candidate for observability, not just accepted ones --
+    behaviorally identical to the parsing fetch_google_news() has always
+    done for accepted articles."""
+    title = raw_title.strip()
+    source = "Unknown"
+    if " - " in title:
+        parts = title.rsplit(" - ", 1)
+        title = parts[0].strip()
+        source = parts[1].strip()
+    return title, source
+
+
+def _fetch_google_news_observed(
+    query: str, lookback_days: int, *, cluster: str
+) -> tuple[list[dict], "QueryRetrievalRecord"]:
+    """Same retrieval + date/lookback logic fetch_google_news() has always
+    used, restructured (SI8-INTEL-NEWS-5B2) so the REJECTED half of the
+    existing accept/reject decision is also captured, not just the
+    accepted half. The returned `list[dict]` of accepted articles is
+    unchanged in content, shape, and order from the pre-5B2 behavior --
+    this function OBSERVES the existing retrieval/date-filtering decision,
+    it does not change it."""
     encoded = requests.utils.quote(query)
     url = f"https://news.google.com/rss/search?q={encoded}&hl=en-US&gl=US&ceid=US:en"
 
     try:
         feed = feedparser.parse(url)
         articles = []
+        candidates: list[CandidateRecord] = []
+        outside_lookback = 0
+        unparseable_date = 0
         cutoff = datetime.now(timezone.utc) - timedelta(days=lookback_days)
 
         for entry in feed.entries:
-            # Parse publication date
+            raw_title = entry.get("title", "")
+            published_raw = entry.get("published", "")
+            title, source = _split_title_source(raw_title)
+
+            # Parse publication date -- identical logic/order to the
+            # pre-5B2 implementation; only the rejected branches now
+            # record a CandidateRecord instead of a silent `continue`.
             try:
-                pub_date = parsedate_to_datetime(entry.get("published", ""))
+                pub_date = parsedate_to_datetime(published_raw)
                 if pub_date.tzinfo is None:
                     pub_date = pub_date.replace(tzinfo=timezone.utc)
                 if pub_date < cutoff:
+                    outside_lookback += 1
+                    candidates.append(CandidateRecord(
+                        title=title, source=source, published_raw=published_raw,
+                        pub_date_iso=pub_date.isoformat(), cluster=cluster, query=query,
+                        disposition="outside_lookback",
+                    ))
                     continue
             except Exception:
+                unparseable_date += 1
+                candidates.append(CandidateRecord(
+                    title=title, source=source, published_raw=published_raw,
+                    pub_date_iso=None, cluster=cluster, query=query,
+                    disposition="unparseable_date",
+                ))
                 continue  # Skip entries with unparseable dates
-
-            # Extract source name from title (Google News format: "Title - Source")
-            title = entry.get("title", "").strip()
-            source = "Unknown"
-            if " - " in title:
-                parts = title.rsplit(" - ", 1)
-                title = parts[0].strip()
-                source = parts[1].strip()
 
             summary_html = entry.get("summary", "")
             import re
@@ -122,16 +162,45 @@ def fetch_google_news(query: str, lookback_days: int) -> list[dict]:
                 "title": title,
                 "url": resolved_url,
                 "source": source,
-                "published": entry.get("published", ""),
+                "published": published_raw,
                 "pub_date": pub_date,
                 "summary": summary,
             })
+            candidates.append(CandidateRecord(
+                title=title, source=source, published_raw=published_raw,
+                pub_date_iso=pub_date.isoformat(), cluster=cluster, query=query,
+                disposition="accepted",
+            ))
 
-        return articles
+        record = QueryRetrievalRecord(
+            cluster=cluster, query=query, status="success",
+            returned_count=len(feed.entries),
+            accepted_count=len(articles),
+            outside_lookback_count=outside_lookback,
+            unparseable_date_count=unparseable_date,
+            candidates=candidates,
+        )
+        return articles, record
 
     except Exception as e:
         print(f"  Warning: RSS fetch failed for '{query}': {e}", file=sys.stderr)
-        return []
+        record = QueryRetrievalRecord(
+            cluster=cluster, query=query, status="failed",
+            error=str(e)[:500],
+        )
+        return [], record
+
+
+def fetch_google_news(query: str, lookback_days: int) -> list[dict]:
+    """Fetch recent articles from Google News RSS for a search query.
+    Public-contract-preserving thin wrapper (SI8-INTEL-NEWS-5B2) -- kept
+    for any caller that only needs accepted articles, not observability.
+    `cluster` is unknown at this call boundary, so it is recorded as
+    "" in the (discarded) observability record; callers that need
+    attributed observability should use fetch_all_articles(), which calls
+    _fetch_google_news_observed() directly with the real cluster name."""
+    articles, _ = _fetch_google_news_observed(query, lookback_days, cluster="")
+    return articles
 
 
 def _title_dedup_key(title: str) -> str:
@@ -180,13 +249,21 @@ def fetch_all_articles(lookback_days: int) -> list[dict]:
     `queries` (sets of the NEWS-3 taxonomy identifiers that surfaced it) so
     downstream code (development.py) never has to reconstruct provenance by
     keyword-guessing. This is purely additive -- no existing key is removed
-    or renamed, so the legacy email/log rendering path is unaffected."""
+    or renamed, so the legacy email/log rendering path is unaffected.
+
+    SI8-INTEL-NEWS-5B2: also builds and persists a RunRetrievalRecord --
+    diagnostic-only, additive. The accepted-article list this function
+    returns (content, shape, sort order) is unchanged from the pre-5B2
+    behavior regardless of whether retrieval-log persistence succeeds;
+    see update_retrieval_log()'s own fail-open contract below."""
     all_articles = []
+    query_records: list[QueryRetrievalRecord] = []
 
     for cluster in KEYWORD_CLUSTERS:
         print(f"  Fetching: {cluster['name']}")
         for query in cluster["queries"]:
-            articles = fetch_google_news(query, lookback_days)
+            articles, record = _fetch_google_news_observed(query, lookback_days, cluster=cluster["name"])
+            query_records.append(record)
             for a in articles:
                 a["clusters"] = {cluster["name"]}
                 a["queries"] = {query}
@@ -198,7 +275,47 @@ def fetch_all_articles(lookback_days: int) -> list[dict]:
     # Sort by date descending
     unique.sort(key=lambda x: x.get("pub_date", datetime.min.replace(tzinfo=timezone.utc)), reverse=True)
 
+    try:
+        run_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        retrieval_record = RunRetrievalRecord(
+            run_date=run_date, lookback_days=lookback_days, queries=query_records,
+        )
+        update_retrieval_log(retrieval_record)
+    except Exception as e:
+        # Diagnostic persistence must never affect which articles reach
+        # the downstream pipeline -- `unique` is already fully built above.
+        print(f"  Warning: retrieval-log persistence failed (pipeline unaffected): {e}", file=sys.stderr)
+
     return unique
+
+
+def build_retrieval_log_line(record: RunRetrievalRecord) -> str:
+    """Serialize one run's retrieval-observability record to a single JSON
+    line (SI8-INTEL-NEWS-5B2). Pure function, no I/O -- mirrors
+    build_audit_log_entry()'s pure-string-building pattern."""
+    return json.dumps(asdict(record), ensure_ascii=False)
+
+
+def update_retrieval_log(record: RunRetrievalRecord) -> None:
+    """Append this run's retrieval-observability record to
+    RETRIEVAL-LOG.jsonl (SI8-INTEL-NEWS-5B2) -- append-only, one JSON
+    object per line, one line per run. Deliberately NOT DIGEST-AUDIT.md's
+    prepend-after-divider mechanics: appending needs no read-parse-rewrite
+    of prior content, which is both simpler and safer under concurrent
+    runs. Deliberately a SEPARATE file from DIGEST-AUDIT.md/DIGEST-LOG.md
+    -- see retrieval_observability.py's module docstring for why raw
+    retrieval evidence and Development-level audit evidence must not be
+    collapsed into one artifact. Any caller of this function that wants
+    fail-open behavior (pipeline unaffected by a persistence failure) is
+    responsible for its own try/except, exactly as fetch_all_articles()
+    does -- mirrors update_audit_log()'s own convention of raising rather
+    than swallowing, so the fail-open decision stays visible at the call
+    site, not hidden inside this function."""
+    RETRIEVAL_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    line = build_retrieval_log_line(record)
+    with open(RETRIEVAL_LOG_PATH, "a", encoding="utf-8") as f:
+        f.write(line + "\n")
+    print(f"Retrieval log updated: {RETRIEVAL_LOG_PATH}")
 
 
 # ---------------------------------------------------------------------------
