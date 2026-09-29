@@ -189,6 +189,36 @@ assert_true "no force-push flag or refspec appears in the script's executable co
   "! grep -v '^\s*#' '$SCRIPT_UNDER_TEST' | grep -E -- '--force|push[^\"]*-f |push[^\"]*\+main'"
 
 echo ""
+echo "=== Case E (SI8-INTEL-NEWS-4C): DIGEST-LOG.md and DIGEST-AUDIT.md persist atomically, in one commit ==="
+REL_AUDIT_PATH="02_Marketing/intelligence/DIGEST-AUDIT.md"
+origin="$(new_origin)"
+checkout="$(new_workflow_checkout "$origin")"
+awk '1; /^---$/ && !done {print ""; while ((getline line < "/tmp/newentry_a.txt") > 0) print line; done=1}' "$checkout/$REL_LOG_PATH" > "$checkout/$REL_LOG_PATH.new"
+mv "$checkout/$REL_LOG_PATH.new" "$checkout/$REL_LOG_PATH"
+mkdir -p "$checkout/$(dirname "$REL_AUDIT_PATH")"
+cat > "$checkout/$REL_AUDIT_PATH" <<'EOF'
+# SI8 News Intelligence -- Run Audit Log
+
+---
+
+## Week of September 28, 2026
+*Run: 2026-09-28 · 2 HIGH · 12 MONITOR · 0 OMIT · 19 excluded · 0 admission-capacity deferred · 33 total candidates*
+
+---
+EOF
+before_commit_count="$(git -C "$origin" log --oneline main | wc -l)"
+( cd "$checkout" && bash "$SCRIPT_UNDER_TEST" )
+after_commit_count="$(git -C "$origin" log --oneline main | wc -l)"
+assert_true "exactly one new commit landed (both files committed together, not separately)" \
+  "[ $((after_commit_count - before_commit_count)) -eq 1 ]"
+assert_true "DIGEST-LOG.md update is present on origin/main" \
+  "git -C '$origin' show main:$REL_LOG_PATH | grep -q 'September 28, 2026'"
+assert_true "DIGEST-AUDIT.md is present on origin/main" \
+  "git -C '$origin' show main:$REL_AUDIT_PATH | grep -q 'Run Audit Log'"
+assert_true "the single new commit's diff touches exactly both files, nothing else" \
+  "[ \"\$(git -C '$origin' show --stat --format= main | grep -c 'DIGEST-')\" -eq 2 ]"
+
+echo ""
 echo "============================================================"
 echo "push_digest_log.sh regression results: $pass_count passed, $fail_count failed"
 echo "============================================================"

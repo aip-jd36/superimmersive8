@@ -59,6 +59,7 @@ _FORBIDDEN_PERSISTENCE_SUBSTRINGS = (
     "pickle",
     ".db",
     "DIGEST_LOG_PATH",  # log writing stays in digest.py's own orchestration layer, not in these pure modules
+    "AUDIT_LOG_PATH",   # same -- audit.py builds a RunAudit, it never touches a file path itself
 )
 
 # Every module in the Development-centric pipeline must import only from
@@ -74,10 +75,11 @@ _ALLOWED_IMPORT_ROOTS = {
     "dataclasses",
     "datetime",
     "typing",
-    "development",       # interpretation.py / triage.py / prioritization.py / composition.py's own intra-package imports
+    "development",       # interpretation.py / triage.py / prioritization.py / composition.py / audit.py's own intra-package imports
     "interpretation",    # prioritization.py / composition.py
-    "prioritization",    # composition.py
-    "triage",            # composition.py
+    "prioritization",    # composition.py / audit.py
+    "triage",            # composition.py / audit.py
+    "composition",       # audit.py (IntelligenceDigest)
     "policy",            # triage.py / prioritization.py / composition.py
 }
 
@@ -88,6 +90,7 @@ _MODULES_UNDER_TEST = [
     "prioritization.py",
     "composition.py",
     "policy.py",
+    "audit.py",
 ]
 
 # The exact NEWS-3 cluster identifiers (tools/news-digest/keywords.py) --
@@ -107,7 +110,7 @@ _KNOWN_CLUSTER_NAMES = (
     "material_capability_changes",
 )
 
-_GENERIC_MODULES = ["triage.py", "prioritization.py", "composition.py"]
+_GENERIC_MODULES = ["triage.py", "prioritization.py", "composition.py", "audit.py"]
 
 
 def _code_only(source: str) -> str:

@@ -72,6 +72,8 @@ class TestEndToEndMainRun(unittest.TestCase):
         self._tmpdir = tempfile.TemporaryDirectory()
         self._orig_log_path = digest.DIGEST_LOG_PATH
         digest.DIGEST_LOG_PATH = Path(self._tmpdir.name) / "DIGEST-LOG.md"
+        self._orig_audit_path = digest.AUDIT_LOG_PATH
+        digest.AUDIT_LOG_PATH = Path(self._tmpdir.name) / "DIGEST-AUDIT.md"
 
         self._orig_client = digest.client
         digest.client = self._FakeAnthropicClient()
@@ -90,6 +92,7 @@ class TestEndToEndMainRun(unittest.TestCase):
 
     def tearDown(self):
         digest.DIGEST_LOG_PATH = self._orig_log_path
+        digest.AUDIT_LOG_PATH = self._orig_audit_path
         digest.client = self._orig_client
         digest.fetch_all_articles = self._orig_fetch
         digest.send_email = self._orig_send_email
@@ -165,6 +168,15 @@ class TestEndToEndMainRun(unittest.TestCase):
         self.assertIn("News Intelligence", html)
         for field in ("linkedin_post", "instagram_caption", "carousel_slides", "Paste into Canva"):
             self.assertNotIn(field, html)
+
+        # SI8-INTEL-NEWS-4C: the audit log is written alongside, to its own
+        # redirected path (never the real project directory in a test).
+        self.assertTrue(digest.AUDIT_LOG_PATH.exists())
+        audit_text = digest.AUDIT_LOG_PATH.read_text(encoding="utf-8")
+        self.assertIn("Run Audit Log", audit_text)
+        self.assertIn("Regulator issues new AI advertising disclosure guidance", audit_text)
+        for field in ("linkedin_post", "instagram_caption", "carousel_slides"):
+            self.assertNotIn(field, audit_text)
 
 
 if __name__ == "__main__":

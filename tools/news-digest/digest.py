@@ -39,10 +39,12 @@ from triage import triage_developments
 from prioritization import prioritize_developments
 from composition import build_intelligence_digest, IntelligenceDigest
 from email_renderer import build_intelligence_email_html
+from audit import build_run_audit, RunAudit
 
 # Path to the digest log relative to this script (tools/news-digest/ → repo root)
 REPO_ROOT = Path(__file__).parent.parent.parent
 DIGEST_LOG_PATH = REPO_ROOT / "02_Marketing" / "intelligence" / "DIGEST-LOG.md"
+AUDIT_LOG_PATH = REPO_ROOT / "02_Marketing" / "intelligence" / "DIGEST-AUDIT.md"
 VOICE_SPEC_PATH = REPO_ROOT / "02_Marketing" / "brand" / "SI8_VOICE.md"
 
 def load_voice_spec() -> str:
@@ -752,7 +754,135 @@ def update_development_digest_log(digest: "IntelligenceDigest") -> None:
 
 
 # ---------------------------------------------------------------------------
-# 7. Main (SI8-INTEL-NEWS-4B production cutover)
+# 7. Run audit log (SI8-INTEL-NEWS-4C -- editorial decision observability)
+# ---------------------------------------------------------------------------
+#
+# A SEPARATE file from DIGEST-LOG.md, deliberately: DIGEST-LOG.md's own
+# established purpose/audience is content-workflow-facing (which admitted
+# Developments exist, for a human to consider acting on) -- dumping every
+# excluded/deferred/OMIT Development into that same file would roughly
+# double-to-triple its size every run with detail aimed at a different
+# audience (editorial/engineering review, not "what should I post about").
+# Reuses the exact same race-safe persistence mechanism as DIGEST-LOG.md
+# (push_digest_log.sh, extended to cover both paths in one commit) rather
+# than inventing a second persistence path. No raw article URL/body/
+# summary is written here -- only Development titles, clusters, source
+# counts, and the pipeline's own already-computed triage/priority
+# rationale strings.
+
+def _audit_row(record) -> str:
+    title = record.canonical_title.replace("|", "\\|")
+    clusters = ", ".join(sorted(record.clusters)).replace("|", "\\|")
+    return title, clusters
+
+
+def _prioritized_audit_row(r) -> str:
+    title, clusters = _audit_row(r)
+    rationale = r.rationale.replace("|", "\\|")
+    degraded = " [DEGRADED]" if r.degraded else ""
+    return f"| {r.tier}{degraded} | {title} | {clusters} | {r.source_count} | {rationale} |"
+
+
+def _disposition_audit_row(r) -> str:
+    title, clusters = _audit_row(r)
+    reason = r.reason.replace("|", "\\|")
+    return f"| {title} | {clusters} | {r.source_count} | {r.max_article_score} | {reason} |"
+
+
+def build_audit_log_entry(audit: RunAudit, run_date: str) -> str:
+    """Build a markdown section for this run's editorial audit trail, to
+    prepend to DIGEST-AUDIT.md. Pure/deterministic given `audit`."""
+    header = (
+        f"## Week of {audit.date}\n"
+        f"*Run: {run_date} · {audit.high_count} HIGH · {audit.monitor_count} MONITOR · "
+        f"{audit.omit_count} OMIT · {audit.excluded_count} excluded (below relevance floor) · "
+        f"{audit.capacity_deferred_count} admission-capacity deferred · "
+        f"{audit.total_candidate_count} total candidates*\n"
+    )
+
+    prioritized_section = ""
+    if audit.prioritized:
+        rows = "\n".join(_prioritized_audit_row(r) for r in audit.prioritized)
+        prioritized_section = (
+            "\n### Prioritized (reached bounded interpretation + priority)\n\n"
+            "| Tier | Development | Cluster(s) | Sources | Rationale |\n"
+            "|------|-------------|------------|---------|-----------|\n"
+            + rows + "\n"
+        )
+
+    excluded_section = ""
+    if audit.excluded:
+        rows = "\n".join(_disposition_audit_row(r) for r in audit.excluded)
+        excluded_section = (
+            "\n### Excluded -- below relevance floor (screened off-topic before interpretation)\n\n"
+            "| Development | Cluster(s) | Sources | Max article score | Reason |\n"
+            "|-------------|------------|---------|--------------------|--------|\n"
+            + rows + "\n"
+        )
+
+    deferred_section = ""
+    if audit.capacity_deferred:
+        rows = "\n".join(_disposition_audit_row(r) for r in audit.capacity_deferred)
+        deferred_section = (
+            "\n### Deferred -- admission capacity (on-topic, not reached this cycle)\n\n"
+            "| Development | Cluster(s) | Sources | Max article score | Reason |\n"
+            "|-------------|------------|---------|--------------------|--------|\n"
+            + rows + "\n"
+        )
+
+    summary_section = "\n### Executive Summary generated this run\n\n"
+    if audit.executive_summary_statements:
+        for i, (text, supporting_ids) in enumerate(audit.executive_summary_statements, 1):
+            summary_section += f"{i}. {text} (supports: {', '.join(supporting_ids)})\n"
+    else:
+        summary_section += "*No Executive Summary was generated this run (omitted by composition's fail-safe contract, or no HIGH developments existed).*\n"
+
+    return header + prioritized_section + excluded_section + deferred_section + summary_section + "\n---\n"
+
+
+def update_audit_log(audit: RunAudit) -> None:
+    """Prepend this run's editorial audit entry to DIGEST-AUDIT.md,
+    preserving prior runs' entries untouched. Same prepend-after-divider
+    mechanics as DIGEST-LOG.md, in a separate file."""
+    run_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    new_entry = build_audit_log_entry(audit, run_date)
+
+    AUDIT_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+    if AUDIT_LOG_PATH.exists():
+        existing = AUDIT_LOG_PATH.read_text(encoding="utf-8")
+        divider = "---\n\n"
+        if divider in existing:
+            header, rest = existing.split(divider, 1)
+            updated = header + divider + new_entry + "\n" + rest
+        else:
+            updated = existing.rstrip() + "\n\n---\n\n" + new_entry
+    else:
+        header = (
+            "# SI8 News Intelligence -- Run Audit Log\n\n"
+            "Internal editorial audit trail for the News Intelligence pipeline "
+            "(SI8-INTEL-NEWS-4C). Records what every retrieved Development "
+            "candidate WAS -- title, cluster, source count, and the pipeline's "
+            "own triage/priority disposition and rationale -- so a human can "
+            "review admitted vs. rejected material after a run.\n\n"
+            "This is an internal engineering/editorial record, not marketing "
+            "content (see DIGEST-LOG.md for that), and not Living Knowledge: "
+            "nothing here is a governed proposition, and nothing here is read "
+            "by CRC, Living Knowledge, or any automated downstream decision. "
+            "It is a durable record of decisions the pipeline already made, "
+            "not a new decision of its own.\n\n"
+            "**Auto-updated** by the digest script via GitHub Actions, "
+            "alongside DIGEST-LOG.md.\n\n"
+            "---\n\n"
+        )
+        updated = header + new_entry
+
+    AUDIT_LOG_PATH.write_text(updated, encoding="utf-8")
+    print(f"Audit log updated: {AUDIT_LOG_PATH}")
+
+
+# ---------------------------------------------------------------------------
+# 8. Main (SI8-INTEL-NEWS-4B production cutover)
 # ---------------------------------------------------------------------------
 #
 # Authoritative live pipeline:
@@ -766,6 +896,10 @@ def update_development_digest_log(digest: "IntelligenceDigest") -> None:
 #     -> build_intelligence_email_html (rendering)
 #     -> send_email
 #     -> update_development_digest_log
+#     -> build_run_audit / update_audit_log (SI8-INTEL-NEWS-4C, observability
+#        only -- a pure projection of objects already computed above; adds
+#        no new call, no new decision, and does not affect the email or
+#        DIGEST-LOG.md in any way)
 #
 # No automatic LinkedIn/Instagram/carousel generation occurs anywhere in
 # this path. No Living Knowledge or CRC system is imported or called
@@ -837,6 +971,12 @@ def main():
 
     print("Step 10: Updating Development-level digest log...")
     update_development_digest_log(digest)
+
+    print("Step 11: Updating editorial audit log...")
+    audit = build_run_audit(developments, triage_results, priorities, digest, date_str=week_str)
+    update_audit_log(audit)
+    print(f"  → {audit.excluded_count} excluded, {audit.capacity_deferred_count} capacity-deferred, "
+          f"{audit.omit_count} OMIT (audit-only; not shown in email or DIGEST-LOG.md)\n")
 
     print(f"\n{'='*60}")
     print("DIGEST SUMMARY")
