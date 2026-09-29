@@ -36,7 +36,7 @@ from development import Development
 from interpretation import BoundedInterpretation
 from policy import EXECUTIVE_SUMMARY_MAX_SOURCE_DEVELOPMENTS, EXECUTIVE_SUMMARY_MAX_STATEMENTS
 from prioritization import DevelopmentPriority
-from triage import TriageResult
+from triage import TriageResult, is_capacity_deferred, is_relevance_excluded
 
 HighItem = tuple[Development, BoundedInterpretation, DevelopmentPriority]
 MonitorItem = tuple[Development, BoundedInterpretation, DevelopmentPriority]
@@ -209,6 +209,15 @@ class IntelligenceDigest:
     lk_product_signals: list[SignalItem]
     marketing_opportunities: list[SignalItem]
     deferred_count: int
+    # SI8-INTEL-NEWS-4C1: `deferred_count` above is kept unchanged (still
+    # the total of both dispositions, for any existing reader of that one
+    # number) but is no longer the only signal available -- these two
+    # fields preserve the distinction triage.py already makes, so
+    # presentation can never again attribute a relevance-floor exclusion
+    # to admission capacity (or vice versa). Always
+    # deferred_count == relevance_excluded_count + capacity_deferred_count.
+    relevance_excluded_count: int = 0
+    capacity_deferred_count: int = 0
     degraded_notes: list[str] = field(default_factory=list)
 
 
@@ -270,7 +279,9 @@ def build_intelligence_digest(
     high.sort(key=lambda item: _earliest_pub_date(item[0]), reverse=True)
     monitor.sort(key=lambda item: _earliest_pub_date(item[0]), reverse=True)
 
-    deferred_count = sum(1 for t in triage_results if not t.admitted)
+    relevance_excluded_count = sum(1 for t in triage_results if is_relevance_excluded(t))
+    capacity_deferred_count = sum(1 for t in triage_results if is_capacity_deferred(t))
+    deferred_count = relevance_excluded_count + capacity_deferred_count
 
     executive_summary = build_executive_summary(high, client=client, model=model)
 
@@ -282,5 +293,7 @@ def build_intelligence_digest(
         lk_product_signals=lk_signals,
         marketing_opportunities=marketing,
         deferred_count=deferred_count,
+        relevance_excluded_count=relevance_excluded_count,
+        capacity_deferred_count=capacity_deferred_count,
         degraded_notes=degraded_notes,
     )

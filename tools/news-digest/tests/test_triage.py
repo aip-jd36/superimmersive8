@@ -13,7 +13,13 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from development import Development  # noqa: E402
-from triage import max_article_score, triage_developments  # noqa: E402
+from triage import (  # noqa: E402
+    TriageResult,
+    is_capacity_deferred,
+    is_relevance_excluded,
+    max_article_score,
+    triage_developments,
+)
 
 
 def _article(title, score, source="Outlet"):
@@ -168,6 +174,45 @@ class TestEveryDevelopmentGetsAnExplicitDecision(unittest.TestCase):
         devs = [_development(f"d{i}", [_article(f"a{i}", 5, "A")], ["cluster_x"]) for i in range(50)]
         results = triage_developments(devs, global_cap=5)
         self.assertEqual(len(results), 50)
+
+
+class TestDispositionClassifiers(unittest.TestCase):
+    """SI8-INTEL-NEWS-4C1: is_relevance_excluded()/is_capacity_deferred()
+    are the one shared classification of a non-admitted TriageResult --
+    every downstream consumer must agree with these, not re-derive its own
+    copy of the reason-string convention."""
+
+    def test_relevance_excluded_result_classified_correctly(self):
+        r = TriageResult(development_id="d1", admitted=False, reason="excluded: below relevance floor (2 < 3)", max_article_score=2)
+        self.assertTrue(is_relevance_excluded(r))
+        self.assertFalse(is_capacity_deferred(r))
+
+    def test_capacity_deferred_result_classified_correctly(self):
+        r = TriageResult(development_id="d1", admitted=False, reason="deferred: admission capacity exhausted this cycle", max_article_score=7)
+        self.assertFalse(is_relevance_excluded(r))
+        self.assertTrue(is_capacity_deferred(r))
+
+    def test_admitted_result_is_neither(self):
+        r = TriageResult(development_id="d1", admitted=True, reason="admitted for bounded interpretation", max_article_score=9)
+        self.assertFalse(is_relevance_excluded(r))
+        self.assertFalse(is_capacity_deferred(r))
+
+    def test_every_non_admitted_result_is_classified_exactly_once(self):
+        """The two predicates must be exhaustive and mutually exclusive
+        over every non-admitted result -- this is what guarantees
+        deferred_count == relevance_excluded_count + capacity_deferred_count
+        always holds in composition.py."""
+        results = [
+            TriageResult(development_id="a", admitted=False, reason="excluded: below relevance floor (1 < 3)", max_article_score=1),
+            TriageResult(development_id="b", admitted=False, reason="deferred: admission capacity exhausted this cycle", max_article_score=6),
+            TriageResult(development_id="c", admitted=True, reason="admitted for bounded interpretation", max_article_score=8),
+        ]
+        excluded = sum(1 for r in results if is_relevance_excluded(r))
+        deferred = sum(1 for r in results if is_capacity_deferred(r))
+        non_admitted = sum(1 for r in results if not r.admitted)
+        self.assertEqual(excluded + deferred, non_admitted)
+        self.assertEqual(excluded, 1)
+        self.assertEqual(deferred, 1)
 
 
 if __name__ == "__main__":

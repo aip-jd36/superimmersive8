@@ -152,7 +152,21 @@ def _marketing_opportunities_section(digest: IntelligenceDigest) -> str:
 
 
 def _footer_note(digest: IntelligenceDigest) -> str:
-    parts = [f"{digest.deferred_count} development(s) deferred this cycle (admission capacity, not judged unimportant)"]
+    """SI8-INTEL-NEWS-4C1: relevance-floor exclusions and admission-
+    capacity deferrals are rendered as separate statements, each present
+    only when its own count is nonzero -- never one figure attributed to
+    the wrong mechanism, and never a statement implying a mechanism that
+    didn't occur just to keep the footer symmetric."""
+    parts = []
+    if digest.relevance_excluded_count > 0:
+        parts.append(
+            f"{digest.relevance_excluded_count} development(s) screened out as outside the current SI8 relevance threshold"
+        )
+    if digest.capacity_deferred_count > 0:
+        parts.append(
+            f"{digest.capacity_deferred_count} relevant development(s) deferred due to this cycle's admission capacity "
+            "(not judged unimportant)"
+        )
     if digest.degraded_notes:
         parts.append(f"{len(digest.degraded_notes)} degraded note(s): " + "; ".join(digest.degraded_notes))
     return " &middot; ".join(_esc(p) for p in parts)
@@ -170,7 +184,16 @@ def build_intelligence_email_html(digest: IntelligenceDigest) -> str:
             + _marketing_opportunities_section(digest)
         )
 
-    stats_line = f"{len(digest.high)} high &middot; {len(digest.monitor)} monitor &middot; {digest.deferred_count} deferred"
+    stats_line = (
+        f"{len(digest.high)} high &middot; {len(digest.monitor)} monitor &middot; "
+        f"{digest.relevance_excluded_count} excluded &middot; {digest.capacity_deferred_count} deferred"
+    )
+
+    footer_text = _footer_note(digest)
+    footer_block = (
+        f'<div style="border-top:1px solid #eee;margin-top:28px;padding-top:14px;font-size:11px;color:#bbb;">{footer_text}</div>'
+        if footer_text else ""
+    )
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -186,9 +209,7 @@ def build_intelligence_email_html(digest: IntelligenceDigest) -> str:
 
     <div style="background:#fff;border-radius:0 0 8px 8px;padding:24px 28px;box-shadow:0 2px 6px rgba(0,0,0,0.07);">
       {body}
-      <div style="border-top:1px solid #eee;margin-top:28px;padding-top:14px;font-size:11px;color:#bbb;">
-        {_footer_note(digest)}
-      </div>
+      {footer_block}
       <div style="margin-top:12px;font-size:11px;color:#bbb;text-align:center;">
         SI8 News Intelligence &nbsp;&middot;&nbsp; PMF Strategy Inc. d/b/a SuperImmersive 8
       </div>

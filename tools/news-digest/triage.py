@@ -44,12 +44,38 @@ from policy import (
 class TriageResult:
     """Deterministic admission decision for exactly one Development.
     `admitted=True` means "worth a bounded-interpretation call" -- nothing
-    more. It is never read downstream as a materiality judgment."""
+    more. It is never read downstream as a materiality judgment.
+
+    `admitted=False` collapses two structurally distinct dispositions into
+    one boolean; `reason` is the one field that still distinguishes them
+    ("excluded: below relevance floor..." vs. "deferred: admission
+    capacity exhausted..."). Use is_relevance_excluded()/
+    is_capacity_deferred() below rather than re-deriving this classification
+    from the reason string independently in more than one place (SI8-INTEL-
+    NEWS-4C1 -- this exact duplication is what let the two dispositions get
+    silently collapsed in composition.py's original deferred_count)."""
 
     development_id: str
     admitted: bool
     reason: str
     max_article_score: int
+
+
+_EXCLUDED_REASON_PREFIX = "excluded:"
+
+
+def is_relevance_excluded(result: TriageResult) -> bool:
+    """True only for a non-admitted result that was screened out below the
+    off-topic relevance floor -- a judgment (this doesn't plausibly belong
+    to SI8's business domain), distinct from a capacity-driven deferral."""
+    return not result.admitted and result.reason.startswith(_EXCLUDED_REASON_PREFIX)
+
+
+def is_capacity_deferred(result: TriageResult) -> bool:
+    """True only for a non-admitted result that cleared the relevance
+    floor but was not admitted because this cycle's admission capacity was
+    exhausted -- NOT a materiality judgment."""
+    return not result.admitted and not result.reason.startswith(_EXCLUDED_REASON_PREFIX)
 
 
 def max_article_score(development: Development) -> int:
