@@ -9,6 +9,72 @@ This is an internal engineering/editorial record, not marketing content (see DIG
 ---
 
 ## Week of September 29, 2026
+*Run: 2026-09-29 · 1 HIGH · 18 MONITOR · 6 OMIT · 20 excluded (below relevance floor) · 0 admission-capacity deferred · 45 total candidates*
+
+### Prioritized (reached bounded interpretation + priority)
+
+| Tier | Development | Cluster(s) | Sources | Rationale |
+|------|-------------|------------|---------|-----------|
+| MONITOR | AI-powered marketing platform brings campaign planning, content creation, creator marketing and amplification together in one platform | buyer_risk_governance_signals | 2 | End-to-end agentic marketing platforms with reduced human checkpoints could drive demand for SI8's assurance services, but internal compliance mechanisms and actual customer demand remain unvalidated. |
+| OMIT | The Liability Chasm: Regulatory Expectations vs. Enterprise Reality | buyer_risk_governance_signals | 1 | Without access to the article's actual content, claims, or scope, no substantive judgment can be made about materiality to SI8's business or customers. |
+| OMIT | 7 Best AI Video Generators in 2026: Features, Pricing & Comparison | provider_commercial_terms | 1 | A generic product comparison article with no detail on tool capabilities, compliance features, or regulatory considerations provides no actionable intelligence for SI8. |
+| MONITOR | AI-Generated Political Ads Violate Disclosure Laws in New York 2026 Elections | regulation_policy_commercial_media | 3 | Documented non-compliance with AI disclosure requirements in political ads suggests a market segment where SI8's assurance services could address risk, but no enforcement actions or validated customer need has been demonstrated. |
+| HIGH | California Requires Disclosure of AI-Generated People in Advertising | regulation_policy_commercial_media | 4 | California's mandatory disclosure requirement for synthetic performers in advertising is a binding, enacted legal obligation affecting a major market, creating direct compliance demand that SI8's Commercial Assurance product can address. |
+| MONITOR | Kuaishou Keling releases Kling 4.0: up to 30 seconds of generation, accelerating its pursuit of ByteDance's Seedance. | provider_commercial_terms | 1 | Longer-duration video synthesis capabilities may expand the scope of media requiring assurance, but adoption patterns, regulatory implications, and commercial deployment in SI8's addressable market remain unclear. |
+| OMIT | Nvidia settles trademark lawsuit over 'Modulus' AI software | litigation_commercial_media_core | 1 | An undisclosed trademark settlement provides no precedent, actionable guidance, or demonstrated relevance to SI8's commercial media assurance or compliance workflows. |
+| MONITOR | An AI App Sold 63 Genshin Impact Voices. A Shanghai Court Made It Pay the Studio, Not the Actors | litigation_commercial_media_core | 1 | A single Shanghai court decision on voice synthesis liability allocation illustrates emerging jurisdictional complexity around synthetic voice content, relevant for SI8's Living Knowledge, but minimal legal detail and geographic scope limit immediate materiality. |
+| MONITOR | NFL uses Adobe AI tools to streamline content production | buyer_risk_governance_signals | 1 | A major media organization deploying AI tools at operational scale signals emerging customer demand for assurance services, but the single source lacks detail on scope, compliance processes, or whether external assurance vendors are involved. |
+| MONITOR | Japanese anime actor fights TikTok over AI voice cloning | litigation_commercial_media_core | 7 | An active lawsuit over unauthorized AI voice cloning in commercial media may eventually establish legal standards relevant to SI8's Commercial Assurance offerings, but no ruling or precedent exists yet to clarify scope or applicability. |
+| MONITOR | NTT West opens consultation service for AI-generated voice issues | material_capability_changes | 1 | A major telecom's entry into AI-generated media consultation suggests market validation of the assurance space, but the service's specific scope, business model, and overlap with SI8's offerings remain entirely unspecified. |
+| MONITOR | What Article 50 of the EU AI Act Means for European Marketing and Sales Leaders | regulation_policy_commercial_media | 1 | EU AI Act Article 50 could create compliance demand for SI8's services if it mandates transparency in commercial AI media, but the source is secondary commentary on an enacted rule without access to the full regulatory text or implementation guidance. |
+| MONITOR | Agencies, not clients, usually carry AI label duty, IAB Austria guide says | commercial_adoption_validation | 1 | IAB Austria guidance on AI labeling responsibility allocation may inform SI8's commercial assurance workflows, but its binding force, geographic scope, and adoption in practice are all unconfirmed. |
+| OMIT | Havas Media Named AOR For Farmers Insurance 07/14/2026 | buyer_risk_governance_signals | 1 | A routine agency account win lacks substantive detail about services scope, AI media involvement, or customer implications, rendering it too speculative to warrant digest inclusion. |
+| MONITOR | How AI-driven synthetic media is forcing Indian OTT to rethink Insurance as risks rise | buyer_risk_governance_signals | 1 | Indian OTT platforms reconsidering insurance coverage for AI synthetic media risks suggests potential demand for SI8's assurance services as risk-documentation evidence, but the specific risks, regulatory drivers, and scale of this trend remain unspecified. |
+| MONITOR | Insurers Split Over AI Coverage As Misinformation And Deepfakes Drive Most Reported Harms | buyer_risk_governance_signals | 1 | Insurer divisions on AI coverage and rising misinformation/deepfake claims signal that insurers may demand third-party assurance as a condition of risk assessment, but claim volume, definitions, and insurer positions remain unresolved. |
+| MONITOR | New Research Examines Insurance’s Verification Gap Amid Rapid AI Adoption | buyer_risk_governance_signals | 1 | Insurance sector AI verification gaps directly align with SI8's Commercial Assurance offering, but the source lacks detail on research methodology, scope, specific findings, or evidence of industry-wide adoption to warrant HIGH classification. |
+| MONITOR | Munich's Suno ruling tests the evidence question Getty left open in Britain | litigation_named_case_tracker | 1 | Munich's ruling on AI music generation evidentiary standards is relevant to SI8's copyright/licensing assessment workflows, but the source does not specify the ruling's holding, jurisdictional scope, or applicability to SI8's operating contexts. |
+| OMIT | Tyrannus Foundation Announces AI Film Summit Los Angeles 2026 With Global Creator and Industry Program | living_knowledge_domain_signals | 1 | A 2026 summit announcement with no disclosed agenda, compliance focus, or demonstrated market impact on SI8's addressable services does not meet the threshold for inclusion in this cycle's digest. |
+| MONITOR | FTC Chairman Andrew Ferguson to lay out AI regulation vision at Reuters NEXT Newsmaker | regulation_policy_commercial_media | 1 | FTC Chairman's AI regulation presentation could signal enforcement priorities affecting SI8's compliance landscape, but the source contains no actual content or specifics on regulatory proposals to assess materiality. |
+| MONITOR | The EU AI Act Deadline Moved. Your Meeting Room Didn’t. | regulation_policy_commercial_media | 1 | EU AI Act deadline movement signals potential operational readiness gaps in SI8's addressable market, but the source does not specify the new deadline, affected requirements, or scope of delay across member states or sectors. |
+| MONITOR | CFC launches affirmative AI cover for intellectual property risks | buyer_risk_governance_signals | 1 | IP insurance product launch validates that AI-generated media IP liability is a recognized commercial risk, but the source lacks coverage scope, exclusions, and evidence of whether this substitutes for or complements pre-publication assurance services. |
+| OMIT | Day One Review: Convention Explored Digital Infrastructure And Smarter AI Adoption For Broadcasters In West Africa | provenance_authenticity_infrastructure | 1 | West African broadcaster convention on AI adoption is too vague and unactionable—no outcomes, regulatory drivers, or specific procurement needs disclosed—to warrant inclusion in this digest. |
+| MONITOR | Who’s suing AI and who’s signing latest: OpenAI signs first India deals | litigation_commercial_media_core, provider_commercial_terms | 1 | OpenAI's India market entry could signal demand for AI-generated media assurance in a new jurisdiction, but the source provides no detail on deal scope, products involved, or whether commercial-readiness assessment is required or relevant. |
+| MONITOR | Moore to pursue right of publicity statute as part of state AI framework | living_knowledge_domain_signals | 1 | A state right-of-publicity statute could materially affect SI8's Commercial Assurance and Living Knowledge workflows, but the statute remains entirely prospective with no bill text, timeline, or scope definition, making premature product changes unjustified pending legislative emergence. |
+
+### Excluded -- below relevance floor (screened off-topic before interpretation)
+
+| Development | Cluster(s) | Sources | Max article score | Reason |
+|-------------|------------|---------|--------------------|--------|
+| Why health insurance is one of India's most expensive categories to advertise online | buyer_risk_governance_signals | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| B2B Creators for Hire: Influencer & Speaker Scott Steinberg | buyer_risk_governance_signals | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| 7 Best AI Voice Generators in 2026: Features, Pricing & Comparison | provider_commercial_terms | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| 6 Best AI Photo-to-Video Generator Tools in 2026 | provider_commercial_terms | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| Best AI Image Generators in 2026: Top 8 Tools Compared | provider_commercial_terms | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| ElevenLabs’ new v4 speech model supports more expression control and 90 languages | provider_commercial_terms | 3 | 1 | excluded: below relevance floor (1 < 3) |
+| AI-generated plagiarism | regulation_policy_commercial_media | 1 | 2 | excluded: below relevance floor (2 < 3) |
+| Business News | buyer_risk_governance_signals | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| AI made marketing faster than it made marketing better | buyer_risk_governance_signals | 1 | 2 | excluded: below relevance floor (2 < 3) |
+| South Korean law targeting 'fake news' takes effect as journalists' groups raise concerns | living_knowledge_domain_signals | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| AI Coding Agents for Enterprise: IP Indemnity, Data Residency and 500-Seat Cost Compared | provider_commercial_terms | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| Inside Novig’s High-Stakes Gamble With Outrage Marketing | buyer_risk_governance_signals | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| Explaining auto dubbing | material_capability_changes | 1 | 2 | excluded: below relevance floor (2 < 3) |
+| Sound designers and SFX libraries launch Professional Sound Alliance to fight AI scraping: ‘Now sound will have protection of our own’ | provider_commercial_terms | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| The Agentic Control Plane: Governing AI Agents at Scale | buyer_risk_governance_signals | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| The latest AI-powered martech news and releases | buyer_risk_governance_signals, commercial_adoption_validation | 1 | 2 | excluded: below relevance floor (2 < 3) |
+| Gemini 3.8 Flash TTS Lets You Design AI Voices From Text | material_capability_changes | 1 | 2 | excluded: below relevance floor (2 < 3) |
+| Outkast vs. Ovrkast: Hip-hop duo sues rapper for 'nearly identical' name | litigation_commercial_media_core | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| Layoff Tracker: Novo workforce down 13,000 | provider_commercial_terms | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| SpaceXAI Launches Grok 4.7: Low Prices, Heavy Token Use | material_capability_changes | 1 | 2 | excluded: below relevance floor (2 < 3) |
+
+### Executive Summary generated this run
+
+1. California has enacted a binding disclosure requirement for AI-generated synthetic performers in advertisements (SB 1050, signed September 2026), though the effective date, enforcement mechanism, penalty structure, and scope boundaries remain unreported. (supports: 76cfcbaf-6d74-4607-8111-679b19e99d33)
+2. SI8's Commercial Assurance and Living Knowledge products may be relevant to advertiser compliance with California's synthetic performer disclosure rule, though sources do not confirm market demand or SI8's actual applicability. (supports: 76cfcbaf-6d74-4607-8111-679b19e99d33)
+3. No other state adoptions of synthetic performer disclosure requirements are reported in the current development set, and it is unclear whether California's requirement will remain jurisdiction-specific. (supports: 76cfcbaf-6d74-4607-8111-679b19e99d33)
+
+---
+
+## Week of September 29, 2026
 *Run: 2026-09-29 · 1 HIGH · 14 MONITOR · 4 OMIT · 24 excluded (below relevance floor) · 0 admission-capacity deferred · 43 total candidates*
 
 ### Prioritized (reached bounded interpretation + priority)
