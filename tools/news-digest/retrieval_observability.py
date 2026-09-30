@@ -76,6 +76,13 @@ class QueryRetrievalRecord:
     outside_lookback_count: int | None = None
     unparseable_date_count: int | None = None
     candidates: list[CandidateRecord] = field(default_factory=list)
+    # SI8-INTEL-NEWS-5B5: which RetrievalVariant (retrieval_experiment.py)
+    # produced this record -- "control" for every existing/Production
+    # query (the default, so every pre-5B5 call site and persisted line
+    # is unaffected), "recency_7d" for an experiment-B request. Distinct
+    # from `query`, which always stays the governed query text itself,
+    # never the transformed/variant-augmented request string.
+    variant: str = "control"
 
 
 @dataclass

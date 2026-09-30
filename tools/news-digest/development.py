@@ -58,6 +58,13 @@ class Development:
     articles: list[dict]
     clusters: set[str]
     queries: set[str]
+    # SI8-INTEL-NEWS-5B5: which retrieval-mechanism variant(s) (see
+    # retrieval_experiment.py) discovered this Development's constituent
+    # articles -- e.g. {"control"}, {"recency_7d"}, or both. Orthogonal to
+    # clusters/queries (taxonomy provenance, not retrieval-mechanism
+    # provenance); defaults to empty for any caller not running a
+    # retrieval experiment, so this field never affects existing behavior.
+    retrieval_variants: set[str] = field(default_factory=set)
 
     @property
     def source_count(self) -> int:
@@ -81,15 +88,18 @@ def _new_development(group_articles: list[dict]) -> Development:
     )
     clusters: set[str] = set()
     queries: set[str] = set()
+    retrieval_variants: set[str] = set()
     for a in group_articles:
         clusters |= set(a.get("clusters", set()))
         queries |= set(a.get("queries", set()))
+        retrieval_variants |= set(a.get("retrieval_variants", set()))
     return Development(
         id=str(uuid.uuid4()),
         canonical_title=ordered[0]["title"],
         articles=list(group_articles),
         clusters=clusters,
         queries=queries,
+        retrieval_variants=retrieval_variants,
     )
 
 

@@ -61,6 +61,7 @@ _FORBIDDEN_PERSISTENCE_SUBSTRINGS = (
     "DIGEST_LOG_PATH",     # log writing stays in digest.py's own orchestration layer, not in these pure modules
     "AUDIT_LOG_PATH",      # same -- audit.py builds a RunAudit, it never touches a file path itself
     "RETRIEVAL_LOG_PATH",  # same -- retrieval_observability.py builds records, it never touches a file path itself (SI8-INTEL-NEWS-5B2)
+    "RETRIEVAL_EXPERIMENT_LOG_PATH",  # same -- retrieval_experiment.py builds records, it never touches a file path itself (SI8-INTEL-NEWS-5B5)
 )
 
 # Every module in the Development-centric pipeline must import only from
@@ -83,6 +84,7 @@ _ALLOWED_IMPORT_ROOTS = {
     "composition",       # audit.py (IntelligenceDigest)
     "policy",            # triage.py / prioritization.py / composition.py
     "retrieval_observability",  # digest.py's own retrieval instrumentation (SI8-INTEL-NEWS-5B2)
+    "retrieval_experiment",     # digest.py's own retrieval recall experiment (SI8-INTEL-NEWS-5B5)
 }
 
 _MODULES_UNDER_TEST = [
@@ -94,6 +96,7 @@ _MODULES_UNDER_TEST = [
     "policy.py",
     "audit.py",
     "retrieval_observability.py",
+    "retrieval_experiment.py",
 ]
 
 # The exact NEWS-3 cluster identifiers (tools/news-digest/keywords.py) --

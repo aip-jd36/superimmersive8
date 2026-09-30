@@ -42,12 +42,24 @@ from composition import build_intelligence_digest, IntelligenceDigest
 from email_renderer import build_intelligence_email_html
 from audit import build_run_audit, RunAudit
 from retrieval_observability import CandidateRecord, QueryRetrievalRecord, RunRetrievalRecord
+from retrieval_experiment import (
+    CONTROL,
+    RECENCY_7D,
+    RetrievalVariant,
+    RealConclusion,
+    build_real_conclusion_index,
+    classify_variant_label,
+    development_evidence_fingerprint,
+    resolve_experimental_development,
+    ExperimentDevelopmentRecord,
+)
 
 # Path to the digest log relative to this script (tools/news-digest/ → repo root)
 REPO_ROOT = Path(__file__).parent.parent.parent
 DIGEST_LOG_PATH = REPO_ROOT / "02_Marketing" / "intelligence" / "DIGEST-LOG.md"
 AUDIT_LOG_PATH = REPO_ROOT / "02_Marketing" / "intelligence" / "DIGEST-AUDIT.md"
 RETRIEVAL_LOG_PATH = REPO_ROOT / "02_Marketing" / "intelligence" / "RETRIEVAL-LOG.jsonl"
+RETRIEVAL_EXPERIMENT_LOG_PATH = REPO_ROOT / "02_Marketing" / "intelligence" / "RETRIEVAL-EXPERIMENT-LOG.jsonl"
 VOICE_SPEC_PATH = REPO_ROOT / "02_Marketing" / "brand" / "SI8_VOICE.md"
 
 def load_voice_spec() -> str:
@@ -98,7 +110,7 @@ def _split_title_source(raw_title: str) -> tuple[str, str]:
 
 
 def _fetch_google_news_observed(
-    query: str, lookback_days: int, *, cluster: str
+    query: str, lookback_days: int, *, cluster: str, variant: RetrievalVariant = CONTROL
 ) -> tuple[list[dict], "QueryRetrievalRecord"]:
     """Same retrieval + date/lookback logic fetch_google_news() has always
     used, restructured (SI8-INTEL-NEWS-5B2) so the REJECTED half of the
@@ -106,8 +118,20 @@ def _fetch_google_news_observed(
     accepted half. The returned `list[dict]` of accepted articles is
     unchanged in content, shape, and order from the pre-5B2 behavior --
     this function OBSERVES the existing retrieval/date-filtering decision,
-    it does not change it."""
-    encoded = requests.utils.quote(query)
+    it does not change it.
+
+    SI8-INTEL-NEWS-5B5: `variant` (default CONTROL, an identity transform)
+    is applied to the governed `query` text ONLY when constructing the
+    provider request URL -- `query` itself, as recorded on every returned
+    article/CandidateRecord/QueryRetrievalRecord, is always the untouched
+    governed query text, never the transformed request string. With the
+    default CONTROL variant this function's provider request is byte-
+    identical to every pre-5B5 call -- no Production behavior changes
+    unless a caller explicitly passes a different variant (only
+    run_retrieval_experiment() does, and never for the real Production
+    pipeline -- see main())."""
+    transformed_query = variant.transform(query)
+    encoded = requests.utils.quote(transformed_query)
     url = f"https://news.google.com/rss/search?q={encoded}&hl=en-US&gl=US&ceid=US:en"
 
     try:
@@ -165,6 +189,7 @@ def _fetch_google_news_observed(
                 "published": published_raw,
                 "pub_date": pub_date,
                 "summary": summary,
+                "retrieval_variants": {variant.id},
             })
             candidates.append(CandidateRecord(
                 title=title, source=source, published_raw=published_raw,
@@ -179,6 +204,7 @@ def _fetch_google_news_observed(
             outside_lookback_count=outside_lookback,
             unparseable_date_count=unparseable_date,
             candidates=candidates,
+            variant=variant.id,
         )
         return articles, record
 
@@ -187,6 +213,7 @@ def _fetch_google_news_observed(
         record = QueryRetrievalRecord(
             cluster=cluster, query=query, status="failed",
             error=str(e)[:500],
+            variant=variant.id,
         )
         return [], record
 
@@ -222,7 +249,13 @@ def dedupe_and_merge_provenance(articles: list[dict]) -> list[dict]:
 
     Pure function, no network access -- the caller (fetch_all_articles) is
     responsible for attaching each article's originating `clusters`/`queries`
-    sets before calling this."""
+    sets before calling this.
+
+    SI8-INTEL-NEWS-5B5: also unions `retrieval_variants` (which retrieval-
+    mechanism variant(s) discovered this article), by the exact same
+    union-on-collision mechanism as `clusters`/`queries` -- defaults to an
+    empty set via `.get(..., set())`, so any caller not using retrieval
+    variants (every pre-5B5 call site) is unaffected."""
     seen: dict[str, dict] = {}
     order: list[str] = []
     for a in articles:
@@ -232,13 +265,19 @@ def dedupe_and_merge_provenance(articles: list[dict]) -> list[dict]:
         if key not in seen:
             # Defensive copy of the provenance sets so later mutation of one
             # article's set can never retroactively affect another.
-            a = {**a, "clusters": set(a.get("clusters", set())), "queries": set(a.get("queries", set()))}
+            a = {
+                **a,
+                "clusters": set(a.get("clusters", set())),
+                "queries": set(a.get("queries", set())),
+                "retrieval_variants": set(a.get("retrieval_variants", set())),
+            }
             seen[key] = a
             order.append(key)
         else:
             existing = seen[key]
             existing["clusters"] |= set(a.get("clusters", set()))
             existing["queries"] |= set(a.get("queries", set()))
+            existing["retrieval_variants"] |= set(a.get("retrieval_variants", set()))
     return [seen[k] for k in order]
 
 
@@ -316,6 +355,158 @@ def update_retrieval_log(record: RunRetrievalRecord) -> None:
     with open(RETRIEVAL_LOG_PATH, "a", encoding="utf-8") as f:
         f.write(line + "\n")
     print(f"Retrieval log updated: {RETRIEVAL_LOG_PATH}")
+
+
+def build_retrieval_experiment_log_line(
+    run_date: str, lookback_days: int, records: list[ExperimentDevelopmentRecord]
+) -> str:
+    """Serialize one experimental run's Development-level comparison to a
+    single JSON line (SI8-INTEL-NEWS-5B5). Pure function, no I/O."""
+    payload = {
+        "run_date": run_date,
+        "lookback_days": lookback_days,
+        "developments": [asdict(r) for r in records],
+    }
+    return json.dumps(payload, ensure_ascii=False)
+
+
+def update_retrieval_experiment_log(
+    run_date: str, lookback_days: int, records: list[ExperimentDevelopmentRecord]
+) -> None:
+    """Append one experimental run's Development-level A/B comparison to
+    RETRIEVAL-EXPERIMENT-LOG.jsonl (SI8-INTEL-NEWS-5B5) -- a separate,
+    explicitly TEMPORARY, experiment-scoped artifact. Never DIGEST-AUDIT.md
+    (see retrieval_experiment.py's module docstring): this file exists only
+    for the duration of the bounded recall experiment and holds only
+    comparison metadata already computed elsewhere -- no raw article
+    bodies, URLs, prompts, or model responses."""
+    RETRIEVAL_EXPERIMENT_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    line = build_retrieval_experiment_log_line(run_date, lookback_days, records)
+    with open(RETRIEVAL_EXPERIMENT_LOG_PATH, "a", encoding="utf-8") as f:
+        f.write(line + "\n")
+    print(f"Retrieval experiment log updated: {RETRIEVAL_EXPERIMENT_LOG_PATH}")
+
+
+def run_retrieval_experiment(
+    control_articles: list[dict],
+    control_developments: list,
+    control_triage: list,
+    control_priorities: list,
+    lookback_days: int,
+    *,
+    client,
+) -> None:
+    """SI8-INTEL-NEWS-5B5 diagnostic-only retrieval-mechanism experiment
+    (Control A vs. Experiment B = same governed queries + `when:7d`).
+
+    STRUCTURALLY ISOLATED FROM PRODUCTION: this function is never called
+    by the real pipeline unless main() is explicitly invoked with
+    --experiment-recency, and even then it is called only AFTER the real
+    email/DIGEST-LOG/DIGEST-AUDIT steps have already completed, using
+    `control_articles`/`control_developments`/`control_triage`/
+    `control_priorities` strictly as READ-ONLY inputs -- this function
+    never mutates them and never calls build_intelligence_email_html(),
+    send_email(), update_development_digest_log(), or update_audit_log().
+    Its only output is a diagnostic-only, temporary log (see
+    update_retrieval_experiment_log()).
+
+    COST DISCIPLINE: Control-A's articles/Developments/triage/priority
+    results are REUSED from the already-completed real run -- Control-A is
+    never re-fetched or re-interpreted here. Only Experiment B is newly
+    fetched. Development formation runs ONCE, over the union of A's and
+    B's articles (never twice separately -- see retrieval_experiment.py's
+    module docstring on grouping non-determinism). Interpretation and
+    prioritization run ONLY for diagnostically-admitted Developments whose
+    evidence fingerprint does NOT exactly match an already-interpreted
+    real Development -- i.e. only for genuinely new/changed evidence, per
+    the SI8-INTEL-NEWS-5B5 architecture gate."""
+    real_index = build_real_conclusion_index(control_developments, control_triage, control_priorities)
+
+    b_articles: list[dict] = []
+    b_query_records: list[QueryRetrievalRecord] = []
+    for cluster in KEYWORD_CLUSTERS:
+        for query in cluster["queries"]:
+            arts, record = _fetch_google_news_observed(
+                query, lookback_days, cluster=cluster["name"], variant=RECENCY_7D
+            )
+            b_query_records.append(record)
+            for a in arts:
+                a["clusters"] = {cluster["name"]}
+                a["queries"] = {query}
+            b_articles.extend(arts)
+            time.sleep(0.3)
+
+    # Control-A's articles were already coarse-scored in Step 2 of the
+    # real run (mutated in place onto the same dicts this function
+    # receives as control_articles); Experiment B's newly-fetched articles
+    # have not been, and triage_developments() cannot meaningfully
+    # classify a Development whose articles carry no relevance_score at
+    # all (max_article_score() would silently default to 0). Reusing the
+    # existing score_articles() unchanged, unconditionally, keeps this
+    # symmetric with Control-A's own Step 2 -- a real, additional model-
+    # call cost of the experiment, not hidden from Phase 12 accounting.
+    if b_articles:
+        b_articles = score_articles(b_articles)
+
+    run_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    try:
+        update_retrieval_log(RunRetrievalRecord(
+            run_date=run_date, lookback_days=lookback_days, queries=b_query_records,
+        ))
+    except Exception as e:
+        print(f"  Warning: experiment-B retrieval-log persistence failed (Production unaffected): {e}", file=sys.stderr)
+
+    combined = dedupe_and_merge_provenance(control_articles + b_articles)
+    diagnostic_developments = build_developments(combined, client=client)
+    diagnostic_triage = triage_developments(diagnostic_developments)
+    triage_by_dev = {t.development_id: t for t in diagnostic_triage}
+    dev_by_id = {d.id: d for d in diagnostic_developments}
+    admitted_ids = {t.development_id for t in diagnostic_triage if t.admitted}
+
+    to_interpret = []
+    reused_by_dev: dict[str, RealConclusion] = {}
+    for dev_id in admitted_ids:
+        d = dev_by_id[dev_id]
+        _label, matched, real = resolve_experimental_development(d, real_index)
+        if matched and real is not None and real.tier is not None:
+            reused_by_dev[dev_id] = real
+        else:
+            to_interpret.append(d)
+
+    interpreted = [(d, interpret_development(d, client=client)) for d in to_interpret]
+    fresh_priorities = prioritize_developments(interpreted, client=client) if interpreted else []
+    fresh_priority_by_dev = {p.development_id: p for p in fresh_priorities}
+
+    records: list[ExperimentDevelopmentRecord] = []
+    for d in diagnostic_developments:
+        label = classify_variant_label(d.retrieval_variants)
+        t = triage_by_dev.get(d.id)
+        if d.id in reused_by_dev:
+            reused, admitted, tier = True, True, reused_by_dev[d.id].tier
+        elif d.id in fresh_priority_by_dev:
+            reused, admitted, tier = False, True, fresh_priority_by_dev[d.id].tier
+        else:
+            reused, admitted, tier = False, bool(t.admitted) if t else False, None
+        records.append(ExperimentDevelopmentRecord(
+            canonical_title=d.canonical_title,
+            clusters=sorted(d.clusters),
+            evidence_keys=sorted(development_evidence_fingerprint(d)),
+            retrieval_variants=sorted(d.retrieval_variants),
+            classification=label,
+            reused=reused,
+            admitted=admitted,
+            tier=tier,
+        ))
+
+    print(f"  Retrieval experiment: {len(control_developments)} Control Developments, "
+          f"{len(diagnostic_developments)} canonical experiment Developments, "
+          f"{len(reused_by_dev)} reused, {len(to_interpret)} evaluated fresh")
+
+    try:
+        update_retrieval_experiment_log(run_date, lookback_days, records)
+    except Exception as e:
+        print(f"  Warning: retrieval-experiment-log persistence failed (Production unaffected): {e}", file=sys.stderr)
 
 
 # ---------------------------------------------------------------------------
@@ -1030,6 +1221,13 @@ def main():
     parser = argparse.ArgumentParser(description="SI8 News Intelligence Digest")
     parser.add_argument("--dry-run", action="store_true", help="Build the digest but don't send email")
     parser.add_argument("--lookback", type=int, default=7, help="Days to look back (default: 7)")
+    parser.add_argument(
+        "--experiment-recency", action="store_true",
+        help="SI8-INTEL-NEWS-5B5: after the normal run completes, run a diagnostic-only "
+             "Control-A-vs-Experiment-B (when:7d) retrieval recall comparison. Never sent "
+             "as email, never affects DIGEST-LOG/DIGEST-AUDIT; writes only "
+             "RETRIEVAL-EXPERIMENT-LOG.jsonl. Default off; not wired into the scheduled workflow.",
+    )
     args = parser.parse_args()
     LAST_LOOKBACK_DAYS = args.lookback
 
@@ -1110,6 +1308,20 @@ def main():
         for d, _interp, p in digest.high[:10]:
             flag = " [DEGRADED]" if p.degraded else ""
             print(f"  [HIGH{flag}] {d.canonical_title[:70]}")
+
+    if args.experiment_recency:
+        # SI8-INTEL-NEWS-5B5: structurally downstream of every Production
+        # step above (email already sent, DIGEST-LOG/DIGEST-AUDIT already
+        # written) -- a failure here can only affect this diagnostic-only
+        # experiment, never the Production run that already completed.
+        print("\nStep 12 (experimental, diagnostic-only): retrieval recall comparison...")
+        try:
+            run_retrieval_experiment(
+                articles, developments, triage_results, priorities,
+                args.lookback, client=client,
+            )
+        except Exception as e:
+            print(f"  Warning: retrieval experiment failed (Production run above is unaffected): {e}", file=sys.stderr)
 
 
 if __name__ == "__main__":
