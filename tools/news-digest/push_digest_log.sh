@@ -1,27 +1,31 @@
 #!/usr/bin/env bash
 #
 # SI8-INTEL-NEWS-4B1 -- race-safe DIGEST-LOG.md / DIGEST-AUDIT.md /
-# RETRIEVAL-LOG.jsonl persistence.
+# RETRIEVAL-LOG.jsonl / RETRIEVAL-EXPERIMENT-LOG.jsonl persistence.
 #
 # Commits any pending change to 02_Marketing/intelligence/DIGEST-LOG.md,
 # 02_Marketing/intelligence/DIGEST-AUDIT.md (SI8-INTEL-NEWS-4C added the
-# second file), and 02_Marketing/intelligence/RETRIEVAL-LOG.jsonl
-# (SI8-INTEL-NEWS-5B2 added the third) -- all three are always written by
-# the same digest.py run, so they are committed and pushed together,
-# atomically, through this one script -- not as separate git operations,
-# which would multiply the race surface for no reason -- in the current
-# working tree, then reconciles with origin/main before pushing -- so a
-# long-running News Intelligence run (minutes of retrieval plus several
-# model calls) can safely persist its log entries even if unrelated
-# commits (or another digest run's own log entries) reached origin/main
-# while it was working. This is the exact race observed in Production:
-# the workflow checks out main at SHA X, runs for several minutes, then
-# does a plain `git push` from a commit still based on X -- rejected the
-# moment origin/main has moved past X.
+# second file), 02_Marketing/intelligence/RETRIEVAL-LOG.jsonl
+# (SI8-INTEL-NEWS-5B2 added the third), and
+# 02_Marketing/intelligence/RETRIEVAL-EXPERIMENT-LOG.jsonl
+# (SI8-INTEL-NEWS-5B6 added the fourth -- present only on a run explicitly
+# dispatched with experiment_recency=true; absent on every normal scheduled
+# or default manual run) -- whichever of these actually exist for a given
+# run are committed and pushed together, atomically, through this one
+# script -- not as separate git operations, which would multiply the race
+# surface for no reason -- in the current working tree, then reconciles
+# with origin/main before pushing -- so a long-running News Intelligence
+# run (minutes of retrieval plus several model calls) can safely persist
+# its log entries even if unrelated commits (or another digest run's own
+# log entries) reached origin/main while it was working. This is the exact
+# race observed in Production: the workflow checks out main at SHA X, runs
+# for several minutes, then does a plain `git push` from a commit still
+# based on X -- rejected the moment origin/main has moved past X.
 #
-# Any of the three files may be absent (e.g. a test harness that only
-# seeds one of them, or a future caller that only updates one) -- only
-# paths that actually exist on disk are staged.
+# Any of the four files may be absent (e.g. a test harness that only
+# seeds one of them, a normal run that never touches the experiment log,
+# or a future caller that only updates one) -- only paths that actually
+# exist on disk are staged.
 #
 # SAFETY GUARANTEES:
 #   - never force-pushes (no `--force`/`-f`, ever);
@@ -52,11 +56,12 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 LOG_PATH="$REPO_ROOT/02_Marketing/intelligence/DIGEST-LOG.md"
 AUDIT_PATH="$REPO_ROOT/02_Marketing/intelligence/DIGEST-AUDIT.md"
 RETRIEVAL_LOG_PATH="$REPO_ROOT/02_Marketing/intelligence/RETRIEVAL-LOG.jsonl"
+RETRIEVAL_EXPERIMENT_LOG_PATH="$REPO_ROOT/02_Marketing/intelligence/RETRIEVAL-EXPERIMENT-LOG.jsonl"
 MAX_ATTEMPTS="${PUSH_DIGEST_LOG_MAX_ATTEMPTS:-5}"
 
 cd "$REPO_ROOT"
 
-for path in "$LOG_PATH" "$AUDIT_PATH" "$RETRIEVAL_LOG_PATH"; do
+for path in "$LOG_PATH" "$AUDIT_PATH" "$RETRIEVAL_LOG_PATH" "$RETRIEVAL_EXPERIMENT_LOG_PATH"; do
   if [ -f "$path" ]; then
     git add "$path"
   fi

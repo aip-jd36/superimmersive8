@@ -268,6 +268,72 @@ assert_true "no RETRIEVAL-LOG.jsonl path was ever staged (absent file never bloc
   "! git -C '$origin' show main:$REL_RETRIEVAL_PATH >/dev/null 2>&1"
 
 echo ""
+echo "=== Case H (SI8-INTEL-NEWS-5B6): DIGEST-LOG.md, DIGEST-AUDIT.md, RETRIEVAL-LOG.jsonl, and RETRIEVAL-EXPERIMENT-LOG.jsonl persist atomically, in one commit ==="
+REL_EXPERIMENT_PATH="02_Marketing/intelligence/RETRIEVAL-EXPERIMENT-LOG.jsonl"
+origin="$(new_origin)"
+checkout="$(new_workflow_checkout "$origin")"
+awk '1; /^---$/ && !done {print ""; while ((getline line < "/tmp/newentry_a.txt") > 0) print line; done=1}' "$checkout/$REL_LOG_PATH" > "$checkout/$REL_LOG_PATH.new"
+mv "$checkout/$REL_LOG_PATH.new" "$checkout/$REL_LOG_PATH"
+mkdir -p "$checkout/$(dirname "$REL_AUDIT_PATH")"
+cat > "$checkout/$REL_AUDIT_PATH" <<'EOF'
+# SI8 News Intelligence -- Run Audit Log
+
+---
+
+## Week of September 30, 2026
+*Run: 2026-09-30 · 1 HIGH · 14 MONITOR · 4 OMIT · 24 excluded · 0 admission-capacity deferred · 43 total candidates*
+
+---
+EOF
+mkdir -p "$checkout/$(dirname "$REL_RETRIEVAL_PATH")"
+printf '{"run_date": "2026-09-30", "lookback_days": 7, "queries": []}\n' > "$checkout/$REL_RETRIEVAL_PATH"
+mkdir -p "$checkout/$(dirname "$REL_EXPERIMENT_PATH")"
+printf '{"run_date": "2026-09-30", "lookback_days": 7, "status": "complete", "b_query_count": 43, "b_query_failure_count": 0, "reused_count": 40, "fresh_count": 3, "developments": []}\n' > "$checkout/$REL_EXPERIMENT_PATH"
+before_commit_count="$(git -C "$origin" log --oneline main | wc -l)"
+( cd "$checkout" && bash "$SCRIPT_UNDER_TEST" )
+after_commit_count="$(git -C "$origin" log --oneline main | wc -l)"
+assert_true "exactly one new commit landed (all four files committed together, not separately)" \
+  "[ $((after_commit_count - before_commit_count)) -eq 1 ]"
+assert_true "DIGEST-LOG.md update is present on origin/main" \
+  "git -C '$origin' show main:$REL_LOG_PATH | grep -q 'September 28, 2026'"
+assert_true "DIGEST-AUDIT.md is present on origin/main" \
+  "git -C '$origin' show main:$REL_AUDIT_PATH | grep -q 'Run Audit Log'"
+assert_true "RETRIEVAL-LOG.jsonl is present on origin/main" \
+  "git -C '$origin' show main:$REL_RETRIEVAL_PATH | grep -q '2026-09-30'"
+assert_true "RETRIEVAL-EXPERIMENT-LOG.jsonl is present on origin/main" \
+  "git -C '$origin' show main:$REL_EXPERIMENT_PATH | grep -q 'complete'"
+assert_true "the single new commit's diff touches exactly all four files, nothing else" \
+  "[ \"\$(git -C '$origin' show --stat --format= main | grep -cE 'DIGEST-|RETRIEVAL-')\" -eq 4 ]"
+
+echo ""
+echo "=== Case I (SI8-INTEL-NEWS-5B6): RETRIEVAL-EXPERIMENT-LOG.jsonl absent (normal, non-experiment run) -> script still succeeds with the other three files ==="
+origin="$(new_origin)"
+checkout="$(new_workflow_checkout "$origin")"
+awk '1; /^---$/ && !done {print ""; while ((getline line < "/tmp/newentry_a.txt") > 0) print line; done=1}' "$checkout/$REL_LOG_PATH" > "$checkout/$REL_LOG_PATH.new"
+mv "$checkout/$REL_LOG_PATH.new" "$checkout/$REL_LOG_PATH"
+mkdir -p "$checkout/$(dirname "$REL_AUDIT_PATH")"
+cat > "$checkout/$REL_AUDIT_PATH" <<'EOF'
+# SI8 News Intelligence -- Run Audit Log
+
+---
+
+## Week of September 30, 2026
+*Run: 2026-09-30 · 1 HIGH · 14 MONITOR · 4 OMIT · 24 excluded · 0 admission-capacity deferred · 43 total candidates*
+
+---
+EOF
+mkdir -p "$checkout/$(dirname "$REL_RETRIEVAL_PATH")"
+printf '{"run_date": "2026-09-30", "lookback_days": 7, "queries": []}\n' > "$checkout/$REL_RETRIEVAL_PATH"
+# Deliberately do NOT create RETRIEVAL-EXPERIMENT-LOG.jsonl -- mirrors
+# every normal scheduled run and every manual run without
+# experiment_recency=true, which never touch this file at all.
+( cd "$checkout" && bash "$SCRIPT_UNDER_TEST" )
+assert_true "DIGEST-LOG.md/DIGEST-AUDIT.md/RETRIEVAL-LOG.jsonl still land on origin/main" \
+  "git -C '$origin' show main:$REL_AUDIT_PATH | grep -q 'Run Audit Log'"
+assert_true "no RETRIEVAL-EXPERIMENT-LOG.jsonl path was ever staged (absent file never blocks the commit, and is never fabricated)" \
+  "! git -C '$origin' show main:$REL_EXPERIMENT_PATH >/dev/null 2>&1"
+
+echo ""
 echo "============================================================"
 echo "push_digest_log.sh regression results: $pass_count passed, $fail_count failed"
 echo "============================================================"

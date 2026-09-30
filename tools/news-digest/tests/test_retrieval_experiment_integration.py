@@ -373,6 +373,65 @@ class TestProductionIsolation(unittest.TestCase):
               f"{len(payload['developments'])} | reused: {reused_count} | fresh: {fresh_count} | "
               f"experimental interpretation calls: {interpretation_calls['count'] - 2} "
               f"(would be {len(payload['developments'])} under a full A∪B pipeline rerun)")
+        # SI8-INTEL-NEWS-5B6: the run-level summary must independently
+        # corroborate the same counts derivable from the developments array.
+        self.assertEqual(payload["status"], "complete")
+        self.assertEqual(payload["b_query_failure_count"], 0)
+        self.assertEqual(payload["reused_count"], reused_count)
+        self.assertEqual(payload["fresh_count"], fresh_count)
+
+    def test_complete_experiment_status_when_all_b_queries_succeed(self):
+        digest.KEYWORD_CLUSTERS = [{"name": "c", "queries": ["q1", "q2"]}]
+        digest.feedparser.parse = lambda url: _FakeFeed([])
+        self._run_main(["--experiment-recency"])
+        payload = json.loads(digest.RETRIEVAL_EXPERIMENT_LOG_PATH.read_text(encoding="utf-8").strip())
+        self.assertEqual(payload["status"], "complete")
+        self.assertEqual(payload["b_query_count"], 2)
+        self.assertEqual(payload["b_query_failure_count"], 0)
+
+    def test_incomplete_experiment_status_when_some_b_queries_fail(self):
+        digest.KEYWORD_CLUSTERS = [{"name": "c", "queries": ["q1", "q2", "q3"]}]
+
+        def flaky_parse(url):
+            if "q2" in url:
+                raise ConnectionError("simulated")
+            return _FakeFeed([])
+        digest.feedparser.parse = flaky_parse
+
+        self._run_main(["--experiment-recency"])
+        payload = json.loads(digest.RETRIEVAL_EXPERIMENT_LOG_PATH.read_text(encoding="utf-8").strip())
+        self.assertEqual(payload["status"], "incomplete",
+                          "a partial Experiment-B query failure must be visibly marked incomplete")
+        self.assertEqual(payload["b_query_count"], 3)
+        self.assertEqual(payload["b_query_failure_count"], 1)
+
+    def test_incomplete_status_not_misread_as_zero_difference(self):
+        """The critical Phase 6 guarantee: an incomplete experiment run
+        that happens to show zero A-only/B-only developments must remain
+        distinguishable, via `status` alone, from a complete run that
+        genuinely found zero differences -- never silently collapsed into
+        the same-looking 'no difference' record."""
+        digest.KEYWORD_CLUSTERS = [{"name": "c", "queries": ["q1"]}]
+        digest.feedparser.parse = lambda url: (_ for _ in ()).throw(ConnectionError("all of B failed"))
+        self._run_main(["--experiment-recency"])
+        payload = json.loads(digest.RETRIEVAL_EXPERIMENT_LOG_PATH.read_text(encoding="utf-8").strip())
+        self.assertEqual(payload["status"], "incomplete")
+        self.assertEqual(payload["b_query_failure_count"], 1)
+        # Even though B contributed nothing this run (every query failed),
+        # the record is NOT indistinguishable from a genuine no-difference
+        # outcome -- `status` makes that explicit.
+        b_only_or_both = [d for d in payload["developments"] if d["classification"] in ("b_only", "both")]
+        self.assertEqual(len(b_only_or_both), 0, "sanity: B genuinely contributed nothing due to total failure")
+        self.assertEqual(payload["status"], "incomplete", "the zero-difference-looking result must still be flagged incomplete, not silently equated with a successful zero-difference run")
+
+    def test_no_prohibited_data_in_experiment_log(self):
+        digest.KEYWORD_CLUSTERS = [{"name": "c", "queries": ["q1"]}]
+        digest.feedparser.parse = lambda url: _FakeFeed([])
+        self._run_main(["--experiment-recency"])
+        raw_text = digest.RETRIEVAL_EXPERIMENT_LOG_PATH.read_text(encoding="utf-8")
+        for forbidden in ("linkedin_post", "instagram_caption", '"url"', '"summary"',
+                           "Traceback", "ANTHROPIC_API_KEY", "@superimmersive8.com"):
+            self.assertNotIn(forbidden, raw_text, f"experiment log must never contain '{forbidden}'")
 
 
 if __name__ == "__main__":

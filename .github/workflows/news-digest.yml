@@ -15,6 +15,10 @@ on:
         description: 'Dry run (score articles but do not send email)'
         required: false
         default: 'false'
+      experiment_recency:
+        description: 'SI8-INTEL-NEWS-5B6: also run the diagnostic-only Control-A-vs-Experiment-B (when:7d) retrieval recall comparison. Never affects the customer email; requires explicit true. Default off.'
+        required: false
+        default: 'false'
 
 jobs:
   digest:
@@ -48,7 +52,11 @@ jobs:
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             DRY_RUN_FLAG="--dry-run"
           fi
-          python digest.py --lookback $LOOKBACK_DAYS $DRY_RUN_FLAG
+          EXPERIMENT_FLAG=""
+          if [ "${{ github.event.inputs.experiment_recency }}" = "true" ]; then
+            EXPERIMENT_FLAG="--experiment-recency"
+          fi
+          python digest.py --lookback $LOOKBACK_DAYS $DRY_RUN_FLAG $EXPERIMENT_FLAG
 
       - name: Commit and push digest log (race-safe)
         # SI8-INTEL-NEWS-4B1: the digest run above can take several

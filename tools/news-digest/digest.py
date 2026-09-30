@@ -358,20 +358,52 @@ def update_retrieval_log(record: RunRetrievalRecord) -> None:
 
 
 def build_retrieval_experiment_log_line(
-    run_date: str, lookback_days: int, records: list[ExperimentDevelopmentRecord]
+    run_date: str,
+    lookback_days: int,
+    records: list[ExperimentDevelopmentRecord],
+    *,
+    b_query_count: int,
+    b_query_failure_count: int,
+    reused_count: int,
+    fresh_count: int,
 ) -> str:
     """Serialize one experimental run's Development-level comparison to a
-    single JSON line (SI8-INTEL-NEWS-5B5). Pure function, no I/O."""
+    single JSON line (SI8-INTEL-NEWS-5B5/5B6). Pure function, no I/O.
+
+    SI8-INTEL-NEWS-5B6: adds a small run-level summary alongside the
+    per-Development records -- `status` is "complete" only when every one
+    of Experiment B's governed queries succeeded this run, else
+    "incomplete". This exists so a partial Experiment-B retrieval failure
+    (some queries succeed, some fail) can never be misread as "B genuinely
+    found no differences" -- the per-Development records would look
+    identical either way, but `status`/`b_query_failure_count` make the
+    distinction explicit from this one artifact alone, without requiring
+    a reader to cross-reference RETRIEVAL-LOG.jsonl's per-query records.
+    `reused_count`/`fresh_count` are the same workload counters already
+    printed to the run's own console output, made durable here instead of
+    requiring a reader to re-derive them by iterating `developments`."""
     payload = {
         "run_date": run_date,
         "lookback_days": lookback_days,
+        "status": "complete" if b_query_failure_count == 0 else "incomplete",
+        "b_query_count": b_query_count,
+        "b_query_failure_count": b_query_failure_count,
+        "reused_count": reused_count,
+        "fresh_count": fresh_count,
         "developments": [asdict(r) for r in records],
     }
     return json.dumps(payload, ensure_ascii=False)
 
 
 def update_retrieval_experiment_log(
-    run_date: str, lookback_days: int, records: list[ExperimentDevelopmentRecord]
+    run_date: str,
+    lookback_days: int,
+    records: list[ExperimentDevelopmentRecord],
+    *,
+    b_query_count: int,
+    b_query_failure_count: int,
+    reused_count: int,
+    fresh_count: int,
 ) -> None:
     """Append one experimental run's Development-level A/B comparison to
     RETRIEVAL-EXPERIMENT-LOG.jsonl (SI8-INTEL-NEWS-5B5) -- a separate,
@@ -379,9 +411,13 @@ def update_retrieval_experiment_log(
     (see retrieval_experiment.py's module docstring): this file exists only
     for the duration of the bounded recall experiment and holds only
     comparison metadata already computed elsewhere -- no raw article
-    bodies, URLs, prompts, or model responses."""
+    bodies, URLs, prompts, or model responses, no stack traces."""
     RETRIEVAL_EXPERIMENT_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
-    line = build_retrieval_experiment_log_line(run_date, lookback_days, records)
+    line = build_retrieval_experiment_log_line(
+        run_date, lookback_days, records,
+        b_query_count=b_query_count, b_query_failure_count=b_query_failure_count,
+        reused_count=reused_count, fresh_count=fresh_count,
+    )
     with open(RETRIEVAL_EXPERIMENT_LOG_PATH, "a", encoding="utf-8") as f:
         f.write(line + "\n")
     print(f"Retrieval experiment log updated: {RETRIEVAL_EXPERIMENT_LOG_PATH}")
@@ -499,12 +535,20 @@ def run_retrieval_experiment(
             tier=tier,
         ))
 
+    b_query_failure_count = sum(1 for r in b_query_records if r.status == "failed")
     print(f"  Retrieval experiment: {len(control_developments)} Control Developments, "
           f"{len(diagnostic_developments)} canonical experiment Developments, "
-          f"{len(reused_by_dev)} reused, {len(to_interpret)} evaluated fresh")
+          f"{len(reused_by_dev)} reused, {len(to_interpret)} evaluated fresh, "
+          f"{b_query_failure_count}/{len(b_query_records)} Experiment-B queries failed")
 
     try:
-        update_retrieval_experiment_log(run_date, lookback_days, records)
+        update_retrieval_experiment_log(
+            run_date, lookback_days, records,
+            b_query_count=len(b_query_records),
+            b_query_failure_count=b_query_failure_count,
+            reused_count=len(reused_by_dev),
+            fresh_count=len(to_interpret),
+        )
     except Exception as e:
         print(f"  Warning: retrieval-experiment-log persistence failed (Production unaffected): {e}", file=sys.stderr)
 
