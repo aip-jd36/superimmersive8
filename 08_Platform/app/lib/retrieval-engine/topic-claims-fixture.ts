@@ -1831,4 +1831,107 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     last_verified: '2026-09-23',
     superseded_by: null,
   },
+  {
+    // California BPC § 17610 (SB 1050) Synthetic Performer Advertising
+    // Disclosure (2026-10-01, LK-CA-SYNTHETIC-PERFORMER-PROD-REP-1 --
+    // Production Representation milestone). Adopted: FGR_026 (2026-10-01,
+    // GO), independently re-tested by a dedicated Applicability Challenge
+    // (2026-10-01, verdict CONFIRM, no FGR revision, report-only -- no
+    // separate commit). CRC Publication: CPR_032 (2026-10-01, APPROVE WITH
+    // BOUNDED WORDING) -- Principle 3 independently re-derived for
+    // California's own statutory text (never inherited from the NY sibling
+    // by analogy): § 17610(a)(6) itself defines "synthetic performer" as
+    // NOT recognizable as any identifiable natural person, the same
+    // structural non-identifiability predicate CPR_025 found dispositive
+    // for CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1 -- confirmed
+    // present in California's own text independently, not assumed from the
+    // NY outcome. Second claim in the synthetic-performer-disclosure
+    // sub-family; distinct governed proposition from both WITHHELD
+    // real-person likeness claims below (CLAIM-LIKENESS-NY-CONSENT-
+    // REQUIREMENT-001-v1, CLAIM-LIKENESS-CN-PORTRAIT-VOICE-CONSENT-001-v1),
+    // each withheld on the opposite (identifiable-person) predicate --
+    // unaffected by this entry.
+    //
+    // Second, separate CPR_032 finding: this is California's statute's own
+    // effective date, January 1, 2027, NOT YET EFFECTIVE as of this
+    // Production Representation. No Lifecycle/effective-date runtime
+    // gating mechanism exists anywhere in current architecture (confirmed
+    // directly: TopicClaim has no effective_date/temporal field, and no
+    // caller date-interpolates `crc_candidate_statement`), so pre-
+    // effective-date publication is represented safely only because the
+    // wording itself leads with the effective date ("Effective January 1,
+    // 2027, ... will require...") rather than trailing it parenthetically
+    // -- a sentence accurate on any date it could ever be read, requiring
+    // no new runtime machinery (CPR_032 §Q-§S; independently re-confirmed
+    // by LK-CA-SYNTHETIC-PERFORMER-PROD-READINESS-1).
+    //
+    // Dependency model is D2 (FGR_026 §8/§9, final and controlling, never
+    // inherited from the NY sibling's own four-dependency array):
+    // `['synthetic_performer_content_present', 'advertisement_purpose_confirmed']`.
+    // Both remain evidence-only -- absent from `DEPENDENCY_TREATMENTS`
+    // (dependency-askability.ts) -- so this claim can never progress past
+    // Case 3B (`relevant_applicability_unresolved`) through self-report
+    // alone. Correction to the Readiness investigation's own framing,
+    // independently re-verified during this milestone: the controlling
+    // reason is NOT specifically "no askability registry entry" -- it is
+    // that `unresolved_project_dependencies` (`BiResult`, assemble-result.ts)
+    // is a static passthrough of the governed claim's own authored array,
+    // never recomputed, filtered, or shrunk at runtime for ANY claim in
+    // this fixture, askable or not (`hasGovernedProjectDependencies` in
+    // build-bounded-interpretation.ts is a pure `.length > 0` check, by its
+    // own doc comment never meaning "checked, confirmed, or resolved").
+    // Even the one real askable dependency in this entire corpus
+    // (`human_contribution_description`) does not leave a claim's own
+    // `unresolved_project_dependencies` array once answered -- askability
+    // only gates whether CRC may ask a bounded question, never whether BI's
+    // hedge is lifted. "Never directly_relevant" is therefore CONFIRMED for
+    // this claim, on a more general architectural basis than "unregistered
+    // dependency" alone.
+    //
+    // Mirrored verbatim from GOVERNED-CLAIMS.md; no wording strengthened,
+    // simplified, or reconstructed here. `crc_publication_scope` omits that
+    // field's own trailing implementation-status sentence ("Runtime note:
+    // this claim has no TOPIC_CLAIMS_FIXTURE representation... a separate,
+    // unauthorized-by-this-task, later milestone"), mirroring
+    // CLAIM-TRADEMARK-TW-ART68-INFRINGEMENT-001-v1's own precedent exactly
+    // (that sentence describes production-representation status, not
+    // governed CRC-facing content, and this fixture entry IS that
+    // separate, later, explicitly-authorized milestone).
+    claim_id: 'CLAIM-SYNTHETIC-PERFORMER-CA-BPC-17610-001-v1',
+    topic: 'likeness',
+    claim_character: 'established',
+    jurisdiction: 'California (state)',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope: `APPROVED FOR CRC PUBLICATION (2026-10-01, CRC Approver: JD (PM) -- see CRC Approver/CRC Decision Date below; CRC Publication Review #32 complete at governance-reviews/CPR_032_CLAIM-SYNTHETIC-PERFORMER-CA-BPC-17610-001-v1_2026-10-01.md, APPROVE WITH BOUNDED WORDING -- the approved wording below is CPR_032 §S/§T verbatim, not the shorter pre-CPR draft this field previously held). Principle 3 finding (CPR_032 §F-§K, independently re-derived for California's own text, not inherited from the NY sibling by analogy): § 17610(a)(6)'s own defining text requires the performer be NOT recognizable as any identifiable natural person -- the same structural non-identifiability predicate CPR_025 found dispositive for the NY sibling, confirmed present in California's own text independently. This claim does not trigger likeness, voice cloning, deepfakes, or political persuasion on its own defining legal predicate (CPR_032 §F). This finding is claim-specific: it does not hold that Principle 3 is inapplicable to synthetic performers generally, that statutory disclosure laws are categorically outside Principle 3, or that any likeness-topic claim is now presumptively CRC-eligible. CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1 and CLAIM-LIKENESS-CN-PORTRAIT-VOICE-CONSENT-001-v1 are each unaffected and remain CRC Publication Scope: WITHHELD FROM CRC, unchanged by this decision. Separate future-effective-date finding (CPR_032 §Q-§R): no Lifecycle/effective-date runtime gating mechanism exists anywhere in current architecture; the claimStatement reaching CRC is a fixed, never-date-interpolated string, so pre-effective-date publication is safe only if the wording itself leads with the effective date rather than trailing it parenthetically -- CPR_032 §S's wording does this, and the approval below uses that wording, not the shorter pre-CPR draft's trailing-parenthetical construction. CRC may state that, effective January 1, 2027, California BPC § 17610 will require a person who creates and causes to be published a qualifying advertisement prominently featuring a synthetic (non-identifiable) performer to include a clear and conspicuous disclosure, subject to the statute's expressive-work and accessibility/translation exemptions, and that California's duty -- unlike New York's -- carries no actual-knowledge condition, covers audio-only content, and rides on the existing §§ 17500/17200 Unfair Competition Law enforcement framework rather than a stand-alone penalty. This is California statutory law, not SI8's own policy, and is not yet in effect as of any date before January 1, 2027. CRC must not state or imply: that a specific project's depicted figure is or is not recognizable as an identifiable real person; that a specific project's use is or is not statutorily "prominent"; that specific content does or does not meet the "Advertisement" definition, or that the user/their principal is or is not within the duty-holder class; that a specific disclosure, if any, is or is not "clear and conspicuous"; that any exemption does or does not apply to a specific project; that a specific court order or service of process satisfies § 17610(e)(1); that California jurisdiction, or the "consumers in this state" nexus the statute itself requires, attaches to a specific project merely because the user named California as the assessment jurisdiction or as a distribution territory; that actual knowledge is required (it is not); that this statute is already in effect before January 1, 2027; that AI tool providers are exempt; that a violation or compliance determination has been reached; or that the project is commercially cleared or ready for commercial use in California or any other jurisdiction. Does not establish that a real, identifiable person's likeness is governed by this statute (excluded from the governed subject itself). A human-reviewed Commercial Assurance Assessment remains the higher-assurance path for resolving any of these project-specific facts.`,
+    crc_candidate_statement: `Effective January 1, 2027, California Business and Professions Code § 17610 (added by SB 1050) will require any person who creates and causes to be published, in an advertising medium, an advertisement that prominently includes a synthetic performer to include a clear and conspicuous disclosure that the advertisement includes a synthetic performer. "Synthetic performer" means a digital figure, voice, or representation created using generative AI that creates the impression of a human performance, where the performer is NOT recognizable as any identifiable natural person -- this does not determine whether any specific depicted figure meets or fails that definition. The duty does not apply to advertisements for expressive works (where the synthetic performer's use is consistent with its use in the work) or to advertisements using generative AI solely for language translation or other accessibility features. Unlike New York's comparable disclosure statute, California's duty is not conditioned on the creator's actual knowledge, applies to audio-only as well as audiovisual content, and states no stand-alone penalty amount of its own -- enforcement rides on California's existing Unfair Competition Law framework (Bus. & Prof. Code §§ 17500/17200). This statute does not restrict or prohibit the creation, distribution, or exhibition of synthetic content generally.`,
+    // AssessmentJurisdictionMention represents only that the user asked CRC
+    // to consider California -- never proof that California law actually
+    // governs the project, or that the advertisement reaches "consumers in
+    // this state" as § 17610(a)(2)(A) itself requires. FGR_026 §7,
+    // independently re-confirmed by a dedicated Applicability Challenge,
+    // 2026-10-01, verdict CONFIRM. DistributionTerritoryMention/
+    // geographic_relevance_scope is Track-A-discovery-only and cannot gate
+    // applicability_requirements today -- a user stating "we're only
+    // showing it to California customers," without also establishing
+    // California as the assessment jurisdiction, will not trigger this
+    // claim. Known, disclosed, fail-safe (under-triggering only) generic
+    // architecture debt -- not remediated by this milestone.
+    applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'California' }],
+    // D2 (FGR_026 §8/§9, final and controlling -- no subsequent
+    // reconsideration). Both evidence-only; neither has a
+    // DEPENDENCY_TREATMENTS entry (dependency-askability.ts) and neither
+    // is converted into a self-attestation question by this milestone.
+    unresolved_project_dependencies: ['synthetic_performer_content_present', 'advertisement_purpose_confirmed'],
+    // § 17610(a)(4)'s own "generative artificial intelligence" definition
+    // is technology-neutral, naming no specific tool or asset provider.
+    provider_scope: null,
+    tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
+    // geographic_relevance_scope deliberately omitted (opt-out by this
+    // field's own inverted default polarity) -- no discovered relevance is
+    // activated by this milestone; this claim is explicit-goal-only.
+    last_verified: '2026-10-01',
+    superseded_by: null,
+  },
 ]
