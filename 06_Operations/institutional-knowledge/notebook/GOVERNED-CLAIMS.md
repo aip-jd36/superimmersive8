@@ -5096,3 +5096,203 @@ either.
 Full Formal Governance Review artifact: `governance-reviews/FGR_024_CAND-TRADEMARK-TW-ART68-INFRINGEMENT-001_2026-09-23.md`
 Full CRC Publication Review artifact: `governance-reviews/CPR_030_CLAIM-TRADEMARK-TW-ART68-INFRINGEMENT-001-v1_2026-09-23.md`
 Full evidence manifest: `evidence-captures/taiwan-trademark/MANIFEST.md`
+
+### CLAIM-LIKENESS-CN-PORTRAIT-VOICE-CONSENT-001-v1
+Domain: Likeness / Portrait & Voice Rights (China, PRC)
+Topic: likeness
+Subtopic: china-civil-code-portrait-voice-rights
+Claim character: established
+Jurisdiction: China (PRC)
+Context: a commercially intended AI-generated or AI-processed video/image that depicts or uses the portrait or voice of a recognizable, real natural person
+
+GOVERNANCE TREATMENT (2026-10-01, PM adoption decision, FGR #25): Second `likeness`-topic Living Knowledge claim adopted in this corpus (after `CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1`, FGR_008), and the first for a non-US/non-Taiwan jurisdiction. Reuses the existing `likeness` `GoalCategory`/`KnowledgeTopic` verbatim -- no new category, no new topic, no new `TopicRelationship`. Explicit-goal-reachable via the existing, unmodified exact-topic `lookupTopicClaims` path, identical in shape to its NY sibling and to `CLAIM-TRADEMARK-TW-ART68-INFRINGEMENT-001-v1`/`CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1`. Durable claim identifier mirrors the corpus-wide convention of minting a `CLAIM-...-v1` ID distinct from, but structurally identical to, the candidate's own working ID (`CAND-LIKENESS-CN-PORTRAIT-VOICE-CONSENT-001` -> `CLAIM-LIKENESS-CN-PORTRAIT-VOICE-CONSENT-001-v1`). **Governed subject is portrait + voice only** -- China's name right (Civil Code Arts. 1012-1017, Art. 1023 para. 1) is explicitly excluded, for an article-level reason independently surfaced by FGR_025 §2: Art. 1014 states a materially different wrongful-conduct standard (interference/misappropriation/impersonation) from Art. 1019's consent-based prohibition, so bundling name into this claim's Art. 1019/1020 framework would misstate name right's own narrower test. **Dependency history, preserved rather than collapsed, mirroring this corpus's own established practice for Taiwan Trademark's D2->D1->D0 record:** FGR_025 §7/§8 originally re-derived TWO dependencies (`portrait_or_voice_content_present`, `consent_from_depicted_person_confirmed`); a same-day Narrow Governance Reconsideration (`LK-CHINA-LIKENESS-FGR025-DEPENDENCY-CHALLENGE-1`, §7/8-REVISED, controlling) independently re-tested `consent_from_depicted_person_confirmed` against the Sept-18 conjunctive statutory-clause-mirror / claim-wide-accuracy standard and withdrew it as an SI8-authored composite of at least three to five categorically distinct evaluative judgments (document existence, grantor identity, grantor authority, scope-match, legal sufficiency) that restates Commercial Assurance Domain L's own evaluative task rather than stating one coherent Living Knowledge project-state fact. `portrait_or_voice_content_present` was independently re-tested against the same standard and re-confirmed admissible -- a single, statute-defined threshold fact (does this specific person's portrait or voice appear on the project's content at all) carrying the identical legal consequence regardless of which modality triggers it. **§7/8-REVISED is controlling: final dependency set is `['portrait_or_voice_content_present']` (D1, not the original D2), and the Bounded Interpretation ceiling remains `relevant_applicability_unresolved` (Case 3B)** -- unlike Taiwan Trademark's D2->D0 path, one surviving dependency still triggers the identical ceiling as two, since `hasGovernedProjectDependencies()` is a pure `.length > 0` check. No commercial-use applicability requirement or dependency exists for this claim -- FGR_025 §4 independently confirmed, by direct text search of the captured Civil Code chapter, that no commercial-use gate exists anywhere in the operative Chinese statutory text (unlike NY Civil Rights Law §§ 50-51's explicit "advertising purposes or purposes of trade" gate) -- the Chinese prohibition is broader in this respect, not narrower. Recognizability (Art. 1018's own "可以被识别的外部形象"/"recognizable external image" definition; the Yin case's own timbre/tone/pronunciation-style test) and the Art. 1020 statutory exceptions are both deliberately NOT represented as dependencies -- folded instead into the proposition's own wording and the Commercial Assurance Domain L boundary (FGR_025 §7.1, §7.4).
+
+Claim proposition: >
+  Under PRC Civil Code (2020, effective 2021) Arts. 1018-1020, a natural
+  person has a statutory portrait right over their own recognizable image --
+  "the recognizable external image of a specific natural person reflected,
+  by means of photography, sculpture, painting, or other methods, on a
+  given medium" (Art. 1018) -- and the right to decide whether and how that
+  image is produced, used, or publicly disclosed. Art. 1019 prohibits
+  defacing, defiling, or using information-technology means to forge a
+  person's portrait, and prohibits producing, using, or publicly disclosing
+  a person's portrait without that person's consent, except as otherwise
+  provided by law. Art. 1020 lists five specific, narrow circumstances --
+  personal study/artistic appreciation/classroom teaching/scientific-
+  research use of an already-published portrait within a necessary scope;
+  unavoidable use for news reporting; a state organ's lawful performance of
+  duties within a necessary scope; unavoidable use to depict a specific
+  public environment; and other acts to safeguard the public interest or
+  the portrait-right holder's own lawful rights/interests -- in which a
+  portrait may be used without consent; this proposition does not
+  determine whether any of these applies to a specific project. By Art.
+  1023 paragraph 2, protection of a natural person's voice applies, by
+  reference, these same portrait-right protection provisions; Chinese
+  courts applying this provision have required that the voice be
+  recognizable as that specific person's own, based on characteristics
+  such as timbre, tone, and pronunciation style, before protection
+  attaches. China's Supreme People's Court 2026 Opinion on AI-related
+  disputes, Article 4, confirms that these existing name-right, portrait-
+  right, and voice-interest protections apply where generative AI is used,
+  without the person's consent, to process a natural person's name or
+  portrait, or to use their voice as training material, so as to generate
+  an identifiable synthetic digital image or synthesized voice --
+  applying the existing statutory concepts to a new technological fact
+  pattern, not creating a new right. Infringement of these rights can
+  expose the infringer to civil liability under Arts. 991, 995, and 1000,
+  including an order to cease the infringing conduct and eliminate its
+  effects, and -- proportionate to the manner and scope of the infringing
+  conduct -- issue an apology; the right to demand cessation of
+  infringement is not subject to a limitations period. This proposition
+  addresses portrait right and voice protection only; it does not address
+  China's separate right to a name (Arts. 1012-1017), which is governed by
+  a materially different interference/misappropriation/impersonation
+  standard, not a consent-based prohibition.
+
+Source references:
+  - primary (Class A, independently retrieved, direct `curl -k` fetch of the Supreme People's Court of the PRC's own official website republishing the full Civil Code from Xinhua News Agency's own official channel; byte-identical across two fetches ~29.5 minutes apart): `evidence-captures/china-likeness/court-gov-civilcode-personality-rights-fulltext_20260930T162743Z_16fb30a1.html`, SHA-256 `16fb30a132114600f32059367dae0d6dd274519aa154126eae0ef9600cf4074e`.
+  - primary (Class A, referenced not re-captured, per `evidence-captures/china-likeness/MANIFEST.md`'s own Load-bearing finding 4 -- already captured and three-way checksum-re-verified for the sibling China AI-copyrightability claim): Supreme People's Court 2026 Opinion on AI-related disputes, Art. 4, `evidence-captures/china-copyrightability/spc-ai-disputes-opinion-fulltext-announcement_20260930T150341Z_b7577f51.html` + companion press-Q&A `evidence-captures/china-copyrightability/spc-ai-disputes-opinion-press-qa_20260930T150224Z_05c5d0ff.html`.
+  - strong secondary/quasi-official (court-research-office-attributed, National Court Case Database entry format, corroborating the Art. 1018/1023 voice-recognizability test): `evidence-captures/china-likeness/bjd-yin-voice-case-national-case-database-entry_20260930T160514Z_fd5321c2.html`, independently cross-corroborated by `evidence-captures/china-likeness/thepaper-yin-voice-case-national-case-database-entry_20260930T160517Z_c7647561.html`.
+  - official court publication (Beijing Internet Court's own official English-language announcement of its own verdict in the same Yin case): `evidence-captures/china-likeness/bjinternetcourt-en-yin-voice-case-verdict-announcement_20260930T160321Z_28488680.html`.
+  - official judicial summary via verified institutional channel (Beijing Internet Court's own official institutional account, two named judges of its Filing Division, on the AI face-swap short-drama case -- illustrative/corroborating only, not load-bearing; no docket number located in any source): `evidence-captures/china-likeness/bjinternetcourt-official-account-aiswap-shortdrama-case-explainer_20260930T160749Z_8bee52c9.html`.
+  - secondary/aggregated (plaintiff media-identification only, not court-confirmed; never relied on for any legal-reasoning finding): `evidence-captures/china-likeness/qq-news-aiswap-shortdrama-secondary-report_20260930T161001Z_d2894b16.html`.
+Source authority/type: Primary legal/official authority (PRC Civil Code; Supreme People's Court 2026 Opinion on AI-related disputes) -- corroborated by strong secondary/quasi-official authority (National Court Case Database entries) and official court publications (Beijing Internet Court's own announcements)
+Source fact: >
+  Art. 990 enumerates "姓名权" (name right) and "肖像权" (portrait right) as
+  two separate, co-equal named personality rights -- not one undifferentiated
+  "likeness" right. Art. 1018 defines portrait right as attaching to "the
+  recognizable external image of a specific natural person reflected...on a
+  given medium," via an open-ended, technology-agnostic list ("影像、雕塑、
+  绘画等方式" -- imagery, sculpture, painting, or other means). Art. 1019
+  prohibits defacing, defiling, or "利用信息技术手段伪造" (using information-
+  technology means to forge) a portrait, and separately prohibits any
+  production/use/public disclosure without the portrait-right holder's
+  consent (except as otherwise provided by law) -- including by a portrait
+  work's own copyright holder (e.g. a photographer), confirming copyright in
+  the artifact and portrait right in the depicted person are separate,
+  non-substitutable rights. Art. 1020 lists exactly five narrow exceptions
+  (personal study/appreciation/teaching/research use of an already-public
+  portrait within a necessary scope; unavoidable news-reporting use; a state
+  organ's lawful-duty use within a necessary scope; unavoidable public-
+  environment-display use; and a public-interest/rights-protection catch-
+  all) -- no sixth item, no general commercial/non-commercial carve-out,
+  confirmed via a direct text search returning zero matches for "商业"/
+  "广告"/"贸易"/"营利"/"营业" (commercial/advertising/trade/for-profit/
+  business) anywhere in Arts. 1018-1023. Art. 1023 extends two different,
+  narrower slices of the portrait chapter to two different subjects:
+  paragraph 1 extends only the licensed-use provisions (Arts. 1021-1022) to
+  a name; paragraph 2 extends the full protection provisions (Art. 1019's
+  prohibition and Art. 1020's exceptions) to a natural person's voice. SPC
+  2026 Opinion Art. 4 (independently cross-confirmed, via the companion
+  press-Q&A file, as the Opinion's own literal article number) applies these
+  existing name/portrait/voice/reputation concepts, and Art. 994's deceased-
+  person standing, to AI face-swap and AI voice-cloning fact patterns,
+  without creating any new right category. The 2024 Yin (殷某桢)
+  voice-cloning case ((2023) 京0491民初12142号, Beijing Internet Court, final/
+  effective) holds that voice protection inherits portrait right's own
+  recognizability precondition via Art. 1023¶2, defines voice recognizability
+  as identifiability "based on others' repeated or long-term listening"
+  through timbre/tone/pronunciation style, finds a sound recording's
+  copyright holder does not thereby acquire authority over the recorded
+  person's own voice-related interest, and applies fault-based (not strict)
+  liability. The Beijing Internet Court AI-face-swap short-drama case (no
+  docket number located; plaintiff identified only in secondary media as
+  迪丽热巴/Dilireba, not court-confirmed) holds, in the court's own words,
+  that "肖像权和著作权两种权利之间并不会互相吸收" (portrait right and
+  copyright do not subsume each other) and that holding a copyright license
+  is not a defense to portrait-right infringement -- independently
+  confirming the same separation-of-rights principle from a second, AI-
+  specific fact pattern.
+SI8 interpretation: >
+  A commercial AI-generated or AI-processed video/image that depicts or
+  uses a real, recognizable person's portrait or voice should not be
+  represented to a client, buyer, or platform as cleared for commercial use
+  in China absent confirmed consent from that person (or an applicable Art.
+  1020 exception) -- these are documentary/evidentiary and legal-
+  characterization facts CRC cannot establish from conversation alone (see
+  Unresolved project dependencies below, and Prohibited conclusions).
+
+Applicability requirements:
+  - fact: jurisdiction
+    operator: equals
+    value: China
+  <!-- Mirrors CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1's and the Taiwan claims' own precedent exactly: AssessmentJurisdictionMention represents only that the user asked CRC to consider China -- never proof that Chinese law actually governs the project, that a Chinese court has jurisdiction, that the depicted person is a PRC national or resident, that distribution/territorial scope attaches, or any inference from a Chinese subject/provider/client/language. Explicit-goal-reachable only (FGR_025 §10), so no Article-50-style unrestricted-reach exposure exists to solve. A parallel, structurally identical gap to the NY sibling's own disclosed gap is recorded, not solved: JURISDICTION_VALUE_ALIASES has no entry resolving a Chinese city/province (e.g. "Beijing," "Shanghai") to the canonical 'China' value (FGR_025 §6). -->
+Unresolved project dependencies: [portrait_or_voice_content_present]   <!-- D1 (FGR_025 §7/8-REVISED, final and controlling), correcting an initial D2 re-derivation at §7/§8. portrait_or_voice_content_present: a disjunctive existence gate -- whether this project's content depicts/uses this specific real person's portrait, or uses their voice, at all (Art. 1018/1023¶2's own named subject matter); evidence-only, since a submitter's own bare assertion that "no real person appears" is explicitly weak evidence absent independent content review per Commercial Assurance Domain L. consent_from_depicted_person_confirmed was originally proposed (§7.3/§8) and independently withdrawn (§7/8-REVISED) as an SI8-authored composite of at least three to five categorically distinct evaluative judgments (document existence, grantor identity, grantor authority, scope-match, legal sufficiency) restating Commercial Assurance Domain L's own evaluative task rather than stating one coherent Living Knowledge project-state fact -- the consent requirement itself remains stated, unresolved, in the proposition's own wording and in Prohibited conclusions below. No recognizability dependency (bundled or split) and no Art. 1020 statutory-exception dependency were created -- both folded into proposition wording and the Commercial Assurance Domain L boundary instead (§7.1, §7.4). -->
+Tool scope: null                 <!-- tool-independent; Art. 1018's own open-ended "or other means" language and the SPC Opinion's own technology-neutral framing confirm this applies identically regardless of which generation tool, if any, was used --> Provider scope (asset-provider sense): null.
+Prohibited conclusions: >
+  CRC must never state or imply, for a specific project: that a specific
+  depicted person's portrait or voice is, as a matter of fact, legally
+  recognizable/identifiable as that person; that a specific person's
+  consent was actually obtained, is documented, is from a person with
+  authority to grant it, or is legally sufficient in scope; that any Art.
+  1020 exception applies or does not apply to a specific project; that the
+  project was or was not produced using AI (irrelevant to which rule
+  applies, since the Civil Code provisions apply regardless, and the SPC
+  Opinion only confirms, never substitutes for, them); that China law
+  definitively governs or territorially applies to a specific project
+  merely because the user named China as the assessment jurisdiction; that
+  a specific project does or does not infringe any Chinese personality
+  right; that a specific project is commercially cleared, legally
+  compliant, or ready for commercial use in China or any other
+  jurisdiction. Does not establish that China's name-right regime (Arts.
+  1012-1017) applies to or governs this claim's subject matter (explicitly
+  excluded from the governed subject itself, see GOVERNANCE TREATMENT
+  above); that a deceased person's rights under Art. 994 are implicated (a
+  separate fact pattern, not addressed here); or that any portrait-
+  licensing-contract dispute rule (Arts. 1021-1022) is implicated. Is not a
+  substitute for Commercial Assurance evidence review (Domain L --
+  Likeness & Performer Rights) of the actual video/audio content, any
+  talent release or consent documentation, and the project-specific facts
+  this claim leaves open.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-10-01
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  PENDING -- CRC Publication Review not yet performed as of this Adoption
+  (2026-10-01). Per this document's own governance-discipline note (top of
+  file): a claim can be `Adopted` with `Adoption Approver` recorded while
+  `CRC Approver` remains `PENDING` indefinitely -- this is the expected,
+  intentional state for reviewer/internal-only knowledge, not a gap. FGR_025
+  §15 independently records, and this Adoption decision does not resolve,
+  predict, or imply any outcome for, a future CRC Publication Review: this
+  claim's topic (likeness) sits squarely on CRC Publication Policy
+  Principle 3's own subject-matter gate (likeness, voice cloning,
+  deepfakes -- "gets more scrutiny, not less, regardless of verification
+  strength"), arguably more centrally than its NY sibling (which required
+  an "advertising purposes or purposes of trade" gate this claim's own
+  underlying statute does not have -- China's prohibition is broader). A
+  legitimate future CPR outcome may be Adopted + Withheld from CRC, exactly
+  `CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1`'s own current state -- not
+  predicted or assumed here, only flagged as FGR_025 itself flagged it.
+
+CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
+  China's Civil Code gives a living person a statutory right over their own
+  portrait and, by extension, their own voice: using, without that person's
+  consent, AI or any other means to produce, reproduce, or publicly
+  disclose a recognizable image or voice of them can create civil liability
+  -- including for AI face-swap and AI voice-cloning uses, which China's
+  Supreme People's Court has confirmed fall within this existing
+  protection rather than requiring a new rule. A small number of narrow
+  statutory exceptions can apply, and this is a separate question from
+  China's own, differently-structured name right.
+
+Effective date: >
+  Civil Code Arts. 990, 1018-1023: in force since 2021-01-01 (2020 Civil
+  Code, no amendment identified to this chapter as of evidence capture).
+  Supreme People's Court 2026 Opinion on AI-related disputes, Art. 4:
+  confirmatory judicial-policy guidance, 2026, applying the above existing
+  statutory concepts to AI-generated/processed fact patterns without
+  amending the Civil Code itself.
+Last reviewed: 2026-10-01 (Formal Governance Review, FGR_025)
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: [[CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1]] (structurally analogous sibling -- shared `likeness` GoalCategory, different jurisdiction and statute; China's own prohibition carries no commercial-use gate, unlike NY's explicit "advertising purposes or purposes of trade" element -- a notable, evidenced divergence, not force-reconciled), [[CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1]] / [[CLAIM-TRADEMARK-TW-ART68-INFRINGEMENT-001-v1]] (other non-US jurisdiction claims in this corpus, distinct legal domains, no shared dependency or applicability mechanism). China's AI-output copyrightability question is governed separately (not yet an adopted claim as of this entry).
+
+Historical debt, recorded not remediated (FGR_025 §7/8-REVISED final paragraph): `FGR_008`'s three NY likeness dependencies (`recognizable_likeness_or_voice_present`, `advertising_or_trade_use_confirmed`, `written_consent_confirmed`, approved 2026-08-28) and the pre-existing stock-provider dependencies (`release_status_confirmed`, `separate_authorization_obtained`, `rights_and_clearance_status`) have never been independently re-tested against the Sept-18-2026 conjunctive statutory-clause-mirror / claim-wide-accuracy standard this China claim's own dependency design was held to -- all predate that standard by three to seven weeks. This Adoption does not modify any of them, and does not broaden this milestone into corpus-wide dependency remediation; recorded here only as a cross-reference for a future, separate, explicitly-authorized task.
+
+Full Formal Governance Review artifact: `governance-reviews/FGR_025_CAND-LIKENESS-CN-PORTRAIT-VOICE-CONSENT-001_2026-10-01.md`
+Full evidence manifest: `evidence-captures/china-likeness/MANIFEST.md`
