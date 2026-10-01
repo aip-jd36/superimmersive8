@@ -5250,22 +5250,52 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-10-01
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  PENDING -- CRC Publication Review not yet performed as of this Adoption
-  (2026-10-01). Per this document's own governance-discipline note (top of
-  file): a claim can be `Adopted` with `Adoption Approver` recorded while
-  `CRC Approver` remains `PENDING` indefinitely -- this is the expected,
-  intentional state for reviewer/internal-only knowledge, not a gap. FGR_025
-  §15 independently records, and this Adoption decision does not resolve,
-  predict, or imply any outcome for, a future CRC Publication Review: this
-  claim's topic (likeness) sits squarely on CRC Publication Policy
-  Principle 3's own subject-matter gate (likeness, voice cloning,
-  deepfakes -- "gets more scrutiny, not less, regardless of verification
-  strength"), arguably more centrally than its NY sibling (which required
-  an "advertising purposes or purposes of trade" gate this claim's own
-  underlying statute does not have -- China's prohibition is broader). A
-  legitimate future CPR outcome may be Adopted + Withheld from CRC, exactly
-  `CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1`'s own current state -- not
-  predicted or assumed here, only flagged as FGR_025 itself flagged it.
+  WITHHELD FROM CRC (2026-10-01, PM: JD -- see CRC Publication Review
+  #31, CPR_031). Not for evidence quality (Class A statutory + SPC Opinion
+  support, independently corroborated by two cross-confirming National
+  Court Case Database entries and an official Beijing Internet Court
+  announcement), not for dependency handling (single evidence-only
+  dependency, `portrait_or_voice_content_present`, already correctly
+  hedged, matching published likeness-sibling precedent), and not for
+  architectural boundedness (the fixed Case 3B template quotes the
+  governed proposition verbatim with no per-input branching -- empirically
+  confirmed incapable of converting any of a named set of adversarial user
+  statements, e.g. "everyone can tell it's her," "I cloned the actor's
+  voice," "the client says they got permission," "it's parody," "it's
+  commercially licensed," "the AI generated it, so it isn't really their
+  likeness," into a legal finding) -- withheld solely because CRC
+  Publication Policy Principle 3's subject-matter gate applies "regardless
+  of verification strength," and Principle 5's narrow-before-withhold
+  default does not apply to Principle 3 concerns. This claim's own
+  governed subject -- a statutory right attaching specifically to "the
+  recognizable external image of a specific natural person" (Art. 1018)
+  and, via Art. 1023 para. 2, to a voice recognizable as that same
+  specific person's own (the Yin case's own timbre/tone/pronunciation-
+  style test) -- squarely implicates likeness and voice cloning as named
+  in Principle 3, and the SPC 2026 Opinion's own framing (applying these
+  protections to AI face-swap and AI voice-mimicry fact patterns)
+  additionally implicates deepfake-adjacent subject matter with high
+  confidence. CPR_031 independently re-tested `CPR_025`'s own APPROVE
+  rationale for the sibling NY synthetic-performer claim (a statutorily
+  non-identifiable synthetic performer) and found it definitionally
+  unavailable here -- this claim's entire legal predicate is the opposite
+  condition, recognizability of a real, identifiable natural person. No
+  commercial-use gate narrows this claim's reach the way NY Civil Rights
+  Law §§ 50-51 narrows the sibling likeness claim's own reach (confirmed
+  an affirmative absence, not an omission, by direct text search) -- if
+  anything, this makes the Principle 3 case at least as strong as, not
+  weaker than, the already-withheld NY sibling's own. This claim's own
+  pre-CPR governance text (above, as originally recorded at Adoption) and
+  FGR_025 §15 already anticipated exactly this outcome; CPR_031
+  independently reaches it by direct application of current policy text,
+  not by deferring to that anticipation. Not a permanent disposition --
+  future reconsideration remains possible, triggered only by a deliberate
+  PM-level Publication-Policy decision defining an acceptable bounded
+  category of likeness-adjacent regulatory-awareness content, or an
+  explicit future authorized human decision to reconsider this specific
+  disposition -- never by a runtime/engineering change or additional
+  evidence corroboration alone. See CPR_031 for the complete
+  publication-safety analysis.
 
 CRC Candidate Statement: >
   [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
@@ -5295,4 +5325,5 @@ Related: [[CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1]] (structurally analogou
 Historical debt, recorded not remediated (FGR_025 §7/8-REVISED final paragraph): `FGR_008`'s three NY likeness dependencies (`recognizable_likeness_or_voice_present`, `advertising_or_trade_use_confirmed`, `written_consent_confirmed`, approved 2026-08-28) and the pre-existing stock-provider dependencies (`release_status_confirmed`, `separate_authorization_obtained`, `rights_and_clearance_status`) have never been independently re-tested against the Sept-18-2026 conjunctive statutory-clause-mirror / claim-wide-accuracy standard this China claim's own dependency design was held to -- all predate that standard by three to seven weeks. This Adoption does not modify any of them, and does not broaden this milestone into corpus-wide dependency remediation; recorded here only as a cross-reference for a future, separate, explicitly-authorized task.
 
 Full Formal Governance Review artifact: `governance-reviews/FGR_025_CAND-LIKENESS-CN-PORTRAIT-VOICE-CONSENT-001_2026-10-01.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_031_CLAIM-LIKENESS-CN-PORTRAIT-VOICE-CONSENT-001-v1_2026-10-01.md`
 Full evidence manifest: `evidence-captures/china-likeness/MANIFEST.md`
