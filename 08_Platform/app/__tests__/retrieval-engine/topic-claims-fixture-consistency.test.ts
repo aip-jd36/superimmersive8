@@ -122,6 +122,16 @@ const CLAIMS_WITHOUT_FIXTURE_REPRESENTATION = new Set<string>([
   // discipline as every Music-domain claim above); never added to this set
   // at Adoption time.
   'CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1',
+  // Pre-existing gap found during the California Synthetic Performer Release
+  // Integration milestone's fresh-origin/main regression baseline
+  // (2026-10-01) -- Adopted (2026-10-01) then reviewed under CRC Publication
+  // Review #31 (CPR_031, 2026-10-01), which WITHHELD this claim FROM CRC
+  // under Publication Policy Principle 3 (subject-sensitivity gate: real,
+  // identifiable person's portrait/voice). Deliberately zero runtime fixture
+  // representation by design -- a WITHHELD disposition means this claim
+  // must never get one, not merely that it doesn't have one yet; never added
+  // to this set at CPR_031 time.
+  'CLAIM-LIKENESS-CN-PORTRAIT-VOICE-CONSENT-001-v1',
   // CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-001-v1 -- Deprecated 2026-09-06
   // (FGR_016 addenda): its applicability requirement (`tool_plan_tier
   // not_equals 'Free'`) was found unsafe (open-world negative predicate)
