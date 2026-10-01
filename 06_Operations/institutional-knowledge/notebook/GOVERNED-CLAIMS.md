@@ -5327,3 +5327,232 @@ Historical debt, recorded not remediated (FGR_025 §7/8-REVISED final paragraph)
 Full Formal Governance Review artifact: `governance-reviews/FGR_025_CAND-LIKENESS-CN-PORTRAIT-VOICE-CONSENT-001_2026-10-01.md`
 Full CRC Publication Review artifact: `governance-reviews/CPR_031_CLAIM-LIKENESS-CN-PORTRAIT-VOICE-CONSENT-001-v1_2026-10-01.md`
 Full evidence manifest: `evidence-captures/china-likeness/MANIFEST.md`
+
+### CLAIM-SYNTHETIC-PERFORMER-CA-BPC-17610-001-v1
+Domain: Synthetic Performer Advertising Disclosure (California)
+Topic: likeness
+Subtopic: ca-bpc-17610-synthetic-performer-advertisement-disclosure
+Claim character: established
+Jurisdiction: California (state)
+Context: a commercial AI-generated or AI-assisted advertisement (audio, video, or audiovisual) that may include a synthetic (AI-generated, non-identifiable) performer, distributed or made available to consumers
+
+GOVERNANCE TREATMENT (2026-10-01, PM adoption decision, FGR #26): Second claim in the synthetic-performer-disclosure sub-family (after `CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1`, FGR_018), and the fourth non-US/non-federal-only jurisdiction claim in this corpus overall (after the two Taiwan claims and the China portrait/voice claim). Reuses the existing `likeness` `GoalCategory`/`KnowledgeTopic` verbatim — no new category, no new topic, no new `TopicRelationship`. A dedicated Applicability Challenge (`LK-CA-SYNTHETIC-PERFORMER-APPLICABILITY-CHALLENGE-1`, 2026-10-01, no separate commit — report-only, verdict CONFIRM) independently re-tested FGR_026's `jurisdiction == California` applicability design before this Adoption and found it correct as written, surfacing one pre-existing, generic, fail-safe architecture gap (no mechanism gates applicability on `DistributionTerritoryMention`/consumer-location facts — see Known architecture/governance debt below) that does not block Adoption.
+
+**Dependency model is independently smaller than the NY sibling's, for evidenced reasons, not imitation.** FGR_026 §8 re-derived every candidate from zero rather than inheriting NY's four-dependency array (`advertiser_or_duty_holder_status_confirmed`, `synthetic_performer_present_confirmed`, `actual_knowledge_confirmed`, `expressive_work_exemption_applies`, all pre-dating the Sept-18-2026 conjunctive statutory-clause-mirror / claim-wide-accuracy standard). Final dependency array is **D2**: `['synthetic_performer_content_present', 'advertisement_purpose_confirmed']`. Independently rejected, each for a stated reason (FGR_026 §8.B–§8.H): recognizability/non-identifiability (a regime-selector between this statute and a wholly separate, unadopted real-person likeness body of law — not a runtime-resolvable project fact); "prominently used" (a multi-factor functional/narrative-role characterization, the same disqualifying character as Taiwan Trademark's rejected bundled items); the duty-holder's own create/publish conduct (closer to case-intake information than an independent Living Knowledge project-state proposition, once content-purpose is separately captured); California's own geographic/consumer-nexus condition (resolved as applicability, §6, not a dependency — no project-state field exists at the granularity the statute's own "consumers in this state" language would require); actual knowledge (**affirmatively absent** from California's text — § 17610(b)'s duty is unconditional, unlike NY's express "actual knowledge" clause; adding this dependency would misstate the statute, not merely over-include); "clear and conspicuous disclosure already supplied" (a multi-factor qualitative standard of the same character as "prominently used" — initially looked admissible, independently withdrawn on closer re-test within the same FGR); the expressive-work and translation/accessibility exemptions, and the court-order/platform-duty condition (each a compound legal-characterization or procedural question, named in the proposition's own wording as an unresolved boundary, never represented as a dependency).
+
+Claim proposition: >
+  Under California Business and Professions Code § 17610 (added by SB
+  1050, Chapter 246, Statutes of 2026), it is unlawful for any person to
+  create and cause to be published, in an advertising medium, an
+  advertisement that prominently includes a synthetic performer, without
+  a clear and conspicuous disclosure that the advertisement includes a
+  synthetic performer. "Advertisement" means any audio, video, or
+  audiovisual message or other representation, disseminated by any means
+  including online platforms, that is intended to induce, or reasonably
+  expected to induce, the purchase of goods or services, as described in
+  Business and Professions Code § 17500. "Synthetic performer" means a
+  digital figure, voice, or representation created in whole or in part
+  using generative artificial intelligence that creates the realistic
+  impression of the audio, audiovisual, or visual performance of a human
+  performer who is NOT recognizable as any identifiable natural person;
+  this proposition does not determine whether any specific depicted
+  figure meets or fails this definition. A synthetic performer is used
+  "prominently" only if it is (a) in the foreground and demonstrating or
+  illustrating the product or service, (b) providing or voicing the on-
+  or off-camera narration or commercial message, or (c) illustrating or
+  reacting to the on- or off-camera narration or commercial message; this
+  proposition does not determine whether any specific project's use meets
+  this threshold. The required disclosure must be "clear and conspicuous"
+  -- difficult to miss, easily understandable, and presented so a
+  reasonable consumer would notice, read, and comprehend it, given the
+  medium, format, and context -- and must use wording substantially
+  similar to "this performance features a synthetic performer" or "no
+  human performer is depicted"; this proposition does not determine
+  whether any specific disclosure, if any, satisfies this standard. The
+  statute expressly does not restrict or prohibit the creation,
+  distribution, or exhibition of synthetic content generally, and does
+  not regulate an advertisement's expressive or informational content
+  beyond the disclosure duty itself. It does not apply to advertisements
+  for expressive works (motion pictures, television programs, streaming
+  content, documentaries, video games, and similar audiovisual works),
+  provided the synthetic performer's use in the advertisement is
+  consistent with its use in the expressive work, nor to advertisements
+  where the use of generative AI solely involves language translation of
+  a human performer or other accessibility features. Separately, an
+  advertising medium (a broadcast station, platform, streaming service,
+  publisher, or similar distributor reaching consumers in California)
+  must not transmit, distribute, display, air, or otherwise make
+  available a non-compliant advertisement once BOTH (i) a court of
+  competent jurisdiction has issued an order finding the advertisement
+  violates this statute or enjoining its creator, and (ii) the medium has
+  been served with that order and information reasonably sufficient to
+  identify the advertisement -- this proposition does not determine
+  whether any specific order or service of process satisfies this test.
+  A violation of § 17610 constitutes a violation of § 17500 and may be
+  enforced under the Unfair Competition Law (Chapter 5, commencing with
+  § 17200); § 17610 itself states no separate, synthetic-performer-
+  specific penalty amount. This proposition does not determine whether
+  any specific project's advertisement, performer, disclosure, exemption
+  claim, platform conduct, or distribution reaches consumers in
+  California or otherwise falls within this statute's scope.
+
+Source references:
+  - primary (Class A, independently fetched via direct CLI `curl`, browser-like User-Agent, no model summarization): chaptered SB 1050 bill text (version `20250SB105093CHP`, "09/16/26 - Chaptered"), `leginfo.legislature.ca.gov/faces/billTextClient.xhtml?bill_id=202520260SB1050`, durably preserved at `evidence-captures/california-synthetic-performer/MANIFEST.md`.
+  - primary (Class A, independently fetched, cross-confirms enactment date/chapter number): SB 1050 bill-history/action-table page, `leginfo.legislature.ca.gov/faces/billHistoryClient.xhtml?bill_id=202520260SB1050`.
+  - primary (Class A, independently fetched): California Constitution Art. IV § 8 (default statutory effective-date and urgency-statute rules), `leginfo.legislature.ca.gov` `codes_displaySection.xhtml?lawCode=CONS&sectionNum=SEC.%208.&article=IV`.
+  - primary (Class A, independently fetched): BPC §§ 17500 and 17200 (the enforcement cross-reference), `leginfo.legislature.ca.gov` `codes_displaySection.xhtml?lawCode=BPC&sectionNum=17500.` / `...17200.`.
+  Full manifest with SHA-256 checksums: `evidence-captures/california-synthetic-performer/MANIFEST.md`.
+Source authority/type: Primary legal/official authority (California Business and Professions Code, as added by SB 1050; California Constitution Art. IV § 8; cross-referenced BPC §§ 17500/17200)
+Source fact: >
+  § 17610(a)(6): a synthetic performer is a figure/voice "created in
+  whole or in part using generative artificial intelligence" creating
+  "the realistic impression" of a human performance, by a performer "NOT
+  recognizable as any identifiable natural person." § 17610(a)(5) defines
+  "prominently" disjunctively across three sub-paragraphs (foreground
+  product demonstration; providing/voicing narration; illustrating or
+  reacting to narration), each carrying the identical consequence.
+  § 17610(a)(1) bounds "Advertisement" to content "intended to induce, or
+  that is reasonably expected to induce, the purchase of goods or
+  services, as described in Section 17500" -- unlike New York's statute,
+  California's entire duty is advertising-scoped; § 17610(d)(1)-(2)
+  affirmatively confirm non-advertising synthetic content is untouched.
+  § 17610(a)(2)(A) defines "Advertising medium" by reference to a
+  distributor reaching "consumers in this state" -- a nexus hook that
+  attaches to the medium/distribution concept, not to the primary (b)
+  duty-holder's own conduct, which is phrased simply as "any person." No
+  match for "urgency," "take effect," "operative," or "immediately"
+  appears anywhere in the three-section bill text (independently
+  confirmed by direct text search of the full captured text). No match
+  for "knowledge," "knowingly," "should know," or "willful" appears
+  anywhere in § 17610 (independently confirmed the same way) -- a
+  material, affirmative divergence from NY GBL § 396-b(3)'s express
+  actual-knowledge condition. § 17610(f): "A violation of this section
+  constitutes a violation of Section 17500 and may be enforced pursuant
+  to Chapter 5 (commencing with Section 17200)" -- no stand-alone
+  synthetic-performer-specific penalty amount, unlike NY's explicit
+  $1,000/$5,000 civil-penalty clause. Cal. Const. Art. IV § 8(c)(1): a
+  statute enacted at a regular session "shall go into effect on January
+  1 next following a 90-day period from the date of enactment," absent
+  an urgency clause (§ 8(d), requiring an express legislative necessity
+  statement passed by a two-thirds rollcall vote in each house -- not
+  present here).
+
+SI8 interpretation: >
+  A commercial AI-generated or AI-assisted advertisement that may include
+  a synthetic (non-identifiable, AI-generated) performer should not be
+  represented to a client, buyer, or platform as ready for commercial use
+  in California without first confirming (a) whether the content meets
+  the statutory synthetic-performer/advertisement definitions, (b)
+  whether the use is statutorily "prominent," (c) whether a disclosure
+  meeting the "clear and conspicuous" standard was included, and (d)
+  whether any exemption applies -- these are documentary/legal-
+  characterization facts CRC cannot establish from conversation alone.
+
+Applicability requirements:
+  - fact: jurisdiction
+    operator: equals
+    value: California
+  <!-- AssessmentJurisdictionMention represents only that the user asked CRC to consider California -- never proof that California law actually governs the project, that the advertisement actually reaches "consumers in this state" as § 17610(a)(2)(A) itself requires, or any inference from a California subject/provider/client/language. This is a sharper-than-usual disclaimer, recorded deliberately: California's own statutory nexus language ("consumers in this state") more directly invites the (wrong) inference that a DistributionTerritoryMention -- a user's statement about where the advertisement is DISTRIBUTED -- should control applicability. It does not. DistributionTerritoryMention/geographic_relevance_scope is, by its own doc comment, a Track-A-discovery-only mechanism that never participates in applicability_requirements evaluation (FGR_026 §7, independently re-confirmed by a dedicated Applicability Challenge, 2026-10-01, verdict CONFIRM, no FGR revision required). A user stating "we're only showing it to California customers" does not satisfy or fail this requirement by itself -- see Known architecture/governance debt below. JURISDICTION_VALUE_ALIASES has no entry resolving a California city (e.g. "Los Angeles," "San Francisco") to the canonical 'California' value -- the same disclosed gap every non-federal jurisdiction-gated claim in this corpus carries. -->
+Unresolved project dependencies: [synthetic_performer_content_present, advertisement_purpose_confirmed]   <!-- D2 (FGR_026 §8/§9, final and controlling -- no subsequent reconsideration). synthetic_performer_content_present: the statute's own baseline existence/categorization antecedent -- does an AI-generated, person-like performance figure or voice appear in the content at all (§ 17610(a)(6), excluding its own non-identifiability clause); evidence-only. advertisement_purpose_confirmed: whether the content functions as a commercial-inducement message per § 17610(a)(1)'s own "Advertisement" definition; evidence-only. Both independently re-tested against the Sept-18-2026 conjunctive statutory-clause-mirror / claim-wide-accuracy standard and admitted; every other FGR_026 candidate (recognizability/non-identifiability, "prominently used," the duty-holder's own create/publish conduct, the geographic/consumer-nexus condition, actual knowledge, "clear and conspicuous disclosure already supplied," the expressive-work/translation-accessibility exemptions, and the court-order/platform-duty condition) was independently tested and rejected, each for a stated reason (FGR_026 §8.B-§8.H) -- none inherited from the NY sibling's own four-dependency array, which pre-dates the current standard. -->
+Tool scope: null                 <!-- tool-independent; § 17610(a)(4)'s own "generative artificial intelligence" definition is technology-neutral, naming no specific tool --> Provider scope (asset-provider sense): null.
+Prohibited conclusions: >
+  CRC must never state or imply, for a specific project: that a depicted
+  figure is, as a matter of fact, recognizable/identifiable as a specific
+  real person, or that it definitively is not; that a synthetic
+  performer's use in a specific project does or does not meet the
+  "prominently" threshold; that specific content does or does not meet
+  § 17610(a)(1)'s "Advertisement" definition, or that the user/their
+  principal is or is not within the "any person [who] create[s] and
+  cause[s] to be published" class; that a specific disclosure, if any, is
+  or is not "clear and conspicuous" or uses sufficiently "substantially
+  similar" wording; that any exemption (expressive-work, translation/
+  accessibility) does or does not apply to a specific project; that a
+  specific court order or service of process does or does not satisfy
+  § 17610(e)(1); that California jurisdiction, or the "consumers in this
+  state" nexus § 17610(a)(2)(A)/(e)(2)(A) actually require, attaches to a
+  specific project merely because the user named California as the
+  assessment jurisdiction, mentioned California as a distribution
+  territory, or for any other reason; that actual knowledge is required
+  under this statute (it is not); that California's duty-holder class is
+  identical to New York's (it is materially broader in some respects and
+  differently structured in others); that AI tool providers are exempt
+  (not named as duty-holders, not the subject of any express exemption);
+  that a violation or compliance determination has been reached; that
+  any civil/UCL penalty has attached or will attach; or that the project
+  is commercially cleared, legally compliant, or ready for commercial use
+  in California or any other jurisdiction. Does not establish that a
+  real, identifiable person's likeness or digital replica is governed by
+  this statute (excluded from the governed subject itself -- see
+  GOVERNANCE TREATMENT above). Is not a substitute for Commercial
+  Assurance evidence review (Domain L -- Likeness & Performer Rights) of
+  the actual advertisement content, disclosure, and project-specific
+  facts this claim leaves open.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-10-01
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  PENDING -- CRC Publication Review not yet performed as of this Adoption
+  (2026-10-01). Per this document's own governance-discipline note (top
+  of file): a claim can be `Adopted` with `Adoption Approver` recorded
+  while `CRC Approver` remains `PENDING` indefinitely -- this is the
+  expected, intentional state, not a gap. FGR_026 §17 independently
+  records, and this Adoption decision does not resolve, predict, or imply
+  any outcome for, a future CRC Publication Review: this claim's topic
+  (likeness) is No-List-adjacent on its face and sits within CRC
+  Publication Policy Principle 3's own subject-matter gate. A genuinely
+  relevant but explicitly non-determinative parallel is recorded, not
+  relied upon: the directly analogous sibling,
+  `CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1`, governing the
+  identical non-identifiable-synthetic-performer-disclosure fact pattern
+  under a different statute, was independently reviewed under CPR_025 and
+  APPROVED FOR CRC PUBLICATION. This candidate shares the same non-
+  identifiability predicate and disclosure-duty (not consent-right)
+  shape -- but CPR_025's own finding was expressly claim-specific, not a
+  categorical rule, and a future CPR must independently re-derive this
+  question on California's own text. Either Adopted + CRC-Approved (the
+  NY-sibling shape) or Adopted + Withheld (the real-person-likeness-
+  sibling shape) remains a live, undecided outcome.
+
+CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
+  California Business and Professions Code § 17610 (effective January 1,
+  2027) requires a person who creates and causes to be published a
+  commercial advertisement prominently featuring a synthetic (AI-
+  generated, non-identifiable) performer to include a clear and
+  conspicuous disclosure of that fact. The duty does not apply to
+  advertisements for expressive works (where the synthetic performer's
+  use is consistent with its use in the work) or to translation/
+  accessibility-only AI use. A violation is enforced as an Unfair
+  Competition Law violation; the statute states no stand-alone penalty
+  amount of its own.
+
+Effective date: >
+  January 1, 2027 -- NOT YET EFFECTIVE as of this Adoption (2026-10-01).
+  Independently computed, not a directly quoted statutory statement: the
+  chaptered bill text and bill-history page both confirm enactment
+  (signed/filed) September 16, 2026, and the full captured bill text
+  contains no urgency clause or "take effect"/"operative"/"immediately"
+  language; California Constitution Art. IV § 8(c)(1)'s default rule
+  (effective "January 1 next following a 90-day period from the date of
+  enactment," absent an urgency statute under § 8(d)) therefore places
+  the effective date at 2027-01-01. This is a materially stronger
+  evidentiary basis than a single inferred secondary-source statement --
+  it rests on two independently fetched Class A primary texts combined
+  through directly re-read constitutional mechanics -- but is still an
+  applied-mechanics conclusion, not a sentence appearing verbatim in any
+  one captured document.
+Last reviewed: 2026-10-01 (Formal Governance Review, FGR_026)
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: [[CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1]] (direct sibling in the synthetic-performer-disclosure sub-family -- shared `likeness` GoalCategory and non-identifiable-performer/disclosure-duty shape, independently re-derived rather than inherited dependency model: California's duty is unconditional (no actual-knowledge element, affirmatively absent from its text) where New York's is conditioned on actual knowledge; California states no stand-alone penalty amount where New York's is explicit ($1,000/$5,000); California's duty-holder class ("any person [who] create[s] and cause[s] to be published") is textually broader/differently structured than New York's ("a person engaged in the business of dealing...for any commercial purpose"); California's translation/accessibility exemption is broader than New York's translation-only exemption; California has no audio-only exemption, unlike New York's express one), [[CLAIM-LIKENESS-CN-PORTRAIT-VOICE-CONSENT-001-v1]] / [[CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1]] (other `likeness`-topic claims in this corpus, governing real-person consent rather than synthetic-performer disclosure -- distinct governed subject, not force-reconciled).
+
+Known architecture/governance debt, recorded not remediated:
+  - No applicability mechanism exists for distribution-territory/consumer-nexus facts (FGR_026 §7/§18, independently re-confirmed by the 2026-10-01 Applicability Challenge). `geographic_relevance_scope`/`DistributionTerritoryMention` is Track-A-discovery-only by explicit, load-bearing design and structurally cannot gate `applicability_requirements` today. Practical effect: a user who states an advertisement reaches California consumers, without also establishing California as the assessment jurisdiction, will not trigger this claim -- a silent, fail-safe (under-triggering, never over-triggering) gap, pre-existing and generic, not specific to this claim, not repaired here, and not authorized to be repaired here.
+  - `FGR_018`'s own four NY dependencies (`advertiser_or_duty_holder_status_confirmed`, `synthetic_performer_present_confirmed`, `actual_knowledge_confirmed`, `expressive_work_exemption_applies`) have never been independently re-tested against the Sept-18-2026 conjunctive standard this California claim's own dependency design was held to -- pre-dates that standard by three weeks. This Adoption does not modify the NY claim and does not broaden this milestone into corpus-wide dependency remediation.
+  - No Reviewer Manual update was made or proposed: Commercial Assurance Domain L currently names only the NY statute explicitly; a parallel California note is a plausible, reasonable future documentation update, not performed or authorized by FGR_026 or this Adoption.
+
+Full Formal Governance Review artifact: `governance-reviews/FGR_026_CAND-SYNTHETIC-PERFORMER-CA-BPC-17610-001_2026-10-01.md`
+Full evidence manifest: `evidence-captures/california-synthetic-performer/MANIFEST.md`
