@@ -52,11 +52,26 @@
  * unmodified (see that module's own header). This component does NOT
  * inspect `ApplicabilityFact`, does not decide whether a note should
  * exist, and does not reconstruct any sentence -- it only attaches an
- * already-finished `note.text` as one more, identically-styled paragraph
- * after the matching goal's own `summary_blocks`, matched by
- * `note.goal_index` against that goal's position in this array (the same
- * association `results-email-template.ts` uses, so browser and email
- * render byte-identical text for the same completed session).
+ * already-finished `note.text`, matched by `note.goal_index` against that
+ * goal's position in this array (the same association
+ * `results-email-template.ts` uses).
+ *
+ * CRC-CC-RENDERER-SCOPED-CONTEXT-1D (2026-10-02): `note.presentation_role`
+ * (additive, optional -- see `ConsultativeNote`'s own header) now decides
+ * WHERE that same, already-finished `note.text` goes -- never whether it
+ * exists, never what it says. `'primary'` (or absent, the fail-closed
+ * default -- see `roleFor` below) keeps the exact pre-1D behavior: one
+ * more identically-styled paragraph inside that goal's own card.
+ * `'scoped_context'` moves it, verbatim, into a separate "Related context"
+ * section rendered once, after every goal card -- never inline with
+ * primary unresolved-project-work text, and never using different wording
+ * (the sentence itself was already fixed upstream, by Realization; this
+ * component only changes where it is placed). This component never reads
+ * `unresolved_reason`, never recomputes applicability, and never inspects
+ * any `ConsultativeRealization` field directly -- `presentation_role` was
+ * already attached to each note server-side (`attachPresentationRole`,
+ * `unresolved-applicability-realization.ts`), by exact structural
+ * correlation, before this component ever sees it.
  */
 
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
@@ -69,7 +84,25 @@ function formatLastVerified(value: string | null): string | null {
   return parsed.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
+/**
+ * CRC-CC-RENDERER-SCOPED-CONTEXT-1D: fail-closed default, same as
+ * Realization's own `presentationRoleForUnresolvedReason` -- absent/
+ * unrecognized -> `'primary'`, never `'scoped_context'`. Exported (not
+ * merely internal) so this one decision point is directly unit-testable
+ * without a DOM/React-rendering environment, which this repository does
+ * not currently have configured for Jest (`testEnvironment: 'node'`, no
+ * `@testing-library/react`) -- see this milestone's own Final Report for
+ * the explicit, non-overclaimed scope of what is and is not verified here.
+ */
+export function roleFor(note: ConsultativeNote): 'primary' | 'scoped_context' {
+  return note.presentation_role === 'scoped_context' ? 'scoped_context' : 'primary'
+}
+
 export function CrcProjectionOutput({ output, consultativeNotes }: { output: ProjectionOutput; consultativeNotes?: ConsultativeNote[] }) {
+  // CRC-CC-RENDERER-SCOPED-CONTEXT-1D: split, never recompute. `notes` is
+  // already fully built upstream; this is a pure partition by the one
+  // field this component is authorized to read.
+  const scopedContextNotes = (consultativeNotes ?? []).filter((n) => roleFor(n) === 'scoped_context')
   const isFullyEmpty =
     output.opening_line === '' && output.understood_summary === '' && output.knowledge_items.length === 0 && output.goal_interpretations.length === 0
 
@@ -115,8 +148,11 @@ export function CrcProjectionOutput({ output, consultativeNotes }: { output: Pro
           <p className="text-sm font-semibold">What this means for what you asked</p>
           {output.goal_interpretations.map((item, i) => {
             // M2B: an optional realized note for THIS goal, matched by
-            // array position -- see this file's own header.
-            const note = consultativeNotes?.find((n) => n.goal_index === i)
+            // array position -- see this file's own header. 1D: only a
+            // `primary`-role note is inlined here; a `scoped_context` one
+            // is rendered separately, below, never inline with primary
+            // unresolved-project-work text.
+            const note = consultativeNotes?.find((n) => n.goal_index === i && roleFor(n) === 'primary')
             const blocks = note ? [...item.summary_blocks, note.text] : item.summary_blocks
             return (
               <div key={i} className="rounded-md border p-4">
@@ -133,6 +169,34 @@ export function CrcProjectionOutput({ output, consultativeNotes }: { output: Pro
                     </p>
                   ))}
                 </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/*
+       * CRC-CC-RENDERER-SCOPED-CONTEXT-1D (2026-10-02). Separate from "What
+       * this means for what you asked" above -- a `scoped_context` note is
+       * never mixed into that primary unresolved-project-work presentation.
+       * Same already-finished `note.text` this component would otherwise
+       * have inlined; only the placement differs. "For: ..." attribution is
+       * shown only when more than one goal exists, mirroring
+       * results-email-template.ts's own `multiGoal` convention exactly, so
+       * web and email agree on when goal attribution is needed, not only on
+       * which role a note carries.
+       */}
+      {scopedContextNotes.length > 0 && (
+        <div className="space-y-2 border-t pt-6">
+          <p className="text-sm font-semibold">Related context</p>
+          {scopedContextNotes.map((note, idx) => {
+            const goalText = output.goal_interpretations[note.goal_index]?.goal_text
+            return (
+              <div key={idx} className="rounded-md border p-4">
+                {output.goal_interpretations.length > 1 && goalText && (
+                  <p className="text-xs italic text-muted-foreground">For: &ldquo;{goalText}&rdquo;</p>
+                )}
+                <p className="mt-2 text-sm whitespace-pre-line">{note.text}</p>
               </div>
             )
           })}

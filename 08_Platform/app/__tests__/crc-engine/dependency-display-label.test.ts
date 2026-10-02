@@ -236,8 +236,16 @@ describe('SCOPE-6F -- real end-to-end: all four real governed consumers (Part 15
     const email = buildResultsEmailContent(result.output, null, 'a@example.com', result.plan, result.consultative_notes, realization)
     const matches = email.text.match(/Your human contribution to the finished work hasn't been confirmed in this conversation\./g) || []
     expect(matches).toHaveLength(3)
-    // the Taiwan claim's own jurisdiction-unresolved item uses the applicability label, not the dependency label
-    expect(email.text).toContain('Your assessment jurisdiction')
+    // The Taiwan claim's own jurisdiction-unresolved item uses the applicability
+    // label, not the dependency label. CRC-CC-RENDERER-SCOPED-CONTEXT-1D
+    // (2026-10-02): with United States established, the real evaluator produces
+    // `value_not_among_established_values` for the Taiwan claim -- a known
+    // non-match, not genuinely-missing -- so it now correctly renders under
+    // "Related context" rather than "Still open", using the same governed
+    // "assessment jurisdiction" label the Still-open path would have used.
+    expect(email.text).toContain('RELATED CONTEXT')
+    expect(email.text).toContain('assessment jurisdiction')
+    expect(email.text).not.toContain('Your assessment jurisdiction') // the primary-role sentence form no longer applies here
   })
 
   test('Taiwan established -> the Taiwan claim matches and contributes the SAME governed dependency label through its own, independent path; the three US claims become jurisdiction-unresolved instead', () => {

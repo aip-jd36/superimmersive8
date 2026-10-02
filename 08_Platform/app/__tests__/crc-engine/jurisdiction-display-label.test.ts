@@ -67,7 +67,14 @@ function openDependency(overrides: Partial<Extract<PlanUnresolvedItem, { kind: '
 // ── GROUP 1: primary/scoped_context label orthogonality (Part 10) ────────
 
 describe('SCOPE-6B -- jurisdiction label is identical regardless of presentation role', () => {
-  test('primary (unresolved_reason: null) and scoped_context (value_not_among_established_values) render the SAME "Still open" sentence for jurisdiction', () => {
+  // CRC-CC-RENDERER-SCOPED-CONTEXT-1D (2026-10-02): this test's original title
+  // and assertion described the exact defect this milestone fixes -- primary
+  // and scoped_context rendering the SAME "Still open" sentence. That is no
+  // longer correct, intentionally: role now determines BOTH section placement
+  // and sentence framing. What's preserved is narrower and still real: the
+  // underlying governed LABEL ("assessment jurisdiction") is identical either
+  // way -- role changes where/how it's framed, never the label vocabulary.
+  test('primary (unresolved_reason: null) renders in "Still open" with the pre-1D sentence; scoped_context (value_not_among_established_values) renders in "Related context" with role-appropriate wording -- same governed "assessment jurisdiction" label either way', () => {
     const secPrimary = section({ category: COPYRIGHTABILITY, goal_text: 'g1', unresolved_items: [applicability({ claim_id: 'A', unresolved_reason: null })] })
     const secScoped = section({ category: COPYRIGHTABILITY, goal_text: 'g2', unresolved_items: [applicability({ claim_id: 'B', unresolved_reason: REASON })] })
 
@@ -80,20 +87,39 @@ describe('SCOPE-6B -- jurisdiction label is identical regardless of presentation
     const emailPrimary = buildResultsEmailContent(projectionOutput(), null, 'a@example.com', plan({ explicit_sections: [secPrimary] }), [], realizationPrimary)
     const emailScoped = buildResultsEmailContent(projectionOutput(), null, 'a@example.com', plan({ explicit_sections: [secScoped] }), [], realizationScoped)
 
-    // Same governed Level-1 sentence either way -- role never changes label wording.
+    expect(emailPrimary.text).toContain('STILL OPEN')
     expect(emailPrimary.text).toContain("Your assessment jurisdiction hasn't been confirmed in this conversation.")
-    expect(emailScoped.text).toContain("Your assessment jurisdiction hasn't been confirmed in this conversation.")
+    expect(emailPrimary.text).not.toContain('RELATED CONTEXT')
+
+    expect(emailScoped.text).toContain('RELATED CONTEXT')
+    expect(emailScoped.text).toContain('assessment jurisdiction')
+    // The primary-role sentence form is specifically what 1D moves away from
+    // for a known non-match -- it must never appear for the scoped_context case.
+    expect(emailScoped.text).not.toContain("Your assessment jurisdiction hasn't been confirmed in this conversation.")
   })
 
-  test('the sentence never explains WHY the item is unresolved -- no relationship/value language for either role', () => {
-    const forbidden = /established|matches?|doesn'?t match|applies elsewhere|outside your jurisdiction|isn'?t met|not met/i
+  test('the "Still open" (primary) sentence never explains WHY the item is unresolved -- no relationship/value language', () => {
+    const forbidden = /matches?|doesn'?t match|applies elsewhere|outside your jurisdiction|isn'?t met|not met/i
     const secPrimary = section({ category: COPYRIGHTABILITY, unresolved_items: [applicability({ unresolved_reason: null })] })
+    const realization = buildConsultativeRealization(plan({ explicit_sections: [secPrimary] }), projectionOutput())
+    const email = buildResultsEmailContent(projectionOutput(), null, 'a@example.com', plan({ explicit_sections: [secPrimary] }), [], realization)
+    expect(email.text).not.toMatch(forbidden)
+  })
+
+  test('the "Related context" (scoped_context) sentence conveys scope without naming the specific established/required value or the comparison outcome', () => {
+    // CRC-CC-RENDERER-SCOPED-CONTEXT-1D (2026-10-02): scoped_context
+    // deliberately uses different, honest framing ("...other than what's
+    // already established for this conversation") to distinguish it from
+    // "Still open" -- generically referencing that something is established,
+    // without saying what, is not the same leak as naming the specific value
+    // or comparison outcome. The narrower forbidden set below guards the
+    // leaks this file's own GROUP 2 real-evaluator tests independently prove
+    // never happen (Taiwan / United States / the raw reason literal).
+    const forbidden = /doesn'?t match|outside your jurisdiction|isn'?t met|not met|value_not_among_established_values/i
     const secScoped = section({ category: COPYRIGHTABILITY, unresolved_items: [applicability({ unresolved_reason: REASON })] })
-    for (const sec of [secPrimary, secScoped]) {
-      const realization = buildConsultativeRealization(plan({ explicit_sections: [sec] }), projectionOutput())
-      const email = buildResultsEmailContent(projectionOutput(), null, 'a@example.com', plan({ explicit_sections: [sec] }), [], realization)
-      expect(email.text).not.toMatch(forbidden)
-    }
+    const realization = buildConsultativeRealization(plan({ explicit_sections: [secScoped] }), projectionOutput())
+    const email = buildResultsEmailContent(projectionOutput(), null, 'a@example.com', plan({ explicit_sections: [secScoped] }), [], realization)
+    expect(email.text).not.toMatch(forbidden)
   })
 })
 
@@ -129,18 +155,36 @@ describe('SCOPE-6B -- UAT-D1 representative reproduction (mixed role, jurisdicti
     expect(tmRoles).toEqual(['primary'])
   })
 
-  test('all three Copyright "Still open" lines now use the governed jurisdiction category sentence -- three times, still identical to each other', () => {
-    const matches = email.text.match(/Your assessment jurisdiction hasn't been confirmed in this conversation\./g) || []
-    expect(matches).toHaveLength(3)
+  // CRC-CC-RENDERER-SCOPED-CONTEXT-1D (2026-10-02): this fixture's 3 Copyright
+  // jurisdiction items are 2 scoped_context (REASON) + 1 primary (null) --
+  // see the roles test above. They no longer co-locate in one section: the
+  // governed sentence now appears once in "Still open" (the primary item)
+  // and the (different, role-appropriate) scoped_context sentence appears
+  // twice in "Related context" -- still identical to EACH OTHER within that
+  // section, which is the real invariant SCOPE-6B/1D both care about: siblings
+  // sharing the same (category, role) pair are never distinguished from one
+  // another.
+  test('the primary Copyright jurisdiction item renders once in "Still open"; the 2 scoped_context siblings render in "Related context", identical to each other', () => {
+    const stillOpenMatches = email.text.match(/Your assessment jurisdiction hasn't been confirmed in this conversation\./g) || []
+    expect(stillOpenMatches).toHaveLength(1)
+    const relatedContextMatches = email.text.match(/A related governed consideration is scoped to a assessment jurisdiction other than what's already established for this conversation\./g) || []
+    expect(relatedContextMatches).toHaveLength(2)
   })
 
-  test('the three lines remain textually IDENTICAL to one another -- SCOPE-6B does not, and is not claimed to, distinguish the three underlying claims', () => {
+  test('"Still open" holds exactly 2 lines (1 Copyright primary + 1 Trademark primary dependency), not identical to each other; "Related context" holds the 2 scoped_context Copyright lines, identical to each other', () => {
     const stillOpenStart = email.text.indexOf('STILL OPEN')
-    const stillOpenEnd = email.text.indexOf("WHAT'S STILL NEEDED")
+    const stillOpenEnd = email.text.indexOf('RELATED CONTEXT')
     const stillOpenSection = email.text.slice(stillOpenStart, stillOpenEnd)
-    const lines = stillOpenSection.split('\n').map((l) => l.trim()).filter((l) => l.startsWith('-'))
-    expect(lines).toHaveLength(4) // 3 Copyright + 1 Trademark
-    expect(new Set(lines.slice(0, 3)).size).toBe(1) // all 3 Copyright lines are the SAME string
+    const stillOpenLines = stillOpenSection.split('\n').map((l) => l.trim()).filter((l) => l.startsWith('-'))
+    expect(stillOpenLines).toHaveLength(2) // 1 Copyright primary + 1 Trademark primary
+    expect(new Set(stillOpenLines).size).toBe(2) // different categories/labels -- not textually identical
+
+    const relatedStart = email.text.indexOf('RELATED CONTEXT')
+    const relatedEnd = email.text.indexOf("WHAT'S STILL NEEDED")
+    const relatedSection = email.text.slice(relatedStart, relatedEnd)
+    const relatedLines = relatedSection.split('\n').map((l) => l.trim()).filter((l) => l.startsWith('-'))
+    expect(relatedLines).toHaveLength(2) // the 2 scoped_context Copyright siblings
+    expect(new Set(relatedLines).size).toBe(1) // SCOPE-6B/1D: siblings sharing (category, role) are never distinguished
   })
 
   // CRC-CC-SCOPE-6F (2026-09-25): this fixture's Trademark item uses

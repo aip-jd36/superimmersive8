@@ -176,9 +176,17 @@ describe('Answered-but-Unresolved Applicability -- empirical canary (real pipeli
     expect(note.text).not.toContain('kling') // no provider name in rendered text either
   })
 
-  test('11: the transport note carries only {goal_index, text} -- the exact shape that would reach the API/browser/email', () => {
+  test('11: the transport note carries exactly {goal_index, presentation_role, text} -- the exact shape that would reach the API/browser/email', () => {
     const result = runPipeline(structuredUnderstanding())
-    expect(Object.keys(result.consultative_notes[0]).sort()).toEqual(['goal_index', 'text'])
+    // CRC-CC-RENDERER-SCOPED-CONTEXT-1D (2026-10-02): `presentation_role` is
+    // now additively attached by `attachPresentationRole`, correlated
+    // structurally against this same note's underlying (claim_id, fact,
+    // tool) -- see that function's own header. This item's unresolved_reason
+    // is null (tool_account_status is genuinely unconfirmed, not a known
+    // non-match), so it fails closed to 'primary', unchanged from where it
+    // renders ("Still open", test 7/8/9/10 above).
+    expect(Object.keys(result.consultative_notes[0]).sort()).toEqual(['goal_index', 'presentation_role', 'text'])
+    expect(result.consultative_notes[0].presentation_role).toBe('primary')
     expect(result.consultative_notes[0].goal_index).toBe(0)
     // Index parity with the goal it belongs to, per the realization module's
     // own documented association mechanism.

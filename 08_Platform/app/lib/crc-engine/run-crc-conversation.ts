@@ -76,7 +76,7 @@ import type { BoundedInterpretation } from '@/lib/bounded-interpretation/types'
 import { deriveDiscoveredTopicOccurrences } from './discovered-relevance'
 import { deriveAssessmentJurisdictionFacts } from './assessment-jurisdiction-scope'
 import { buildConsultativeAnswerPlan, type ConsultativeAnswerPlan } from './consultative-answer-plan'
-import { realizeUnresolvedApplicability, toConsultativeNotes, type ConsultativeNote } from './unresolved-applicability-realization'
+import { realizeUnresolvedApplicability, toConsultativeNotes, attachPresentationRole, type ConsultativeNote } from './unresolved-applicability-realization'
 import { buildConsultativeRealization, type ConsultativeRealization } from './consultative-realization-contract'
 import type { RetrievalHandoff, StructuredUnderstanding } from '@/types/interview-engine'
 
@@ -306,14 +306,34 @@ export function runCRCConversation(
   // computed -- glue only. `plan.explicit_sections` only, never `plan`
   // itself, is passed on (see realizeUnresolvedApplicability's own
   // signature) -- discovered-context notes are out of scope by
-  // construction, not by a runtime check. Narrowed to the transport shape
-  // immediately -- nothing beyond `{goal_index, text}` leaves this function.
-  const consultative_notes = toConsultativeNotes(realizeUnresolvedApplicability(plan.explicit_sections))
+  // construction, not by a runtime check. Kept in its rich, pre-narrowing
+  // shape here (CRC-CC-RENDERER-SCOPED-CONTEXT-1D, 2026-10-02) because the
+  // `(claim_id, fact, tool)` identity it still carries is exactly what the
+  // role-correlation step below needs -- narrowed to the transport shape
+  // only once, at the very end of this computation.
+  const realizedNotes = realizeUnresolvedApplicability(plan.explicit_sections)
 
   // CRC-CC-RENDERER-SCOPED-CONTEXT-1C: same authoritative builder email
   // already calls, same three already-computed inputs -- see this field's
-  // own header on CRCPipelineResult above.
-  const realization = buildConsultativeRealization(plan, output, consultative_notes)
+  // own header on CRCPipelineResult above. Built from the PLAIN narrowed
+  // notes (`toConsultativeNotes`, unchanged) -- `buildConsultativeRealization`
+  // only ever reads `note.goal_index`/`note.text` for its own
+  // `goal_answers[i].note` attachment, and its `unresolved_item_
+  // presentation`/`unresolved_groups` construction depends only on `plan`,
+  // never on `notes` at all -- so there is no circular computation between
+  // this line and the role-correlation line immediately below it.
+  const realization = buildConsultativeRealization(plan, output, toConsultativeNotes(realizedNotes))
+
+  // CRC-CC-RENDERER-SCOPED-CONTEXT-1D (2026-10-02): the SAME rich notes,
+  // now additionally carrying each one's own already-computed
+  // `presentation_role`, via pure structural correlation against
+  // `realization.unresolved_item_presentation` (see
+  // `attachPresentationRole`'s own header) -- never a second role
+  // computation, never a read of `unresolved_reason`. This is the
+  // `consultative_notes` value actually exposed on `CRCPipelineResult`
+  // below; `toConsultativeNotes`'s own narrower, role-free output above is
+  // used only internally, for `realization`'s own construction.
+  const consultative_notes = attachPresentationRole(realizedNotes, realization)
 
   return {
     output,

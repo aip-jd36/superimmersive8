@@ -205,6 +205,66 @@ function unresolvedItemSentence(item: PlanUnresolvedItem, displayLabel: string |
   return "An additional governed consideration for this topic hasn't been confirmed."
 }
 
+/**
+ * CRC-CC-RENDERER-SCOPED-CONTEXT-1D (2026-10-02). The `scoped_context`
+ * counterpart to `categoryLabelSentence`/`unresolvedItemSentence` above --
+ * same shared structure, same inputs (`display_label` / `item.fact`),
+ * deliberately DIFFERENT wording, because `scoped_context` means something
+ * materially different from the `primary` default this module's own
+ * `presentation_role`-blind rendering previously applied uniformly to
+ * every unresolved item: a known, already-established value exists for
+ * this dimension, just not the one this specific item's own requirement
+ * names (CRC-CC-SCOPE-3's own `value_not_among_established_values`). This
+ * sentence must never say "hasn't been confirmed" (that is the EXACT false
+ * claim the paired California/New York Production UAT exposed), and -- per
+ * the architecture's own open-world cardinality (CRC-CC-APPLICABILITY-1 §Z)
+ * -- must never say "doesn't apply," "is excluded," "is out of scope," or
+ * "is irrelevant" either, since none of those is authorized by
+ * `presentation_role` alone. "Scoped to" states only the one fact
+ * `presentation_role: 'scoped_context'` itself establishes: this item's own
+ * governed consideration concerns a value other than what is currently
+ * established -- no stronger or weaker claim than that.
+ */
+function scopedContextSentence(label: string): string {
+  return `A related governed consideration is scoped to a ${label} other than what's already established for this conversation.`
+}
+
+function boundedFactScopedContextSentence(fact: ApplicabilityFact | null): string | null {
+  if (!fact) return null
+  const label = getApplicabilityFactLabel(fact)
+  return label ? scopedContextSentence(label) : null
+}
+
+/** `scoped_context` counterpart to `unresolvedItemSentence` -- identical structure and inputs, never `item.unresolved_reason`, never a jurisdiction-specific branch. */
+function scopedContextItemSentence(item: PlanUnresolvedItem, displayLabel: string | null): string {
+  if (displayLabel) return scopedContextSentence(displayLabel)
+  if (item.kind === 'unresolved_applicability') {
+    return boundedFactScopedContextSentence(item.fact) ?? 'A related governed consideration is scoped elsewhere for this topic.'
+  }
+  if (item.kind === 'withheld_relevant_claim') {
+    return boundedFactScopedContextSentence(item.fact) ?? 'An additional governed consideration is scoped elsewhere for this topic.'
+  }
+  return 'An additional governed consideration is scoped elsewhere for this topic.'
+}
+
+/**
+ * CRC-CC-RENDERER-SCOPED-CONTEXT-1D (2026-10-02). Pure, structural-only
+ * split of an already-built group list by each item's own already-
+ * computed `presentation_role` -- never recomputes the role, never reads
+ * `unresolved_reason`. A group that loses every item for the requested
+ * role is dropped entirely (never rendered with an empty `items` array);
+ * a group's own `heading`/`goal_index`/`category` are carried through
+ * unchanged on whatever items remain, since those describe the governed
+ * DIMENSION, not resolution status, and apply identically regardless of
+ * which role a specific item within the group carries.
+ */
+function filterGroupsByRole(
+  groups: ConsultativeUnresolvedPresentationGroup[],
+  role: ConsultativeUnresolvedPresentationGroup['items'][number]['presentation_role'],
+): ConsultativeUnresolvedPresentationGroup[] {
+  return groups.map((group) => ({ ...group, items: group.items.filter((item) => item.presentation_role === role) })).filter((group) => group.items.length > 0)
+}
+
 export function buildResultsEmailContent(
   output: ProjectionOutput,
   attributionToken: string | null | undefined,
@@ -343,11 +403,27 @@ export function buildResultsEmailContent(
    * `unresolvedItemSentence`, producing output visually identical to the
    * pre-grouping flat rendering for any unlabeled/ungrouped dimension.
    */
-  const renderUnresolved = (groups: ConsultativeUnresolvedPresentationGroup[], goalAnswers: ConsultativeGoalAnswer[]) => {
+  /**
+   * CRC-CC-RENDERER-SCOPED-CONTEXT-1D (2026-10-02). Generic over the
+   * section heading and sentence builder so "Still open" (`primary`) and
+   * "Related context" (`scoped_context`) share one rendering path --
+   * never two independently-maintained copies of the grouping/goal-
+   * transition logic. `groups` here is ALREADY role-filtered by the
+   * caller (`filterGroupsByRole`); this function itself never inspects
+   * `presentation_role`, `unresolved_reason`, or any applicability field
+   * -- it only lays out whatever group list it is given, exactly as the
+   * pre-1D single-section version did.
+   */
+  const renderUnresolvedSection = (
+    heading: string,
+    groups: ConsultativeUnresolvedPresentationGroup[],
+    goalAnswers: ConsultativeGoalAnswer[],
+    sentenceFor: (item: PlanUnresolvedItem, displayLabel: string | null) => string,
+  ) => {
     if (groups.length === 0) return
     const multiGoal = goalAnswers.length > 1
-    htmlParts.push('<p style="font-size:14px;font-weight:600;margin:24px 0 10px;color:#111;border-top:1px solid #eee;padding-top:20px;">Still open</p>')
-    textParts.push('\nSTILL OPEN\n')
+    htmlParts.push(`<p style="font-size:14px;font-weight:600;margin:24px 0 10px;color:#111;border-top:1px solid #eee;padding-top:20px;">${escapeHtml(heading)}</p>`)
+    textParts.push(`\n${heading.toUpperCase()}\n`)
     let lastGoalIndex: number | null = null
     for (const group of groups) {
       if (multiGoal && group.goal_index !== lastGoalIndex) {
@@ -361,11 +437,31 @@ export function buildResultsEmailContent(
         textParts.push(`${group.heading}\n`)
       }
       for (const child of group.items) {
-        const sentence = unresolvedItemSentence(child.item, child.display_label)
+        const sentence = sentenceFor(child.item, child.display_label)
         htmlParts.push(`<p style="font-size:14px;color:#222;margin:0 0 8px;">${escapeHtml(sentence)}</p>`)
         textParts.push(`- ${sentence}\n`)
       }
     }
+  }
+
+  /**
+   * CRC-CC-RENDERER-SCOPED-CONTEXT-1D (2026-10-02). Splits the ALREADY-
+   * fully-resolved `unresolved_presentation_groups` by each item's own
+   * already-computed `presentation_role` (`filterGroupsByRole` -- pure
+   * filtering, no recomputation) and renders the two roles as two
+   * separate sections, `primary` first: "Still open" (byte-for-byte the
+   * same heading, grouping, and sentence wording as before this
+   * milestone -- zero visible change for the dominant case where every
+   * item is `primary`), then, only if non-empty, "Related context" using
+   * the SAME generic section renderer with `scopedContextItemSentence`
+   * instead. A `scoped_context` item never reaches the "Still open"
+   * section and is never rendered with `unresolvedItemSentence`'s own
+   * "hasn't been confirmed" wording -- the exact false claim the paired
+   * California/New York Production UAT exposed.
+   */
+  const renderUnresolved = (groups: ConsultativeUnresolvedPresentationGroup[], goalAnswers: ConsultativeGoalAnswer[]) => {
+    renderUnresolvedSection('Still open', filterGroupsByRole(groups, 'primary'), goalAnswers, unresolvedItemSentence)
+    renderUnresolvedSection('Related context', filterGroupsByRole(groups, 'scoped_context'), goalAnswers, scopedContextItemSentence)
   }
 
   /**

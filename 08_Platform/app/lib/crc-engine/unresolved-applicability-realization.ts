@@ -99,6 +99,7 @@ import { getApplicabilityFactLabel } from './applicability-fact-display'
 import type { PlanGoalSection, PlanUnresolvedItem } from './consultative-answer-plan'
 import type { ApplicabilityFact } from '@/lib/retrieval-engine/types'
 import type { GoalCategory } from '@/types/interview-engine'
+import type { ConsultativeRealization, ConsultativeUnresolvedPresentationRole } from './consultative-realization-contract'
 
 /**
  * Internal, rich representation -- carries provenance for tracing/testing
@@ -140,6 +141,19 @@ export interface RealizedUnresolvedApplicabilityNote {
 export interface ConsultativeNote {
   goal_index: number
   text: string
+  /**
+   * CRC-CC-RENDERER-SCOPED-CONTEXT-1D (2026-10-02). Additive, optional --
+   * `toConsultativeNotes` below never sets it (byte-identical output,
+   * every existing caller/test unaffected); only `attachPresentationRole`
+   * (below) sets it, by exact structural correlation against the SAME
+   * turn's already-computed `ConsultativeRealization.unresolved_item_
+   * presentation` -- never re-derived from `unresolved_reason`,
+   * applicability requirements, or any raw project fact. Absent/undefined
+   * means exactly what the Realization contract's own fail-closed rule
+   * means for a reason it doesn't recognize: treat as `'primary'`. A
+   * renderer must apply that same fallback itself, never assume presence.
+   */
+  presentation_role?: ConsultativeUnresolvedPresentationRole
 }
 
 function candidateApplicabilityFacts(items: PlanUnresolvedItem[]): Extract<PlanUnresolvedItem, { kind: 'unresolved_applicability' }>[] {
@@ -237,7 +251,54 @@ export function realizeUnresolvedApplicability(sections: PlanGoalSection[]): Rea
   return notes
 }
 
-/** Narrows the internal, rich result to the transport shape -- see `ConsultativeNote`'s own header. */
+/** Narrows the internal, rich result to the transport shape -- see `ConsultativeNote`'s own header. Unchanged by CRC-CC-RENDERER-SCOPED-CONTEXT-1D -- every existing caller/test keeps receiving the exact same byte-for-byte `{goal_index, text}` shape. */
 export function toConsultativeNotes(notes: RealizedUnresolvedApplicabilityNote[]): ConsultativeNote[] {
   return notes.map(({ goal_index, text }) => ({ goal_index, text }))
+}
+
+/**
+ * CRC-CC-RENDERER-SCOPED-CONTEXT-1D (2026-10-02). Pure structural
+ * correlation only -- matches this note's own `(claim_id, fact, tool)`
+ * identity (already carried internally, never rendered -- see this
+ * module's own header) against `realization.unresolved_item_presentation`,
+ * an array of items for the SAME turn, each already carrying an
+ * authoritative `presentation_role` computed entirely upstream (Realization
+ * itself, CRC-CC-SCOPE-5). Never inspects `unresolved_reason`, never
+ * recomputes applicability, never reasons about jurisdiction/tool/claim
+ * semantics -- the match is an exact identity lookup, the same granularity
+ * `findCorrelatedUnresolvedItem` already uses elsewhere in this same
+ * subsystem (consultative-realization-contract.ts) to correlate missing-
+ * evidence items back to their own originating unresolved item. No match
+ * (should not occur for a genuinely corresponding note, but defensively
+ * possible if Realization and this module's own eligibility conditions
+ * ever diverge) fails closed to `'primary'` -- the SAME default
+ * `presentationRoleForUnresolvedReason` itself uses for an unrecognized
+ * reason, never the more visually-subordinate `'scoped_context'`.
+ */
+function presentationRoleForRealizedNote(note: RealizedUnresolvedApplicabilityNote, realization: ConsultativeRealization): ConsultativeUnresolvedPresentationRole {
+  const match = realization.unresolved_item_presentation.find(
+    (p) => p.item.kind === 'unresolved_applicability' && p.item.claim_id === note.claim_id && p.item.fact === note.fact && p.item.tool === note.tool,
+  )
+  return match?.presentation_role ?? 'primary'
+}
+
+/**
+ * CRC-CC-RENDERER-SCOPED-CONTEXT-1D (2026-10-02). The ONLY production
+ * entry point that sets `ConsultativeNote.presentation_role` -- additive
+ * sibling to `toConsultativeNotes` above, never a replacement for it
+ * (that function's own existing callers/tests are untouched). Takes the
+ * SAME rich, pre-narrowing `RealizedUnresolvedApplicabilityNote[]` this
+ * module already produces, plus the SAME turn's already-computed
+ * `ConsultativeRealization` (built from the SAME `plan`/`output` --
+ * `realization` does not depend on these notes at all; it reads only
+ * `plan.explicit_sections[].unresolved_items`, so there is no circular
+ * computation here, only a correlation performed after both already
+ * exist).
+ */
+export function attachPresentationRole(notes: RealizedUnresolvedApplicabilityNote[], realization: ConsultativeRealization): ConsultativeNote[] {
+  return notes.map((note) => ({
+    goal_index: note.goal_index,
+    text: note.text,
+    presentation_role: presentationRoleForRealizedNote(note, realization),
+  }))
 }
