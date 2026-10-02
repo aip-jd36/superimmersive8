@@ -5747,33 +5747,63 @@ Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-10-02
 Publication scope: Reviewer/Commercial Assurance
 CRC Publication Scope: >
-  PENDING -- CRC Publication Review not yet performed as of this Adoption
-  (2026-10-02). FGR_027 §17 independently diagnoses, but this Adoption
-  decision does not resolve, predict, or imply any outcome for, a future
-  CRC Publication Review: this proposition is a technical, non-human-
-  facing marking/detectability mandate addressed to AI-system providers
-  that does not characterize, produce, or facilitate deceptive content,
-  and appears, diagnostically, to sit at least as far outside CRC-
-  PUBLICATION-POLICY.md's Principle 3 as the already-approved Article
-  50(4) sibling (CPR_026's own finding). This diagnostic does not
-  predetermine a future CPR's own independent re-derivation -- every
-  prior CPR in this corpus (CPR_026, CPR_032) has independently re-
-  derived Principle 3 rather than inheriting a sibling's finding, and
-  this claim's future CPR must do the same.
+  APPROVED FOR CRC PUBLICATION (2026-10-02, CRC Approver: JD (PM) -- see
+  CRC Approver/CRC Decision Date below; CRC Publication Review #33
+  complete at governance-reviews/CPR_033_CLAIM-EUAI-ART50-2-PROVIDER-
+  MARKING-001-v1_2026-10-02.md, APPROVE WITH BOUNDED WORDING -- the
+  approved wording below is CPR_033's own finalized text, not the
+  shorter pre-CPR draft this field previously held). **Principle 3
+  finding (CPR_033 §7, independently re-derived for this claim's own
+  text, not inherited from the Article 50(4) sibling's CPR_026
+  finding):** Article 50(2) contains no "deep fake" definition, no
+  person-identifying or performer element, and no resemblance-to-a-
+  real-person concept anywhere in its text -- applying uniformly to ALL
+  AI-generated/manipulated audio, image, video, or text regardless of
+  whether it depicts or could be confused with any real person. This is
+  a stronger, more straightforward basis for finding Principle 3
+  inapplicable than CPR_026 reached for the sibling claim (whose own
+  Article 3(60) "deep fake" definition can reach content resembling a
+  real person, requiring careful analysis CPR_026 itself flagged as
+  novel). This finding is claim-specific: it does not hold that
+  Principle 3 is inapplicable to AI-content-transparency claims
+  generally, or that any future deepfake/likeness/voice-cloning claim is
+  now presumptively CRC-eligible. `CLAIM-LIKENESS-NY-CONSENT-
+  REQUIREMENT-001-v1` and `CLAIM-LIKENESS-CN-PORTRAIT-VOICE-CONSENT-001-
+  v1` are each unaffected and remain `CRC Publication Scope: WITHHELD
+  FROM CRC`, unchanged by this decision. **Applicability/reach finding
+  (CPR_033 §9):** unlike the Article 50(4) sibling at its own initial
+  CPR_026 review (which found an empty `applicability_requirements: []`
+  produced unrestricted global reach, later remediated), this claim was
+  authored at Adoption time with the jurisdiction == European Union gate
+  already in place -- confirmed by CPR_033 to avoid that defect from the
+  outset, not merely inherit its later fix. **Regulated-actor and
+  provider-terminology findings (CPR_033 §2-§3):** the finalized wording
+  below preserves, as a first-class sentence (not a footnote), that the
+  duty falls on the AI system's provider, not on SI8's typical CRC user,
+  and adds one clarifying parenthetical distinguishing the AI Act's
+  "provider" from a stock-footage/asset vendor, to pre-empt a plausible
+  natural-language confusion CRC's own internal `provider_scope` field
+  (confirmed by CPR_033 to be keyed exclusively to third-party asset
+  vendors, never exposed in CRC output text) does not itself create but
+  which the shared English word could. **Temporal finding (CPR_033 §8):**
+  the two-date wording-only pattern (no date-gating runtime logic) is
+  independently re-confirmed safe to publish now, before 2 December
+  2026, because the finalized sentence states both populations and both
+  dates explicitly and remains accurate whenever read.
 
 CRC Candidate Statement: >
-  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
-  Under Article 50(2) of Regulation (EU) 2024/1689 (the AI Act), a
-  provider of an AI system, including a general-purpose AI system, that
-  generates synthetic audio, image, video, or text content must ensure
-  that the outputs of that AI system are marked in a machine-readable
-  format and are detectable as artificially generated or manipulated,
-  subject to statutory technical-feasibility, assistive-editing, and
-  law-enforcement qualifications. The obligation applies from 2 August
-  2026, except that a provider of a system placed on the market before
-  that date has until 2 December 2026 to come into compliance. This duty
-  falls on the AI system's provider, not on the person using the system
-  to create content.
+  Under Article 50(2) of the EU AI Act (Regulation (EU) 2024/1689), a
+  provider of an AI system -- the company or organization that develops
+  or publishes the AI tool, not a stock-footage or asset vendor, and not
+  the person using the tool to create content -- must ensure that
+  outputs the system generates (audio, image, video, or text) are marked
+  in a machine-readable format and detectable as artificially generated
+  or manipulated, subject to statutory technical-feasibility, assistive-
+  editing, and law-enforcement qualifications. The obligation applies
+  from 2 August 2026, except that a provider of a system placed on the
+  market before that date has until 2 December 2026 to come into
+  compliance. This duty falls on the AI system's provider, not on the
+  person using the system to create content.
 
 Effective date: >
   Two source-stated dates govern two different populations of the same
@@ -5786,18 +5816,20 @@ Effective date: >
   belongs to is not knowable from this claim's own evidence and is not a
   CRC-askable project fact (FGR_027 §8/§9) -- recorded as an evidence
   limitation, not represented as a dependency.
-Last reviewed: 2026-10-02 (Formal Governance Review, FGR_027)
+Last reviewed: 2026-10-02 (CRC Publication Review, CPR_033)
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING
-CRC Decision Date: PENDING
-Related: [[CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1]] (direct sibling under the same `ai_content_transparency` topic -- different regulated actor (provider vs. deployer), different content scope (four modalities incl. text, vs. three), asymmetric Digital Omnibus transitional treatment (transitional rule exists only for this claim, not the sibling), confirmed non-overlapping and non-contradictory per FGR_027 §3/§20; the sibling claim was not reopened, reinterpreted, or modified by this Adoption).
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-10-02
+Related: [[CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1]] (direct sibling under the same `ai_content_transparency` topic -- different regulated actor (provider vs. deployer), different content scope (four modalities incl. text, vs. three), asymmetric Digital Omnibus transitional treatment (transitional rule exists only for this claim, not the sibling), confirmed non-overlapping and non-contradictory per FGR_027 §3/§20 and re-confirmed by CPR_033 §1/§14; the sibling claim was not reopened, reinterpreted, or modified by this Adoption or by CPR_033).
 
 Known architecture/governance debt, recorded not remediated:
-  - No applicability mechanism exists for distribution-territory/consumer-nexus facts (FGR_027 §7/§19, same pre-existing, generic, fail-safe gap already disclosed for the sibling and the California claim) -- slightly more consequential here given Article 50(2)'s broader 2(1)(a) reach (irrespective of provider establishment).
-  - Evidence-only provider facts (technical marking presence, detectability, technical-feasibility/robustness standard, assistive-editing/non-substantial-alteration exclusion, placed-on-market date) are deliberately NOT represented as dependencies or self-attestation questions -- Provider Evidence / Commercial Assurance surface (Domain T) by design, not an architecture gap (FGR_027 §9/§10/§13/§14).
+  - No applicability mechanism exists for distribution-territory/consumer-nexus facts (FGR_027 §7/§19, same pre-existing, generic, fail-safe gap already disclosed for the sibling and the California claim) -- slightly more consequential here given Article 50(2)'s broader 2(1)(a) reach (irrespective of provider establishment). CPR_033 §9 independently re-confirmed this gap is fail-safe (under-triggering), not a publication-safety defect, and left it unsolved.
+  - Evidence-only provider facts (technical marking presence, detectability, technical-feasibility/robustness standard, assistive-editing/non-substantial-alteration exclusion, placed-on-market date) are deliberately NOT represented as dependencies or self-attestation questions -- Provider Evidence / Commercial Assurance surface (Domain T) by design, not an architecture gap (FGR_027 §9/§10/§13/§14; re-confirmed against current runtime code by CPR_033 §4/§10).
   - One limitation worth naming explicitly: the statute's own "effective, interoperable, robust and reliable... technically feasible... state of the art" standard may exceed even Commercial Assurance Domain T's typical documentary-review scope, since it is a genuine technical-standards question that could require specialized technical expertise beyond SI8's standard Reviewer Workbook process (FGR_027 §13).
   - No Reviewer Manual update was made or proposed for a parallel Article 50(2) Domain T note.
-  - Dependency-model discrepancy between this Adoption milestone's own prompt (which described D0) and FGR_027's actual controlling text (D2) -- recorded above (GOVERNANCE TREATMENT) and resolved in favor of the repository's own governance artifact, per this Adoption milestone's explicit instruction that repository evidence controls.
+  - Dependency-model discrepancy between the PM Adoption milestone's own prompt (which described D0) and FGR_027's actual controlling text (D2) -- recorded above (GOVERNANCE TREATMENT) and resolved in favor of the repository's own governance artifact, per that milestone's explicit instruction that repository evidence controls. CPR_033 did not reopen this and independently re-confirmed D2's runtime behavior directly against current code (§4).
+  - **Runtime note:** this claim has no `TOPIC_CLAIMS_FIXTURE` representation as of this CRC Publication Review -- CRC-eligible does not mean production-reachable; Production Representation remains a separate, unauthorized-by-this-task, later milestone (CPR_033 §18).
 
 Full Formal Governance Review artifact: `governance-reviews/FGR_027_CAND-EUAI-ART50-2-PROVIDER-MARKING-001_2026-10-02.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_033_CLAIM-EUAI-ART50-2-PROVIDER-MARKING-001-v1_2026-10-02.md`
 Full evidence manifest: `evidence-captures/eu-ai-act/MANIFEST.md`
