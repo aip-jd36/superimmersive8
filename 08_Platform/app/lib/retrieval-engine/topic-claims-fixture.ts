@@ -1934,4 +1934,103 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     last_verified: '2026-10-01',
     superseded_by: null,
   },
+  {
+    // EU AI Act Article 50(2) Provider-Side Machine-Readable Marking /
+    // Detectability (2026-10-02, LK-EUAI-ART50-2-PROD-REP-1 -- Production
+    // Representation milestone). Second claim under the already-Adopted
+    // ai_content_transparency KnowledgeOnlyTopic, sibling to
+    // CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1 above --
+    // reached through the SAME existing REL-COMMERCIAL-USE-AI-CONTENT-
+    // TRANSPARENCY-v1 relationship (source_topic: commercial_use), no new
+    // topic/GoalCategory/TopicRelationship authored by this milestone.
+    // Adopted: FGR_027 (2026-10-02, GO) -- independently re-derived from
+    // authoritative primary evidence rather than inheriting FGR_019's
+    // dependency model, applicability shape, or provider_scope treatment.
+    // CRC Publication: CPR_033 (2026-10-02, APPROVE WITH BOUNDED WORDING) --
+    // Principle 3 independently re-derived for this claim's own text (not
+    // inherited from the Article 50(4) sibling's CPR_026 finding): Article
+    // 50(2) contains no "deep fake" definition, no person-identifying or
+    // performer element, and no resemblance-to-a-real-person concept
+    // anywhere in its text -- applying uniformly to ALL AI-generated/
+    // manipulated audio, image, video, or text regardless of whether it
+    // depicts or could be confused with any real person. Mirrored verbatim
+    // from GOVERNED-CLAIMS.md's own CRC Candidate Statement/CRC Publication
+    // Scope fields (post-CPR_033 controlling text, not the pre-CPR Adoption
+    // draft); no wording strengthened, simplified, or reconstructed here.
+    //
+    // Dependency-model provenance: an earlier PM Adoption prompt stated a
+    // stale D0 (dependencies: []) description for this candidate. The
+    // controlling FGR_027 artifact (§9/§21) is D2, independently
+    // re-derived from zero -- NOT inherited from the Article 50(4)
+    // sibling's own four-dependency array. Both dependencies
+    // (provider_status_confirmed, union_establishment_or_output_use) are
+    // evidence-only; neither has a DEPENDENCY_TREATMENTS entry
+    // (dependency-askability.ts) and neither is converted into a
+    // self-attestation question here. The marking/detectability/technical-
+    // feasibility/assistive-editing-exclusion candidates were each
+    // independently tested and REJECTED (FGR_027 §9 table) as Provider
+    // Evidence (what the AI tool vendor's system technically does), never a
+    // CRC-askable project fact.
+    //
+    // provider_scope is null, NOT because this claim is provider-agnostic
+    // in the ordinary sense, but because this field is keyed exclusively to
+    // AssetProviderMention (third-party stock/asset content vendors --
+    // Getty, Shutterstock, etc.), an entirely different concept from the EU
+    // AI Act's own Article 3(3) "provider" (an AI-system developer/
+    // publisher). Using this field to represent the Article 50(2)
+    // regulated-actor class would be a category error (FGR_027 §6,
+    // independently re-confirmed against types.ts at PM Adoption and again
+    // at CPR_033). The EU AI Act's own actor vocabulary is represented in
+    // prose only, inside crc_candidate_statement/crc_publication_scope
+    // below, which preserve -- as a first-class sentence, not a footnote --
+    // that this duty falls on the AI system's provider, not on SI8's
+    // typical CRC user (a creator/customer of a third-party AI tool, i.e.
+    // the Article 50(4) "deployer," a structurally broader and different
+    // actor class).
+    claim_id: 'CLAIM-EUAI-ART50-2-PROVIDER-MARKING-001-v1',
+    topic: 'ai_content_transparency',
+    claim_character: 'established',
+    jurisdiction: 'European Union',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope: `APPROVED FOR CRC PUBLICATION (2026-10-02, CRC Approver: JD (PM) -- see CRC Approver/CRC Decision Date below; CRC Publication Review #33 complete at governance-reviews/CPR_033_CLAIM-EUAI-ART50-2-PROVIDER-MARKING-001-v1_2026-10-02.md, APPROVE WITH BOUNDED WORDING -- the approved wording below is CPR_033's own finalized text, not the shorter pre-CPR draft this field previously held). Principle 3 finding (CPR_033 §7, independently re-derived for this claim's own text, not inherited from the Article 50(4) sibling's CPR_026 finding): Article 50(2) contains no "deep fake" definition, no person-identifying or performer element, and no resemblance-to-a-real-person concept anywhere in its text -- applying uniformly to ALL AI-generated/manipulated audio, image, video, or text regardless of whether it depicts or could be confused with any real person. This is a stronger, more straightforward basis for finding Principle 3 inapplicable than CPR_026 reached for the sibling claim (whose own Article 3(60) "deep fake" definition can reach content resembling a real person, requiring careful analysis CPR_026 itself flagged as novel). This finding is claim-specific: it does not hold that Principle 3 is inapplicable to AI-content-transparency claims generally, or that any future deepfake/likeness/voice-cloning claim is now presumptively CRC-eligible. CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1 and CLAIM-LIKENESS-CN-PORTRAIT-VOICE-CONSENT-001-v1 are each unaffected and remain CRC Publication Scope: WITHHELD FROM CRC, unchanged by this decision. Applicability/reach finding (CPR_033 §9): unlike the Article 50(4) sibling at its own initial CPR_026 review (which found an empty applicability_requirements: [] produced unrestricted global reach, later remediated), this claim was authored at Adoption time with the jurisdiction == European Union gate already in place -- confirmed by CPR_033 to avoid that defect from the outset, not merely inherit its later fix. Regulated-actor and provider-terminology findings (CPR_033 §2-§3): the finalized wording below preserves, as a first-class sentence (not a footnote), that the duty falls on the AI system's provider, not on SI8's typical CRC user, and adds one clarifying parenthetical distinguishing the AI Act's "provider" from a stock-footage/asset vendor, to pre-empt a plausible natural-language confusion CRC's own internal provider_scope field (confirmed by CPR_033 to be keyed exclusively to third-party asset vendors, never exposed in CRC output text) does not itself create but which the shared English word could. Temporal finding (CPR_033 §8): the two-date wording-only pattern (no date-gating runtime logic) is independently re-confirmed safe to publish now, before 2 December 2026, because the finalized sentence states both populations and both dates explicitly and remains accurate whenever read.`,
+    crc_candidate_statement: `Under Article 50(2) of the EU AI Act (Regulation (EU) 2024/1689), a provider of an AI system -- the company or organization that develops or publishes the AI tool, not a stock-footage or asset vendor, and not the person using the tool to create content -- must ensure that outputs the system generates (audio, image, video, or text) are marked in a machine-readable format and detectable as artificially generated or manipulated, subject to statutory technical-feasibility, assistive-editing, and law-enforcement qualifications. The obligation applies from 2 August 2026, except that a provider of a system placed on the market before that date has until 2 December 2026 to come into compliance. This duty falls on the AI system's provider, not on the person using the system to create content.`,
+    // AssessmentJurisdictionMention represents only that the user asked CRC
+    // to consider European Union knowledge -- never proof that Article
+    // 2(1)(a)/(c)'s territorial nexus actually attaches to a specific
+    // project. FGR_027 §7/§12, re-confirmed by CPR_033 §9. Unlike the
+    // Article 50(4) sibling, this claim was authored at Adoption time with
+    // this gate already in place (no empty-applicability_requirements
+    // defect to later remediate). JURISDICTION_VALUE_ALIASES has zero
+    // EU-related entries, so this gate under-fires (misses "France"/
+    // "Germany"-phrased statements) rather than over-fires -- the same
+    // accepted, safer-direction trade-off already precedented for the
+    // sibling and the NY/California synthetic-performer claims.
+    // DistributionTerritoryMention/geographic_relevance_scope is Track-A-
+    // discovery-only and cannot gate applicability_requirements today --
+    // known, disclosed, fail-safe (under-triggering only) generic
+    // architecture debt, slightly more consequential here given Article
+    // 50(2)'s own broader 2(1)(a) reach ("irrespective of... establishment")
+    // -- not remediated by this milestone.
+    applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'European Union' }],
+    // D2 (FGR_027 §9/§21, final and controlling -- independently re-derived
+    // from zero, NOT inherited from the Article 50(4) sibling's own
+    // four-dependency array). Both evidence-only; neither has a
+    // DEPENDENCY_TREATMENTS entry (dependency-askability.ts) and neither is
+    // converted into a self-attestation question by this milestone.
+    unresolved_project_dependencies: ['provider_status_confirmed', 'union_establishment_or_output_use'],
+    // Category error to represent the EU AI Act's own "provider" actor
+    // class here -- see this entry's own header comment and
+    // GOVERNED-CLAIMS.md's GOVERNANCE TREATMENT note. Statutory,
+    // technology-neutral: no specific tool named.
+    provider_scope: null,
+    tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
+    // geographic_relevance_scope deliberately omitted (opt-out by this
+    // field's own inverted default polarity) -- no discovered relevance is
+    // activated by this milestone; this claim is reachable only via the
+    // existing commercial_use -> ai_content_transparency relationship.
+    last_verified: '2026-10-02',
+    superseded_by: null,
+  },
 ]

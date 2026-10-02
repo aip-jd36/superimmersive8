@@ -278,6 +278,22 @@ describe('REL-COMMERCIAL-USE-AI-CONTENT-TRANSPARENCY-v1 -- production TopicRelat
    */
   describe('double-gate proof -- fully synthetic clones on both sides, independent of real production eligibility', () => {
     const euFacts = { jurisdiction: { included: ['European Union'], excluded: [] }, toolMentions: [] }
+    // [UPDATED, LK-EUAI-ART50-2-PROD-REP-1, 2026-10-02] A second real,
+    // Adopted + crc_eligible: 'Yes' claim (CLAIM-EUAI-ART50-2-PROVIDER-
+    // MARKING-001-v1) now targets the same ai_content_transparency topic
+    // through this same relationship. This isolation block's own stated
+    // purpose is "fully synthetic clones on both sides" -- both real
+    // ai_content_transparency claim IDs must be excluded from the base
+    // array, not just this file's own CLAIM_ID, or the real Article 50(2)
+    // claim leaks into a scenario meant to test exactly one synthetic
+    // claim object. No governance/architecture change -- a pure test-
+    // isolation-construction fix, mechanically identical in kind to the
+    // 36->37/37->38 fixture-population-count updates these files already
+    // receive on each Production Representation.
+    const OTHER_REAL_AI_CONTENT_TRANSPARENCY_CLAIM_ID = 'CLAIM-EUAI-ART50-2-PROVIDER-MARKING-001-v1'
+    const isolatedBaseClaims = TOPIC_CLAIMS_FIXTURE.filter(
+      (c) => c.claim_id !== CLAIM_ID && c.claim_id !== OTHER_REAL_AI_CONTENT_TRANSPARENCY_CLAIM_ID,
+    )
 
     const syntheticEligibleClaim: TopicClaim = {
       ...targetClaim(),
@@ -306,7 +322,7 @@ describe('REL-COMMERCIAL-USE-AI-CONTENT-TRANSPARENCY-v1 -- production TopicRelat
       const result = lookupRelatedTopicClaims(
         [goal()],
         [syntheticPendingRelationship],
-        [...TOPIC_CLAIMS_FIXTURE.filter((c) => c.claim_id !== CLAIM_ID), syntheticEligibleClaim],
+        [...isolatedBaseClaims, syntheticEligibleClaim],
         euFacts,
       )
       expect(result.matches).toEqual([])
@@ -316,7 +332,7 @@ describe('REL-COMMERCIAL-USE-AI-CONTENT-TRANSPARENCY-v1 -- production TopicRelat
       const result = lookupRelatedTopicClaims(
         [goal()],
         [syntheticEligibleRelationship],
-        [...TOPIC_CLAIMS_FIXTURE.filter((c) => c.claim_id !== CLAIM_ID), syntheticPendingClaim],
+        [...isolatedBaseClaims, syntheticPendingClaim],
         euFacts,
       )
       expect(result.matches).toEqual([])
@@ -326,7 +342,7 @@ describe('REL-COMMERCIAL-USE-AI-CONTENT-TRANSPARENCY-v1 -- production TopicRelat
       const result = lookupRelatedTopicClaims(
         [goal()],
         [syntheticPendingRelationship],
-        [...TOPIC_CLAIMS_FIXTURE.filter((c) => c.claim_id !== CLAIM_ID), syntheticPendingClaim],
+        [...isolatedBaseClaims, syntheticPendingClaim],
         euFacts,
       )
       expect(result.matches).toEqual([])
@@ -336,7 +352,7 @@ describe('REL-COMMERCIAL-USE-AI-CONTENT-TRANSPARENCY-v1 -- production TopicRelat
       const result = lookupRelatedTopicClaims(
         [goal()],
         [syntheticEligibleRelationship],
-        [...TOPIC_CLAIMS_FIXTURE.filter((c) => c.claim_id !== CLAIM_ID), syntheticEligibleClaim],
+        [...isolatedBaseClaims, syntheticEligibleClaim],
         euFacts,
       )
       expect(result.matches.map((m) => m.claim.claim_id)).toContain(CLAIM_ID)

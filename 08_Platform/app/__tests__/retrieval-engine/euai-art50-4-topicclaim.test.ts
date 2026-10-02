@@ -159,9 +159,10 @@ describe('CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1 -- productio
     expect(isGoalCategoryTopic(TOPIC)).toBe(false)
   })
 
-  test('V. no Article 50(2) claim exists anywhere in the production fixture', () => {
+  test('V. [UPDATED, LK-EUAI-ART50-2-PROD-REP-1, 2026-10-02] exactly one Article 50(2) claim now exists in the production fixture -- CLAIM-EUAI-ART50-2-PROVIDER-MARKING-001-v1, the sibling provider-side marking/detectability claim; this does not modify, supersede, or reinterpret this file\'s own CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1 in any way -- see euai-art50-2-provider-marking.test.ts for its own dedicated reachability/applicability/BI/coexistence tests', () => {
     const ids = TOPIC_CLAIMS_FIXTURE.map((c) => c.claim_id)
-    expect(ids.some((id) => /ART50-2/i.test(id))).toBe(false)
+    const art50_2Ids = ids.filter((id) => /ART50-2/i.test(id))
+    expect(art50_2Ids).toEqual(['CLAIM-EUAI-ART50-2-PROVIDER-MARKING-001-v1'])
   })
 
   test('W. no public-interest-text (Article 50(4) second subparagraph) claim exists anywhere in the production fixture', () => {
