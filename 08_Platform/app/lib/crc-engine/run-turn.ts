@@ -542,6 +542,27 @@ function isJurisdictionQuestionProposal(proposal: CandidateQuestionProposal): bo
 }
 
 /**
+ * CRC-USERGOAL-QUESTION-CONTEXT-1 (2026-10-02). Structural (question_kind-
+ * only) identity for "this proposal is a governed dependency/readiness
+ * question," same discipline as `isJurisdictionQuestionProposal` immediately
+ * above -- consumed only by `governedDependencyQuestionJustAsked` below, via
+ * the single `askedProposal` choke point every approved-question path
+ * (decline branch, attempt1-4) already funnels through. Unlike
+ * `isJurisdictionQuestionProposal`, there is no organic/LLM-generated
+ * variant to also match on `target_signal_id`: both
+ * `governed_selector_clarification` and `knowledge_readiness_acquisition`
+ * are deterministic-only kinds, explicitly excluded from the ordinary
+ * generator's own schema enum (anthropic-candidate-question.ts) -- see each
+ * kind's own header in boundaries.ts. Deliberately covers both kinds with
+ * one function returning one flag, not two -- see
+ * `governed_dependency_question_pending_answer`'s own header
+ * (boundaries.ts) for why one flag is the right granularity here.
+ */
+function isGovernedDependencyQuestionProposal(proposal: CandidateQuestionProposal): boolean {
+  return proposal.question_kind === 'governed_selector_clarification' || proposal.question_kind === 'knowledge_readiness_acquisition'
+}
+
+/**
  * CRC-QA-5 -- Next Deterministic Candidate Progression (2026-09-26). Pure,
  * reference-identity-only selection over the SAME four already-computed
  * proposal variables `forcedProposal`'s own `??` chain (below) expresses --
@@ -690,12 +711,21 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   // own field header for why this lives in BoundaryState rather than a new
   // CRCSessionState field (zero DB migration).
   const answeringJurisdictionQuestion = boundaryStateLoaded.jurisdiction_clarification_pending_answer === true
+  // CRC-USERGOAL-QUESTION-CONTEXT-1 (2026-10-02): same discipline as
+  // answeringJurisdictionQuestion immediately above -- true ONLY when the
+  // immediately preceding assistant turn asked a governed_selector_clarification
+  // or knowledge_readiness_acquisition proposal, read from BoundaryState (set
+  // at the end of THIS function whenever that happens, consumed here, then
+  // reset for the state that gets saved this turn), never inferred from this
+  // turn's own text. See boundaries.ts's own field header.
+  const answeringGovernedDependencyQuestion = boundaryStateLoaded.governed_dependency_question_pending_answer === true
   const rawTurn: RawUserTurn = {
     turn: input.turnNumber,
     text: input.userText,
     pending_clarification: loaded?.pending_clarification ?? null,
     current_human_contribution_description: currentHumanContributionDescription,
     answering_jurisdiction_question: answeringJurisdictionQuestion,
+    answering_governed_dependency_question: answeringGovernedDependencyQuestion,
   }
   // LK-DEMAND-2C (2026-09-18): captured here, threaded through to this
   // function's own return points (below) as additive TurnOutcome metadata
@@ -1458,6 +1488,13 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
   const jurisdictionQuestionJustAsked =
     outcome.kind === 'question' && askedProposal !== undefined && isJurisdictionQuestionProposal(askedProposal)
 
+  // CRC-USERGOAL-QUESTION-CONTEXT-1 (2026-10-02). Same discipline and same
+  // single choke point (`askedProposal`, set at every approval point above)
+  // as jurisdictionQuestionJustAsked immediately above -- consumed by the
+  // very next turn's `answeringGovernedDependencyQuestion` read above.
+  const governedDependencyQuestionJustAsked =
+    outcome.kind === 'question' && askedProposal !== undefined && isGovernedDependencyQuestionProposal(askedProposal)
+
   // CRC Global User-Facing Question Budget milestone (2026-08-26). Computed
   // directly from the FINAL outcome, same discipline as
   // jurisdictionQuestionJustAsked immediately above -- the single choke
@@ -1476,6 +1513,7 @@ export async function runTurn(input: RunTurnInput, deps: RunTurnDeps): Promise<T
     boundary_state: {
       ...nextBoundaryState,
       jurisdiction_clarification_pending_answer: jurisdictionQuestionJustAsked,
+      governed_dependency_question_pending_answer: governedDependencyQuestionJustAsked,
       user_facing_questions_asked: userFacingQuestionsAsked,
     },
     pending_clarification: pendingClarification,

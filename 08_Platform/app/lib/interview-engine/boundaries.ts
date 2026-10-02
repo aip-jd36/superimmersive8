@@ -388,6 +388,37 @@ export interface BoundaryState {
    * safe-default-on-missing-field reasoning as every `_asked` field above.
    */
   jurisdiction_clarification_pending_answer: boolean
+  /**
+   * CRC-USERGOAL-QUESTION-CONTEXT-1 (2026-10-02). Same shape/lifecycle as
+   * `jurisdiction_clarification_pending_answer` immediately above: true for
+   * exactly one turn -- the turn immediately AFTER a proposal whose
+   * `question_kind` is `governed_selector_clarification` or
+   * `knowledge_readiness_acquisition` was approved and asked. Consumed
+   * (read, then explicitly reset) by run-turn.ts at the start of that next
+   * turn to set `RawUserTurn.answering_governed_dependency_question` --
+   * closing the gap CRC-UAT-USERGOAL-PROVENANCE-1 found: neither of these
+   * two deterministic, governed-dependency question kinds was a member of
+   * `PENDING_CLARIFICATION_KINDS` (pending-clarification.ts), so a reply to
+   * either reached extraction with no signal at all that it was answering
+   * CRC's own immediately preceding question. Deliberately a SEPARATE field
+   * from `jurisdiction_clarification_pending_answer`, not a generalization
+   * of it -- that field's own consumer (`answering_jurisdiction_question`)
+   * unlocks a bespoke jurisdiction-only interpretive exception
+   * (anthropic-extractor.ts SYSTEM_PROMPT), which does not apply here; this
+   * field's own consumer carries a generic, kind-agnostic context line
+   * instead (see anthropic-extractor.ts's `buildUserMessageContent`).
+   * Deliberately covers BOTH kinds with one flag, not two: from the
+   * extractor's point of view, both represent the identical fact ("CRC
+   * asked a governed dependency/readiness question and this reply answers
+   * it"), and the two kinds already have their own separate, independent
+   * caps elsewhere (`selector_needs_used` / `knowledge_readiness_used`,
+   * both above) -- this field governs only the next turn's extraction
+   * context, never question eligibility/budget, so it carries no cap of
+   * its own and does not need per-kind separation. Same safe-default-on-
+   * missing-field reasoning as every other boolean `_asked`/`_pending_answer`
+   * field in this interface.
+   */
+  governed_dependency_question_pending_answer: boolean
   /** True once an interview-scoped decline has occurred; persists across all future evaluations. */
   interview_ended: boolean
   /** Phases closed by a phase-scoped decline. A phase not in this list is unaffected, even after another phase closes -- closing one phase must not automatically end unrelated future questioning in a different phase. */
@@ -423,6 +454,7 @@ export function createInitialBoundaryState(): BoundaryState {
     human_contribution_clarification_asked: false,
     jurisdiction_clarification_retry_asked: false,
     jurisdiction_clarification_pending_answer: false,
+    governed_dependency_question_pending_answer: false,
     selector_needs_used: {},
     knowledge_readiness_used: {},
     interview_ended: false,

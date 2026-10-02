@@ -121,4 +121,55 @@ describe('buildUserMessageContent', () => {
     const turn: RawUserTurn = { turn: 1, text: 'Yes.' }
     expect(buildUserMessageContent(turn)).toBe('Yes.')
   })
+
+  // CRC-USERGOAL-QUESTION-CONTEXT-1 (2026-10-02). Same discipline as every
+  // flag above -- deterministic, fixed template text, never live-generated.
+  // Repairs the gap CRC-UAT-USERGOAL-PROVENANCE-1 diagnosed: a reply to a
+  // governed_selector_clarification or knowledge_readiness_acquisition
+  // question previously reached extraction with none of the context lines
+  // above. This test proves ONLY that the correct, deterministic context
+  // reaches the model -- it proves nothing about how the model classifies
+  // the reply once it has that context (a separate, model-behavior
+  // question, same discipline as every other flag in this file).
+  test('answering_governed_dependency_question: true -> prepends a deterministic, kind-agnostic context line', () => {
+    const turn: RawUserTurn = { turn: 3, text: 'I have the standard license, but I don\'t know whether that covers this project.', answering_governed_dependency_question: true }
+    const content = buildUserMessageContent(turn)
+    expect(content).toContain('your immediately preceding question was a governed question CRC needed answered in order to proceed')
+    expect(content).toContain('should not by itself be proposed as a new, independent user_goal')
+    expect(content).toContain('a clearly distinct, new question or need')
+    expect(content).toContain('I have the standard license, but I don\'t know whether that covers this project.')
+    expect(content.endsWith('I have the standard license, but I don\'t know whether that covers this project.')).toBe(true)
+  })
+
+  test('answering_governed_dependency_question: false -> no context line added, byte-identical to turn.text', () => {
+    const turn: RawUserTurn = { turn: 1, text: 'I have the standard license.', answering_governed_dependency_question: false }
+    expect(buildUserMessageContent(turn)).toBe('I have the standard license.')
+  })
+
+  test('answering_governed_dependency_question absent -> same as false, no context line (byte-identical to every pre-existing turn shape -- proves this addition changes nothing for any turn that does not set it)', () => {
+    const turn: RawUserTurn = { turn: 1, text: 'I have the standard license.' }
+    expect(buildUserMessageContent(turn)).toBe('I have the standard license.')
+  })
+
+  // Case E (regression): the new line composes independently with every
+  // pre-existing context line, same as jurisdiction/content-presence do
+  // with each other above -- none of the four pre-existing flags' own
+  // tests above were modified by this milestone; this proves the fifth
+  // flag joins the same family without disturbing it.
+  test('answering_governed_dependency_question composes independently with pending_clarification, current_human_contribution_description, and answering_jurisdiction_question -- all four lines present, text always last', () => {
+    const turn: RawUserTurn = {
+      turn: 8,
+      text: 'Standard license, not sure if it covers this.',
+      pending_clarification: { signal_id: 'tm-1', kind: 'follow_up_on_signal', unresolved_summary: "tool mention 'Nano Banana'" },
+      current_human_contribution_description: 'I selected the takes.',
+      answering_jurisdiction_question: true,
+      answering_governed_dependency_question: true,
+    }
+    const content = buildUserMessageContent(turn)
+    expect(content).toContain("tool mention 'Nano Banana'")
+    expect(content).toContain('I selected the takes.')
+    expect(content).toContain('directly asked the user which jurisdiction(s) CRC should consider for this assessment')
+    expect(content).toContain('your immediately preceding question was a governed question CRC needed answered in order to proceed')
+    expect(content.endsWith('Standard license, not sure if it covers this.')).toBe(true)
+  })
 })

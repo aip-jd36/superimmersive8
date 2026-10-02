@@ -149,6 +149,31 @@ import { CANONICAL_TOOL_IDS, type CanonicalToolId } from '@/lib/tool-identity/re
  * SYSTEM_PROMPT for the exact exception this unlocks, and
  * buildUserMessageContent's own doc comment for why `source_statement`
  * itself is never rewritten to reflect the inferred meaning.
+ *
+ * `answering_governed_dependency_question` (CRC-USERGOAL-QUESTION-CONTEXT-1,
+ * 2026-10-02): same additive, narrow-deterministic-signal discipline as the
+ * fields above -- the extractor has no visibility into which question (if
+ * any) CRC's own previous turn asked. `true` ONLY when run-turn.ts has
+ * confirmed, deterministically (via
+ * `BoundaryState.governed_dependency_question_pending_answer`, never
+ * inferred from this turn's own text), that the immediately preceding
+ * assistant turn asked a proposal whose `question_kind` is
+ * `governed_selector_clarification` or `knowledge_readiness_acquisition`.
+ * Repairs the gap CRC-UAT-USERGOAL-PROVENANCE-1 diagnosed: a reply to
+ * either of these two deterministic, governed-dependency question kinds
+ * previously reached extraction with none of the context signals above, so
+ * a reply that merely answered CRC's own question (or expressed
+ * uncertainty about that answer) could be proposed as a brand-new,
+ * independent `user_goal` candidate. Unlike
+ * `answering_jurisdiction_question`/`answering_content_presence_question`,
+ * this flag does not unlock a bespoke interpretive exception for one
+ * specific candidate kind -- it carries a generic context line (see
+ * `buildUserMessageContent`) that applies across whatever candidate kind(s)
+ * the reply's own content actually matches, and explicitly preserves the
+ * extractor's ordinary ability to propose a genuinely new, distinct
+ * candidate from the same reply. `false`/absent -- the normal case for
+ * every other turn -- leaves existing extraction behavior for every
+ * candidate kind completely unchanged.
  */
 export interface RawUserTurn {
   turn: number
@@ -157,6 +182,7 @@ export interface RawUserTurn {
   current_human_contribution_description?: string | null
   answering_jurisdiction_question?: boolean
   answering_content_presence_question?: boolean
+  answering_governed_dependency_question?: boolean
 }
 
 // ── Candidate observations (stage 1) ────────────────────────────────────────

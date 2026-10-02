@@ -925,6 +925,35 @@ function resolveModel(options?: AnthropicExtractorOptions): string {
  * `source_statement` to be rewritten (see attestCandidate's own content-
  * presence branch, extraction.ts). Composes independently with every line
  * above.
+ *
+ * `answering_governed_dependency_question` (CRC-USERGOAL-QUESTION-CONTEXT-1,
+ * 2026-10-02): same discipline, a fifth independent prefix line --
+ * deterministic, a fixed template string, never any live-generated text.
+ * Set true ONLY when run-turn.ts has confirmed (via
+ * `BoundaryState.governed_dependency_question_pending_answer`) that the
+ * immediately preceding assistant turn asked a proposal whose
+ * `question_kind` is `governed_selector_clarification` or
+ * `knowledge_readiness_acquisition` -- never inferred from this turn's own
+ * text. Unlike `answering_jurisdiction_question`/
+ * `answering_content_presence_question`, this line does not loosen any
+ * single candidate kind's own extraction rule (no SYSTEM_PROMPT exception
+ * is tied to it); it addresses a different failure mode entirely --
+ * CRC-UAT-USERGOAL-PROVENANCE-1 found that a reply answering one of these
+ * two governed-dependency question kinds reached extraction with NO
+ * context signal at all (neither this kind nor its sibling was ever a
+ * member of `PENDING_CLARIFICATION_KINDS`, pending-clarification.ts), so a
+ * statement that merely supplied the requested information, or expressed
+ * uncertainty about whether that information was sufficient, could be
+ * proposed as a brand-new, independent `user_goal` candidate purely on the
+ * strength of the `user_goal` rule's own "declarative need" clause, which
+ * has no turn-context precondition. The line below is deliberately
+ * kind-agnostic prose (no provider/topic vocabulary, no reference to any
+ * specific candidate kind) and deliberately advisory, not prohibitive --
+ * exactly like `pending_clarification`'s own "if it applies" phrasing
+ * above, it explicitly preserves the extractor's ordinary ability to
+ * propose a genuinely new, distinct candidate (of any kind, including
+ * `user_goal`) from the same reply when the reply's own content actually
+ * contains one. Composes independently with every line above.
  */
 export function buildUserMessageContent(turn: RawUserTurn): string {
   const contextLines: string[] = []
@@ -955,6 +984,15 @@ export function buildUserMessageContent(turn: RawUserTurn): string {
     // live-generated text.
     contextLines.push(
       `[Context: your immediately preceding question directly asked the user whether the project's output contains a recognizable real person's image or voice -- report a direct "yes"/"no" reply as the answer to that specific content-presence question. See the content_presence_mention guidance in your system prompt for how this changes what counts as a valid answer for this reply only.]`,
+    )
+  }
+  if (turn.answering_governed_dependency_question) {
+    // CRC-USERGOAL-QUESTION-CONTEXT-1 (2026-10-02). Same discipline as the
+    // three lines immediately above -- generic, fixed template text, never
+    // live-generated. See this function's own doc comment for the full
+    // rationale and the specific gap this closes.
+    contextLines.push(
+      `[Context: your immediately preceding question was a governed question CRC needed answered in order to proceed -- this reply is answering it. A statement that merely supplies the requested information, or expresses uncertainty about whether that information is sufficient, should not by itself be proposed as a new, independent user_goal. If this same reply also contains a clearly distinct, new question or need the user is raising -- separate from what was asked -- propose that normally, exactly as you would on any other turn.]`,
     )
   }
   if (contextLines.length === 0) return turn.text
