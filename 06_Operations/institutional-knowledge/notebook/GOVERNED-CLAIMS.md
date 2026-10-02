@@ -5612,3 +5612,192 @@ Known architecture/governance debt, recorded not remediated:
 
 Full Formal Governance Review artifact: `governance-reviews/FGR_026_CAND-SYNTHETIC-PERFORMER-CA-BPC-17610-001_2026-10-01.md`
 Full evidence manifest: `evidence-captures/california-synthetic-performer/MANIFEST.md`
+
+### CLAIM-EUAI-ART50-2-PROVIDER-MARKING-001-v1
+Domain: EU AI Act / AI Content Transparency — Article 50(2) Provider-Side Machine-Readable Marking / Detectability
+Topic: ai_content_transparency
+Subtopic: eu-ai-act-article-50-2-provider-marking-detectability
+Claim character: established
+Jurisdiction: European Union
+Context: an AI system, including a general-purpose AI system, generating synthetic audio, image, video, or text content, operated by an entity within Regulation (EU) 2024/1689's territorial scope
+
+GOVERNANCE TREATMENT (2026-10-02, PM adoption decision, FGR #27): Second claim under the already-Adopted `ai_content_transparency` `KnowledgeOnlyTopic` (sibling to `CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1`, FGR_019/CPR_026) — no new topic, no new `GoalCategory`, no new `TopicRelationship`; the existing `REL-COMMERCIAL-USE-AI-CONTENT-TRANSPARENCY-v1` relationship (`target_topic: ai_content_transparency`) already reaches this claim once Adopted. FGR_027 independently re-derived this candidate from authoritative primary evidence rather than inheriting FGR_019's dependency model, applicability shape, or `provider_scope` treatment.
+
+**Dependency-model discrepancy, recorded explicitly rather than silently resolved:** this milestone's own PM Adoption review prompt (sections 8 and 19) described FGR_027 as having concluded a D0 (`dependencies: []`) model. Direct reading of the controlling `FGR_027_CAND-EUAI-ART50-2-PROVIDER-MARKING-001_2026-10-02.md` artifact (§9, §21, verbatim) shows this is incorrect: FGR_027's actual, final, controlling dependency model is **D2 = `['provider_status_confirmed', 'union_establishment_or_output_use']`**, not D0. Per the Adoption milestone's own instruction ("Do not rely solely on the previous final report... If the repository state contradicts the report, repository evidence controls and the discrepancy must be reported"), this Adoption proceeds on the actual FGR_027 text (D2), not the prompt's own D0 description. This is not a defect in FGR_027 — the artifact is internally consistent and its D2 reasoning is independently sound — it is a stale/incorrect characterization in the Adoption milestone's own prompt, flagged here rather than silently adopted either way.
+
+**`provider_scope` resolved as a non-issue, not an architecture gap (FGR_027 §6, independently re-confirmed against `types.ts` during this Adoption):** `provider_scope: AssetProviderId[] | null` is runtime metadata keyed exclusively to `AssetProviderMention` (third-party stock/asset content vendors — Getty, Shutterstock, etc.) — an entirely different concept from the EU AI Act's own Article 3(3) "provider" (an AI-system developer/publisher). Using this field to represent the Article 50(2) regulated-actor class would be a category error. Mirrors the Article 50(4) sibling's own established pattern exactly: the EU AI Act's actor vocabulary is represented in prose only (`Provider/actor scope` below); the runtime `provider_scope` field is `null`.
+
+**A material actor-breadth finding, independently derived, not present in FGR_019's own analysis of the sibling claim:** Article 50(4)'s "deployer" actor class (Article 3(4)) is structurally broad — almost any user of an AI system under their own authority qualifies, meaning SI8's typical CRC user (a commercial AI-video creator using a third-party tool) plausibly *is* a deployer. Article 50(2)'s "provider" actor class (Article 3(3)) is structurally narrow — it requires having developed the AI system (or had it developed) and placed it on the market or put it into service under one's own name or trademark. For the overwhelming majority of SI8's CRC population — creators who are customers of third-party generative-AI tools, not the tools' own developers/publishers — the Article 50(2) duty falls on a different legal person (the tool vendor), not the user. This shapes the prohibited-conclusions list below.
+
+Claim proposition: >
+  Under Article 50(2) of Regulation (EU) 2024/1689 (the AI Act), a
+  provider of an AI system, including a general-purpose AI system, that
+  generates synthetic audio, image, video, or text content must ensure
+  that the outputs of that AI system are marked in a machine-readable
+  format and are detectable as artificially generated or manipulated.
+  Providers must ensure their technical marking and detection solutions
+  are effective, interoperable, robust, and reliable, as far as this is
+  technically feasible, taking into account the specificities and
+  limitations of different types of content, the costs of implementation,
+  and the generally acknowledged state of the art as may be reflected in
+  relevant technical standards. This obligation does not apply to the
+  extent the AI system performs an assistive function for standard
+  editing, does not substantially alter the input data provided by the
+  deployer or its semantics, or where the use is authorised by law to
+  detect, prevent, investigate, or prosecute criminal offences. Under
+  Article 111(4) of the same Regulation, as inserted by Regulation (EU)
+  2026/1744 (the Digital Omnibus on AI), a provider of such a system that
+  was placed on the market before 2 August 2026 has until 2 December 2026
+  to come into compliance with this obligation; the obligation otherwise
+  applies from 2 August 2026. This proposition does not determine whether
+  any specific AI system, provider, or output satisfies this obligation;
+  whether any specific marking or detection mechanism is technically
+  feasible, effective, interoperable, robust, or reliable; whether any
+  specific case falls within the assistive-editing or non-substantial-
+  alteration exclusions; when any specific AI system was placed on the
+  market; or who, for a specific project, is the Article 3(3) "provider"
+  of the AI system used.
+
+Source references:
+  - primary (Class A, AI Act Service Desk, official Commission reference tool; Class B, enacted Digital Omnibus text, human-captured directly from EUR-Lex): Regulation (EU) 2024/1689, Article 50(2) — `evidence-captures/eu-ai-act/ai-act-servicedesk-article-50_20260912T040235Z_eb822bdb.html`.
+  - primary (Class B, confirmed unamended by the enacted Digital Omnibus except as noted): Regulation (EU) 2024/1689, Article 3(3) ("provider" definition) — `evidence-captures/eu-ai-act/EU-AI-ACT-ARTICLE-50-EVIDENCE-NOTE.md` §4.
+  - primary (Class B, enacted text): Regulation (EU) 2024/1689, Article 111(4), as inserted by Regulation (EU) 2026/1744 (Digital Omnibus) — `evidence-captures/eu-ai-act/EU-AI-ACT-ARTICLE-50-EVIDENCE-NOTE.md` §2b.ii.
+  - context: Regulation (EU) 2024/1689, Article 2(1)(a)/(c) — territorial/application scope (see Applicability requirements below).
+  - context: Commission non-binding Guidelines (C(2026) 5054 final) and EPRS briefing — consulted only as corroborating institutional description for the transitional-date history, never as the source of this proposition's own wording.
+  Full manifest: `evidence-captures/eu-ai-act/MANIFEST.md`.
+Source authority/type: Primary legal/official authority (enacted Regulation text) — Class A/B
+Source fact: >
+  "2. Providers of AI systems, including general-purpose AI systems,
+  generating synthetic audio, image, video or text content, shall ensure
+  that the outputs of the AI system are marked in a machine-readable
+  format and detectable as artificially generated or manipulated.
+  Providers shall ensure their technical solutions are effective,
+  interoperable, robust and reliable as far as this is technically
+  feasible, taking into account the specificities and limitations of
+  various types of content, the costs of implementation and the generally
+  acknowledged state of the art, as may be reflected in relevant
+  technical standards. This obligation shall not apply to the extent the
+  AI systems perform an assistive function for standard editing or do not
+  substantially alter the input data provided by the deployer or the
+  semantics thereof, or where authorised by law to detect, prevent,
+  investigate or prosecute criminal offences." (Article 50(2)). "'provider'
+  means a natural or legal person, public authority, agency or other body
+  that develops an AI system or a general-purpose AI model or that has an
+  AI system or a general-purpose AI model developed and places it on the
+  market or puts the AI system into service under its own name or
+  trademark, whether for payment or free of charge" (Article 3(3)).
+  "Providers of AI systems, including general-purpose AI systems,
+  generating synthetic audio, image, video or text content, that have
+  been placed on the market before 2 August 2026 shall take the necessary
+  steps in order to comply with Article 50(2) by 2 December 2026."
+  (Article 111(4), enacted by the Digital Omnibus).
+
+SI8 interpretation: >
+  A commercial AI-video project using a third-party generative-AI tool
+  should not be represented to a client, buyer, or platform as clear of
+  Article 50(2) considerations without confirming both (a) who, if
+  anyone, is the Article 3(3) "provider" of the AI system used for this
+  specific project (typically the tool vendor, not SI8's typical CRC
+  user), and (b) whether Article 2(1) territorial scope attaches — SI8's
+  typical client role (a creator/customer of a third-party AI tool) does
+  not automatically resolve either question, and CRC must not assume it
+  does, nor assume the user personally bears a marking obligation.
+
+Applicability requirements:
+  - fact: jurisdiction
+    operator: equals
+    value: European Union
+  <!-- AssessmentJurisdictionMention represents only that the user asked CRC to consider EU law -- it does not establish that Article 2(1)(a)/(c)'s territorial nexus actually attaches to a specific project. JURISDICTION_VALUE_ALIASES has zero EU-related entries, so this gate under-fires (misses "France"/"Germany"-phrased statements) rather than over-fires -- the same accepted, safer-direction trade-off already precedented for the Article 50(4) sibling and the NY synthetic-performer claim. Article 50(2)'s own 2(1)(a) limb ("irrespective of... establishment") is actually BROADER than Article 50(4)'s deployer-side 2(1)(b) limb (which requires EU establishment or location) -- a non-EU-established provider placing a system on the EU market is squarely covered -- making the pre-existing, disclosed DistributionTerritoryMention-cannot-gate-applicability architecture gap (unchanged, not solved here) slightly more consequential for this claim than for the sibling. -->
+Unresolved project dependencies: [provider_status_confirmed, union_establishment_or_output_use]   <!-- D2 (FGR_027 §9/§21, final and controlling -- independently re-derived from zero, NOT inherited from the Article 50(4) sibling's own four-dependency array). provider_status_confirmed: Type D, not currently representable -- no structured fact type exists anywhere in the interview-engine contract for "is the user, for this project, the Article 3(3) provider of the AI system used"; fails closed. Per this claim's own actor-breadth finding above, resolves to "not applicable" for most of SI8's population, but the possibility (e.g. an agency/platform operating its own generative-AI tool under its own brand) is real and not manufactured away. union_establishment_or_output_use: Type B, bounded but only partially representable -- a stated DistributionTerritoryMention evidences, but never conclusively resolves, Article 2(1)(a)/(c) applicability; same classification already governing the sibling claim's own identical Article 2(1) concept. Content-modality trigger, machine-readable-marking-present, marking-technically-detectable, technical-feasibility-established, provider-compliance-confirmed, and the assistive-editing/non-substantial-alteration exclusion were each independently tested and REJECTED (FGR_027 §9 table) -- the marking/detectability/feasibility/exclusion candidates specifically as Provider Evidence (what the AI tool vendor's system technically does), never a CRC-askable project fact or self-attestation question. -->
+Provider/actor scope: provider only (Article 3(3)) -- never conflated with "deployer" (Article 3(4), the Article 50(4) actor), "operator," "user," "creator," "advertiser," "agency," or "client." Tool scope: null (statutory, technology-neutral). Provider scope (asset-provider sense): null (not a third-party asset-provider-scoped claim; see GOVERNANCE TREATMENT above for why this field is not used to represent the EU AI Act's own "provider" actor class).
+Prohibited conclusions: >
+  CRC must not state or imply: that a specific AI system, provider, or
+  output satisfies Article 50(2); that the user (or their organization)
+  is the statutory "provider" (absent provider_status_confirmed resolving
+  otherwise, which no current mechanism can do); that a specific
+  technical marking or detection mechanism is machine-readable,
+  detectable, effective, interoperable, robust, reliable, or technically
+  feasible in the statute's own sense; that a specific case falls within
+  the assistive-editing or non-substantial-alteration exclusions; that a
+  specific AI system was or was not placed on the market before 2 August
+  2026, or that the 2 August 2026 or 2 December 2026 date currently binds
+  a specific project; that Article 2(1)(a)/(c)'s territorial nexus is
+  established for a specific project merely because the user named the
+  European Union as assessment jurisdiction or a distribution territory;
+  that Article 50(2) and Article 50(4) are the same duty, or that
+  satisfying/being exempt from one satisfies the other; that the user
+  must personally add a watermark or implement technical marking (the
+  duty, where it attaches at all, falls on the AI system's provider, not
+  on SI8's typical CRC user); that visible, human-facing labeling and
+  Article 50(2)'s machine-readable technical marking are the same thing;
+  that a provider's own compliance claim, or the presence of Content
+  Credentials or similar metadata, establishes compliance; that the
+  absence of visible marking establishes a violation by anyone; or that
+  satisfying, or being exempt from, this obligation establishes broader
+  legal compliance, copyright clearance, provider/platform permission, or
+  overall commercial readiness. Does not address Article 50(4) (a
+  distinct deployer-side human-facing disclosure obligation) -- remains
+  out of scope, confirmed severable per FGR_019 §13/FGR_027 §3. A
+  human-reviewed Commercial Assurance Assessment (Reviewer Manual Domain
+  T -- Technical Provenance) remains the higher-assurance path for the
+  project-specific facts this claim leaves open.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-10-02
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: >
+  PENDING -- CRC Publication Review not yet performed as of this Adoption
+  (2026-10-02). FGR_027 §17 independently diagnoses, but this Adoption
+  decision does not resolve, predict, or imply any outcome for, a future
+  CRC Publication Review: this proposition is a technical, non-human-
+  facing marking/detectability mandate addressed to AI-system providers
+  that does not characterize, produce, or facilitate deceptive content,
+  and appears, diagnostically, to sit at least as far outside CRC-
+  PUBLICATION-POLICY.md's Principle 3 as the already-approved Article
+  50(4) sibling (CPR_026's own finding). This diagnostic does not
+  predetermine a future CPR's own independent re-derivation -- every
+  prior CPR in this corpus (CPR_026, CPR_032) has independently re-
+  derived Principle 3 rather than inheriting a sibling's finding, and
+  this claim's future CPR must do the same.
+
+CRC Candidate Statement: >
+  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
+  Under Article 50(2) of Regulation (EU) 2024/1689 (the AI Act), a
+  provider of an AI system, including a general-purpose AI system, that
+  generates synthetic audio, image, video, or text content must ensure
+  that the outputs of that AI system are marked in a machine-readable
+  format and are detectable as artificially generated or manipulated,
+  subject to statutory technical-feasibility, assistive-editing, and
+  law-enforcement qualifications. The obligation applies from 2 August
+  2026, except that a provider of a system placed on the market before
+  that date has until 2 December 2026 to come into compliance. This duty
+  falls on the AI system's provider, not on the person using the system
+  to create content.
+
+Effective date: >
+  Two source-stated dates govern two different populations of the same
+  obligation. General application: 2 August 2026 -- ALREADY PASSED as of
+  this Adoption (2026-10-02); Article 50(2) is, in general, already
+  applicable law today, unlike the California claim's wholly-future date.
+  Transitional date: 2 December 2026 (Article 111(4)), applicable only to
+  providers of systems placed on the market before 2 August 2026 -- NOT
+  YET PASSED as of this Adoption. Which population a specific AI system
+  belongs to is not knowable from this claim's own evidence and is not a
+  CRC-askable project fact (FGR_027 §8/§9) -- recorded as an evidence
+  limitation, not represented as a dependency.
+Last reviewed: 2026-10-02 (Formal Governance Review, FGR_027)
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+Related: [[CLAIM-EUAI-ART50-4-AUDIOVISUAL-DEEPFAKE-DISCLOSURE-001-v1]] (direct sibling under the same `ai_content_transparency` topic -- different regulated actor (provider vs. deployer), different content scope (four modalities incl. text, vs. three), asymmetric Digital Omnibus transitional treatment (transitional rule exists only for this claim, not the sibling), confirmed non-overlapping and non-contradictory per FGR_027 §3/§20; the sibling claim was not reopened, reinterpreted, or modified by this Adoption).
+
+Known architecture/governance debt, recorded not remediated:
+  - No applicability mechanism exists for distribution-territory/consumer-nexus facts (FGR_027 §7/§19, same pre-existing, generic, fail-safe gap already disclosed for the sibling and the California claim) -- slightly more consequential here given Article 50(2)'s broader 2(1)(a) reach (irrespective of provider establishment).
+  - Evidence-only provider facts (technical marking presence, detectability, technical-feasibility/robustness standard, assistive-editing/non-substantial-alteration exclusion, placed-on-market date) are deliberately NOT represented as dependencies or self-attestation questions -- Provider Evidence / Commercial Assurance surface (Domain T) by design, not an architecture gap (FGR_027 §9/§10/§13/§14).
+  - One limitation worth naming explicitly: the statute's own "effective, interoperable, robust and reliable... technically feasible... state of the art" standard may exceed even Commercial Assurance Domain T's typical documentary-review scope, since it is a genuine technical-standards question that could require specialized technical expertise beyond SI8's standard Reviewer Workbook process (FGR_027 §13).
+  - No Reviewer Manual update was made or proposed for a parallel Article 50(2) Domain T note.
+  - Dependency-model discrepancy between this Adoption milestone's own prompt (which described D0) and FGR_027's actual controlling text (D2) -- recorded above (GOVERNANCE TREATMENT) and resolved in favor of the repository's own governance artifact, per this Adoption milestone's explicit instruction that repository evidence controls.
+
+Full Formal Governance Review artifact: `governance-reviews/FGR_027_CAND-EUAI-ART50-2-PROVIDER-MARKING-001_2026-10-02.md`
+Full evidence manifest: `evidence-captures/eu-ai-act/MANIFEST.md`
