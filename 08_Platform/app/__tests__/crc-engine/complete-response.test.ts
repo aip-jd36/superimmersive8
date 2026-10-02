@@ -9,6 +9,7 @@ import { buildCompleteResponseFields } from '../../lib/crc-engine/complete-respo
 import { CRC_CONFIG } from '../../lib/crc-engine/config'
 import type { ProjectionOutput } from '../../lib/projection-layer/types'
 import type { ConsultativeNote } from '../../lib/crc-engine/unresolved-applicability-realization'
+import type { ConsultativeRealization } from '../../lib/crc-engine/consultative-realization-contract'
 
 const SAMPLE_OUTPUT: ProjectionOutput = {
   opening_line: 'Real opening line.',
@@ -24,6 +25,27 @@ const SAMPLE_OUTPUT: ProjectionOutput = {
 /** M2B: a realized note, distinct enough (a real sentence, not an empty placeholder) to prove leak-detection assertions below are meaningful. */
 const SAMPLE_NOTES: ConsultativeNote[] = [{ goal_index: 0, text: "Specifically, this depends on your test fact, which hasn't been confirmed in this conversation." }]
 
+/**
+ * CRC-CC-RENDERER-SCOPED-CONTEXT-1C: a minimal, structurally-valid
+ * realization matching SAMPLE_OUTPUT's own `goal_interpretations: []` --
+ * every array here is derived 1:1 from goal/unresolved-item counts the real
+ * `buildConsultativeRealization` would see as zero for this fixture, so
+ * this is exactly what that function would itself produce, not a
+ * hand-invented shape. This test file's own leak-detection assertions are
+ * about `projection`/`consultative_notes`, not `realization` -- it is
+ * included here only so `CompleteResponseInput` type-checks.
+ */
+const SAMPLE_REALIZATION: ConsultativeRealization = {
+  goal_answers: [],
+  unresolved_groups: [],
+  missing_evidence_groups: [],
+  unresolved_item_presentation: [],
+  missing_evidence_presentation: [],
+  unresolved_presentation_groups: [],
+  discovered_context: [],
+  commercial_assurance: { applies: false, closing_cta: '' },
+}
+
 const BEFORE_LAUNCH = new Date(new Date(CRC_CONFIG.resultsGateLaunchedAt).getTime() - 1000).toISOString()
 const AFTER_LAUNCH = new Date(new Date(CRC_CONFIG.resultsGateLaunchedAt).getTime() + 1000).toISOString()
 
@@ -33,6 +55,7 @@ describe('buildCompleteResponseFields', () => {
       sessionCreatedAt: BEFORE_LAUNCH,
       output: SAMPLE_OUTPUT,
       consultativeNotes: SAMPLE_NOTES,
+      realization: SAMPLE_REALIZATION,
       attributionToken: 'attr-1',
       email: 'jd@example.com',
       resultsEmailStatus: null,
@@ -52,6 +75,7 @@ describe('buildCompleteResponseFields', () => {
       sessionCreatedAt: BEFORE_LAUNCH,
       output: SAMPLE_OUTPUT,
       consultativeNotes: SAMPLE_NOTES,
+      realization: SAMPLE_REALIZATION,
       attributionToken: 'attr-1',
       email: 'jd@example.com',
       resultsEmailStatus: null,
@@ -66,6 +90,7 @@ describe('buildCompleteResponseFields', () => {
       sessionCreatedAt: AFTER_LAUNCH,
       output: SAMPLE_OUTPUT,
       consultativeNotes: SAMPLE_NOTES,
+      realization: SAMPLE_REALIZATION,
       attributionToken: 'attr-1',
       email: 'jd@example.com',
       resultsEmailStatus: null,
@@ -83,6 +108,7 @@ describe('buildCompleteResponseFields', () => {
       sessionCreatedAt: AFTER_LAUNCH,
       output: SAMPLE_OUTPUT,
       consultativeNotes: SAMPLE_NOTES,
+      realization: SAMPLE_REALIZATION,
       attributionToken: 'attr-1',
       email: 'jd@example.com',
       resultsEmailStatus: null,
@@ -97,6 +123,7 @@ describe('buildCompleteResponseFields', () => {
       sessionCreatedAt: AFTER_LAUNCH,
       output: SAMPLE_OUTPUT,
       consultativeNotes: SAMPLE_NOTES,
+      realization: SAMPLE_REALIZATION,
       attributionToken: undefined,
       email: null,
       resultsEmailStatus: null,
@@ -112,6 +139,7 @@ describe('buildCompleteResponseFields', () => {
       sessionCreatedAt: AFTER_LAUNCH,
       output: SAMPLE_OUTPUT,
       consultativeNotes: SAMPLE_NOTES,
+      realization: SAMPLE_REALIZATION,
       attributionToken: undefined,
       email: 'jd@example.com',
       resultsEmailStatus: 'accepted',
@@ -126,6 +154,7 @@ describe('buildCompleteResponseFields', () => {
       sessionCreatedAt: AFTER_LAUNCH,
       output: SAMPLE_OUTPUT,
       consultativeNotes: SAMPLE_NOTES,
+      realization: SAMPLE_REALIZATION,
       attributionToken: undefined,
       email: null,
       resultsEmailStatus: null,
@@ -139,6 +168,7 @@ describe('buildCompleteResponseFields', () => {
       sessionCreatedAt: AFTER_LAUNCH,
       output: SAMPLE_OUTPUT,
       consultativeNotes: SAMPLE_NOTES,
+      realization: SAMPLE_REALIZATION,
       attributionToken: undefined,
       email: null,
       resultsEmailStatus: 'accepted',
@@ -152,6 +182,7 @@ describe('buildCompleteResponseFields', () => {
       sessionCreatedAt: CRC_CONFIG.resultsGateLaunchedAt,
       output: SAMPLE_OUTPUT,
       consultativeNotes: SAMPLE_NOTES,
+      realization: SAMPLE_REALIZATION,
       attributionToken: undefined,
       email: null,
       resultsEmailStatus: null,

@@ -77,6 +77,7 @@ import { deriveDiscoveredTopicOccurrences } from './discovered-relevance'
 import { deriveAssessmentJurisdictionFacts } from './assessment-jurisdiction-scope'
 import { buildConsultativeAnswerPlan, type ConsultativeAnswerPlan } from './consultative-answer-plan'
 import { realizeUnresolvedApplicability, toConsultativeNotes, type ConsultativeNote } from './unresolved-applicability-realization'
+import { buildConsultativeRealization, type ConsultativeRealization } from './consultative-realization-contract'
 import type { RetrievalHandoff, StructuredUnderstanding } from '@/types/interview-engine'
 
 export interface CRCPipelineDiagnostics {
@@ -145,6 +146,24 @@ export interface CRCPipelineResult {
    * so browser and email cannot independently diverge.
    */
   consultative_notes: ConsultativeNote[]
+  /**
+   * CRC-CC-RENDERER-SCOPED-CONTEXT-1C (2026-10-02). The SAME authoritative,
+   * already-shipped `buildConsultativeRealization(plan, output,
+   * consultative_notes)` call `results-email-delivery.ts` already makes
+   * (separately, later, from a reloaded/persisted record) -- computed ONCE
+   * here, from the SAME `plan`/`output`/`consultative_notes` this function
+   * already has in hand, so there is exactly one realization computation
+   * per turn for the live pipeline, never a second, independently-
+   * implemented one. Purely additive: `output`, `plan`,
+   * `bounded_interpretations`, `consultative_notes`, `diagnostics`, and
+   * `trace` are all unchanged by this field's presence. This milestone adds
+   * the field only -- no production renderer (web or email) consumes it
+   * yet; see that module's own header for the full authority/ownership
+   * contract (goal_answers/unresolved_groups/missing_evidence_groups/
+   * presentation_role are reproduced verbatim from already-bounded
+   * upstream state, nothing is reinterpreted or strengthened here).
+   */
+  realization: ConsultativeRealization
   diagnostics: CRCPipelineDiagnostics
   trace: CRCPipelineTrace
   /**
@@ -291,6 +310,11 @@ export function runCRCConversation(
   // immediately -- nothing beyond `{goal_index, text}` leaves this function.
   const consultative_notes = toConsultativeNotes(realizeUnresolvedApplicability(plan.explicit_sections))
 
+  // CRC-CC-RENDERER-SCOPED-CONTEXT-1C: same authoritative builder email
+  // already calls, same three already-computed inputs -- see this field's
+  // own header on CRCPipelineResult above.
+  const realization = buildConsultativeRealization(plan, output, consultative_notes)
+
   return {
     output,
     plan,
@@ -299,6 +323,7 @@ export function runCRCConversation(
     // exposed, not recomputed.
     bounded_interpretations: interpretations,
     consultative_notes,
+    realization,
     diagnostics: { retrieval: retrievalDiagnostics, projection: projectionDiagnostics },
     trace: { retrieval_handoff: handoff, retrieval_results: results, projection_output: output },
     // CRC-PILOT-OBS-3: the SAME `discoveredTopicOccurrences` value already

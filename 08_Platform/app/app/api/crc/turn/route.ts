@@ -78,6 +78,7 @@ import { shouldNotifyCrcSessionStarted, shouldNotifyCrcResultsEmailCaptured } fr
 import { getResultsEmailErrorMessage, type ResultsEmailClaimReason } from '@/lib/crc-engine/results-gate-copy'
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
 import type { ConsultativeNote } from '@/lib/crc-engine/unresolved-applicability-realization'
+import type { ConsultativeRealization } from '@/lib/crc-engine/consultative-realization-contract'
 
 const COOKIE_NAME = 'crc_session'
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 7 // 7 days
@@ -119,12 +120,14 @@ function buildCompleteTurnResponse(
   >,
   output: ProjectionOutput,
   consultativeNotes: ConsultativeNote[],
+  realization: ConsultativeRealization,
   overlay?: { blockedReason?: string; errorMessage?: string },
 ): Extract<TurnResponseBody, { status: 'complete' }> {
   const fields = buildCompleteResponseFields({
     sessionCreatedAt: productState.created_at,
     output,
     consultativeNotes,
+    realization,
     attributionToken: productState.attribution_token,
     email: productState.email,
     resultsEmailStatus: productState.results_email_status,
@@ -189,6 +192,7 @@ export async function GET(request: NextRequest) {
       sessionCreatedAt: productState?.created_at ?? new Date(0).toISOString(),
       output: result.output,
       consultativeNotes: result.consultative_notes,
+      realization: result.realization,
       attributionToken: productState?.attribution_token,
       email: productState?.email ?? null,
       resultsEmailStatus: productState?.results_email_status ?? null,
@@ -440,7 +444,7 @@ export async function POST(request: NextRequest) {
     // result the user should be able to have emailed.
     if (productState?.product_stop_reason && parsed.kind !== 'email' && parsed.kind !== 'resend_result_email') {
       const result = runCRCConversation(engineState.structured_understanding, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
-      const response = NextResponse.json<TurnResponseBody>(buildCompleteTurnResponse(productState, result.output, result.consultative_notes))
+      const response = NextResponse.json<TurnResponseBody>(buildCompleteTurnResponse(productState, result.output, result.consultative_notes, result.realization))
       setSessionCookie(response, token)
       return response
     }
@@ -535,7 +539,7 @@ export async function POST(request: NextRequest) {
             : undefined
 
       const result = runCRCConversation(engineState.structured_understanding, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
-      const responseBody = buildCompleteTurnResponse(refreshed ?? productState!, result.output, result.consultative_notes, overlay)
+      const responseBody = buildCompleteTurnResponse(refreshed ?? productState!, result.output, result.consultative_notes, result.realization, overlay)
       const response = NextResponse.json<TurnResponseBody>(responseBody)
       setSessionCookie(response, token)
       return response
@@ -563,7 +567,7 @@ export async function POST(request: NextRequest) {
         // specially handled here.
         await recordCrcCompletionTrace(supabaseAdmin, { sessionId: token, turnNumber, result })
         const ceilingResponse = NextResponse.json<TurnResponseBody>(
-          buildCompleteTurnResponse(productState ?? ({} as CrcSessionProductState), result.output, result.consultative_notes),
+          buildCompleteTurnResponse(productState ?? ({} as CrcSessionProductState), result.output, result.consultative_notes, result.realization),
         )
         setSessionCookie(ceilingResponse, token)
         return ceilingResponse
@@ -830,6 +834,7 @@ export async function POST(request: NextRequest) {
             },
             outcome.result.output,
             outcome.result.consultative_notes,
+            outcome.result.realization,
           ),
           precedingTakeaway: outcome.precedingTakeaway,
         })

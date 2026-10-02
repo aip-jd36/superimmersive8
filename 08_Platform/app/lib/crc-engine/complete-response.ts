@@ -33,6 +33,7 @@ import { maskEmail } from './results-gate-copy'
 import type { CrcResultsEmailState, CrcTeaser } from './api-contract'
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
 import type { ConsultativeNote } from './unresolved-applicability-realization'
+import type { ConsultativeRealization } from './consultative-realization-contract'
 
 /**
  * Takes an already-computed ProjectionOutput rather than computing it
@@ -60,6 +61,18 @@ export interface CompleteResponseInput {
    * discipline (this file's own header).
    */
   consultativeNotes: ConsultativeNote[]
+  /**
+   * CRC-CC-RENDERER-SCOPED-CONTEXT-1C (2026-10-02). Required, not defaulted
+   * -- same discipline as `consultativeNotes` immediately above: every real
+   * call site already has `CRCPipelineResult.realization` in hand from the
+   * same `runCRCConversation()` call that produced `output`. Non-
+   * grandfathered sessions never receive this in the response regardless of
+   * what is passed here (see the non-grandfathered branch below) -- passing
+   * it keeps this function's own gating logic the single place that
+   * decision is made. No renderer consumes this field yet (1C is plumbing
+   * only); consumption is 1D's own scope.
+   */
+  realization: ConsultativeRealization
   attributionToken: string | null | undefined
   email: string | null
   resultsEmailStatus: string | null
@@ -82,6 +95,17 @@ export interface CompleteResponseFields {
    * error.
    */
   consultative_notes?: ConsultativeNote[]
+  /**
+   * CRC-CC-RENDERER-SCOPED-CONTEXT-1C (2026-10-02). Additive, Consultative-
+   * Composition-owned bounded realization -- present ONLY on the
+   * grandfathered branch, exactly mirroring `projection`/`consultative_notes`'
+   * own gating immediately above (this file's own header: "This is the ONLY
+   * branch that ever returns `projection`"; the non-grandfathered branch
+   * must never leak Composition's realized content pre-email any more than
+   * it may leak `projection`/`consultative_notes` themselves). Plumbing
+   * only -- no renderer reads this field yet (1D's own scope).
+   */
+  realization?: ConsultativeRealization
   attribution_token?: string
   email?: string | null
 }
@@ -94,6 +118,7 @@ export function buildCompleteResponseFields(input: CompleteResponseInput): Compl
       grandfathered: true,
       projection: input.output,
       consultative_notes: input.consultativeNotes,
+      realization: input.realization,
       attribution_token: input.attributionToken ?? undefined,
       email: input.email,
     }

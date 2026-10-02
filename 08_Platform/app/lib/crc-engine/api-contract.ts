@@ -17,6 +17,7 @@ import { DECLINE_ACTIONS } from './decline'
 import type { TranscriptEntry } from './supabase-session-store'
 import type { ProjectionOutput } from '@/lib/projection-layer/types'
 import type { ConsultativeNote } from './unresolved-applicability-realization'
+import type { ConsultativeRealization } from './consultative-realization-contract'
 import type { SessionCreationRateResult, BurstResult } from './abuse-prevention'
 import { validateGuidedEntryRequest, type RawGuidedEntryInit } from './guided-entry-init'
 import type { GuidedEntrySelection } from '@/types/guided-entry'
@@ -209,6 +210,8 @@ export type TurnResponseBody =
       projection?: ProjectionOutput
       /** M2B (2026-09-05). Same gating as `projection` above -- present only for grandfathered sessions. See complete-response.ts's own doc comment. */
       consultative_notes?: ConsultativeNote[]
+      /** CRC-CC-RENDERER-SCOPED-CONTEXT-1C (2026-10-02). Same gating as `projection`/`consultative_notes` above -- present only for grandfathered sessions. Plumbing only; no renderer consumes it yet. See complete-response.ts's own doc comment. */
+      realization?: ConsultativeRealization
       precedingTakeaway?: string
       attribution_token?: string
       email?: string | null
@@ -232,6 +235,8 @@ export type SessionStatusResponseBody =
       projection?: ProjectionOutput
       /** M2B (2026-09-05). Same gating as `projection` above -- present only for grandfathered sessions. See complete-response.ts's own doc comment. */
       consultative_notes?: ConsultativeNote[]
+      /** CRC-CC-RENDERER-SCOPED-CONTEXT-1C (2026-10-02). Same gating as `projection`/`consultative_notes` above -- present only for grandfathered sessions. Plumbing only; no renderer consumes it yet. See complete-response.ts's own doc comment. */
+      realization?: ConsultativeRealization
       attribution_token?: string
       email?: string | null
     }

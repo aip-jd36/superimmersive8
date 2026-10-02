@@ -273,6 +273,18 @@ describe('subsystem boundaries -- Consultative Answer Plan (CC-3A)', () => {
       // production call sites as of this milestone (CC-4C.2B wires a channel
       // renderer to it, after human review).
       'lib/crc-engine/consultative-realization-contract.ts',
+      // CRC-CC-RENDERER-SCOPED-CONTEXT-1C (2026-10-02): `complete-response.ts`
+      // now carries the `ConsultativeRealization` TYPE only (an additive,
+      // gated-identically-to-`projection`/`consultative_notes` passthrough
+      // field) -- see the dedicated boundary block below for the
+      // type-only-vs-constructs-it distinction, mirroring
+      // `results-email-template.ts`'s own existing CC-4C.2B precedent.
+      'lib/crc-engine/complete-response.ts',
+      // CRC-CC-RENDERER-SCOPED-CONTEXT-1C (2026-10-02): same type-only
+      // passthrough reason as `complete-response.ts` immediately above --
+      // `TurnResponseBody`/`SessionStatusResponseBody`'s own additive
+      // `realization?: ConsultativeRealization` field.
+      'lib/crc-engine/api-contract.ts',
     ])
     const FORBIDDEN = [
       ...BOUNDED_INTERPRETATION_FILES,
@@ -283,7 +295,6 @@ describe('subsystem boundaries -- Consultative Answer Plan (CC-3A)', () => {
       'lib/projection-layer/understood-summary.ts',
       'lib/projection-layer/types.ts',
       'lib/crc-engine/run-turn.ts',
-      'lib/crc-engine/complete-response.ts',
       'lib/crc-engine/selector-questioning.ts',
       'lib/crc-engine/knowledge-readiness.ts',
     ]
@@ -390,17 +401,36 @@ describe('subsystem boundaries -- Consultative Realization Contract (CC-4C.2A)',
     expect(source).not.toMatch(/buildConsultativeRealization/)
   })
 
-  test('CC-4C.2B: run-crc-conversation.ts, the browser CrcProjectionOutput.tsx, and the API route remain untouched by this contract -- channel/orchestrator scope boundary preserved', () => {
-    const UNTOUCHED_CANDIDATES = ['lib/crc-engine/run-crc-conversation.ts']
-    for (const file of UNTOUCHED_CANDIDATES) {
-      const source = fs.readFileSync(path.join(APP_ROOT, file), 'utf-8')
-      expect(source).not.toMatch(/consultative-realization-contract|buildConsultativeRealization/)
-    }
+  /**
+   * CRC-CC-RENDERER-SCOPED-CONTEXT-1C (2026-10-02): `run-crc-conversation.ts`
+   * is now the SINGLE authorized orchestrator-level construction site --
+   * WEB-1's own documented finding that `ConsultativeRealization` was
+   * designed, at its own creation (CC-4C.2A), as a channel-independent
+   * contract with web wiring explicitly deferred, not rejected. This test
+   * replaces the prior "remains untouched" assertion with its own narrower,
+   * now-true replacement: the orchestrator constructs it ONCE (the single
+   * authoritative call site, mirroring `results-email-delivery.ts`'s own
+   * pre-existing call), and nothing downstream of it (the API route,
+   * `complete-response.ts`, the browser renderer) ever calls the builder a
+   * second time -- they may only reference the already-computed VALUE or
+   * its TYPE for passthrough.
+   */
+  test('CC-RENDERER-SCOPED-CONTEXT-1C: run-crc-conversation.ts is the single authorized orchestrator-level buildConsultativeRealization call site', () => {
+    const source = fs.readFileSync(path.join(APP_ROOT, 'lib/crc-engine/run-crc-conversation.ts'), 'utf-8')
+    expect(source).toMatch(/buildConsultativeRealization\(/)
+  })
+
+  test('CC-RENDERER-SCOPED-CONTEXT-1C: the API route, complete-response.ts, and api-contract.ts reference the ConsultativeRealization TYPE only -- none ever calls buildConsultativeRealization itself (construction stays in the orchestrator)', () => {
     const appDir = path.join(APP_ROOT, 'app')
     const apiCrcTurnRoute = path.join(appDir, 'api', 'crc', 'turn', 'route.ts')
-    if (fs.existsSync(apiCrcTurnRoute)) {
-      expect(fs.readFileSync(apiCrcTurnRoute, 'utf-8')).not.toMatch(/consultative-realization-contract|buildConsultativeRealization/)
-    }
+    expect(fs.readFileSync(apiCrcTurnRoute, 'utf-8')).not.toMatch(/buildConsultativeRealization\(/)
+    const completeResponse = path.join(APP_ROOT, 'lib/crc-engine/complete-response.ts')
+    expect(fs.readFileSync(completeResponse, 'utf-8')).not.toMatch(/buildConsultativeRealization\(/)
+    const apiContract = path.join(APP_ROOT, 'lib/crc-engine/api-contract.ts')
+    expect(fs.readFileSync(apiContract, 'utf-8')).not.toMatch(/buildConsultativeRealization\(/)
+  })
+
+  test('CC-4C.2B: the browser CrcProjectionOutput.tsx remains fully untouched by this contract -- no renderer consumption yet (1D\'s own scope)', () => {
     const crcProjectionOutput = path.join(APP_ROOT, 'components', 'CrcProjectionOutput.tsx')
     if (fs.existsSync(crcProjectionOutput)) {
       expect(fs.readFileSync(crcProjectionOutput, 'utf-8')).not.toMatch(/consultative-realization-contract|buildConsultativeRealization/)
