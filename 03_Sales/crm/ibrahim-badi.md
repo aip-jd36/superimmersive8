@@ -6,9 +6,9 @@ contacts:
 slug: ibrahim-badi
 stage: lead_responded
 source: stec_campaign
-next_action: "Send Commercial Readiness discovery follow-up"
-next_action_date: 2026-09-03
-last_contacted: 2026-09-01
+next_action: "Review the thread — if Ibrahim hasn't replied to the 2026-09-23 CRC feedback message, decide whether a light follow-up is warranted (not yet decided)"
+next_action_date: 2026-09-30
+last_contacted: 2026-09-23
 blocked: false
 blocked_reason: null
 review_date: null
@@ -24,6 +24,27 @@ Graduated from `03_Sales/CRM.md` (row B087) on 2026-09-01. Geo: London/UK. Origi
 **CR hypothesis being tested:** Does evidence/documentation feed into a distinct interpretation + commercial-use decision layer?
 
 ## Interaction log (reverse-chronological)
+
+### 2026-09-23 — CRC product-feedback / re-engagement message SENT (LinkedIn, Ivy, existing thread)
+
+**Sent (actual outbound, not a draft):**
+> Hi Ibrahim — we rolled out something I thought would be relevant to our conversation from earlier this year.
+>
+> It's a free "Commercial Readiness Check" for AI video. You can ask it questions and it walks through the kinds of commercial-readiness issues we talked about around tools, rights, documentation and client requirements:
+>
+> https://app.superimmersive8.com/crc
+>
+> It's designed to be a quick "commercial check" rather than a full assessment. Would you mind trying it out and letting me know your first impression?
+>
+> Thanks!
+
+**What this is:** a CRC product-feedback / re-engagement motion building on his earlier Commercial Readiness discussion (his Apr 28 – May 28 replies on documenting models, licensing, workflow and IP ownership). It is the first actual SI8 send in this thread since the brand-vertical answer + COMP-B2 code logged in `CRM.md`.
+
+**Evidence boundary:** sending CRC is not buying intent, product validation, or stage progression. Stage stays `lead_responded` until Ibrahim responds with new evidence.
+
+**Supersedes:** the 2026-09-01 Commercial Readiness discovery follow-up below (never sent) as the open next action — this send replaces it; it is not a second pending thread. The earlier unsent drafts (Jun 29 evidence-gap question; Jul 25 `03_Sales/reply-drafts/REPLY-DRAFT-B087-Ibrahim-Badi.md`) likewise remain unsent historical artifacts. Also corrects `last_contacted`, which previously read 2026-09-01 from the unsent draft; the real last contact before this send was his May 28 reply / SI8's subsequent brand-vertical answer.
+
+**Next step (2026-09-30):** review the thread. If no reply, decide then whether a light follow-up is warranted — no automatic follow-up has been decided.
 
 ### 2026-09-01 — discovery follow-up drafted, not sent
 
