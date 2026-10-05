@@ -6,12 +6,12 @@ contacts:
 slug: anchor-film
 stage: evaluating
 source: event
-next_action: "Once the conversation resumes (2026-09-30 is an internal review date, not a promised outreach date): schedule an Anchor × SI8 working session: define the system Alice still wants built, Anchor vs SI8 product boundaries and interface (creation-record/workflow → SI8 Commercial Assurance is a working hypothesis, not agreed), and IP — fitting the October grant around the product, not the product around the grant. Alongside: (1) obtain the complete/latest October grant RFP/application package (only 草案 slides so far); (2) consortium economics + grant administrative obligations — see the 2026-09-22/23 log entry for the full list; (3) collect Alice/Anchor feedback on the zh-TW CRC; (4) carried over, still open: Sept MODA grant (九月標案) status, who 'Kay' is, reconcile JD's 'US/Europe' framing against claude.md's Geographic Strategy; (5) non-PRC AI-model/API/SBOM audit only if SI8 decides to pursue — already tracked in `01_Business/research/TAIWAN-CROSSDOMAIN-AI-GRANT-2026-SMEA.md` §7."
-next_action_date: 2026-09-30
-last_contacted: 2026-09-23
-blocked: true
-blocked_reason: "Awaiting Alice's response / next movement on the October grant collaboration and CRC feedback."
-review_date: 2026-09-30
+next_action: "Oct 12 is an internal check only (not an Alice outreach date — she has said registration isn't announced yet and they are waiting on Kei): see whether registration for the Oct 19 Taipei/online Cross-Domain R&D briefing has been announced. Register when available; attend the Oct 19 briefing; use it to resolve the capital/consortium eligibility questions (Kei's reported >NT$9M combined-capital rule is unverified); then schedule the Anchor × SI8 working session for after the briefing. Alice is separately exploring a possible third consortium member, which SI8 has not agreed to. Full open-question list in the 2026-10-05 log entry."
+next_action_date: 2026-10-12
+last_contacted: 2026-10-05
+blocked: false
+blocked_reason: null
+review_date: null
 billing_summary: null
 created: 2026-08-15
 ---
@@ -21,6 +21,62 @@ created: 2026-08-15
 Graduated from `03_Sales/CRM.md` (row B164) on 2026-08-15 — an active, developing strategic-partnership discovery conversation, well past a reply-only signal.
 
 ## Interaction log (reverse-chronological)
+
+### 2026-10-05 — Alice relays Kei's capital-eligibility guidance; third consortium member raised; plan is official briefing first, then meet
+
+**Sep 29 (Tue) 15:09, LINE:** JD: "Hi Alice, 要這禮拜找時間討論10月的別按嗎？" (want to find time this week to discuss the October grant? — "別按" is a typo for 標案). No reply until Oct 5. No reply to JD's Sep 23 CRC-sharing message either; no CRC feedback received yet.
+
+**Oct 5 (Mon), LINE (JD ↔ Alice, verbatim):**
+- 08:28 Alice: [screenshot — briefing schedule, see below]
+- 08:29 Alice: "我早上跟Kei 聊 看起來跨域計畫滿重資本額的， 我們可能要找3家才有資格提案" (I talked with Kei this morning — the Cross-Domain program seems to weigh registered capital heavily; we may need to find 3 companies to qualify to submit)
+- 08:29 Alice: [screenshot — her chat with Kei, see below]
+- 08:30 Alice: "看要不要留時間聽一下說明會" (see whether to leave time to listen to the briefing)
+- 09:05 JD: "嗯嗯 好啊 可以聽聽看" / "10/19 週一線上會？" (sure, we can listen — is the 10/19 Monday one online?)
+- 09:12 Alice: "聽完我們 再開會吧 我同步兜第三家" (let's meet after we've listened; I'll work on putting together a third company in parallel)
+- 09:28 JD: "好👌"
+- 09:29 JD: "那10/19是哪裡報名聽會？" (where do we register for 10/19?)
+- 09:34 Alice: "還沒公告 要等Kei XD" (not announced yet — have to wait for Kei)
+- 09:36 JD: "Okay! 👌"
+
+**Screenshot 1 — Alice's LINE chat with Kei** (`03_Sales/crm/raw/anchor-film/2026-10-05-alice-kei-capital-eligibility-line.jpg`; Kei's display name: "Kei～數轉院(SBIR台日)"; timestamps 清晨 7:21–7:30, Oct 5 per Alice's message):
+- Kei 7:21: "你們兩家加起來低於900萬，系統會直接擋掉，你們無法在系統上完成提案" (your two companies combined are below NT$9M; the system will block it and you won't be able to complete the application in the system)
+- Alice 7:26: "真假 今年這麼要求資本額喔" (really? they require this much capital this year?)
+- Kei 7:27: "政府補助案都要求資本額不能小於補助款" (government subsidy programs all require capital not less than the subsidy)
+- Alice 7:28: "600+150=750萬資本額 / 原本想說就提700萬案子 / 50%自籌 350萬 / 50%補助 350萬" (NT$6M + NT$1.5M = NT$7.5M capital; she had planned a NT$7M project, NT$3.5M self-funded / NT$3.5M subsidy). 600 matches Anchor's NT$6M from the Aug 21 call; 150 approximates SI8 Taiwan entity's NT$1.55M confirmed to Alice on Aug 25.
+- Kei 7:30: "補助900萬元，資本額要大於900萬。不管你們想申請多少。系統就這樣設定了🤷" (subsidy is NT$9M, so capital must exceed NT$9M regardless of how much you apply for — that's how the system is set)
+
+**Screenshot 2 — Kei's briefing schedule** (`03_Sales/crm/raw/anchor-film/2026-10-05-kei-crossdomain-briefing-schedule.jpg`): "跨域研發計畫徵案說明會，可以先預留時間（通常在下午）" (Cross-Domain R&D program call-for-proposals briefings — reserve time, usually afternoons): 10/16 (Fri) 高雄 Kaohsiung · **10/19 (Mon) 台北 Taipei — "只有此場有線上直播" (only this session is livestreamed)** · 10/21 (Wed) 宜蘭 Yilan · 10/27 (Tue) 台中 Taichung. Registration not yet announced per Alice.
+
+**Classification:**
+- CURRENT FACT: Alice and Kei currently believe Anchor + SI8 alone may fail the program's capital eligibility check, and Alice therefore believes a third consortium member may be necessary.
+- CURRENT FACT: Alice is taking on exploring a third company in parallel ("我同步兜第三家"). No third company has been identified or approved. **SI8 has NOT agreed to add a third partner**, and no three-party consortium exists.
+- CURRENT FACT: both sides agreed to listen to the official briefing first and meet afterward. JD is targeting the Oct 19 Taipei session, the only livestreamed one; registration details are pending (Alice is waiting on Kei).
+- KEI'S REPORTED GUIDANCE (second-hand, via Alice's screenshot — NOT independently verified against official program rules or the application system): combined two-company capital below NT$9M is blocked by the system; capital must exceed NT$9M regardless of the subsidy amount requested.
+- **Not consistent on its face with the draft rule already on file.** The Sep 15 draft slide states 補助款 ≤ 自籌款 ≤ 實收資本額, under which Alice's NT$7M project (NT$3.5M subsidy, NT$7.5M combined capital) would appear to qualify. Kei's version ties the threshold to the NT$9M *cap*, not the amount requested, and says "大於" (greater than) where the draft's ≤ allows equality. Kei may know something the draft doesn't show (e.g. a system-configuration rule or the final RFP), but this is unresolved — do not record the >NT$9M-regardless rule as a program fact.
+- Identity note: "Kei" is very likely the same person as the "Kay" who supplied the Sep 16 draft slides (same thread, similar romanization) — INFERENCE, not confirmed. The display name suggests a 數轉院 / SBIR affiliation but does not establish Kei's role or authority on this program.
+- WORKING HYPOTHESIS: the Oct 19 briefing can clarify capital/consortium eligibility and the other outstanding rules, keeping the application option open without SI8 recruiting another partner before eligibility and economics are confirmed.
+- Signal read: stronger evidence of active collaboration — Alice consulted Kei about eligibility, shared the result with JD unprompted, is proactively sourcing a third company, and wants Anchor + SI8 to reconvene after the briefing. Still NOT an agreed application, committed consortium, identified third partner, proposal, or funded project. Stage stays `evaluating`.
+
+**Strategic guardrail (added):** the need for a third company must not drive product architecture. Any third participant should have a credible role in the R&D/commercialization project, not exist merely to cross a capital threshold — unless official program rules explicitly permit that structure and SI8 deliberately decides it's appropriate.
+
+**New open questions:**
+1. Is Kei's >NT$9M combined-capital interpretation confirmed by the official program rules / application system?
+2. Does the threshold apply regardless of the subsidy actually requested (vs. the draft's 補助款 ≤ 自籌款 ≤ 實收資本額)?
+3. How exactly is consortium capital calculated (summed across members? paid-in vs. registered)?
+4. Which eligibility requirements apply to each member individually vs. to the consortium collectively?
+5. Who might the third company be, and what strategic/work-package role would it have beyond supplying capital eligibility?
+6. How would a third company affect budget, matching funds, IP, governance and commercialization rights?
+7. Final application/project dates and official requirements.
+8. Once eligibility is clarified, does the grant still make economic and strategic sense for SI8?
+
+**DECISION / next milestone (supersedes the Sep 30 review state and the "working session first" ordering in the 2026-09-22/23 follow-up list):**
+1. Get Oct 19 Taipei/online briefing registration once announced (via Kei/Alice or the program).
+2. Attend/listen to the Oct 19 briefing.
+3. Use it to clarify capital/consortium eligibility and the other outstanding rules.
+4. Meanwhile, Alice explores a possible third consortium member (her action, not SI8's).
+5. Anchor × SI8 meet **after** the briefing to decide whether and how to proceed — this is where the working session from the Sep 22/23 list now happens.
+
+Still open from the Sep 22/23 list: full/official grant materials (the briefing may supply them); consortium economics and administrative obligations, now including any third party; IP/commercialization structure; CRC feedback from Alice/Anchor (none yet); Sept MODA grant (九月標案) status (still unanswered); reconciling the "US/Europe" framing; conditional non-PRC/SBOM audit (`01_Business/research/TAIWAN-CROSSDOMAIN-AI-GRANT-2026-SMEA.md` §7). The "who is Kay" item is now likely Kei (see identity note above) — role still unconfirmed.
 
 ### 2026-09-22/23 — updated CRC (Traditional Chinese UI) sent; Alice invited to share it with Anchor colleagues/partners
 
