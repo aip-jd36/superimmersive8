@@ -112,7 +112,7 @@ describe('Kling unknown -> account-status question appears (real registry, real 
     const outcome = await runTurn({ token: 't1', turnNumber: 1, userText: 'x' }, eligibleDeps({ generator }, store))
     expect(outcome.kind).toBe('question')
     if (outcome.kind === 'question') {
-      expect(outcome.message).toBe('Do you know what kind of kling account or membership you currently have?')
+      expect(outcome.message).toBe('Apart from your plan or subscription tier, do you know what type of account or membership you have with kling?')
     }
     expect(generatorCalled).toBe(false)
 
@@ -143,7 +143,7 @@ describe('Member response -> account_status resolves, no repeat question', () =>
       eligibleDeps({ extractor: constantExtractor([correction]) }, store),
     )
     if (second.kind === 'question') {
-      expect(second.message).not.toBe('Do you know what kind of kling account or membership you currently have?')
+      expect(second.message).not.toBe('Apart from your plan or subscription tier, do you know what type of account or membership you have with kling?')
     }
 
     const loadedAfterSecond = (await store.load('t1')) as {
@@ -157,7 +157,7 @@ describe('Member response -> account_status resolves, no repeat question', () =>
 
     const third = await runTurn({ token: 't1', turnNumber: 3, userText: 'x' }, eligibleDeps({}, store))
     if (third.kind === 'question') {
-      expect(third.message).not.toBe('Do you know what kind of kling account or membership you currently have?')
+      expect(third.message).not.toBe('Apart from your plan or subscription tier, do you know what type of account or membership you have with kling?')
     }
   })
 })
@@ -201,7 +201,7 @@ describe('ToolMention Supersession Fact Persistence -- product-consequence regre
     )
     // The selector must never re-ask, on this or any later turn.
     if (third.kind === 'question') {
-      expect(third.message).not.toBe('Do you know what kind of kling account or membership you currently have?')
+      expect(third.message).not.toBe('Apart from your plan or subscription tier, do you know what type of account or membership you have with kling?')
     }
 
     const loadedAfterThird = (await store.load('t1')) as {
@@ -253,7 +253,7 @@ describe('Regular Account response -> account_status resolves, no repeat questio
       eligibleDeps({ extractor: constantExtractor([correction]) }, store),
     )
     if (second.kind === 'question') {
-      expect(second.message).not.toBe('Do you know what kind of kling account or membership you currently have?')
+      expect(second.message).not.toBe('Apart from your plan or subscription tier, do you know what type of account or membership you have with kling?')
     }
 
     const loadedAfterSecond = (await store.load('t1')) as {
@@ -289,7 +289,7 @@ describe('Ambiguous response -> unknown remains, no repeat question, fail-closed
       eligibleDeps({ extractor: constantExtractor([ambiguousCorrection]) }, store),
     )
     if (second.kind === 'question') {
-      expect(second.message).not.toBe('Do you know what kind of kling account or membership you currently have?')
+      expect(second.message).not.toBe('Apart from your plan or subscription tier, do you know what type of account or membership you have with kling?')
     }
 
     const loadedAfterSecond = (await store.load('t1')) as {
@@ -302,7 +302,7 @@ describe('Ambiguous response -> unknown remains, no repeat question, fail-closed
 
     const third = await runTurn({ token: 't1', turnNumber: 3, userText: 'x' }, eligibleDeps({}, store))
     if (third.kind === 'question') {
-      expect(third.message).not.toBe('Do you know what kind of kling account or membership you currently have?')
+      expect(third.message).not.toBe('Apart from your plan or subscription tier, do you know what type of account or membership you have with kling?')
     }
   })
 })

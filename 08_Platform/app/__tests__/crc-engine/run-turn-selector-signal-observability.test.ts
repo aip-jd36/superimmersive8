@@ -128,7 +128,7 @@ describe('selectorSignal: accepted candidate, behaviorally unchanged', () => {
     if (second.kind === 'question') {
       // Exact same fixed text this mechanism has always produced -- proves
       // the observability change did not alter candidate generation.
-      expect(second.message).toBe('Do you know what kind of kling account or membership you currently have?')
+      expect(second.message).toBe('Apart from your plan or subscription tier, do you know what type of account or membership you have with kling?')
     }
     expect(second.selectorSignal).toEqual({ eligible: true, dedupe_key: 'tool_account_status::kling', outcome: 'asked' })
 

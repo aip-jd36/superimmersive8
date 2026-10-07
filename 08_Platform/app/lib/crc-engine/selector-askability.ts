@@ -88,6 +88,29 @@ export interface SelectorAskabilityEntry {
  * status (tool_account_status is deliberately the current, reported fact
  * only -- see ToolMention.account_status's own doc comment).
  *
+ * Question wording revised (CRC-GOVERNED-SELECTOR-QUESTION-COPY-1,
+ * 2026-10-07), following a real Production UAT + read-only diagnostic
+ * (CRC-GOVERNED-SELECTOR-ANSWER-MAPPING-1): the original wording ("Do you
+ * know what kind of {tool} account or membership you currently have?")
+ * read, to an ordinary user, as a request for their plan/tier name -- a
+ * real user answered with a plan name ("a paid Kling Pro plan"), which
+ * extraction correctly declined to treat as `account_status` (a plan/grade
+ * name is explicitly NOT the governed status term -- see
+ * anthropic-extractor.ts's own tool_mention attribute rules), leaving the
+ * selector unresolved even though the user reasonably believed they had
+ * answered. This is a pure copy change, not a semantic one: it explicitly
+ * contrasts "plan or subscription tier" against "account or membership" so
+ * the user has a better chance of recognizing these as two different
+ * things, without naming any provider's specific governed vocabulary
+ * (never "Member Account"/"Regular Account" or any other provider-specific
+ * class), without implying paid = member, without demanding a legal
+ * characterization, and without hinting at which answer would be
+ * favorable. Still a single fixed, generic, `{tool}`-substituted template
+ * -- the extraction rule, the selector cap, applicability evaluation, BI,
+ * and Composition are all unchanged and remain the actual source of
+ * correctness; this wording only reduces the chance of an avoidable,
+ * good-faith non-answer.
+ *
  * Do not add `jurisdiction` (owned entirely by the existing, unmigrated
  * jurisdiction-clarification.ts -- selector-questioning.ts's own
  * HANDLED_BY_DEDICATED_MODULE guard excludes it defensively regardless of
@@ -99,7 +122,7 @@ export interface SelectorAskabilityEntry {
 const SELECTOR_ASKABILITY: Partial<Record<ApplicabilityFact, SelectorAskabilityEntry>> = {
   tool_account_status: {
     treatment: 'askable_in_crc',
-    question_text: 'Do you know what kind of {tool} account or membership you currently have?',
+    question_text: 'Apart from your plan or subscription tier, do you know what type of account or membership you have with {tool}?',
   },
 }
 

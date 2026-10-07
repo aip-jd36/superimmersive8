@@ -128,8 +128,8 @@ describe('C: generic tool substitution -- no hardcoded Kling branch', () => {
     const klingProposal = buildSelectorNeedProposal(klingNeed, 2)
     const runwayProposal = buildSelectorNeedProposal(runwayNeed, 2)
 
-    expect(klingProposal.question_text).toBe('Do you know what kind of kling account or membership you currently have?')
-    expect(runwayProposal.question_text).toBe('Do you know what kind of runway-gen3 account or membership you currently have?')
+    expect(klingProposal.question_text).toBe('Apart from your plan or subscription tier, do you know what type of account or membership you have with kling?')
+    expect(runwayProposal.question_text).toBe('Apart from your plan or subscription tier, do you know what type of account or membership you have with runway-gen3?')
     // Proves substitution is a mechanical string replace, not a lookup keyed on 'kling' specifically.
     expect(klingProposal.question_text).not.toContain('runway')
     expect(runwayProposal.question_text).not.toContain('kling')

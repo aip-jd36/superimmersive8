@@ -131,7 +131,7 @@ describe('V/H: critical real-defect regression -- dedicated selector attempt res
     const second = await runTurn({ token: 't1', turnNumber: 2, userText: 'x' }, deps({ decider: selectorOnlyDecider }, store))
     expect(second.kind).toBe('question')
     if (second.kind === 'question') {
-      expect(second.message).toBe('Do you know what kind of kling account or membership you currently have?')
+      expect(second.message).toBe('Apart from your plan or subscription tier, do you know what type of account or membership you have with kling?')
     }
 
     const loaded = (await store.load('t1')) as { structured_understanding: { completion_reason: string | null }; boundary_state: { selector_needs_used: Record<string, number> } }
