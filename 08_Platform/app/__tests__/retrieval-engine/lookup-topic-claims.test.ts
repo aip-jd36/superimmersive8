@@ -78,6 +78,85 @@ describe('canonicalizeJurisdictionValue (Copyright UAT Output-Path Diagnostic P0
   test('negative: no substring/startsWith matching -- "US market maybe" is not coerced merely because it contains "US"', () => {
     expect(canonicalizeJurisdictionValue('US market maybe')).not.toBe('United States')
   })
+
+  // CRC-JURISDICTION-CANONICALIZATION-REPAIR-1 (2026-10-07): production
+  // UAT session 37a78beb-8cc4-462a-944b-bccf6d444f7e persisted a confirmed
+  // assessment-jurisdiction mention with the exact value below, which
+  // silently failed both governed EU AI Act Article 50 claims' jurisdiction
+  // gate before this fix. These values are the production-proven case, not
+  // a speculative set.
+  test('positive: recognized European Union aliases all canonicalize to "European Union"', () => {
+    for (const value of ['European Union', 'EU', 'E.U.', 'The European Union', 'the EU']) {
+      expect(canonicalizeJurisdictionValue(value)).toBe('European Union')
+    }
+  })
+
+  test('positive: the exact production-proven value ("The European Union", session 37a78beb-8cc4-462a-944b-bccf6d444f7e) canonicalizes to "European Union"', () => {
+    expect(canonicalizeJurisdictionValue('The European Union')).toBe('European Union')
+  })
+
+  test('positive: European Union case/whitespace robustness', () => {
+    expect(canonicalizeJurisdictionValue('european union')).toBe('European Union')
+    expect(canonicalizeJurisdictionValue('  EU  ')).toBe('European Union')
+  })
+
+  test('negative: adding European Union aliases does not disturb United States aliasing, or vice versa', () => {
+    expect(canonicalizeJurisdictionValue('US')).toBe('United States')
+    expect(canonicalizeJurisdictionValue('the US')).toBe('United States')
+    expect(canonicalizeJurisdictionValue('EU')).toBe('European Union')
+    expect(canonicalizeJurisdictionValue('the EU')).toBe('European Union')
+  })
+
+  test('negative: a genuinely unrelated/fictional jurisdiction value remains unchanged and non-matching -- fail-closed is generic, not EU-specific', () => {
+    for (const value of ['Republic of Elsewhere', 'The Republic of Elsewhere', 'Narnia', 'the EUphoria Zone']) {
+      expect(canonicalizeJurisdictionValue(value)).toBe(value)
+      expect(canonicalizeJurisdictionValue(value)).not.toBe('European Union')
+      expect(canonicalizeJurisdictionValue(value)).not.toBe('United States')
+    }
+  })
+
+  test('negative: a real, different governed jurisdiction (New York, California, Taiwan) is never coerced toward European Union or United States', () => {
+    for (const value of ['New York', 'California', 'Taiwan', 'the New York', 'the Taiwan']) {
+      expect(canonicalizeJurisdictionValue(value)).toBe(value)
+    }
+  })
+})
+
+describe('evaluateJurisdictionRequirementStatus / isApplicable -- production canonicalization boundary (CRC-JURISDICTION-CANONICALIZATION-REPAIR-1, 2026-10-07)', () => {
+  // These tests exercise the real canonicalization -> applicability boundary
+  // via isApplicable/evaluateApplicabilityDetailed with a RAW, uncanonicalized
+  // facts.included value -- deliberately NOT a test that constructs
+  // `included: ['European Union']` directly, which is exactly how the
+  // original production test gap occurred (see
+  // euai-art50-2-provider-marking.test.ts, which only ever injected the
+  // already-canonical literal).
+  const euReq: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'equals', value: 'European Union' }]
+
+  test('BEFORE/AFTER: the exact production-proven raw value ("The European Union") now satisfies the "European Union" jurisdiction requirement', () => {
+    expect(isApplicable(euReq, facts({ jurisdiction: { included: ['The European Union'], excluded: [] } }))).toBe(true)
+  })
+
+  test('evaluateApplicabilityDetailed reports "met" (not "unresolved"/"value_not_among_established_values") for the raw production value', () => {
+    const outcomes = evaluateApplicabilityDetailed(euReq, facts({ jurisdiction: { included: ['The European Union'], excluded: [] } }))
+    expect(outcomes).toEqual([{ requirement: euReq[0], status: 'met', unresolved_reason: null }])
+  })
+
+  test('a genuinely unestablished jurisdiction remains unresolved -- fail-closed unaffected by this repair', () => {
+    expect(isApplicable(euReq, facts())).toBe(false)
+  })
+
+  test('a genuinely different, non-aliasable jurisdiction value still does not satisfy the EU requirement, and surfaces "value_not_among_established_values" exactly as before', () => {
+    const outcomes = evaluateApplicabilityDetailed(euReq, facts({ jurisdiction: { included: ['Narnia'], excluded: [] } }))
+    expect(outcomes).toEqual([{ requirement: euReq[0], status: 'unresolved', unresolved_reason: 'value_not_among_established_values' }])
+  })
+
+  test('explicit exclusion of the raw production value still resolves to not_met (not silently repaired into met)', () => {
+    expect(isApplicable(euReq, facts({ jurisdiction: { included: [], excluded: ['The European Union'] } }))).toBe(false)
+  })
+
+  test('a different real governed jurisdiction (New York) does not satisfy the European Union requirement', () => {
+    expect(isApplicable(euReq, facts({ jurisdiction: { included: ['New York'], excluded: [] } }))).toBe(false)
+  })
 })
 
 describe('isApplicable', () => {

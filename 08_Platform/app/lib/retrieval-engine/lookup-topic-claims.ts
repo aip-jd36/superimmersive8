@@ -83,14 +83,39 @@ export interface ApplicabilityFacts {
  * that is a different fact type with its own (currently exact-match)
  * semantics, out of this fix's scope.
  *
- * Only one canonical jurisdiction is governed today -- every real
- * `applicability_requirements` entry across the current
- * `TOPIC_CLAIMS_FIXTURE` uses the literal value `"United States"`
- * (confirmed by direct inspection before this fix was written; COPY-001/
- * 002/003 are the only claims with a jurisdiction requirement at all).
- * This registry is therefore intentionally small -- not a world-country
- * database -- and should only grow when a real governed claim actually
- * requires a second jurisdiction value.
+ * Multiple canonical jurisdictions are governed today -- the current
+ * `TOPIC_CLAIMS_FIXTURE` authors real `applicability_requirements` entries
+ * for `"United States"`, `"New York"`, `"California"`, `"Taiwan"`, and
+ * `"European Union"` (confirmed by direct inspection, 2026-10-07; this list
+ * is a snapshot, not an invariant -- re-inventory from the fixture itself
+ * before trusting it, since governed claims are added over time). This
+ * registry is still intentionally small -- not a world-country database --
+ * and each jurisdiction's own alias entries should only grow when a real,
+ * evidenced user/extractor variation is found for THAT value, same
+ * discipline as the original "US" entries below.
+ *
+ * CRC-JURISDICTION-CANONICALIZATION-REPAIR-1 (2026-10-07) added the
+ * "European Union" entries following this exact precedent: a real
+ * production UAT session (`37a78beb-8cc4-462a-944b-bccf6d444f7e`) persisted
+ * a confirmed assessment-jurisdiction mention with value `"The European
+ * Union"` (the user's literal answer to CRC's own jurisdiction question,
+ * source_statement "The European Union.") -- extraction already strips
+ * trailing sentence punctuation before persisting `.value`, but never
+ * strips a leading "The" -- silently failing both governed EU AI Act
+ * Article 50 claims' jurisdiction gate the identical way the original
+ * 2026-08-19 fix describes for "It's in the US". Only `"European Union"`'s
+ * own proven variants are added here;
+ * `"New York"`, `"California"`, and `"Taiwan"` are NOT touched by this
+ * repair -- no production evidence of a variation exists for them, and
+ * speculatively aliasing proper nouns that are not conventionally used with
+ * a leading article (nobody says "the New York" or "the Taiwan") would be
+ * exactly the kind of un-evidenced, over-general expansion this registry's
+ * own discipline exists to prevent. Each entry here mirrors an existing
+ * "United States" entry's shape one-for-one: the bare value, the common
+ * abbreviation, the abbreviation's punctuated form, and the "the "-prefixed
+ * form of both -- never a generic "strip leading 'the'" rule, which would
+ * silently affect every other jurisdiction value, including ones (like
+ * Taiwan) where "the Taiwan" is not a legitimate variant to normalize away.
  *
  * Applied at the APPLICABILITY COMPARISON BOUNDARY, never at attestation/
  * capture time: `ProjectFacts.jurisdiction.attestation.value` (the user's
@@ -108,6 +133,11 @@ const JURISDICTION_VALUE_ALIASES: Record<string, string> = {
   'u.s.': 'United States',
   'u.s.a.': 'United States',
   'the us': 'United States',
+  'european union': 'European Union',
+  eu: 'European Union',
+  'e.u.': 'European Union',
+  'the european union': 'European Union',
+  'the eu': 'European Union',
 }
 
 export function canonicalizeJurisdictionValue(value: string): string {

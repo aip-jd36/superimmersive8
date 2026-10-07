@@ -374,6 +374,79 @@ describe('Article 50(2) + Article 50(4) coexistence -- both reached via the same
     expect(claimIds).toContain(CLAIM_ID)
     expect(claimIds).toContain(ART50_4_SIBLING_ID)
   })
+
+  // CRC-JURISDICTION-CANONICALIZATION-REPAIR-1 (2026-10-07): the production
+  // defect this reproduces used the REAL `assessment_jurisdiction_mentions`
+  // model (not the legacy `project_facts.jurisdiction` scalar
+  // `suWithEUJurisdiction()` above exercises), with the raw, uncanonicalized
+  // value a real user actually typed, not an already-canonical literal.
+  // Session 37a78beb-8cc4-462a-944b-bccf6d444f7e persisted exactly this
+  // shape and both EU claims were silently withheld before this repair.
+  test('full pipeline, real assessment_jurisdiction_mentions model, raw production value "The European Union": both Article 50(2) and Article 50(4) reach knowledge_items, dependencies remain unresolved, governance untouched', () => {
+    const su: StructuredUnderstanding = {
+      ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
+      user_goals: [commercialUseGoal()],
+      assessment_jurisdiction_mentions: [
+        {
+          mention_id: 'm-1',
+          value: 'The European Union',
+          confidence: 'confirmed',
+          source_turn: 2,
+          source_statement: 'The European Union.',
+          superseded_by: null,
+        },
+      ],
+    }
+    const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+    const claimIds = output.knowledge_items.map((k) => k.claim_id)
+
+    // The proven production fix: both claims now reach the user instead of
+    // being silently dropped behind "Related context" with no substantive
+    // explanation.
+    expect(claimIds).toContain(CLAIM_ID)
+    expect(claimIds).toContain(ART50_4_SIBLING_ID)
+
+    // Jurisdiction matching is necessary, not sufficient -- this repair does
+    // not resolve either claim's own governed dependencies or strengthen
+    // the BI ceiling. Still Case 3B, still the fixed generic hedge, still no
+    // prohibited conclusion.
+    const interp = output.goal_interpretations.find((i) => i.goal_text.includes('marking or label'))
+    expect(interp).toBeDefined()
+    expect(interp!.summary).toMatch(/there isn't enough project-specific information to determine how it applies to your specific project/)
+    expect(interp!.summary).not.toMatch(/article 50\(2\) (applies to|governs) your project/i)
+    expect(interp!.summary).not.toMatch(/your (ai )?provider (complies|is compliant|violates|is violating)/i)
+
+    const art502 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === CLAIM_ID)!
+    const art504 = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === ART50_4_SIBLING_ID)!
+    expect(art502.unresolved_project_dependencies).toEqual(['provider_status_confirmed', 'union_establishment_or_output_use'])
+    expect(art504.unresolved_project_dependencies).toEqual([
+      'deployer_status_confirmed',
+      'content_constitutes_deep_fake',
+      'artistic_creative_satirical_fictional_analogous_work',
+      'union_establishment_or_output_use',
+    ])
+  })
+
+  test('the raw production value is NEVER substituted by a distribution-territory mention -- assessment jurisdiction and distribution territory remain structurally separate inputs', () => {
+    // A session with ONLY a distribution_territory_mentions entry (never an
+    // assessment_jurisdiction_mentions entry) must not retrieve either claim
+    // -- deriveAssessmentJurisdictionFacts (lib/crc-engine/assessment-
+    // jurisdiction-scope.ts) reads exclusively from
+    // assessment_jurisdiction_mentions/the legacy scalar, never from
+    // distribution_territory_mentions, and this repair does not touch that
+    // function at all.
+    const su: StructuredUnderstanding = {
+      ...DIALOGUE_FIXTURES.no_signal.structured_understanding,
+      user_goals: [commercialUseGoal()],
+      distribution_territory_mentions: [
+        { mention_id: 'd-1', value: 'the European Union', confidence: 'confirmed', source_turn: 2, source_statement: 'the European Union', superseded_by: null },
+      ],
+    }
+    const { output } = runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+    const claimIds = output.knowledge_items.map((k) => k.claim_id)
+    expect(claimIds).not.toContain(CLAIM_ID)
+    expect(claimIds).not.toContain(ART50_4_SIBLING_ID)
+  })
 })
 
 // ── sibling non-interference (all directions) ───────────────────────────────
