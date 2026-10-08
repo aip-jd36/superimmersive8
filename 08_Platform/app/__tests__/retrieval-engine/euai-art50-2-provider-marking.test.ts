@@ -500,6 +500,6 @@ describe('sibling claim isolation -- Article 50(4), NY/California synthetic-perf
 describe('total fixture population sanity', () => {
   test('exactly thirty-eight Adopted + CRC-eligible claims exist as of 2026-10-02 (see topic-claims-fixture-consistency.test.ts for the authoritative, itemized manifest assertion -- the 38th is this claim, CLAIM-EUAI-ART50-2-PROVIDER-MARKING-001-v1)', () => {
     const live = TOPIC_CLAIMS_FIXTURE.filter((c) => c.lifecycle === 'Adopted' && c.crc_eligible === 'Yes')
-    expect(live).toHaveLength(38)
+    expect(live).toHaveLength(39)
   })
 })

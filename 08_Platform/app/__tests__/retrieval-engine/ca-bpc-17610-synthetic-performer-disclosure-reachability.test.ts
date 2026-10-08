@@ -283,6 +283,6 @@ describe('sibling claim isolation -- NY synthetic-performer claim unaffected, bo
 describe('total fixture population sanity', () => {
   test('exactly thirty-eight Adopted + CRC-eligible claims exist as of 2026-10-02 (see topic-claims-fixture-consistency.test.ts for the authoritative, itemized manifest assertion -- this claim is the 37th; the 38th, added after this file was authored, is CLAIM-EUAI-ART50-2-PROVIDER-MARKING-001-v1)', () => {
     const live = TOPIC_CLAIMS_FIXTURE.filter((c) => c.lifecycle === 'Adopted' && c.crc_eligible === 'Yes')
-    expect(live).toHaveLength(38)
+    expect(live).toHaveLength(39)
   })
 })

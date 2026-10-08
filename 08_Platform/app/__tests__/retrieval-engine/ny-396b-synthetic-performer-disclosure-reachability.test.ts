@@ -507,6 +507,6 @@ describe('Copyright (provider_scope: null) claims unaffected by this activation'
 describe('total fixture population sanity', () => {
   test('exactly thirty-eight Adopted + CRC-eligible claims exist as of 2026-10-02 (see topic-claims-fixture-consistency.test.ts for the authoritative, itemized manifest assertion -- the 37th is CLAIM-SYNTHETIC-PERFORMER-CA-BPC-17610-001-v1 (California BPC § 17610 CRC Production Representation milestone, LK-CA-SYNTHETIC-PERFORMER-PROD-REP-1), the 38th is CLAIM-EUAI-ART50-2-PROVIDER-MARKING-001-v1 (EU AI Act Article 50(2) CRC Production Representation milestone, LK-EUAI-ART50-2-PROD-REP-1))', () => {
     const live = TOPIC_CLAIMS_FIXTURE.filter((c) => c.lifecycle === 'Adopted' && c.crc_eligible === 'Yes')
-    expect(live).toHaveLength(38)
+    expect(live).toHaveLength(39)
   })
 })

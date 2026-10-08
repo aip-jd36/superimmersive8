@@ -2033,4 +2033,85 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     last_verified: '2026-10-02',
     superseded_by: null,
   },
+  {
+    // China AI-Assisted/Generated Content Copyrightability -- Production
+    // Representation (2026-10-08). Adopted (GOVERNED-CLAIMS.md), Formal
+    // Governance Review FGR_028, CRC Publication Review CPR_034,
+    // Production Readiness (generic China jurisdiction canonicalization,
+    // commit 23f04466). Reuses the existing `copyrightability` topic
+    // verbatim -- same underlying human-creative-contribution question
+    // already governed for the U.S. (CLAIM-COPY-001/002/003-v1) and
+    // Taiwan (CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1), independently
+    // re-confirmed at FGR_028/Adoption/CPR_034, not assumed from topic-name
+    // similarity. No new GoalCategory, no new KnowledgeTopic, no
+    // TopicRelationship, no Track A trigger -- explicit-goal-reachable
+    // only, identical in shape to both siblings. `crc_publication_scope`/
+    // `crc_candidate_statement` are copied verbatim from
+    // GOVERNED-CLAIMS.md's own `CRC Publication Scope:`/`CRC Candidate
+    // Statement:` fields, not paraphrased or strengthened -- the SPC's
+    // twice-independently-stated national non-decision (2026-09-07 press
+    // Q&A; 2026-09-09 IP Tribunal explainer) is the proposition's own
+    // grammatically final, inseparable clause, not a footnote (CPR_034
+    // §4/§7, independently re-confirmed against this exact statement
+    // string, not assumed from the markdown proposition's own framing).
+    // Materially different national legal posture from the Taiwan sibling
+    // (TIPO's own official interpretation affirmatively settles Taiwan's
+    // national rule, leaving only project-specific sufficiency open;
+    // China's own top court has expressly and repeatedly declined to
+    // settle the national rule at all) -- not force-reconciled with it.
+    claim_id: 'CLAIM-COPYRIGHT-CN-AI-ASSISTED-OUTPUT-001-v1',
+    topic: 'copyrightability',
+    claim_character: 'established',
+    jurisdiction: 'China',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      "APPROVED FOR CRC PUBLICATION (2026-10-08, CRC Approver: JD (PM) -- see CRC Publication Review #34, CPR_034, governance-reviews/CPR_034_CLAIM-COPYRIGHT-CN-AI-ASSISTED-OUTPUT-001-v1_2026-10-08.md). CRC may state that official Supreme People's Court guidance (the People's Courts IP Judicial Protection Implementation Plan, 2026-2030) directs courts to comprehensively consider a human user's specific input instructions and the process of selection/modification when assessing whether AI-assisted or AI-generated content reflects original human creative choices and expression, that particular Chinese courts (reported Wuhan decisions) have found copyright protection on this basis in specific, fact-specific cases, and that the Supreme People's Court has twice stated, in separate 2026 official explanatory publications, that views on AI-content copyrightability remain divided and that its own AI-disputes Opinion does not establish a rule on this question -- there is no uniform national rule on AI-content copyrightability in China at this time. CRC must not state that a specific project's output is (or is not) protected by copyright under Chinese law, that a specific user's described contribution is legally sufficient to satisfy any Chinese human-creative-contribution standard, that the user is the author, that the user/an employer/a client/a commissioning party owns the economic rights in any specific work, that the Wuhan cases or the Implementation Plan establish a national rule or are binding beyond their own fact pattern, that infringement occurred or did not occur, that any third-party rights are cleared, that Chinese jurisdiction attaches to a specific project for any reason including the user merely selecting China as the assessment jurisdiction, or that the project is otherwise commercially cleared. A human-reviewed Commercial Assurance Assessment remains the higher-assurance path for the project-specific facts this claim leaves open.",
+    crc_candidate_statement:
+      "In Chinese litigation, when courts assess whether AI-assisted or AI-generated content is protected by copyright, official Supreme People's Court guidance directs courts to comprehensively consider the human user's specific input instructions and the process of selection and modification, to determine whether the resulting content reflects the human's own original creative choices and expression. Particular Chinese courts (reported Wuhan decisions) have found copyright protection on this basis in specific, fact-specific cases. However, the Supreme People's Court has twice stated, in separate 2026 official explanatory publications, that views on the copyrightability of AI-generated content remain divided and that its own AI-disputes Opinion does not establish a rule on this question -- there is no uniform national rule on AI-content copyrightability in China at this time.",
+    // AssessmentJurisdictionMention represents only that the user asked CRC
+    // to consider China/Chinese law -- never proof that Chinese law
+    // actually attaches to a specific project. Explicit-goal-reachable
+    // only, so no Article-50-style unrestricted-reach exposure exists to
+    // solve. `jurisdiction == China` is a first-of-kind canonical value
+    // for JURISDICTION_VALUE_ALIASES (lookup-topic-claims.ts) -- the
+    // Production Readiness milestone (commit 23f04466) independently
+    // validated the live extraction -> canonicalization -> applicability
+    // boundary for this value (adding `china`, `people's republic of
+    // china`, `the people's republic of china`, `prc` as curated aliases;
+    // `mainland china` deliberately investigated and left unaliased/
+    // fail-closed) before this Production Representation was authorized --
+    // not merely assumed safe from a deterministic test using the
+    // already-canonical fixture value, learning directly from the EU
+    // jurisdiction-canonicalization failure mode this corpus already found
+    // and fixed (commits 24a330f4/e3ade635).
+    applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'China' }],
+    // D1 (FGR_028 §13/§14, independently re-derived from zero against this
+    // candidate's own evidentiary posture, re-confirmed at Adoption and
+    // CPR_034 -- not chosen for Taiwan symmetry). This dependency's actual
+    // runtime function (traced against
+    // build-bounded-interpretation.ts's shouldIncludeHumanContributionSentence()/
+    // hasGovernedProjectDependencies() and the Taiwan claim's own code
+    // comment above) is a bounded, non-interpretive, category-gated
+    // echo-only augmentation (H5) that never resolves copyrightability,
+    // never removes the dependency from the array, and never permits this
+    // claim to reach directly_relevant -- identical, re-confirmed
+    // mechanism, not inherited by assumption. D0 was independently found
+    // also defensible (the proposition's own text is already
+    // self-qualifying) but D1 was preferred as a second, independent layer
+    // of boundedness for a claim touching genuinely contested/unsettled
+    // national doctrine.
+    unresolved_project_dependencies: ['human_contribution_description'],
+    // Category error to represent a China legal actor or AI-developer
+    // concept here -- this field remains scoped to third-party asset/
+    // stock-provider mentions only. Statutory, tool-independent.
+    provider_scope: null,
+    tool_scope: null,
+    publication_scope: 'Reviewer/Commercial Assurance', // hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
+    // geographic_relevance_scope deliberately omitted (opt-out by this
+    // field's own inverted default polarity) -- no discovered relevance is
+    // activated by this milestone; this claim is explicit-goal-only.
+    last_verified: '2026-10-08',
+    superseded_by: null,
+  },
 ]
