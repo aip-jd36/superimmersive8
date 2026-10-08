@@ -115,6 +115,31 @@
  * an improvised description -- see `getApplicabilityFactLabel`'s own
  * fail-closed contract below, and unresolved-applicability-realization.ts's
  * own consumption of it.
+ *
+ * CRC-CC-DISPLAY-VOCABULARY-2 (2026-10-08, following the read-only
+ * CRC-CC-DISPLAY-VOCABULARY-1 contract diagnostic). Coverage model changed
+ * from a PARTIAL registry (`Partial<Record<ApplicabilityFact, Entry>>`,
+ * absence = "nobody has decided yet") to an EXHAUSTIVE one
+ * (`Record<ApplicabilityFact, Entry | null>`, every key present, `null`
+ * meaning "a human reviewer has explicitly decided this fact has no
+ * approved Level-1 label yet"). This is DECISION-FORCING, not
+ * LABEL-FORCING, exactly mirroring `AUTHORIZED_SCOPED_CONTEXT_REASONS`'s
+ * own already-proven pattern (the shared Realization contract module,
+ * CRC-CC-SCOPE-5): a future `ApplicabilityFact` added to the union without
+ * a corresponding entry here is now a TypeScript compile error, forcing
+ * conscious review -- but that review may still, correctly, conclude
+ * `null`. `getApplicabilityFactLabel`'s own return type/behavior is
+ * UNCHANGED -- `null`'s optional-chained `.label` access already evaluates
+ * to `undefined`, identical to the prior "key absent" case, so every
+ * existing caller (`boundedFactCategorySentence`,
+ * `boundedFactScopedContextSentence`, `headingForDimensionIdentity`, and
+ * every existing test) observes byte-identical behavior. `tool_account_status`
+ * and `jurisdiction`'s own approved labels are reproduced here VERBATIM,
+ * unchanged. `tool_plan_tier` is now an EXPLICIT `null` decision (previously
+ * an absent key) -- this is not a new governance decision, only the
+ * existing, already-cited CRC-CC-SCOPE-6A deferral made structurally
+ * visible rather than silently representable as "not yet considered." No
+ * label is authored by this milestone for any fact.
  */
 
 import type { ApplicabilityFact } from '@/lib/retrieval-engine/types'
@@ -130,29 +155,37 @@ export interface ApplicabilityFactDisplayEntry {
 }
 
 /**
- * Two entries: `tool_account_status` (M2B.1, 2026-09-05) and `jurisdiction`
- * (CRC-CC-SCOPE-6B, 2026-09-24), both human/PM-approved -- see this
- * module's own header for the full authority/scope of each. `tool_plan_tier`
- * is deliberately NOT an entry here -- see module header -- and must not be
- * added without its own separate governance sign-off. Do not populate any
- * future entry from informal wording found in governance-review markdown,
- * PLATFORM-RIGHTS-MATRIX.md column headers, or an existing selector
- * question's own text -- none of those are an approved display label on
- * their own.
+ * Exhaustive -- every `ApplicabilityFact` MUST have an entry (TypeScript
+ * enforces this; omitting one, or omitting a future new union member, is a
+ * compile error). An entry is either an approved `ApplicabilityFactDisplayEntry`
+ * or the literal `null` ("explicitly reviewed, no label yet"). `tool_account_status`
+ * (M2B.1, 2026-09-05) and `jurisdiction` (CRC-CC-SCOPE-6B, 2026-09-24) are
+ * both human/PM-approved -- see this module's own header for the full
+ * authority/scope of each; reproduced here byte-for-byte unchanged.
+ * `tool_plan_tier` is deliberately `null` -- see module header -- and must
+ * not become a real label without its own separate governance sign-off. Do
+ * not populate any future entry from informal wording found in
+ * governance-review markdown, PLATFORM-RIGHTS-MATRIX.md column headers, or
+ * an existing selector question's own text -- none of those are an
+ * approved display label on their own.
  */
-const APPLICABILITY_FACT_DISPLAY: Partial<Record<ApplicabilityFact, ApplicabilityFactDisplayEntry>> = {
+const APPLICABILITY_FACT_DISPLAY: Record<ApplicabilityFact, ApplicabilityFactDisplayEntry | null> = {
   tool_account_status: { label: 'account or membership status' },
   jurisdiction: { label: 'assessment jurisdiction' },
+  tool_plan_tier: null,
 }
 
 /**
  * Fail-closed by construction, never a thrown error -- an unregistered fact
  * returns `undefined`, structurally identical to "no label exists" from
- * every caller's point of view. The sole caller
- * (unresolved-applicability-realization.ts) treats `undefined` as a reason
- * to produce no specific realization at all, falling back to the existing
- * generic Bounded Interpretation copy -- never to the raw enum value, never
- * to an improvised description.
+ * every caller's point of view. CRC-CC-DISPLAY-VOCABULARY-2: an explicit
+ * `null` decision returns the exact same `undefined` -- optional chaining on
+ * `null` evaluates to `undefined`, not a thrown error -- so this function's
+ * own body did not need to change at all; only the table above did. The sole
+ * caller (unresolved-applicability-realization.ts) treats `undefined` as a
+ * reason to produce no specific realization at all, falling back to the
+ * existing generic Bounded Interpretation copy -- never to the raw enum
+ * value, never to an improvised description.
  */
 export function getApplicabilityFactLabel(fact: ApplicabilityFact): string | undefined {
   return APPLICABILITY_FACT_DISPLAY[fact]?.label
