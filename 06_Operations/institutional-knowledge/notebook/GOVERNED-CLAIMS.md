@@ -5947,9 +5947,39 @@ Lifecycle: Adopted
 Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-10-08
 Publication scope: Reviewer/Commercial Assurance
-CRC Publication Scope: PENDING
+CRC Publication Scope: >
+  APPROVED FOR CRC PUBLICATION (2026-10-08, CRC Approver: JD (PM) -- see
+  CRC Publication Review #34, CPR_034,
+  governance-reviews/CPR_034_CLAIM-COPYRIGHT-CN-AI-ASSISTED-OUTPUT-001-v1_2026-10-08.md).
+  CRC may state that official Supreme People's Court guidance (the
+  People's Courts IP Judicial Protection Implementation Plan, 2026-2030)
+  directs courts to comprehensively consider a human user's specific
+  input instructions and the process of selection/modification when
+  assessing whether AI-assisted or AI-generated content reflects original
+  human creative choices and expression, that particular Chinese courts
+  (reported Wuhan decisions) have found copyright protection on this
+  basis in specific, fact-specific cases, and that the Supreme People's
+  Court has twice stated, in separate 2026 official explanatory
+  publications, that views on AI-content copyrightability remain divided
+  and that its own AI-disputes Opinion does not establish a rule on this
+  question -- there is no uniform national rule on AI-content
+  copyrightability in China at this time. CRC must not state that a
+  specific project's output is (or is not) protected by copyright under
+  Chinese law, that a specific user's described contribution is legally
+  sufficient to satisfy any Chinese human-creative-contribution standard,
+  that the user is the author, that the user/an employer/a client/a
+  commissioning party owns the economic rights in any specific work,
+  that the Wuhan cases or the Implementation Plan establish a national
+  rule or are binding beyond their own fact pattern, that infringement
+  occurred or did not occur, that any third-party rights are cleared,
+  that Chinese jurisdiction attaches to a specific project for any reason
+  including the user merely selecting China as the assessment
+  jurisdiction, or that the project is otherwise commercially cleared. A
+  human-reviewed Commercial Assurance Assessment remains the
+  higher-assurance path for the project-specific facts this claim leaves
+  open.
+
 CRC Candidate Statement: >
-  [DRAFT -- pending CRC Publication Review; not yet approved for CRC use]
   In Chinese litigation, when courts assess whether AI-assisted or
   AI-generated content is protected by copyright, official Supreme
   People's Court guidance directs courts to comprehensively consider the
@@ -5974,17 +6004,18 @@ Effective date: >
   proposition's final sentence is that this remains true as of this
   Adoption. Evidence captured 2026-09-30 (initial pass) and 2026-10-08
   (primary-source refresh, this milestone).
-Last reviewed: 2026-10-08 (Formal Governance Review, FGR_028)
+Last reviewed: 2026-10-08 (Formal Governance Review, FGR_028; CRC Publication Review, CPR_034)
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
-CRC Approver: PENDING
-CRC Decision Date: PENDING
-Related: [[CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1]] (same KnowledgeTopic, structurally analogous human-creative-contribution question, materially different evidentiary posture -- Taiwan's TIPO letter affirmatively settles the national rule, leaving only project-specific sufficiency open; China's own top court has expressly and repeatedly declined to settle the national rule at all -- not force-reconciled), [[CLAIM-COPY-001-v1]] (U.S. sibling, same underlying question, different statutory basis), [[CLAIM-LIKENESS-CN-PORTRAIT-VOICE-CONSENT-001-v1]] (different China domain -- portrait/voice/personality rights, WITHHELD FROM CRC under Publication Policy Principle 3 for an unrelated reason, real identifiable-person subject sensitivity; that entry's own cross-reference anticipated this claim ("China's AI-output copyrightability question is governed separately (not yet an adopted claim as of this entry)") -- this Adoption resolves that forward reference; this claim's own future CRC-eligibility question is distinct and must be independently derived, never inherited from that unrelated Principle-3 disposition).
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-10-08
+Related: [[CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1]] (same KnowledgeTopic, structurally analogous human-creative-contribution question, materially different evidentiary posture -- Taiwan's TIPO letter affirmatively settles the national rule, leaving only project-specific sufficiency open; China's own top court has expressly and repeatedly declined to settle the national rule at all -- not force-reconciled), [[CLAIM-COPY-001-v1]] (U.S. sibling, same underlying question, different statutory basis), [[CLAIM-LIKENESS-CN-PORTRAIT-VOICE-CONSENT-001-v1]] (different China domain -- portrait/voice/personality rights, WITHHELD FROM CRC under Publication Policy Principle 3 for an unrelated reason, real identifiable-person subject sensitivity; that entry's own cross-reference anticipated this claim ("China's AI-output copyrightability question is governed separately (not yet an adopted claim as of this entry)") -- this Adoption resolves that forward reference; CPR_034 independently re-derived this claim's own CRC-eligibility question on its own subject matter and did not inherit that unrelated Principle-3 disposition -- see CPR_034 §3 row 3 and §16 for the explicit comparison).
 
 Known architecture/governance debt, recorded not remediated:
-  - `jurisdiction == China` is a first-of-kind canonical value for `JURISDICTION_VALUE_ALIASES` (`lookup-topic-claims.ts`) -- confirmed, by direct grep at both FGR_028 and this Adoption review, zero existing China/PRC entries of any kind. Recommended future canonical value `'China'` (bare proper noun, matching the existing single-word `'Taiwan'`/`'New York'`/`'California'` pattern); not implemented by this Adoption. A future Production Readiness Investigation MUST independently validate the live extraction -> canonicalization -> applicability boundary for this value before Production Representation is authorized -- do not repeat the EU jurisdiction-canonicalization failure mode (`CRC-JURISDICTION-CANONICALIZATION-REPAIR-1`, 2026-10-07, commits `24a330f4`/`e3ade635`) where deterministic tests constructing the already-canonical fixture value were mistaken for proof of the live production extraction path.
-  - No judgment text, docket number, or case number exists for either Wuhan lower-court decision in any source captured across two separate evidence-gathering passes (2026-09-30, 2026-10-08) -- a genuine, unresolved evidence gap (FGR_028 §5), independently re-confirmed at this Adoption review.
-  - FGR_028's CRC eligibility recommendation (§18: CRC ELIGIBLE, advisory only) is NOT adopted or decided by this milestone -- a future, separate, independently-derived CRC Publication Review remains required, and must not inherit China Likeness's unrelated Principle-3 (subject-identifiability) disposition or reasoning; the live question for that future CPR is instead whether national legal uncertainty itself makes conversational publication unsafe.
-  - No `TOPIC_CLAIMS_FIXTURE` representation exists for this claim as of this Adoption -- Adoption is pure governance documentation with zero runtime effect; this claim's own markdown entry will cause the existing `topic-claims-fixture-consistency.test.ts` invariant to fail until either (a) a future, separately-authorized Production Representation milestone adds a fixture entry, or (b) a future CPR withholds this claim, in which case it would be added to `CLAIMS_WITHOUT_FIXTURE_REPRESENTATION` at that time. This is the same expected, transient, non-remediated gap already established as correct practice for `CLAIM-EUAI-ART50-2-PROVIDER-MARKING-001-v1` between its own Adoption and Production Representation -- not added to the allowlist now, consistent with that allowlist's own documented purpose (permanent, deliberate non-representation only, never a "pending" placeholder).
+  - `jurisdiction == China` is a first-of-kind canonical value for `JURISDICTION_VALUE_ALIASES` (`lookup-topic-claims.ts`) -- confirmed, by direct grep at FGR_028, Adoption, and CPR_034, zero existing China/PRC entries of any kind. Recommended future canonical value `'China'` (bare proper noun, matching the existing single-word `'Taiwan'`/`'New York'`/`'California'` pattern); not implemented by this Adoption or by CPR_034. A future Production Readiness Investigation MUST independently validate the live extraction -> canonicalization -> applicability boundary for this value before Production Representation is authorized -- do not repeat the EU jurisdiction-canonicalization failure mode (`CRC-JURISDICTION-CANONICALIZATION-REPAIR-1`, 2026-10-07, commits `24a330f4`/`e3ade635`) where deterministic tests constructing the already-canonical fixture value were mistaken for proof of the live production extraction path. CPR_034 §15 names this explicitly as the next milestone's own required gate.
+  - No judgment text, docket number, or case number exists for either Wuhan lower-court decision in any source captured across two separate evidence-gathering passes (2026-09-30, 2026-10-08) -- a genuine, unresolved evidence gap (FGR_028 §5), independently re-confirmed at Adoption and again at CPR_034 §2/§13.
+  - CRC Publication Review completed 2026-10-08 (CPR_034): APPROVE FOR CRC PUBLICATION. National uncertainty independently confirmed load-bearing in the governed proposition's own text (not a footnote); Principle 3 independently re-derived as inapplicable to this claim's own subject matter (whether AI-assisted output is copyrightable, not any identifiable person's likeness/voice) -- explicitly not inherited from China Likeness's unrelated WITHHELD disposition (CPR_034 §3 row 3, §16). Permanent Case 3B ceiling re-confirmed by direct code trace, byte-identical to the Taiwan sibling's own CPR_029 trace.
+  - No `TOPIC_CLAIMS_FIXTURE` representation exists for this claim as of CPR_034 -- CRC-eligible does not mean production-reachable (Publication Policy Principle 7). This claim's own markdown entry will cause the existing `topic-claims-fixture-consistency.test.ts` invariant to fail until a future, separately-authorized Production Representation milestone adds a fixture entry. This is the same expected, transient, non-remediated gap already established as correct practice for `CLAIM-EUAI-ART50-2-PROVIDER-MARKING-001-v1` between its own Adoption/CPR and Production Representation -- not added to `CLAIMS_WITHOUT_FIXTURE_REPRESENTATION`, consistent with that allowlist's own documented purpose (permanent, deliberate non-representation only, never a "pending" placeholder).
 
 Full Formal Governance Review artifact: `governance-reviews/FGR_028_CAND-COPYRIGHT-CN-AI-ASSISTED-OUTPUT-001_2026-10-08.md`
+Full CRC Publication Review artifact: `governance-reviews/CPR_034_CLAIM-COPYRIGHT-CN-AI-ASSISTED-OUTPUT-001-v1_2026-10-08.md`
 Full evidence manifest: `evidence-captures/china-copyrightability/MANIFEST.md`, `evidence-captures/china-copyrightability/MANIFEST-ADDENDUM-2026-10-08.md`
