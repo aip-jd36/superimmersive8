@@ -142,8 +142,15 @@ describe('SCOPE-6F -- fail-closed matrix', () => {
     expect(email.text).toContain("An additional governed consideration for this topic hasn't been confirmed.")
   })
 
+  // CRC-CC-DEPENDENCY-LABELS-1 (2026-10-08): this test's own fixture ID,
+  // 'editorial_designation_confirmed', is intentionally superseded -- it
+  // is now a human/PM-approved Category-A label (CRC-CC-DEPENDENCY-LABEL-
+  // GOVERNANCE-1's own triage), not an unregistered example. Swapped to
+  // 'asset_confirmed_getty', a real, still-unregistered (Category-B)
+  // evidence-only stock dependency, which preserves this test's own
+  // original intent exactly.
   test('C: unregistered evidence-only-shaped dependency ID -> null label, current generic fallback', () => {
-    const sec = section({ category: COPYRIGHTABILITY, unresolved_items: [openDependency('C1', 'editorial_designation_confirmed')] })
+    const sec = section({ category: COPYRIGHTABILITY, unresolved_items: [openDependency('C1', 'asset_confirmed_getty')] })
     const r = buildConsultativeRealization(plan({ explicit_sections: [sec] }), projectionOutput())
     expect(r.unresolved_item_presentation[0].display_label).toBeNull()
   })

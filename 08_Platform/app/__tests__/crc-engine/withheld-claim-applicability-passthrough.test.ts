@@ -237,6 +237,13 @@ describe('CC-4C.2D/SCOPE-6B -- jurisdiction is now registered; passthrough + col
   })
 })
 
+// CRC-CC-DEPENDENCY-LABELS-1 (2026-10-08): this test's own fixture ID,
+// 'editorial_designation_confirmed', is intentionally superseded -- it is
+// now a human/PM-approved Category-A label (CRC-CC-DEPENDENCY-LABEL-
+// GOVERNANCE-1's own triage), so it no longer renders the generic sentence
+// this test exists to prove. Swapped to 'asset_confirmed_getty', a real,
+// still-unregistered (Category-B) evidence-only stock dependency -- the
+// test's own "unchanged/generic" intent is otherwise untouched.
 describe('CC-4C.2D -- N: open_project_dependency output unchanged/generic (regression)', () => {
   test('a documentary-evidence open_project_dependency still renders the existing generic sentence, never a new label', () => {
     const plan = {
@@ -248,8 +255,8 @@ describe('CC-4C.2D -- N: open_project_dependency output unchanged/generic (regre
           disposition: 'governed_guidance_available_with_open_items' as const,
           supported_claim_refs: [],
           summary_claim_refs: [],
-          unresolved_items: [{ kind: 'open_project_dependency' as const, source_claim_id: 'C1', dependency_id: 'editorial_designation_confirmed' }],
-          missing_evidence: [{ source_claim_id: 'C1', dependency_id: 'editorial_designation_confirmed', applicability_fact: null, classification: 'requires_documentary_evidence' as const }],
+          unresolved_items: [{ kind: 'open_project_dependency' as const, source_claim_id: 'C1', dependency_id: 'asset_confirmed_getty' }],
+          missing_evidence: [{ source_claim_id: 'C1', dependency_id: 'asset_confirmed_getty', applicability_fact: null, classification: 'requires_documentary_evidence' as const }],
           boundary_ref: 'tool_source' as const,
           bi_summary_blocks: ['Governed text.'],
         },
@@ -262,8 +269,8 @@ describe('CC-4C.2D -- N: open_project_dependency output unchanged/generic (regre
     const realization = buildConsultativeRealization(plan, output)
     const { html, text } = buildResultsEmailContent(output, 'attr-1', 'jd@example.com', plan, [], realization)
     expect(text).toContain("An additional governed consideration for this topic hasn't been confirmed.")
-    expect(html).not.toContain('editorial_designation_confirmed')
-    expect(text).not.toContain('editorial_designation_confirmed')
+    expect(html).not.toContain('asset_confirmed_getty')
+    expect(text).not.toContain('asset_confirmed_getty')
     expect(text).toContain('requires supporting documentation')
   })
 })

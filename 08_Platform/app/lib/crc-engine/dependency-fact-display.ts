@@ -86,10 +86,14 @@
  * label never favors one theory over another, since it never states which
  * theory applies.
  *
- * No other dependency ID is activated by this change -- `editorial_
- * designation_confirmed`, `separate_authorization_obtained`,
- * `release_status_confirmed`, `rights_and_clearance_status`, and every other
- * governed dependency ID remain unregistered (fail-closed). Evidence-only
+ * No other dependency ID was activated BY THIS CHANGE (SCOPE-6F itself) --
+ * `editorial_designation_confirmed`, `separate_authorization_obtained`,
+ * `release_status_confirmed`, and `rights_and_clearance_status` were later
+ * separately approved by CRC-CC-DEPENDENCY-LABELS-1 (2026-10-08, following
+ * CRC-CC-DEPENDENCY-LABEL-GOVERNANCE-1's own triage) -- see that entry's own
+ * table below for current status; they do not remain unregistered. Every
+ * other governed dependency ID not listed in that later table's own 19
+ * approved entries remains unregistered (fail-closed). Evidence-only
  * dependency sentence semantics were explicitly left as unresolved future
  * governance by SCOPE-6E (§X) and must not be inferred from this entry.
  *
@@ -138,18 +142,23 @@ export interface DependencyDisplayDescriptor {
 }
 
 /**
- * One approved entry (CRC-CC-SCOPE-6F, 2026-09-25, human/PM-approved).
+ * 19 approved entries: `human_contribution_description` (CRC-CC-SCOPE-6F,
+ * 2026-09-25), plus 18 more (CRC-CC-DEPENDENCY-LABELS-1, 2026-10-08,
+ * following the CRC-CC-DEPENDENCY-LABEL-GOVERNANCE-1 read-only triage --
+ * the exact, human/PM-approved Category-A set from that governance review).
  * Every other key below is an EXPLICIT `null` -- a recorded "no label
- * decided yet" for every dependency ID currently referenced anywhere in
- * `TOPIC_CLAIMS_FIXTURE`'s own `unresolved_project_dependencies` arrays
- * (enumerated by direct inspection, 2026-10-08; re-verify against the live
- * fixture before trusting this list, since it is a snapshot, not an
- * invariant -- the coverage test below is the actual, durable guarantee,
- * not this comment). None must be added without its own separate
- * governance sign-off. Do not populate any future entry from informal
- * wording found in governance-review markdown, GOVERNED-CLAIMS.md prose, or
- * an existing clarification question's own text -- none of those are an
- * approved display label on their own.
+ * decided yet" (CRC-CC-DEPENDENCY-LABEL-GOVERNANCE-1's own Category-B --
+ * governance-sensitive pending further review) for every remaining
+ * dependency ID currently referenced anywhere in `TOPIC_CLAIMS_FIXTURE`'s
+ * own `unresolved_project_dependencies` arrays (enumerated by direct
+ * inspection, 2026-10-08; re-verify against the live fixture before
+ * trusting this list, since it is a snapshot, not an invariant -- the
+ * coverage test below is the actual, durable guarantee, not this comment).
+ * None must be added or changed without its own separate governance
+ * sign-off. Do not populate any future entry from informal wording found in
+ * governance-review markdown, GOVERNED-CLAIMS.md prose, or an existing
+ * clarification question's own text -- none of those are an approved
+ * display label on their own.
  */
 const DEPENDENCY_DISPLAY: Record<string, DependencyDisplayDescriptor | null> = {
   human_contribution_description: { label: 'human contribution to the finished work' },
@@ -157,35 +166,35 @@ const DEPENDENCY_DISPLAY: Record<string, DependencyDisplayDescriptor | null> = {
   advertisement_purpose_confirmed: null,
   advertiser_or_duty_holder_status_confirmed: null,
   artistic_creative_satirical_fictional_analogous_work: null,
-  artlist_license_type_confirmed: null,
-  artlist_licensee_employer_size_confirmed: null,
-  artlist_licensee_employer_type_confirmed: null,
-  artlist_subscription_active_at_publication_confirmed: null,
+  artlist_license_type_confirmed: { label: 'Artlist license type' },
+  artlist_licensee_employer_size_confirmed: { label: 'Artlist licensee organization size' },
+  artlist_licensee_employer_type_confirmed: { label: 'Artlist licensee organization type' },
+  artlist_subscription_active_at_publication_confirmed: { label: 'Artlist subscription status at publication' },
   asset_confirmed_getty: null,
   asset_confirmed_istock: null,
   asset_confirmed_shutterstock: null,
   confusion_as_to_affiliation_or_sponsorship: null,
   content_constitutes_deep_fake: null,
   deployer_status_confirmed: null,
-  editorial_designation_confirmed: null,
-  epidemic_license_tier_confirmed: null,
+  editorial_designation_confirmed: { label: 'provider content designation' },
+  epidemic_license_tier_confirmed: { label: 'Epidemic Sound license tier' },
   expressive_work_exemption_applies: null,
-  music_subscription_active_at_publication_confirmed: null,
+  music_subscription_active_at_publication_confirmed: { label: 'music subscription status at publication' },
   provider_status_confirmed: null,
-  release_status_confirmed: null,
-  rights_and_clearance_status: null,
-  separate_authorization_obtained: null,
-  stabilityai_commercial_registration_completed: null,
-  stabilityai_organization_revenue_threshold_status: null,
-  stabilityai_product_is_core_model_under_community_license: null,
-  storyblocks_license_tier_confirmed: null,
-  synthesia_stock_avatar_used_confirmed: null,
-  synthesia_written_consent_obtained: null,
+  release_status_confirmed: { label: 'model or property release status' },
+  rights_and_clearance_status: { label: 'provider rights-and-clearance status' },
+  separate_authorization_obtained: { label: 'separate provider authorization' },
+  stabilityai_commercial_registration_completed: { label: 'Stability AI commercial registration status' },
+  stabilityai_organization_revenue_threshold_status: { label: 'Stability AI organization revenue status' },
+  stabilityai_product_is_core_model_under_community_license: { label: 'Stability AI product category' },
+  storyblocks_license_tier_confirmed: { label: 'Storyblocks license tier' },
+  synthesia_stock_avatar_used_confirmed: { label: 'Synthesia avatar type' },
+  synthesia_written_consent_obtained: { label: 'Synthesia written-consent status' },
   synthetic_performer_content_present: null,
   synthetic_performer_present_confirmed: null,
   union_establishment_or_output_use: null,
-  which_music_provider: null,
-  which_provider: null,
+  which_music_provider: { label: 'music provider' },
+  which_provider: { label: 'stock or footage provider' },
 }
 
 /**
