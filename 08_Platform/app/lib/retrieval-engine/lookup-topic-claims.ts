@@ -124,6 +124,49 @@ export interface ApplicabilityFacts {
  * comparing. This preserves the raw attested fact untouched, requires no
  * persistence/schema change, and keeps the fix exactly where the semantic
  * mismatch actually occurs.
+ *
+ * PRODUCTION-READINESS-CHINA-AI-ASSISTED-COPYRIGHTABILITY-1 (2026-10-08)
+ * added the "China" entries pre-emptively (no production UAT session has
+ * exercised this claim yet -- CLAIM-COPYRIGHT-CN-AI-ASSISTED-OUTPUT-001-v1
+ * is Adopted/CRC-approved but not yet Production-Represented), following the
+ * same lesson the EU repair above already proved: the extraction system
+ * prompt (anthropic-extractor.ts) instructs the model to return
+ * `raw_jurisdiction_value` "preserving the user's wording, exactly as named
+ * ... Never map it to a canonical/normalized form yourself" -- so a live user
+ * answering China's own assessment-jurisdiction question is exactly as
+ * likely to say "PRC" or "People's Republic of China" as the EU UAT user
+ * was to say "The European Union", and this table would silently withhold
+ * the claim exactly the same way absent these entries. Four aliases added,
+ * each independently justified (not added merely for count-symmetry with the
+ * US/EU entries above): the bare lowercase form (mirrors the existing
+ * `'united states'`/`'european union'` baseline entries exactly -- the
+ * canonical value itself is `'China'`, so a lowercase-cased user answer
+ * would otherwise fail even an exact-content match), the full formal name
+ * (mirrors `'united states of america'`), the "the "-prefixed form of the
+ * full formal name (mirrors `'the us'`/`'the eu'`), and the common
+ * abbreviation `'prc'` (mirrors `'usa'`/`'eu'`). Deliberately NOT a
+ * `'the china'` entry -- unlike "the US"/"the EU", "the China" is not an
+ * attested or natural English construction for the bare short name, so
+ * adding it would be exactly the kind of speculative, un-evidenced entry
+ * this registry's own discipline prohibits. Deliberately NOT a punctuated
+ * `'p.r.c.'` entry -- unlike "U.S.A."/"E.U.", a periods-between-letters
+ * written form is not conventional usage for this abbreviation. Deliberately
+ * NOT `'mainland china'`: investigated and REJECTED as ambiguous, not merely
+ * unproven -- "Mainland China" is a real, narrower geographic/legal concept
+ * (excluding Hong Kong and Macau, each a separate legal/judicial system with
+ * its own distinct copyright regime, and commonly understood to exclude
+ * Taiwan -- already this corpus's own separate governed jurisdiction, see
+ * CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1) that this claim's own
+ * governed evidence (Supreme People's Court / mainland Chinese courts only)
+ * may in fact match MORE precisely than the bare "China" canonical value
+ * does. Collapsing it into undifferentiated "China" here would risk erasing
+ * that distinction rather than merely tolerating superficial wording
+ * variation -- a materially different judgment than normalizing "PRC". Left
+ * unaliased and fail-closed; a future claim or governance decision
+ * concerning Hong Kong/Macau specifically, or an evidenced production
+ * signal that "Mainland China" in practice always means the same governed
+ * scope as "China" for this user population, would be the correct trigger
+ * to revisit -- not speculative convenience now.
  */
 const JURISDICTION_VALUE_ALIASES: Record<string, string> = {
   'united states': 'United States',
@@ -138,6 +181,10 @@ const JURISDICTION_VALUE_ALIASES: Record<string, string> = {
   'e.u.': 'European Union',
   'the european union': 'European Union',
   'the eu': 'European Union',
+  china: 'China',
+  "people's republic of china": 'China',
+  "the people's republic of china": 'China',
+  prc: 'China',
 }
 
 export function canonicalizeJurisdictionValue(value: string): string {

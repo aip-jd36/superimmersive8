@@ -120,6 +120,45 @@ describe('canonicalizeJurisdictionValue (Copyright UAT Output-Path Diagnostic P0
       expect(canonicalizeJurisdictionValue(value)).toBe(value)
     }
   })
+
+  // PRODUCTION-READINESS-CHINA-AI-ASSISTED-COPYRIGHTABILITY-1 (2026-10-08):
+  // CLAIM-COPYRIGHT-CN-AI-ASSISTED-OUTPUT-001-v1 is Adopted/CRC-approved but
+  // not yet Production-Represented -- no production UAT session has
+  // exercised this claim's jurisdiction gate yet. Added pre-emptively,
+  // applying the exact lesson the EU repair above already proved: the
+  // extraction system prompt tells the model to preserve the user's own
+  // wording verbatim, never normalize it, so a live "PRC" or "People's
+  // Republic of China" answer is foreseeable, not speculative.
+  test('positive: recognized China aliases all canonicalize to "China"', () => {
+    for (const value of ['China', "People's Republic of China", "the People's Republic of China", 'PRC']) {
+      expect(canonicalizeJurisdictionValue(value)).toBe('China')
+    }
+  })
+
+  test('positive: China case/whitespace robustness', () => {
+    expect(canonicalizeJurisdictionValue('china')).toBe('China')
+    expect(canonicalizeJurisdictionValue('  PRC  ')).toBe('China')
+    expect(canonicalizeJurisdictionValue('prc')).toBe('China')
+  })
+
+  test('negative: "Mainland China" is intentionally NOT aliased -- a real, narrower geographic/legal concept (excludes Hong Kong/Macau, commonly excludes Taiwan) this registry must not silently collapse into undifferentiated "China"', () => {
+    expect(canonicalizeJurisdictionValue('Mainland China')).toBe('Mainland China')
+    expect(canonicalizeJurisdictionValue('Mainland China')).not.toBe('China')
+  })
+
+  test('negative: adding China aliases does not disturb United States or European Union aliasing, or vice versa', () => {
+    expect(canonicalizeJurisdictionValue('US')).toBe('United States')
+    expect(canonicalizeJurisdictionValue('EU')).toBe('European Union')
+    expect(canonicalizeJurisdictionValue('PRC')).toBe('China')
+    expect(canonicalizeJurisdictionValue('china')).not.toBe('United States')
+    expect(canonicalizeJurisdictionValue('china')).not.toBe('European Union')
+  })
+
+  test('negative: a real, different governed jurisdiction (New York, California, Taiwan) is never coerced toward China', () => {
+    for (const value of ['New York', 'California', 'Taiwan']) {
+      expect(canonicalizeJurisdictionValue(value)).not.toBe('China')
+    }
+  })
 })
 
 describe('evaluateJurisdictionRequirementStatus / isApplicable -- production canonicalization boundary (CRC-JURISDICTION-CANONICALIZATION-REPAIR-1, 2026-10-07)', () => {
@@ -156,6 +195,47 @@ describe('evaluateJurisdictionRequirementStatus / isApplicable -- production can
 
   test('a different real governed jurisdiction (New York) does not satisfy the European Union requirement', () => {
     expect(isApplicable(euReq, facts({ jurisdiction: { included: ['New York'], excluded: [] } }))).toBe(false)
+  })
+})
+
+describe('evaluateJurisdictionRequirementStatus / isApplicable -- China production-boundary readiness (PRODUCTION-READINESS-CHINA-AI-ASSISTED-COPYRIGHTABILITY-1, 2026-10-08)', () => {
+  // CLAIM-COPYRIGHT-CN-AI-ASSISTED-OUTPUT-001-v1's own governed applicability
+  // requirement is `jurisdiction == 'China'`. These tests exercise the real
+  // canonicalization -> applicability boundary with RAW, uncanonicalized
+  // facts.included values representative of ordinary user language -- not a
+  // test that constructs `included: ['China']` directly, which is exactly
+  // the test gap that let the EU defect reach production undetected.
+  const cnReq: ApplicabilityRequirement[] = [{ fact: 'jurisdiction', operator: 'equals', value: 'China' }]
+
+  test('a representative natural-language China jurisdiction answer satisfies the requirement', () => {
+    expect(isApplicable(cnReq, facts({ jurisdiction: { included: ['PRC'], excluded: [] } }))).toBe(true)
+  })
+
+  test('evaluateApplicabilityDetailed reports "met" (not "unresolved"/"value_not_among_established_values") for a representative raw value', () => {
+    const outcomes = evaluateApplicabilityDetailed(cnReq, facts({ jurisdiction: { included: ["People's Republic of China"], excluded: [] } }))
+    expect(outcomes).toEqual([{ requirement: cnReq[0], status: 'met', unresolved_reason: null }])
+  })
+
+  test('a genuinely unestablished jurisdiction remains unresolved -- fail-closed unaffected by this repair', () => {
+    expect(isApplicable(cnReq, facts())).toBe(false)
+  })
+
+  test('"Mainland China" does NOT satisfy the China requirement -- intentionally unaliased, surfaces "value_not_among_established_values" exactly like any other non-aliased value', () => {
+    const outcomes = evaluateApplicabilityDetailed(cnReq, facts({ jurisdiction: { included: ['Mainland China'], excluded: [] } }))
+    expect(outcomes).toEqual([{ requirement: cnReq[0], status: 'unresolved', unresolved_reason: 'value_not_among_established_values' }])
+  })
+
+  test('explicit exclusion of a representative raw value still resolves to not_met (not silently repaired into met)', () => {
+    expect(isApplicable(cnReq, facts({ jurisdiction: { included: [], excluded: ['PRC'] } }))).toBe(false)
+  })
+
+  test('a different real governed jurisdiction (Taiwan) does not satisfy the China requirement', () => {
+    expect(isApplicable(cnReq, facts({ jurisdiction: { included: ['Taiwan'], excluded: [] } }))).toBe(false)
+  })
+
+  test('correction/supersession is a facts-level concern, not a canonicalization concern: a China inclusion alongside an explicit China exclusion (malformed/corrected state) fails closed as "unresolved", never silently met', () => {
+    const outcomes = evaluateApplicabilityDetailed(cnReq, facts({ jurisdiction: { included: ['PRC'], excluded: ['China'] } }))
+    expect(outcomes[0].status).toBe('unresolved')
   })
 })
 
