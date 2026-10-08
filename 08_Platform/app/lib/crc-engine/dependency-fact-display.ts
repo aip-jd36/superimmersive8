@@ -101,6 +101,30 @@
  * Absence defaults to no label, never a fallback to the raw dependency-ID
  * string or an improvised description -- see `getDependencyDisplayLabel`'s
  * own fail-closed contract below.
+ *
+ * CRC-CC-DISPLAY-VOCABULARY-2 (2026-10-08, following the read-only
+ * CRC-CC-DISPLAY-VOCABULARY-1 contract diagnostic). Dependency IDs are open
+ * strings, not a closed union -- TypeScript exhaustiveness (the mechanism
+ * used for `applicability-fact-display.ts`'s sibling registry) cannot
+ * apply here, and this milestone does NOT invent a closed dependency enum
+ * solely to force one. Coverage is instead made explicit and enforced at
+ * TEST time: every dependency ID TOPIC_CLAIMS_FIXTURE actually references
+ * via `unresolved_project_dependencies` now has its own entry below, either
+ * an approved label or the literal `null` ("explicitly reviewed, no label
+ * yet") -- `__tests__/crc-engine/dependency-fact-display.test.ts` asserts
+ * this against the live fixture, so a FUTURE governed claim introducing a
+ * new, undecided dependency ID fails that test rather than silently
+ * reaching Production anonymous. `null` is distinguishable from "never
+ * decided" via `hasExplicitDependencyDisplayDecision` below (present-with-
+ * `null` vs. absent-from-the-table are different JS values,
+ * `null`/`undefined` respectively, at the SAME key) -- `getDependencyDisplayLabel`'s
+ * own public behavior is UNCHANGED either way (`null?.label` and
+ * `undefined?.label` both evaluate to `undefined`). `human_contribution_description`'s
+ * approved label is reproduced here byte-for-byte unchanged. No label is
+ * authored by this milestone for any other dependency ID -- every other
+ * entry below is an EXPLICIT `null`, not a new governance decision, only
+ * the prior, already-fail-closed absence made structurally visible and
+ * test-enforced.
  */
 
 export interface DependencyDisplayDescriptor {
@@ -114,16 +138,54 @@ export interface DependencyDisplayDescriptor {
 }
 
 /**
- * One entry (CRC-CC-SCOPE-6F, 2026-09-25, human/PM-approved). Every other
- * governed dependency ID is deliberately NOT an entry here -- see module
- * header -- and must not be added without its own separate governance
- * sign-off. Do not populate any future entry from informal wording found in
- * governance-review markdown, GOVERNED-CLAIMS.md prose, or an existing
- * clarification question's own text -- none of those are an approved
- * display label on their own.
+ * One approved entry (CRC-CC-SCOPE-6F, 2026-09-25, human/PM-approved).
+ * Every other key below is an EXPLICIT `null` -- a recorded "no label
+ * decided yet" for every dependency ID currently referenced anywhere in
+ * `TOPIC_CLAIMS_FIXTURE`'s own `unresolved_project_dependencies` arrays
+ * (enumerated by direct inspection, 2026-10-08; re-verify against the live
+ * fixture before trusting this list, since it is a snapshot, not an
+ * invariant -- the coverage test below is the actual, durable guarantee,
+ * not this comment). None must be added without its own separate
+ * governance sign-off. Do not populate any future entry from informal
+ * wording found in governance-review markdown, GOVERNED-CLAIMS.md prose, or
+ * an existing clarification question's own text -- none of those are an
+ * approved display label on their own.
  */
-const DEPENDENCY_DISPLAY: Partial<Record<string, DependencyDisplayDescriptor>> = {
+const DEPENDENCY_DISPLAY: Record<string, DependencyDisplayDescriptor | null> = {
   human_contribution_description: { label: 'human contribution to the finished work' },
+  actual_knowledge_confirmed: null,
+  advertisement_purpose_confirmed: null,
+  advertiser_or_duty_holder_status_confirmed: null,
+  artistic_creative_satirical_fictional_analogous_work: null,
+  artlist_license_type_confirmed: null,
+  artlist_licensee_employer_size_confirmed: null,
+  artlist_licensee_employer_type_confirmed: null,
+  artlist_subscription_active_at_publication_confirmed: null,
+  asset_confirmed_getty: null,
+  asset_confirmed_istock: null,
+  asset_confirmed_shutterstock: null,
+  confusion_as_to_affiliation_or_sponsorship: null,
+  content_constitutes_deep_fake: null,
+  deployer_status_confirmed: null,
+  editorial_designation_confirmed: null,
+  epidemic_license_tier_confirmed: null,
+  expressive_work_exemption_applies: null,
+  music_subscription_active_at_publication_confirmed: null,
+  provider_status_confirmed: null,
+  release_status_confirmed: null,
+  rights_and_clearance_status: null,
+  separate_authorization_obtained: null,
+  stabilityai_commercial_registration_completed: null,
+  stabilityai_organization_revenue_threshold_status: null,
+  stabilityai_product_is_core_model_under_community_license: null,
+  storyblocks_license_tier_confirmed: null,
+  synthesia_stock_avatar_used_confirmed: null,
+  synthesia_written_consent_obtained: null,
+  synthetic_performer_content_present: null,
+  synthetic_performer_present_confirmed: null,
+  union_establishment_or_output_use: null,
+  which_music_provider: null,
+  which_provider: null,
 }
 
 /**
@@ -139,4 +201,22 @@ const DEPENDENCY_DISPLAY: Partial<Record<string, DependencyDisplayDescriptor>> =
  */
 export function getDependencyDisplayLabel(dependencyId: string): string | undefined {
   return DEPENDENCY_DISPLAY[dependencyId]?.label
+}
+
+/**
+ * CRC-CC-DISPLAY-VOCABULARY-2. Test-time coverage check ONLY -- never
+ * imported by any renderer, Composition, or Realization logic, and never a
+ * substitute for `getDependencyDisplayLabel`'s own public, fail-closed
+ * contract (display decisions must never gate runtime substantive
+ * behavior; see this module's own header). True when `dependencyId` has an
+ * explicit entry in the table above, whether an approved label OR an
+ * explicit `null` ("reviewed, no label yet") -- false only when the ID has
+ * never been decided at all. This is the one place "decided: no label" is
+ * distinguishable from "never decided" -- `getDependencyDisplayLabel` alone
+ * cannot tell the two apart (both return `undefined`), which is correct for
+ * runtime (both must render identically) but insufficient for the coverage
+ * test, which needs exactly this distinction.
+ */
+export function hasExplicitDependencyDisplayDecision(dependencyId: string): boolean {
+  return Object.prototype.hasOwnProperty.call(DEPENDENCY_DISPLAY, dependencyId)
 }
