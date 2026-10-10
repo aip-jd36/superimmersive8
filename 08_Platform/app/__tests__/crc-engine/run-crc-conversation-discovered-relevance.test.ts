@@ -15,6 +15,8 @@ import { MATRIX_FIXTURE } from '@/lib/retrieval-engine/matrix-fixture'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { TOPIC_RELATIONSHIPS_FIXTURE } from '@/lib/retrieval-engine/topic-relationships-fixture'
 import type { StructuredUnderstanding } from '@/types/interview-engine'
+import { isDependencyAskableInCrc } from '@/lib/crc-engine/dependency-askability'
+import { buildResultsEmailContent } from '@/lib/crc-engine/results-email-template'
 
 /**
  * Byte-shape reconstruction of the real confirmed production session's
@@ -283,5 +285,63 @@ describe('R/S: exact production opening extraction result unchanged, downstream 
     const before = JSON.stringify(su)
     runCRCConversation(su, MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
     expect(JSON.stringify(su)).toBe(before) // untouched by the pipeline
+  })
+})
+
+// CRC-CC-DISCOVERED-DEPENDENCY-AUTHORITY-2 (2026-10-10): the canonical
+// production iStock session above is exactly the architectural shape a
+// later Production UAT (an unrelated Kling+Shutterstock session, same
+// generic mechanism, different provider) exposed as a reachability gap --
+// a discovered, dependency-bearing stock claim contributed substantive
+// guidance but none of its own unresolved evidence requirements. This
+// milestone's generic fix is proven here, using this file's own existing,
+// unmodified, real governed fixture -- no Shutterstock-specific or
+// stock-specific code exists anywhere in the implementation; iStock is used
+// only because it is the fixture this test file already established.
+describe('T: discovered supporting dependencies now reach Plan/Realization under the SAME explicit goal (full real pipeline, real approved Level-1 labels)', () => {
+  test('T1: the discovered, dependency-bearing stock claims contribute open_project_dependency items to the SAME commercial_use PlanGoalSection their own prose already supports', () => {
+    const result = runCRCConversation(productionIstockSessionState(), MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+    const section = result.plan.explicit_sections.find((s) => s.category === 'commercial_use')!
+    expect(section).toBeDefined()
+    const dependencyIds = section.unresolved_items.filter((i) => i.kind === 'open_project_dependency').map((i) => (i as { dependency_id: string }).dependency_id)
+    // which_provider / separate_authorization_obtained (CLAIM-STOCK-EDITORIAL-001-v2)
+    // and editorial_designation_confirmed (both stock claims) are now present.
+    expect(dependencyIds).toEqual(expect.arrayContaining(['which_provider', 'separate_authorization_obtained', 'editorial_designation_confirmed']))
+    // No new goal, no new section: still exactly one explicit section, still the user's real question.
+    expect(result.plan.explicit_sections).toHaveLength(1)
+    expect(result.output.goal_interpretations).toHaveLength(1)
+    expect(result.output.goal_interpretations[0].goal_text).toBe('Can I use that commercially?')
+  })
+
+  test('T2: those same dependencies reach ConsultativeRealization resolved to their exact approved Level-1 display labels', () => {
+    const result = runCRCConversation(productionIstockSessionState(), MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+    const presentations = result.realization.unresolved_item_presentation.filter((p) => p.item.kind === 'open_project_dependency')
+    const labelsByDependency = new Map(presentations.map((p) => [(p.item as { dependency_id: string }).dependency_id, p.display_label]))
+    expect(labelsByDependency.get('which_provider')).toBe('stock or footage provider')
+    expect(labelsByDependency.get('separate_authorization_obtained')).toBe('separate provider authorization')
+    expect(labelsByDependency.get('editorial_designation_confirmed')).toBe('provider content designation')
+    // Every one of these resolves to 'primary' role (open_project_dependency is
+    // always primary, unconditionally) -- never scoped_context.
+    for (const p of presentations) expect(p.presentation_role).toBe('primary')
+  })
+
+  test('T3: askability is unaffected -- these dependencies remain exactly as non-askable as before this milestone', () => {
+    runCRCConversation(productionIstockSessionState(), MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+    expect(isDependencyAskableInCrc('which_provider')).toBe(false)
+    expect(isDependencyAskableInCrc('separate_authorization_obtained')).toBe(false)
+    expect(isDependencyAskableInCrc('editorial_designation_confirmed')).toBe(false)
+    expect(isDependencyAskableInCrc('asset_confirmed_istock')).toBe(false)
+  })
+
+  test('T4: the delivered email now names the stock dependency dimension instead of falling through to the anonymous fallback, under "Still open" for the real explicit goal -- no renderer change was required', () => {
+    const result = runCRCConversation(productionIstockSessionState(), MATRIX_FIXTURE, TOPIC_CLAIMS_FIXTURE, TOPIC_RELATIONSHIPS_FIXTURE)
+    const email = buildResultsEmailContent(result.output, null, 'a@example.com', result.plan, result.consultative_notes, result.realization)
+    expect(email.text).toContain('STILL OPEN')
+    expect(email.text).toContain('stock or footage provider')
+    expect(email.text).toContain('provider content designation')
+    expect(email.text).toContain('separate provider authorization')
+    // No claim identity, no legal conclusion, no readiness statement introduced.
+    expect(email.text).not.toMatch(/CLAIM-STOCK|CLAIM-/i)
+    expect(email.text).not.toMatch(/\bcleared\b|\bcompliant\b|commercially ready/i)
   })
 })

@@ -391,7 +391,32 @@ export function buildConsultativeAnswerPlan(
           })
         }
       }
-      for (const r of supportedResults) {
+      // CRC-CC-DISCOVERED-DEPENDENCY-AUTHORITY-2 (2026-10-10, following the
+      // read-only CRC-CC-DISCOVERED-DEPENDENCY-AUTHORITY-1 governance
+      // diagnostic). Reads `summaryResults`, not `supportedResults` --
+      // deliberately widened from "explicit-origin only" to "every claim
+      // Bounded Interpretation has already authorized to support THIS
+      // goal's bounded answer" (exactly the same `interp.supporting_
+      // claim_ids` membership that already, and unconditionally, governs
+      // `withheld_relevant_claim` (above, via `interp.unresolved_relevant_
+      // claims`) and `unresolved_applicability` (above, via `diagnostics`)
+      // -- neither of which was ever filtered by `match_origin` in the
+      // first place. This brings the third unresolved-item mechanism into
+      // line with the other two, rather than inventing new authority:
+      // `summaryResults` is still scoped to THIS goal only
+      // (`r.matched_goal_category === interp.category`, line ~366), so a
+      // claim authorized for a different goal cannot leak in, and a
+      // discovered claim BI did NOT fold into this goal's answer (i.e. not
+      // in `interp.supporting_claim_ids`) still never reaches here --
+      // `supportedResults`'s own narrower role (supported_claim_refs,
+      // allSupportedToolSourced) is unchanged, since this is a new, third
+      // read of `summaryResults`, not a redefinition of `supportedResults`
+      // itself. No UserGoal is created; the dependency attaches to the
+      // SAME `PlanGoalSection` for `interp.category` every other item in
+      // this loop already uses. Askability/evidence-only governance is
+      // unaffected -- `classifyDependency` (below) reads the identical,
+      // untouched registry regardless of which claim originated the item.
+      for (const r of summaryResults) {
         for (const dep of r.unresolved_project_dependencies) {
           unresolvedItems.push({ kind: 'open_project_dependency', source_claim_id: r.claim_id, dependency_id: dep })
         }

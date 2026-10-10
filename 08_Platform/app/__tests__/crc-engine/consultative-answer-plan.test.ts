@@ -253,6 +253,120 @@ describe('CC-3A -- CASE 3: explicit goal + discovered context stay separate', ()
   })
 })
 
+// ── CASE 9: discovered supporting dependency propagation ──────────────────
+// (CRC-CC-DISCOVERED-DEPENDENCY-AUTHORITY-2, 2026-10-10, implementing the
+// approved contract from the read-only CRC-CC-DISCOVERED-DEPENDENCY-
+// AUTHORITY-1 diagnostic). A discovered-topic claim's own
+// `unresolved_project_dependencies` may now contribute `open_project_
+// dependency` items to the SAME goal section whose answer BI already
+// folded that claim's prose into (`interp.supporting_claim_ids`
+// membership) -- never a new section, never a new goal, never a claim BI
+// did not already authorize for this goal.
+describe('CC-3A -- CASE 9: discovered supporting dependency propagation', () => {
+  test('1: a discovered claim BI authorized for goal G contributes its dependency to G, without creating any new UserGoal or section', () => {
+    const g = interp({ goal_id: 'g1', category: 'commercial_use', status: 'directly_relevant', supporting_claim_ids: ['stock-claim'] })
+    const results: RetrievalResult[] = [
+      result({
+        claim_id: 'stock-claim',
+        matched_goal_category: 'commercial_use',
+        match_origin: 'discovered_topic',
+        source_fact: { kind: 'topic', identifier: 'third_party_source_rights' },
+        topic: 'third_party_source_rights',
+        unresolved_project_dependencies: ['editorial_designation_confirmed'],
+      }),
+    ]
+    const plan = buildConsultativeAnswerPlan([g], results, [])
+    expect(plan.explicit_sections).toHaveLength(1) // no new section
+    expect(plan.explicit_sections[0].category).toBe('commercial_use') // no new goal/category
+    expect(plan.explicit_sections[0].unresolved_items).toEqual([{ kind: 'open_project_dependency', source_claim_id: 'stock-claim', dependency_id: 'editorial_designation_confirmed' }])
+    // The claim's own discovered-context provenance is still preserved, unchanged, alongside this.
+    expect(plan.discovered_context).toEqual([{ claim_ref: expect.objectContaining({ claim_id: 'stock-claim', match_origin: 'discovered_topic' }), authorizing_goal_category: 'commercial_use' }])
+  })
+
+  test('2: explicit-origin dependency behavior is byte-identical to before this milestone', () => {
+    const g = interp({ goal_id: 'g1', category: 'commercial_use', status: 'directly_relevant', supporting_claim_ids: ['tool-claim'] })
+    const results: RetrievalResult[] = [result({ claim_id: 'tool-claim', matched_goal_category: 'commercial_use', match_origin: 'exact_topic', unresolved_project_dependencies: ['human_contribution_description'] })]
+    const plan = buildConsultativeAnswerPlan([g], results, [])
+    expect(plan.explicit_sections[0].unresolved_items).toEqual([{ kind: 'open_project_dependency', source_claim_id: 'tool-claim', dependency_id: 'human_contribution_description' }])
+  })
+
+  test('3: a discovered claim authorized for G1 only -- its dependency appears under G1 and never under G2', () => {
+    const g1 = interp({ goal_id: 'g1', category: 'commercial_use', status: 'directly_relevant', supporting_claim_ids: ['stock-claim'] })
+    const g2 = interp({ goal_id: 'g2', category: 'copyrightability', status: 'directly_relevant', supporting_claim_ids: [] })
+    const results: RetrievalResult[] = [
+      result({ claim_id: 'stock-claim', matched_goal_category: 'commercial_use', match_origin: 'discovered_topic', topic: 'third_party_source_rights', unresolved_project_dependencies: ['editorial_designation_confirmed'] }),
+    ]
+    const plan = buildConsultativeAnswerPlan([g1, g2], results, [])
+    const commercialSection = plan.explicit_sections.find((s) => s.category === 'commercial_use')!
+    const copyrightSection = plan.explicit_sections.find((s) => s.category === 'copyrightability')!
+    expect(commercialSection.unresolved_items).toEqual([{ kind: 'open_project_dependency', source_claim_id: 'stock-claim', dependency_id: 'editorial_designation_confirmed' }])
+    expect(copyrightSection.unresolved_items).toEqual([])
+    expect(JSON.stringify(copyrightSection)).not.toContain('stock-claim')
+  })
+
+  test('4: a matched-but-NOT-BI-authorized discovered claim gains no dependency-presentation authority merely by existing in Retrieval', () => {
+    // BI's own supporting_claim_ids does NOT include 'unauthorized-claim' -- it
+    // matched in Retrieval (is present in `results`) but was never folded into
+    // this goal's bounded answer, so it must not contribute anything to Plan.
+    const g = interp({ goal_id: 'g1', category: 'commercial_use', status: 'directly_relevant', supporting_claim_ids: ['stock-claim'] })
+    const results: RetrievalResult[] = [
+      result({ claim_id: 'stock-claim', matched_goal_category: 'commercial_use', match_origin: 'discovered_topic', topic: 'third_party_source_rights', unresolved_project_dependencies: ['editorial_designation_confirmed'] }),
+      result({ claim_id: 'unauthorized-claim', matched_goal_category: 'commercial_use', match_origin: 'discovered_topic', topic: 'third_party_source_rights', unresolved_project_dependencies: ['rights_and_clearance_status'] }),
+    ]
+    const plan = buildConsultativeAnswerPlan([g], results, [])
+    // 'unauthorized-claim' is still, correctly, visible in discovered_context
+    // (Track A's own unchanged "what was discovered for this goal" list --
+    // separate from, and broader than, what BI actually used) -- but it must
+    // contribute NOTHING to the goal's own authorized unresolved/evidence state.
+    expect(plan.explicit_sections[0].unresolved_items).toEqual([{ kind: 'open_project_dependency', source_claim_id: 'stock-claim', dependency_id: 'editorial_designation_confirmed' }])
+    expect(plan.explicit_sections[0].missing_evidence).toEqual([{ source_claim_id: 'stock-claim', dependency_id: 'editorial_designation_confirmed', applicability_fact: null, classification: 'requires_documentary_evidence' }])
+    expect(JSON.stringify(plan.explicit_sections)).not.toContain('unauthorized-claim')
+    expect(JSON.stringify(plan.explicit_sections)).not.toContain('rights_and_clearance_status')
+    expect(plan.discovered_context.map((d) => d.claim_ref.claim_id).sort()).toEqual(['stock-claim', 'unauthorized-claim']) // both legitimately discovered; only one authorized for unresolved state
+  })
+
+  test('5: an evidence-only discovered dependency reaches missing_evidence as requires_documentary_evidence, never answerable_in_conversation, merely by becoming visible', () => {
+    const g = interp({ goal_id: 'g1', category: 'commercial_use', status: 'directly_relevant', supporting_claim_ids: ['stock-claim'] })
+    const results: RetrievalResult[] = [
+      result({ claim_id: 'stock-claim', matched_goal_category: 'commercial_use', match_origin: 'discovered_topic', topic: 'third_party_source_rights', unresolved_project_dependencies: ['editorial_designation_confirmed'] }),
+    ]
+    const plan = buildConsultativeAnswerPlan([g], results, [])
+    expect(plan.explicit_sections[0].missing_evidence).toEqual([{ source_claim_id: 'stock-claim', dependency_id: 'editorial_designation_confirmed', applicability_fact: null, classification: 'requires_documentary_evidence' }])
+  })
+
+  test('6: no provenance fabrication -- the discovered claim keeps its own match_origin/topic, and goal_text/category are taken only from the EXISTING interpretation, never invented for the discovered claim', () => {
+    const g = interp({ goal_id: 'g1', category: 'commercial_use', status: 'directly_relevant', goal_text: 'Can I use this commercially?', supporting_claim_ids: ['stock-claim'] })
+    const results: RetrievalResult[] = [
+      result({ claim_id: 'stock-claim', matched_goal_category: 'commercial_use', match_origin: 'discovered_topic', topic: 'third_party_source_rights', unresolved_project_dependencies: ['editorial_designation_confirmed'] }),
+    ]
+    const plan = buildConsultativeAnswerPlan([g], results, [])
+    expect(plan.explicit_sections[0].goal_text).toBe('Can I use this commercially?') // the user's real words, unchanged
+    expect(plan.discovered_context[0].claim_ref.match_origin).toBe('discovered_topic') // never rewritten to exact_topic
+    expect(plan.discovered_context[0].claim_ref.matched_goal_category).toBe('commercial_use')
+    // Confirm the underlying result's own intrinsic subject (topic) is untouched by this propagation.
+    expect(plan.discovered_context[0].claim_ref).not.toHaveProperty('goal_text')
+  })
+
+  test('7: withheld_relevant_claim and unresolved_applicability are unaffected -- they were already origin-blind before this milestone and remain so', () => {
+    const g = interp({
+      goal_id: 'g1',
+      category: 'copyrightability',
+      status: 'relevant_applicability_unresolved',
+      supporting_claim_ids: [],
+      unresolved_relevant_claims: [{ claim_id: 'withheld-1', fact: null, tool: null, unresolved_reason: null }],
+    })
+    const results: RetrievalResult[] = []
+    const diagnostics: RetrievalDiagnostic[] = [
+      { identifier: 'copyrightability', reason: 'applicability_unmet', unmet_applicability: [{ claim_id: 'applic-1', requirement: { fact: 'jurisdiction', operator: 'equals', value: 'United States' }, status: 'unresolved', unresolved_reason: null }] },
+    ]
+    const plan = buildConsultativeAnswerPlan([g], results, diagnostics)
+    expect(plan.explicit_sections[0].unresolved_items).toEqual([
+      { kind: 'withheld_relevant_claim', claim_id: 'withheld-1', fact: null, tool: null, unresolved_reason: null },
+      { kind: 'unresolved_applicability', claim_id: 'applic-1', fact: 'jurisdiction', tool: null, unresolved_reason: null },
+    ])
+  })
+})
+
 describe('CC-3A -- CASE 4: correction / supersession leaves zero stale refs', () => {
   // pre-correction: Suno is the operative tool
   const preInterp = interp({ goal_id: 'g1', category: 'commercial_use', status: 'directly_relevant', supporting_claim_ids: ['suno'] })
