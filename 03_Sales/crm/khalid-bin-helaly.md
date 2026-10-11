@@ -6,9 +6,9 @@ contacts:
 slug: khalid-bin-helaly
 stage: lead_responded
 source: stec_campaign
-next_action: "Send the approved PAIN_FIRST reply (see 'APPROVED / PENDING SEND' section) in the existing Angel LinkedIn thread, then log the actual send; if still unsent or unanswered by 2026-10-18, review the thread"
+next_action: "Await Khalid's response to the Oct 12 PAIN_FIRST reply; do not send another follow-up automatically. Review the thread on 2026-10-18."
 next_action_date: 2026-10-18
-last_contacted: 2026-10-11
+last_contacted: 2026-10-12
 blocked: false
 blocked_reason: null
 review_date: null
@@ -29,14 +29,14 @@ Account record created 2026-10-12 (CRM ID **B169**) on graduation from the CRC L
 
 ## Interaction log (reverse-chronological)
 
-### Approved PAIN_FIRST follow-up — APPROVED / PENDING SEND
+### 2026-10-12 — PAIN_FIRST follow-up — SENT (user-confirmed; exact time unverified)
 
-**Status: APPROVED / PENDING SEND.** Not sent. Not contact; does not change `last_contacted` or `stage`. No send timestamp exists or is recorded.
+**Status: SENT (user-confirmed).** Sent by JD from Angel's LinkedIn account on 2026-10-12, as confirmed by the user. The exact send time is not available and is not recorded or inferred. Previously recorded as APPROVED / PENDING SEND (2026-10-12).
 
 - **Channel / sender:** LinkedIn, existing Angel thread
 - **Treatment:** `PAIN_FIRST` · `CRC_INTRODUCED=false` · `CRC_LINK_SENT=false` (ref 7ZDM is not included in this message)
 
-**Approved message (send exactly as written):**
+**Message sent (exactly as approved):**
 
 ```
 That makes sense, Khalid. But here's a scenario I'm curious about.
@@ -50,7 +50,7 @@ Have you ever run into something like that, or had a close call?
 
 **Hypothesis being tested (not evidence):** client approval of assets may not resolve the underlying commercial-use rights — for example AI tool licensing terms or the rights attached to a reference image — creating potential rework, delivery delays, or client escalation. The consequences named in the message (redoing shots, delaying delivery, an uncomfortable client conversation) are hypothetical scenario framing, not anything Khalid has said he experienced.
 
-**Post-send checklist:** change this heading to `— SENT <date>`, update `last_contacted` to the real send date, set the next review step, and keep `stage: lead_responded` unless Khalid replies with new evidence.
+**After send:** `last_contacted` updated to 2026-10-12 (date-level only); `stage` remains `lead_responded`; next review 2026-10-18. Await his response — no further follow-up has been decided, and none is sent automatically.
 
 ### 2026-10-11 — Angel's outreach and Khalid's reply — Standing Encore dashboard (user-supplied)
 
@@ -64,6 +64,6 @@ Times are as displayed on the Standing Encore dashboard (2:17 AM outreach, 2:18 
 
 **Classification:** an existing asset-approval workflow — he locks assets with the client before production. This describes his process; it is NOT an experienced pain, a reported failure, purchase or commercial intent, or CRC usage. He did not say whether client approval covers tool licensing terms or reference-image rights. An earlier copy of this reply relayed in conversation showed a single space after "Hei!!"; the dashboard-sourced text above (three spaces) is the reference.
 
-**`last_contacted`** = 2026-10-11 — the date of his reply, the latest real interaction (date-level only).
+**`last_contacted`** was 2026-10-11 (his reply); updated to 2026-10-12 when the PAIN_FIRST follow-up was sent (see above).
 
-**Next step (2026-10-18):** if the approved reply has not been sent or has not been answered by then, review the thread and decide next steps — no further follow-up has been decided. Do not alter the PRE arm assignment or ref 7ZDM.
+**Next step (2026-10-18):** if Khalid has not replied by then, review the thread and decide next steps — no further follow-up has been decided. Do not alter the PRE arm assignment or ref 7ZDM.
