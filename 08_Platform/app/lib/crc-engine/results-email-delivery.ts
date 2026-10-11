@@ -1,18 +1,39 @@
 /**
  * Results-email delivery orchestration (CRC Results Gate milestone,
- * 2026-08-14, PM-revised). The single place that sequences: lead
- * persistence (required, blocks send on failure) -> atomic send claim ->
- * recompute the already-completed result (pure, no model call) -> send via
- * Resend (awaited) -> record the outcome.
+ * 2026-08-14, PM-revised; extended by CRC-OUTBOUND-ARTIFACT-1B,
+ * 2026-10-11). The single place that sequences: lead persistence (required,
+ * blocks send on failure) -> atomic send claim -> recompute the
+ * already-completed result (pure, no model call) -> persist the exact
+ * generated artifact (required, blocks send on failure) -> send via Resend
+ * (awaited, using the SAME in-memory content just persisted) -> record the
+ * delivery attempt -> record the session-summary outcome.
  *
  * DB-failure policy (PM revision, non-negotiable):
  *   - lead upsert/link failure -> the send never happens at all, Resend is
  *     never called, the caller gets an honest retryable error.
+ *   - CRC-OUTBOUND-ARTIFACT-1B extends this identically to artifact
+ *     persistence: if the exact rendered content cannot be durably
+ *     persisted, Resend is never called either -- the session's already-
+ *     claimed 'pending' status is restored to 'unknown' (via the existing
+ *     record_crc_result_send_outcome RPC, no new state machine) so the
+ *     claim can be retried, and the caller gets an honest retryable error.
  *   - Resend confirms acceptance, then the outcome-recording write fails ->
  *     the user still sees "sent" (Resend already did its job); the
  *     inconsistency is logged loudly via logPilotEvent for reconciliation,
  *     never silently swallowed and never turned into a false failure
- *     message.
+ *     message. CRC-OUTBOUND-ARTIFACT-1B's delivery-attempt row is written
+ *     under the identical policy: a failure to record the attempt after
+ *     Resend has already responded never changes what the user is told.
+ *
+ * CRC-OUTBOUND-ARTIFACT-1B retry decision (see results-email-artifacts.ts's
+ * own header for the full reasoning): every successful claim that reaches
+ * this point -- first send, ordinary retry after failed/unknown, or
+ * explicit resend -- generates and persists a NEW artifact. This milestone
+ * does not attempt same-artifact-retry (reusing one artifact across
+ * multiple delivery attempts), because distinguishing "retry of unchanged
+ * content" from "first send" would require a material change to
+ * claim_crc_result_send's own return contract, which is out of this
+ * milestone's bounded scope.
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -27,12 +48,14 @@ import { saveCrcSessionEmail } from './supabase-session-store'
 import { maskEmail, type ResultsEmailClaimReason } from './results-gate-copy'
 import { logPilotEvent } from './pilot-events'
 import { CRC_CONFIG } from './config'
+import { createResultsEmailArtifact, findMostRecentResultsEmailArtifactId, recordResultsEmailDeliveryAttempt } from './results-email-artifacts'
 
 export type DeliveryResult =
   | { kind: 'sent'; maskedEmail: string }
   | { kind: 'already_sent'; maskedEmail: string }
   | { kind: 'blocked'; reason: ResultsEmailClaimReason }
   | { kind: 'lead_persistence_failed' }
+  | { kind: 'artifact_persistence_failed' }
   | { kind: 'send_failed' }
   | { kind: 'send_unknown' }
 
@@ -129,8 +152,79 @@ export async function deliverCrcResultsEmail(client: SupabaseClient, params: Del
   // assuming a shape stronger than the function signature itself commits to.
   const realization = result.plan && result.output ? buildConsultativeRealization(result.plan, result.output, result.consultative_notes ?? []) : undefined
   const { html, text } = buildResultsEmailContent(result.output, params.attributionToken, params.email, result.plan, result.consultative_notes, realization)
+  // CRC-OUTBOUND-ARTIFACT-1B: captured once, in one local value, and never
+  // recomputed -- this exact object is both what gets persisted below AND
+  // what gets handed to sendCrcResultsEmail further down. No second
+  // render, no reconstructed subject, no rebuilt CTA URL between
+  // persistence and delivery.
+  const emailContent = { subject: 'Your Commercial Readiness Check results', html, text }
 
-  const outcome = await sendCrcResultsEmail(params.email, 'Your Commercial Readiness Check results', html, text)
+  // ── CRC-OUTBOUND-ARTIFACT-1B: persist the exact artifact BEFORE any
+  // provider call. Lineage lookup is best-effort/fail-open (see that
+  // function's own header); artifact creation is fail-closed -- if it
+  // throws, Resend must never be called. ──
+  const previousArtifactId = await findMostRecentResultsEmailArtifactId(client, params.sessionId)
+  let artifactId: string
+  try {
+    const artifact = await createResultsEmailArtifact(client, {
+      crcSessionId: params.sessionId,
+      crcLeadId: leadId,
+      recipientNormalized: emailNormalized,
+      content: emailContent,
+      templateVersion: CRC_CONFIG.resultsEmailTemplateVersion,
+      attributionToken: params.attributionToken,
+      previousArtifactId,
+    })
+    artifactId = artifact.id
+  } catch (err) {
+    // Governing invariant (1A decision E): the exact generated content
+    // could not be durably persisted, so it must never be handed to
+    // Resend. The claim above already moved this session to 'pending' --
+    // reusing the existing record_crc_result_send_outcome RPC (no new
+    // state machine) restores it to 'unknown', the same free-to-retry
+    // state an ambiguous provider response already produces today, so the
+    // next request can claim and attempt again rather than being
+    // permanently stranded in 'pending'.
+    console.error('[results-email-delivery] createResultsEmailArtifact failed, send blocked', err)
+    const { error: restoreError } = await client.rpc('record_crc_result_send_outcome', {
+      p_session_id: params.sessionId,
+      p_email_normalized: emailNormalized,
+      p_status: 'unknown',
+      p_accepted_at: new Date().toISOString(),
+      p_template_version: CRC_CONFIG.resultsEmailTemplateVersion,
+    })
+    if (restoreError) {
+      console.error('[results-email-delivery] failed to restore claim state after artifact persistence failure', restoreError)
+    }
+    await logPilotEvent(client, {
+      session_id: params.sessionId,
+      event_type: 'persistence_error',
+      detail: 'results_email_artifact_persistence_failed',
+    })
+    return { kind: 'artifact_persistence_failed' }
+  }
+
+  const outcome = await sendCrcResultsEmail(params.email, emailContent.subject, emailContent.html, emailContent.text)
+
+  // ── CRC-OUTBOUND-ARTIFACT-1B: one delivery-attempt row per actual
+  // provider call, linked to the artifact just persisted. Same
+  // never-change-the-user-facing-result-on-local-failure policy as the
+  // existing record_crc_result_send_outcome failure case below. ──
+  const attemptRecord = await recordResultsEmailDeliveryAttempt(client, {
+    artifactId,
+    outcome: outcome.status,
+    providerMessageId: outcome.status === 'accepted' ? outcome.providerId : null,
+    errorDetail: outcome.status === 'accepted' ? null : outcome.error,
+    acceptedAt: outcome.status === 'accepted' ? new Date().toISOString() : null,
+  })
+  if (!attemptRecord.ok) {
+    console.error('[results-email-delivery] recordResultsEmailDeliveryAttempt failed after send', attemptRecord.error)
+    await logPilotEvent(client, {
+      session_id: params.sessionId,
+      event_type: 'persistence_error',
+      detail: `results_email_attempt_record_failed:${outcome.status}`,
+    })
+  }
 
   const now = new Date().toISOString()
   const dbStatus = outcome.status === 'accepted' ? 'accepted' : outcome.status === 'failed' ? 'failed' : 'unknown'

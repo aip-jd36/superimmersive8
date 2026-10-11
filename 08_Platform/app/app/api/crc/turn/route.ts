@@ -504,6 +504,15 @@ export async function POST(request: NextRequest) {
         return NextResponse.json<TurnResponseBody>({ status: 'retry', message: "We couldn't save your email right now. Please try again." }, { status: 503 })
       }
 
+      // CRC-OUTBOUND-ARTIFACT-1B: same early-return shape as lead_persistence_failed
+      // immediately above -- the exact generated content could not be durably
+      // persisted, so Resend was never called (results-email-delivery.ts's own
+      // governing invariant). This never reaches the admin-notification or
+      // overlay logic below, which both assume a real send attempt occurred.
+      if (delivery.kind === 'artifact_persistence_failed') {
+        return NextResponse.json<TurnResponseBody>({ status: 'retry', message: "We couldn't prepare your results email right now. Please try again." }, { status: 503 })
+      }
+
       // CRC-OPS-NOTIFY-1: best-effort admin notification for a genuine
       // FIRST successful results-email acceptance only -- 'sent' plus
       // "not already accepted before this call" together exclude both an
