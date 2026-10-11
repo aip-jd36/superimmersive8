@@ -91,32 +91,57 @@ describe('SCOPE-6F -- original UAT-D1 dependency triple, before/after', () => {
     expect(labels).toEqual(['human contribution to the finished work', 'human contribution to the finished work', 'human contribution to the finished work'])
   })
 
-  test('AFTER: three instances of the new governed sentence in "Still open"; no invented count/summary line replaces them there', () => {
+  // CRC-CC-RHETORICAL-REPETITION-2 (2026-10-11): updated from "three
+  // instances... no invented count line" to the approved opposite -- a
+  // single shared sentence plus an explicit, neutral cardinality clause.
+  // Per CRC-CC-RHETORICAL-REPETITION-1, repeating the sentence three times
+  // carried no information the single sentence + exact count doesn't
+  // preserve (no per-child identity was ever present in either form).
+  test('AFTER: the governed sentence renders ONCE in "Still open", with exact cardinality restated via a separate neutral clause', () => {
     const matches = email.text.match(/Your human contribution to the finished work hasn't been confirmed in this conversation\./g) || []
-    expect(matches).toHaveLength(3)
+    expect(matches).toHaveLength(1)
     // Scoped to "Still open" only -- "What's still needed"'s own pre-existing,
     // unchanged, unrelated classification-count line ("3 items can be
     // confirmed in a follow-up conversation.") legitimately still mentions a
     // count; this milestone does not touch that section at all.
     const stillOpenOnly = email.text.slice(email.text.indexOf('STILL OPEN'), email.text.indexOf("WHAT'S STILL NEEDED"))
-    expect(stillOpenOnly).not.toMatch(/\b3 (items|claims|considerations)\b/i)
+    expect(stillOpenOnly).toContain('This reflects 3 separate items in this conversation.')
+    expect(stillOpenOnly).not.toMatch(/several|multiple claims|the main|material issue|these considerations|\bonly\b|important|blocker|problem|requirement/i)
   })
 
   test('the old generic fallback string no longer appears for this dependency', () => {
     expect(email.text).not.toContain("An additional governed consideration for this topic hasn't been confirmed.")
   })
 
-  test('no grouping: no shared heading, no group count, items remain in the flat "Still open" list exactly as before', () => {
+  // CRC-CC-RHETORICAL-REPETITION-2 (2026-10-11): this test's title/premise
+  // ("no grouping... flat list exactly as before") was already inaccurate
+  // by the time SCOPE-6D.1 shipped grouping (its own heading-line check used
+  // a capitalized `/^\s*Human contribution/m` that never matched the real,
+  // lowercase-`h` governed heading, so it passed vacuously rather than
+  // actually proving "no heading"). Corrected to assert what is actually
+  // true today: grouping exists, a heading renders, and -- as of this
+  // milestone -- the three originally-flat bullet lines consolidate to one
+  // line plus an explicit cardinality clause.
+  test('grouped rendering: one heading, the shared sentence once, exact cardinality restated separately', () => {
     const stillOpen = email.text.slice(email.text.indexOf('STILL OPEN'), email.text.indexOf("WHAT'S STILL NEEDED"))
+    expect(stillOpen).toMatch(/^\s*human contribution to the finished work\s*$/m) // the governed heading line
     const bulletLines = stillOpen.split('\n').filter((l) => l.trim().startsWith('-'))
-    expect(bulletLines).toHaveLength(3)
-    expect(stillOpen).not.toMatch(/^\s*Human contribution/m) // no heading line introduced
+    expect(bulletLines).toHaveLength(1)
+    expect(stillOpen).toContain('This reflects 3 separate items in this conversation.')
   })
 
-  test('no claim descriptor: the three lines remain textually identical, sibling claims remain indistinguishable', () => {
+  // CRC-CC-RHETORICAL-REPETITION-2 (2026-10-11): this test's premise ("the
+  // three lines remain textually identical") is moot now that there is only
+  // one line -- updated to prove the real underlying invariant it was
+  // protecting: sibling claims are never distinguished from one another in
+  // the rendered sentence itself (no claim-specific wording is invented to
+  // tell them apart; the only place cardinality appears is the separate,
+  // neutral clause).
+  test('no claim descriptor: the single rendered sentence carries no claim-specific wording; sibling claims remain indistinguishable from each other within it', () => {
     const stillOpen = email.text.slice(email.text.indexOf('STILL OPEN'), email.text.indexOf("WHAT'S STILL NEEDED"))
     const bulletLines = stillOpen.split('\n').filter((l) => l.trim().startsWith('-'))
-    expect(new Set(bulletLines).size).toBe(1)
+    expect(bulletLines).toHaveLength(1)
+    for (const i of items) expect(bulletLines[0]).not.toContain((i as any).source_claim_id)
   })
 
   test('no candidate-statement/claim-substance leakage', () => {
@@ -237,12 +262,17 @@ describe('SCOPE-6F -- real end-to-end: all four real governed consumers (Part 15
     for (const c of ALL_FOUR_CLAIMS) expect(c.unresolved_project_dependencies).toEqual([HCD])
   })
 
-  test('United States established -> the three US claims match, each contributes its OWN labeled dependency line; Taiwan claim remains a SEPARATE, jurisdiction-unresolved item, unaffected', () => {
+  test('United States established -> the three US claims match and contribute ONE grouped dependency line internally covering all three; Taiwan claim remains a SEPARATE, jurisdiction-unresolved item, unaffected', () => {
     const result = runCRCConversation(baseSU('United States'), [], ALL_FOUR_CLAIMS, [])
     const realization = buildConsultativeRealization(result.plan, result.output, result.consultative_notes ?? [])
     const email = buildResultsEmailContent(result.output, null, 'a@example.com', result.plan, result.consultative_notes, realization)
+    // CRC-CC-RHETORICAL-REPETITION-2 (2026-10-11): the three US claims
+    // still all contribute internally (unchanged) -- the renderer now
+    // states the shared sentence once, with exact cardinality restated
+    // via a separate neutral clause, rather than repeating the sentence.
     const matches = email.text.match(/Your human contribution to the finished work hasn't been confirmed in this conversation\./g) || []
-    expect(matches).toHaveLength(3)
+    expect(matches).toHaveLength(1)
+    expect(email.text).toContain('This reflects 3 separate items in this conversation.')
     // The Taiwan claim's own jurisdiction-unresolved item uses the applicability
     // label, not the dependency label. CRC-CC-RENDERER-SCOPED-CONTEXT-1D
     // (2026-10-02): with United States established, the real evaluator produces

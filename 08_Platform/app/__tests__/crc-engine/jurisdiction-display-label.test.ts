@@ -158,20 +158,23 @@ describe('SCOPE-6B -- UAT-D1 representative reproduction (mixed role, jurisdicti
   // CRC-CC-RENDERER-SCOPED-CONTEXT-1D (2026-10-02): this fixture's 3 Copyright
   // jurisdiction items are 2 scoped_context (REASON) + 1 primary (null) --
   // see the roles test above. They no longer co-locate in one section: the
-  // governed sentence now appears once in "Still open" (the primary item)
-  // and the (different, role-appropriate) scoped_context sentence appears
-  // twice in "Related context" -- still identical to EACH OTHER within that
-  // section, which is the real invariant SCOPE-6B/1D both care about: siblings
-  // sharing the same (category, role) pair are never distinguished from one
-  // another.
-  test('the primary Copyright jurisdiction item renders once in "Still open"; the 2 scoped_context siblings render in "Related context", identical to each other', () => {
+  // governed sentence now appears once in "Still open" (the primary item).
+  // CRC-CC-RHETORICAL-REPETITION-2 (2026-10-11): the 2 scoped_context
+  // siblings share one Realization group (same fact+tool), so the
+  // "Related context" sentence -- already identical between them, the
+  // real invariant SCOPE-6B/1D cared about -- now renders ONCE, with their
+  // exact cardinality (2) restated via a separate neutral clause, instead
+  // of twice.
+  test('the primary Copyright jurisdiction item renders once in "Still open"; the 2 scoped_context siblings render ONCE in "Related context" with exact cardinality restated', () => {
     const stillOpenMatches = email.text.match(/Your assessment jurisdiction hasn't been confirmed in this conversation\./g) || []
     expect(stillOpenMatches).toHaveLength(1)
     const relatedContextMatches = email.text.match(/A related governed consideration is scoped to a assessment jurisdiction other than what's already established for this conversation\./g) || []
-    expect(relatedContextMatches).toHaveLength(2)
+    expect(relatedContextMatches).toHaveLength(1)
+    const relatedSection = email.text.slice(email.text.indexOf('RELATED CONTEXT'), email.text.indexOf("WHAT'S STILL NEEDED"))
+    expect(relatedSection).toContain('This reflects 2 separate items in this conversation.')
   })
 
-  test('"Still open" holds exactly 2 lines (1 Copyright primary + 1 Trademark primary dependency), not identical to each other; "Related context" holds the 2 scoped_context Copyright lines, identical to each other', () => {
+  test('"Still open" holds exactly 2 lines (1 Copyright primary + 1 Trademark primary dependency), not identical to each other; "Related context" holds ONE consolidated scoped_context Copyright line plus its cardinality clause', () => {
     const stillOpenStart = email.text.indexOf('STILL OPEN')
     const stillOpenEnd = email.text.indexOf('RELATED CONTEXT')
     const stillOpenSection = email.text.slice(stillOpenStart, stillOpenEnd)
@@ -183,8 +186,8 @@ describe('SCOPE-6B -- UAT-D1 representative reproduction (mixed role, jurisdicti
     const relatedEnd = email.text.indexOf("WHAT'S STILL NEEDED")
     const relatedSection = email.text.slice(relatedStart, relatedEnd)
     const relatedLines = relatedSection.split('\n').map((l) => l.trim()).filter((l) => l.startsWith('-'))
-    expect(relatedLines).toHaveLength(2) // the 2 scoped_context Copyright siblings
-    expect(new Set(relatedLines).size).toBe(1) // SCOPE-6B/1D: siblings sharing (category, role) are never distinguished
+    expect(relatedLines).toHaveLength(1) // the 2 scoped_context Copyright siblings, consolidated to one shared sentence
+    expect(relatedSection).toContain('This reflects 2 separate items in this conversation.')
   })
 
   // CRC-CC-SCOPE-6F (2026-09-25): this fixture's Trademark item uses

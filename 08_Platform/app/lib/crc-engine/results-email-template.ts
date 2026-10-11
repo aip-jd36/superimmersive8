@@ -248,6 +248,22 @@ function scopedContextItemSentence(item: PlanUnresolvedItem, displayLabel: strin
 }
 
 /**
+ * CRC-CC-RHETORICAL-REPETITION-2 (2026-10-11). The ONLY new user-facing
+ * copy this milestone introduces. States exactly, and only, how many
+ * distinct governed items the immediately-preceding sentence stands for
+ * -- never characterizes them (no "issues"/"problems"/"requirements"/
+ * "remain"/"only"/"important"). "items" reuses this codebase's own
+ * existing, already-neutral internal vocabulary (`PlanUnresolvedItem`,
+ * `unresolved_items`) rather than inventing a new noun. Always plural --
+ * the only call site (`renderUnresolvedSection` below) gates this
+ * function behind `group.items.length > 1`, so no singular form exists or
+ * is needed; `count` is always >= 2 by construction.
+ */
+function cardinalityClause(count: number): string {
+  return `This reflects ${count} separate items in this conversation.`
+}
+
+/**
  * CRC-CC-RENDERER-SCOPED-CONTEXT-1D (2026-10-02). Pure, structural-only
  * split of an already-built group list by each item's own already-
  * computed `presentation_role` -- never recomputes the role, never reads
@@ -436,10 +452,38 @@ export function buildResultsEmailContent(
         htmlParts.push(`<p style="font-size:13px;font-weight:600;margin:10px 0 4px;color:#333;">${escapeHtml(group.heading)}</p>`)
         textParts.push(`${group.heading}\n`)
       }
-      for (const child of group.items) {
-        const sentence = sentenceFor(child.item, child.display_label)
+      // CRC-CC-RHETORICAL-REPETITION-2 (2026-10-11). The approved trigger is
+      // membership in this ALREADY-existing, already-role-filtered
+      // Realization group with `items.length > 1` -- never byte-identical
+      // text compared across groups, never a new grouping relationship.
+      // Byte equality of the rendered sentence is used here ONLY as a
+      // local, per-group corollary check (CRC-CC-RHETORICAL-REPETITION-1
+      // §M/§H8): a single `dimension_identity` group can still, in one
+      // narrow case, contain children whose own sentence differs --
+      // `applicability_fact`-kind groups may mix `unresolved_applicability`
+      // and `withheld_relevant_claim` children (SCOPE-6D.1's own "groups
+      // WITH a sibling" case), and when the shared `fact` has no
+      // registered label, `unresolvedItemSentence`'s fallback text differs
+      // by `item.kind`. Consolidating only when every child's sentence is
+      // already, genuinely identical keeps the trigger exactly what
+      // REPETITION-1 approved: real group membership, with text equality
+      // as a safety-proof, never as the primitive itself. When the check
+      // fails, every child still renders independently, unchanged.
+      const sentences = group.items.map((child) => sentenceFor(child.item, child.display_label))
+      const canConsolidate = group.items.length > 1 && sentences.every((s) => s === sentences[0])
+      if (canConsolidate) {
+        const sentence = sentences[0]
         htmlParts.push(`<p style="font-size:14px;color:#222;margin:0 0 8px;">${escapeHtml(sentence)}</p>`)
         textParts.push(`- ${sentence}\n`)
+        const clause = cardinalityClause(group.items.length)
+        htmlParts.push(`<p style="font-size:13px;color:#555;margin:0 0 8px;">${escapeHtml(clause)}</p>`)
+        textParts.push(`  ${clause}\n`)
+      } else {
+        for (const child of group.items) {
+          const sentence = sentenceFor(child.item, child.display_label)
+          htmlParts.push(`<p style="font-size:14px;color:#222;margin:0 0 8px;">${escapeHtml(sentence)}</p>`)
+          textParts.push(`- ${sentence}\n`)
+        }
       }
     }
   }

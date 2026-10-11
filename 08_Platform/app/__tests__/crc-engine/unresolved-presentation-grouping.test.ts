@@ -316,23 +316,37 @@ describe('SCOPE-6D.1 -- CC-4C.2F collapse remains untouched; grouping operates o
 // ── GROUP 1: rendered "Still Open" output for the representative UAT-D1 mock ──
 
 describe('SCOPE-6D.1 -- rendered output matches the accepted mock structure', () => {
-  test('original UAT-D1 triple: one heading, three identical children, no count/relational prose', () => {
+  // CRC-CC-RHETORICAL-REPETITION-2 (2026-10-11): this test documented the
+  // PRE-consolidation renderer behavior (three byte-identical child
+  // sentences, one per claim). The approved `CRC-CC-RHETORICAL-REPETITION-1`
+  // architecture diagnostic established that this is pure rhetorical
+  // repetition -- no per-child sentence ever carried claim identity, so
+  // repeating it three times communicated nothing beyond cardinality.
+  // Updated to prove the NEW invariant instead: the group's three
+  // underlying items remain fully present internally (unaffected), the
+  // shared sentence renders exactly once, and cardinality is restated
+  // explicitly via a separate, neutral, non-evaluative clause -- never a
+  // materiality/priority/completeness word.
+  test('original UAT-D1 triple: one heading, the shared sentence once, exact cardinality preserved via a separate neutral clause', () => {
     const items = [openDependency('CLAIM-A', HCD), openDependency('CLAIM-B', HCD), openDependency('CLAIM-C', HCD)]
     const evidence = items.map((i) => evidenceForDependency((i as any).source_claim_id, HCD))
     const sec = section({ category: COPYRIGHTABILITY, unresolved_items: items, missing_evidence: evidence })
     const fullPlan = plan({ explicit_sections: [sec] })
     const realization = buildConsultativeRealization(fullPlan, projectionOutput())
+    // Internal cardinality is untouched by rendering: all three distinct
+    // claim-scoped items still exist in Realization, exactly as before.
+    expect(realization.unresolved_presentation_groups[0].items).toHaveLength(3)
     const email = buildResultsEmailContent(projectionOutput(), null, 'a@example.com', fullPlan, [], realization)
     const stillOpen = email.text.slice(email.text.indexOf('STILL OPEN'), email.text.indexOf("WHAT'S STILL NEEDED"))
     expect(stillOpen).toContain('human contribution to the finished work')
     const headingCount = (stillOpen.match(/human contribution to the finished work/g) || []).length
-    // heading (1) + three identical child sentences (each also containing the label) = 4 occurrences of the label substring total
-    expect(headingCount).toBe(4)
+    // heading (1) + ONE shared child sentence (also containing the label) = 2, not 4
+    expect(headingCount).toBe(2)
     const childSentences = stillOpen.match(/^- .*$/gm) || []
-    expect(childSentences).toHaveLength(3)
-    expect(new Set(childSentences).size).toBe(1) // still textually identical -- expected, not a defect
-    expect(stillOpen).not.toMatch(/\b3 (items|claims|considerations)\b/i)
-    expect(stillOpen).not.toMatch(/several|multiple claims|the main|material issue|these considerations/i)
+    expect(childSentences).toHaveLength(1) // rendered once, not once per claim
+    // user-visible cardinality is restated explicitly, exactly, and neutrally
+    expect(stillOpen).toContain('This reflects 3 separate items in this conversation.')
+    expect(stillOpen).not.toMatch(/several|multiple claims|the main|material issue|these considerations|\bonly\b|important|blocker|problem|requirement/i)
   })
 })
 
@@ -365,20 +379,21 @@ function baseSU(jurisdictionValue: string): StructuredUnderstanding {
 const ALL_FOUR_CLAIMS = TOPIC_CLAIMS_FIXTURE.filter((c) => ['CLAIM-COPY-001-v1', 'CLAIM-COPY-002-v1', 'CLAIM-COPY-003-v1', 'CLAIM-COPYRIGHT-TW-AI-ASSISTED-OUTPUT-001-v1'].includes(c.claim_id))
 
 describe('SCOPE-6D.1 -- real end-to-end reproduction (original UAT-D1 dependency case)', () => {
-  test('United States established -> the three US claims match, contributing ONE shared dependency group with three children and the governed heading', () => {
+  test('United States established -> the three US claims match, contributing ONE shared dependency group with three children internally; rendered once with exact cardinality restated separately', () => {
     const result = runCRCConversation(baseSU('United States'), [], ALL_FOUR_CLAIMS, [])
     const realization = buildConsultativeRealization(result.plan, result.output, result.consultative_notes ?? [])
     const groups = realization.unresolved_presentation_groups.filter((g) => g.dimension_identity.kind === 'dependency')
     expect(groups).toHaveLength(1)
     expect(groups[0].heading).toBe('human contribution to the finished work')
-    expect(groups[0].items).toHaveLength(3)
+    expect(groups[0].items).toHaveLength(3) // internal cardinality: unaffected by the renderer change
     const claimIds = groups[0].items.map((c) => (c.item as any).source_claim_id)
     expect(new Set(claimIds).size).toBe(3)
 
     const email = buildResultsEmailContent(result.output, null, 'a@example.com', result.plan, result.consultative_notes, realization)
     const stillOpen = email.text.slice(email.text.indexOf('STILL OPEN'), email.text.indexOf("WHAT'S STILL NEEDED"))
     const childLines = stillOpen.match(/^- Your human contribution to the finished work hasn't been confirmed in this conversation\.$/gm) || []
-    expect(childLines).toHaveLength(3)
+    expect(childLines).toHaveLength(1) // rendered once, not once per underlying claim
+    expect(stillOpen).toContain('This reflects 3 separate items in this conversation.')
   })
 })
 
@@ -446,5 +461,164 @@ describe('SCOPE-6D.1 -- leakage and dumb-renderer checks against real governed d
         expect(stillOpen).not.toContain(words.slice(i, i + 8).join(' '))
       }
     }
+  })
+})
+
+// ── CRC-CC-RHETORICAL-REPETITION-2 (2026-10-11): the approved cardinality-
+// preserving consolidation contract -- dedicated coverage mirroring the
+// required test matrix (TEST A-L) from that milestone's own spec. ──
+
+function stillOpenOf(email: ReturnType<typeof buildResultsEmailContent>): string {
+  const start = email.text.indexOf('STILL OPEN')
+  const relatedIdx = email.text.indexOf('RELATED CONTEXT')
+  const end = relatedIdx === -1 ? email.text.indexOf("WHAT'S STILL NEEDED") : relatedIdx
+  return email.text.slice(start, end)
+}
+function relatedContextOf(email: ReturnType<typeof buildResultsEmailContent>): string {
+  const start = email.text.indexOf('RELATED CONTEXT')
+  if (start === -1) return ''
+  return email.text.slice(start, email.text.indexOf("WHAT'S STILL NEEDED"))
+}
+function bulletsOf(section: string): string[] {
+  return section.split('\n').filter((l) => l.trim().startsWith('-'))
+}
+
+describe('CRC-CC-RHETORICAL-REPETITION-2 -- TEST A: singleton labeled group unchanged', () => {
+  test('one labeled item renders exactly as before -- no cardinality clause, no change', () => {
+    const sec = section({ category: COPYRIGHTABILITY, unresolved_items: [openDependency('C1', HCD)] })
+    const fullPlan = plan({ explicit_sections: [sec] })
+    const realization = buildConsultativeRealization(fullPlan, projectionOutput())
+    const email = buildResultsEmailContent(projectionOutput(), null, 'a@example.com', fullPlan, [], realization)
+    const stillOpen = stillOpenOf(email)
+    expect(bulletsOf(stillOpen)).toHaveLength(1)
+    expect(stillOpen).toContain("Your human contribution to the finished work hasn't been confirmed in this conversation.")
+    expect(stillOpen).not.toMatch(/This reflects \d+ separate items/)
+  })
+})
+
+describe('CRC-CC-RHETORICAL-REPETITION-2 -- TEST B: singleton anonymous group unchanged', () => {
+  test('one anonymous fallback item renders exactly as before -- no cardinality clause, no change', () => {
+    const sec = section({ category: COPYRIGHTABILITY, unresolved_items: [withheld('C1', null, null)] })
+    const fullPlan = plan({ explicit_sections: [sec] })
+    const realization = buildConsultativeRealization(fullPlan, projectionOutput())
+    const email = buildResultsEmailContent(projectionOutput(), null, 'a@example.com', fullPlan, [], realization)
+    const stillOpen = stillOpenOf(email)
+    expect(bulletsOf(stillOpen)).toHaveLength(1)
+    expect(stillOpen).toContain("An additional governed consideration for this topic hasn't been confirmed.")
+    expect(stillOpen).not.toMatch(/This reflects \d+ separate items/)
+  })
+})
+
+describe('CRC-CC-RHETORICAL-REPETITION-2 -- TEST D: grouped multi-item anonymous dimension', () => {
+  test('two open_project_dependency items sharing one UNREGISTERED dependency_id -> one real group, shared fallback once, exact cardinality, no invented label', () => {
+    const sec = section({ category: COPYRIGHTABILITY, unresolved_items: [openDependency('C1', 'some_future_unregistered_dependency'), openDependency('C2', 'some_future_unregistered_dependency')] })
+    const fullPlan = plan({ explicit_sections: [sec] })
+    const realization = buildConsultativeRealization(fullPlan, projectionOutput())
+    expect(realization.unresolved_presentation_groups).toHaveLength(1)
+    expect(realization.unresolved_presentation_groups[0].heading).toBeNull() // still null -- no label invented
+    const email = buildResultsEmailContent(projectionOutput(), null, 'a@example.com', fullPlan, [], realization)
+    const stillOpen = stillOpenOf(email)
+    const bullets = bulletsOf(stillOpen)
+    expect(bullets).toHaveLength(1)
+    expect(bullets[0]).toContain("An additional governed consideration for this topic hasn't been confirmed.")
+    expect(stillOpen).toContain('This reflects 2 separate items in this conversation.')
+    expect(stillOpen).not.toContain('some_future_unregistered_dependency')
+  })
+})
+
+describe('CRC-CC-RHETORICAL-REPETITION-2 -- TEST E: ungrouped identical fallbacks must NOT consolidate (critical regression)', () => {
+  test('two distinct withheld_relevant_claim items with fact === null are separate (ungrouped) singleton groups -- byte-identical fallback text, but must still render as TWO independent lines, never consolidated', () => {
+    const sec = section({ category: COPYRIGHTABILITY, unresolved_items: [withheld('C1', null, null), withheld('C2', null, null)] })
+    const fullPlan = plan({ explicit_sections: [sec] })
+    const realization = buildConsultativeRealization(fullPlan, projectionOutput())
+    // structurally two separate singleton groups, never one group of two
+    expect(realization.unresolved_presentation_groups).toHaveLength(2)
+    expect(realization.unresolved_presentation_groups.every((g) => g.items.length === 1)).toBe(true)
+    const email = buildResultsEmailContent(projectionOutput(), null, 'a@example.com', fullPlan, [], realization)
+    const stillOpen = stillOpenOf(email)
+    const bullets = bulletsOf(stillOpen)
+    expect(bullets).toHaveLength(2) // NOT consolidated, even though byte-identical
+    expect(new Set(bullets).size).toBe(1) // confirms they ARE byte-identical -- and still rendered twice anyway
+    expect(stillOpen).not.toMatch(/This reflects \d+ separate items/) // no cardinality clause is invented across groups
+  })
+})
+
+describe('CRC-CC-RHETORICAL-REPETITION-2 -- TEST F: same text, different goals, must not consolidate', () => {
+  test('goal 1 has a real 2-item group (consolidates to 1 line + cardinality); goal 2 has its own single item with the SAME dependency (its own, separate group) -- never merged into one cross-goal "3 items" statement', () => {
+    const sec1 = section({ category: COPYRIGHTABILITY, goal_text: 'Can I use this commercially?', unresolved_items: [openDependency('C1', HCD), openDependency('C2', HCD)] })
+    const sec2 = section({ category: TRADEMARK, goal_text: 'Is the logo a trademark risk?', unresolved_items: [openDependency('C3', HCD)] })
+    const fullPlan = plan({ explicit_sections: [sec1, sec2] })
+    const realization = buildConsultativeRealization(fullPlan, projectionOutput())
+    const email = buildResultsEmailContent(projectionOutput(), null, 'a@example.com', fullPlan, [], realization)
+    const stillOpen = stillOpenOf(email)
+    expect(stillOpen).toContain('This reflects 2 separate items in this conversation.') // goal 1's own group only
+    expect(stillOpen).not.toMatch(/This reflects 3 separate items/) // never aggregated across goals
+    expect(stillOpen).toContain('For: "Can I use this commercially?"')
+    expect(stillOpen).toContain('For: "Is the logo a trademark risk?"')
+  })
+})
+
+describe('CRC-CC-RHETORICAL-REPETITION-2 -- TEST G: primary / scoped_context must not consolidate across roles', () => {
+  test('two items share fact+tool (one real Realization group) but differ in unresolved_reason -> different roles; each role section renders its own single item, unconsolidated, never a cross-role "2 items" statement', () => {
+    const item1: PlanUnresolvedItem = { kind: 'unresolved_applicability', claim_id: 'C1', fact: 'jurisdiction', tool: null, unresolved_reason: 'value_not_among_established_values' }
+    const item2: PlanUnresolvedItem = { kind: 'unresolved_applicability', claim_id: 'C2', fact: 'jurisdiction', tool: null, unresolved_reason: null }
+    const sec = section({ category: COPYRIGHTABILITY, unresolved_items: [item1, item2] })
+    const fullPlan = plan({ explicit_sections: [sec] })
+    const realization = buildConsultativeRealization(fullPlan, projectionOutput())
+    expect(realization.unresolved_presentation_groups).toHaveLength(1) // one real group, same dimension_identity
+    const email = buildResultsEmailContent(projectionOutput(), null, 'a@example.com', fullPlan, [], realization)
+    const stillOpen = stillOpenOf(email)
+    const related = relatedContextOf(email)
+    expect(bulletsOf(stillOpen)).toHaveLength(1) // the primary item, alone
+    expect(bulletsOf(related)).toHaveLength(1) // the scoped_context item, alone
+    expect(stillOpen).not.toMatch(/This reflects \d+ separate items/)
+    expect(related).not.toMatch(/This reflects \d+ separate items/)
+  })
+})
+
+describe('CRC-CC-RHETORICAL-REPETITION-2 -- TEST I: exact cardinality, no off-by-one', () => {
+  test('two items -> "2 separate items"; four items -> "4 separate items" (never a deduped or unique-string count)', () => {
+    const secTwo = section({ category: COPYRIGHTABILITY, unresolved_items: [openDependency('C1', HCD), openDependency('C2', HCD)] })
+    const planTwo = plan({ explicit_sections: [secTwo] })
+    const realTwo = buildConsultativeRealization(planTwo, projectionOutput())
+    const emailTwo = buildResultsEmailContent(projectionOutput(), null, 'a@example.com', planTwo, [], realTwo)
+    expect(stillOpenOf(emailTwo)).toContain('This reflects 2 separate items in this conversation.')
+
+    const secFour = section({
+      category: COPYRIGHTABILITY,
+      unresolved_items: [openDependency('C1', HCD), openDependency('C2', HCD), openDependency('C3', HCD), openDependency('C4', HCD)],
+    })
+    const planFour = plan({ explicit_sections: [secFour] })
+    const realFour = buildConsultativeRealization(planFour, projectionOutput())
+    const emailFour = buildResultsEmailContent(projectionOutput(), null, 'a@example.com', planFour, [], realFour)
+    expect(stillOpenOf(emailFour)).toContain('This reflects 4 separate items in this conversation.')
+    expect(bulletsOf(stillOpenOf(emailFour))).toHaveLength(1)
+  })
+})
+
+describe('CRC-CC-RHETORICAL-REPETITION-2 -- TEST J: no internal identifier leak via the new consolidation path', () => {
+  test('claim_id, source_claim_id and the raw dependency_id string never appear in the consolidated output', () => {
+    const sec = section({ category: COPYRIGHTABILITY, unresolved_items: [openDependency('CLAIM-ALPHA', HCD), openDependency('CLAIM-BETA', HCD), openDependency('CLAIM-GAMMA', HCD)] })
+    const fullPlan = plan({ explicit_sections: [sec] })
+    const realization = buildConsultativeRealization(fullPlan, projectionOutput())
+    const email = buildResultsEmailContent(projectionOutput(), null, 'a@example.com', fullPlan, [], realization)
+    const stillOpen = stillOpenOf(email)
+    expect(stillOpen).not.toContain('CLAIM-ALPHA')
+    expect(stillOpen).not.toContain('CLAIM-BETA')
+    expect(stillOpen).not.toContain('CLAIM-GAMMA')
+    expect(stillOpen).not.toContain(HCD) // raw dependency_id string
+  })
+})
+
+describe('CRC-CC-RHETORICAL-REPETITION-2 -- TEST K: missing-evidence rendering is untouched', () => {
+  test('renderMissingEvidence still renders its own pre-existing per-classification count line, unaffected by the unresolved-section consolidation change', () => {
+    const items = [openDependency('C1', HCD), openDependency('C2', HCD), openDependency('C3', HCD)]
+    const evidence = items.map((i) => evidenceForDependency((i as any).source_claim_id, HCD))
+    const sec = section({ category: COPYRIGHTABILITY, unresolved_items: items, missing_evidence: evidence })
+    const fullPlan = plan({ explicit_sections: [sec] })
+    const realization = buildConsultativeRealization(fullPlan, projectionOutput())
+    const email = buildResultsEmailContent(projectionOutput(), null, 'a@example.com', fullPlan, [], realization)
+    const neededSection = email.text.slice(email.text.indexOf("WHAT'S STILL NEEDED"))
+    expect(neededSection).toContain('3 items can be confirmed in a follow-up conversation.')
   })
 })
