@@ -113,6 +113,22 @@ describe('answer-context CONSUMES the unchanged pipeline; owns neither Retrieval
   })
 })
 
+describe('the results-email viewer is a pure READ projection, never a generation/delivery path (CRC-EMAIL-HISTORY-1B §21)', () => {
+  test.each(CRC_SALES_ALL.filter((f) => !f.endsWith('answer-context.ts')))('%s never imports results-email generation, delivery, or run-crc-conversation', (rel) => {
+    const src = read(rel)
+    expect(src).not.toMatch(/from\s+['"]@\/lib\/crc-engine\/results-email-template['"]/)
+    expect(src).not.toMatch(/from\s+['"]@\/lib\/crc-engine\/results-email-delivery['"]/)
+    expect(src).not.toMatch(/from\s+['"]@\/lib\/crc-engine\/run-crc-conversation['"]/)
+  })
+
+  test('the results-email repository functions issue no insert/update/upsert/delete against the artifact tables', () => {
+    const src = read('lib/crc-sales/repository.ts')
+    const writeTargets = [...src.matchAll(/\.from\(\s*['"]([a-z_]+)['"]\s*\)[\s\S]{0,160}?\.(insert|update|upsert|delete)\b/g)].map((m) => m[1])
+    expect(writeTargets).not.toContain('crc_results_email_artifacts')
+    expect(writeTargets).not.toContain('crc_results_email_delivery_attempts')
+  })
+})
+
 describe('no risk / materiality / scoring / prohibited-authority concept in crc-sales CODE', () => {
   test.each(CRC_SALES_LIB)('%s', (rel) => {
     const src = codeOnly(rel).toLowerCase()

@@ -164,3 +164,47 @@ export interface SalesTranscriptEntry {
   text: string
   timestamp: string | null
 }
+
+// ── Results-email history (CRC-EMAIL-HISTORY-1B) ───────────────────────────
+//
+// A read-only projection over the durably persisted
+// crc_results_email_artifacts / crc_results_email_delivery_attempts tables
+// (CRC-OUTBOUND-ARTIFACT-1B). Every field here is copied verbatim from an
+// authoritative persisted row -- nothing here is recomputed, rendered, or
+// inferred. 'accepted' means "the provider confirmed receipt", never
+// "delivered" / "opened" -- see SalesResultsEmailDeliveryAttempt.outcome.
+
+export interface SalesResultsEmailDeliveryAttempt {
+  /** 'accepted' = the provider confirmed RECEIPT only -- never delivered/opened/read. */
+  outcome: 'accepted' | 'failed' | 'unknown'
+  provider_message_id: string | null
+  error_detail: string | null
+  attempted_at: string
+  accepted_at: string | null
+}
+
+export interface SalesResultsEmailArtifact {
+  id: string
+  recipient_normalized: string
+  subject: string
+  html: string
+  text: string
+  generated_at: string
+  /** Technical provenance -- not foregrounded in the normal viewer (see Admin/Sales field split). */
+  content_hash: string
+  template_version: string
+  runtime_commit: string
+  attribution_token: string | null
+  /** Lineage pointer only -- never required reading for the normal viewer. */
+  previous_artifact_id: string | null
+  /** Chronological (oldest first); normally exactly one, under the 1B "new artifact per send" retry decision. */
+  attempts: SalesResultsEmailDeliveryAttempt[]
+}
+
+/**
+ * `found: false` covers BOTH "session does not exist" and "session exists
+ * but is not on an authorized lead/session path" -- deliberately
+ * indistinguishable to the caller, so this can never become a session-ID
+ * enumeration oracle (CRC-EMAIL-HISTORY-1B §6/§19).
+ */
+export type SalesResultsEmailHistory = { found: true; artifacts: SalesResultsEmailArtifact[] } | { found: false }

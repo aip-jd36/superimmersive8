@@ -14,6 +14,7 @@ import { getSalesContactDetail } from '@/lib/crc-sales/repository'
 import { SessionStatusControl } from '../SessionStatusControl'
 import { TranscriptViewer } from '../TranscriptViewer'
 import { AnswerContextViewer } from '../AnswerContextViewer'
+import { ResultsEmailViewer } from '../ResultsEmailViewer'
 
 export const dynamic = 'force-dynamic'
 
@@ -103,6 +104,7 @@ export default async function CrcLeadDetailPage({ params }: { params: { lead_id:
 
               <AnswerContextViewer sessionId={s.session_id} />
               <TranscriptViewer sessionId={s.session_id} />
+              <ResultsEmailViewer sessionId={s.session_id} />
             </CardContent>
           </Card>
         ))}

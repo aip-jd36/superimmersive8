@@ -28,6 +28,9 @@ import type {
   SalesSessionContext,
   SalesSessionWorkflowState,
   SalesTranscriptEntry,
+  SalesResultsEmailArtifact,
+  SalesResultsEmailDeliveryAttempt,
+  SalesResultsEmailHistory,
 } from './types'
 
 // Columns needed to evaluate eligibility + build the default projection.
@@ -273,6 +276,143 @@ export async function recordTranscriptViewAudit(actorUserId: string, sessionId: 
     .insert({ event_type: 'transcript_viewed', actor_user_id: actorUserId, crc_session_id: sessionId })
   if (error) {
     throw new Error(`[crc-sales/repository] recordTranscriptViewAudit failed: ${error.message}`)
+  }
+}
+
+// ── results-email history (CRC-EMAIL-HISTORY-1B) ───────────────────────────
+//
+// Pure READ projection over the durably persisted artifact / delivery-
+// attempt tables (CRC-OUTBOUND-ARTIFACT-1B). This module never inserts,
+// updates, or upserts either table -- there is no artifact-mutation path
+// here, by construction (no function below has any write call against
+// crc_results_email_artifacts / crc_results_email_delivery_attempts).
+
+interface RawResultsEmailArtifactRow {
+  id: string
+  recipient_normalized: string
+  subject: string
+  html: string
+  text: string
+  content_hash: string
+  template_version: string
+  runtime_commit: string
+  attribution_token: string | null
+  generated_at: string
+  previous_artifact_id: string | null
+}
+
+interface RawResultsEmailDeliveryAttemptRow {
+  artifact_id: string
+  outcome: string
+  provider_message_id: string | null
+  error_detail: string | null
+  attempted_at: string
+  accepted_at: string | null
+}
+
+async function fetchResultsEmailDeliveryAttempts(artifactIds: string[]): Promise<Map<string, SalesResultsEmailDeliveryAttempt[]>> {
+  const map = new Map<string, SalesResultsEmailDeliveryAttempt[]>()
+  if (artifactIds.length === 0) return map
+  const { data, error } = await supabaseAdmin
+    .from('crc_results_email_delivery_attempts')
+    .select('artifact_id, outcome, provider_message_id, error_detail, attempted_at, accepted_at')
+    .in('artifact_id', artifactIds)
+    .order('attempted_at', { ascending: true })
+  if (error) throw new Error(`[crc-sales/repository] fetchResultsEmailDeliveryAttempts: ${error.message}`)
+  for (const r of (data ?? []) as unknown as RawResultsEmailDeliveryAttemptRow[]) {
+    const arr = map.get(r.artifact_id) ?? []
+    arr.push({
+      outcome: r.outcome as SalesResultsEmailDeliveryAttempt['outcome'],
+      provider_message_id: r.provider_message_id,
+      error_detail: r.error_detail,
+      attempted_at: r.attempted_at,
+      accepted_at: r.accepted_at,
+    })
+    map.set(r.artifact_id, arr)
+  }
+  return map
+}
+
+async function fetchResultsEmailArtifacts(sessionId: string): Promise<SalesResultsEmailArtifact[]> {
+  const { data, error } = await supabaseAdmin
+    .from('crc_results_email_artifacts')
+    .select('id, recipient_normalized, subject, html, text, content_hash, template_version, runtime_commit, attribution_token, generated_at, previous_artifact_id')
+    .eq('crc_session_id', sessionId)
+    .order('generated_at', { ascending: false })
+  if (error) throw new Error(`[crc-sales/repository] fetchResultsEmailArtifacts: ${error.message}`)
+  const rows = (data ?? []) as unknown as RawResultsEmailArtifactRow[]
+  if (rows.length === 0) return []
+
+  const attempts = await fetchResultsEmailDeliveryAttempts(rows.map((r) => r.id))
+
+  return rows.map((r) => ({
+    id: r.id,
+    recipient_normalized: r.recipient_normalized,
+    subject: r.subject,
+    html: r.html,
+    text: r.text,
+    generated_at: r.generated_at,
+    content_hash: r.content_hash,
+    template_version: r.template_version,
+    runtime_commit: r.runtime_commit,
+    attribution_token: r.attribution_token,
+    previous_artifact_id: r.previous_artifact_id,
+    attempts: attempts.get(r.id) ?? [],
+  }))
+}
+
+/**
+ * Authoritative artifact-access rule (CRC-EMAIL-HISTORY-1A/1B §6).
+ *
+ * `isSalesEligible()` MUST NOT become the authority for whether a
+ * persisted results-email artifact may be viewed -- 1A found that its
+ * `completion_reason != null` predicate would silently hide a legitimately
+ * generated artifact for a session that completed only via the
+ * product-layer turn-ceiling path (`product_stop_reason` set,
+ * `completion_reason` null; see eligibility.ts's own "Correction 1").
+ *
+ * The narrowest safe rule that avoids both problems:
+ *   1. the session must exist and be linked to a lead (crc_lead_id);
+ *   2. that LEAD must be an authorized Sales lead -- i.e. have at least
+ *      one Sales-eligible session under isSalesEligible (the same
+ *      lead-legitimacy boundary getSalesContactDetail already enforces to
+ *      decide whether a lead is reachable at all);
+ *   3. given (1)+(2), THIS session's own artifact history is returned
+ *      regardless of whether this exact session individually satisfies
+ *      isSalesEligible's completion_reason predicate.
+ *
+ * This authorizes exactly "a session belonging to an already-legitimate
+ * Sales lead", never an arbitrary/unrelated session id and never a session
+ * on a lead with zero genuine Sales-eligible interactions -- so it cannot
+ * be used to enumerate or reach sessions outside the existing Sales
+ * surface's own reachability boundary.
+ */
+export async function getResultsEmailHistoryForSession(sessionId: string): Promise<SalesResultsEmailHistory> {
+  const { data, error } = await supabaseAdmin.from('crc_sessions').select(SESSION_COLUMNS).eq('id', sessionId).maybeSingle()
+  if (error) throw new Error(`[crc-sales/repository] getResultsEmailHistoryForSession: ${error.message}`)
+  if (!data) return { found: false }
+  const row = data as unknown as RawSessionRow
+  if (!row.crc_lead_id) return { found: false }
+
+  const leadIsAuthorized = eligibleRowsFrom(await fetchCandidateSessions(row.crc_lead_id)).length > 0
+  if (!leadIsAuthorized) return { found: false }
+
+  const artifacts = await fetchResultsEmailArtifacts(sessionId)
+  return { found: true, artifacts }
+}
+
+/**
+ * Fail-closed results-email-view audit -- mirrors recordTranscriptViewAudit
+ * exactly (same table, same audit-before-content discipline). Throws if the
+ * row cannot be persisted; the caller MUST NOT return artifact content on
+ * throw. Contains no email content.
+ */
+export async function recordResultsEmailViewAudit(actorUserId: string, sessionId: string): Promise<void> {
+  const { error } = await supabaseAdmin
+    .from('crc_sales_events')
+    .insert({ event_type: 'results_email_viewed', actor_user_id: actorUserId, crc_session_id: sessionId })
+  if (error) {
+    throw new Error(`[crc-sales/repository] recordResultsEmailViewAudit failed: ${error.message}`)
   }
 }
 
