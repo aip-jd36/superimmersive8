@@ -165,7 +165,7 @@ import type { KnowledgeDemandOccurrence, Phase, StructuredUnderstanding } from '
  * exactly the same "fixed copy is Runtime's own job" pattern
  * `assemble-projection-output.ts`'s opening_line/closing_cta already are.
  */
-const ACKNOWLEDGMENT_COPY = 'Got it ??thanks for sharing that.'
+const ACKNOWLEDGMENT_COPY = 'Got it — thanks for sharing that.'
 
 /**
  * CRC Global User-Facing Question Budget milestone (2026-08-26). A ceiling,

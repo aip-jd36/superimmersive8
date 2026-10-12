@@ -12,7 +12,7 @@
  * only scans lib/, never __tests__/).
  */
 
-import { runTurn, type RunTurnDeps } from '@/lib/crc-engine/run-turn'
+import { runTurn, type RunTurnDeps, type TurnOutcome } from '@/lib/crc-engine/run-turn'
 import { createInMemorySessionStore } from '@/lib/crc-engine/in-memory-session-store'
 import { constantExtractor } from '@/lib/interview-engine/mock-extractor'
 import { constantCandidateQuestionGenerator } from '@/lib/interview-engine/mock-candidate-question'
@@ -371,6 +371,13 @@ describe('Model 4 -- decline path untouched (recovery pattern, trial 12)', () =>
       deps({ extractor: constantExtractor([toolCandidate()]), generator: constantCandidateQuestionGenerator(realProposal), decider: constantConstraintADecider(askDecision()) }, store),
     )
     expect(outcome.kind).toBe('acknowledgment')
+    // Encoding/copy regression guard (confirmed Production defect,
+    // 2026-10-13): the fixed acknowledgment copy must render its em-dash
+    // correctly, never as the literal mojibake "??" an unrelated commit
+    // (7bae18d8) once silently introduced into ACKNOWLEDGMENT_COPY.
+    const acknowledgment = outcome as Extract<TurnOutcome, { kind: 'acknowledgment' }>
+    expect(acknowledgment.message).toBe('Got it — thanks for sharing that.')
+    expect(acknowledgment.message).not.toContain('??')
 
     // Recovery: the very next turn (no decline) can still ask a real
     // question -- matches trial 12's own observed live pattern.
