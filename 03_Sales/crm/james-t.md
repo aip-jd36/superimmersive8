@@ -6,9 +6,9 @@ contacts:
 slug: james-t
 stage: lead_responded
 source: stec_campaign
-next_action: "Send the approved Oct 12 exploratory CRC warm-lead reactivation message (see 'APPROVED, NOT SENT' section) in the existing Ivy LinkedIn thread, then log the actual interaction"
-next_action_date: 2026-10-12
-last_contacted: 2026-06-17
+next_action: "Await evidence from James after the Oct 12 CRC reactivation: a reply, CRC use attributable to ref B161, product feedback, a current client problem/applicability, or movement toward Commercial Assurance. The send is not a qualification signal; no automatic follow-up. Review on 2026-10-19."
+next_action_date: 2026-10-19
+last_contacted: 2026-10-12
 blocked: false
 blocked_reason: null
 review_date: null
@@ -26,17 +26,17 @@ Account file created 2026-10-11 from `03_Sales/CRM.md` row B161 plus the raw Sup
 
 ## Interaction log (reverse-chronological)
 
-### 2026-10-12 planned — LinkedIn exploratory CRC warm-lead reactivation — APPROVED, NOT SENT
+### 2026-10-12 — LinkedIn exploratory CRC warm-lead reactivation — SENT 2026-10-12 (user-confirmed; exact send time unverified)
 
-**Status: APPROVED — NOT SENT.** Approved by JD 2026-10-11. Nothing in this section has been sent; it is not contact and does not change `last_contacted` or `stage`.
+**Status: SENT — 2026-10-12.** Approved by JD 2026-10-11; sent 2026-10-12 via Ivy in the existing LinkedIn thread (user-confirmed; exact send time and delivery not independently verified). `last_contacted` updated to 2026-10-12. The send is not a reply, click, CRC use, interest, or qualification signal; `stage` is unchanged.
 
-- **Planned send date:** 2026-10-12
+- **Sent:** 2026-10-12 (as planned)
 - **Channel / sender:** LinkedIn, existing Ivy thread (campaign `SI8_Who's Asking_ASA (4 Msg)`)
 - **Purpose:** exploratory CRC warm-lead reactivation — invite him to put real client requirements to CRC and report what it does or doesn't handle
 - **CRC URL (attribution `ref` = CRM ID):** https://app.superimmersive8.com/crc?ref=B161
 - **CRC status:** James has never received the live free Commercial Readiness Check.
 
-**Approved message (send exactly as written):**
+**Message sent (exactly as approved):**
 
 ```
 Hi James — you mentioned before that some clients prohibit certain AI tools altogether, while others want you to verify how the tools handle creator or client content.
@@ -62,7 +62,7 @@ I'd be curious to see what happens if you throw some of the real client requirem
 
 **Collision status:** a targeted audit checked the CR Wave 1 lists (`cr-wave1-launch`), the STEC CRC prelaunch/staged lists, Downloads CSVs, the Standing Encore send lists, and local staged data CSVs. He appears only in the profile master CSV (research population, not planned contact). No current planned-send collision was identified. This was not an exhaustive every-branch search.
 
-**Post-send checklist:** change this heading to `— SENT <date>`, update `last_contacted` to the real send date, set the next review step, record any CRC gaps he reports as product evidence, and keep `stage: lead_responded` unless James replies with new evidence.
+**Post-send (2026-10-12):** heading and `last_contacted` updated; `stage: lead_responded` kept. Next step: await evidence (reply, ref-B161-attributed CRC use, product feedback, client applicability, Commercial Assurance movement); review 2026-10-19. Nothing beyond the send is recorded or inferred.
 
 ### 2026-06-17 — Ivy follow-up and James's reply — VERIFIED RAW (Supabase export)
 

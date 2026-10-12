@@ -6,9 +6,9 @@ contacts:
 slug: ivan-petruzzelli
 stage: lead_responded
 source: stec_campaign
-next_action: "Send the approved Oct 12 CRC warm-lead reactivation message (see 'APPROVED, NOT SENT' section) in the existing Ivy LinkedIn thread, then log the actual interaction"
-next_action_date: 2026-10-12
-last_contacted: 2026-06-19
+next_action: "Await evidence from Ivan after the Oct 12 CRC reactivation: a reply, CRC use attributable to ref B130, product feedback, a current client problem/applicability, or movement toward Commercial Assurance. The send is not a qualification signal; no automatic follow-up. Review on 2026-10-19."
+next_action_date: 2026-10-19
+last_contacted: 2026-10-12
 blocked: false
 blocked_reason: null
 review_date: null
@@ -25,16 +25,16 @@ Graduated from `03_Sales/CRM.md` (row B130) on 2026-09-01. Geo: London/UK. Origi
 
 ## Interaction log (reverse-chronological)
 
-### 2026-10-12 planned — LinkedIn CRC warm-lead reactivation — APPROVED, NOT SENT
+### 2026-10-12 — LinkedIn CRC warm-lead reactivation — SENT 2026-10-12 (user-confirmed; exact send time unverified)
 
-**Status: APPROVED — NOT SENT.** Approved by JD 2026-10-10. Nothing in this section has been sent; it is not contact and does not change `last_contacted` or `stage`.
+**Status: SENT — 2026-10-12.** Approved by JD 2026-10-10; sent 2026-10-12 via Ivy in the existing LinkedIn thread (user-confirmed; exact send time and delivery not independently verified). `last_contacted` updated to 2026-10-12. The send is not a reply, click, CRC use, interest, or qualification signal; `stage` is unchanged.
 
-- **Planned send date:** 2026-10-12
+- **Sent:** 2026-10-12 (as planned)
 - **Channel / sender:** LinkedIn, existing Ivy thread (campaign `SI8_Legal Friction (4 Msg)`)
 - **Purpose:** CRC warm-lead reactivation
 - **CRC URL (attribution `ref` = CRM ID):** https://app.superimmersive8.com/crc?ref=B130
 
-**Approved message (send exactly as written):**
+**Message sent (exactly as approved):**
 
 ```
 Hi Ivan — I was thinking about what you told me about how State Street handles AI work, especially the two layers you audit.
@@ -61,13 +61,13 @@ If you get a chance to try it, I'd be really interested in what you think we're 
 - **No call was ever requested, accepted, or scheduled.** No sent SI8 message in the raw thread offers a call, and no Ivan message mentions one. The "Call Requested" label (`PIPELINE-ICP-ANALYSIS-2026-06-11.md`, `DISCOVERY-PIPELINE.md`, `SALES-PIPELINE.md`, `SPLIT-TEST-LOG.md`) was SI8's own classification of his "Yes we are" reply — kept in those files as historical analysis, not current fact.
 - **`last_contacted`** corrected from 2026-09-01 (the date of the unsent draft, not contact) to 2026-06-19 — Ivan's Jun 19 reply, the latest verified real interaction in either direction.
 
-**When actually sent:** change this heading to `— SENT <date>`, update `last_contacted` to the real send date, set the next review step, and keep `stage: lead_responded` unless Ivan replies with new evidence.
+**Post-send (2026-10-12):** heading and `last_contacted` updated; `stage: lead_responded` kept. Next step: await evidence (reply, ref-B130-attributed CRC use, product feedback, client applicability, Commercial Assurance movement); review 2026-10-19. Nothing beyond the send is recorded or inferred.
 
 ### 2026-09-01 — discovery follow-up drafted, not sent
 
 **Previous evidence (from prior Legal Friction campaign reply, CRM.md):** "Yes we are [moving toward structured documentation]." A call has previously been discussed/requested.
 
-> **Correction (2026-10-10):** no call was ever requested, accepted, or scheduled — see the 2026-10-12 APPROVED, NOT SENT section above. The sentence above is preserved as the Sep 1 record, not current fact.
+> **Correction (2026-10-10):** no call was ever requested, accepted, or scheduled — see the 2026-10-12 CRC reactivation section above (sent 2026-10-12). The sentence above is preserved as the Sep 1 record, not current fact.
 
 **Fuller history since (CRM.md, as of last update) — important ambiguity:** a Jun 17 reply elaborated: "Yes we require a single, structured campaign brief that combines a short human summary with a machine-readable payload (spreadsheet or JSON). This ensures clarity, repeatability, and auditability across AI-driven workflows." **CRM.md itself flags this as ambiguous — it could describe IP/provenance documentation, or it could just as easily describe general campaign-workflow data, unrelated to commercial-readiness clearance.** A design-partner question was drafted Jun 29 (Ivy) probing exactly this: "Does that governance conversation typically happen before production starts, or once there's something to review?" — still awaiting reply as of the last check (Jul 6). The discovery follow-up below should be read as a second attempt at the same underlying question, not a fresh one.
 

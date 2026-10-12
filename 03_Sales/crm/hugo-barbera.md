@@ -6,9 +6,9 @@ contacts:
 slug: hugo-barbera
 stage: lead_responded
 source: stec_campaign
-next_action: "Send the approved Oct 12 CRC warm-lead reactivation message (see 'APPROVED, NOT SENT' section) in the existing Ivy LinkedIn thread, then log the actual interaction"
-next_action_date: 2026-10-12
-last_contacted: 2026-05-08
+next_action: "Await evidence from Hugo after the Oct 12 CRC reactivation: a reply, CRC use attributable to ref B011, product feedback, a current client problem/applicability, or movement toward Commercial Assurance. The send is not a qualification signal; no automatic follow-up. Review on 2026-10-19."
+next_action_date: 2026-10-19
+last_contacted: 2026-10-12
 blocked: false
 blocked_reason: null
 review_date: null
@@ -25,16 +25,16 @@ Graduated from `03_Sales/CRM.md` (row B011) on 2026-09-01. Geo: Paris/France. Or
 
 ## Interaction log (reverse-chronological)
 
-### 2026-10-12 planned — LinkedIn CRC warm-lead reactivation — APPROVED, NOT SENT
+### 2026-10-12 — LinkedIn CRC warm-lead reactivation — SENT 2026-10-12 (user-confirmed; exact send time unverified)
 
-**Status: APPROVED — NOT SENT.** Approved by JD 2026-10-10. Nothing in this section has been sent; it is not contact and does not change `last_contacted` or `stage`.
+**Status: SENT — 2026-10-12.** Approved by JD 2026-10-10; sent 2026-10-12 via Ivy in the existing LinkedIn thread (user-confirmed; exact send time and delivery not independently verified). `last_contacted` updated to 2026-10-12. The send is not a reply, click, CRC use, interest, or qualification signal; `stage` is unchanged.
 
-- **Planned send date:** 2026-10-12
+- **Sent:** 2026-10-12 (as planned)
 - **Channel / sender:** LinkedIn, existing Ivy thread (campaign `SI8_Hitting a Wall (4 Msg)`)
 - **Purpose:** CRC warm-lead reactivation
 - **CRC URL (attribution `ref` = CRM ID):** https://app.superimmersive8.com/crc?ref=B011
 
-**Approved message (send exactly as written):**
+**Message sent (exactly as approved):**
 
 ```
 Hi Hugo — wanted to come back to our conversation from earlier this year. You mentioned that your clients' legal teams usually give you requirements around which AI models and conditions you can use before you take on a project.
@@ -58,7 +58,7 @@ Give it a try on a real project when you have a chance. I'd be really interested
 
 **Data correction (2026-10-10):** `last_contacted` corrected from 2026-09-01 (the date of the unsent draft, not contact) to 2026-05-08 — SI8's second nudge via Ivy (`CRM.md` summary; exact text not on file), the latest real interaction in either direction. Hugo's last verified reply is 2026-04-09 (Supabase export). Full raw reconstruction of the Apr 2 – May 8 thread was reviewed before approval.
 
-**When actually sent:** change this heading to `— SENT <date>`, update `last_contacted` to the real send date, set the next review step, and keep `stage: lead_responded` unless Hugo replies with new evidence.
+**Post-send (2026-10-12):** heading and `last_contacted` updated; `stage: lead_responded` kept. Next step: await evidence (reply, ref-B011-attributed CRC use, product feedback, client applicability, Commercial Assurance movement); review 2026-10-19. Nothing beyond the send is recorded or inferred.
 
 ### 2026-09-01 — discovery follow-up drafted, not sent
 

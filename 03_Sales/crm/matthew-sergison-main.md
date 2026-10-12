@@ -6,9 +6,9 @@ contacts:
 slug: matthew-sergison-main
 stage: lead_responded
 source: stec_campaign
-next_action: "Send the approved Oct 12 CRC warm-lead reactivation message (see 'APPROVED, NOT SENT' section) in the existing Ivy LinkedIn thread, then log the actual interaction"
-next_action_date: 2026-10-12
-last_contacted: 2026-06-08
+next_action: "Await evidence from Matthew after the Oct 12 CRC reactivation: a reply, CRC use attributable to ref B088, product feedback, a current client problem/applicability, or movement toward Commercial Assurance. The send is not a qualification signal; no automatic follow-up. Review on 2026-10-19."
+next_action_date: 2026-10-19
+last_contacted: 2026-10-12
 blocked: false
 blocked_reason: null
 review_date: null
@@ -27,16 +27,16 @@ Graduated from `03_Sales/CRM.md` (row B088) on 2026-09-01. Geo: Winchester/UK. O
 
 ## Interaction log (reverse-chronological)
 
-### 2026-10-12 planned — LinkedIn CRC warm-lead reactivation — APPROVED, NOT SENT
+### 2026-10-12 — LinkedIn CRC warm-lead reactivation — SENT 2026-10-12 (user-confirmed; exact send time unverified)
 
-**Status: APPROVED — NOT SENT.** Approved by JD 2026-10-10. Nothing in this section has been sent; it is not contact and does not change `last_contacted` or `stage`.
+**Status: SENT — 2026-10-12.** Approved by JD 2026-10-10; sent 2026-10-12 via Ivy in the existing LinkedIn thread (user-confirmed; exact send time and delivery not independently verified). `last_contacted` updated to 2026-10-12. The send is not a reply, click, CRC use, interest, or qualification signal; `stage` is unchanged.
 
-- **Planned send date:** 2026-10-12
+- **Sent:** 2026-10-12 (as planned)
 - **Channel / sender:** LinkedIn, existing Ivy thread (campaign `SI8_Legal Friction (4 Msg)`)
 - **Purpose:** CRC warm-lead reactivation
 - **CRC URL (attribution `ref` = CRM ID):** https://app.superimmersive8.com/crc?ref=B088
 
-**Approved message (send exactly as written):**
+**Message sent (exactly as approved):**
 
 ```
 Hi Matthew — you mentioned earlier this year that you're being asked about documentation for AI-generated video, so I thought you might find this useful.
@@ -67,7 +67,7 @@ If you get a chance to try it on a real project, I'd be really interested to kno
 - **There was contact after the quote.** After his Apr 28 reply SI8 contacted him May 1 (Q-Gate-v1 question + Logline-UK-v1), May 28 (clearance-report deliverables + "does this cover what OLIVER's clients are asking for?") and Jun 8 (break-up-style follow-up + B2B2B probe + format check) — all via Ivy, exact texts not on file (`CRM.md`, `LINKEDIN-REPLY-TEMPLATES.md`, `TODO-PRODUCT-VALIDATION.md`). He did not reply to any of them. The earlier "no contact since testimonial capture" statement is incorrect.
 - **`last_contacted`** corrected from 2026-09-01 (the date of the unsent draft, not contact) to 2026-06-08 — the latest verified real interaction. The Jun 29 message is not used because its send status is unknown.
 
-**When actually sent:** change this heading to `— SENT <date>`, update `last_contacted` to the real send date, set the next review step, and keep `stage: lead_responded` unless Matthew replies with new evidence.
+**Post-send (2026-10-12):** heading and `last_contacted` updated; `stage: lead_responded` kept. Next step: await evidence (reply, ref-B088-attributed CRC use, product feedback, client applicability, Commercial Assurance movement); review 2026-10-19. Nothing beyond the send is recorded or inferred.
 
 ### 2026-09-01 — discovery follow-up drafted, not sent
 
