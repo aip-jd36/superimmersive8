@@ -6,7 +6,7 @@ contacts:
 slug: ivan-petruzzelli
 stage: lead_responded
 source: stec_campaign
-next_action: "Await evidence from Ivan after the Oct 12 CRC reactivation: a reply, CRC use attributable to ref B130, product feedback, a current client problem/applicability, or movement toward Commercial Assurance. The send is not a qualification signal; no automatic follow-up. Review on 2026-10-19."
+next_action: "Observe whether Ivan returns to or completes his ref-B130 CRC session (00aed8b5), submits an email, or replies naturally; also watch for product feedback, a current client problem/applicability, or movement toward Commercial Assurance. Do not follow up merely because he activated CRC; the activation is not a qualification event. Review on 2026-10-19."
 next_action_date: 2026-10-19
 last_contacted: 2026-10-12
 blocked: false
@@ -24,6 +24,33 @@ Graduated from `03_Sales/CRM.md` (row B130) on 2026-09-01. Geo: London/UK. Origi
 **CR hypothesis being tested:** Does evidence/documentation feed into a distinct interpretation + commercial-use decision layer?
 
 ## Interaction log (reverse-chronological)
+
+### 2026-10-12 — Attributed CRC activation (ref B130) — product-behavior evidence
+
+**Classification:** attributed CRC activation / product-behavior evidence. Stronger evidence than a click alone, but **not a qualification event** and not evidence of buying intent. `stage` and `last_contacted` are unchanged (`last_contacted` stays 2026-10-12 from the LinkedIn send).
+
+**Source:** production CRC session data as observed and supplied by the user on 2026-10-12. This CLI did not query production.
+
+- **Session:** `00aed8b5-7a39-4936-b650-a4807c6a7e89`
+- **Created:** `2026-10-12 13:27:48.593871+00`
+- **Attribution:** `acquisition_ref = B130`, the personalized link sent in the Oct 12 reactivation (https://app.superimmersive8.com/crc?ref=B130). Internal attribution token: `a57f6f14-be24-4cf9-9a07-11d88a4acc71`.
+- **Initialization:** guided; guided entry `in-house-own-organization` v2
+- **Observed inputs:** workflow role "in-house team, for my own organization"; jurisdiction European Union; tools Google Veo, Midjourney, Adobe Firefly, Synthesia
+- **User free text (exact):** "copyright of images and assets in general"
+- **CRC's next question (exact):** "What's the intended use for this video project—are you planning to use it commercially, or is this more for internal or non-commercial purposes?"
+- **User selected (exact):** "Let's skip this question."
+- **Session state at inspection:** `turn_count = 3`; no email captured; no results email; no CRC lead ID; `completion_reason = null`; no completed result reached.
+
+**CURRENT FACT:**
+- The B130 personalized link generated an attributable CRC session, so Ivan activated CRC from the Oct 12 reactivation link. (The session is attributed to his ref; the person at the keyboard is not independently identified.)
+- He configured an in-house / EU scenario involving Google Veo, Midjourney, Adobe Firefly and Synthesia.
+- He raised "copyright of images and assets in general."
+- He skipped CRC's first clarification question.
+- At the time of inspection, no result or email capture had occurred.
+
+**NOT ESTABLISHED:** that CRC was useful or satisfactory; that Ivan liked the experience; product validation; a current live commercial project; a pain point around copyright; that he wants Commercial Assurance; buying intent; willingness to pay; that he abandoned permanently rather than returning later.
+
+**Next step:** keep the 2026-10-19 review. Do not follow up merely because he activated CRC; observe whether he returns, completes the session, submits an email, or replies naturally.
 
 ### 2026-10-12 — LinkedIn CRC warm-lead reactivation — SENT 2026-10-12 (user-confirmed; exact send time unverified)
 
