@@ -6,8 +6,8 @@ contacts:
 slug: ibrahim-badi
 stage: lead_responded
 source: stec_campaign
-next_action: "Review the thread — if Ibrahim hasn't replied to the 2026-09-23 CRC feedback message, decide whether a light follow-up is warranted (not yet decided)"
-next_action_date: 2026-09-30
+next_action: null
+next_action_date: null
 last_contacted: 2026-09-23
 blocked: false
 blocked_reason: null
@@ -26,6 +26,8 @@ Graduated from `03_Sales/CRM.md` (row B087) on 2026-09-01. Geo: London/UK. Origi
 **Cross-alias contact history / collision (recorded 2026-10-13):** Ibrahim has SI8 threads with **two aliases** — Ivy (original Legal Friction thread; the 2026-09-23 CRC send) and **Vanessa** (campaign `SI8_RV_R4LI_AgencyLdr_ArmB_Gbl_0826A_VP`, Dripify lead ID 671410811; 2026-09-20 exchange below). The two interactions occurred three days apart. No explanation for the move between aliases is recorded or inferred, and the Sep 23 Ivy message is not claimed to be a response to his Sep 20 request to Vanessa. **Operational implication:** do not place Ibrahim into a new Vanessa CRC reactivation while this history remains relevant.
 
 **Displayed profile — Vanessa Dripify thread (user-supplied 2026-10-13):** Ibrahim Badi · "Cinematic AI Director | Voiceover Artist | Founder, IKM Marketing" · Company: IKM Marketing · Position: Managing Director · United Kingdom. Campaign displayed as **Paused**. Source-specific; other profile data in this file (e.g. role "MD") is preserved, not overwritten.
+
+**Current state (2026-10-13):** no follow-up is scheduled. The 2026-09-30 review checkpoint attached to the Sep 23 CRC send has expired; the missed checkpoint is not a reason to contact Ibrahim now. Await inbound or product evidence (a reply in either the Ivy or Vanessa thread, or other evidence of CRC/product use); if it appears, evaluate it normally. Do not add him to a Vanessa CRC reactivation, because of the cross-alias history above. `next_action`/`next_action_date` are both `null` — the repo's existing representation for "no scheduled follow-up" (the schema pairs the two fields, so a next action cannot be kept without a date). `stage: lead_responded` and `last_contacted: 2026-09-23` are unchanged.
 
 ## Interaction log (reverse-chronological)
 
