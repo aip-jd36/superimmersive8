@@ -52,6 +52,21 @@ Graduated from `03_Sales/CRM.md` (row B130) on 2026-09-01. Geo: London/UK. Origi
 
 **Next step:** keep the 2026-10-19 review. Do not follow up merely because he activated CRC; observe whether he returns, completes the session, submits an email, or replies naturally.
 
+### 2026-10-12 — Ivan's LinkedIn reply — inbound acknowledgment
+
+**Ivan (2026-10-12, approximately 7:00 PM Taipei time as supplied by the user — exact):**
+> thanks Ivy
+
+**Classification:** inbound acknowledgment / non-substantive reply, in the existing Ivy thread after the Oct 12 CRC reactivation message.
+
+**Timing note:** on the supplied times, this reply (~19:00 Taipei, ~11:00 UTC) came **before** the attributed CRC session (created `2026-10-12 13:27:48 UTC` = 21:27 Taipei, logged above). It is placed in that order here. The reply time is approximate.
+
+**CURRENT FACT:** Ivan replied "thanks Ivy" after the Oct 12 outreach, and the same outreach also generated an attributed B130 CRC session. The Oct 12 reactivation therefore produced both an inbound acknowledgment and an attributable CRC activation.
+
+**NOT to be read as:** positive product feedback; evidence that CRC was useful; satisfaction; product validation; a current commercial pain point; Commercial Assurance interest; buying intent; willingness to pay; or a request for follow-up.
+
+**State:** `stage`, `last_contacted` (2026-10-12), `next_action` and `next_action_date` (2026-10-19) unchanged. No immediate follow-up because of this reply.
+
 ### 2026-10-12 — LinkedIn CRC warm-lead reactivation — SENT 2026-10-12 (user-confirmed; exact send time unverified)
 
 **Status: SENT — 2026-10-12.** Approved by JD 2026-10-10; sent 2026-10-12 via Ivy in the existing LinkedIn thread (user-confirmed; exact send time and delivery not independently verified). `last_contacted` updated to 2026-10-12. The send is not a reply, click, CRC use, interest, or qualification signal; `stage` is unchanged.
