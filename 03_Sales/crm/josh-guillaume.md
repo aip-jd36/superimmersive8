@@ -6,9 +6,9 @@ contacts:
 slug: josh-guillaume
 stage: lead_responded
 source: stec_campaign
-next_action: "Send the approved Oct 12 CRC warm-lead reactivation message (see 'APPROVED, NOT SENT' section) in the existing Vanessa LinkedIn thread, then log the actual interaction"
-next_action_date: 2026-10-12
-last_contacted: 2026-04-27
+next_action: "Await evidence from Josh after the Oct 13 CRC reactivation: a natural reply, CRC use attributable to ref B082, product feedback, a current client problem/applicability, or movement toward Commercial Assurance. The send is outreach, not a qualification signal; no automatic follow-up. Review on 2026-10-20."
+next_action_date: 2026-10-20
+last_contacted: 2026-10-13
 blocked: false
 blocked_reason: null
 review_date: null
@@ -22,19 +22,21 @@ Account file created 2026-10-10 from `03_Sales/CRM.md` row B082 plus the raw Sup
 
 **Profile:** historical role (Supabase lead record, first captured Apr 27 and repeated through the Jul 17 export) — "Creative Director", Blue Dog VFX, Los Angeles. The later local profile data (`SI8 Rights Verified-Grid View.csv`, scrape date unknown) reads "Senior Compositor | VFX Supervisor | Creative Production Solutions", Blue Dog VFX, Los Angeles. That is later local profile evidence, not proof of current employment; current employment is not independently verified.
 
+**Current Dripify display (2026-10-13, user-supplied):** Compositing Supervisor at Blur Studio; Company: Blur Studio; Los Angeles, United States. Recorded as currently displayed profile evidence; historical profile data elsewhere in this file is preserved, not overwritten, and current employment is not independently verified.
+
 ## Interaction log (reverse-chronological)
 
-### 2026-10-12 planned — LinkedIn CRC warm-lead reactivation — APPROVED, NOT SENT
+### 2026-10-13 — LinkedIn CRC warm-lead reactivation — SENT 2026-10-13 (user-confirmed; 21:55 Taipei as displayed)
 
-**Status: APPROVED — NOT SENT.** Approved by JD 2026-10-10. Nothing in this section has been sent; it is not contact and does not change `last_contacted` or `stage`.
+**Status: SENT — 2026-10-13.** Approved by JD 2026-10-10 for 2026-10-12; actually sent manually by the user from Vanessa in the existing LinkedIn thread on 2026-10-13, 21:55 Taipei time as displayed (delivery not independently verified). `last_contacted` updated to 2026-10-13. The send is outreach — not a reply, click, CRC use, interest, product validation, or qualification signal; `stage` is unchanged.
 
-- **Planned send date:** 2026-10-12
+- **Sent:** 2026-10-13, 21:55 Taipei as displayed (planned 2026-10-12)
 - **Channel / sender:** LinkedIn, existing Vanessa thread (campaign `SI8_Legal Friction (4 Msg)`)
 - **Purpose:** CRC warm-lead reactivation — a (very delayed) answer to his Apr 27 question "How has it been looking on your end?", connected to his own client-intake approach
 - **CRC URL (attribution `ref` = CRM ID):** https://app.superimmersive8.com/crc?ref=B082
 - **CRC status:** Josh has never received the live free Commercial Readiness Check, or any sample, report, Chain of Title or product description.
 
-**Approved message (send exactly as written):**
+**Message sent (exact):**
 
 ```
 Hi Josh — very delayed reply to your question earlier this year about what we've been seeing on our end.
@@ -48,13 +50,17 @@ https://app.superimmersive8.com/crc?ref=B082
 Give it a real project or client scenario and it'll help you work through the tools, assets, intended use and commercial-readiness issues that may matter.
 
 I'd be curious whether it catches the things your clients actually care about — or what we're missing.
+
+Thanks!
 ```
+
+**Sent vs. approved:** the copy actually sent ends with a final line "Thanks!" (after a blank line) that the version approved 2026-10-10 did not include; otherwise identical. The sent copy above is the record.
 
 The message says CRC "might help" — that is not a proven benefit, and CRC does not replace documentation a client may ultimately require.
 
 **Supersedes (as the open next action):** the stale `CRM.md` B082 next action "Monitor — off-geo (LA); … Year 1 geography out of scope". That off-geo / Year 2 rule was an internal decision, not customer evidence, and is superseded for this individually approved CRC reactivation. Josh is not named in the 2026-07-19 ICP 3 / film-adjacent hold.
 
-**Post-send checklist:** change this heading to `— SENT <date>`, update `last_contacted` to the real send date, set the next review step, and keep `stage: lead_responded` unless Josh replies with new evidence.
+**Post-send (2026-10-13):** heading and `last_contacted` updated; `stage: lead_responded` kept. Next step: await evidence (natural reply, ref-B082-attributed CRC use, product feedback, client applicability, Commercial Assurance movement); review 2026-10-20. Nothing beyond the send is recorded or inferred — no reply after the send and no CRC activation is established.
 
 ### 2026-04-27 — Josh's reply to the Legal Friction question — VERIFIED RAW (Supabase export)
 
@@ -84,6 +90,8 @@ The message says CRC "might help" — that is not a proven benefit, and CRC does
 >  
 > My Best,
 > Josh
+
+> **Note (2026-10-13):** also directly verified in the raw LinkedIn/Dripify thread supplied by the user 2026-10-13 (consistent with the Supabase export). The Oct 13 message is SI8's first reply to his question "How has it been looking on your end?"
 
 **No subsequent SI8 contact of any kind** exists after this reply — no follow-up (raw or CRM-summary), sample, report, call invitation, research probe, draft, queued message, Commercial Assurance pitch or CRC link. **SI8 never answered his question "How has it been looking on your end?"** `last_contacted` = 2026-04-27, the date of this exchange.
 

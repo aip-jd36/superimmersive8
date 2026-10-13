@@ -6,9 +6,9 @@ contacts:
 slug: justin-lufair-brown
 stage: lead_responded
 source: stec_campaign
-next_action: "Send the approved Oct 12 CRC warm-lead reactivation message (see 'APPROVED, NOT SENT' section) in the existing Vanessa LinkedIn thread, then log the actual interaction"
-next_action_date: 2026-10-12
-last_contacted: 2026-06-10
+next_action: "Await evidence from Justin after the Oct 13 CRC reactivation: a natural reply, CRC use attributable to ref B094, product feedback, a current client problem/applicability, or movement toward Commercial Assurance. The send is outreach, not a qualification signal; no automatic follow-up. Review on 2026-10-20."
+next_action_date: 2026-10-20
+last_contacted: 2026-10-13
 blocked: false
 blocked_reason: null
 review_date: null
@@ -22,19 +22,21 @@ Account file created 2026-10-10 from `03_Sales/CRM.md` row B094 plus the raw Sup
 
 **Profile:** historical role (Supabase lead record, captured Apr 30 and repeated through the Jul 17 export) — "Creative Producer, AI Video Production", Amazon, Los Angeles. The latest local profile data (`SI8 Rights Verified-Grid View.csv`, scrape date unknown) reads "Creative Producer, AI Video Production at Amazon". Current employment is not independently verified.
 
+**Current Dripify display (2026-10-13, user-supplied):** Creative Producer, AI Video Production at Amazon; Company: Amazon; Los Angeles, United States. Recorded as currently displayed profile evidence; historical profile data elsewhere in this file is preserved, not overwritten, and current employment is not independently verified.
+
 ## Interaction log (reverse-chronological)
 
-### 2026-10-12 planned — LinkedIn CRC warm-lead reactivation — APPROVED, NOT SENT
+### 2026-10-13 — LinkedIn CRC warm-lead reactivation — SENT 2026-10-13 (user-confirmed; 21:54 Taipei as displayed)
 
-**Status: APPROVED — NOT SENT.** Approved by JD 2026-10-10. Nothing in this section has been sent; it is not contact and does not change `last_contacted` or `stage`.
+**Status: SENT — 2026-10-13.** Approved by JD 2026-10-10 for 2026-10-12; actually sent manually by the user from Vanessa in the existing LinkedIn thread on 2026-10-13, 21:54 Taipei time as displayed (delivery not independently verified). `last_contacted` updated to 2026-10-13. The send is outreach — not a reply, click, CRC use, interest, product validation, or qualification signal; `stage` is unchanged.
 
-- **Planned send date:** 2026-10-12
+- **Sent:** 2026-10-13, 21:54 Taipei as displayed (planned 2026-10-12)
 - **Channel / sender:** LinkedIn, existing Vanessa thread (campaign `SI8_Legal Friction (4 Msg)`)
 - **Purpose:** CRC warm-lead reactivation — answer Justin's Apr 28 question about whether SI8 was building something around the problem
 - **CRC URL (attribution `ref` = CRM ID):** https://app.superimmersive8.com/crc?ref=B094
 - **CRC status:** Justin has never received the live free Commercial Readiness Check. The Jun 10 sample (historical Chain of Title / Commercial Assurance output) is not equivalent to CRC.
 
-**Approved message (send exactly as written):**
+**Message sent (exactly as approved):**
 
 ```
 Hi Justin — coming back to a conversation we had earlier this year. You asked whether we were building a tool around some of the AI production issues you were seeing.
@@ -56,7 +58,7 @@ The message's "for bigger clients…" sentence is a concise outreach paraphrase 
 
 **Strategic decision recorded (2026-10-10):** on 2026-07-19 B094 was moved to Nurturing under the then-current "ICP 3 / film-adjacent" segment hold (`03_Sales/SALES-PIPELINE.md`, `03_Sales/ICP-DEFINITIONS.md`). That record stands as the decision made at the time. For this CRC reactivation it is superseded: the later Commercial Readiness research spec (`03_Sales/validation/CR-WARM-LEAD-RESEARCH-SPEC.md`, Aug 30) states the earlier segment classification does not carry over and leads should be reassessed fresh; Justin's raw evidence is predominantly about commercial production (Fortune 500 brands, campaign approval, agencies, deliverables, legal requirements, production responsibility); and Strategic OS reassessed B094 individually and approved him for CRC reactivation. "ICP 3", "film-adjacent", "buyer", "T1" and similar labels are internal classifications, not customer evidence.
 
-**Post-send checklist:** change this heading to `— SENT <date>`, update `last_contacted` to the real send date, set the next review step, and keep `stage: lead_responded` unless Justin replies with new evidence.
+**Post-send (2026-10-13):** heading and `last_contacted` updated; `stage: lead_responded` kept. Next step: await evidence (natural reply, ref-B094-attributed CRC use, product feedback, client applicability, Commercial Assurance movement); review 2026-10-20. Nothing beyond the send is recorded or inferred — no reply after the send and no CRC activation is established.
 
 ### 2026-07-19 — internal: moved to Nurturing (ICP 3 / film-adjacent hold)
 
@@ -66,9 +68,11 @@ Internal classification only, not customer contact (`SALES-PIPELINE.md`). Supers
 
 Queued 2026-06-16 (commit `44a9c546`): "Still open to that deeper conversation you mentioned — would a 20-minute call this week or next work?" Never subsequently confirmed as sent; the `CRM.md` row still reads "Send Jun 17". Not counted as contact.
 
-### 2026-06-10 — Vanessa follow-up with sample link — CRM SUMMARY ONLY (historically recorded as sent)
+### 2026-06-10 — Vanessa follow-up with sample link — VERIFIED SENT (raw LinkedIn/Dripify thread supplied by the user 2026-10-13)
 
 Recorded the same day in `CRM.md` (commit `5bcbf2a3`): Vanessa acknowledged the SAG-AFTRA / Fortune 500 context, introduced SI8 as an output-documentation / Chain of Title layer, sent a sample link, and asked whether this was something people could use now. No raw message text is on file. No recorded response from Justin. Used as `last_contacted` (2026-06-10), consistent with how CRM-summary sends were treated for B011 and B088.
+
+> **Correction (2026-10-13):** this message is now **raw-verified as actually sent** — it is visible in the raw LinkedIn/Dripify thread supplied by the user 2026-10-13, alongside Justin's Apr 28 reply. Its exact text has not been copied into this file. As supplied, it presented the then-current positioning: SI8 trying to make AI-video rights clearance and chain of title easier; "Chain of Title for AI video"; claims around tool licensing, training data, indemnification chain and provenance; a historical sample URL; and the question "Do you think this is something that people can use right now?" These are **historical outbound claims, not current product truth**, and their having been sent does not make them so. No reply from Justin to it is established. The Jun 17 call invite below remains SEND STATUS UNKNOWN.
 
 ### 2026-04-28 — Justin's reply to the Legal Friction question — VERIFIED RAW (Supabase export)
 

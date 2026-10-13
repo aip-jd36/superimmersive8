@@ -6,9 +6,9 @@ contacts:
 slug: graeme-carr
 stage: lead_responded
 source: stec_campaign
-next_action: "Send the approved Oct 12 CRC warm-lead reactivation message (see 'APPROVED, NOT SENT' section) in the existing Vanessa LinkedIn thread, then log the actual interaction"
-next_action_date: 2026-10-12
-last_contacted: 2026-05-20
+next_action: "Await evidence from Graeme after the Oct 13 CRC reactivation: a natural reply, CRC use attributable to ref B074, product feedback, a current client problem/applicability, or movement toward Commercial Assurance. The send is outreach, not a qualification signal; no automatic follow-up. Review on 2026-10-20."
+next_action_date: 2026-10-20
+last_contacted: 2026-10-13
 blocked: false
 blocked_reason: null
 review_date: null
@@ -22,19 +22,21 @@ Account file created 2026-10-10 from `03_Sales/CRM.md` row B074 plus the raw Sup
 
 **Profile:** historical role (Supabase lead record, Apr 19 through the Jul 17 export) — "VFX & AI Artist (Commercials, Brand Films)", OBSIDIAN, Amsterdam. The later local profile data (`SI8 Rights Verified-Grid View.csv`, scrape date unknown) reads "Senior VFX Supervisor & Artist · AI Filmmaker · Creative Producer · Building hybrid AI-VFX workflows for film, television, brand films & global campaigns", OBSIDIAN, Amsterdam. That is later local profile evidence, not proof of current employment; current employment is not independently verified.
 
+**Current Dripify display (2026-10-13, user-supplied):** Senior VFX Supervisor & Artist · AI Filmmaker · Creative Producer · Building hybrid AI-VFX workflows for film, television, brand films & global campaigns.; Company: Ambassadors; Position: Senior Generative AI Artist; Amsterdam, Netherlands. Recorded as currently displayed profile evidence; historical profile data elsewhere in this file is preserved, not overwritten, and current employment is not independently verified.
+
 ## Interaction log (reverse-chronological)
 
-### 2026-10-12 planned — LinkedIn CRC warm-lead reactivation — APPROVED, NOT SENT
+### 2026-10-13 — LinkedIn CRC warm-lead reactivation — SENT 2026-10-13 (user-confirmed; 21:56 Taipei as displayed)
 
-**Status: APPROVED — NOT SENT.** Approved by JD 2026-10-10. Nothing in this section has been sent; it is not contact and does not change `last_contacted` or `stage`.
+**Status: SENT — 2026-10-13.** Approved by JD 2026-10-10 for 2026-10-12; actually sent manually by the user from Vanessa in the existing LinkedIn thread on 2026-10-13, 21:56 Taipei time as displayed (delivery not independently verified). `last_contacted` updated to 2026-10-13. The send is outreach — not a reply, click, CRC use, interest, product validation, or qualification signal; `stage` is unchanged.
 
-- **Planned send date:** 2026-10-12
+- **Sent:** 2026-10-13, 21:56 Taipei as displayed (planned 2026-10-12)
 - **Channel / sender:** LinkedIn, existing Vanessa thread (campaign `SI8_Legal Friction (4 Msg)`)
 - **Purpose:** CRC warm-lead reactivation — acknowledge the sample report SI8 offered and never sent, and introduce the live Commercial Readiness Check
 - **CRC URL (attribution `ref` = CRM ID):** https://app.superimmersive8.com/crc?ref=B074
 - **CRC status:** Graeme has never received the live free Commercial Readiness Check.
 
-**Approved message (send exactly as written):**
+**Message sent (exactly as approved):**
 
 ```
 Hi Graeme — I was looking back at our conversation earlier this year and realized we never actually sent you the sample report you asked to see. Sorry about that.
@@ -59,7 +61,7 @@ I'd be curious how it compares with the process you're already using.
 
 **Wave 1 collision — do not double-contact:** Graeme also appears in an unlaunched CR Wave 1 Track B population (`03_Sales/validation/SI8_CR-TrackB_JD_Wave1_FINAL.csv`, local branch `cr-wave1-launch`, sender JD, list-local row ID "B002" — not a CRM ID and unrelated to CRM B002). Its QA record states "No Dripify campaign created. No LinkedIn message sent. No CRC invitation sent." — so that is not historical contact. B074 is now approved for this Vanessa warm-lead CRC reactivation; he must NOT subsequently receive a separate JD Wave 1 CRC invitation without explicit Strategic OS review, and the unlaunched Wave 1 population should be reconciled before any future launch.
 
-**Post-send checklist:** change this heading to `— SENT <date>`, update `last_contacted` to the real send date, set the next review step, and keep `stage: lead_responded` unless Graeme replies with new evidence.
+**Post-send (2026-10-13):** heading and `last_contacted` updated; `stage: lead_responded` kept. Next step: await evidence (natural reply, ref-B074-attributed CRC use, product feedback, client applicability, Commercial Assurance movement); review 2026-10-20. Nothing beyond the send is recorded or inferred — no reply after the send and no CRC activation is established.
 
 ### 2026-05-19 / 2026-05-20 — sample report offered; Graeme asks to see it — VERIFIED RAW (Supabase export)
 
@@ -77,6 +79,8 @@ I'd be curious how it compares with the process you're already using.
 **Graeme, Wed May 20 (01:53 am as displayed) — his last reply:**
 > I would be interested in seeing that Vanessa
 
+> **Note (2026-10-13):** the May 19 offer and Graeme's May 20 reply are also directly visible in the raw LinkedIn/Dripify thread supplied by the user 2026-10-13 (consistent with the Supabase export). No delivery of the sample report between May 20 and the Oct 13 reactivation is established — the Oct 13 message acknowledges it was never sent.
+
 In context, "that" refers to the sample report Vanessa had just offered ("Happy to drop a sample report here.") — a sample of the then-current Chain of Title review output. This is curiosity and a request to see a specific artifact; it is not product-buying intent, a willingness to test, a meeting request, or interest in today's CRC. He did not answer Vanessa's question about whether tool disclosure goes to the client as a document or in conversation. **No SI8 contact of any kind followed** — no sample, follow-up, draft, queued message or CRC link. `last_contacted` = 2026-05-20, his reply — the latest real interaction in either direction. The "Happy to drop a sample report here." wording is the raw text (an earlier Strategic OS packet paraphrased it as "I can drop…").
 
 ### 2026-04-17 — Graeme's reply to the Legal Friction question — VERIFIED RAW (Supabase export)
@@ -93,6 +97,8 @@ In context, "that" refers to the sample report Vanessa had just offered ("Happy 
 
 **Graeme (06:05 pm, separate message):**
 > We do disclose which tools we use
+
+> **Note (2026-10-13):** also directly visible in the raw LinkedIn/Dripify thread supplied by the user 2026-10-13.
 
 **What his words establish:** asked whether client legal teams ask for documentation on how AI-generated video was made, he said "Not directly" and that it depends on the project — "If its a big campaign then yes, if its for social not so much"; his side keeps a record of what was uploaded where and what references were used; they often require the director/agency/client to supply approved references so the onus on legality of those references sits with the supplying party from the start; they disclose which tools they use.
 

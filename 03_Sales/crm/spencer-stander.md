@@ -6,9 +6,9 @@ contacts:
 slug: spencer-stander
 stage: lead_responded
 source: stec_campaign
-next_action: "Send the approved Oct 12 CRC warm-lead reactivation message (see 'APPROVED, NOT SENT' section) in the existing Vanessa LinkedIn thread, then log the actual interaction"
-next_action_date: 2026-10-12
-last_contacted: 2026-06-10
+next_action: "Await evidence from Spencer after the Oct 13 CRC reactivation: a natural reply, CRC use attributable to ref B149, product feedback, a current client problem/applicability, or movement toward Commercial Assurance. The send is outreach, not a qualification signal; no automatic follow-up. Review on 2026-10-20."
+next_action_date: 2026-10-20
+last_contacted: 2026-10-13
 blocked: false
 blocked_reason: null
 review_date: null
@@ -22,19 +22,21 @@ Account file created 2026-10-10 from `03_Sales/CRM.md` row B149 plus the raw Sup
 
 **Profile:** historical role (Supabase lead record, May 22 through the Jul 17 export) — "Producer", STANDER PRODUCTIONS INC, Los Angeles Metropolitan Area. The later local profile data (`SI8 Rights Verified-Grid View.csv`, scrape date unknown) reads "Producer - Executive Production, Feature Films, Television Series, Marketing, and branded content.", STANDER PRODUCTIONS INC. That is later local profile evidence, not proof of current employment; current employment is not independently verified.
 
+**Current Dripify display (2026-10-13, user-supplied):** Chief Content Officer | AI Strategy Advisor | Executive Producer | Brand, Film, TV & Vertical Content; Company: STANDER PRODUCTIONS INC; Position: Producer; Los Angeles Metropolitan Area, United States. Recorded as currently displayed profile evidence; historical profile data elsewhere in this file is preserved, not overwritten, and current employment is not independently verified.
+
 ## Interaction log (reverse-chronological)
 
-### 2026-10-12 planned — LinkedIn CRC warm-lead reactivation — APPROVED, NOT SENT
+### 2026-10-13 — LinkedIn CRC warm-lead reactivation — SENT 2026-10-13 (user-confirmed; 21:57 Taipei as displayed)
 
-**Status: APPROVED — NOT SENT.** Approved by JD 2026-10-10. Nothing in this section has been sent; it is not contact and does not change `last_contacted` or `stage`.
+**Status: SENT — 2026-10-13.** Approved by JD 2026-10-10 for 2026-10-12; actually sent manually by the user from Vanessa in the existing LinkedIn thread on 2026-10-13, 21:57 Taipei time as displayed (delivery not independently verified). `last_contacted` updated to 2026-10-13. The send is outreach — not a reply, click, CRC use, interest, product validation, or qualification signal; `stage` is unchanged.
 
-- **Planned send date:** 2026-10-12
+- **Sent:** 2026-10-13, 21:57 Taipei as displayed (planned 2026-10-12)
 - **Channel / sender:** LinkedIn, existing Vanessa thread (campaign `SI8_Legal Friction (4 Msg)`)
 - **Purpose:** CRC warm-lead reactivation — return to the clearance questions he described for larger brands and paid media
 - **CRC URL (attribution `ref` = CRM ID):** https://app.superimmersive8.com/crc?ref=B149
 - **CRC status:** Spencer has never received the live free Commercial Readiness Check. The Jun 10 contact concerned the historical paid Chain of Title offer, not CRC.
 
-**Approved message (send exactly as written):**
+**Message sent (exactly as approved):**
 
 ```
 Hi Spencer — wanted to come back to something you said earlier this year about the clearance questions you're seeing around AI work, especially with larger brands and paid media.
@@ -61,7 +63,7 @@ I'd be really interested to know whether it covers the questions you're actually
 
 **Collision status:** a targeted audit found him absent from the CR Wave 1 lists (`cr-wave1-launch`), the STEC CRC prelaunch lists, the Standing Encore send lists, and the local staged send lists checked. He appears in the profile master CSV only as research population, not planned contact. No current planned-send collision was identified. (An exhaustive all-branches scan was started but stopped before completion, so this is not an exhaustive search.)
 
-**Post-send checklist:** change this heading to `— SENT <date>`, update `last_contacted` to the real send date, set the next review step, and keep `stage: lead_responded` unless Spencer replies with new evidence.
+**Post-send (2026-10-13):** heading and `last_contacted` updated; `stage: lead_responded` kept. Next step: await evidence (natural reply, ref-B149-attributed CRC use, product feedback, client applicability, Commercial Assurance movement); review 2026-10-20. Nothing beyond the send is recorded or inferred — no reply after the send and no CRC activation is established.
 
 ### 2026-07-19 — internal: flagged in the ICP 3-adjacent hold
 
@@ -71,9 +73,11 @@ Internal classification only, not customer contact. Superseded for this individu
 
 Logged in commit `00c2b8af` ("crm: log Jun 29 message drafts for 11 leads"). No evidence it was ever sent. Not contact. Its wording ("We've finalized the product and it's built around exactly what you described…") overclaims and must not be reused.
 
-### 2026-06-10 — Vanessa manual follow-up — CRM SUMMARY ONLY (historically recorded as sent)
+### 2026-06-10 — Vanessa manual follow-up — VERIFIED SENT (raw LinkedIn/Dripify thread supplied by the user 2026-10-13)
 
 Recorded the same day in `CRM.md` (commit `5bcbf2a3`): mirrored his clearance framing, introduced the then-current Chain of Title offer, quoted the historical tiers, and asked whether it would fit his existing clearance workflow. No raw message text is on file. No reply from Spencer. Used as `last_contacted` (2026-06-10), consistent with how CRM-summary sends were treated for other queued leads. Separately, `BUILD_IN_PUBLIC_LOG.md` says he "received only one automated follow-up"; that claim is unverified (SEND STATUS UNKNOWN) — no automated message appears in the raw thread — and is not counted as contact.
+
+> **Correction (2026-10-13):** this message is now **raw-verified as actually sent** — it is visible in the raw LinkedIn/Dripify thread supplied by the user 2026-10-13. Its exact text has not been copied into this file. As supplied, it presented the then-current positioning: "Chain of Title for AI video"; tool licensing; usage rights; territory coverage; indemnification chain; "$29 per video for automatic self service / $499 per video for a 90-minute human review"; and a question about whether it would slot into his existing clearance workflow. These are **historical outbound product/pricing claims, not current product truth**, and their having been sent does not make them so. No reply from Spencer to it is established.
 
 ### 2026-05-18 — Spencer's reply to the Legal Friction question — VERIFIED RAW (Supabase export)
 
@@ -92,6 +96,8 @@ Recorded the same day in `CRM.md` (commit `5bcbf2a3`): mirrored his clearance fr
 > For most clients, I think the practical answer is to treat AI video like any other production deliverable: keep a basic paper trail, document the workflow, separate owned/licensed/generated assets, and make sure the usage rights match the campaign.
 >
 > It is still uneven, though. Some legal teams are very on top of it. Others are only starting to ask.
+
+> **Note (2026-10-13):** also directly visible in the raw LinkedIn/Dripify thread supplied by the user 2026-10-13. Interpretation preserved: the "basic paper trail / document the workflow / separate assets / match usage rights" passage is his view of the practical answer "for most clients", not necessarily a description of his own workflow; he said legal-team sophistication remains uneven.
 
 **What his words establish:** he is "definitely seeing it come up more this year, especially with larger brands and anything headed into paid media"; the questions are "usually less about the creative process itself and more about clearance" — what tools were used, whether a real person's likeness or voice was involved, what source materials informed the work, whether there are model releases, music/image rights, and whether the final asset can be safely used across the intended platforms and territories; his view that "For most clients, I think the practical answer is to treat AI video like any other production deliverable" — keep a basic paper trail, document the workflow, separate owned/licensed/generated assets, and make sure usage rights match the campaign (advice, not a description of his own process); legal-team maturity is uneven — "Some legal teams are very on top of it. Others are only starting to ask."
 

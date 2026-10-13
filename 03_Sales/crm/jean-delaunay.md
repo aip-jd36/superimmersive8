@@ -6,9 +6,9 @@ contacts:
 slug: jean-delaunay
 stage: lead_responded
 source: stec_campaign
-next_action: "Send the approved Oct 12 CRC warm-lead reactivation message (see 'APPROVED, NOT SENT' section) in the existing Vanessa LinkedIn thread, then log the actual interaction"
-next_action_date: 2026-10-12
-last_contacted: 2026-05-15
+next_action: "Await evidence from Jean after the Oct 13 CRC reactivation: a natural reply, CRC use attributable to ref B151, product feedback, a current client problem/applicability, or movement toward Commercial Assurance. The send is outreach, not a qualification signal; no automatic follow-up. Review on 2026-10-20."
+next_action_date: 2026-10-20
+last_contacted: 2026-10-13
 blocked: false
 blocked_reason: null
 review_date: null
@@ -25,18 +25,20 @@ Graduated from `03_Sales/CRM.md` (row B151) on 2026-09-01. Geo: USA. Original co
 **Commercial Readiness Discovery tags:** Commercial Readiness Discovery · Warm Lead · Prior Response · Qualitative Evidence · Priority 3
 **CR hypothesis being tested:** Does evidence/documentation feed into a distinct interpretation + commercial-use decision layer?
 
+**Current Dripify display (2026-10-13, user-supplied):** Freelance Creative Director & CG Lead // Filmmaker; Position: Independent Filmmaker; Los Angeles, United States. Recorded as currently displayed profile evidence; historical profile data elsewhere in this file is preserved, not overwritten, and current employment is not independently verified.
+
 ## Interaction log (reverse-chronological)
 
-### 2026-10-12 planned — LinkedIn CRC warm-lead reactivation — APPROVED, NOT SENT
+### 2026-10-13 — LinkedIn CRC warm-lead reactivation — SENT 2026-10-13 (user-confirmed; 21:53 Taipei as displayed)
 
-**Status: APPROVED — NOT SENT.** Approved by JD 2026-10-10. Nothing in this section has been sent; it is not contact and does not change `last_contacted` or `stage`.
+**Status: SENT — 2026-10-13.** Approved by JD 2026-10-10 for 2026-10-12; actually sent manually by the user from Vanessa in the existing LinkedIn thread on 2026-10-13, 21:53 Taipei time as displayed (delivery not independently verified). `last_contacted` updated to 2026-10-13. The send is outreach — not a reply, click, CRC use, interest, product validation, or qualification signal; `stage` is unchanged.
 
-- **Planned send date:** 2026-10-12
+- **Sent:** 2026-10-13, 21:53 Taipei as displayed (planned 2026-10-12)
 - **Channel / sender:** LinkedIn, existing Vanessa thread (campaign `SI8_Legal Friction (4 Msg)`, list `SI8_RV_R4LI_CreaDir_AI Video_LA_0426A_VP`)
 - **Purpose:** CRC warm-lead reactivation — challenge-led / counterintuitive-knowledge framing (invites him to pressure-test CRC against a real project, including challenging it if he thinks it's wrong). The copyright example is approved outreach copy, not evidence that Jean holds that misconception.
 - **CRC URL (attribution `ref` = CRM ID):** https://app.superimmersive8.com/crc?ref=B151
 
-**Approved message (send exactly as written):**
+**Message sent (exactly as approved):**
 
 ```
 Hi Jean — I've been thinking about something you said earlier this year — that AI production is still pretty "wild west," even on the legal side.
@@ -68,6 +70,7 @@ I'd actually be curious to see if you can stump it with a real project. If it te
   - "Others need to work on custom trained models"
   - "It's still very much the wild west right now... Even on the legal side of things."
   - "Hope that helps :)"
+- *Note (2026-10-13):* the May 15 Vanessa message and Jean's replies are also directly visible in the raw LinkedIn/Dripify thread supplied by the user 2026-10-13 (consistent with the Supabase export).
 
 **Current-state corrections (2026-10-10, from the raw-thread reconstruction):**
 - **What his words establish:** an initial conversation about the tools intended for the production; the client/agency runs that information through its legal team; his side learns its limitations "very early in the process"; the situation varies significantly by client; some clients have preexisting relationships with specific AI model providers; others need to work on custom-trained models; he called it "very much the wild west", including on the legal side.
@@ -75,13 +78,13 @@ I'd actually be curious to see if you can stump it with a real project. If it te
 - **Engagement:** one SI8 question, one prompt and substantive five-message reply ending "Hope that helps :)", and no SI8 reply afterward. That is strong participation in a single discovery exchange — not product interest or buying intent.
 - **`last_contacted`** corrected from 2026-09-01 (the date of an unsent draft, not contact) to 2026-05-15 — his verified reply, the latest real interaction. There is no evidence of any SI8 contact after it.
 
-**When actually sent:** change this heading to `— SENT <date>`, update `last_contacted` to the real send date, set the next review step, and keep `stage: lead_responded` unless Jean replies with new evidence.
+**Post-send (2026-10-13):** heading and `last_contacted` updated; `stage: lead_responded` kept. Next step: await evidence (natural reply, ref-B151-attributed CRC use, product feedback, client applicability, Commercial Assurance movement); review 2026-10-20. Nothing beyond the send is recorded or inferred — no reply after the send and no CRC activation is established.
 
 ### 2026-09-01 — discovery follow-up drafted, not sent
 
 **Previous evidence (from prior campaign reply, CRM.md):** "Initial conversation about tools before production — client/agency runs it through legal so we know limitations very early." Pre-production vetting described independently; CD/Designer at a high-end commercial production company in LA.
 
-> **Correction (2026-10-10):** the quoted line above is a `CRM.md` paraphrase, not Jean's words — "before production", "vetting" and "high-end" are SI8's additions. His verbatim reply is in the 2026-10-12 section above. Preserved as the Sep 1 record.
+> **Correction (2026-10-10):** the quoted line above is a `CRM.md` paraphrase, not Jean's words — "before production", "vetting" and "high-end" are SI8's additions. His verbatim reply is in the 2026-10-13 section above. Preserved as the Sep 1 record.
 
 **Why this matters:** May represent either genuine commercial clearance or simply routine project intake — the two need to be distinguished, not assumed.
 
@@ -92,6 +95,6 @@ I'd actually be curious to see if you can stump it with a real project. If it te
 >
 > Does that conversation ever actually surface a blocker, or is it more of a formality at this point? Curious who's usually involved in it.
 
-> **Note (2026-10-10):** DRAFT / NOT SENT — superseded by the approved Oct 12 message; kept as a historical draft.
+> **Note (2026-10-10):** DRAFT / NOT SENT — superseded by the Oct 13 CRC reactivation message (approved for Oct 12); kept as a historical draft.
 
 **Analytical discipline reminder (applies once a reply lands):** classify as CURRENT FACT before drawing any WORKING HYPOTHESIS. Lowest priority tier (3) — folded into the next low-priority re-engage cycle, not urgent.
