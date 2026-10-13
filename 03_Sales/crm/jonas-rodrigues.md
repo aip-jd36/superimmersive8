@@ -4,11 +4,11 @@ contacts:
   - name: "Jonas Rodrigues"
     role: "AI Creative Director | VFX & CGI · 10 years on set and in post, bringing the soul AI lacks. Creative direction + generative pipeline firmly under control. (as displayed on the Standing Encore dashboard)"
 slug: jonas-rodrigues
-stage: lead_responded
+stage: meeting_scheduled
 source: stec_campaign
-next_action: "Await Jonas's scheduling response to the Oct 12 meeting invitation (offered Wed–Fri Oct 14–16, 9:30–11:30 PM Taipei). If he proposes a time, prepare JD's meeting handoff. Review on 2026-10-15. Do not send another message automatically."
-next_action_date: 2026-10-15
-last_contacted: 2026-10-12
+next_action: "Conduct the discovery meeting with Jonas — Wed 2026-10-14, 21:00–21:20 Asia/Taipei (10:00–10:20 Curitiba), Zoom; calendar invitation sent by JD, acceptance not verified — and record findings. Exploratory practitioner discovery, not a demo or qualified opportunity; do not introduce CRC by default."
+next_action_date: 2026-10-14
+last_contacted: 2026-10-13
 blocked: false
 blocked_reason: null
 review_date: null
@@ -27,6 +27,50 @@ Account record created 2026-10-12 (CRM ID **B173**) on graduation from the CRC L
 **Arm vs. follow-up treatment:** the DURING arm governs the automated sequence. The Oct 12 manual follow-up is a separate treatment, `WORKFLOW_DISCOVERY / MEETING_INVITATION`, and does not change the arm assignment.
 
 ## Interaction log (reverse-chronological)
+
+### 2026-10-14 (scheduled) — discovery meeting with JD — CONFIRMED TIME; ZOOM INVITATION SENT; NOT YET HELD
+
+**Meeting:** SI8 / Jonas Rodrigues — AI-video workflow discovery
+- **When:** Wednesday 2026-10-14, 21:00–21:20 Asia/Taipei (UTC+8) = 10:00–10:20 Curitiba (UTC−3); 20-minute proposed duration
+- **Participants:** JD and Jonas Rodrigues (business@creativejonas.com)
+- **Platform:** Zoom
+- **Calendar invitation:** SENT — explicitly confirmed by the user on 2026-10-13. No Zoom URL, calendar event ID, or invitation timestamp is on file.
+- **Calendar acceptance:** NOT independently verified (invitation sent ≠ invitation accepted)
+- **Occurrence:** not yet held — do not record as completed until it happens
+- **Purpose:** exploratory practitioner discovery — not a product demo or a qualified sales opportunity
+
+**Discovery objective:** understand Jonas's actual commercial AI-video production workflow, his current commercial-rights controls, and whether independent assurance would add value beyond his existing process. Do not introduce CRC or send ref UWHD by default; `CRC_INTRODUCED=false` and `CRC_LINK_SENT=false` still hold.
+
+**CURRENT FACT:** Jonas proactively suggested a 20-minute call (Oct 12); reports producing AI-generated content for companies in Brazil and for clients abroad; reports looking at SI8's website; explicitly agreed to Wednesday at 9 PM Taipei time; supplied his email address. JD confirms sending the Zoom calendar invitation.
+
+**NOT YET ESTABLISHED:** calendar acceptance or actual attendance; commercial-rights pain; demand for independent assurance; willingness to pay; CRC usage; a qualified commercial opportunity.
+
+**State:** `stage: meeting_scheduled` (a time is confirmed and the invitation sent); `last_contacted` = 2026-10-13 (Angel's latest outbound LinkedIn message); next review 2026-10-14. Do not alter the DURING arm assignment or ref UWHD.
+
+### 2026-10-12 → 2026-10-13 — scheduling exchange — Standing Encore dashboard (user-supplied)
+
+Times are as displayed on the dashboard; the display timezone is not verified. Messages are in chronological order within this entry.
+
+**Jonas (2026-10-12, 9:51 PM as displayed — exact):**
+> Great! I took a look at your website. I’d love to speak with your manager. I currently produce a lot of content including AI-generated content for companies here in Brazil, and I also have clients abroad. I could connect with your manager on Tuesday at 9:00 PM Taipei time. How does that sound?
+
+**Angel (2026-10-13, 6:56 AM as displayed — exact):**
+> hi Jonas! unfortunately, he's already booked on Tuesday night (Oct. 13) for other calls. Would Wed./Thrs this week work for you?
+
+**Jonas (2026-10-13, 7:24 AM as displayed — exact):**
+> Wednesday 09 PM its fine!
+
+**Jonas (2026-10-13, 7:24 AM as displayed — exact):**
+> Taipei time
+
+**Angel (2026-10-13, 8:15 AM as displayed — exact):**
+> great! what's your email address? JD will send you a zoom invite for Wed. Oct. 14th 9pm TPE time.   Thanks~
+
+**Jonas (2026-10-13, 9:38 AM as displayed — exact):**
+> business@creativejonas.com
+
+**Jonas (2026-10-13, 9:38 AM as displayed — exact):**
+> Looking foward for the call!
 
 ### 2026-10-12 — manual follow-up with meeting invitation — SENT (user-confirmed; exact send time unverified)
 
