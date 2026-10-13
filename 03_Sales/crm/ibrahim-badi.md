@@ -23,6 +23,10 @@ Graduated from `03_Sales/CRM.md` (row B087) on 2026-09-01. Geo: London/UK. Origi
 **Commercial Readiness Discovery tags:** Commercial Readiness Discovery · Warm Lead · Prior Response · Qualitative Evidence · Priority 1
 **CR hypothesis being tested:** Does evidence/documentation feed into a distinct interpretation + commercial-use decision layer?
 
+**Cross-alias contact history / collision (recorded 2026-10-13):** Ibrahim has SI8 threads with **two aliases** — Ivy (original Legal Friction thread; the 2026-09-23 CRC send) and **Vanessa** (campaign `SI8_RV_R4LI_AgencyLdr_ArmB_Gbl_0826A_VP`, Dripify lead ID 671410811; 2026-09-20 exchange below). The two interactions occurred three days apart. No explanation for the move between aliases is recorded or inferred, and the Sep 23 Ivy message is not claimed to be a response to his Sep 20 request to Vanessa. **Operational implication:** do not place Ibrahim into a new Vanessa CRC reactivation while this history remains relevant.
+
+**Displayed profile — Vanessa Dripify thread (user-supplied 2026-10-13):** Ibrahim Badi · "Cinematic AI Director | Voiceover Artist | Founder, IKM Marketing" · Company: IKM Marketing · Position: Managing Director · United Kingdom. Campaign displayed as **Paused**. Source-specific; other profile data in this file (e.g. role "MD") is preserved, not overwritten.
+
 ## Interaction log (reverse-chronological)
 
 ### 2026-09-23 — CRC product-feedback / re-engagement message SENT (LinkedIn, Ivy, existing thread)
@@ -45,6 +49,34 @@ Graduated from `03_Sales/CRM.md` (row B087) on 2026-09-01. Geo: London/UK. Origi
 **Supersedes:** the 2026-09-01 Commercial Readiness discovery follow-up below (never sent) as the open next action — this send replaces it; it is not a second pending thread. The earlier unsent drafts (Jun 29 evidence-gap question; Jul 25 `03_Sales/reply-drafts/REPLY-DRAFT-B087-Ibrahim-Badi.md`) likewise remain unsent historical artifacts. Also corrects `last_contacted`, which previously read 2026-09-01 from the unsent draft; the real last contact before this send was his May 28 reply / SI8's subsequent brand-vertical answer.
 
 **Next step (2026-09-30):** review the thread. If no reply, decide then whether a light follow-up is warranted — no automatic follow-up has been decided.
+
+### 2026-09-20 — Vanessa outreach and Ibrahim's reply — VERIFIED RAW (Dripify/LinkedIn thread, user-supplied 2026-10-13)
+
+Source: Dripify/LinkedIn thread supplied by the user on 2026-10-13. Campaign displayed `SI8_RV_R4LI_AgencyLdr_ArmB_Gbl_0826A_VP` (currently shown as Paused); Dripify lead ID 671410811. Times are as displayed; timezone not verified. Recovered after the fact — this exchange was not previously recorded anywhere in the CRM.
+
+**Vanessa (2026-09-20, 03:45 am as displayed):**
+> Hi Ibrahim,
+>
+> Curious if this has been discussed at your agency. An AI platform can give you commercial-use rights to a video without the video necessarily being copyrightable.
+>
+> Does that ever come up with clients?
+
+**Ibrahim (2026-09-20, 03:48 am as displayed — exact):**
+> Hi Vanessa, not at the moment as I usually create original content.
+>
+> Tell me a bit more about your platform.
+
+**CURRENT FACT:** Ibrahim received this Vanessa message and replied. His reply carries two distinct signals, both preserved:
+1. **Against assuming active pain on this issue:** "not at the moment as I usually create original content." The specific commercial-use-rights vs. copyrightability issue Vanessa raised was **not** established by him as a current client problem at that time. Not to be read as an active copyright problem, client clearance pain, blocked work, legal-team pressure, documentation burden, or dissatisfaction with his existing process.
+2. **Explicit product curiosity / request for more information:** "Tell me a bit more about your platform." Stronger than a generic acknowledgment — a direct request to learn more about SI8's platform.
+
+**NOT ESTABLISHED by this reply:** product need; agreement with SI8's framing; willingness to test; willingness to buy or pay; Commercial Assurance demand; meeting intent; an active project need. **Classification:** explicit product curiosity / request for more information — not buying intent.
+
+**Source boundaries:** this reply is not used to weaken or reinterpret his earlier, independently recorded statements (documentation in regulated-sector work, etc.), and that earlier evidence is not used to reinterpret this reply. No SI8 reply to it in the Vanessa thread is established.
+
+**Chronology:** 2026-09-20 Vanessa exchange (this entry) → 2026-09-23 Ivy CRC send (above), sent with the plain `https://app.superimmersive8.com/crc` URL, which carries **no personalized ref** — so any CRC usage cannot be attributed to B087 via `acquisition_ref`. No CRC activation is claimed.
+
+**State:** recovering this evidence does not change `stage` (`lead_responded`) or `last_contacted` (2026-09-23, the later Ivy send), and no new follow-up is set.
 
 ### 2026-09-01 — discovery follow-up drafted, not sent
 
