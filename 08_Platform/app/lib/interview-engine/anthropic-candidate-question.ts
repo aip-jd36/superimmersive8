@@ -42,7 +42,7 @@ import type {
   CandidateQuestionProposal,
 } from './candidate-question'
 import { CANDIDATE_QUESTION_KINDS, FOLLOW_UP_NEEDS, type CandidateQuestionKind, type FollowUpNeed } from './boundaries'
-import { callWithOneRecoveryRetry } from './anthropic-structured-output-retry'
+import { callWithOneRecoveryRetry, type StructuredOutputSuccessTelemetrySink } from './anthropic-structured-output-retry'
 
 export const DEFAULT_MODEL = 'claude-sonnet-5'
 
@@ -191,6 +191,15 @@ interface ParsedCandidateQuestionResponse {
 export interface AnthropicCandidateQuestionOptions {
   apiKey?: string
   model?: string
+  /**
+   * CRC-LATENCY-2 (2026-10-14). Purely observational, additive injection
+   * point -- when omitted, `callWithOneRecoveryRetry` falls back to its own
+   * existing `defaultSuccessTelemetrySink` (console only), byte-identical
+   * to behavior before this option existed. Never affects retry decisions,
+   * model inputs/outputs, or timeout behavior -- it only gets to OBSERVE a
+   * call that already succeeded, after the fact.
+   */
+  successTelemetrySink?: StructuredOutputSuccessTelemetrySink
 }
 
 function resolveApiKey(options?: AnthropicCandidateQuestionOptions): string {
@@ -244,6 +253,8 @@ export function createAnthropicCandidateQuestionGenerator(
         }),
       BASE_CANDIDATE_QUESTION_MAX_TOKENS,
       RETRY_CANDIDATE_QUESTION_MAX_TOKENS,
+      undefined,
+      options?.successTelemetrySink,
     )
 
     const parsed = response.parsed_output as ParsedCandidateQuestionResponse | null

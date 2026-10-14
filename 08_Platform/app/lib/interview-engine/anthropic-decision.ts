@@ -34,7 +34,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { jsonSchemaOutputFormat } from '@anthropic-ai/sdk/helpers/json-schema'
 import { CONSTRAINT_A_REASON_CODES, type ConstraintADecider, type ConstraintADecision, type ConstraintAInput, type ConstraintAReasonCode } from './decision'
-import { callWithOneRecoveryRetry } from './anthropic-structured-output-retry'
+import { callWithOneRecoveryRetry, type StructuredOutputSuccessTelemetrySink } from './anthropic-structured-output-retry'
 
 export const DEFAULT_MODEL = 'claude-sonnet-5'
 
@@ -112,6 +112,15 @@ interface ParsedDecisionResponse {
 export interface AnthropicDecisionOptions {
   apiKey?: string
   model?: string
+  /**
+   * CRC-LATENCY-2 (2026-10-14). Purely observational, additive injection
+   * point -- when omitted, `callWithOneRecoveryRetry` falls back to its own
+   * existing `defaultSuccessTelemetrySink` (console only), byte-identical
+   * to behavior before this option existed. Never affects retry decisions,
+   * model inputs/outputs, or timeout behavior -- it only gets to OBSERVE a
+   * call that already succeeded, after the fact.
+   */
+  successTelemetrySink?: StructuredOutputSuccessTelemetrySink
 }
 
 function resolveApiKey(options?: AnthropicDecisionOptions): string {
@@ -165,6 +174,8 @@ export function createAnthropicConstraintADecider(options?: AnthropicDecisionOpt
         }),
       BASE_DECISION_MAX_TOKENS,
       RETRY_DECISION_MAX_TOKENS,
+      undefined,
+      options?.successTelemetrySink,
     )
 
     const parsed = response.parsed_output as ParsedDecisionResponse | null

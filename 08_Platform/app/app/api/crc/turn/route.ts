@@ -37,6 +37,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { randomUUID } from 'crypto'
+import { performance } from 'node:perf_hooks'
 import { runTurn, type RunTurnDeps } from '@/lib/crc-engine/run-turn'
 import { runCRCConversation } from '@/lib/crc-engine/run-crc-conversation'
 import {
@@ -71,6 +72,7 @@ import { checkSessionCreationRate, checkBurst, checkTurnCeiling, logRateLimitedE
 import { getRuntimeCommit, getModelConfig } from '@/lib/crc-engine/runtime-metadata'
 import { buildCompleteResponseFields } from '@/lib/crc-engine/complete-response'
 import { recordCrcCompletionTrace, recordCrcExtractionTrace } from '@/lib/crc-engine/turn-traces'
+import { TurnTimingCollector, recordingSuccessSink, recordingExtractorSuccessSink, recordCrcTurnTiming } from '@/lib/crc-engine/turn-timing'
 import { recordAndNotifyMaterialDemandEvidence } from '@/lib/crc-engine/material-demand-notification-trigger'
 import { deliverCrcResultsEmail } from '@/lib/crc-engine/results-email-delivery'
 import { sendCrcSessionStartedAdminNotification, sendCrcResultsEmailCapturedAdminNotification } from '@/lib/emails'
@@ -205,6 +207,22 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  // CRC-LATENCY-2 (2026-10-14). Observational only -- see
+  // lib/crc-engine/turn-timing.ts's own header. Measures total
+  // server/request processing duration for this conversational request:
+  // from here (before any parsing) through immediately before this turn's
+  // own recordCrcTurnTiming() call near the end of the ordinary-turn path
+  // below -- i.e. it includes request parsing, abuse/rate-limit checks,
+  // the Supabase reads, runTurn() itself, and every existing best-effort
+  // persistence call this route already made for this turn. It does NOT
+  // include anything after the response is constructed, and it is never
+  // recorded at all for a request that returns early (invalid_request,
+  // rate_limited, session_not_found, email/resend) -- those are not
+  // "ordinary conversational CRC turns" and this milestone does not
+  // instrument them.
+  const requestStartedAt = performance.now()
+  const turnTimingCollector = new TurnTimingCollector()
+
   let body: TurnRequestBody
   try {
     body = await request.json()
@@ -595,6 +613,7 @@ export async function POST(request: NextRequest) {
   const declineAction = parsed.kind === 'decline' ? parsed.action : undefined
 
   let outcome: Awaited<ReturnType<typeof runTurn>>
+  let runTurnDurationMs = 0
   try {
     // createAnthropicExtractor()/createAnthropicCandidateQuestionGenerator()/
     // createAnthropicConstraintADecider() each throw synchronously and
@@ -607,15 +626,25 @@ export async function POST(request: NextRequest) {
     // this point either way, so the catch below's own safety reasoning
     // still holds unchanged.
     const deps: RunTurnDeps = {
-      extractor: createAnthropicExtractor(),
-      generator: createAnthropicCandidateQuestionGenerator(),
-      decider: createAnthropicConstraintADecider(),
+      // CRC-LATENCY-2: successTelemetrySink is a purely additive,
+      // observational injection point each adapter already exposes (see
+      // their own CRC-LATENCY-2 header notes) -- it changes nothing about
+      // what is called, what is sent, or how retries are decided; it only
+      // gets to OBSERVE a physical call that already succeeded.
+      extractor: createAnthropicExtractor({ successTelemetrySink: recordingExtractorSuccessSink(turnTimingCollector) }),
+      generator: createAnthropicCandidateQuestionGenerator({ successTelemetrySink: recordingSuccessSink(turnTimingCollector, 'candidate_question_generator') }),
+      decider: createAnthropicConstraintADecider({ successTelemetrySink: recordingSuccessSink(turnTimingCollector, 'constraint_a_decider') }),
       sessionStore,
       matrix: MATRIX_FIXTURE,
       topicClaims: TOPIC_CLAIMS_FIXTURE,
       relationships: TOPIC_RELATIONSHIPS_FIXTURE,
     }
+    // CRC-LATENCY-2: wraps ONLY this one call, tightly -- see
+    // turn-timing.ts's own header for why this is the correct boundary for
+    // run_turn_duration_ms (distinct from request_duration_ms above).
+    const runTurnStartedAt = performance.now()
     outcome = await runTurn({ token, turnNumber, userText, declineAction }, deps)
+    runTurnDurationMs = performance.now() - runTurnStartedAt
   } catch (err) {
     // runTurn() has not persisted anything at this point on any failure
     // path (its own sessionStore.save() calls are always the last step,
@@ -826,6 +855,20 @@ export async function POST(request: NextRequest) {
   if (outcome.kind === 'complete' && !wasAlreadyComplete) {
     await recordCrcCompletionTrace(supabaseAdmin, { sessionId: token, turnNumber, result: outcome.result })
   }
+
+  // CRC-LATENCY-2: the LAST best-effort write this turn makes, after every
+  // other authoritative and best-effort persistence above has already
+  // succeeded -- same ordering/fail-open discipline as every call above.
+  // request_duration_ms deliberately measured right here, immediately
+  // before this call, not after -- so the telemetry write's own duration
+  // is never counted as part of the turn it is describing.
+  await recordCrcTurnTiming(supabaseAdmin, {
+    sessionId: token,
+    turnNumber,
+    requestDurationMs: performance.now() - requestStartedAt,
+    runTurnDurationMs,
+    modelCalls: turnTimingCollector.modelCalls(),
+  })
 
   const response =
     outcome.kind === 'complete'

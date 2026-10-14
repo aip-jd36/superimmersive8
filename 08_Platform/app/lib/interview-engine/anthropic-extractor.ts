@@ -864,6 +864,16 @@ export async function callWithStructuredOutputRecoveryRetry<T extends MinimalPar
 export interface AnthropicExtractorOptions {
   apiKey?: string
   model?: string
+  /**
+   * CRC-LATENCY-2 (2026-10-14). Purely observational, additive injection
+   * point -- when omitted, `callWithStructuredOutputRecoveryRetry` falls
+   * back to its own existing `defaultExtractorSuccessTelemetrySink`
+   * (console only), byte-identical to behavior before this option existed.
+   * Never affects retry decisions, model inputs/outputs, or timeout
+   * behavior -- it only gets to OBSERVE a call that already succeeded,
+   * after the fact.
+   */
+  successTelemetrySink?: ExtractorSuccessTelemetrySink
 }
 
 function resolveApiKey(options?: AnthropicExtractorOptions): string {
@@ -1026,6 +1036,10 @@ export function createAnthropicExtractor(options?: AnthropicExtractorOptions): C
         output_config: { format: jsonSchemaOutputFormat(CANDIDATE_RESPONSE_SCHEMA) },
         // No temperature/top_p/top_k -- API defaults only, unchanged.
       }),
+      BASE_EXTRACTION_MAX_TOKENS,
+      RETRY_EXTRACTION_MAX_TOKENS,
+      undefined,
+      options?.successTelemetrySink,
     )
 
     const parsed = response.parsed_output
