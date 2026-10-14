@@ -607,6 +607,10 @@ const KNOWN_AMBIGUOUS_TOOLS: Record<string, AmbiguousToolEntry> = {
  * unchanged; this is a type-only tightening, not a data change.
  */
 const KNOWN_TOOLS: Record<string, CanonicalToolId> = {
+  // 'higgsfield' added 2026-10-14 (CAND-HIGGSFIELD-COMMERCIAL-USE-001-v1 PM
+  // Adoption, FGR_029): bare-name alias, same minimal pattern as 'synthesia'/
+  // 'suno' at their own registration -- no fuzzy/generic matching added.
+  higgsfield: 'higgsfield',
   runway: 'runway-gen3',
   'runway gen-3': 'runway-gen3',
   'runway gen 3': 'runway-gen3',

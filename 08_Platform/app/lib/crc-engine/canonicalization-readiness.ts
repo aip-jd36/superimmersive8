@@ -204,6 +204,12 @@ export const NEW_IDENTITY_CANONICALIZATION_READINESS: readonly CanonicalizationR
   // bare, deliberately-unregistered "Envato" company name.
   { kind: 'provider', identifier: 'envato-elements', representativeExpression: 'Envato Elements' },
   { kind: 'provider', identifier: 'epidemic-sound', representativeExpression: 'Epidemic Sound' },
+  // 'higgsfield' (CAND-HIGGSFIELD-COMMERCIAL-USE-001-v1 PM Adoption, FGR_029,
+  // 2026-10-14): representative expression "Higgsfield" is the identity's
+  // own canonical/governed name, per GOVERNED-CLAIMS.md's Domain header --
+  // no Matrix section header exists for this TopicClaim-only identity,
+  // matching the Synthesia/Stability AI precedent's own sourcing rule.
+  { kind: 'tool', identifier: 'higgsfield', representativeExpression: 'Higgsfield' },
 ]
 
 /**

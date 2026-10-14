@@ -6019,3 +6019,125 @@ Known architecture/governance debt, recorded not remediated:
 Full Formal Governance Review artifact: `governance-reviews/FGR_028_CAND-COPYRIGHT-CN-AI-ASSISTED-OUTPUT-001_2026-10-08.md`
 Full CRC Publication Review artifact: `governance-reviews/CPR_034_CLAIM-COPYRIGHT-CN-AI-ASSISTED-OUTPUT-001-v1_2026-10-08.md`
 Full evidence manifest: `evidence-captures/china-copyrightability/MANIFEST.md`, `evidence-captures/china-copyrightability/MANIFEST-ADDENDUM-2026-10-08.md`
+
+### CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1
+Domain: AI Video Generation Platform Rights — Higgsfield
+Topic: commercial_use
+Subtopic: higgsfield-unconditional-commercial-use-grant
+Claim character: established
+Jurisdiction: Not a legal jurisdiction — this is a Higgsfield platform contractual representation, not a legal-jurisdiction-scoped rule. See "Transitional jurisdiction representation for provider/platform propositions" (governance-discipline section above); the underlying `TopicClaim` representation records `jurisdiction: 'Global'` as a bounded transitional compatibility value under that rule, never as a claim of worldwide legal validation.
+Context: commercial use of AI-generated Output produced using Higgsfield, on Higgsfield's standard (non-Enterprise) terms.
+
+GOVERNANCE TREATMENT (2026-10-14, PM adoption decision, following Formal Governance Review #29 — `governance-reviews/FGR_029_CAND-HIGGSFIELD-COMMERCIAL-USE-001_2026-10-14.md`, itself following the preliminary architecture/source investigation `LK-HIGGSFIELD-ARCHITECTURE-SOURCE-VERIFICATION-1`, 2026-10-14): `provider_scope: null`, `tool_scope: ['higgsfield']` — `'higgsfield'` was NOT an existing `CANONICAL_TOOL_ID`; this Adoption performed the minor generic registry extension (`lib/tool-identity/registry.ts`), the matching `KNOWN_TOOLS` bare-name extraction alias (`lib/interview-engine/extraction.ts`), and the required `NEW_IDENTITY_CANONICALIZATION_READINESS` entry (`lib/crc-engine/canonicalization-readiness.ts`) in the same mechanical shape every prior post-LK-94 identity (Suno, Stability AI, Envato Elements, Epidemic Sound) required at its own onboarding — no schema change, no new orchestration, no provider_scope change. The readiness check (`checkCanonicalizationReadiness({kind:'tool', identifier:'higgsfield', representativeExpression:'Higgsfield'})`) was run and confirmed passing before this Adoption was finalized, not merely declared. Before adopting, this Adoption independently re-fetched the live Higgsfield Terms of Use (not merely trusting FGR_029's own disclosed reliance on the preceding investigation's quoted text) and confirmed the document is unchanged in material effect — same "Last updated: July 26, 2026" date, same operative language word-for-word across every quoted clause (ownership non-claim, commercial-use non-restriction, uniqueness/originality/exclusivity disclaimer, rights-survival/client-transfer language, Enterprise carve-out, third-party-model incorporation).
+
+One governed proposition (Option C, FGR_029 §6-7) — not two — exactly mirroring `CLAIM-RUNWAY-COMMERCIAL-USE-001-v1`'s own structure for the identical underlying contractual-quote shape: the unconditional commercial-use permission is the Claim proposition itself; the ownership/originality/exclusivity findings are carried as Source fact content and reinforced via Prohibited conclusions, not elevated into a second claim or merged into one over-broad paragraph (a field-placement correction from FGR_029's own proposed single-paragraph draft, made for structural fidelity to the Runway precedent FGR_029 itself cited as controlling — not a semantic change; every fact FGR_029 approved is preserved, only relocated to the field each already belongs in under this corpus's own established convention).
+
+D0 dependency model (`Applicability requirements: []`, `Unresolved project dependencies: []`) — re-tested against current applicability rather than inherited: Higgsfield's standard-terms commercial-use permission does not depend on account status, plan tier (Team/Scale), or any other project-specific fact; `tool_account_status`/`tool_plan_tier` exist as real, implemented `ApplicabilityFact` branches (used by the Kling Member-Account claim) but are correctly NOT used here, since no evidence gates this permission on them. BI classification independently re-traced against `build-bounded-interpretation.ts`: `needsApplicabilityHedge()` is `hasGovernedProjectDependencies() || hasUnresolvedApplicability()`, both false for this D0, fully-applicable claim, so it reaches `directly_relevant` — the same path Kling-baseline/Runway/Pika already use, not Case 3B (which is reserved for claims whose applicability or dependency state is genuinely unresolved, e.g. real-person-identifiability or the China copyrightability claim's own declared national non-decision immediately above). Forcing Case 3B here would contradict this corpus's own established, precedent-proven case semantics.
+
+Third-party-model coexistence with `CLAIM-KLING-COMMERCIAL-USE-BASELINE-001-v1` (Higgsfield's own Terms §8 incorporate third-party model-provider policies, and Higgsfield's enterprise marketing names Kling as an available underlying model) independently re-traced against `toolScopeMatches(claim, activeToolIds)`'s actual implementation: `activeToolIds` is a plural array, and each claim's own `tool_scope` is matched independently (`claim.tool_scope.some(t => activeToolIds.includes(t))`) — a project with both `ToolMention = higgsfield` and `ToolMention = kling` would retrieve both claims independently; neither suppresses, supersedes, or hides the other. No generic architecture gap exists; no Higgsfield-specific orchestration was created to achieve this.
+
+Claim proposition: >
+  Under Higgsfield's current Terms of Use, commercial use of generated
+  Output is permitted, unconditionally, across Higgsfield's standard
+  (non-Enterprise) terms, and these rights survive account or subscription
+  cancellation/termination; exported Outputs may be transferred or
+  sublicensed to clients. This proposition does not extend to Higgsfield's
+  Enterprise tier, which is governed by a separate, non-public Enterprise
+  Agreement not evidenced by this claim.
+
+Source references:
+  - primary (Official platform authority, Class A, directly fetched twice — preceding investigation 2026-10-14, re-fetched and confirmed unchanged at this Adoption 2026-10-14): Higgsfield Terms of Use Agreement (`higgsfield.ai/terms-of-use-agreement`), document's own stated "Last updated: July 26, 2026" — §1.3, §4.4, §8, §13.2.
+Source authority/type: Official platform authority (directly source-backed, single-provider)
+Source fact: >
+  Higgsfield's own Terms of Use, §4.4, states "Company does not claim
+  ownership of any of your Inputs or Outputs, nor does it restrict your
+  commercial use of Outputs," and separately: "Your rights in Outputs you
+  have generated and exported survive cancellation of your subscription or
+  deletion or termination of your Account, and you may transfer or
+  sublicense your rights in Outputs to your clients or other third
+  parties." §4.4 further states: "You acknowledge that, due to the nature
+  of artificial intelligence, Outputs generated by the Service may not be
+  unique across users. Other users may receive an Output that is similar
+  or possibly identical to yours. Company does not guarantee the
+  uniqueness, originality, or exclusivity of any Output." §13.2 adds:
+  "Company further makes no representation or warranty as to the
+  originality, uniqueness, legality, accuracy, or fitness of any Output."
+  §1.3 states that enterprise/business/organizational use "may be governed
+  by a separate written agreement... (an 'Enterprise Agreement')," which
+  "controls over these Terms of Use to the extent of any conflict." §8
+  states that "certain features and models available through the Service
+  are provided by third-party model providers," and that where a
+  third-party provider's own policies are more restrictive, "the more
+  restrictive terms govern." No distinct Higgsfield-contractual
+  determination of copyrightability or non-infringement appears anywhere
+  in the quoted text — recorded as undetermined by this source, not
+  inferred from silence as a denial.
+
+SI8 interpretation: >
+  A client using Higgsfield-generated Output in a commercial production on
+  Higgsfield's standard (non-Enterprise) terms may rely on this
+  unconditional grant. A client described only as using a "business
+  account" has not thereby established Enterprise Agreement status —
+  Higgsfield's own named commercial tiers (Team, Scale, Enterprise) are
+  distinct from that ambiguous marketing phrase, and only an executed
+  Enterprise Agreement (not any self-serve paid tier) changes the
+  training/confidentiality treatment of content (Wave 2, not governed by
+  this claim). If the project's Output was produced via a third-party
+  model available through Higgsfield (e.g. Kling), that model's own terms
+  may apply in addition to, and may be more restrictive than, this claim's
+  Higgsfield-level permission — this claim does not resolve that separate
+  question.
+
+Applicability requirements: []
+Unresolved project dependencies: []
+Tool scope: ['higgsfield']
+Prohibited conclusions: >
+  Does not establish Enterprise-tier commercial-use status of any kind
+  (explicitly out of scope, separate non-public agreement); does not
+  establish that a "business account" or any other non-Enterprise paid
+  tier constitutes an Enterprise Agreement, or that it changes
+  training/confidentiality treatment, or that it provides IP
+  indemnification (Wave 2, unestablished here); does not establish user
+  copyright ownership in the Output merely because Higgsfield does not
+  claim ownership; does not establish that the Output is original,
+  unique, or exclusive — Higgsfield's own Terms expressly disclaim all
+  three and state Outputs may be identical across users; does not
+  establish that the Output is non-infringing, copyrightable, or legally
+  accurate/fit for any purpose; does not establish that any underlying
+  third-party model's own terms are satisfied or inapplicable; does not
+  establish rights concerning identifiable people, voices, music, client
+  assets, or other third-party material appearing in Inputs or Outputs;
+  downstream IP clearance; platform suitability for a particular
+  commercial project; or any broader commercial-readiness conclusion. Is
+  not a substitute for Commercial Assurance evidence review.
+
+Lifecycle: Adopted
+Adoption Approver: JD (PM)
+Adoption Decision Date: 2026-10-14
+Publication scope: Reviewer/Commercial Assurance
+CRC Publication Scope: PENDING
+CRC Approver: PENDING
+CRC Decision Date: PENDING
+
+Effective date: >
+  2026-10-14 (Adoption date); underlying primary source "Last updated"
+  date: July 26, 2026 — independently re-fetched and confirmed unchanged
+  at Adoption time (2026-10-14), not merely inherited from the preceding
+  investigation's own earlier fetch. Temporal/version risk recorded as
+  MEDIUM-HIGH (a prior dated revision already exists; staggered effective
+  dates for new vs. existing users show active document management) —
+  a future refresh trigger is any subsequent change to this document's own
+  "Last updated" date.
+Last reviewed: 2026-10-14 (Formal Governance Review, FGR_029; PM Adoption, this entry; CRC Publication Review not yet performed)
+Version lineage: v1 (initial) — supersedes: none — superseded by: none
+Related: [[CLAIM-RUNWAY-COMMERCIAL-USE-001-v1]] (same unconditional-grant shape, same dual ownership/commercial-use quote pattern, direct structural precedent), [[CLAIM-KLING-COMMERCIAL-USE-BASELINE-001-v1]] (different shape — baseline-plus-exception, not unconditional; also a live third-party-model coexistence watch item, since Higgsfield's own Terms §8 incorporate third-party model-provider policies and Higgsfield's enterprise marketing names Kling as an available underlying model — both claims independently retrievable, neither suppresses the other, confirmed against `toolScopeMatches()`'s actual plural-`activeToolIds` implementation), [[CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1]] (same claim-class pattern, different gating shape).
+
+Known architecture/governance debt, recorded not remediated:
+  - Enterprise Wave 2 (no-training/model-improvement treatment, confidentiality, IP indemnification) remains explicitly deferred — per the preceding investigation and FGR_029, these should become two separate future propositions given their differing evidence/authority profiles (training/confidentiality is directly stated in this same Terms of Use's own §4.4 cross-reference; indemnification's exact scope lives only in a non-public executed Enterprise Agreement, evidenced only by Higgsfield's own enterprise marketing page, not the binding Terms). Not created by this Adoption.
+  - No `TOPIC_CLAIMS_FIXTURE` representation exists for this claim as of this Adoption — CRC-eligible-pending-CPR does not mean production-reachable (Publication Policy Principle 7). This claim's own markdown entry will cause `topic-claims-fixture-consistency.test.ts` to report it as unrepresented until a future, separately-authorized Production Representation milestone — the same expected, transient, non-remediated lifecycle gap already established as correct practice for prior claims (e.g. `CLAIM-EUAI-ART50-2-PROVIDER-MARKING-001-v1`, `CLAIM-COPYRIGHT-CN-AI-ASSISTED-OUTPUT-001-v1`). Not added to `CLAIMS_WITHOUT_FIXTURE_REPRESENTATION` (permanent-exclusion allowlist only).
+  - CRC Publication Review has NOT been performed for this claim. FGR_029 recorded an advisory "CRC-ELIGIBLE WITH BOUNDARIES" recommendation only — this is not a Publication decision and must not be treated as one; a future, separate, independently-derived CPR is required before any CRC Publication Scope beyond PENDING is set.
+  - Higgsfield's own Terms of Use is a single, dated, versioned HTML page — assessed as POTENTIALLY MONITORABLE by the existing content-hash Source Monitor mechanism if ever pursued; no allowlist change made or recommended; Source Monitor expansion remains parked.
+
+Full Formal Governance Review artifact: `governance-reviews/FGR_029_CAND-HIGGSFIELD-COMMERCIAL-USE-001_2026-10-14.md`
+Full CRC Publication Review artifact: none (not yet performed)
+Full evidence manifest: none (evidence recorded inline in Source references/Source fact above; no dedicated evidence-capture directory created for this claim, consistent with the Runway/Kling/Pika precedent's own practice of recording a direct-fetch citation inline rather than a separate MANIFEST.md)

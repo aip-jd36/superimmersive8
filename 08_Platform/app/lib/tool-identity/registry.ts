@@ -77,6 +77,7 @@ export const CANONICAL_TOOL_IDS = [
   'luma',
   'suno',
   'stability-ai',
+  'higgsfield',
 ] as const
 
 /**
@@ -101,6 +102,27 @@ export const CANONICAL_TOOL_IDS = [
  * 2026-09-09, well after the 2026-09-01 cutover) and requires a passing
  * `NEW_IDENTITY_CANONICALIZATION_READINESS` entry, added in that file at the
  * same time as this registration.
+ */
+
+/**
+ * 'higgsfield' added 2026-10-14 (CAND-HIGGSFIELD-COMMERCIAL-USE-001-v1 PM
+ * Adoption, FGR_029) -- pure generic registry extension, same mechanism as
+ * every entry above, no new category. Governed via `GOVERNED-CLAIMS.md` (not
+ * `PLATFORM-RIGHTS-MATRIX.md` -- no Matrix coverage exists for Higgsfield,
+ * same governance home already used for Stability AI). Single evidence-backed
+ * canonical identity (Higgsfield Terms of Use Agreement,
+ * `higgsfield.ai/terms-of-use-agreement`, "Last updated: July 26, 2026,"
+ * live-re-fetched and confirmed unchanged at PM Adoption time); the Terms'
+ * own §1.3 explicitly excludes Enterprise/business customers governed by a
+ * separate, non-public Enterprise Agreement from this identity's standard-
+ * terms scope -- that Enterprise scope remains deliberately unregistered
+ * under this identity, not merged into it (Wave 2, parked). This
+ * registration is the precondition for LK-94's Canonicalization Readiness
+ * check (`lib/crc-engine/canonicalization-readiness.ts`), exercised against
+ * this identity at the same time as this registration -- 'higgsfield' is NOT
+ * grandfathered (registered well after the 2026-09-01 cutover) and requires
+ * a passing `NEW_IDENTITY_CANONICALIZATION_READINESS` entry, added in that
+ * file at the same time as this registration.
  */
 
 /**
