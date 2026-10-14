@@ -462,19 +462,80 @@ export function buildBoundedInterpretations(
       // matched RetrievalResult already carries its own source_fact.kind;
       // this is a read of existing data, not a new fact or new matching
       // logic.
-      const allToolSourced = matches.every((m) => m.source_fact.kind === 'tool')
-      const directlyRelevantResult = directlyRelevantSummary(intent.category, combinedStatement, allToolSourced, includesRelatedTopicContent)
+      //
+      // CRC-BI-MULTI-D0-PRESERVATION-1 (2026-10-14, PM/Architecture-
+      // authorized, narrowly scoped -- see
+      // CRC-CC-MULTI-RESULT-POSTURE-COMPOSITION-1's own read-only
+      // architecture investigation for the full root-cause trace). The
+      // prior single `combinedStatement` (computed above, still used only
+      // for the defensive `=== ''` fallback) fused EVERY matched claim's own
+      // candidate_statement into one undifferentiated string before a
+      // SINGLE shared boundary clause was appended -- destroying claim-level
+      // separation whenever more than one dependency-free claim matched the
+      // same goal (e.g. two independently mentioned tools both tagged
+      // 'commercial_use', proven live in production for
+      // CLAIM-RUNWAY-COMMERCIAL-USE-001-v1 + CLAIM-KLING-COMMERCIAL-USE-
+      // BASELINE-001-v1 by that investigation's own second canary). This
+      // renders each matched claim's statement as its OWN relevance block,
+      // reusing directlyRelevantSummary's existing per-claim template
+      // verbatim -- no new wording, no precedence, no contradiction
+      // detection, no conflict resolution; each block states only that ITS
+      // OWN claim is relevant. When matches.length === 1 this produces the
+      // exact byte-identical single block as before (same function, same
+      // per-claim arguments that single match already had).
+      //
+      // includesRelatedTopicContent (computed above, still used unchanged by
+      // the Case 3B branch below) is deliberately NOT reused here. Each
+      // block attaches the related-topic boundary clause only for the
+      // FIRST match (in matched order) whose own match_origin is
+      // 'related_topic', tracked via `relatedClauseAttached` below -- never
+      // for every such match. A naive per-claim read of match_origin would
+      // reattach the clause once per related-topic match, which a dedicated
+      // existing test (related-topic-interpretation.test.ts, "the clause
+      // appears exactly once even when multiple related claims contribute")
+      // already covers for exactly this reason -- caught by that test
+      // during this milestone's own regression run, not missed. For
+      // matches.length === 1 this remains exactly equivalent to the prior
+      // global boolean (there is only one claim, so "first" and "any" are
+      // the same test); for matches.length > 1 it now provably appears at
+      // most once in total, preserving RELATED_TOPIC_BOUNDARY_CLAUSE's own
+      // documented "appended once, never once per related claim" discipline
+      // exactly, the same way it was already preserved pre-fix.
+      //
+      // The Case 3B / CC-1 `noDependencyStatement` grouping above (lines
+      // ~394-407) shares this same join-granularity shape for its own
+      // dependency-free subgroup when more than one dependency-free claim
+      // coexists with a dependency-bearing one -- deliberately NOT extended
+      // by this milestone (narrower reproduced defect, different function
+      // signatures in rules.ts, out of this milestone's "smallest generic
+      // correction" scope); tracked as known follow-up, not silently
+      // ignored.
+      let relatedClauseAttached = false
+      const directlyRelevantBlocks = matches
+        .map((m) => ({ m, statement: m.candidate_statement }))
+        .filter((x): x is { m: BiResult; statement: string } => x.statement !== null)
+        .map(({ m, statement }) => {
+          const attachRelatedClause = m.match_origin === 'related_topic' && !relatedClauseAttached
+          if (attachRelatedClause) relatedClauseAttached = true
+          return directlyRelevantSummary(intent.category, statement, m.source_fact.kind === 'tool', attachRelatedClause)
+        })
       // Single-group shape (every matched claim dependency-free) has no
       // internal boundary CC-1 ever computed -- one block, not artificially
       // split, per this milestone's own "if a case naturally yields one
-      // block, render one block" scope.
+      // block, render one block" scope. Multiple matches now render as
+      // multiple separate blocks (CRC-BI-MULTI-D0-PRESERVATION-1 above)
+      // instead of one fused block.
       //
       // Mixed-Resolution Consultative Guidance milestone (2026-08-24):
       // appended AFTER the existing, unchanged directly_relevant content --
       // status remains 'directly_relevant', the resolved conclusion is
       // never weakened or strengthened. Identity when unresolvedRelevantClaims
       // is empty (every pre-existing goal renders byte-identical).
-      const directlyRelevantWithGuidance = appendMixedResolutionGuidance(directlyRelevantResult, [directlyRelevantResult], unresolvedRelevantClaims)
+      const directlyRelevantWithGuidance = appendMixedResolutionGuidance(
+        directlyRelevantBlocks.join(' '),
+        directlyRelevantBlocks,
+        unresolvedRelevantClaims,
+      )
       return buildInterpretation(
         intent,
         'directly_relevant',

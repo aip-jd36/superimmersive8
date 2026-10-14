@@ -1727,7 +1727,7 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
     })
 
     // B. two matched + one unresolved
-    test('B: two matched + one unresolved -- existing resolved content unchanged, exactly one generic block appended', () => {
+    test('B: two matched + one unresolved -- each matched claim keeps its own block (CRC-BI-MULTI-D0-PRESERVATION-1, 2026-10-14), exactly one generic guidance block appended after both', () => {
       const matrix = [
         matrixRow({ claim_id: 'MATCHED-A', topic: 'commercial_use', crc_candidate_statement: 'First matched statement.' }),
         matrixRow({ claim_id: 'MATCHED-B', topic: 'commercial_use', crc_candidate_statement: 'Second matched statement.' }),
@@ -1738,8 +1738,15 @@ describe('buildBoundedInterpretations -- unresolved_relevant_claims (Generic Mix
       const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
       expect(interp.summary).toContain('First matched statement.')
       expect(interp.summary).toContain('Second matched statement.')
-      expect(interp.summary_blocks).toHaveLength(2) // one combined resolved block (unchanged shape) + one guidance block
-      expect(interp.summary_blocks[1]).toBe(GUIDANCE_SENTENCE)
+      // CRC-BI-MULTI-D0-PRESERVATION-1: the two matched claims no longer
+      // fuse into one combined block -- each keeps its own separate
+      // relevance block, so the guidance block is now third, not second.
+      expect(interp.summary_blocks).toHaveLength(3)
+      expect(interp.summary_blocks[0]).toContain('First matched statement.')
+      expect(interp.summary_blocks[0]).not.toContain('Second matched statement.')
+      expect(interp.summary_blocks[1]).toContain('Second matched statement.')
+      expect(interp.summary_blocks[1]).not.toContain('First matched statement.')
+      expect(interp.summary_blocks[2]).toBe(GUIDANCE_SENTENCE)
       expect(interp.supporting_claim_ids.sort()).toEqual(['MATCHED-A', 'MATCHED-B'])
     })
 
