@@ -6,8 +6,8 @@ contacts:
 slug: leonard-mugnier-bajat
 stage: lead_responded
 source: stec_campaign
-next_action: "Await Leonard's reply to the Oct 14 manual follow-up; review the thread in the Oct 19–21 window (no automatic follow-up). Do not alter the POST arm, ref 8XQG, or the paused lead sequence."
-next_action_date: 2026-10-19
+next_action: "Review Leonard's new response and determine whether a further reply is appropriate"
+next_action_date: 2026-10-15
 last_contacted: 2026-10-14
 blocked: false
 blocked_reason: null
@@ -25,6 +25,23 @@ Account record created 2026-10-14 (CRM ID **B178**) on graduation from the CRC L
 **Arm vs. follow-up treatment:** the randomized POST arm governs the automated M1–M4 sequence. The Oct 14 manual follow-up is observational discovery activity, not a randomized treatment, and does not change the arm assignment or experiment denominators. **Sequence state:** his individual Dripify lead sequence displayed **Paused** after his reply — a per-lead state, not the whole campaign. Do not resume it.
 
 ## Interaction log (reverse-chronological)
+
+### 2026-10-14 — Leonard's reply to the manual follow-up — inbound (15:54 as displayed)
+
+Inbound on LinkedIn / Dripify, 2026-10-14, 3:54 PM as displayed (timezone not verified), replying to Angel's 2026-10-14 15:38 manual follow-up (below). Source: user-supplied. Logged verbatim — spelling, capitalization, punctuation and line breaks preserved as received (including "expansive", "we we", "clients", "loras", "ai", "genAi").
+
+**Leonard (exact):**
+> As a SEA company, we are anticipating those concerns, but haven’t been hit by the same restrictions.
+>
+> Since credits are quite expansive, we we prioritize open source models (LTX), and self training per production (loras).
+>
+> The production team handles the clients concerns and we work with what they agree with (sometimes no ai, sometimes proprietary models allowed).
+> SEA clients usually are more flexible about AI ethics than Europeans.
+>
+> Since we have other art departments in production, genAi is simply a step in our pipeline.
+> Just a new tool for compositors.
+
+**Logging only:** the provisional `EXPLICIT_NO_DELIVERY_ISSUE` classification (below) is unchanged pending separate strategic review. No claims about legal compliance, commercial pain or buying interest are drawn from this message. `stage` unchanged; `last_contacted` remains 2026-10-14 (the CRM's equivalent of a last-inbound date). No outbound message was sent; no CRC link.
 
 ### 2026-10-14 — manual follow-up — SENT (confirmed sent through Dripify; 15:38 as displayed)
 
