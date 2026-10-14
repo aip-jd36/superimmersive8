@@ -6117,9 +6117,41 @@ Lifecycle: Adopted
 Adoption Approver: JD (PM)
 Adoption Decision Date: 2026-10-14
 Publication scope: Reviewer/Commercial Assurance
-CRC Publication Scope: PENDING
-CRC Approver: PENDING
-CRC Decision Date: PENDING
+CRC Publication Scope: >
+  APPROVED FOR CRC PUBLICATION (2026-10-14, CRC Approver: JD (PM) -- see
+  CRC Publication Review #36, CPR_036,
+  governance-reviews/CPR_036_CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1_RECONSIDERATION_2026-10-14.md,
+  reconsidering CPR_035's own original WITHHOLD -- see CPR_035,
+  governance-reviews/CPR_035_CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1_2026-10-14.md,
+  preserved unmodified as the historical pre-fix record). CRC may state
+  that under Higgsfield's current Terms of Use, commercial use of
+  generated Output is permitted, unconditionally, across Higgsfield's
+  standard (non-Enterprise) terms, that these rights survive account or
+  subscription cancellation/termination, and that exported Outputs may be
+  transferred or sublicensed to clients -- and that this proposition does
+  not extend to Higgsfield's Enterprise tier, which is governed by a
+  separate, non-public Enterprise Agreement not evidenced by this claim.
+  CRC must not state or imply that a "business account" or any other
+  non-Enterprise paid tier constitutes an Enterprise Agreement or changes
+  training/confidentiality/indemnification treatment; that the user owns
+  copyright in the Output merely because Higgsfield does not claim
+  ownership; that the Output is original, unique, exclusive,
+  non-infringing, copyrightable, or legally accurate/fit for any purpose;
+  that any underlying third-party model's own terms (e.g. Kling, where
+  used through Higgsfield) are satisfied or inapplicable; that rights
+  concerning identifiable people, voices, music, client assets, or other
+  third-party material are resolved; or that the project is otherwise
+  commercially cleared. Where a separately applicable tool-scoped claim
+  (e.g. Kling) also co-retrieves for the same project, CRC preserves both
+  governed statements separately and does not infer which one controls --
+  per CRC-BI-MULTI-D0-PRESERVATION-1 (commit 9dd9b9c4), the generic fix
+  CPR_036 independently re-verified removes the composed-output defect
+  CPR_035 originally found, without resolving or ranking the two claims'
+  relationship. A human-reviewed Commercial Assurance Assessment remains
+  the higher-assurance path for the project-specific facts this claim
+  leaves open.
+CRC Approver: JD (PM)
+CRC Decision Date: 2026-10-14
 
 Effective date: >
   2026-10-14 (Adoption date); underlying primary source "Last updated"
@@ -6130,16 +6162,17 @@ Effective date: >
   dates for new vs. existing users show active document management) —
   a future refresh trigger is any subsequent change to this document's own
   "Last updated" date.
-Last reviewed: 2026-10-14 (Formal Governance Review, FGR_029; PM Adoption, this entry; CRC Publication Review, CPR_035, WITHHOLD)
+Last reviewed: 2026-10-14 (Formal Governance Review, FGR_029; PM Adoption, this entry; CRC Publication Review, CPR_035, WITHHOLD; CRC Publication Review reconsideration, CPR_036, APPROVE)
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
 Related: [[CLAIM-RUNWAY-COMMERCIAL-USE-001-v1]] (same unconditional-grant shape, same dual ownership/commercial-use quote pattern, direct structural precedent), [[CLAIM-KLING-COMMERCIAL-USE-BASELINE-001-v1]] (different shape — baseline-plus-exception, not unconditional; also a live third-party-model coexistence watch item, since Higgsfield's own Terms §8 incorporate third-party model-provider policies and Higgsfield's enterprise marketing names Kling as an available underlying model — both claims independently retrievable, neither suppresses the other, confirmed against `toolScopeMatches()`'s actual plural-`activeToolIds` implementation), [[CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1]] (same claim-class pattern, different gating shape).
 
 Known architecture/governance debt, recorded not remediated:
   - Enterprise Wave 2 (no-training/model-improvement treatment, confidentiality, IP indemnification) remains explicitly deferred — per the preceding investigation and FGR_029, these should become two separate future propositions given their differing evidence/authority profiles (training/confidentiality is directly stated in this same Terms of Use's own §4.4 cross-reference; indemnification's exact scope lives only in a non-public executed Enterprise Agreement, evidenced only by Higgsfield's own enterprise marketing page, not the binding Terms). Not created by this Adoption.
   - No `TOPIC_CLAIMS_FIXTURE` representation exists for this claim as of this Adoption — CRC-eligible-pending-CPR does not mean production-reachable (Publication Policy Principle 7). This claim's own markdown entry will cause `topic-claims-fixture-consistency.test.ts` to report it as unrepresented until a future, separately-authorized Production Representation milestone — the same expected, transient, non-remediated lifecycle gap already established as correct practice for prior claims (e.g. `CLAIM-EUAI-ART50-2-PROVIDER-MARKING-001-v1`, `CLAIM-COPYRIGHT-CN-AI-ASSISTED-OUTPUT-001-v1`). Not added to `CLAIMS_WITHOUT_FIXTURE_REPRESENTATION` (permanent-exclusion allowlist only).
-  - CRC Publication Review (CPR_035, 2026-10-14) recommended WITHHOLD, solely on the empirically-demonstrated Higgsfield+Kling composed-output coexistence defect above — not on evidence, applicability, dependency, Principle 3, or isolated-rendering grounds, all of which passed. Reconsideration requires either a deliberate, PM/Architecture-authorized Composition-layer decision about how co-retrieved tool-scoped `commercial_use` claims with differing postures should be framed (cross-cutting, not Higgsfield-specific), or an informed PM decision accepting the residual co-occurrence risk — neither performed here.
+  - CRC Publication Review (CPR_035, 2026-10-14) recommended WITHHOLD, solely on the empirically-demonstrated Higgsfield+Kling composed-output coexistence defect above — not on evidence, applicability, dependency, Principle 3, or isolated-rendering grounds, all of which passed. **Reconsidered and superseded for the publication question by CPR_036 (2026-10-14): APPROVE.** The blocking defect was fixed by `CRC-BI-MULTI-D0-PRESERVATION-1` (commit `9dd9b9c4`) — a generic Bounded Interpretation fix, not Higgsfield-specific, independently re-verified by CPR_036 against both a fresh Higgsfield+Kling canary and the already-live Runway+Kling production pair. `CPR_035` itself is preserved unmodified as the historical pre-fix record; it is not retroactively rewritten.
   - Higgsfield's own Terms of Use is a single, dated, versioned HTML page — assessed as POTENTIALLY MONITORABLE by the existing content-hash Source Monitor mechanism if ever pursued; no allowlist change made or recommended; Source Monitor expansion remains parked.
 
 Full Formal Governance Review artifact: `governance-reviews/FGR_029_CAND-HIGGSFIELD-COMMERCIAL-USE-001_2026-10-14.md`
-Full CRC Publication Review artifact: `governance-reviews/CPR_035_CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1_2026-10-14.md` (WITHHOLD)
+Full CRC Publication Review artifact (initial): `governance-reviews/CPR_035_CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1_2026-10-14.md` (WITHHOLD — historical record, preserved unmodified)
+Full CRC Publication Review artifact (reconsideration): `governance-reviews/CPR_036_CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1_RECONSIDERATION_2026-10-14.md` (APPROVE)
 Full evidence manifest: none (evidence recorded inline in Source references/Source fact above; no dedicated evidence-capture directory created for this claim, consistent with the Runway/Kling/Pika precedent's own practice of recording a direct-fetch citation inline rather than a separate MANIFEST.md)
