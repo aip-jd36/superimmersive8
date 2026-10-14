@@ -165,6 +165,15 @@ const REPRESENTATIVE_EXPRESSIONS: Record<string, string> = {
   // mechanical runtime-reachability milestone closes it. Sourced from this
   // row's own Matrix section header, "Adobe Firefly."
   'adobe-firefly': 'Adobe Firefly',
+  // 'higgsfield' added 2026-10-14 (ProdIM-HIGGSFIELD-COMMERCIAL-USE-001-v1,
+  // CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1 Production Representation):
+  // TopicClaim-origin, matching Synthesia/Pika/Stability AI's own precedent
+  // (no Matrix row). Sourced from the claim's own platform name, same as
+  // every other TopicClaim-origin entry above. The KNOWN_TOOLS extraction
+  // alias for this identity was already added at PM Adoption time
+  // (commit ae788505); this entry is the separate, required-at-publication
+  // backstop registration this file's own header discipline calls for.
+  higgsfield: 'Higgsfield',
 }
 
 export interface CrcActiveReachabilityResult {

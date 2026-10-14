@@ -2114,4 +2114,56 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     last_verified: '2026-10-08',
     superseded_by: null,
   },
+  {
+    // Fifth tool_scope-narrowed provider (after Synthesia, Kling, Runway,
+    // Pika). CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1 Adopted 2026-10-14
+    // (FGR_029) -- same unconditional-grant shape as Runway above, not
+    // Kling's/Pika's baseline-plus-exception shape. CPR_035 initially
+    // WITHHELD this claim -- not for evidence, applicability, or isolated
+    // Bounded Interpretation/Composition reasons (all independently passed),
+    // but because a live buildBoundedInterpretations() canary showed that a
+    // project with both ToolMention=higgsfield and ToolMention=kling
+    // retrieved both this claim and the live CLAIM-KLING-COMMERCIAL-USE-
+    // BASELINE-001-v1 for one commercial_use goal, and the then-unconditional
+    // combinedStatement join fused both dependency-free (D0) statements into
+    // one internally oppositional directly_relevant rendering ("permitted,
+    // unconditionally" immediately followed by "may not use... without
+    // written permission"). That generic defect -- proven to already affect
+    // the already-published Runway+Kling pair too, not merely a Higgsfield
+    // risk -- was fixed by CRC-BI-MULTI-D0-PRESERVATION-1 (commit
+    // 9dd9b9c4), which extends build-bounded-interpretation.ts's existing
+    // CC-1 grouping pattern so each matched D0 claim renders as its own
+    // separate block. CPR_036 then independently reconsidered CRC
+    // eligibility against the fixed pipeline -- re-ran a fresh Higgsfield+
+    // Kling canary (2 separate blocks, neither containing the other's text)
+    // and the real Runway+Kling production canary (confirming the fix is
+    // generic, not Higgsfield-specific) -- and APPROVED. CPR_035 itself is
+    // preserved unmodified as the historical pre-fix record; it is not
+    // retroactively rewritten. See GOVERNED-CLAIMS.md's own CRC Publication
+    // Scope and governance-reviews/CPR_035_CLAIM-HIGGSFIELD-COMMERCIAL-USE-
+    // 001-v1_2026-10-14.md (WITHHOLD, historical) +
+    // CPR_036_CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1_RECONSIDERATION_
+    // 2026-10-14.md (APPROVE, controlling) for the full decision sequence.
+    // 'higgsfield' is an existing CANONICAL_TOOL_ID with a passing LK-94
+    // NEW_IDENTITY_CANONICALIZATION_READINESS entry, both added at PM
+    // Adoption time (commit ae788505) -- no further identity work needed
+    // here.
+    claim_id: 'CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1',
+    topic: 'commercial_use',
+    claim_character: 'established',
+    jurisdiction: 'Global',
+    lifecycle: 'Adopted',
+    crc_eligible: 'Yes',
+    crc_publication_scope:
+      'APPROVED FOR CRC PUBLICATION (2026-10-14, CRC Approver: JD (PM) -- see CRC Publication Review #36, CPR_036, governance-reviews/CPR_036_CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1_RECONSIDERATION_2026-10-14.md, reconsidering CPR_035\'s own original WITHHOLD -- see CPR_035, governance-reviews/CPR_035_CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1_2026-10-14.md, preserved unmodified as the historical pre-fix record). CRC may state that under Higgsfield\'s current Terms of Use, commercial use of generated Output is permitted, unconditionally, across Higgsfield\'s standard (non-Enterprise) terms, that these rights survive account or subscription cancellation/termination, and that exported Outputs may be transferred or sublicensed to clients -- and that this proposition does not extend to Higgsfield\'s Enterprise tier, which is governed by a separate, non-public Enterprise Agreement not evidenced by this claim. CRC must not state or imply that a "business account" or any other non-Enterprise paid tier constitutes an Enterprise Agreement or changes training/confidentiality/indemnification treatment; that the user owns copyright in the Output merely because Higgsfield does not claim ownership; that the Output is original, unique, exclusive, non-infringing, copyrightable, or legally accurate/fit for any purpose; that any underlying third-party model\'s own terms (e.g. Kling, where used through Higgsfield) are satisfied or inapplicable; that rights concerning identifiable people, voices, music, client assets, or other third-party material are resolved; or that the project is otherwise commercially cleared. Where a separately applicable tool-scoped claim (e.g. Kling) also co-retrieves for the same project, CRC preserves both governed statements separately and does not infer which one controls -- per CRC-BI-MULTI-D0-PRESERVATION-1 (commit 9dd9b9c4), the generic fix CPR_036 independently re-verified removes the composed-output defect CPR_035 originally found, without resolving or ranking the two claims\' relationship. A human-reviewed Commercial Assurance Assessment remains the higher-assurance path for the project-specific facts this claim leaves open.',
+    crc_candidate_statement:
+      'Under Higgsfield\'s current Terms of Use, commercial use of generated Output is permitted, unconditionally, across Higgsfield\'s standard (non-Enterprise) terms, and these rights survive account or subscription cancellation/termination; exported Outputs may be transferred or sublicensed to clients. This proposition does not extend to Higgsfield\'s Enterprise tier, which is governed by a separate, non-public Enterprise Agreement not evidenced by this claim.',
+    applicability_requirements: [],
+    unresolved_project_dependencies: [],
+    provider_scope: null,
+    tool_scope: ['higgsfield'],
+    publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
+    last_verified: '2026-10-14',
+    superseded_by: null,
+  },
 ]
