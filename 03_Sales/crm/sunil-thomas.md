@@ -6,8 +6,8 @@ contacts:
 slug: sunil-thomas
 stage: lead_responded
 source: stec_campaign
-next_action: "Await Sunil's reply to the Oct 14 manual follow-up; review the thread in the Oct 19–21 window (no automatic follow-up). Do not alter the POST arm, ref 28XT, or the paused lead sequence."
-next_action_date: 2026-10-19
+next_action: "Review latest response before deciding whether to reply"
+next_action_date: 2026-10-15
 last_contacted: 2026-10-14
 blocked: false
 blocked_reason: null
@@ -25,6 +25,19 @@ Account record created 2026-10-14 (CRM ID **B181**) on graduation from the CRC L
 **Arm vs. follow-up treatment:** the randomized POST arm governs the automated M1–M4 sequence. The Oct 14 manual follow-up is observational discovery activity, not a randomized treatment, and does not change the arm assignment or experiment denominators. **Sequence state:** his individual Dripify lead sequence displayed **Paused** after his reply — a per-lead state, not the whole campaign. Do not resume it.
 
 ## Interaction log (reverse-chronological)
+
+### 2026-10-14 — Sunil's reply to the manual follow-up — inbound (5:17 PM as displayed)
+
+Inbound on LinkedIn / Dripify, 2026-10-14, 5:17 PM as displayed (timezone not verified), replying to Angel's 2026-10-14 15:55 manual question about whether he, the agency, or the client handles commercial-use checks (below). Source: user-supplied. Logged verbatim (lowercase and grammar as received).
+
+**Sunil (exact):**
+> agency and client takes responsibility
+
+**New factual evidence (his statement only):** he says the agency and client take responsibility for commercial-use checks. This does **not** establish whether formal checks actually occur, what they involve, or who performs them in practice.
+
+**Logging only:** the provisional `EXPLICIT_NO_PROBLEMS_REPORTED` classification (below) is unchanged. No claims about legal compliance, buying interest, pain or urgency are drawn from this message. `stage` unchanged; `last_contacted` remains 2026-10-14 (the CRM's equivalent of a last-inbound date). No reply was sent; the Dripify lead sequence was not resumed.
+
+**Data-quality note:** the latest CSR notification labels Sunil as responding after Message #2, whereas the chronological conversation (below) shows his first reply immediately after M1 (Oct 12, 16:09 → 16:10 as displayed). The original first-response attribution (after M1) is preserved; the discrepancy is recorded, not resolved.
 
 ### 2026-10-14 — manual follow-up — SENT (confirmed sent through Dripify; 15:55 as displayed)
 
