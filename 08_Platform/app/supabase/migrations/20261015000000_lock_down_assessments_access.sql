@@ -25,6 +25,12 @@
 -- only. No other table, policy, user permission, submission policy, or
 -- payment logic is touched. `assessments_deny_delete` (restrictive) is kept.
 --
+-- APPLIED: executed manually in the production Supabase SQL Editor on
+-- 2026-10-15 (PM-confirmed privilege checks: anon/authenticated cannot read,
+-- service_role can; anon cannot execute the function or use the sequence).
+-- Independently verified CAA-SECURITY-2B: anon REST HEAD → 401. Do not
+-- re-run against production.
+--
 -- RECOVERY: never re-create a permissive anon/authenticated SELECT policy or
 -- re-grant SELECT on this table to anon/authenticated. If a future feature
 -- needs public data, expose a server-side, service-role, allowlisted path
