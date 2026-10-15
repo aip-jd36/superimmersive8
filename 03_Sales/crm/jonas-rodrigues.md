@@ -4,11 +4,11 @@ contacts:
   - name: "Jonas Rodrigues"
     role: "AI Creative Director | VFX & CGI · 10 years on set and in post, bringing the soul AI lacks. Creative direction + generative pipeline firmly under control. (as displayed on the Standing Encore dashboard)"
 slug: jonas-rodrigues
-stage: meeting_scheduled
+stage: meeting_taken
 source: stec_campaign
-next_action: "Conduct the discovery meeting with Jonas — Wed 2026-10-14, 21:00–21:20 Asia/Taipei (10:00–10:20 Curitiba), Zoom; calendar invitation sent by JD, acceptance not verified — and record findings. Exploratory practitioner discovery, not a demo or qualified opportunity; do not introduce CRC by default."
-next_action_date: 2026-10-14
-last_contacted: 2026-10-13
+next_action: "Wait for Jonas to identify a suitable real commercial AI-video project for the offered free Commercial Assurance assessment. Light check-in only if no project is volunteered by the checkpoint; no sales cadence."
+next_action_date: 2026-11-04
+last_contacted: 2026-10-14
 blocked: false
 blocked_reason: null
 review_date: null
@@ -27,6 +27,65 @@ Account record created 2026-10-12 (CRM ID **B173**) on graduation from the CRC L
 **Arm vs. follow-up treatment:** the DURING arm governs the automated sequence. The Oct 12 manual follow-up is a separate treatment, `WORKFLOW_DISCOVERY / MEETING_INVITATION`, and does not change the arm assignment.
 
 ## Interaction log (reverse-chronological)
+
+### 2026-10-14 — Customer discovery / Commercial Assurance discussion — MEETING HELD (Zoom, JD)
+
+**Source / evidence:** the 2026-10-14 call with JD, `~/Downloads/GMT20261014-143015_Recording.transcript.vtt` (Zoom transcript of the 2026-10-14 call, ~54 min; kept outside the repo). Observations below are from that call; the transcript is the evidence source. The meeting scheduled in the section below took place.
+
+#### Meeting outcome — CURRENT FACT (observed in the call)
+- Jonas is actively doing commercial AI-video production.
+- He described current work for two Brazilian companies, an active real-estate AI-video workflow, and recent work for a Dubai client ("Last week I finished a work with people from Dubai").
+- His workflow uses tools including Higgsfield (business account), Nano Banana (Pro), ChatGPT and Claude (the transcript renders it "Cloud", in the context of MCP workflows connected to Higgsfield MCP).
+- His clients have not asked him about copyright issues / Commercial Assurance to date ("They never ask to me copyright issues").
+- Clients generally expect him to manage the production process and deliver the finished result.
+- He understood the value of an assurance/report artifact, but spontaneously suggested assurance would be more useful if integrated into the production platform/workflow, using Envato / Motion Array-style licensing documentation as an analogy.
+- He specifically discussed SI8 functioning as a third-party assurance layer integrated with a platform such as Higgsfield, and said he sees significant B2B opportunity.
+- He associated increasing assurance value with greater production scale: more videos, more spend, more clients, greater exposure.
+- His typical economics: a video may generate roughly US$1,000 of revenue, with AI-tool costs of roughly US$300–400 ("in a work that I receive $1,000, I usually pay $300, $400 in AI tools").
+- For his economics he suggested assurance around roughly 10% of project value / about US$100 as more workable, and said US$500 would be expensive for him in Brazil.
+- He demonstrated a workflow using creative references (Wes Anderson / Moonrise Kingdom), decomposing references into attributes such as symmetry, warmth, palette and framing.
+- He expressed interest in trying a real SI8 Commercial Assurance assessment on an appropriate future client project.
+- SI8 (JD) offered one real Commercial Assurance assessment free when he has an appropriate project.
+- No paid commitment was made. No immediate client-driven Commercial Assurance requirement was identified.
+
+#### Strategic interpretation — WORKING HYPOTHESIS (not validated customer demand)
+- Jonas is a strong example of the state-qualified ICP: an actively producing commercial AI-video practitioner, not merely a role-qualified prospect.
+- Active commercial production appears necessary for strong relevance but may not by itself create enough urgency to buy standalone Commercial Assurance.
+- Production scale / organizational exposure may be an additional activation variable: structural fit × active commercial production × consequence/scale.
+- For practitioners with his project economics, standalone per-project assurance at US$499 may be hard to justify.
+- His feedback supports investigating embedded / platform-distributed Commercial Assurance, where SI8 remains an independent third-party assurance layer but the assessment/report is accessed inside or adjacent to the production workflow.
+- His workflow reinforces the distinction between workflow/provenance documentation and Commercial Assurance: knowing how an asset was produced does not itself resolve the commercial-readiness decision.
+
+#### Lead classification (2026-10-14)
+The CRM schema has no dedicated fields for these, so they are recorded here:
+
+| Dimension | Value |
+|---|---|
+| Active commercial AI-video practitioner | YES |
+| Commercial Assurance relevance | HIGH |
+| Demonstrated Commercial Assurance pain | NO / NOT YET |
+| Explicit client assurance demand | NO |
+| Paid buying intent | NOT ESTABLISHED |
+| Pilot / design-partner willingness | POSITIVE |
+| Standalone US$499 price fit for his typical project economics | LOW (his stated feedback) |
+| Platform / embedded-assurance signal | STRONG QUALITATIVE SIGNAL |
+
+**NOT ESTABLISHED / do not claim:** validated willingness to pay; that he currently needs Commercial Assurance; that his clients require assurance; that the embedded-platform model is validated; that US$100 or 10% is the correct SI8 price. The pricing signal is **one customer's economics** and is not a pricing decision.
+
+#### Strategic signal (also logged in `01_Business/product-discovery/DISCOVERY-LOG.md`)
+> Active commercial production produced strong product relevance but not demonstrated immediate assurance pain. Jonas independently proposed an embedded B2B/platform model for third-party assurance and associated assurance value with increasing production scale/exposure. Treat as qualitative product/distribution evidence, not demand validation.
+
+#### Sales / legal communication learning
+Avoid categorical sales-language claims that AI-generated output is simply "not protected by copyright." Preferred SI8 framing:
+> Commercial permission from an AI tool doesn't necessarily mean the resulting asset will qualify for copyright protection. That can depend on jurisdiction, human contribution and the specific facts.
+
+A messaging/governance learning, not a change to governed CRC knowledge.
+
+#### State
+- `stage` moved `meeting_scheduled` → `meeting_taken`: the schema's factual state for "a real meeting/call already happened". The scheduled meeting is no longer upcoming. This is **not** commercial advancement: no evaluation, proposal or qualified-opportunity stage was set.
+- `last_contacted` = 2026-10-14 (the call).
+- **Next action:** wait for Jonas to identify a suitable real commercial AI-video project for the free assessment. Light check-in only if no project is volunteered by 2026-11-04 (three-week checkpoint); no sales cadence.
+- Experiment identity unchanged (CRC-R0065, DURING, ref UWHD — still not sent; the call did not introduce CRC).
 
 ### 2026-10-14 (scheduled) — discovery meeting with JD — CONFIRMED TIME; ZOOM INVITATION SENT; NOT YET HELD
 

@@ -13,6 +13,19 @@
 
 ## Log
 
+### 2026-10-14 — Active Producer: Relevance Without Pain; Embedded-Platform Assurance Suggested (Jonas Rodrigues, B173)
+**Insight:** Active commercial production produced strong product relevance but not demonstrated immediate assurance pain. Jonas independently proposed an embedded B2B/platform model for third-party assurance and associated assurance value with increasing production scale/exposure. Treat as qualitative product/distribution evidence, not demand validation.
+
+**Source:** Customer-discovery call, 2026-10-14 (JD × Jonas Rodrigues, B173 — CRC Lifecycle R1 respondent; Zoom transcript `GMT20261014-143015_Recording.transcript.vtt`). Full notes: `03_Sales/crm/jonas-rodrigues.md`.
+
+**Product implication:** None decided. Working hypotheses to investigate, not conclusions: (1) active commercial production may be necessary but not sufficient for standalone Commercial Assurance purchase; scale/exposure may be an additional activation variable; (2) embedded / platform-distributed assurance (SI8 stays the independent third-party layer, accessed inside or adjacent to the production workflow) is worth investigating; (3) workflow/provenance documentation ≠ the commercial-readiness decision. **Pricing signal is one customer's economics** (~US$1,000 project, ~US$300–400 AI-tool cost; ~10%/~US$100 described as workable, US$500 as expensive in Brazil) — explicitly not a pricing decision and not generalized; `PRICING-STRATEGY-v3.0.md` unchanged.
+
+**Status:** Hypothesis (single qualitative source).
+
+**Version impact:** None.
+
+---
+
 ### 2026-09-11 — Commercial Readiness Strategy & Documentation Synchronized (A1/A2/B1/B2)
 **Insight:** Not a market finding — a documentation-synchronization pointer. Strategic OS issued "SI8 Commercial Readiness Validation — Strategic Thesis & Product-Surface Mapping" (2026-09-11), restating the RECORD→DECIDE→ASSURE thesis, the three-surface product mapping (Living Knowledge / Decision Engine / CRC), and formally naming the four current experiments as **A1** (JD: After Documentation), **A2** (Angel: Decision Ownership), **B1** (JD: Creator Readiness), **B2** (Vanessa: Decision Friction) — A2/B2 documented as sub-experiments of Track A/B, not new top-level tracks. Repository synchronized: `COMMERCIAL-READINESS-VALIDATION-PLAN-v1.md` §2/§6/§9 updated with the A1/A2/B1/B2 structure and the A–H evidence-chain framing; two new spec files created (`CR-TRACK-A2-DECISION-OWNERSHIP-SPEC.md`, `CR-TRACK-B2-DECISION-FRICTION-SPEC.md`); the Dripify sourcing-vs-actual-outreach distinction (list membership ≠ prior contact) documented in `VALIDATION-LEDGER-SCHEMA.md`.
 
