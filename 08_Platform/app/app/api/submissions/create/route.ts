@@ -1,78 +1,57 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
+import { buildIntakeInsert } from '@/lib/submissions/build-intake-insert'
 
-// Verify service role key is set
-if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-  console.error('⚠️ SUPABASE_SERVICE_ROLE_KEY is not set!')
-}
+// CAA-SECURITY-3A: the insert below uses the service role (bypasses RLS), so
+// this route is the authorization boundary for submission creation:
+//   - the creator is the authenticated session user (never the request body);
+//   - only allowlisted intake fields are written (lib/submissions/build-intake-insert.ts);
+//   - status / payment_status are set server-side;
+//   - database error details are logged server-side, never returned.
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('🔷 API /api/submissions/create called')
-
-    const body = await request.json()
-    const { submissionData, userId, catalogData } = body
-
-    console.log('🔷 User ID:', userId)
-    console.log('🔷 Submission data keys:', Object.keys(submissionData))
-    console.log('🔷 Catalog opt-in:', catalogData?.catalog_opt_in || false)
-    console.log('🔷 Using service role key:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'YES' : 'NO')
-
-    // Verify the user is authenticated
-    if (!userId) {
-      console.log('❌ No userId provided')
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    const supabase = createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Insert submission using service role (bypasses RLS)
-    console.log('🔷 Attempting to insert submission...')
+    let body: unknown
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    }
+
+    const submissionData = typeof body === 'object' && body !== null ? (body as Record<string, unknown>).submissionData : undefined
+    const built = buildIntakeInsert(submissionData, user.id)
+    if (!built.ok) {
+      return NextResponse.json({ error: 'Invalid submission', reason: built.reason }, { status: 400 })
+    }
+    if (built.discarded_fields.length > 0) {
+      // Field names only — never values.
+      console.warn('[submissions/create] discarded non-intake fields', { userId: user.id, fields: built.discarded_fields })
+    }
+
     const { data: submission, error } = await supabaseAdmin
       .from('submissions')
-      .insert(submissionData)
-      .select()
+      .insert(built.row)
+      .select('id') // both intake forms only read `submission.id`
       .single()
 
-    if (error) {
-      console.error('❌ Submission insert error:', error)
-      console.error('❌ Error details:', JSON.stringify(error, null, 2))
-      return NextResponse.json(
-        { error: error.message, details: error },
-        { status: 400 }
-      )
+    if (error || !submission) {
+      console.error('[submissions/create] insert failed', { userId: user.id, code: error?.code, message: error?.message })
+      return NextResponse.json({ error: 'Failed to create submission' }, { status: 400 })
     }
 
-    console.log('✅ Submission created successfully:', submission.id)
-
-    // CATALOG DISABLED: opt_in record creation removed.
+    // CATALOG DISABLED: opt_in record creation removed (catalogData is ignored).
     // Video URL now lives on submissions.video_url directly.
-    // Preserved below for future reactivation:
-    /*
-    if (catalogData && catalogData.catalog_opt_in) {
-      const optInData = {
-        submission_id: submission.id,
-        opted_in: true,
-        video_url: catalogData.video_url,
-        thumbnail_url: catalogData.thumbnail_url || null,
-        public_description: catalogData.public_description || submissionData.logline || null,
-        visible: false,
-      }
-      const { data: optIn, error: optInError } = await supabaseAdmin
-        .from('opt_ins').insert(optInData).select().single()
-      if (optInError) console.error('⚠️ Opt-in creation failed:', optInError)
-      else console.log('✅ Catalog opt-in created:', optIn.id)
-    }
-    */
 
     return NextResponse.json({ submission }, { status: 200 })
-  } catch (error: any) {
-    console.error('❌ API error:', error)
-    console.error('❌ Error stack:', error.stack)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error) {
+    console.error('[submissions/create] unexpected error', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
