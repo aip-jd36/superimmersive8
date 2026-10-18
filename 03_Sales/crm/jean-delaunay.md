@@ -6,9 +6,9 @@ contacts:
 slug: jean-delaunay
 stage: lead_responded
 source: stec_campaign
-next_action: "Await evidence from Jean after the Oct 13 CRC reactivation: a natural reply, CRC use attributable to ref B151, product feedback, a current client problem/applicability, or movement toward Commercial Assurance. The send is outreach, not a qualification signal; no automatic follow-up. Review on 2026-10-20."
-next_action_date: 2026-10-20
-last_contacted: 2026-10-13
+next_action: "Jean replied Oct 16 ('I'll take a look'); Oct 18 follow-up sent inviting CRC feedback. Await reply, product feedback, or CRC use attributable to ref B151 — none established yet. No automatic follow-up. Review on 2026-10-25."
+next_action_date: 2026-10-25
+last_contacted: 2026-10-18
 blocked: false
 blocked_reason: null
 review_date: null
@@ -25,9 +25,44 @@ Graduated from `03_Sales/CRM.md` (row B151) on 2026-09-01. Geo: USA. Original co
 **Commercial Readiness Discovery tags:** Commercial Readiness Discovery · Warm Lead · Prior Response · Qualitative Evidence · Priority 3
 **CR hypothesis being tested:** Does evidence/documentation feed into a distinct interpretation + commercial-use decision layer?
 
-**Current Dripify display (2026-10-13, user-supplied):** Freelance Creative Director & CG Lead // Filmmaker; Position: Independent Filmmaker; Los Angeles, United States. Recorded as currently displayed profile evidence; historical profile data elsewhere in this file is preserved, not overwritten, and current employment is not independently verified.
+**Dripify lead:** https://app.dripify.com/leads/630335660 (added 2026-10-18).
+
+**Current Dripify display (2026-10-13, user-supplied; same on 2026-10-18):** Freelance Creative Director & CG Lead // Filmmaker; Position: Independent Filmmaker; Los Angeles, United States. Recorded as currently displayed profile evidence; historical profile data elsewhere in this file is preserved, not overwritten, and current employment is not independently verified.
 
 ## Interaction log (reverse-chronological)
+
+### 2026-10-18 — manual follow-up — SENT (user-confirmed; 12:14 PM as displayed in Dripify)
+
+Sent manually from Vanessa in the existing LinkedIn thread; send confirmed by the user. Dripify displayed 12:14 PM on 2026-10-18 (timezone not verified; delivery not independently verified). Replies to his Oct 16 acknowledgement below.
+
+- **Follow-up treatment:** CRC feedback invitation tied to his May point about client-specific AI-tool requirements. No new link; `ref=B151` unchanged.
+- **CRC:** `CRC_INTRODUCED=true` (Oct 13) · `CRC_LINK_SENT=true` (Oct 13) · `CRC_USAGE_VERIFIED=false`.
+
+**Message sent (exact):**
+
+```
+Thanks Jean, appreciate it!
+
+Given what you mentioned about clients having different requirements around AI tools, I'd be especially interested in whether the check reflects the kinds of questions you encounter in real productions.
+
+If you do get a chance to try it, I'd welcome any feedback — especially anything it misses or gets wrong.
+```
+
+**`last_contacted`** = 2026-10-18 — the date of this user-confirmed send (date-level only).
+
+**Next step (review 2026-10-25):** check for a reply, feedback, or CRC use attributable to ref B151. No further follow-up decided; none sent automatically. Dripify campaign observed **Paused** (2026-10-18) — not changed, not resumed.
+
+### 2026-10-16 — Jean's reply to the Oct 13 CRC reactivation — inbound (02:09 AM as displayed)
+
+Inbound on LinkedIn / Dripify, 2026-10-16, 02:09 AM as displayed (timezone not verified). Source: user-supplied. Logged verbatim.
+
+**Jean (exact):**
+> Interesting. I'll take a look.
+> Thanks for sharing
+
+**Classification:** acknowledgement of the CRC invitation and stated willingness to look — deferred, unconfirmed intent (same pattern as B094's reply). Warm historical reactivation; not part of the CRC Lifecycle R1 cold-acquisition experiment.
+- **NOT ESTABLISHED:** that he clicked the link, started or completed a CRC session, tested it on a real project, or gave product feedback; any personal clearance pain, budget, purchase intent, or Commercial Assurance opportunity. CRC use under ref B151 must be verified separately.
+- **Distinct from the May 15 evidence:** his May reply described practice (client/agency legal reviews intended tools early; requirements vary by client). His Oct 16 reply only responds to the CRC invitation. Neither is independent verification of legal clearance.
 
 ### 2026-10-13 — LinkedIn CRC warm-lead reactivation — SENT 2026-10-13 (user-confirmed; 21:53 Taipei as displayed)
 
