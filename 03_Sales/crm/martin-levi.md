@@ -6,7 +6,7 @@ contacts:
 slug: martin-levi
 stage: lead_responded
 source: stec_campaign
-next_action: "Confirm whether the 2026-10-18 follow-up question was sent; if sent, await Martin's reply on whether his team has an AI-specific clearance process"
+next_action: "Await Martin's reply to the 2026-10-18 follow-up on whether his team has an AI-specific clearance process; review 2026-10-23; no automatic follow-up"
 next_action_date: 2026-10-23
 last_contacted: 2026-10-18
 blocked: false
@@ -26,14 +26,14 @@ Account record created 2026-10-18 (CRM ID **B182**) on graduation from the CRC L
 
 ## Interaction log (reverse-chronological)
 
-### 2026-10-18 — proposed follow-up — SEND STATUS UNCONFIRMED
+### 2026-10-18 — manual follow-up — SENT (user-confirmed; 11:56 AM as displayed)
 
-Proposed manual follow-up from Angel's account, in the existing thread. The user-supplied Dripify thread capture shows this text in the thread at 11:56 AM as displayed (timezone not verified), but the user has **not separately confirmed** the send, so it is not recorded as sent. Confirm before treating it as sent.
+Sent manually from Angel's account in the existing thread; send confirmed by the user on 2026-10-18. The user-supplied Dripify thread capture shows it at 11:56 AM as displayed (timezone not verified). No independent delivery confirmation beyond that.
 
-- **Follow-up treatment (proposed):** WORKFLOW_DISCOVERY — asks whether his team has an AI-specific checking process or folds AI footage into normal production clearance.
+- **Follow-up treatment:** WORKFLOW_DISCOVERY — asks whether his team has an AI-specific checking process or folds AI footage into normal production clearance.
 - **CRC:** `CRC_INTRODUCED=false` · `CRC_LINK_SENT=false` · `CRC_USAGE_VERIFIED=false`. No CRC link in the message.
 
-**Message (exact):**
+**Message sent (exact):**
 
 ```
 Thanks Martin, good to hear you've got a team handling that.
@@ -65,6 +65,6 @@ Times as displayed in Dripify on 2026-10-18 ("Today"); timezone not verified.
 >
 > When that happens, does it ever hold up client approval, lead to last-minute changes, or mean going back to check the tools or assets used in production?
 
-**`last_contacted`** = 2026-10-18 — the date of his inbound reply (date-level only).
+**`last_contacted`** = 2026-10-18 — the date of his inbound reply and of the user-confirmed follow-up (date-level only).
 
-**Next step (review 2026-10-23):** confirm whether the follow-up was sent; if so, check for his reply. No further follow-up is sent automatically.
+**Next step (review 2026-10-23):** check for his reply on whether his team has an AI-specific clearance process. No further follow-up has been decided; none is sent automatically.
