@@ -65,6 +65,7 @@
 
 | B-ID | Lead | Company | Geo | Signal Summary | Sample Sent? | Next Action | Follow Up By |
 |------|------|---------|-----|----------------|-------------|-------------|--------------|
+| B101 | Anas Bakal | Monoud Trading | Dubai/UAE | Sep 11 CR-Track B2 reply [Vanessa]: ambiguous AI terms are a recurring gray area; when in doubt he redesigns/recreates manually or decides the risk with the client, and saves dated screenshots of terms. Moved from 1st Mtg Scheduled 2026-10-18: Jun 22 Calendly booking claim unverified; no meeting took place (user-confirmed). | No | Oct 18 Vanessa follow-up sent (Product A concept); await reply | 2026-10-23 (internal review) |
 | B100 | Ramez Tabshi | — | Dubai/UAE | **T1 + PRODUCT FIT CONFIRMED.** Jun 26 reply: "once legal teams get involved, conversation immediately shifts to IP ownership and copyright risks… That IP and commercial licensing document is exactly what they are looking for." Clients = finserv, healthcare, public sector. Current output = technical/security PDF only — explicit gap to SI8 Chain of Title. | No | Send sample (superimmersive8.com/sample) + 20-min call offer by Jul 5 | 2026-07-05 |
 | B145 | Daniele Zennaro | AiYR4 | England | "Request via commercial/rights side — legal/compliance probably behind it." Partial B2B2B confirmation. Chain: legal→commercial/rights→agency. Case-by-case but trending structured. Test 6 v6-A. | No | Pitch + send sample (superimmersive8.com/sample) — position as what the commercial/rights clearance request formalises | — |
 | B002 | Theodor (Teddy) Sandu | MullenLowe Singapore (IPG) | Singapore | "They are asking for both" — disclosure + Chain of Title. CD at holdco. T1 same-day reply. | No | Send Part 2 gate: what are you sending them and does it satisfy their legal team? | 2026-06-18 |
@@ -166,13 +167,12 @@
 
 ---
 
-## 2. 1st Mtg Scheduled (2)
+## 2. 1st Mtg Scheduled (1)
 
 *Call confirmed on calendar.*
 
 | B-ID | Lead | Company | Geo | Call Date | Format | Prep Notes |
 |------|------|---------|-----|-----------|--------|------------|
-| B101 | Anas Bakal | Monoud Trading | Dubai/UAE | TBD (Calendly self-scheduled) | Calendly (JD leads) | 3-point structured reply Jun 22: (1) licensing AI tools for specific commercial use; (2) prompt logs/generation settings for provenance; (3) digital labeling/signature requirements from platform regulations. Title: AI Creative Director | Luxury Brand Experience Architect. Gate Qs: is documentation requirement written/contractual or conversational? AI campaign volume per month? Direct brand relationships or through agency? |
 | B166 | Damien Barron-Tan (+ Matthew Crescenzo, CC'd Aug 8 — identity/role unconfirmed) | Carbon — CEO, HK-headquartered agency (confirmed via research; company is "Carbon," carbonmoves.com is just the domain) | Unknown (invitee timezone: Hong Kong) | Aug 13, 2026, 10:00 AM Taipei | Zoom (Calendly self-scheduled) | Booked directly, no prior outreach campaign on file — first contact, not a Dripify sequence conversion. Booking note reads "please use this time slot for a networking & learning call" signed JD — still unconfirmed whether this is a warm personal connection. Aug 8: pre-call warm-up email sent to Damien + Matthew. Full discovery brief: `03_Sales/call-notes/PREP-2026-08-13-B166-Damien-Barron-Tan-Carbon.md`. |
 
 ---
