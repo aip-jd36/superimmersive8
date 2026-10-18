@@ -875,7 +875,11 @@ describe('buildBoundedInterpretations -- CC-2 Semantics-Preserving Rhetorical Co
     const g = goal({ goal_id: 'g-1', raw_text: 'Can I use these third-party images commercially?', category: 'third_party_source_rights' })
     const out = retrieve(handoff(), MATRIX_FIXTURE, [g], claims, facts)
     const [interp] = buildBoundedInterpretations([g], out.results, out.diagnostics)
-    expect(interp.summary.match(/This is relevant to/g)).toHaveLength(1)
+    // CRC-BI-CASE3B-LEADING-QUALIFIER-1: with two or more dependency-bearing
+    // statements the single lead-in is now the approved leading qualifier
+    // ("The following guidance is relevant to ..."), still stated exactly once.
+    expect(interp.summary.match(/is relevant to/g)).toHaveLength(1)
+    expect(interp.summary_blocks[0]).toMatch(/^The following guidance is relevant to /)
     expect(interp.summary).toContain('First dependency-bearing statement.')
     expect(interp.summary).toContain('Second dependency-bearing statement.')
   })

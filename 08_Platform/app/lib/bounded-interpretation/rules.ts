@@ -369,6 +369,7 @@ function buildRelevantApplicabilityUnresolvedContentBlocks(
   humanContributionSentence: string | null,
   noDependencyStatement: string | null,
   noDependencyAllToolSourced: boolean,
+  dependencyBearingStatements: string[] | null,
 ): string[] {
   const relatedClause = includesRelatedTopicContent ? ` ${RELATED_TOPIC_BOUNDARY_CLAUSE}` : ''
   // H5 -- minimal echo-only relevance composition (Copyright UAT Correction
@@ -378,6 +379,24 @@ function buildRelevantApplicabilityUnresolvedContentBlocks(
   const blocks: string[] = []
   if (noDependencyStatement) {
     blocks.push(`${noDependencyStatement} This is relevant to ${CATEGORY_LABELS[category]}, ${boundaryClause(noDependencyAllToolSourced)}`)
+  }
+  // CRC-BI-CASE3B-LEADING-QUALIFIER-1 -- see dependencyBearingLeadingQualifier's
+  // own doc comment. Only when the dependency-bearing group has two or more
+  // non-empty statements; a single statement falls through to the unchanged
+  // shape below, byte-for-byte.
+  const separatedStatements = (dependencyBearingStatements ?? []).filter((s) => s.length > 0)
+  if (separatedStatements.length >= 2) {
+    blocks.push(dependencyBearingLeadingQualifier(category))
+    blocks.push(...separatedStatements)
+    // Related-topic clause, H5 sentence and bridge keep their existing
+    // conditions and at-most-once semantics; they trail the statements,
+    // exactly where they sat in the single-paragraph shape.
+    blocks.push(
+      [includesRelatedTopicContent ? RELATED_TOPIC_BOUNDARY_CLAUSE : null, humanContributionSentence, BRIDGE_SENTENCE]
+        .filter((s): s is string => Boolean(s))
+        .join(' '),
+    )
+    return blocks
   }
   const closingSentence = noDependencyStatement
     ? `But based on what's been described here, there isn't enough project-specific information to determine how it applies to your specific project.`
@@ -393,6 +412,7 @@ export function relevantApplicabilityUnresolvedWithContentSummary(
   humanContributionSentence: string | null = null,
   noDependencyStatement: string | null = null,
   noDependencyAllToolSourced: boolean = true,
+  dependencyBearingStatements: string[] | null = null,
 ): string {
   return buildRelevantApplicabilityUnresolvedContentBlocks(
     category,
@@ -401,6 +421,7 @@ export function relevantApplicabilityUnresolvedWithContentSummary(
     humanContributionSentence,
     noDependencyStatement,
     noDependencyAllToolSourced,
+    dependencyBearingStatements,
   ).join(' ')
 }
 
@@ -413,7 +434,10 @@ export function relevantApplicabilityUnresolvedWithContentSummary(
  * clause as separate, visually equivalent paragraphs without either layer
  * inferring where the boundary is. Exactly one block when no
  * dependency-free clause exists (the pre-CC-1 single-group shape) --
- * never artificially split.
+ * never artificially split. When `dependencyBearingStatements` carries two
+ * or more non-empty statements, the dependency-bearing group instead
+ * renders as leading qualifier + one block per statement + trailing
+ * related/H5/bridge block (CRC-BI-CASE3B-LEADING-QUALIFIER-1).
  */
 export function relevantApplicabilityUnresolvedWithContentBlocks(
   category: GoalCategory,
@@ -422,6 +446,7 @@ export function relevantApplicabilityUnresolvedWithContentBlocks(
   humanContributionSentence: string | null = null,
   noDependencyStatement: string | null = null,
   noDependencyAllToolSourced: boolean = true,
+  dependencyBearingStatements: string[] | null = null,
 ): string[] {
   return buildRelevantApplicabilityUnresolvedContentBlocks(
     category,
@@ -430,5 +455,26 @@ export function relevantApplicabilityUnresolvedWithContentBlocks(
     humanContributionSentence,
     noDependencyStatement,
     noDependencyAllToolSourced,
+    dependencyBearingStatements,
   )
+}
+
+/**
+ * CRC-BI-CASE3B-LEADING-QUALIFIER-1 (2026-10-18, PM/Architecture-approved
+ * wording, design B′ from CRC-BI-CASE3B-BOUNDARY-PRESENTATION-1). The
+ * Case 3B dependency-bearing group's collective qualification, moved AHEAD
+ * of the statements it covers so each governed statement can render as its
+ * own paragraph without appearing unqualified. Same uncertainty as the
+ * existing trailing closing sentence -- the tail ("but based on what's been
+ * described here, there isn't enough project-specific information to
+ * determine how it applies to your specific project.") is byte-identical;
+ * only the anaphoric "This is" becomes the forward-referring "The following
+ * guidance is", which a trailing-position sentence could not express. The
+ * dependency-free block (if any) is always emitted BEFORE this sentence and
+ * keeps its own closing boundary, so "the following" never reaches it.
+ * Uses only the existing CATEGORY_LABELS goal label -- no reinterpretation
+ * of the user's goal, no actor, no claim content.
+ */
+function dependencyBearingLeadingQualifier(category: GoalCategory): string {
+  return `The following guidance is relevant to ${CATEGORY_LABELS[category]}, but based on what's been described here, there isn't enough project-specific information to determine how it applies to your specific project.`
 }

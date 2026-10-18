@@ -394,10 +394,15 @@ export function buildBoundedInterpretations(
         const dependencyBearingMatches = matches.filter(needsApplicabilityHedge)
         const noDependencyMatches = matches.filter((m) => !needsApplicabilityHedge(m))
 
-        const dependencyBearingStatement = dependencyBearingMatches
+        // CRC-BI-CASE3B-LEADING-QUALIFIER-1 (2026-10-18): the same verbatim
+        // statements, in the same match order, kept as a list as well as
+        // joined. rules.ts renders them one block each, behind one leading
+        // collective qualification, only when two or more are non-empty;
+        // otherwise the joined string drives the unchanged single-block shape.
+        const dependencyBearingStatements = dependencyBearingMatches
           .map((m) => m.candidate_statement)
           .filter((s): s is string => s !== null)
-          .join(' ')
+        const dependencyBearingStatement = dependencyBearingStatements.join(' ')
         const noDependencyStatement =
           noDependencyMatches.length > 0
             ? noDependencyMatches
@@ -431,6 +436,7 @@ export function buildBoundedInterpretations(
             humanContributionSentence,
             noDependencyStatement,
             noDependencyAllToolSourced,
+            dependencyBearingStatements,
           ),
           // CRC Email/UI Structural Readability -- Phase 1 (2026-08-23):
           // the ordered-blocks sibling of the summary call directly above,
@@ -444,6 +450,7 @@ export function buildBoundedInterpretations(
             humanContributionSentence,
             noDependencyStatement,
             noDependencyAllToolSourced,
+            dependencyBearingStatements,
           ),
           unresolvedRelevantClaims,
         )
