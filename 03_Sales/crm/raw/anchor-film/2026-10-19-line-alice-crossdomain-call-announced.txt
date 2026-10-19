@@ -1,0 +1,62 @@
+SOURCE / PROVENANCE
+- Channel: LINE, JD <-> 馮鈺婷 (Alice Feng, Anchor Film, CRM B164)
+- Date: 2026-10-19. Timestamps are Taiwan local time (UTC+8), as supplied by JD.
+- Provenance: manually copied by JD from the LINE app into ChatGPT, then supplied to this repository. NOT a native LINE export; not independently authenticated.
+- Everything below the line is the user-supplied text, preserved exactly as provided (wording, punctuation, emojis, links, order). Nothing corrected.
+- Logged: 2026-10-19 (ALICE-ANCHOR-LOG-2). Canonical record: 03_Sales/crm/anchor-film.md
+
+----- BEGIN VERBATIM TRANSCRIPT -----
+
+11:54 馮鈺婷
+🚀116年度企業跨域研發補助｜徵案開跑！🚀
+💰每案最高補助900萬元｜補助比例最高50%
+AI創新不單打獨鬥！鼓勵中小及新創企業跨域結盟，整合技術與產業資源，加速創新研發、商業化落地與市場拓展！
+
+🎯116年度三大徵案主軸
+🔹代理式AI與領域應用(Agentic AI)
+🔹永續AI與災防管理(Sustainable AI)
+🔹物理AI與服務(Physical AI）
+
+✨參加徵案說明會，你將掌握：
+🗝️計畫補助資源、申請資格與三大徵案方向
+🗝️提案申請流程、審查機制及注意事項
+🗝️獲補助企業現身分享，分享跨域合作實戰經驗與成功關鍵
+
+📣全臺四場徵案說明會，立即報名！
+📍臺北場｜10/28(三)14:30–16:30
+🌐實體＋線上同步參與
+🏛️Living Lab（民生科服大樓）｜臺北市松山區民生東路四段133號2樓A區
+🔗報名：https://ievents.iii.org.tw/EventS.aspx?t=0&id=3580
+📍高雄場｜10/30(五)14:30–16:30
+🏛️亞灣新創園戰情室｜高雄市前鎮區成功二路25號
+🔗報名：https://ievents.iii.org.tw/EventS.aspx?t=0&id=3582
+📍臺中場｜11/2(一)14:30–16:30
+🏛️心之谷永續教育園區Gallery教育區｜臺中市西屯區台灣大道三段501號
+🔗報名：https://ievents.iii.org.tw/EventS.aspx?t=0&id=3583
+📍宜蘭場｜11/4(三)14:30–16:30
+🏛️宜蘭傳藝中心登義漢藥體驗館｜宜蘭縣五結鄉五濱路二段201號
+🔗報名：https://ievents.iii.org.tw/EventS.aspx?t=0&id=3584
+
+⏰計畫申請至12/7(一)17:30止
+🔎更多申請資訊：https://sbir.sme.gov.tw/cross/info
+
+🔥跨域結盟，讓AI創新從研發走向市場！
+誠摯邀請企業踴躍報名，一同掌握AI創新與跨域合作新商機！
+
+11:54 馮鈺婷
+計劃公布了～
+
+12:27 JD
+好！謝謝 Alice 分享 😄 我會報名 10/28 的線上說明會。聽完我們再找時間聊聊怎麼一起提案！
+
+12:29 馮鈺婷
+好的
+
+12:29 馮鈺婷
+我同步也有問主張數據
+他們資本額1000萬哈
+
+12:31 JD
+嗯嗯 好喔 😀
+
+----- END VERBATIM TRANSCRIPT -----

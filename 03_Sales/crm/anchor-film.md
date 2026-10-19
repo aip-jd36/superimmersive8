@@ -6,9 +6,9 @@ contacts:
 slug: anchor-film
 stage: evaluating
 source: event
-next_action: "Oct 12 is an internal check only (not an Alice outreach date — she has said registration isn't announced yet and they are waiting on Kei): see whether registration for the Oct 19 Taipei/online Cross-Domain R&D briefing has been announced. Register when available; attend the Oct 19 briefing; use it to resolve the capital/consortium eligibility questions (Kei's reported >NT$9M combined-capital rule is unverified); then schedule the Anchor × SI8 working session for after the briefing. Alice is separately exploring a possible third consortium member, which SI8 has not agreed to. Full open-question list in the 2026-10-05 log entry."
-next_action_date: 2026-10-12
-last_contacted: 2026-10-05
+next_action: "Register for (or otherwise get access to) the Oct 28 Taipei Cross-Domain R&D briefing, 14:30–16:30, online participation advertised; JD told Alice he will register, registration not yet confirmed. Attend it and get the official program materials. Use them to resolve capital/consortium eligibility, eligible costs, the AI supply-chain rule and conflict-of-interest/independence implications. Then arrange the post-briefing discussion with Alice JD proposed. Application deadline Dec 7, 2026 17:30 (per forwarded announcement) is a planning constraint only. SI8 has not agreed to apply or to any third member (主張數據 is a possible participant only). See 2026-10-19 log entry."
+next_action_date: 2026-10-28
+last_contacted: 2026-10-19
 blocked: false
 blocked_reason: null
 review_date: null
@@ -21,6 +21,64 @@ created: 2026-08-15
 Graduated from `03_Sales/CRM.md` (row B164) on 2026-08-15 — an active, developing strategic-partnership discovery conversation, well past a reply-only signal.
 
 ## Interaction log (reverse-chronological)
+
+### 2026-10-19 — Alice forwards the official ROC 116 Cross-Domain R&D call; JD will register for the Oct 28 online briefing; Alice has also approached 主張數據
+
+**Source:** `03_Sales/crm/raw/anchor-film/2026-10-19-line-alice-crossdomain-call-announced.txt`. JD copied the exchange manually from LINE into ChatGPT, then supplied it here. It is not a native LINE export and has not been independently authenticated. Times are Taiwan local (UTC+8).
+
+**LINE, Oct 19 (Mon), verbatim:**
+- 11:54 Alice: forwarded the full call-for-proposals announcement "🚀116年度企業跨域研發補助｜徵案開跑！🚀" (full text in the raw file).
+- 11:54 Alice: "計劃公布了～" (the program has been announced)
+- 12:27 JD: "好！謝謝 Alice 分享 😄 我會報名 10/28 的線上說明會。聽完我們再找時間聊聊怎麼一起提案！" (Great, thanks for sharing! I'll register for the 10/28 online briefing. After we've heard it, let's find time to talk about how to propose together!)
+- 12:29 Alice: "好的" (OK)
+- 12:29 Alice: "我同步也有問主張數據 / 他們資本額1000萬哈" (I've also asked 主張數據 in parallel; their registered capital is NT$10M, ha)
+- 12:31 JD: "嗯嗯 好喔 😀" (OK, sounds good)
+
+**What the forwarded announcement states** (attributed to the announcement Alice forwarded, not independently verified against official rules):
+- Program: 116年度企業跨域研發補助 (ROC Year 116 enterprise cross-domain R&D subsidy). Same three tracks as the Sep 15–16 draft slides: Agentic AI / Sustainable AI / Physical AI.
+- Up to NT$9M per case; subsidy ratio up to 50%. Encourages SME and startup cross-domain alliances.
+- Four briefings, all 14:30–16:30:
+
+  | Session | Date | Venue | Notes |
+  |---|---|---|---|
+  | Taipei | 10/28 (Wed) | Living Lab, 民生東路四段133號2樓A區 | **In person + online**; registration https://ievents.iii.org.tw/EventS.aspx?t=0&id=3580 |
+  | Kaohsiung | 10/30 (Fri) | 亞灣新創園 | in person |
+  | Taichung | 11/2 (Mon) | 心之谷永續教育園區 | in person |
+  | Yilan | 11/4 (Wed) | 宜蘭傳藝中心 | in person |
+
+- **Applications close 12/7 (Mon) 17:30**, i.e. 2026-12-07.
+- More information: https://sbir.sme.gov.tw/cross/info
+
+**Supersedes the Oct 5 briefing schedule:** Kei's earlier screenshot listed the Taipei briefing as 10/19 (Mon), the only livestreamed session, with Kaohsiung 10/16, Yilan 10/21 and Taichung 10/27. The officially announced dates differ: Taipei is 10/28, still advertised with online participation. The Oct 5 plan to "attend Oct 19" is therefore replaced by Oct 28. The Oct 5 entry below is preserved as it was recorded.
+
+**Classification:**
+- CURRENT FACT (JD's own message): JD said he **will** register for the Oct 28 online briefing, and proposed talking afterward about how to propose together. **Registration not yet confirmed done; the briefing hasn't been attended.**
+- CURRENT FACT: Alice acknowledged ("好的").
+- CURRENT FACT (Alice's report): she has also approached **主張數據** and says its registered capital is **NT$10M**. Alice-reported and unverified.
+  - 主張數據 is a **possible** third consortium participant, not a confirmed member. Its role, interest and identity are not established.
+  - SI8 has not agreed to a third member.
+  - No CRM record created for it (insufficient verified identifying information).
+- Signal read: Alice proactively forwarded the official call and approached another company in parallel. Both are positive indicators of continuing collaboration interest. They are **not** an agreement, a consortium, an application commitment, or confirmed eligibility. Stage stays `evaluating`.
+
+**Still unresolved (carried from 2026-10-05 and earlier):**
+- The capital threshold. Kei's reported ">NT$9M combined capital regardless of amount requested" vs. the draft slide's 補助款 ≤ 自籌款 ≤ 實收資本額.
+- Whether a NT$10M third member would change the analysis depends on the official rule and how consortium capital is calculated. Not assumed.
+- **Before agreeing to apply, confirm from official materials:**
+  - the final RFP/application package;
+  - the capital calculation and consortium rules;
+  - eligible cost categories for SI8's kind of work;
+  - the AI supply-chain (non-PRC) requirement, with SI8's own stack still unaudited (`01_Business/research/TAIWAN-CROSSDOMAIN-AI-GRANT-2026-SMEA.md` §7);
+  - conflict-of-interest and independent-assessment implications (PQ-006 — SI8 as Anchor's grant partner vs. independent assessor);
+  - lead applicant, workshare, budget and IP;
+  - the September MODA question (still unanswered).
+
+**Next actions (internal, not commitments from Alice):**
+1. Register for, or otherwise get access to, the Oct 28 Taipei briefing (online advertised). Internal checkpoint is the briefing date itself.
+2. Attend it; obtain the official program materials from https://sbir.sme.gov.tw/cross/info.
+3. Arrange the post-briefing discussion with Alice that JD proposed. No date agreed.
+4. Treat **2026-12-07 17:30** as a planning constraint only. No application is approved or committed.
+
+**Guardrail (unchanged):** keep the product/pilot rationale separate from grant-driven partnership construction. The grant is worth pursuing only if it accelerates work SI8 already has strategic reason to do, and a third member must have a real role, not just supply capital (see 2026-10-05 entry and `TAIWAN-CROSSDOMAIN-AI-GRANT-2026-SMEA.md` §8).
 
 ### 2026-10-05 — Alice relays Kei's capital-eligibility guidance; third consortium member raised; plan is official briefing first, then meet
 

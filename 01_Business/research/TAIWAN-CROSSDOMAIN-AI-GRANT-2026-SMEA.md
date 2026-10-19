@@ -100,3 +100,14 @@ Updated read, after the Sept 16 slide additions: **strong prima facie technical-
 | 專業服務文件審閱與法遵作業 (scenario #12) | CRC / Commercial Assurance use case directly |
 
 **Strategic test to apply before treating any of this as justification to build:** would SI8 have reason to build or validate this capability without the grant? If no, grant funding alone is not sufficient strategic justification — consistent with SI8's existing ACTIVE STRATEGIC HYPOTHESIS validation discipline (`claude.md`, Decision Engine section: capability/demand/economics must each be validated independently). The grant is, at most, evidence that this technical direction may qualify for public R&D funding — it is not evidence that customers will buy a Decision Engine, and it is not license to broaden SI8 into generic Agentic-AI/workflow software.
+
+## 9. Announcement status (addendum, 2026-10-19)
+
+On 2026-10-19 Alice forwarded the official call-for-proposals announcement via LINE (raw: `03_Sales/crm/raw/anchor-film/2026-10-19-line-alice-crossdomain-call-announced.txt`; copied manually by JD, not a native export). It states:
+- Program name: **116年度企業跨域研發補助** (ROC Year 116 enterprise cross-domain R&D subsidy). Same three tracks as the drafts.
+- Up to NT$9M per case; ratio up to 50%.
+- **Applications close 2026-12-07 17:30.** This answers OQ #7's deadline question, per the announcement only.
+- Four briefings: Taipei 10/28 (in person + online), Kaohsiung 10/30, Taichung 11/2, Yilan 11/4. These replace the dates in Kei's Oct 5 screenshot (Taipei 10/19).
+- Official info page: https://sbir.sme.gov.tw/cross/info
+
+**Not changed by this addendum:** the announcement text doesn't restate the capital rule, consortium capital calculation, eligible costs or the non-PRC supply-chain requirement. §2 and §7 still describe **draft** rules. The Oct 5 capital-threshold conflict is still open (Kei's ">NT$9M combined" vs. the draft's 補助款 ≤ 自籌款 ≤ 實收資本額; see `03_Sales/crm/anchor-film.md`). Verify all of it against the official materials before relying on it.
