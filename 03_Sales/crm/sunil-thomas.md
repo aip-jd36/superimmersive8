@@ -6,9 +6,9 @@ contacts:
 slug: sunil-thomas
 stage: lead_responded
 source: stec_campaign
-next_action: "Review latest response before deciding whether to reply"
-next_action_date: 2026-10-15
-last_contacted: 2026-10-14
+next_action: "Await Sunil's answer to the 2026-10-20 question (whether agencies/clients ask him for rights/clearances documentation covering AI tools, generated content or source materials); internal review checkpoint 2026-10-25; no automatic follow-up"
+next_action_date: 2026-10-25
+last_contacted: 2026-10-20
 blocked: false
 blocked_reason: null
 review_date: null
@@ -24,7 +24,32 @@ Account record created 2026-10-14 (CRM ID **B181**) on graduation from the CRC L
 
 **Arm vs. follow-up treatment:** the randomized POST arm governs the automated M1–M4 sequence. The Oct 14 manual follow-up is observational discovery activity, not a randomized treatment, and does not change the arm assignment or experiment denominators. **Sequence state:** his individual Dripify lead sequence displayed **Paused** after his reply — a per-lead state, not the whole campaign. Do not resume it.
 
+**`next_action_date` choice (2026-10-20):** 2026-10-25 is an **internal review checkpoint only** — five days after the follow-up, matching the MEDIUM practice used for other leads (e.g. B189, B190, B191). It is not a date Sunil agreed to and does not schedule any outbound message.
+
 ## Interaction log (reverse-chronological)
+
+### 2026-10-20 — manual follow-up — SENT (03:05 PM as displayed in Dripify)
+
+Sent from Angel's account in the existing thread; shown as sent in the user-supplied Dripify thread, 2026-10-20 (timezone not verified; delivery not independently verified). This is the reply to his 2026-10-14 answer.
+
+- **Follow-up treatment:** discovery question on agency/client documentation demand (closest existing label: WORKFLOW_DISCOVERY) — asks whether agencies or clients ask **him** for an AI equivalent of a traditional rights and clearances package (talent releases, music licenses, third-party asset permissions).
+- **Hypothesis tested — OPEN / UNTESTED:** that agencies/clients request AI-related rights and clearances documentation. Sunil has **not** answered. No request for, or delivery of, such a package is claimed.
+- **Responsibility vs. evidence:** his 2026-10-14 statement is about **who takes responsibility** for commercial-use checks. This question is about **who supplies supporting evidence**. These are kept separate; it is not inferred that he personally supplies documentation or that the agency/client performs any specific verification.
+- **CRC / Product A:** `CRC_INTRODUCED=false` · `CRC_LINK_SENT=false` · `CRC_USAGE_VERIFIED=false`. No CRC link; no Product A proposition introduced. Attribution stays CRC Lifecycle R1 POST; not a Product A response or a CRC completion.
+
+**Message sent (exact):**
+
+```
+Got it, Sunil — thanks for clarifying.
+
+In traditional ad production, agencies and clients sometimes require a rights and clearances package — things like talent releases, music licenses, and permissions for third-party assets.
+
+When you deliver AI-generated work, do they ever ask you for similar documentation covering the AI tools, generated content, or source materials? Or hasn't that become an expectation yet?
+```
+
+**`last_contacted`** = 2026-10-20.
+
+**Next step (internal review 2026-10-25):** check for his answer. No further follow-up decided; none is sent automatically. Do not resume the paused sequence.
 
 ### 2026-10-14 — Sunil's reply to the manual follow-up — inbound (5:17 PM as displayed)
 
@@ -60,7 +85,7 @@ For your AI film projects, do you typically handle those commercial-use checks y
 
 **`last_contacted`** = 2026-10-14 — the date of this follow-up (date-level only).
 
-**Next step (2026-10-19, review window Oct 19–21):** check for his reply. No further follow-up has been decided; none is sent automatically.
+**Next step (2026-10-19, review window Oct 19–21):** check for his reply. No further follow-up has been decided; none is sent automatically. *[Superseded: he replied 2026-10-14 5:17 PM; see the 2026-10-20 entry above.]*
 
 ### Automated sequence and his reply — Dripify (user-supplied)
 
