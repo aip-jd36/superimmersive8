@@ -4,11 +4,9 @@ contacts:
   - name: "Arturo Alanis Garza"
     role: "Managing Partner Director/Producer/Writer; profile describes Film Director & Founder (as displayed in Dripify)"
 slug: arturo-alanis-garza
-stage: lead_responded
+stage: nurturing
 source: stec_campaign
-next_action: "Await Arturo's answer to the 2026-10-18 follow-up (whether the scenario hasn't arisen because his team checks AI tools/assets before production, or simply hasn't come up); review 2026-10-23; no automatic follow-up"
-next_action_date: 2026-10-23
-last_contacted: 2026-10-18
+last_contacted: 2026-10-20
 blocked: false
 blocked_reason: null
 review_date: null
@@ -24,9 +22,40 @@ Account record created 2026-10-18 (CRM ID **B185**) on graduation from the CRC L
 
 **Arm vs. follow-up treatment:** the randomized POST arm governs the automated M1–M4 sequence. The manual follow-up is observational discovery activity, not a randomized treatment, and does not change the arm assignment or experiment denominators. **Sequence state (observed 2026-10-18):** his Dripify lead sequence shows **Paused** — a per-lead state, observed only; Dripify was not changed. Do not resume it.
 
-**Dates:** Dripify displays "Yesterday" and "Today", not absolute dates. Calendar dates below are **inferred** from the capture being supplied on 2026-10-18 ("Today" = 2026-10-18, "Yesterday" = 2026-10-17). Times are as displayed; timezone not verified.
+**Disposition (2026-10-20):** conversation acknowledged and **closed for now — no further proactive follow-up**. Stage set to `nurturing` (terminal, no open next action), following the B186 precedent for a closed conversation. This is **not** a product rejection, opt-out or blacklist: no product was offered, and he can be re-engaged if he reaches out or circumstances change. Stage was not advanced; no opportunity, evaluation or pilot.
+
+**Dates:** Dripify displays "Yesterday" and "Today", not absolute dates. Calendar dates below are **inferred** from the capture being supplied on 2026-10-18 ("Today" = 2026-10-18, "Yesterday" = 2026-10-17). Times are as displayed; timezone not verified. **Update 2026-10-20:** the user has now supplied absolute dates for the whole exchange (2026-10-17 M1 + reply, 2026-10-18 follow-up, 2026-10-19 reply, 2026-10-20 closing message); they agree with the earlier inference. Entries below keep their original "(inferred)" labels as historical.
 
 ## Interaction log (reverse-chronological)
+
+### 2026-10-20 — closing acknowledgement — SENT (2:48 PM as displayed in Dripify)
+
+Sent from Angel's account in the existing thread; date as supplied by the user; displayed 2:48 PM (timezone not verified; delivery not independently verified). Source: user-supplied Dripify thread, 2026-10-20.
+
+- **Treatment:** acknowledgement / courtesy close. No question, no CRC link, no Product A proposition.
+- **CRC:** `CRC_INTRODUCED=false` · `CRC_LINK_SENT=false` · `CRC_USAGE_VERIFIED=false`.
+
+**Message sent (exact):**
+
+```
+Got it, Arturo — thanks for sharing. Good to know it hasn't been an issue for your projects so far. Appreciate the perspective!
+```
+
+**`last_contacted`** = 2026-10-20. **Next step:** none — closed for now; no proactive follow-up. Do not resume the paused sequence.
+
+### 2026-10-19 — Arturo's second reply — inbound
+
+Inbound on LinkedIn / Dripify, date as supplied by the user; time not supplied. Logged verbatim — **"Dimly" is preserved exactly as received and not corrected** (it may be a typo for "Simply", but that is not assumed).
+
+**Arturo (exact):**
+> Dimly not an issue so far
+
+**Classification (provisional, extends the 2026-10-17 `EXPLICIT_NO_DELIVERY_ISSUE` reading):** engaged respondent — two substantive inbound replies — with a **negative problem-occurrence signal**.
+- **CURRENT FACT (his own words):** it has not been an issue so far.
+- **Preventive process: UNKNOWN.** He did not take up the "your team checks the AI tools and assets before production" option offered in the follow-up, and did not describe any pre-production checking.
+- **NOT ESTABLISHED:** verified absence of rights or commercial-readiness risk; an established clearance process; pain; CRC interest or usage; Product A demand or pilot intent (not tested, since Product A was never introduced); buying intent.
+- **Not** a product rejection or opt-out.
+- **Attribution:** CRC Lifecycle R1 POST arm (CRC-R0161), via the manual discovery follow-up. Not a Product A campaign response.
 
 ### 2026-10-18 (inferred) — manual follow-up — SENT (user-confirmed; "Today" 12:26 PM as displayed)
 
@@ -62,4 +91,4 @@ Inbound on LinkedIn / Dripify, displayed as Yesterday, 03:06 AM, after M1. Sourc
 
 **`last_contacted`** = 2026-10-18 — the inferred date of the user-confirmed follow-up (date-level only).
 
-**Next step (review 2026-10-23):** check for his answer. No further follow-up has been decided; none is sent automatically.
+**Next step (review 2026-10-23):** check for his answer. No further follow-up has been decided; none is sent automatically. *[Superseded 2026-10-20: he answered on 2026-10-19; closed for now — see the 2026-10-20 entry above.]*
