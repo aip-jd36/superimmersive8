@@ -1,0 +1,25 @@
+SOURCE / PROVENANCE
+- Channel: LinkedIn via Dripify, alias Angel (LinkedIn display name "Yu-Chieh Li"; the reply greets "Chieh Li").
+- Lead: Andy Greenaway — Founder and Chief Creative Officer, TAO Marketing Systems — Country: Singapore (as displayed in Dripify; not independently verified). Company website displayed: https://www.readytorumble.sg/ . Email: not available on LinkedIn.
+- Dripify lead: https://app.dripify.com/leads/692461084
+- Dripify campaign: SI8_RV_R4LI_CreaPro_ProdA_ActiveAI_A_Gbl_1026A_AL — https://app.dripify.com/campaigns/2123175/audience — campaign state shown in the copied view: Paused (campaign-level only; the individual lead's sequence state is not inferred).
+- Product A roster (local, outside repo, not modified): SI8_Product_A_79_Dripify_STAGING_NOT_CLEARED_2026-10-15.csv lists Andy Greenaway, https://sg.linkedin.com/in/andy-greenaway, roster lead ID STATE-R027 (not a CRM ID), segment "Secondary — creative decision-maker/influencer", sender Angel; also present in SI8_Product_A_Angel_79_FINAL_IMPORT_PREPARED_2026-10-15.csv. Not part of the CRC Lifecycle R1 experiment.
+- Provenance: Dripify page content manually copied by JD into ChatGPT, then supplied to this repository on 2026-10-20. NOT a native Dripify export; not an independently verified platform event.
+- Date/time: reply displayed as "Yesterday", 07:15 pm. Timezone and absolute date NOT verified. The capture was supplied 2026-10-20, so "Yesterday" would contextually suggest 2026-10-19, but that is an inference only and is NOT recorded as the canonical event date. Date verification pending. The outreach message's send time was not shown in the copied view.
+- Message position: the copied view shows one outreach message; whether it was sequence M1 or a later step is not established here.
+- Logged: 2026-10-20 (ANGEL-REPLY-LOG-1). Summary row: 03_Sales/CRM.md, "⚪ Polite Pass — Closed". No CRM ID or record file was created.
+- Everything below the line is the user-supplied text, preserved exactly as provided. Nothing corrected.
+
+----- BEGIN VERBATIM (as displayed) -----
+
+[Angel / outreach — displayed message]
+Hi Andy — quick question.
+
+When making AI videos for clients, do they ever ask which AI tools you used, whether they're cleared for commercial use, or for supporting documentation?
+
+Is that a headache, or do you have a good process for it?
+
+[Andy Greenaway — reply — Yesterday, 07:15 pm as displayed]
+Hey Chieh Li, we’re all good.
+
+----- END VERBATIM -----

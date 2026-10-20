@@ -444,6 +444,7 @@
 | Natalie Leroy | Accenture UK & Ireland | Design Lead - Research | London | SI8_Legal Friction | Ivy | "Hi not interested thank you" — wrong role (research/design, not video production) |
 | Martin Venter | Al Khaleej Investment PSC | CCO | Dubai | SI8_Legal Friction | Lilly | "No thanks" — investment firm, wrong sector; Dubai off-geo (msg#2) |
 | Sanar Najim | ALZAEEM GROUP | — | Dubai | SI8_Legal Friction | Lilly | "No, no client has made such a requirement" — Dubai off-geo (msg#1) |
+| Andy Greenaway | TAO Marketing Systems | Founder and Chief Creative Officer | Singapore | SI8_RV_R4LI_CreaPro_ProdA_ActiveAI_A_Gbl_1026A_AL (Product A; roster lead ID STATE-R027; not CRC Lifecycle) | Angel | "Hey Chieh Li, we’re all good." — displayed "Yesterday" 07:15 pm (absolute date/timezone unverified; captured 2026-10-20). Brief polite disengagement: does not say whether clients ask or describe any process; not evidence of a working clearance process, nor that the problem is absent; no pain, demand or buying intent; AI-video client work not established from profile. Unscored (no repo rubric). No reply sent; no follow-up planned. Raw: `crm/raw/andy-greenaway/` (logged 2026-10-20) |
 
 ---
 
