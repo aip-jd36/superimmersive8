@@ -14,7 +14,10 @@ import { randomUUID } from 'crypto'
 import { Client } from 'pg'
 
 const URL = process.env.DATABASE_URL_TEST
-const MIGRATION = join(__dirname, '..', '..', 'supabase', 'migrations', '20261021000000_payment_fulfillments.sql')
+const MIGRATION_DIR = join(__dirname, '..', '..', 'supabase', 'migrations')
+const MIGRATION = join(MIGRATION_DIR, '20261021000000_payment_fulfillments.sql')
+// FIX-1 (forward-only): Stripe reports a fully discounted session as 'paid' with no PaymentIntent.
+const MIGRATION_FIX_1 = join(MIGRATION_DIR, '20261022000000_payment_zero_total_paid.sql')
 const BOOTSTRAP = join(__dirname, 'bootstrap.sql')
 const PREFLIGHT = join(__dirname, '..', '..', '..', 'implementation', 'caa-3b', 'CAA_3B_PRODUCTION_SCHEMA_PREFLIGHT.sql')
 
@@ -57,6 +60,7 @@ maybe('payment ledger (PostgreSQL)', () => {
     await admin.query(readFileSync(BOOTSTRAP, 'utf8'))
     preflightBefore = (await admin.query(readFileSync(PREFLIGHT, 'utf8'))).rows   // operator script, verbatim
     await admin.query(readFileSync(MIGRATION, 'utf8'))   // the migration, verbatim
+    await admin.query(readFileSync(MIGRATION_FIX_1, 'utf8'))   // then FIX-1, verbatim, in deploy order
     installedPolicy = (await admin.query('SELECT * FROM public.payment_legacy_session_policy')).rows[0]
   })
 
@@ -227,7 +231,8 @@ maybe('payment ledger (PostgreSQL)', () => {
     ['discount_inconsistent', { total: 2900, discount: -1 }],
     ['payment_status_inconsistent', { pi: null }],
     ['payment_status_inconsistent', { pi: 'not_a_pi' }],
-    ['payment_status_inconsistent', { total: 0, discount: 2900 }],
+    ['payment_status_inconsistent', { total: 0, discount: 2900 }],   // 'paid' $0 WITH a PaymentIntent
+    ['payment_status_inconsistent', { total: 0, discount: 2900, pi: 'not_a_pi' }],
     ['payment_status_inconsistent', { payment_status: 'no_payment_required', total: 100, discount: 2800 }],
     ['payment_not_settled', { payment_status: 'unpaid' }],
     ['payment_not_settled', { payment_status: null }],
@@ -257,6 +262,147 @@ maybe('payment ledger (PostgreSQL)', () => {
     const r = await record(svc, facts({ session, ref: s.id, payment_status: 'no_payment_required', total: 0, discount: 2900, pi: null }))
     expect(r).toMatchObject({ out_outcome: 'accepted', out_reason: 'accepted' })
     expect(await sub(s.id)).toMatchObject({ payment_status: 'paid', status: 'approved', amount_paid: 0 })
+  })
+
+  // ------------------------------------------- FIX-1: Stripe 'paid' + $0
+  // Observed live (INCIDENT-1): a 100%-discounted payment-mode session arrives
+  // as payment_status 'paid', amount_total 0, payment_intent null.
+  const zeroPaid = (price: number): Partial<Facts> => ({ payment_status: 'paid', total: 0, discount: price, pi: null })
+
+  test('FIX-1: Creator Record $0 paid session (no PaymentIntent) is accepted and approved', async () => {
+    const svc = await connect('service_role')
+    const session = sid()
+    const s = await seedSubmission({ tier: 'creator_record', stripe_checkout_session_id: session })
+    const r = await record(svc, facts({ session, ref: s.id, ...zeroPaid(2900) }))
+    expect(r).toMatchObject({ out_outcome: 'accepted', out_reason: 'accepted', out_is_new: true, out_fulfillment_status: 'pending', out_tier: 'creator_record' })
+    expect(await sub(s.id)).toMatchObject({ payment_status: 'paid', status: 'approved', amount_paid: 0, stripe_payment_intent_id: null })
+    expect(await ledger(session)).toMatchObject({
+      session_binding: 'bound', anomaly_status: 'none', stripe_payment_status: 'paid', stripe_payment_intent_id: null,
+      expected_amount: 2900, amount_subtotal: 2900, amount_discount: 2900, amount_total: 0,
+      fulfillment_status: 'pending', pdf_status: 'pending', email_status: 'pending' })
+  })
+
+  test('FIX-1: Certified $0 paid session is accepted but never approved', async () => {
+    const svc = await connect('service_role')
+    for (const tier of ['si8_certified', 'certified']) {
+      const session = sid()
+      const s = await seedSubmission({ tier, stripe_checkout_session_id: session })
+      const r = await record(svc, facts({ session, ref: s.id, ...zeroPaid(49900) }, 49900))
+      expect(r).toMatchObject({ out_outcome: 'accepted', out_reason: 'accepted' })
+      expect(await sub(s.id)).toMatchObject({ payment_status: 'paid', status: 'pending', amount_paid: 0 })
+      expect(await ledger(session)).toMatchObject({ pdf_status: 'not_required', email_status: 'pending', anomaly_status: 'none' })
+    }
+  })
+
+  test('FIX-1: positive paid sessions keep the PaymentIntent requirement', async () => {
+    const svc = await connect('service_role')
+    const cases: Array<[Partial<Facts>, string, string]> = [
+      [{}, 'accepted', 'accepted'],                                            // full price
+      [{ total: 1450, discount: 1450 }, 'accepted', 'accepted'],               // partial promotion
+      [{ total: 1450, discount: 1450, pi: null }, 'rejected', 'payment_status_inconsistent'],
+      [{ pi: null }, 'rejected', 'payment_status_inconsistent'],
+      [{ pi: '' }, 'rejected', 'payment_status_inconsistent'],
+      [{ pi: 'ch_123' }, 'rejected', 'payment_status_inconsistent'],
+      [{ total: 1, discount: 2899, pi: null }, 'rejected', 'payment_status_inconsistent'],
+    ]
+    for (const [over, outcome, reason] of cases) {
+      const session = sid()
+      const s = await seedSubmission({ stripe_checkout_session_id: session })
+      const r = await record(svc, facts({ session, ref: s.id, ...over }))
+      expect([r.out_outcome, r.out_reason]).toEqual([outcome, reason])
+      expect((await sub(s.id)).payment_status).toBe(outcome === 'accepted' ? 'paid' : 'unpaid')
+    }
+  })
+
+  test.each([
+    ['session_not_complete', { status: 'open' }],
+    ['unexpected_mode', { mode: 'subscription' }],
+    ['currency_mismatch', { currency: 'twd' }],
+    ['amount_mismatch', { subtotal: 0 }],                                      // $0 list price is not a full discount
+    ['amount_mismatch', { subtotal: 49900, discount: 49900 }],                 // wrong tier price
+    ['unexpected_tax_or_shipping', { tax: 100 }],
+    ['unexpected_tax_or_shipping', { shipping: 100 }],
+    ['discount_inconsistent', { discount: 2800 }],                             // not a full discount
+    ['discount_inconsistent', { discount: null }],
+    ['payment_status_inconsistent', { pi: 'pi_test_123' }],                   // $0 with a PaymentIntent
+    ['payment_not_settled', { payment_status: 'unpaid' }],
+  ])('FIX-1: $0 paid session still rejected for %s (%j), submission untouched', async (reason, over) => {
+    const svc = await connect('service_role')
+    const session = sid()
+    const s = await seedSubmission({ stripe_checkout_session_id: session })
+    const r = await record(svc, facts({ session, ref: s.id, ...zeroPaid(2900), ...(over as Partial<Facts>) }))
+    expect(r).toMatchObject({ out_outcome: 'rejected', out_reason: reason, out_fulfillment_status: 'not_required' })
+    expect(await sub(s.id)).toMatchObject({ payment_status: 'unpaid', status: 'pending', amount_paid: null })
+    expect(await ledger(session)).toMatchObject({ anomaly_status: 'open', pdf_status: 'not_required', email_status: 'not_required' })
+  })
+
+  test('FIX-1: $0 paid session keeps every binding rule (mismatch, unknown submission, unbound after cutoff)', async () => {
+    const svc = await connect('service_role')
+    const persisted = sid()
+    const m = await seedSubmission({ stripe_checkout_session_id: persisted })
+    const mismatch = await record(svc, facts({ session: sid(), ref: m.id, ...zeroPaid(2900) }))
+    expect(mismatch).toMatchObject({ out_outcome: 'rejected', out_reason: 'session_mismatch' })
+    expect(await sub(m.id)).toMatchObject({ payment_status: 'unpaid', status: 'pending', stripe_checkout_session_id: persisted })
+
+    const unknown = await record(svc, facts({ session: sid(), ref: randomUUID(), ...zeroPaid(2900) }))
+    expect(unknown).toMatchObject({ out_outcome: 'rejected', out_reason: 'unknown_submission' })
+
+    const now = nowEpoch()
+    await setPolicy(now - 3600, now + 86400)
+    const u = await seedSubmission({ stripe_checkout_session_id: null })
+    const unbound = await record(svc, facts({ session: sid(), ref: u.id, created: now - 60, ...zeroPaid(2900) }))
+    expect(unbound).toMatchObject({ out_outcome: 'rejected', out_reason: 'unbound_session_after_cutoff' })
+    expect(await sub(u.id)).toMatchObject({ payment_status: 'unpaid', status: 'pending' })
+  })
+
+  test('FIX-1: $0 paid replay is a no-op and a second $0 session is a duplicate', async () => {
+    const svc = await connect('service_role')
+    const session = sid()
+    const s = await seedSubmission({ stripe_checkout_session_id: session })
+    const f = facts({ session, ref: s.id, ...zeroPaid(2900) })
+    expect((await record(svc, f)).out_is_new).toBe(true)
+    const before = await sub(s.id)
+    const replay = await record(svc, { ...f, event: eid() })
+    expect(replay).toMatchObject({ out_outcome: 'accepted', out_reason: 'accepted', out_is_new: false })
+    expect(await sub(s.id)).toEqual(before)
+    const dup = await record(svc, facts({ session: sid(), ref: s.id, ...zeroPaid(2900) }))
+    expect(dup).toMatchObject({ out_outcome: 'duplicate_payment', out_reason: 'submission_already_paid', out_is_new: true })
+    expect((await admin.query(`SELECT count(*)::int AS n FROM public.payment_fulfillments WHERE outcome = 'accepted'`)).rows[0].n).toBe(1)
+  })
+
+  test('FIX-1: $0 paid Creator Record runs the normal fenced fulfillment to completion', async () => {
+    const svc = await connect('service_role')
+    const session = sid()
+    const s = await seedSubmission({ stripe_checkout_session_id: session })
+    await record(svc, facts({ session, ref: s.id, ...zeroPaid(2900) }))
+    const c = await claim(svc, session)
+    expect(c).toMatchObject({ out_claimed: true, out_pdf_status: 'pending', out_email_status: 'pending' })
+    expect(await mark(svc, session, c.out_claim_token, 'pdf', 'completed')).toBe(true)
+    expect(await mark(svc, session, c.out_claim_token, 'email', 'sending')).toBe(true)
+    expect(await mark(svc, session, c.out_claim_token, 'email', 'accepted', 're_zero')).toBe(true)
+    expect(await finish(svc, session, c.out_claim_token)).toBe('completed')
+    expect((await claim(svc, session)).out_reason).toBe('nothing_to_do')
+  })
+
+  test('FIX-1: accepted-row constraint admits paid+$0 only without a PaymentIntent', async () => {
+    const insert = async (ps: string, total: number, pi: string | null) => {
+      const s = await seedSubmission()
+      return errCode(admin.query(
+        `INSERT INTO public.payment_fulfillments (stripe_checkout_session_id, submission_ref, submission_id, session_binding,
+           first_stripe_event_id, last_stripe_event_id, stripe_session_status, stripe_mode, stripe_payment_status,
+           stripe_payment_intent_id, tier, expected_amount, currency, amount_subtotal, amount_total, amount_discount,
+           outcome, outcome_reason, fulfillment_status, pdf_status, email_status)
+         VALUES ($1, $2, $2, 'bound', 'evt_x', 'evt_x', 'complete', 'payment', $3, $4, 'creator_record', 2900, 'usd', 2900,
+           $5::int, 2900 - $5::int, 'accepted', 'accepted', 'not_required', 'not_required', 'not_required')`,
+        [sid(), s.id, ps, pi, total]))
+    }
+    expect(await insert('paid', 0, null)).toBeNull()
+    expect(await insert('paid', 0, 'pi_x')).toBe('23514')
+    expect(await insert('paid', 2900, null)).toBe('23514')
+    expect(await insert('paid', 2900, 'pi_x')).toBeNull()
+    expect(await insert('no_payment_required', 0, null)).toBeNull()
+    expect(await insert('no_payment_required', 100, null)).toBe('23514')
+    expect(await insert('unpaid', 0, null)).toBe('23514')
   })
 
   test('partial promotion is accepted with the discounted total recorded', async () => {
@@ -815,5 +961,46 @@ maybe('payment ledger (PostgreSQL)', () => {
     expect(await ledger(session)).toMatchObject({ submission_id: null, submission_ref: s.id, outcome: 'accepted' })
     const c = await claim(svc, session)
     expect(c).toMatchObject({ out_claimed: true, out_submission_id: null })
+  })
+
+  // ---------------------------------------- FIX-1 ordering + history (LAST:
+  // rebuilds the schema and ends with both migrations applied, as beforeAll).
+  test('FIX-1 over a live ledger: refuses to run first; a session rejected under the old rule stays rejected', async () => {
+    await admin.query('DROP SCHEMA public CASCADE')
+    await admin.query('CREATE SCHEMA public')
+    await admin.query(readFileSync(BOOTSTRAP, 'utf8'))
+    expect(await errCode(admin.query(readFileSync(MIGRATION_FIX_1, 'utf8')))).toBe('55000')
+    await admin.query(readFileSync(MIGRATION, 'utf8'))
+
+    const svc = await connect('service_role')
+    const accepted = sid()
+    const a = await seedSubmission({ stripe_checkout_session_id: accepted })
+    await record(svc, facts({ session: accepted, ref: a.id }))                  // positive accepted row before FIX-1
+    const session = sid()
+    const s = await seedSubmission({ stripe_checkout_session_id: session })
+    const f = facts({ session, ref: s.id, ...zeroPaid(2900) })
+    expect(await record(svc, f)).toMatchObject({ out_outcome: 'rejected', out_reason: 'payment_status_inconsistent' })
+    const rowBefore = await ledger(session)
+
+    await admin.query(readFileSync(MIGRATION_FIX_1, 'utf8'))                    // existing rows re-validate
+    const replay = await record(svc, { ...f, event: eid() })
+    expect(replay).toMatchObject({ out_outcome: 'rejected', out_reason: 'payment_status_inconsistent', out_is_new: false })
+    expect({ ...(await ledger(session)), last_stripe_event_id: null, updated_at: null })
+      .toEqual({ ...rowBefore, last_stripe_event_id: null, updated_at: null })
+    expect(await sub(s.id)).toMatchObject({ payment_status: 'unpaid', status: 'pending', amount_paid: null })
+    expect(await reconcile(svc, session, 'retry_fulfillment')).toBe('not_applicable')
+    expect((await ledger(accepted)).outcome).toBe('accepted')
+
+    // Owner, SECURITY INVOKER, search_path and grants survive CREATE OR REPLACE.
+    const { rows } = await admin.query(`SELECT p.prosecdef, p.proconfig,
+        has_function_privilege('service_role', p.oid, 'EXECUTE') AS svc,
+        has_function_privilege('anon', p.oid, 'EXECUTE') AS anon,
+        has_function_privilege('authenticated', p.oid, 'EXECUTE') AS auth
+      FROM pg_proc p WHERE p.oid = 'public.record_checkout_payment(text,text,text,bigint,text,text,text,text,text,integer,integer,integer,integer,integer)'::regprocedure`)
+    expect(rows[0]).toEqual({ prosecdef: false, proconfig: ['search_path=public, pg_temp'], svc: true, anon: false, auth: false })
+
+    const n = sid()
+    const ns = await seedSubmission({ stripe_checkout_session_id: n })
+    expect(await record(svc, facts({ session: n, ref: ns.id, ...zeroPaid(2900) }))).toMatchObject({ out_outcome: 'accepted' })
   })
 })

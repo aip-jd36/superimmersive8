@@ -99,7 +99,16 @@ describe('signed facts, never metadata', () => {
     expect(arg).not.toContain('99999999')   // metadata.submissionId ignored; client_reference_id wins
   })
 
-  it('a valid 100% promotion is forwarded with a null payment intent', async () => {
+  // Observed live (INCIDENT-1): a 100%-discounted payment-mode session is 'paid', total 0, no PaymentIntent.
+  it('a 100% promotion (Stripe: paid, total 0, null payment intent) is forwarded verbatim', async () => {
+    constructEvent.mockReturnValue(completedEvent({ payment_status: 'paid', payment_intent: null, amount_total: 0,
+      total_details: { amount_discount: 49900, amount_tax: 0, amount_shipping: 0 } }))
+    await POST(req())
+    expect(recordCheckoutPayment.mock.calls[0][0]).toMatchObject({
+      paymentStatus: 'paid', paymentIntentId: null, amountSubtotal: 49900, amountTotal: 0, amountDiscount: 49900, currency: 'usd' })
+  })
+
+  it('a no_payment_required session is still forwarded verbatim (the database decides)', async () => {
     constructEvent.mockReturnValue(completedEvent({ payment_status: 'no_payment_required', payment_intent: null, amount_total: 0, total_details: { amount_discount: 49900 } }))
     await POST(req())
     expect(recordCheckoutPayment.mock.calls[0][0]).toMatchObject({ paymentStatus: 'no_payment_required', paymentIntentId: null, amountTotal: 0, amountDiscount: 49900 })
@@ -150,7 +159,7 @@ describe('response mapping and side effects', () => {
     expect(body.events[0].params.items[0].item_id).toBe('si8_certified')   // ledger tier, not metadata 'creator_record'
     // 100% promotion: value 0, still one event
     fetchMock.mockClear()
-    constructEvent.mockReturnValue(completedEvent({ payment_status: 'no_payment_required', payment_intent: null, amount_total: 0 }))
+    constructEvent.mockReturnValue(completedEvent({ payment_status: 'paid', payment_intent: null, amount_total: 0 }))
     recordCheckoutPayment.mockResolvedValue(recorded({ tier: 'creator_record' }))
     await POST(req())
     const promo = JSON.parse(fetchMock.mock.calls[0][1].body)
@@ -177,7 +186,7 @@ describe('response mapping and side effects', () => {
     ['rejected', 'amount_mismatch'], ['rejected', 'session_mismatch'], ['rejected', 'currency_mismatch'],
     ['duplicate_payment', 'submission_already_paid'],
     ['rejected', 'unbound_session_after_cutoff'], ['rejected', 'unbound_session_window_closed'],
-    ['rejected', 'unbound_session_created_unknown'],
+    ['rejected', 'unbound_session_created_unknown'], ['rejected', 'payment_status_inconsistent'],
   ])('new %s/%s → durable anomaly alert, no fulfillment, no GA4, 200', async (outcome, reason) => {
     recordCheckoutPayment.mockResolvedValue(recorded({ outcome, reason, fulfillmentStatus: 'not_required' }))
     const res = await POST(req())
@@ -185,6 +194,16 @@ describe('response mapping and side effects', () => {
     expect(sendPaymentLedgerAdminAlert).toHaveBeenCalledTimes(1)
     expect(runPaymentFulfillment).not.toHaveBeenCalled()
     expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('replay of a previously rejected session: 200, no alert, no GA4, no fulfillment (stored outcome stands)', async () => {
+    constructEvent.mockReturnValue(completedEvent({ payment_status: 'paid', payment_intent: null, amount_total: 0 }))
+    recordCheckoutPayment.mockResolvedValue(recorded({ outcome: 'rejected', reason: 'payment_status_inconsistent', isNew: false, fulfillmentStatus: 'not_required' }))
+    const res = await POST(req())
+    expect(res.status).toBe(200)
+    expect(sendPaymentLedgerAdminAlert).not.toHaveBeenCalled()
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(runPaymentFulfillment).not.toHaveBeenCalled()
   })
 
   it('legacy unbound session: accepted explicitly, alerted, fulfilled', async () => {

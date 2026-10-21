@@ -40,8 +40,13 @@ describe('extractCheckoutSessionFacts', () => {
   it('handles an expanded payment_intent and a 100% promotion (null intent)', () => {
     const expanded = { ...event, data: { object: { ...event.data.object, payment_intent: { id: 'pi_2' } } } }
     expect(extractCheckoutSessionFacts(expanded).paymentIntentId).toBe('pi_2')
-    const free = { ...event, data: { object: { ...event.data.object, payment_intent: null, payment_status: 'no_payment_required', amount_total: 0 } } }
-    expect(extractCheckoutSessionFacts(free)).toMatchObject({ paymentIntentId: null, paymentStatus: 'no_payment_required', amountTotal: 0 })
+    // Observed live (INCIDENT-1): Stripe reports a 100% promotion as 'paid' with no PaymentIntent.
+    const free = { ...event, data: { object: { ...event.data.object, payment_intent: null, payment_status: 'paid', amount_total: 0 } } }
+    expect(extractCheckoutSessionFacts(free)).toMatchObject({ paymentIntentId: null, paymentStatus: 'paid', amountTotal: 0 })
+    const absent = { ...event, data: { object: { ...event.data.object, payment_intent: undefined, payment_status: 'paid', amount_total: 0 } } }
+    expect(extractCheckoutSessionFacts(absent).paymentIntentId).toBeNull()
+    const npr = { ...event, data: { object: { ...event.data.object, payment_intent: null, payment_status: 'no_payment_required', amount_total: 0 } } }
+    expect(extractCheckoutSessionFacts(npr)).toMatchObject({ paymentIntentId: null, paymentStatus: 'no_payment_required', amountTotal: 0 })
   })
 
   it('turns malformed values into null (the database rejects null)', () => {

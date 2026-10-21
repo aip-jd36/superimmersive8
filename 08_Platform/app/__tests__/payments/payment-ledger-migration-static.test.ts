@@ -88,3 +88,77 @@ describe('production preflight script (static)', () => {
     expect(code).not.toMatch(/SELECT\s+(\w+\.)?(email|name|stripe_checkout_session_id|stripe_payment_intent_id|user_id|title|filmmaker_name)\b/i)
   })
 })
+
+describe.each(['CAA_3B_FIX_1_PREFLIGHT.sql', 'CAA_3B_FIX_1_VERIFY.sql'])('FIX-1 operator script %s (static)', (file) => {
+  const raw = readFileSync(join(__dirname, '..', '..', '..', 'implementation', 'caa-3b', file), 'utf8')
+  const code = raw.replace(/--[^\n]*/g, '').replace(/'(?:[^']|'')*'/g, "''")
+
+  it('is exactly one WITH ... SELECT statement with no dollar-quoted body', () => {
+    expect(code.trim()).toMatch(/^WITH\b/i)
+    expect((code.match(/;/g) ?? []).length).toBe(1)
+    expect(code).not.toContain('$$')
+  })
+
+  it.each(['INSERT', 'UPDATE', 'DELETE', 'MERGE', 'TRUNCATE', 'CREATE', 'ALTER', 'DROP', 'GRANT', 'REVOKE',
+           'DO', 'SET', 'RESET', 'CALL', 'COPY', 'LOCK', 'BEGIN', 'COMMIT', 'set_config', 'dblink'])('contains no %s', (kw) => {
+    expect(code).not.toMatch(new RegExp(`\\b${kw}\\b`, 'i'))
+  })
+
+  it('outputs fixed columns only; session ids appear only inside an md5(...) fingerprint', () => {
+    expect(code).not.toMatch(/\b(email|filmmaker_name|user_id|title|stripe_payment_intent_id)\b/i)
+    expect(code).toMatch(/\)\s*SELECT ord, check_name, observed, expected,\s*CASE WHEN info THEN '' WHEN ok THEN '' ELSE '' END AS verdict\s+FROM checks/)
+    const md5Spans: Array<[number, number]> = []
+    for (const m of code.matchAll(/md5\(/g)) {
+      let depth = 0, i = m.index! + 3
+      do { if (code[i] === '(') depth++; else if (code[i] === ')') depth--; i++ } while (depth > 0 && i < code.length)
+      md5Spans.push([m.index!, i])
+    }
+    const uses = [...code.matchAll(/stripe_checkout_session_id/g)].map((m) => m.index!)
+    expect(uses.length).toBeGreaterThan(0)
+    for (const at of uses) expect(md5Spans.some(([a, b]) => at > a && at < b)).toBe(true)
+  })
+})
+
+describe('FIX-1 forward migration (static): zero-total paid sessions', () => {
+  const fix = readFileSync(join(__dirname, '..', '..', 'supabase', 'migrations', '20261022000000_payment_zero_total_paid.sql'), 'utf8')
+  const fnOf = (s: string) => {
+    const a = s.indexOf('CREATE OR REPLACE FUNCTION public.record_checkout_payment(')
+    return s.slice(a, s.indexOf('\n$$;', a) + 4)
+  }
+  const OLD_BRANCH = `    IF p_amount_total = 0 OR p_payment_intent_id IS NULL OR p_payment_intent_id !~ '^pi_[A-Za-z0-9_]+$' THEN
+      v_reason := 'payment_status_inconsistent';
+    END IF;`
+
+  it('touches only pf_accepted_payment_facts and record_checkout_payment; no row writes, no other drops', () => {
+    const outsideFn = fix.replace(fnOf(fix), '')   // the function body itself is checked against the deployed one below
+    expect(fix.match(/\bDROP\b[^;]*/gi)).toEqual(['DROP CONSTRAINT pf_accepted_payment_facts'])
+    expect(outsideFn).not.toMatch(/\b(DELETE\s+FROM|TRUNCATE|INSERT\s+INTO|UPDATE\s+public\.|ALTER\s+TABLE\s+public\.(submissions|users|rights_packages))/i)
+    expect(fix.match(/CREATE OR REPLACE FUNCTION/g)).toHaveLength(1)
+    expect(fix).not.toMatch(/SECURITY DEFINER/i)
+  })
+
+  it('record_checkout_payment is the deployed body except the paid branch', () => {
+    const before = fnOf(sql)
+    const after = fnOf(fix)
+    expect(before).toContain(OLD_BRANCH)
+    const a = after.indexOf("  ELSIF p_payment_status = 'paid' THEN")
+    const b = after.indexOf("  ELSIF p_payment_status = 'no_payment_required' THEN")
+    const rebuilt = after.slice(0, a) + "  ELSIF p_payment_status = 'paid' THEN\n" + OLD_BRANCH + '\n' + after.slice(b)
+    expect(rebuilt).toBe(before)
+    expect(after.slice(a, b)).toMatch(/IF p_amount_total > 0\s+AND \(p_payment_intent_id IS NULL OR p_payment_intent_id !~ '\^pi_\[A-Za-z0-9_\]\+\$'\) THEN/)
+    expect(after.slice(a, b)).toMatch(/ELSIF p_amount_total = 0 AND p_payment_intent_id IS NOT NULL THEN/)
+  })
+
+  it('constraint adds exactly the paid + $0 + no PaymentIntent combination', () => {
+    expect(fix).toMatch(/\(stripe_payment_status = 'paid' AND amount_total > 0 AND stripe_payment_intent_id IS NOT NULL\)/)
+    expect(fix).toMatch(/\(stripe_payment_status = 'paid' AND amount_total = 0 AND stripe_payment_intent_id IS NULL\)/)
+    expect(fix).toMatch(/\(stripe_payment_status = 'no_payment_required' AND amount_total = 0\)/)
+  })
+
+  it('re-asserts service_role-only execution and refuses to run before the base migration', () => {
+    expect(fix).toMatch(/REVOKE ALL ON FUNCTION public\.record_checkout_payment\([^)]*\) FROM PUBLIC, anon, authenticated, service_role;/)
+    expect(fix).toMatch(/GRANT EXECUTE ON FUNCTION public\.record_checkout_payment\([^)]*\) TO service_role;/)
+    expect(fix).not.toMatch(/GRANT[^;]*TO[^;]*(anon|authenticated)/)
+    expect(fix).toMatch(/requires migration 20261021000000_payment_fulfillments/)
+  })
+})
