@@ -59,5 +59,10 @@ jobs:
             const msg = `suites=${r.numTotalTestSuites} tests=${r.numTotalTests} passed=${r.numPassedTests} failed=${r.numFailedTests} skipped=${r.numPendingTests + r.numTodoTests}`;
             const ok = r.success && r.numTotalTests > 0 && r.numPassedTests === r.numTotalTests && r.numPendingTests === 0 && r.numTodoTests === 0;
             console.log(`::${ok ? "notice" : "error"} title=Payment ledger DB tests::${msg}`);
+            if (!ok) {
+              const failed = r.testResults.flatMap((t) => [t.message || "", ...t.assertionResults.filter((a) => a.status === "failed").map((a) => a.title + ": " + a.failureMessages.join(" "))]).filter(Boolean);
+              const first = (failed[0] || "no failure message").split(String.fromCharCode(27)).join("").split(String.fromCharCode(10)).join(" | ").slice(0, 1800);
+              console.log(`::error title=First DB test failure::${first}`);
+            }
             if (!ok) process.exit(1);
           '
