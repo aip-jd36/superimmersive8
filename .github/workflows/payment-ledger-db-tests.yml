@@ -1,0 +1,52 @@
+name: SI8 Payment Ledger DB Tests
+
+# CAA-SECURITY-3B — real PostgreSQL 15 integration tests for the payment
+# ledger migration (atomicity, concurrency, replay, claim fencing, lease
+# expiry, recovery, privileges, deletion). Isolated, disposable service
+# container only — never a Supabase project.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '08_Platform/app/supabase/migrations/20261021000000_payment_fulfillments.sql'
+      - '08_Platform/app/__tests__/db/**'
+      - '08_Platform/app/jest.db.config.js'
+      - '.github/workflows/payment-ledger-db-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  db-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: si8_test_payments
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: 08_Platform/app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 08_Platform/app/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - name: Run payment ledger DB tests
+        env:
+          DATABASE_URL_TEST: postgres://postgres:postgres@localhost:5432/si8_test_payments
+        run: npx jest --config jest.db.config.js --runInBand --ci

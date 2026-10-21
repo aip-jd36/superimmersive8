@@ -12,8 +12,9 @@ const config = {
     // Support Next.js @/* path alias (must come after the specific stubs above)
     '^@/(.*)$': '<rootDir>/$1',
   },
-  // Exclude Next.js generated types and node_modules from test runs
-  testPathIgnorePatterns: ['/node_modules/', '/.next/'],
+  // Exclude Next.js generated types and node_modules from test runs.
+  // __tests__/db/ = real-PostgreSQL integration tests (jest.db.config.js, CI only).
+  testPathIgnorePatterns: ['/node_modules/', '/.next/', '/__tests__/db/'],
 }
 
 module.exports = config

@@ -1,167 +1,135 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
-import { supabaseAdmin } from '@/lib/supabase/admin'
-import { sendSubmissionReceivedEmail, sendCreatorRecordApprovedEmail, sendSubmissionApprovedEmail } from '@/lib/emails'
-import { generateCreatorRecordPDF } from '@/lib/pdf/generateChainOfTitle'
+import { extractCheckoutSessionFacts, isCheckoutSessionId, isStripeEventId } from '@/lib/payments/stripe-session-facts'
+import { recordCheckoutPayment } from '@/lib/payments/repository'
+import { runPaymentFulfillment } from '@/lib/payments/run-payment-fulfillment'
+import { productionFulfillmentDeps } from '@/lib/payments/fulfillment-deps'
+import { sendPaymentLedgerAdminAlert } from '@/lib/emails'
+
+/**
+ * CAA-SECURITY-3B — Stripe webhook.
+ *
+ *   1. Verify the Stripe signature (unchanged).
+ *   2. Only checkout.session.completed is processed.
+ *   3. Pass the signed session facts verbatim to record_checkout_payment();
+ *      the database decides acceptance (session binding, stored tier, list
+ *      price, currency, amounts, payment status). Metadata is never read.
+ *   4. Ledger write failure → 500 (Stripe retries; recording is idempotent).
+ *      Everything after a successful record returns 200: anomalies are durable
+ *      in the ledger, and fulfillment failures are recovered by the ledger
+ *      (sweep / admin), not by Stripe redelivery.
+ */
+
+export const dynamic = 'force-dynamic'
+export const maxDuration = 60
+
+const OPEN_ANOMALY_REASONS = new Set(['accepted_unbound_legacy_session', 'accepted_status_not_pending', 'pre_ledger_payment'])
+const RUNNABLE_FULFILLMENT = new Set(['pending', 'failed', 'in_progress'])
+
+// GA4 payload is unchanged from the pre-3B webhook (client_id = customer email
+// or session id, currency from the session), except: it fires once per
+// accepted payment (not on replays) and the item tier comes from the
+// persisted submission, not Stripe metadata.
+async function sendGa4Purchase(sessionId: string, tier: string | null, amountTotal: number | null,
+                               clientId: string, currency: string | null) {
+  const ga4ApiSecret = process.env.GA4_API_SECRET
+  if (!ga4ApiSecret) return
+  const isCreatorRecord = tier === 'creator_record'
+  try {
+    await fetch(
+      `https://www.google-analytics.com/mp/collect?measurement_id=G-628BLE9N15&api_secret=${ga4ApiSecret}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client_id: clientId,
+          events: [{
+            name: 'purchase',
+            params: {
+              transaction_id: sessionId,
+              value: (amountTotal || 0) / 100,
+              currency: currency?.toUpperCase() || 'USD',
+              items: [{
+                item_id: isCreatorRecord ? 'creator_record' : 'si8_certified',
+                item_name: isCreatorRecord ? 'Creator Record' : 'SI8 Certified',
+                price: isCreatorRecord ? 29 : 499,
+                quantity: 1,
+              }],
+            },
+          }],
+        }),
+      },
+    )
+  } catch (err) {
+    console.error('⚠️ Webhook: GA4 purchase event failed (non-fatal):', err)
+  }
+}
 
 export async function POST(request: NextRequest) {
   const body = await request.text()
   const sig = request.headers.get('stripe-signature')
-
   if (!sig) {
     return NextResponse.json({ error: 'No signature' }, { status: 400 })
   }
 
   let event
-
   try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    )
+    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
   } catch (err: any) {
-    console.error('Webhook signature verification failed:', err.message)
-    return NextResponse.json(
-      { error: `Webhook Error: ${err.message}` },
-      { status: 400 }
+    console.error('Webhook signature verification failed:', err?.message)
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
+  }
+
+  if (event.type !== 'checkout.session.completed') {
+    return NextResponse.json({ received: true })
+  }
+
+  const facts = extractCheckoutSessionFacts(event as any)
+  if (!isCheckoutSessionId(facts.sessionId) || !isStripeEventId(facts.eventId)) {
+    // A signed event without a usable session/event id cannot be recorded or
+    // retried usefully. Make it visible; do not loop Stripe retries.
+    console.error('❌ Webhook: signed checkout event without usable ids', { eventId: facts.eventId })
+    await sendPaymentLedgerAdminAlert('Unrecordable checkout event', { event: facts.eventId, session: facts.sessionId })
+    return NextResponse.json({ received: true })
+  }
+
+  let result
+  try {
+    result = await recordCheckoutPayment(facts)
+  } catch (err) {
+    console.error('❌ Webhook: payment ledger record failed', { sessionId: facts.sessionId, error: String(err) })
+    return NextResponse.json({ error: 'Temporary processing failure' }, { status: 500 })
+  }
+
+  console.log('🔷 Webhook: payment recorded', {
+    sessionId: facts.sessionId, outcome: result.outcome, reason: result.reason, isNew: result.isNew,
+  })
+
+  if (result.isNew && (result.outcome !== 'accepted' || OPEN_ANOMALY_REASONS.has(result.reason))) {
+    await sendPaymentLedgerAdminAlert(
+      result.outcome === 'accepted' ? 'Payment accepted with anomaly' : `Payment ${result.outcome}`,
+      {
+        session: facts.sessionId, submission: result.submissionId ?? facts.clientReferenceId,
+        outcome: result.outcome, reason: result.reason,
+        amount_total: facts.amountTotal, payment_status: facts.paymentStatus,
+      },
     )
   }
 
-  // Handle the checkout.session.completed event
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object as any
+  if (result.isNew && result.outcome === 'accepted'
+      && (result.reason === 'accepted' || result.reason === 'accepted_unbound_legacy_session')) {
+    const rawSession = (event as any).data?.object ?? {}
+    const ga4ClientId = typeof rawSession.customer_email === 'string' && rawSession.customer_email
+      ? rawSession.customer_email : facts.sessionId
+    await sendGa4Purchase(facts.sessionId, result.tier, facts.amountTotal, ga4ClientId, facts.currency)
+  }
 
-    const submissionId = session.client_reference_id || session.metadata?.submissionId
-
-    if (!submissionId) {
-      console.error('No submission ID found in session')
-      return NextResponse.json({ error: 'No submission ID' }, { status: 400 })
-    }
-
+  if (result.outcome === 'accepted' && RUNNABLE_FULFILLMENT.has(result.fulfillmentStatus)) {
     try {
-      console.log('🔷 Webhook: Processing payment for submission:', submissionId)
-
-      const isCreatorRecord = session.metadata?.tier === 'creator_record'
-
-      // Update submission payment status
-      // Creator Record auto-approves (self-attested, no human review needed)
-      // SI8 Certified goes to pending for human review queue
-      const { data: submission, error: updateError } = await supabaseAdmin
-        .from('submissions')
-        .update({
-          payment_status: 'paid',
-          stripe_payment_intent_id: session.payment_intent,
-          stripe_checkout_session_id: session.id,
-          amount_paid: session.amount_total,
-          status: isCreatorRecord ? 'approved' : 'pending',
-        })
-        .eq('id', submissionId)
-        .select()
-        .single()
-
-      if (updateError) {
-        console.error('❌ Webhook: Update error:', updateError)
-        throw updateError
-      }
-
-      console.log('✅ Webhook: Submission payment updated successfully')
-
-      // Fire GA4 purchase event via Measurement Protocol (server-side)
-      try {
-        const ga4ApiSecret = process.env.GA4_API_SECRET
-        const ga4MeasurementId = 'G-628BLE9N15'
-        if (ga4ApiSecret) {
-          await fetch(
-            `https://www.google-analytics.com/mp/collect?measurement_id=${ga4MeasurementId}&api_secret=${ga4ApiSecret}`,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                client_id: session.customer_email || session.id,
-                events: [{
-                  name: 'purchase',
-                  params: {
-                    transaction_id: session.id,
-                    value: (session.amount_total || 0) / 100,
-                    currency: session.currency?.toUpperCase() || 'USD',
-                    items: [{
-                      item_id: isCreatorRecord ? 'creator_record' : 'si8_certified',
-                      item_name: isCreatorRecord ? 'Creator Record' : 'SI8 Certified',
-                      price: isCreatorRecord ? 29 : 499,
-                      quantity: 1,
-                    }],
-                  },
-                }],
-              }),
-            }
-          )
-          console.log('✅ Webhook: GA4 purchase event sent')
-        }
-      } catch (ga4Error) {
-        console.error('⚠️ Webhook: GA4 purchase event failed (non-fatal):', ga4Error)
-      }
-
-      // Get user info for email (separate query to avoid relationship ambiguity)
-      const { data: user } = await supabaseAdmin
-        .from('users')
-        .select('name, email')
-        .eq('id', submission.user_id)
-        .single()
-
-      // Auto-generate Creator Record PDF (self-attested)
-      if (isCreatorRecord) {
-        console.log('📄 Webhook: Auto-generating Creator Record PDF...')
-        try {
-          const parseJsonb = (val: any, fb: any) => { if (!val) return fb; if (typeof val === 'string') { try { return JSON.parse(val) } catch { return fb } } return val }
-          const tools: any[] = parseJsonb(submission.tools_used, [])
-          const likenessConfirmation: Record<string, boolean> = parseJsonb(submission.likeness_confirmation, {})
-          const ipConfirmation: Record<string, boolean> = parseJsonb(submission.ip_confirmation, {})
-
-          await generateCreatorRecordPDF({
-            submissionId: submission.id,
-            filmmakerName: submission.filmmaker_name || 'Unknown',
-            title: submission.title,
-            tools,
-            authorshipStatement: submission.authorship_statement || undefined,
-            likenessConfirmation,
-            ipConfirmation,
-            territory: submission.territory_preferences || submission.territory || 'Global',
-          })
-          console.log('✅ Webhook: Creator Record PDF generated')
-        } catch (pdfError) {
-          // PDF generation failure must not block webhook — creator can get PDF later
-          console.error('⚠️ Webhook: Creator Record PDF generation failed (non-fatal):', pdfError)
-        }
-      }
-
-      // Send confirmation email — approval email for Creator Record (auto-approved),
-      // submission received email for SI8 Certified (goes to human review queue)
-      if (user && submission) {
-        if (isCreatorRecord) {
-          await sendCreatorRecordApprovedEmail(
-            user.name || 'Creator',
-            submission.title,
-            `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/submissions/${submission.id}`,
-            user.email
-          )
-        } else {
-          await sendSubmissionReceivedEmail(
-            user.name || 'Creator',
-            submission.title,
-            user.email
-          )
-        }
-        console.log('✅ Webhook: Confirmation email sent')
-      }
-
-      console.log('✅ Webhook: Processing complete for submission:', submissionId)
-    } catch (error: any) {
-      console.error('❌ Webhook: Error processing:', error)
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      )
+      await runPaymentFulfillment(facts.sessionId, productionFulfillmentDeps())
+    } catch (err) {
+      // The ledger holds the state; the sweep / admin retry resumes it.
+      console.error('❌ Webhook: fulfillment run failed (recoverable)', { sessionId: facts.sessionId, error: String(err) })
     }
   }
 

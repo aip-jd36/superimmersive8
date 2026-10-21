@@ -1,5 +1,6 @@
 import { Resend } from 'resend'
 import { escapeHtml } from '@/lib/crc-engine/results-email-template'
+import { sendAndClassify, type PaymentEmailOutcome } from '@/lib/payments/email-outcome'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
@@ -484,5 +485,100 @@ export async function sendInfoRequestEmail(
     })
   } catch (error) {
     console.error('Error sending info request email:', error)
+  }
+}
+
+// ---------------------------------------------------------------------------
+// CAA-SECURITY-3B — payment fulfillment emails.
+// The customer-facing send reports a classified outcome (accepted / definite
+// rejection / unknown) so the payment ledger can make retry decisions; it
+// never throws. The admin awareness copy stays best-effort, as before.
+// ---------------------------------------------------------------------------
+
+export async function sendCreatorRecordReadyPaymentEmail(p: {
+  creatorName: string; filmTitle: string; dashboardUrl: string; to: string
+}): Promise<PaymentEmailOutcome> {
+  const name = escapeHtml(p.creatorName)
+  const title = escapeHtml(p.filmTitle)
+  return sendAndClassify(() => resend.emails.send({
+    from: FROM_EMAIL,
+    to: p.to,
+    subject: `Your Creator Record is ready: ${p.filmTitle}`,
+    html: `
+        <h2>Hi ${name},</h2>
+        <p>Your Creator Record for <strong>${title}</strong> has been issued and your self-attested documentation PDF is ready to download.</p>
+        <p><strong>Important:</strong> Your Creator Record is stamped <em>"SELF-ATTESTED — NOT FOR COMMERCIAL USE."</em> It is suitable for personal records and portfolio documentation only.</p>
+        <h3>Want to use this film commercially?</h3>
+        <p>Upgrade to <strong>SI8 Certified ($499)</strong> for a human-reviewed Chain of Title stamped "CLEARED FOR COMMERCIAL USE." Required for brand placements, agency deliverables, streaming submissions, and E&O insurance.</p>
+        <p><a href="${p.dashboardUrl}" style="background: #d97706; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Download Your Creator Record PDF</a></p>
+        <br>
+        <p>Best,<br>The SI8 Team</p>
+      `,
+  }))
+}
+
+export async function sendCertifiedPaymentReceivedEmail(p: {
+  creatorName: string; filmTitle: string; dashboardUrl: string; to: string
+}): Promise<PaymentEmailOutcome> {
+  const name = escapeHtml(p.creatorName)
+  const title = escapeHtml(p.filmTitle)
+  return sendAndClassify(() => resend.emails.send({
+    from: FROM_EMAIL,
+    to: p.to,
+    subject: `Submission received: ${p.filmTitle}`,
+    html: `
+        <h2>Hi ${name},</h2>
+        <p>Thank you for submitting <strong>${title}</strong> for Rights Verified verification.</p>
+        <p>We'll review your submission within 5 business days and notify you when it's approved.</p>
+        <p>You can track the status of your submission in your <a href="${p.dashboardUrl}">dashboard</a>.</p>
+        <br>
+        <p>Best,<br>The SI8 Team</p>
+      `,
+  }))
+}
+
+/** Admin awareness copy of a completed payment fulfillment (best-effort). */
+export async function notifyAdminPaymentFulfillment(p: {
+  tier: string; filmTitle: string; creatorName: string; creatorEmail: string
+}): Promise<void> {
+  const isCreatorRecord = p.tier === 'creator_record'
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
+      subject: isCreatorRecord
+        ? `Creator Record submitted: ${p.filmTitle} — auto-approved`
+        : `New submission: ${p.filmTitle}`,
+      html: `
+        <h2>${isCreatorRecord ? 'Creator Record auto-approved' : 'New submission received'}</h2>
+        <p><strong>Film:</strong> ${escapeHtml(p.filmTitle)}</p>
+        <p><strong>Creator:</strong> ${escapeHtml(p.creatorName)} (${escapeHtml(p.creatorEmail)})</p>
+        ${isCreatorRecord ? '<p><strong>Tier:</strong> Creator Record ($29) — self-attested, no review required</p>' : ''}
+        <p><a href="${process.env.NEXT_PUBLIC_SITE_URL}/admin">${isCreatorRecord ? 'View in Admin Panel →' : 'Review in Admin Panel →'}</a></p>
+      `,
+    })
+  } catch (error) {
+    console.error('Error sending payment fulfillment admin notification:', error)
+  }
+}
+
+/** Operational alert for payment anomalies / reconciliation (best-effort; the ledger is the record). */
+export async function sendPaymentLedgerAdminAlert(subject: string, fields: Record<string, string | number | null | undefined>): Promise<void> {
+  const rows = Object.entries(fields)
+    .map(([k, v]) => `<p style="margin: 4px 0;"><strong>${escapeHtml(k)}:</strong> ${escapeHtml(String(v ?? '—'))}</p>`)
+    .join('')
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
+      subject: `[Payment ledger] ${subject}`,
+      html: `
+        <h2>Payment ledger: ${escapeHtml(subject)}</h2>
+        ${rows}
+        <p><a href="${process.env.NEXT_PUBLIC_SITE_URL}/admin/payments">Open payment reconciliation →</a></p>
+      `,
+    })
+  } catch (error) {
+    console.error('Error sending payment ledger admin alert:', error)
   }
 }
