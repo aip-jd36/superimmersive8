@@ -26,12 +26,12 @@ export const maxDuration = 60
 const OPEN_ANOMALY_REASONS = new Set(['accepted_unbound_legacy_session', 'accepted_status_not_pending', 'pre_ledger_payment'])
 const RUNNABLE_FULFILLMENT = new Set(['pending', 'failed', 'in_progress'])
 
-// GA4 payload is unchanged from the pre-3B webhook (client_id = customer email
-// or session id, currency from the session), except: it fires once per
-// accepted payment (not on replays) and the item tier comes from the
-// persisted submission, not Stripe metadata.
+// GA4 purchase: fires once per accepted payment (not on replays); item tier
+// comes from the persisted submission, not Stripe metadata. client_id is the
+// Stripe checkout session id — never the customer email or any other personal
+// data (GA4 prohibits PII). transaction_id (same id) keeps GA4 deduplication.
 async function sendGa4Purchase(sessionId: string, tier: string | null, amountTotal: number | null,
-                               clientId: string, currency: string | null) {
+                               currency: string | null) {
   const ga4ApiSecret = process.env.GA4_API_SECRET
   if (!ga4ApiSecret) return
   const isCreatorRecord = tier === 'creator_record'
@@ -42,7 +42,7 @@ async function sendGa4Purchase(sessionId: string, tier: string | null, amountTot
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          client_id: clientId,
+          client_id: sessionId,
           events: [{
             name: 'purchase',
             params: {
@@ -118,10 +118,7 @@ export async function POST(request: NextRequest) {
 
   if (result.isNew && result.outcome === 'accepted'
       && (result.reason === 'accepted' || result.reason === 'accepted_unbound_legacy_session')) {
-    const rawSession = (event as any).data?.object ?? {}
-    const ga4ClientId = typeof rawSession.customer_email === 'string' && rawSession.customer_email
-      ? rawSession.customer_email : facts.sessionId
-    await sendGa4Purchase(facts.sessionId, result.tier, facts.amountTotal, ga4ClientId, facts.currency)
+    await sendGa4Purchase(facts.sessionId, result.tier, facts.amountTotal, facts.currency)
   }
 
   if (result.outcome === 'accepted' && RUNNABLE_FULFILLMENT.has(result.fulfillmentStatus)) {

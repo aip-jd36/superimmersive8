@@ -2,7 +2,7 @@
 -- CAA-SECURITY-3B — Stripe checkout & webhook integrity: payment ledger +
 -- recoverable Creator Record / Certified fulfillment.
 --
--- ADDITIVE ONLY. Creates one table and six functions. Does not alter or
+-- ADDITIVE ONLY. Creates two tables and seven functions. Does not alter or
 -- backfill any existing table. Old application code ignores everything here.
 --
 -- Authority model:
@@ -105,6 +105,8 @@ CREATE TABLE public.payment_fulfillments (
   CONSTRAINT pf_log_is_array CHECK (jsonb_typeof(reconciliation_log) = 'array'),
   CONSTRAINT pf_ref_unless_rejected CHECK (outcome = 'rejected' OR submission_ref IS NOT NULL),
   CONSTRAINT pf_accepted_is_bound_or_unbound CHECK (outcome <> 'accepted' OR session_binding IN ('bound', 'unbound')),
+  CONSTRAINT pf_unbound_has_created CHECK (
+    outcome <> 'accepted' OR session_binding <> 'unbound' OR stripe_session_created_at IS NOT NULL),
   CONSTRAINT pf_accepted_payment_facts CHECK (
     outcome <> 'accepted' OR COALESCE((
           currency = 'usd'
@@ -146,6 +148,80 @@ CREATE INDEX pf_attention_idx ON public.payment_fulfillments (created_at)
   WHERE anomaly_status = 'open' OR fulfillment_status IN ('needs_reconciliation', 'failed');
 
 -- ---------------------------------------------------------------------------
+-- Legacy unbound-session policy (singleton). Pre-3B checkout never persisted
+-- its session id, so a session it created arrives "unbound". That exception
+-- is bounded twice, both enforced inside record_checkout_payment():
+--   * cutoff_at    — only sessions whose Stripe-signed `created` is strictly
+--                    before this instant are eligible;
+--   * accept_until — after this instant no unbound session is accepted at
+--                    all, whatever its creation time (absolute sunset).
+-- FAIL-CLOSED DEFAULTS: applying this migration sets a provisional cutoff of
+-- apply-time + 72h and accept_until = cutoff + 7 days. If the post-deploy
+-- activation is missed, the exception still closes on its own. Activation
+-- (activate_payment_legacy_cutoff) can only TIGHTEN both bounds. Missing row
+-- or NULL creation time ⇒ rejected. Rejections are durable ledger anomalies.
+-- service_role may only READ this table; it cannot reopen the exception.
+-- ---------------------------------------------------------------------------
+CREATE TABLE public.payment_legacy_session_policy (
+  singleton       boolean PRIMARY KEY DEFAULT true,
+  cutoff_at       timestamptz NOT NULL,
+  accept_until    timestamptz NOT NULL,
+  installed_at    timestamptz NOT NULL DEFAULT now(),
+  activated_at    timestamptz,
+  activation_note text,
+  CONSTRAINT plsp_singleton CHECK (singleton),
+  CONSTRAINT plsp_order CHECK (accept_until >= cutoff_at),
+  CONSTRAINT plsp_bounded_tail CHECK (accept_until <= cutoff_at + interval '7 days'),
+  CONSTRAINT plsp_activation_noted CHECK ((activated_at IS NULL) = (activation_note IS NULL))
+);
+
+COMMENT ON TABLE public.payment_legacy_session_policy IS
+  'CAA-SECURITY-3B legacy unbound checkout-session exception. Fail-closed provisional bounds; tighten-only activation via activate_payment_legacy_cutoff().';
+
+INSERT INTO public.payment_legacy_session_policy (cutoff_at, accept_until)
+VALUES (now() + interval '72 hours', now() + interval '72 hours' + interval '7 days');
+
+-- Operator procedure (run as the migration owner, AFTER the 3B deploy is
+-- confirmed live at time T):  SELECT * FROM public.activate_payment_legacy_cutoff(T, 'note');
+-- T must be in the past and no later than the current cutoff.
+CREATE OR REPLACE FUNCTION public.activate_payment_legacy_cutoff(
+  p_cutoff timestamptz,
+  p_note   text
+) RETURNS TABLE(out_cutoff_at timestamptz, out_accept_until timestamptz)
+LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path = public, pg_temp
+AS $$
+#variable_conflict error
+DECLARE
+  v_pol public.payment_legacy_session_policy%ROWTYPE;
+BEGIN
+  IF p_cutoff IS NULL OR p_cutoff > now() THEN
+    RAISE EXCEPTION 'cutoff must be a confirmed past deploy time' USING ERRCODE = '22023';
+  END IF;
+  IF p_note IS NULL OR length(btrim(p_note)) < 5 THEN
+    RAISE EXCEPTION 'activation requires a note (min 5 chars)' USING ERRCODE = '22023';
+  END IF;
+  SELECT p.* INTO v_pol FROM public.payment_legacy_session_policy p WHERE p.singleton FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'legacy session policy row missing' USING ERRCODE = '22023';
+  END IF;
+  IF p_cutoff > v_pol.cutoff_at THEN
+    RAISE EXCEPTION 'activation may only tighten the cutoff (current %)', v_pol.cutoff_at USING ERRCODE = '22023';
+  END IF;
+
+  UPDATE public.payment_legacy_session_policy p
+     SET cutoff_at       = p_cutoff,
+         accept_until    = LEAST(p.accept_until, p_cutoff + interval '7 days'),
+         activated_at    = now(),
+         activation_note = left(btrim(p_note), 2000)
+   WHERE p.singleton;
+
+  RETURN QUERY SELECT p.cutoff_at, p.accept_until FROM public.payment_legacy_session_policy p WHERE p.singleton;
+END
+$$;
+
+-- ---------------------------------------------------------------------------
 -- 1) record_checkout_payment — atomic: ledger row + payment + CR approval.
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.record_checkout_payment(
@@ -185,6 +261,9 @@ DECLARE
   v_approve       boolean := false;
   v_tier          text;
   v_inserted      integer;
+  v_created_at    timestamptz;
+  v_cutoff_at     timestamptz;
+  v_accept_until  timestamptz;
 BEGIN
   IF p_session_id IS NULL OR p_session_id !~ '^cs_[A-Za-z0-9_]+$' THEN
     RAISE EXCEPTION 'invalid checkout session id' USING ERRCODE = '22023';
@@ -215,6 +294,10 @@ BEGIN
 
   v_tier  := CASE WHEN v_sub.tier IN ('creator_record', 'certified', 'si8_certified') THEN v_sub.tier END;
   v_price := public.payment_list_price_cents(v_sub.tier);
+  -- Stripe-signed session creation time (verified webhook payload).
+  v_created_at := CASE WHEN p_session_created_epoch IS NULL THEN NULL ELSE to_timestamp(p_session_created_epoch) END;
+  SELECT p.cutoff_at, p.accept_until INTO v_cutoff_at, v_accept_until
+    FROM public.payment_legacy_session_policy p WHERE p.singleton;
 
   -- Session identity: Stripe session vs the session id SI8 persisted at checkout.
   IF v_sub.id IS NULL THEN
@@ -291,6 +374,18 @@ BEGIN
     v_outcome := 'rejected';
     v_reason  := 'session_mismatch';
     v_anomaly := 'open';
+  ELSIF v_binding = 'unbound'
+        AND (v_created_at IS NULL OR v_cutoff_at IS NULL OR v_accept_until IS NULL
+             OR now() >= v_accept_until OR v_created_at >= v_cutoff_at) THEN
+    -- Legacy exception does not apply (fail-closed): durable anomaly, no payment write.
+    v_outcome := 'rejected';
+    v_reason  := CASE
+                   WHEN v_created_at IS NULL THEN 'unbound_session_created_unknown'
+                   WHEN v_cutoff_at IS NULL OR v_accept_until IS NULL OR now() >= v_accept_until
+                     THEN 'unbound_session_window_closed'
+                   ELSE 'unbound_session_after_cutoff'
+                 END;
+    v_anomaly := 'open';
   ELSE
     -- Unpaid submission, session bound (or legacy-unbound): record payment.
     v_outcome := 'accepted';
@@ -330,7 +425,7 @@ BEGIN
   VALUES (
     p_session_id, v_sub.id, v_sub.id, left(p_client_reference_id, 200), v_binding,
     p_event_id, p_event_id,
-    CASE WHEN p_session_created_epoch IS NULL THEN NULL ELSE to_timestamp(p_session_created_epoch) END,
+    v_created_at,
     left(p_session_status, 50), left(p_mode, 50), left(p_payment_status, 50), left(p_payment_intent_id, 200),
     v_tier, v_price, left(p_currency, 10),
     p_amount_subtotal, p_amount_total, p_amount_discount, p_amount_tax, p_amount_shipping,
@@ -651,6 +746,12 @@ $$;
 ALTER TABLE public.payment_fulfillments ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON TABLE public.payment_fulfillments FROM PUBLIC, anon, authenticated, service_role;
 GRANT SELECT, INSERT, UPDATE ON TABLE public.payment_fulfillments TO service_role;
+
+ALTER TABLE public.payment_legacy_session_policy ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public.payment_legacy_session_policy FROM PUBLIC, anon, authenticated, service_role;
+GRANT SELECT ON TABLE public.payment_legacy_session_policy TO service_role;
+-- Activation is an operator action only: no role but the owner may execute it.
+REVOKE ALL ON FUNCTION public.activate_payment_legacy_cutoff(timestamptz, text) FROM PUBLIC, anon, authenticated, service_role;
 
 REVOKE ALL ON FUNCTION public.payment_list_price_cents(text) FROM PUBLIC, anon, authenticated, service_role;
 REVOKE ALL ON FUNCTION public.record_checkout_payment(text, text, text, bigint, text, text, text, text, text, integer, integer, integer, integer, integer) FROM PUBLIC, anon, authenticated, service_role;

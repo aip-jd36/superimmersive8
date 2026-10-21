@@ -36,6 +36,11 @@ CREATE TABLE public.submissions (
   stripe_payment_intent_id   text,
   stripe_checkout_session_id text,
   amount_paid                integer,
+  tools_used                 jsonb,
+  authorship_statement       text,
+  likeness_confirmation      boolean,
+  ip_confirmation            boolean,
+  territory_preferences      jsonb,
   created_at                 timestamptz DEFAULT now(),
   updated_at                 timestamptz DEFAULT now()
 );

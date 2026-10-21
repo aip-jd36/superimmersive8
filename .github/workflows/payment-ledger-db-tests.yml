@@ -11,6 +11,7 @@ on:
     paths:
       - '08_Platform/app/supabase/migrations/20261021000000_payment_fulfillments.sql'
       - '08_Platform/app/__tests__/db/**'
+      - '08_Platform/implementation/caa-3b/CAA_3B_PRODUCTION_SCHEMA_PREFLIGHT.sql'
       - '08_Platform/app/jest.db.config.js'
       - '.github/workflows/payment-ledger-db-tests.yml'
 

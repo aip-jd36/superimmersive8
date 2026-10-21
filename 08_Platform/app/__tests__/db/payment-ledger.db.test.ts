@@ -16,6 +16,7 @@ import { Client } from 'pg'
 const URL = process.env.DATABASE_URL_TEST
 const MIGRATION = join(__dirname, '..', '..', 'supabase', 'migrations', '20261021000000_payment_fulfillments.sql')
 const BOOTSTRAP = join(__dirname, 'bootstrap.sql')
+const PREFLIGHT = join(__dirname, '..', '..', '..', 'implementation', 'caa-3b', 'CAA_3B_PRODUCTION_SCHEMA_PREFLIGHT.sql')
 
 function assertDisposable(url: string) {
   const u = new globalThis.URL(url)
@@ -35,6 +36,9 @@ const maybe = URL ? describe : describe.skip
 maybe('payment ledger (PostgreSQL)', () => {
   let admin: Client
   const extra: Client[] = []
+  let installedPolicy: { cutoff_at: Date; accept_until: Date; installed_at: Date; activated_at: Date | null }
+  type PreflightRow = { check_id: string; check_name: string; observed: string; expected: string; verdict: string }
+  let preflightBefore: PreflightRow[]
 
   async function connect(role?: 'service_role' | 'anon' | 'authenticated'): Promise<Client> {
     const c = new Client({ connectionString: URL })
@@ -51,7 +55,9 @@ maybe('payment ledger (PostgreSQL)', () => {
     await admin.query('DROP SCHEMA IF EXISTS public CASCADE')
     await admin.query('CREATE SCHEMA public')
     await admin.query(readFileSync(BOOTSTRAP, 'utf8'))
+    preflightBefore = (await admin.query(readFileSync(PREFLIGHT, 'utf8'))).rows   // operator script, verbatim
     await admin.query(readFileSync(MIGRATION, 'utf8'))   // the migration, verbatim
+    installedPolicy = (await admin.query('SELECT * FROM public.payment_legacy_session_policy')).rows[0]
   })
 
   afterAll(async () => {
@@ -61,7 +67,20 @@ maybe('payment ledger (PostgreSQL)', () => {
 
   beforeEach(async () => {
     await admin.query('TRUNCATE public.payment_fulfillments, public.rights_packages, public.submissions, public.users CASCADE')
+    // Restore the migration's provisional (un-activated) legacy policy.
+    await admin.query(`INSERT INTO public.payment_legacy_session_policy (singleton, cutoff_at, accept_until)
+      VALUES (true, now() + interval '72 hours', now() + interval '72 hours' + interval '7 days')
+      ON CONFLICT (singleton) DO UPDATE SET cutoff_at = EXCLUDED.cutoff_at, accept_until = EXCLUDED.accept_until,
+                                            activated_at = NULL, activation_note = NULL`)
   })
+
+  const nowEpoch = () => Math.floor(Date.now() / 1000)
+  /** Set the legacy policy directly (owner), epochs in seconds. */
+  async function setPolicy(cutoffEpoch: number, acceptUntilEpoch: number) {
+    await admin.query('UPDATE public.payment_legacy_session_policy SET cutoff_at = to_timestamp($1), accept_until = to_timestamp($2)',
+      [cutoffEpoch, acceptUntilEpoch])
+  }
+  const policy = async () => (await admin.query('SELECT * FROM public.payment_legacy_session_policy')).rows[0]
 
   // ---------------------------------------------------------------- helpers
   async function seedSubmission(over: Partial<{ tier: string; status: string; payment_status: string; stripe_checkout_session_id: string | null }> = {}) {
@@ -119,6 +138,29 @@ maybe('payment ledger (PostgreSQL)', () => {
     }
     return false
   }
+
+  // ------------------------------------------------- operator preflight script
+  test('production preflight script executes read-only and reports no BLOCKER on a compatible schema', async () => {
+    expect(preflightBefore.length).toBeGreaterThan(40)
+    for (const r of preflightBefore) expect(['PASS', 'BLOCKER', 'REVIEW', 'INFO']).toContain(r.verdict)
+    expect(preflightBefore.filter((r) => r.verdict === 'BLOCKER')).toEqual([])
+    expect(preflightBefore.find((r) => r.check_name === 'name free: relation public.payment_fulfillments')?.verdict).toBe('PASS')
+  })
+
+  test('production preflight script flags an already-applied migration and a missing privilege as BLOCKER', async () => {
+    const run = async () => (await admin.query(readFileSync(PREFLIGHT, 'utf8'))).rows as PreflightRow[]
+    const after = await run()
+    const blockers = after.filter((r) => r.verdict === 'BLOCKER').map((r) => r.check_name)
+    expect(blockers).toEqual(expect.arrayContaining([
+      'name free: relation public.payment_fulfillments', 'name free: function public.record_checkout_payment',
+      'name free: relation public.payment_legacy_session_policy']))
+    await admin.query('REVOKE UPDATE ON public.submissions FROM service_role')
+    try {
+      expect((await run()).find((r) => r.check_name === 'service_role UPDATE on public.submissions')?.verdict).toBe('BLOCKER')
+    } finally {
+      await admin.query('GRANT UPDATE ON public.submissions TO service_role')
+    }
+  })
 
   // ------------------------------------------------------------- pricing
   test('price function is the single list-price authority', async () => {
@@ -262,6 +304,151 @@ maybe('payment ledger (PostgreSQL)', () => {
     expect(r).toMatchObject({ out_outcome: 'accepted', out_reason: 'accepted_unbound_legacy_session' })
     expect(await ledger(session)).toMatchObject({ session_binding: 'unbound', anomaly_status: 'open', fulfillment_status: 'pending' })
     expect(await sub(s.id)).toMatchObject({ payment_status: 'paid', status: 'approved', stripe_checkout_session_id: session })
+  })
+
+  // ------------------------------------------------- legacy unbound sunset (E2)
+  test('migration installs fail-closed provisional bounds (72h cutoff, +7d absolute sunset, not activated)', async () => {
+    const hours = (a: Date, b: Date) => (a.getTime() - b.getTime()) / 3_600_000
+    expect(hours(installedPolicy.cutoff_at, installedPolicy.installed_at)).toBeCloseTo(72, 1)
+    expect(hours(installedPolicy.accept_until, installedPolicy.cutoff_at)).toBeCloseTo(7 * 24, 5)
+    expect(installedPolicy.activated_at).toBeNull()
+  })
+
+  test('unbound session created at/after the cutoff is rejected (signed created time), submission untouched', async () => {
+    const svc = await connect('service_role')
+    const cutoff = nowEpoch() - 3600
+    await setPolicy(cutoff, cutoff + 7 * 86400)
+    for (const created of [cutoff, cutoff + 1, nowEpoch()]) {
+      const s = await seedSubmission({ stripe_checkout_session_id: null })
+      const session = sid()
+      const r = await record(svc, facts({ session, ref: s.id, created }))
+      expect(r).toMatchObject({ out_outcome: 'rejected', out_reason: 'unbound_session_after_cutoff', out_is_new: true, out_fulfillment_status: 'not_required' })
+      const row = await ledger(session)
+      expect(row).toMatchObject({ session_binding: 'unbound', anomaly_status: 'open', pdf_status: 'not_required', email_status: 'not_required' })
+      expect(row.stripe_session_created_at.getTime()).toBe(created * 1000)
+      expect(await sub(s.id)).toMatchObject({ payment_status: 'unpaid', status: 'pending', stripe_checkout_session_id: null })
+    }
+  })
+
+  test('unbound session created strictly before the cutoff, inside the window, is accepted with an open anomaly', async () => {
+    const svc = await connect('service_role')
+    const cutoff = nowEpoch() - 3600
+    await setPolicy(cutoff, cutoff + 7 * 86400)
+    const s = await seedSubmission({ stripe_checkout_session_id: null })
+    const session = sid()
+    const r = await record(svc, facts({ session, ref: s.id, created: cutoff - 1 }))
+    expect(r).toMatchObject({ out_outcome: 'accepted', out_reason: 'accepted_unbound_legacy_session' })
+    expect(await ledger(session)).toMatchObject({ session_binding: 'unbound', anomaly_status: 'open' })
+  })
+
+  test('unbound session with no signed creation time is rejected', async () => {
+    const svc = await connect('service_role')
+    const s = await seedSubmission({ stripe_checkout_session_id: null })
+    const r = await record(svc, facts({ session: sid(), ref: s.id, created: null }))
+    expect(r).toMatchObject({ out_outcome: 'rejected', out_reason: 'unbound_session_created_unknown' })
+    expect(await sub(s.id)).toMatchObject({ payment_status: 'unpaid' })
+  })
+
+  test('absolute sunset: after accept_until even a genuinely pre-cutoff session is rejected (no expiry assumption)', async () => {
+    const svc = await connect('service_role')
+    const cutoff = nowEpoch() - 8 * 86400
+    await setPolicy(cutoff, nowEpoch() - 60)
+    const s = await seedSubmission({ stripe_checkout_session_id: null })
+    const r = await record(svc, facts({ session: sid(), ref: s.id, created: cutoff - 3600 }))
+    expect(r).toMatchObject({ out_outcome: 'rejected', out_reason: 'unbound_session_window_closed' })
+    expect(await sub(s.id)).toMatchObject({ payment_status: 'unpaid' })
+  })
+
+  test('missing policy row fails closed', async () => {
+    const svc = await connect('service_role')
+    await admin.query('DELETE FROM public.payment_legacy_session_policy')
+    const s = await seedSubmission({ stripe_checkout_session_id: null })
+    const r = await record(svc, facts({ session: sid(), ref: s.id, created: 1000000000 }))
+    expect(r).toMatchObject({ out_outcome: 'rejected', out_reason: 'unbound_session_window_closed' })
+  })
+
+  test('bound sessions are unaffected by the legacy cutoff or sunset', async () => {
+    const svc = await connect('service_role')
+    await setPolicy(nowEpoch() - 8 * 86400, nowEpoch() - 60)   // exception fully closed
+    const session = sid()
+    const s = await seedSubmission({ stripe_checkout_session_id: session })
+    const r = await record(svc, facts({ session, ref: s.id, created: nowEpoch() }))
+    expect(r).toMatchObject({ out_outcome: 'accepted', out_reason: 'accepted' })
+  })
+
+  test('a mismatched session is rejected whatever its creation time', async () => {
+    const svc = await connect('service_role')
+    for (const created of [1000000000, nowEpoch()]) {
+      const s = await seedSubmission({ stripe_checkout_session_id: sid() })
+      const r = await record(svc, facts({ session: sid(), ref: s.id, created }))
+      expect(r).toMatchObject({ out_outcome: 'rejected', out_reason: 'session_mismatch' })
+    }
+  })
+
+  test('activation procedure: tighten-only, past-only, noted; then enforces the exact deploy time T', async () => {
+    const svc = await connect('service_role')
+    const activate = (t: number | null, note: string | null = 'deploy confirmed live') =>
+      admin.query('SELECT * FROM public.activate_payment_legacy_cutoff(to_timestamp($1), $2)', [t, note])
+    expect(await errCode(activate(nowEpoch() + 3600))).toBe('22023')               // future
+    expect(await errCode(activate(null))).toBe('22023')
+    expect(await errCode(activate(nowEpoch() - 60, 'x'))).toBe('22023')            // note required
+    const T = nowEpoch() - 600
+    const { rows } = await activate(T)
+    expect(rows[0].out_cutoff_at.getTime()).toBe(T * 1000)
+    expect(rows[0].out_accept_until.getTime()).toBe((T + 7 * 86400) * 1000)        // tightened from provisional
+    const pol = await policy()
+    expect(pol.activation_note).toBe('deploy confirmed live')
+    expect(pol.activated_at).not.toBeNull()
+    expect(await errCode(activate(T + 60))).toBe('22023')                          // cannot loosen
+    expect((await activate(T)).rows[0].out_cutoff_at.getTime()).toBe(T * 1000)    // idempotent
+
+    const before = await seedSubmission({ stripe_checkout_session_id: null })
+    expect(await record(svc, facts({ session: sid(), ref: before.id, created: T - 1 })))
+      .toMatchObject({ out_outcome: 'accepted', out_reason: 'accepted_unbound_legacy_session' })
+    const after = await seedSubmission({ stripe_checkout_session_id: null })
+    expect(await record(svc, facts({ session: sid(), ref: after.id, created: T })))
+      .toMatchObject({ out_outcome: 'rejected', out_reason: 'unbound_session_after_cutoff' })
+  })
+
+  test('service_role can read but never change the legacy policy or run activation', async () => {
+    const svc = await connect('service_role')
+    expect((await svc.query('SELECT cutoff_at FROM public.payment_legacy_session_policy')).rows).toHaveLength(1)
+    expect(await errCode(svc.query(`UPDATE public.payment_legacy_session_policy SET accept_until = now() + interval '1 year'`))).toBe('42501')
+    expect(await errCode(svc.query('DELETE FROM public.payment_legacy_session_policy'))).toBe('42501')
+    expect(await errCode(svc.query(`INSERT INTO public.payment_legacy_session_policy (singleton, cutoff_at, accept_until) VALUES (true, now(), now())`))).toBe('42501')
+    expect(await errCode(svc.query(`SELECT * FROM public.activate_payment_legacy_cutoff(now() - interval '1 hour', 'trying to reopen')`))).toBe('42501')
+  })
+
+  test('policy constraints: singleton, ordered bounds, tail at most 7 days', async () => {
+    expect(await errCode(admin.query(`INSERT INTO public.payment_legacy_session_policy (singleton, cutoff_at, accept_until) VALUES (false, now(), now())`))).toBe('23514')
+    expect(await errCode(admin.query(`UPDATE public.payment_legacy_session_policy SET accept_until = cutoff_at - interval '1 second'`))).toBe('23514')
+    expect(await errCode(admin.query(`UPDATE public.payment_legacy_session_policy SET accept_until = cutoff_at + interval '8 days'`))).toBe('23514')
+  })
+
+  test('accepted unbound rows cannot lose their signed creation time', async () => {
+    const svc = await connect('service_role')
+    const s = await seedSubmission({ stripe_checkout_session_id: null })
+    const session = sid()
+    await record(svc, facts({ session, ref: s.id }))
+    expect(await errCode(admin.query('UPDATE public.payment_fulfillments SET stripe_session_created_at = NULL WHERE stripe_checkout_session_id = $1', [session]))).toBe('23514')
+  })
+
+  // ------------------------------------------------ DB failure classification (E3)
+  test('an unexpected constraint failure (23514) propagates with its SQLSTATE and writes nothing; a retry succeeds once fixed', async () => {
+    const svc = await connect('service_role')
+    const session = sid()
+    const s = await seedSubmission({ stripe_checkout_session_id: session })
+    await admin.query(`ALTER TABLE public.submissions ADD CONSTRAINT test_reject_paid CHECK (payment_status <> 'paid') NOT VALID`)
+    const f = facts({ session, ref: s.id })
+    try {
+      expect(await errCode(record(svc, f))).toBe('23514')
+      expect(await sub(s.id)).toMatchObject({ payment_status: 'unpaid', status: 'pending', stripe_checkout_session_id: session })
+      expect(await ledger(session)).toBeUndefined()
+    } finally {
+      await admin.query('ALTER TABLE public.submissions DROP CONSTRAINT test_reject_paid')
+    }
+    // Environment fixed: the same delivery (Stripe retry) now records normally.
+    expect(await record(svc, f)).toMatchObject({ out_outcome: 'accepted', out_reason: 'accepted', out_is_new: true })
   })
 
   test('pre-ledger payment: no fulfillment evidence is invented', async () => {
@@ -605,6 +792,8 @@ maybe('payment ledger (PostgreSQL)', () => {
     expect(await errCode(c.query(`SELECT public.mark_payment_fulfillment_step('cs_x', NULL, 'pdf', 'completed', NULL, NULL)`))).toBe('42501')
     expect(await errCode(c.query(`SELECT public.finish_payment_fulfillment('cs_x', NULL, NULL)`))).toBe('42501')
     expect(await errCode(c.query(`SELECT public.reconcile_payment_fulfillment('cs_x', 'resolve_anomaly', $1, 'hello')`, [randomUUID()]))).toBe('42501')
+    expect(await errCode(c.query('SELECT * FROM public.payment_legacy_session_policy'))).toBe('42501')
+    expect(await errCode(c.query(`SELECT * FROM public.activate_payment_legacy_cutoff(now(), 'hello there')`))).toBe('42501')
   })
 
   test('service_role: no DELETE or TRUNCATE on the ledger', async () => {

@@ -123,17 +123,39 @@ describe('response mapping and side effects', () => {
     expect(sendPaymentLedgerAdminAlert).not.toHaveBeenCalled()
   })
 
-  it('GA4 payload keeps the pre-3B shape (client_id = customer email, else session id); tier from the ledger', async () => {
-    constructEvent.mockReturnValue(completedEvent({ customer_email: 'owner@example.com' }))
+  it('GA4 client_id is the session id, never the customer email or other personal data', async () => {
+    constructEvent.mockReturnValue(completedEvent({
+      customer_email: 'owner@example.com',
+      customer_details: { email: 'owner@example.com', name: 'Owner Name', phone: '+15550100', address: { line1: '1 Main St' } },
+      customer: 'cus_123',
+    }))
+    await POST(req())
+    const raw = fetchMock.mock.calls[0][1].body as string
+    const body = JSON.parse(raw)
+    expect(body.client_id).toBe('cs_test_1')
+    expect(body.user_id).toBeUndefined()
+    expect(body.user_data).toBeUndefined()
+    for (const pii of ['owner@example.com', 'Owner Name', '+15550100', '1 Main St', 'cus_123', SUB_ID]) {
+      expect(raw).not.toContain(pii)
+    }
+  })
+
+  it('GA4 purchase keeps dedup id, amount, currency and ledger tier authority', async () => {
+    constructEvent.mockReturnValue(completedEvent({ customer_email: 'owner@example.com', currency: 'usd' }))
     await POST(req())
     const body = JSON.parse(fetchMock.mock.calls[0][1].body)
-    expect(body.client_id).toBe('owner@example.com')
+    expect(body.events).toHaveLength(1)
+    expect(body.events[0].name).toBe('purchase')
     expect(body.events[0].params).toMatchObject({ transaction_id: 'cs_test_1', value: 499, currency: 'USD' })
     expect(body.events[0].params.items[0].item_id).toBe('si8_certified')   // ledger tier, not metadata 'creator_record'
+    // 100% promotion: value 0, still one event
     fetchMock.mockClear()
-    constructEvent.mockReturnValue(completedEvent({ customer_email: null }))
+    constructEvent.mockReturnValue(completedEvent({ payment_status: 'no_payment_required', payment_intent: null, amount_total: 0 }))
+    recordCheckoutPayment.mockResolvedValue(recorded({ tier: 'creator_record' }))
     await POST(req())
-    expect(JSON.parse(fetchMock.mock.calls[0][1].body).client_id).toBe('cs_test_1')
+    const promo = JSON.parse(fetchMock.mock.calls[0][1].body)
+    expect(promo.events[0].params).toMatchObject({ transaction_id: 'cs_test_1', value: 0 })
+    expect(promo.events[0].params.items[0].item_id).toBe('creator_record')
   })
 
   it('replay with pending fulfillment resumes it, but repeats no GA4 / alert', async () => {
@@ -154,6 +176,8 @@ describe('response mapping and side effects', () => {
   it.each([
     ['rejected', 'amount_mismatch'], ['rejected', 'session_mismatch'], ['rejected', 'currency_mismatch'],
     ['duplicate_payment', 'submission_already_paid'],
+    ['rejected', 'unbound_session_after_cutoff'], ['rejected', 'unbound_session_window_closed'],
+    ['rejected', 'unbound_session_created_unknown'],
   ])('new %s/%s → durable anomaly alert, no fulfillment, no GA4, 200', async (outcome, reason) => {
     recordCheckoutPayment.mockResolvedValue(recorded({ outcome, reason, fulfillmentStatus: 'not_required' }))
     const res = await POST(req())
@@ -184,6 +208,18 @@ describe('response mapping and side effects', () => {
     await POST(req())
     expect(sendPaymentLedgerAdminAlert).toHaveBeenCalledTimes(1)
     expect(runPaymentFulfillment).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ['23514', 'check_violation'], ['23505', 'unique_violation'], ['22023', 'invalid_parameter_value'],
+    ['42883', 'undefined_function'], ['42501', 'insufficient_privilege'], ['40001', 'serialization_failure'],
+    ['PGRST202', 'postgrest schema cache'],
+  ])('database error %s (%s) stays retryable: 500, no alert-and-200, no side effects', async (code) => {
+    recordCheckoutPayment.mockRejectedValue(Object.assign(new Error(`ledger error ${code}`), { code }))
+    const res = await POST(req())
+    expect(res.status).toBe(500)
+    expect(runPaymentFulfillment).not.toHaveBeenCalled()
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 
   it('ledger write failure → 500 so Stripe retries (recording is idempotent)', async () => {
