@@ -351,7 +351,7 @@ maybe('payment ledger (PostgreSQL)', () => {
 
   test('absolute sunset: after accept_until even a genuinely pre-cutoff session is rejected (no expiry assumption)', async () => {
     const svc = await connect('service_role')
-    const cutoff = nowEpoch() - 8 * 86400
+    const cutoff = nowEpoch() - 7 * 86400
     await setPolicy(cutoff, nowEpoch() - 60)
     const s = await seedSubmission({ stripe_checkout_session_id: null })
     const r = await record(svc, facts({ session: sid(), ref: s.id, created: cutoff - 3600 }))
@@ -369,7 +369,7 @@ maybe('payment ledger (PostgreSQL)', () => {
 
   test('bound sessions are unaffected by the legacy cutoff or sunset', async () => {
     const svc = await connect('service_role')
-    await setPolicy(nowEpoch() - 8 * 86400, nowEpoch() - 60)   // exception fully closed
+    await setPolicy(nowEpoch() - 7 * 86400, nowEpoch() - 60)   // exception fully closed
     const session = sid()
     const s = await seedSubmission({ stripe_checkout_session_id: session })
     const r = await record(svc, facts({ session, ref: s.id, created: nowEpoch() }))
