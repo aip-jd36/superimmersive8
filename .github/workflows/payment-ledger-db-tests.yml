@@ -49,4 +49,14 @@ jobs:
       - name: Run payment ledger DB tests
         env:
           DATABASE_URL_TEST: postgres://postgres:postgres@localhost:5432/si8_test_payments
-        run: npx jest --config jest.db.config.js --runInBand --ci
+        run: npx jest --config jest.db.config.js --runInBand --ci --json --outputFile=db-test-results.json
+      - name: Verify the DB suite actually executed (no skips, no empty run)
+        if: always()
+        run: |
+          node -e '
+            const r = require("./db-test-results.json");
+            const msg = `suites=${r.numTotalTestSuites} tests=${r.numTotalTests} passed=${r.numPassedTests} failed=${r.numFailedTests} skipped=${r.numPendingTests + r.numTodoTests}`;
+            const ok = r.success && r.numTotalTests > 0 && r.numPassedTests === r.numTotalTests && r.numPendingTests === 0 && r.numTodoTests === 0;
+            console.log(`::${ok ? "notice" : "error"} title=Payment ledger DB tests::${msg}`);
+            if (!ok) process.exit(1);
+          '

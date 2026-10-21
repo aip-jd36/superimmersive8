@@ -27,6 +27,9 @@ function assertDisposable(url: string) {
   }
 }
 
+if (process.env.CI && !URL) {
+  throw new Error('DATABASE_URL_TEST is required in CI — the payment ledger DB suite must not be skipped')
+}
 const maybe = URL ? describe : describe.skip
 
 maybe('payment ledger (PostgreSQL)', () => {
