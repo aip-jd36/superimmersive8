@@ -61,7 +61,7 @@ b1 AS (
 ),
 b2 AS (
   -- CHECK constraints on the vocabulary columns the ledger writes or reads.
-  SELECT 'B2', 'check constraint ' || con.conrelid::regclass || '.' || con.conname,
+  SELECT 'B2', 'check constraint ' || con.conrelid::regclass::text || '.' || con.conname,
          pg_get_constraintdef(con.oid),
          'tier ⊇ {creator_record,certified,si8_certified}; status allows ''approved''; payment_status ⊇ {unpaid,paid,refunded}',
          'REVIEW'
@@ -93,7 +93,7 @@ b2 AS (
    WHERE i.indrelid = to_regclass('public.submissions') AND i.indisunique AND NOT i.indisprimary
 ),
 b3 AS (
-  SELECT 'B3', 'FK into submissions from ' || con.conrelid::regclass || ' (' || con.conname || ')',
+  SELECT 'B3', 'FK into submissions from ' || con.conrelid::regclass::text || ' (' || con.conname || ')',
          pg_get_constraintdef(con.oid),
          'informational; RESTRICT/NO ACTION already blocks submission deletion today',
          CASE WHEN con.confdeltype IN ('r', 'a') THEN 'REVIEW' ELSE 'INFO' END
@@ -102,7 +102,7 @@ b3 AS (
 ),
 b4 AS (
   SELECT 'B4', 'user trigger on submissions: ' || t.tgname,
-         p.proname || ' enabled=' || t.tgenabled || ' :: ' || pg_get_triggerdef(t.oid),
+         p.proname || ' enabled=' || t.tgenabled::text || ' :: ' || pg_get_triggerdef(t.oid),
          'only updated_at-style triggers; anything that writes/raises on UPDATE must be reviewed',
          'REVIEW'
     FROM pg_trigger t JOIN pg_proc p ON p.oid = t.tgfoid
@@ -142,7 +142,7 @@ b5 AS (
 roles(r) AS (VALUES ('anon'), ('authenticated'), ('service_role')),
 b6 AS (
   SELECT 'B6', 'role ' || ro.r || ' exists / bypassrls',
-         COALESCE((SELECT 'exists bypassrls=' || pr.rolbypassrls FROM pg_roles pr WHERE pr.rolname = ro.r), 'MISSING'),
+         COALESCE((SELECT 'exists bypassrls=' || pr.rolbypassrls::text FROM pg_roles pr WHERE pr.rolname = ro.r), 'MISSING'),
          CASE WHEN ro.r = 'service_role' THEN 'exists bypassrls=true' ELSE 'exists' END,
          CASE
            WHEN NOT EXISTS (SELECT 1 FROM pg_roles pr WHERE pr.rolname = ro.r) THEN 'BLOCKER'
@@ -181,13 +181,13 @@ b7 AS (
   SELECT 'B7', 'current_user (the role that will own the new objects)', current_user::text, 'postgres',
          CASE WHEN current_user::text = 'postgres' THEN 'PASS' ELSE 'REVIEW' END
   UNION ALL
-  SELECT 'B7', 'default privileges in public: ' || pg_get_userbyid(d.defaclrole) || ' / ' || d.defaclobjtype,
+  SELECT 'B7', 'default privileges in public: ' || pg_get_userbyid(d.defaclrole) || ' / ' || d.defaclobjtype::text,
          d.defaclacl::text,
          'informational; the migration REVOKEs these explicitly for its own objects', 'INFO'
     FROM pg_default_acl d WHERE d.defaclnamespace = 'public'::regnamespace
   UNION ALL
   SELECT 'B7', 'PostgREST schema-reload event trigger present',
-         (SELECT COALESCE(string_agg(e.evtname || ':' || e.evtenabled, ', '), 'none')
+         (SELECT COALESCE(string_agg(e.evtname || ':' || e.evtenabled::text, ', '), 'none')
             FROM pg_event_trigger e WHERE e.evtname ILIKE '%pgrst%'),
          'at least one enabled (else run the reload step in the release runbook)',
          CASE WHEN EXISTS (SELECT 1 FROM pg_event_trigger e WHERE e.evtname ILIKE '%pgrst%' AND e.evtenabled <> 'D')
