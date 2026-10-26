@@ -33,7 +33,7 @@
 
 import type { GoalCategory, UserGoal } from '@/types/interview-engine'
 import type { RetrievalDiagnostic, TopicClaim, TopicRelationship } from './types'
-import { isApplicable, type ApplicabilityFacts } from './lookup-topic-claims'
+import { exclusionGateBlocks, isApplicable, type ApplicabilityFacts } from './lookup-topic-claims'
 
 /**
  * The relationship-side governance gate `lookupRelatedTopicClaims` below has
@@ -117,7 +117,12 @@ export function lookupRelatedTopicClaims(
         if (claim.lifecycle !== 'Adopted' || claim.crc_eligible !== 'Yes') continue
         anyEligible = true
 
-        if (!isApplicable(claim.applicability_requirements, facts)) continue
+        // LK-APPLICABILITY-EXCLUSION-1B: this legacy path evaluates mandatory
+        // requirements only (pre-existing; `applicability_any_of` is not read
+        // here and is out of this milestone's scope). Governed exclusions are
+        // enforced here too, so a triggered or invalid exclusion cannot be
+        // bypassed through a relationship hop.
+        if (!isApplicable(claim.applicability_requirements, facts) || exclusionGateBlocks(claim, facts)) continue
         anyApplicable = true
 
         // Goal-scoped dedup (PM decision, approved 2026-08-16): keyed on

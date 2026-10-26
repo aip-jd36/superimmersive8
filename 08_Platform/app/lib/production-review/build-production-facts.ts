@@ -9,9 +9,15 @@
  *   - Every fact here is a customer DECLARATION. Nothing is verified.
  *   - Tool identity comes only from `normalizeCandidate` (fail closed: an
  *     unresolved or ambiguous name contributes no identity).
- *   - A declared plan is passed to applicability only when it exactly equals a
- *     value an existing governed `tool_plan_tier` requirement for that same
- *     canonical tool uses. Anything else stays `unknown` → `unresolved`.
+ *   - A declared plan is passed to applicability only when it maps to exactly
+ *     one governed `tool_plan_tier` value for that same canonical tool, under
+ *     the shared contract (retrieval-engine/governed-applicability-values.ts,
+ *     ADR-001 §L.9: equal after case/whitespace/Unicode normalization, no
+ *     aliases). The canonical governed value is passed; the declaration is
+ *     kept verbatim. Anything else stays `unknown` → `unresolved`.
+ *   - A tool declared with more than one different plan passes none of them
+ *     as confirmed. Governed values among them are reported to the exclusion
+ *     gate as withheld, so a possibly-excluded plan can never yield coverage.
  *   - Account status is not collected by /certify, so it is always `unknown`.
  *   - Distribution territory (G1) is carried for display and NEVER becomes the
  *     applicability `jurisdiction` fact.
@@ -22,8 +28,15 @@
  */
 
 import { normalizeCandidate } from '@/lib/interview-engine/extraction'
+import {
+  governedToolFactValues,
+  matchGovernedValue,
+  normalizeGovernedValue,
+  type GovernedValueMatch,
+  type WithheldToolFact,
+} from '@/lib/retrieval-engine/governed-applicability-values'
 import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
-import type { ApplicabilityRequirement, TopicClaim } from '@/lib/retrieval-engine/types'
+import type { TopicClaim } from '@/lib/retrieval-engine/types'
 import type { ToolMention } from '@/types/interview-engine'
 import type { DeclaredTool, DeclaredToolIdentity, ProductionFacts } from './types'
 
@@ -57,21 +70,12 @@ function str(value: unknown): string | null {
   return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null
 }
 
-function allRequirements(claim: TopicClaim): ApplicabilityRequirement[] {
-  return [...claim.applicability_requirements, ...(claim.applicability_any_of ?? []).flat()]
-}
-
-/** Governed `tool_plan_tier` values per canonical tool, taken only from existing governed requirements. */
+/**
+ * Governed `tool_plan_tier` values per canonical tool: requirements, any_of
+ * alternatives and exclusions (shared contract, ADR-001 §L.9).
+ */
 export function governedPlanValuesByTool(topicClaims: TopicClaim[]): Map<string, Set<string>> {
-  const out = new Map<string, Set<string>>()
-  for (const claim of topicClaims) {
-    for (const req of allRequirements(claim)) {
-      if (req.fact !== 'tool_plan_tier' || !req.tool) continue
-      if (!out.has(req.tool)) out.set(req.tool, new Set())
-      out.get(req.tool)!.add(req.value)
-    }
-  }
-  return out
+  return governedToolFactValues(topicClaims, 'tool_plan_tier')
 }
 
 function resolveIdentity(rawName: string | null): DeclaredToolIdentity {
@@ -110,6 +114,7 @@ export function buildProductionFacts(input: ProductionFactsInput, topicClaims: T
   const tools: DeclaredTool[] = []
   const toolMentions: ToolMention[] = []
   const activeToolIds: string[] = []
+  const planMatches = new Map<number, GovernedValueMatch>()
 
   if (toolsReadable) {
     ;(parsedTools.value as unknown[]).forEach((entry, index) => {
@@ -119,9 +124,12 @@ export function buildProductionFacts(input: ProductionFactsInput, topicClaims: T
       const declaredPlan = str(e.plan_type) ?? str(e.planType)
 
       let planRelation: DeclaredTool['plan_relation'] = 'not_declared'
+      let governedPlanValue: string | null = null
       if (declaredPlan) {
-        const governed = identity.kind === 'canonical' ? governedPlans.get(identity.tool_id) : undefined
-        planRelation = governed?.has(declaredPlan) ? 'matches_governed_value' : 'not_a_governed_value'
+        const match = matchGovernedValue(declaredPlan, identity.kind === 'canonical' ? governedPlans.get(identity.tool_id) : undefined)
+        planMatches.set(index, match)
+        planRelation = match.kind === 'canonical' ? 'matches_governed_value' : match.kind === 'ambiguous' ? 'withheld_ambiguous_governed_value' : 'not_a_governed_value'
+        governedPlanValue = match.kind === 'canonical' ? match.value : null
       }
 
       tools.push({
@@ -130,6 +138,7 @@ export function buildProductionFacts(input: ProductionFactsInput, topicClaims: T
         identity,
         declared_plan: declaredPlan,
         plan_relation: planRelation,
+        governed_plan_value: governedPlanValue,
         account_status_basis: 'not_declared',
         declared_window: { start: str(e.start_date) ?? str(e.startDate), end: str(e.end_date) ?? str(e.endDate) },
         receipt_presented: !!(str(e.receipt_path) ?? str(e.receipt_url)),
@@ -139,16 +148,13 @@ export function buildProductionFacts(input: ProductionFactsInput, topicClaims: T
       if (identity.kind !== 'canonical') return
       if (!activeToolIds.includes(identity.tool_id)) activeToolIds.push(identity.tool_id)
       // One mention per declared entry. A declaration is passed through as the
-      // evaluator's "confirmed" state ONLY for governed plan values; the output
-      // lanes always label it `customer_declared`, never verified.
+      // evaluator's "confirmed" state ONLY as its canonical governed value; the
+      // output lanes always label it `customer_declared`, never verified.
       toolMentions.push({
         mention_id: `production-review:tool:${index}`,
         resolution: { kind: 'canonical', identifier: identity.tool_id },
         access_surface: { state: 'unknown' },
-        plan_tier:
-          planRelation === 'matches_governed_value' && declaredPlan
-            ? { state: 'confirmed', value: declaredPlan }
-            : { state: 'unknown' },
+        plan_tier: governedPlanValue !== null ? { state: 'confirmed', value: governedPlanValue } : { state: 'unknown' },
         account_status: { state: 'unknown' },
         confidence: 'unknown',
         source_turn: 0,
@@ -159,18 +165,30 @@ export function buildProductionFacts(input: ProductionFactsInput, topicClaims: T
   }
 
   // The evaluator finds the FIRST non-superseded mention per tool. If the same
-  // tool was declared twice with different governed plans, the declarations
-  // conflict: drop the plan for that tool rather than pick one (fail closed).
+  // tool was declared with more than one different plan (governed or not,
+  // compared after normalization), the declarations conflict: confirm none of
+  // them rather than pick one (fail closed). Governed or ambiguous values among
+  // them are reported as withheld so an exclusion cannot be silently bypassed.
+  const withheldToolFacts: WithheldToolFact[] = []
   for (const toolId of activeToolIds) {
-    const plans = new Set(
-      toolMentions
-        .filter((m) => m.resolution.kind === 'canonical' && m.resolution.identifier === toolId && m.plan_tier.state === 'confirmed')
-        .map((m) => (m.plan_tier as { value: string }).value),
-    )
-    if (plans.size > 1) {
-      for (const m of toolMentions) {
-        if (m.resolution.kind === 'canonical' && m.resolution.identifier === toolId) m.plan_tier = { state: 'unknown' }
+    const mine = tools.filter((t) => t.identity.kind === 'canonical' && t.identity.tool_id === toolId && t.declared_plan !== null)
+    const conflicting = new Set(mine.map((t) => normalizeGovernedValue(t.declared_plan!))).size > 1
+    for (const t of mine) {
+      const match = planMatches.get(t.index)!
+      if (conflicting) {
+        t.plan_relation = 'withheld_conflicting_declarations'
+        t.governed_plan_value = null
+        const m = toolMentions.find((x) => x.mention_id === `production-review:tool:${t.index}`)!
+        m.plan_tier = { state: 'unknown' }
       }
+      if (match.kind === 'not_governed' || (!conflicting && match.kind === 'canonical')) continue
+      withheldToolFacts.push({
+        mention_id: `production-review:tool:${t.index}`,
+        tool: toolId,
+        fact: 'tool_plan_tier',
+        value: match.kind === 'canonical' ? match.value : t.declared_plan!,
+        reason: conflicting ? 'conflicting_declarations' : 'ambiguous_governed_value',
+      })
     }
   }
 
@@ -185,7 +203,11 @@ export function buildProductionFacts(input: ProductionFactsInput, topicClaims: T
   return {
     facts,
     // Jurisdiction is deliberately empty: G1 territory is not an assessment jurisdiction.
-    applicabilityFacts: { jurisdiction: { included: [], excluded: [] }, toolMentions },
+    applicabilityFacts: {
+      jurisdiction: { included: [], excluded: [] },
+      toolMentions,
+      ...(withheldToolFacts.length > 0 ? { withheldToolFacts } : {}),
+    },
     activeToolIds,
     assetProviderIds: [],
   }

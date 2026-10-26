@@ -27,6 +27,7 @@ import type {
   Lifecycle,
   PublicationScope,
 } from '@/lib/retrieval-engine/types'
+import type { ApplicabilityExclusionOutcome } from '@/lib/retrieval-engine/applicability-exclusions'
 import type { ApplicabilityRequirementStatus } from '@/lib/retrieval-engine/lookup-topic-claims'
 import type { GoalScope } from '@/types/interview-engine'
 
@@ -308,6 +309,14 @@ export interface ReviewerLkClaim {
    * one.
    */
   applicability_established: boolean
+  /**
+   * Governed scope-exclusion diagnostics (ADR-001 §L), verbatim from the
+   * evaluator. Present ONLY when the claim carries `applicability_exclusions`
+   * (none do today). A `triggered` entry explains why the claim is `not_met`;
+   * untriggered entries are provenance only and are never an established
+   * requirement.
+   */
+  applicability_exclusion_outcomes?: ApplicabilityExclusionOutcome[]
   /** Governed project-fact dependencies CRC does not model — verbatim identifiers, informational only. */
   unresolved_project_dependencies: string[]
   provider_scope: string[] | null

@@ -53,7 +53,7 @@ describe('runProductionReview — governed commercial-use conditions', () => {
   })
 
   test('3b. Pika with an undeclared / non-governed plan: plan claims stay unresolved, never applied', () => {
-    for (const plan of [undefined, 'Team', 'pro']) {
+    for (const plan of [undefined, 'Team', 'Pro plan']) {
       const r = run([{ tool_name: 'Pika', plan_type: plan }])
       for (const id of ['STANDARD', 'PRO', 'FANCY']) {
         expect(find(r, `CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-${id}-001-v1`)!.applicability).toBe('applies_if')

@@ -33,7 +33,7 @@ import { extractMatchableFacts } from './extract-matchable-facts'
 import { lookupRows } from './lookup-rows'
 import { enumerateEligibleClaims } from './enumerate-eligible-claims'
 import { assembleResult, assembleTopicResult, assembleRelatedTopicResult, assembleDiscoveredTopicResult } from './assemble-result'
-import { evaluateApplicabilityExpression, lookupTopicClaims, type ApplicabilityFacts } from './lookup-topic-claims'
+import { evaluateClaimApplicability, lookupTopicClaims, type ApplicabilityFacts } from './lookup-topic-claims'
 import { lookupRelatedTopicClaims } from './lookup-topic-relationships'
 import { lookupDiscoveredTopicClaims } from './lookup-discovered-topic-claims'
 import type { DiscoveredTopicOccurrence, MatrixRow, RetrievalDiagnostic, RetrievalResult, TopicClaim, TopicRelationship, UnmetApplicabilityDetail } from './types'
@@ -185,7 +185,7 @@ export function retrieve(
       // gets a distinct diagnostic reason, never `applicability_unmet`,
       // never carrying `unmet_applicability` -- unreachable for any
       // production Matrix claim today.
-      const result = evaluateApplicabilityExpression(claim.applicability_requirements, claim.applicability_any_of, applicabilityFacts)
+      const result = evaluateClaimApplicability(claim, applicabilityFacts)
       if (!result.valid) {
         diagnostics.push({ identifier: claim.topic ?? 'unknown', reason: 'applicability_invalid_governance' })
         continue

@@ -176,11 +176,17 @@ function requirementKey(req: ApplicabilityRequirement): string {
 }
 
 function toConsideration(claim: ReviewerLkClaim): HrrGovernedConsideration {
+  const triggered = (claim.applicability_exclusion_outcomes ?? []).filter((o) => o.result === 'triggered').map((o) => ({ ...o.exclusion }))
+  const indeterminate = (claim.applicability_exclusion_outcomes ?? [])
+    .filter((o) => o.result === 'indeterminate_conflicting_values')
+    .map((o) => ({ ...o.exclusion }))
   return {
     claim_id: claim.claim_id,
     statement_verbatim: claim.statement,
     applicability_established: claim.applicability_established,
     applicability_outcomes: claim.applicability_outcomes,
+    ...(triggered.length > 0 ? { triggered_exclusions: triggered } : {}),
+    ...(indeterminate.length > 0 ? { indeterminate_exclusions: indeterminate } : {}),
     unresolved_project_dependencies: claim.unresolved_project_dependencies,
     governed_claims_reference: claim.governed_claims_reference,
   }

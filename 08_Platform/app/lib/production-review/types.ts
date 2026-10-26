@@ -65,23 +65,36 @@ export type DeclaredToolIdentity =
 
 /**
  * How the declared plan relates to governed applicability for this tool.
- *   - `matches_governed_value`: the declared plan string exactly equals a
- *     value some governed `tool_plan_tier` requirement for this tool uses. It
- *     is passed to the evaluator as a DECLARATION only.
- *   - `not_a_governed_value`: a plan was declared but no governed requirement
- *     for this tool uses that value (or the tool has no plan-gated claims).
- *     It is shown but never fed to applicability.
+ *   - `matches_governed_value`: the declared plan maps to exactly one value
+ *     governed for this tool (shared contract, ADR-001 §L.9: equal after
+ *     case/whitespace/Unicode normalization; no aliases). The canonical
+ *     governed value is passed to the evaluator as a DECLARATION only.
+ *   - `not_a_governed_value`: a plan was declared but no governed value for
+ *     this tool matches it (or the tool has no plan-gated claims). It is shown
+ *     but never fed to applicability.
+ *   - `withheld_conflicting_declarations`: the tool was declared with more
+ *     than one different plan; no plan for it is passed as confirmed.
+ *   - `withheld_ambiguous_governed_value`: the declaration matches more than
+ *     one governed spelling (a governance defect); not passed as confirmed.
  *   - `not_declared`.
  */
-export type DeclaredPlanRelation = 'matches_governed_value' | 'not_a_governed_value' | 'not_declared'
+export type DeclaredPlanRelation =
+  | 'matches_governed_value'
+  | 'not_a_governed_value'
+  | 'withheld_conflicting_declarations'
+  | 'withheld_ambiguous_governed_value'
+  | 'not_declared'
 
 export interface DeclaredTool {
   /** 0-based position in the submission's tools list. */
   index: number
   raw_name: string | null
   identity: DeclaredToolIdentity
+  /** The declaration verbatim (trimmed). Never rewritten. */
   declared_plan: string | null
   plan_relation: DeclaredPlanRelation
+  /** The governed value passed to applicability, iff `plan_relation === 'matches_governed_value'`. */
+  governed_plan_value: string | null
   /** Always `not_declared` in this slice — /certify does not collect account status. */
   account_status_basis: 'not_declared'
   declared_window: { start: string | null; end: string | null }

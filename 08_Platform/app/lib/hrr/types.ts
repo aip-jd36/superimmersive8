@@ -21,7 +21,7 @@
 
 import type { InterpretationStatus, UnresolvedRelevantClaim } from '@/lib/bounded-interpretation/types'
 import type { GoalCategory, GoalScope } from '@/types/interview-engine'
-import type { ApplicabilityRequirement } from '@/lib/retrieval-engine/types'
+import type { ApplicabilityExclusion, ApplicabilityRequirement } from '@/lib/retrieval-engine/types'
 import type {
   HrrAuthorityGateResult,
   ReviewerApplicabilityOutcome,
@@ -118,6 +118,20 @@ export interface HrrGovernedConsideration {
   applicability_established: boolean
   /** Verbatim per-requirement outcomes (grounding B + E). */
   applicability_outcomes: ReviewerApplicabilityOutcome[]
+  /**
+   * Governed scope exclusions TRIGGERED for this submission (ADR-001 §L), verbatim
+   * (grounding B) -- the reason a claim is in `does_not_apply` when no requirement
+   * is `not_met`. Present only when non-empty; untriggered exclusions are never
+   * projected (they establish nothing).
+   */
+  triggered_exclusions?: ApplicabilityExclusion[]
+  /**
+   * Governed scope exclusions that could NOT be decided because the declared
+   * values for that tool conflict or are ambiguous and include the excluded
+   * value (ADR-001 §L.9). The reason a claim is held at `unresolved` when no
+   * requirement is unresolved. Present only when non-empty.
+   */
+  indeterminate_exclusions?: ApplicabilityExclusion[]
   /** Verbatim governed project-fact dependency identifiers (grounding E). */
   unresolved_project_dependencies: string[]
   /** Verbatim pointer into the canonical governed ledger (grounding E). */

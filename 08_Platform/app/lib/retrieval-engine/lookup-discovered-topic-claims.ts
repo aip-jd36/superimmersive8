@@ -54,7 +54,7 @@
 
 import type { GoalCategory } from '@/types/interview-engine'
 import type { DiscoveredTopicOccurrence, KnowledgeTopic, RetrievalDiagnostic, TopicClaim, UnmetApplicabilityDetail } from './types'
-import { evaluateApplicabilityExpression, providerScopeMatches, type ApplicabilityFacts } from './lookup-topic-claims'
+import { evaluateClaimApplicability, providerScopeMatches, type ApplicabilityFacts } from './lookup-topic-claims'
 
 /**
  * One discovered-topic-eligible claim, still paired with the originating
@@ -166,7 +166,7 @@ export function lookupDiscoveredTopicClaims(
       if (claim.lifecycle !== 'Adopted' || claim.crc_eligible !== 'Yes') continue
       anyEligible = true
 
-      const result = evaluateApplicabilityExpression(claim.applicability_requirements, claim.applicability_any_of, facts)
+      const result = evaluateClaimApplicability(claim, facts)
 
       if (!result.valid) {
         invalidGovernanceClaimIds.push(claim.claim_id)

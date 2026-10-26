@@ -29,7 +29,7 @@
  */
 
 import {
-  evaluateApplicabilityExpression,
+  evaluateClaimApplicability,
   providerScopeMatches,
   toolScopeMatches,
   type ApplicabilityFacts,
@@ -133,7 +133,7 @@ export function selectReviewerClaims(input: SelectReviewerClaimsInput): SelectRe
     // no downstream consumer needs to re-derive materiality. Neither is
     // computed from `applicability_outcomes`'s own shape -- both come
     // straight from the evaluator, alongside it, from the same call.
-    const result = evaluateApplicabilityExpression(claim.applicability_requirements, claim.applicability_any_of, input.applicabilityFacts)
+    const result = evaluateClaimApplicability(claim, input.applicabilityFacts)
     if (!result.valid) {
       withheld.push({ claim_id: claim.claim_id, reason: 'invalid_governed_applicability' })
       continue
@@ -164,6 +164,9 @@ export function selectReviewerClaims(input: SelectReviewerClaimsInput): SelectRe
       last_verified: claim.last_verified,
       superseded_by: null,
       governed_claims_reference: `${GOVERNED_CLAIMS_DOC}#${claim.claim_id.toLowerCase()}`,
+      // Present only when the claim carries governed exclusions (dormant today), so the
+      // shape is unchanged for every current claim. Kept separate from applicability_outcomes.
+      ...(result.exclusion_outcomes.length > 0 ? { applicability_exclusion_outcomes: result.exclusion_outcomes } : {}),
     })
   }
 

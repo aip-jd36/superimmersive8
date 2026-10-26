@@ -85,6 +85,8 @@ export const PRODUCTION_REVIEW_TEMPLATES = {
   plan: {
     matches_governed_value: 'Declared: {plan} — used as a declared input to plan-specific conditions',
     not_a_governed_value: 'Declared: {plan} — no governed condition for this tool depends on this plan value',
+    withheld_conflicting_declarations: 'Declared: {plan} — not used: this tool was declared with more than one different plan',
+    withheld_ambiguous_governed_value: 'Declared: {plan} — not used: it matches more than one governed plan spelling',
     not_declared: 'No plan declared',
     toolUnresolved: 'Declared: {plan} — not evaluated because the tool was not recognized',
   },

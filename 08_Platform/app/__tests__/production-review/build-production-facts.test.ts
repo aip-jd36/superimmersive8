@@ -39,9 +39,16 @@ describe('buildProductionFacts', () => {
     expect(runway.facts.tools[0].plan_relation).toBe('not_a_governed_value')
     expect(runway.applicabilityFacts.toolMentions[0].plan_tier).toEqual({ state: 'unknown' })
 
-    // Case-sensitive exact match only — no fuzzy promotion.
-    const pikaLower = facts([{ tool_name: 'Pika', plan_type: 'pro' }])
-    expect(pikaLower.applicabilityFacts.toolMentions[0].plan_tier).toEqual({ state: 'unknown' })
+    // LK-EXCLUSION-ACTIVATION-READINESS-1 (ADR-001 §L.9): case/whitespace-only variants map to the
+    // ONE governed spelling; the declaration is kept verbatim. No aliases, no fuzzy promotion.
+    const pikaLower = facts([{ tool_name: 'Pika', plan_type: '  pro ' }])
+    expect(pikaLower.facts.tools[0]).toMatchObject({ declared_plan: 'pro', plan_relation: 'matches_governed_value', governed_plan_value: 'Pro' })
+    expect(pikaLower.applicabilityFacts.toolMentions[0].plan_tier).toEqual({ state: 'confirmed', value: 'Pro' })
+    for (const alias of ['Pro plan', 'the pro', 'Pr0', 'Professional', 'paid']) {
+      const b = facts([{ tool_name: 'Pika', plan_type: alias }])
+      expect(b.facts.tools[0].plan_relation).toBe('not_a_governed_value')
+      expect(b.applicabilityFacts.toolMentions[0].plan_tier).toEqual({ state: 'unknown' })
+    }
   })
 
   test('account status is never set (not collected by intake)', () => {

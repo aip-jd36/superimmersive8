@@ -65,7 +65,7 @@ import type { RetrievalHandoff, UserGoal } from '@/types/interview-engine'
 import { extractMatchableFacts } from './extract-matchable-facts'
 import { lookupRows } from './lookup-rows'
 import { enumerateEligibleClaims } from './enumerate-eligible-claims'
-import { activeConfirmedGoalCategories, evaluateApplicabilityExpression, lookupTopicClaims, type ApplicabilityFacts } from './lookup-topic-claims'
+import { activeConfirmedGoalCategories, evaluateClaimApplicability, lookupTopicClaims, type ApplicabilityFacts } from './lookup-topic-claims'
 import type { MatrixRow, RetrievalDiagnostic, TopicClaim, UnmetApplicabilityDetail } from './types'
 
 /**
@@ -104,7 +104,7 @@ function deriveMatrixApplicabilityGaps(handoff: RetrievalHandoff, matrix: Matrix
       // unmet_applicability" identically, and per Phase 11's own hard
       // requirement, invalid governed applicability must never create a
       // Track B/question candidate.
-      const result = evaluateApplicabilityExpression(claim.applicability_requirements, claim.applicability_any_of, facts)
+      const result = evaluateClaimApplicability(claim, facts)
       if (!result.valid) continue
       if (result.status === 'met') continue
       if (result.material_unresolved.length === 0) continue

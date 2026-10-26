@@ -21,6 +21,8 @@
 import type { GoalCategory, ToolMention, UserGoal } from '@/types/interview-engine'
 import type { ApplicabilityRequirement, ApplicabilityUnresolvedReason, RetrievalDiagnostic, TopicClaim, UnmetApplicabilityDetail } from './types'
 import { validateApplicabilityAnyOf, type ApplicabilityAnyOfViolation } from './applicability-any-of-structural-validation'
+import { evaluateApplicabilityExclusionGate, type ApplicabilityExclusionOutcome, type ApplicabilityExclusionViolation } from './applicability-exclusions'
+import type { WithheldToolFact } from './governed-applicability-values'
 
 /**
  * Assessment-jurisdiction membership facts (CRC Assessment-Jurisdiction
@@ -55,6 +57,15 @@ export interface AssessmentJurisdictionFacts {
 export interface ApplicabilityFacts {
   jurisdiction: AssessmentJurisdictionFacts
   toolMentions: ToolMention[]
+  /**
+   * LK-EXCLUSION-ACTIVATION-READINESS-1 (ADR-001 §L.9). Declared governed
+   * values a declaration-based fact builder (Product A, Creator Record)
+   * withheld from confirmation because the declarations conflict or the
+   * governed vocabulary is ambiguous. Read ONLY by the exclusion gate, which
+   * uses it to refuse coverage of a possibly-excluded project. Requirements
+   * never read it. Absent for CRC.
+   */
+  withheldToolFacts?: readonly WithheldToolFact[]
 }
 
 /**
@@ -503,6 +514,73 @@ export function evaluateApplicabilityExpression(
   return { valid: true, status, material_unresolved, all_outcomes }
 }
 
+/** The applicability-bearing fields of a governed claim. `MatrixClaim` satisfies it structurally (it carries no exclusions). */
+export interface ApplicabilityBearingClaim {
+  applicability_requirements: ApplicabilityRequirement[]
+  applicability_any_of?: ApplicabilityRequirement[][]
+  applicability_exclusions?: unknown
+}
+
+export interface ClaimApplicabilityOutcome extends ApplicabilityExpressionOutcome {
+  /** Exclusion diagnostics, kept separate from requirement outcomes. Empty when the claim has no exclusions. */
+  exclusion_outcomes: ApplicabilityExclusionOutcome[]
+  /** True iff an exclusion was triggered (then `status === 'not_met'`). An `indeterminate_conflicting_values` outcome is not `excluded`; it caps a `met` status at `unresolved`. */
+  excluded: boolean
+}
+
+export interface ClaimApplicabilityInvalid {
+  valid: false
+  /** `applicability_any_of` violations (unchanged shape). */
+  violations: ApplicabilityAnyOfViolation[]
+  /** `applicability_exclusions` violations. */
+  exclusion_violations: ApplicabilityExclusionViolation[]
+}
+
+export type ClaimApplicabilityResult = ({ valid: true } & ClaimApplicabilityOutcome) | ClaimApplicabilityInvalid
+
+/**
+ * LK-APPLICABILITY-EXCLUSION-1B (ADR-001 §L) -- the shared, exclusion-aware
+ * applicability contract for a governed claim. Ordinary evaluation
+ * (`evaluateApplicabilityExpression`, unchanged) runs first; the exclusion
+ * gate runs after it:
+ *   - invalid exclusion governance -> invalid (fail closed, like invalid any_of);
+ *   - triggered -> `not_met`, nothing material (the aggregate is settled);
+ *   - indeterminate (conflicting/withheld values include the excluded one,
+ *     ADR-001 §L.9) -> the ordinary result with a `met` status capped at
+ *     `unresolved` (never covered, never excluded);
+ *   - not triggered -> the ordinary result, byte-identical.
+ * Exclusions never enter `all_outcomes`, so an untriggered exclusion can never
+ * be reported as an established requirement or satisfy an any_of group.
+ * With no exclusions configured the result equals the ordinary result plus
+ * `exclusion_outcomes: []`, `excluded: false`.
+ */
+export function evaluateClaimApplicability(claim: ApplicabilityBearingClaim, facts: ApplicabilityFacts): ClaimApplicabilityResult {
+  const base = evaluateApplicabilityExpression(claim.applicability_requirements, claim.applicability_any_of, facts)
+  const gate = evaluateApplicabilityExclusionGate(claim.applicability_exclusions, facts.toolMentions, facts.withheldToolFacts)
+  if (!base.valid || !gate.valid) {
+    return { valid: false, violations: base.valid ? [] : base.violations, exclusion_violations: gate.valid ? [] : gate.violations }
+  }
+  if (gate.triggered) {
+    return { valid: true, status: 'not_met', material_unresolved: [], all_outcomes: base.all_outcomes, exclusion_outcomes: gate.outcomes, excluded: true }
+  }
+  if (gate.indeterminate && base.status === 'met') {
+    return { ...base, status: 'unresolved', exclusion_outcomes: gate.outcomes, excluded: false }
+  }
+  return { ...base, exclusion_outcomes: gate.outcomes, excluded: false }
+}
+
+/**
+ * Exclusion gate alone, for the one legacy path that evaluates only the
+ * mandatory requirements (`lookup-topic-relationships.ts`, via `isApplicable`).
+ * True when the claim must be treated as NOT applicable because an exclusion
+ * is invalid, triggered or indeterminate (that path includes only applicable
+ * claims, so a capped-to-unresolved claim is excluded there too).
+ */
+export function exclusionGateBlocks(claim: Pick<ApplicabilityBearingClaim, 'applicability_exclusions'>, facts: ApplicabilityFacts): boolean {
+  const gate = evaluateApplicabilityExclusionGate(claim.applicability_exclusions, facts.toolMentions, facts.withheldToolFacts)
+  return !gate.valid || gate.triggered || gate.indeterminate
+}
+
 /**
  * Provider pre-filter (Living Knowledge — Third-Party Source Rights, M3,
  * 2026-08-18, per THIRD_PARTY_SOURCE_RIGHTS_PATH_A_PROVIDER_NARROWING.md
@@ -737,7 +815,7 @@ export function lookupTopicClaims(
       if (claim.lifecycle !== 'Adopted' || claim.crc_eligible !== 'Yes') continue
       anyEligible = true
 
-      const result = evaluateApplicabilityExpression(claim.applicability_requirements, claim.applicability_any_of, facts)
+      const result = evaluateClaimApplicability(claim, facts)
 
       if (!result.valid) {
         invalidGovernanceClaimIds.push(claim.claim_id)

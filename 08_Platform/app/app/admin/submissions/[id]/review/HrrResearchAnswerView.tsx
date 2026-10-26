@@ -94,6 +94,11 @@ function DoesNotApplyClaim({ c }: { c: HrrGovernedConsideration }) {
             {requirementText(o.requirement)} — <span className="font-medium">{o.status}</span>
           </li>
         ))}
+        {(c.triggered_exclusions ?? []).map((x, i) => (
+          <li key={`x${i}`}>
+            {x.fact} ({x.tool}) excluded when confirmed “{x.value}” — <span className="font-medium">confirmed, excluded</span>
+          </li>
+        ))}
       </ul>
       <p className="mt-1 text-[11px]" style={{ color: MUTED }}>
         <span className="font-mono">{c.claim_id}</span> · <span className="font-mono">{c.governed_claims_reference}</span>
@@ -218,6 +223,11 @@ function TopicBlock({ topic }: { topic: HrrAnswerTopic }) {
                       applicability {c.applicability_established ? 'established' : 'not established'}
                     </span>{' '}
                     · <span className="font-mono">{c.governed_claims_reference}</span>
+                    {(c.indeterminate_exclusions ?? []).map((x, i) => (
+                      <div key={`ix${i}`}>
+                        {x.fact} ({x.tool}) excluded when “{x.value}” — not decided: the declared values for this tool conflict or are ambiguous
+                      </div>
+                    ))}
                   </li>
                 ))}
               </ul>

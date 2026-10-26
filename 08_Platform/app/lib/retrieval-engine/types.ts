@@ -225,6 +225,32 @@ export interface ApplicabilityRequirement {
 }
 
 /**
+ * LK-APPLICABILITY-EXCLUSION-1B (2026-10-25; ADR-001 §L) -- a governed SCOPE
+ * EXCLUSION: "this claim's proposition does not cover a project whose
+ * confirmed `fact` for `tool` is `value`." Deliberately NOT an
+ * `ApplicabilityRequirement` and never part of `applicability_requirements`
+ * or `applicability_any_of`:
+ *   - a triggered exclusion makes the whole claim `not_met`;
+ *   - an untriggered exclusion contributes NOTHING -- it is never an
+ *     established requirement, never material, never askable, and can never
+ *     satisfy an `applicability_any_of` group;
+ *   - only scalar per-tool facts are excludable; `jurisdiction` is not.
+ * Evaluated only by `evaluateClaimApplicability` /
+ * `evaluateApplicabilityExclusionGate` (lookup-topic-claims.ts,
+ * applicability-exclusions.ts).
+ */
+export const EXCLUDABLE_APPLICABILITY_FACTS = ['tool_plan_tier', 'tool_account_status'] as const
+export type ExcludableApplicabilityFact = (typeof EXCLUDABLE_APPLICABILITY_FACTS)[number]
+
+export interface ApplicabilityExclusion {
+  fact: ExcludableApplicabilityFact
+  /** Canonical tool identifier the excluded value is scoped to. Required. */
+  tool: string
+  /** The governed excluded value (e.g. a plan name). Compared with conservative normalization against CONFIRMED facts only. */
+  value: string
+}
+
+/**
  * One non-tool-scoped governed claim, mirroring MatrixClaim's shape plus
  * the fields PRD v0.2 §7 requires that tool-scoped claims don't need
  * (jurisdiction, applicability, lifecycle, character, version lineage).
@@ -623,6 +649,11 @@ export interface TopicClaim {
    * ever go, by construction, not by a runtime check.
    */
   applicability_any_of?: ApplicabilityRequirement[][]
+  /**
+   * Governed scope exclusions (ADR-001 §L). Absent = no exclusion (every current
+   * claim). Must never be an empty array. See `ApplicabilityExclusion`.
+   */
+  applicability_exclusions?: ApplicabilityExclusion[]
   /** See the doc comment immediately above this interface. */
   unresolved_project_dependencies: string[]
   /** See this interface's own header comment, immediately above. */

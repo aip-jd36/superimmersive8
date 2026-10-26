@@ -34,6 +34,17 @@
  * last_verified freshness, and ApplicabilityRequirement.operator membership
  * (already fully closed by its own TypeScript union, no registry needed).
  *
+ * LK-EXCLUSION-ACTIVATION-READINESS-1 (2026-10-26, ADR-001 §L.9) extends the
+ * same primitive to `applicability_exclusions`: the structural checks reuse
+ * the runtime gate's own validator (`validateApplicabilityExclusions`, so
+ * readiness and runtime cannot disagree about what is malformed), the tool
+ * reference is checked against the same canonical tool authority as
+ * `tool_scope`, and an exclusion that names the very value a mandatory
+ * `equals` requirement of the same claim demands is rejected as
+ * self-contradictory. Corpus-level spelling collisions are checked by
+ * `findGovernedValueCollisions` (governed-applicability-values.ts), not here,
+ * because this primitive validates one claim at a time.
+ *
  * This module is not wired into any candidate/Adoption gate yet -- it is
  * the primitive only, per this milestone's own explicit Hard Boundary.
  * Never mutates its input; never throws for ordinary invalid representation
@@ -44,6 +55,8 @@ import type { ApplicabilityRequirement, TopicClaim } from '@/lib/retrieval-engin
 import { APPLICABILITY_FACTS, CRC_ELIGIBLE_VALUES, KNOWLEDGE_TOPICS, LIFECYCLE_VALUES } from '@/lib/retrieval-engine/types'
 import { ASSET_PROVIDER_IDS } from '@/types/interview-engine'
 import { isCanonicalToolIdentity } from '@/lib/tool-identity/registry'
+import { validateApplicabilityExclusions, type ApplicabilityExclusionViolationKind } from '@/lib/retrieval-engine/applicability-exclusions'
+import { normalizeGovernedValue } from '@/lib/retrieval-engine/governed-applicability-values'
 
 export type RepresentationReadinessIssueCode =
   | 'invalid_topic'
@@ -54,6 +67,14 @@ export type RepresentationReadinessIssueCode =
   | 'invalid_applicability_fact'
   | 'missing_applicability_tool_reference'
   | 'invalid_applicability_tool_reference'
+  | 'invalid_applicability_exclusions'
+  | 'malformed_applicability_exclusion'
+  | 'unsupported_applicability_exclusion_fact'
+  | 'missing_applicability_exclusion_tool_reference'
+  | 'invalid_applicability_exclusion_tool_reference'
+  | 'blank_applicability_exclusion_value'
+  | 'duplicate_applicability_exclusion'
+  | 'contradictory_applicability_exclusion'
 
 /**
  * Deliberately minimal -- an issue code, the field path it was found at
@@ -125,6 +146,41 @@ function checkApplicabilityRequirement(req: ApplicabilityRequirement, index: num
   }
 }
 
+const EXCLUSION_VIOLATION_CODES: Record<ApplicabilityExclusionViolationKind, RepresentationReadinessIssueCode> = {
+  not_an_array: 'invalid_applicability_exclusions',
+  empty_array: 'invalid_applicability_exclusions',
+  malformed_exclusion: 'malformed_applicability_exclusion',
+  unsupported_fact: 'unsupported_applicability_exclusion_fact',
+  missing_tool: 'missing_applicability_exclusion_tool_reference',
+  empty_value: 'blank_applicability_exclusion_value',
+}
+
+function checkApplicabilityExclusions(claim: TopicClaim, issues: RepresentationReadinessIssue[]): void {
+  const raw: unknown = (claim as { applicability_exclusions?: unknown }).applicability_exclusions
+  const violations = validateApplicabilityExclusions(raw)
+  for (const v of violations) {
+    const path = v.exclusion_index === undefined ? 'applicability_exclusions' : `applicability_exclusions[${v.exclusion_index}]`
+    issues.push({ code: EXCLUSION_VIOLATION_CODES[v.kind], path: v.kind === 'missing_tool' ? `${path}.tool` : v.kind === 'empty_value' ? `${path}.value` : v.kind === 'unsupported_fact' ? `${path}.fact` : path })
+  }
+  if (!Array.isArray(raw)) return
+  const badIndexes = new Set(violations.map((v) => v.exclusion_index))
+  const seen = new Set<string>()
+  raw.forEach((x: { fact: string; tool: string; value: string }, index) => {
+    if (badIndexes.has(index)) return
+    if (!isCanonicalToolIdentity(x.tool)) {
+      issues.push({ code: 'invalid_applicability_exclusion_tool_reference', path: `applicability_exclusions[${index}].tool`, value: x.tool })
+      return
+    }
+    const key = `${x.fact}\u0000${x.tool}\u0000${normalizeGovernedValue(x.value)}`
+    if (seen.has(key)) issues.push({ code: 'duplicate_applicability_exclusion', path: `applicability_exclusions[${index}]`, value: x.value })
+    seen.add(key)
+    const contradicts = claim.applicability_requirements.some(
+      (r) => r.operator === 'equals' && r.fact === x.fact && r.tool === x.tool && normalizeGovernedValue(r.value) === normalizeGovernedValue(x.value),
+    )
+    if (contradicts) issues.push({ code: 'contradictory_applicability_exclusion', path: `applicability_exclusions[${index}]`, value: x.value })
+  })
+}
+
 export function checkTopicClaimRepresentationReadiness(claim: TopicClaim): RepresentationReadinessResult {
   const issues: RepresentationReadinessIssue[] = []
 
@@ -157,6 +213,8 @@ export function checkTopicClaimRepresentationReadiness(claim: TopicClaim): Repre
   }
 
   claim.applicability_requirements.forEach((req, index) => checkApplicabilityRequirement(req, index, issues))
+
+  checkApplicabilityExclusions(claim, issues)
 
   return { ready: issues.length === 0, issues }
 }
