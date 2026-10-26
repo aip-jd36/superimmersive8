@@ -4,11 +4,9 @@ contacts:
   - name: "Tina Colby"
     role: "Founder (as displayed in Dripify)"
 slug: tina-colby
-stage: lead_responded
+stage: nurturing
 source: stec_campaign
-next_action: "Await Tina's answer to the 2026-10-20 question (whether clients ask for rights/clearances documentation covering AI tools, generated content or source materials); internal review checkpoint 2026-10-25; no automatic follow-up"
-next_action_date: 2026-10-25
-last_contacted: 2026-10-20
+last_contacted: 2026-10-26
 blocked: false
 blocked_reason: null
 review_date: null
@@ -28,18 +26,49 @@ Account record created 2026-10-20 (CRM ID **B191**) on graduation from the CRC L
 
 **Arm vs. follow-up treatment:** the randomized PRE arm governs the automated sequence. The 2026-10-20 manual follow-up is observational discovery activity, not a randomized treatment, and does not change the arm assignment or experiment denominators. The campaign shows **Paused**; the individual lead's sequence state was not separately observed. Dripify was not changed. Do not resume it.
 
+**Disposition (2026-10-26):** discovery exchange **closed for now — no further proactive follow-up**. Stage set to `nurturing` (terminal, no open next action), following the B185 / B186 precedent for a closed conversation. This is **not** Closed Lost, a product rejection, opt-out or blacklist: she was never a qualified opportunity, no product was offered, and she can be re-engaged if she reaches out or circumstances change.
+
+**Standing Encore (STEC) status — Oct 25 reply CONFIRMED auto-ingested (read-only check, 2026-10-26):** PRE campaign mapping active (STEC campaign "SI8_CRC Lifecycle_PRE (4 Msg)"). Webhook event `9589c948-…` (received 2026-10-26) captured "Not once." as inbound message `2e88473f-…`; bridge event (`followup`, `succeeded`, attempt 1) created `lead_responses` **version 2** `7b591ab7-1071-4094-8243-ffdfc0ea4f09` (parent = version 1 `b76deef5-…`, the Oct 19 reply; latest; 5 messages; Lead Responded). Version 1 is no longer latest. Both versions are bridge-created (`drip_sequence`); no manual CSR exists or is needed — **do not submit one**. The 2026-10-26 closing message was not yet in STEC at the time of the check (it postdates the last webhook); that is outbound sync lag, not a missing inbound response.
+
 **Dates/times:** dates and times as supplied by the user from the Dripify display (local display times; timezone not verified; no UTC conversion).
 
 **`next_action_date` choice:** 2026-10-25 is an **internal review checkpoint only** — five days after the follow-up, matching the MEDIUM practice used for other leads (e.g. B101, B189, B190). It is not a date Tina agreed to and does not schedule any outbound message.
 
 ## Interaction log (reverse-chronological)
 
+### 2026-10-26 — closing acknowledgement — SENT (23:15 as displayed in Dripify)
+
+Sent from Angel's account in the existing thread; shown as an outgoing message in the user-supplied Dripify transcript. Delivery or reading is not independently verified.
+
+- **Treatment:** acknowledgement / courtesy close. No question, no CRC link, no Product A proposition.
+- **CRC:** `CRC_INTRODUCED=false` · `CRC_LINK_SENT=false` · `CRC_USAGE_VERIFIED=false`.
+
+**Message sent (exact):**
+
+```
+Got it, Tina — that's really helpful to know. We're trying to understand whether AI rights documentation is becoming a client expectation, so hearing that it hasn't come up in your work is just as useful. Thanks for sharing your perspective!
+```
+
+**`last_contacted`** = 2026-10-26. **Next step:** none — closed for now; no proactive follow-up. Do not resume the paused sequence.
+
+### 2026-10-25 — Tina's reply — inbound (08:39 as displayed)
+
+Inbound on LinkedIn / Dripify, answering the 2026-10-20 question (whether clients ask for similar rights/clearances documentation for AI-generated work). Logged verbatim.
+
+**Tina (exact):**
+> Not once.
+
+**Classification (provisional):** negative discovery signal for client-driven AI documentation demand, in her reported experience.
+- **CURRENT FACT (her own words):** clients have never asked her for comparable AI rights-and-clearances documentation.
+- **Hypothesis (client documentation demand) — answered NO for this lead.** Not proof that the broader hypothesis is false.
+- **NOT ESTABLISHED:** that her AI assets are legally cleared; that avoiding proprietary prompt references removes third-party IP or commercial-use risk; that no other advertising clients request AI rights documentation; absence of broader market demand; need for Product A; interest in a pilot, purchase or Commercial Assurance Assessment.
+
 ### 2026-10-20 — manual follow-up — SENT (03:00 PM as displayed in Dripify)
 
 Sent from Angel's account in the existing thread; shown as sent in the user-supplied Dripify thread (delivery not independently verified).
 
 - **Follow-up treatment:** discovery question on client documentation demand (closest existing label: WORKFLOW_DISCOVERY) — asks whether clients request a rights/clearances package for AI-generated work, by analogy with traditional ad production (talent releases, music licenses, third-party asset permissions).
-- **Hypothesis tested — OPEN / UNTESTED:** that clients request AI-related rights and clearances documentation. Tina has **not** answered; no client documentation demand is inferred.
+- **Hypothesis tested — OPEN / UNTESTED:** that clients request AI-related rights and clearances documentation. Tina has **not** answered; no client documentation demand is inferred. *[Update: answered "Not once." on 2026-10-25 — see above.]*
 - **CRC / Product A:** `CRC_INTRODUCED=false` · `CRC_LINK_SENT=false` · `CRC_USAGE_VERIFIED=false`. No CRC link; no Product A proposition introduced.
 
 **Message sent (exact):**
@@ -54,7 +83,7 @@ I'm curious: when you deliver AI-generated work, do clients ever ask for similar
 
 **`last_contacted`** = 2026-10-20.
 
-**Next step (internal review 2026-10-25):** check for her answer. No further follow-up decided; none is sent automatically.
+**Next step (internal review 2026-10-25):** check for her answer. No further follow-up decided; none is sent automatically. *[Superseded 2026-10-26: she answered on 2026-10-25; closed for now — see the 2026-10-26 entry above.]*
 
 ### 2026-10-19 — Tina's reply — inbound (05:48 AM as displayed)
 
