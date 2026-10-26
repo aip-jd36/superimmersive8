@@ -6,7 +6,7 @@ contacts:
 slug: rafael-mitre
 stage: lead_responded
 source: stec_campaign
-next_action: "Await Rafael's answer to the 2026-10-26 question (whether clients already ask for documentation or backing on rights in AI-generated content, or whether it is mainly his own concern as a producer); internal review checkpoint 2026-10-30; no automatic follow-up"
+next_action: "Await Rafael's answer to the 2026-10-26 Product A beta invitation (whether he'd like to take part and test the tool with one of his real projects); internal review checkpoint 2026-10-30; no automatic follow-up"
 next_action_date: 2026-10-30
 last_contacted: 2026-10-26
 blocked: false
@@ -28,6 +28,8 @@ Account record created 2026-10-26 (CRM ID **B192**, new — no prior CRM record,
 
 **Standing Encore (STEC) status — CONFIRMED auto-ingested (read-only check, 2026-10-26):** the DUR campaign has an active Dripify mapping (`automation_enabled = true`, STEC campaign "SI8_CRC Lifecycle_DURING (4 Msg)"). Webhook event `20a3aed8-…` captured M1 and his reply into `dripify_conversation_messages`; bridge event `38de8883-…` (`initial`, `succeeded`, attempt 1) created `lead_responses` row `fe247a75-654d-46e6-8e46-a25ec6a0451e` (version 1, latest, 2 messages, after Message #1, Lead Responded). The webhook rows' `processing_status = unmatched` comes from the legacy experiment-matching step, not the bridge. **Do not submit a manual CSR entry.** The 22:57 follow-up was not yet in STEC at the time of the check (it postdates the last webhook).
 
+**STEC re-check (read-only, 2026-10-26, DB time 15:36 UTC):** his second reply (23:10 as displayed) is **not yet captured** — no new webhook event, conversation message or bridge event for `/in/rafaelmitre`, and `fe247a75-…` is still the only and latest `lead_responses` version (v1; its text does not contain "IMPI"). No webhook had arrived from **any** campaign since 13:57 UTC, and earlier captures in this experiment lagged the reply by roughly 1–2 days (B191: ~30 h; B194: ~46 h). Status: **PENDING — consistent with normal webhook delay, not a confirmed failure.** Re-check later; expect a version 2 via the bridge. Do not submit a manual CSR unless a later check shows the reply still missing after a normal delay window.
+
 **Dates/times:** Dripify display times as supplied by the user (2026-10-26). Timezone not verified; no UTC conversion is recorded here.
 
 **`next_action_date` choice:** 2026-10-30 is an **internal review checkpoint only**, chosen by the user (four days after the follow-up). It is not a date Rafael agreed to and does not schedule any outbound message.
@@ -40,10 +42,46 @@ Positive problem signal plus an **unsolicited solution inquiry** — not a quali
 - **"amparar"** may mean support, back, assure or protect. The ambiguity is preserved; it is **not** recorded as an indemnification or certification requirement.
 - **SI8 side:** described a developing AI rights-and-clearances documentation concept (explicitly not a legal guarantee) and asked whether documentation demand comes from clients or from him as producer.
 - **NOT ESTABLISHED:** specific rights or licensing failures; that clients currently demand AI rights/clearances packages; a blocked or delayed delivery; need for legal indemnification or certification; willingness to pay; pilot participation; Product A qualification or purchase intent.
-- **Hypothesis tested — OPEN / UNTESTED:** client-originated documentation demand vs. producer-driven concern. Unanswered.
-- **CRC / Product A:** `CRC_INTRODUCED=false` · `CRC_LINK_SENT=false` · `CRC_USAGE_VERIFIED=false`. No CRC link; Product A not named or offered.
+- **Hypothesis tested:** client-originated documentation demand vs. producer-driven concern. **Answered 2026-10-26: "Yo como productor"** — he frames it as his own concern as a producer. Client demand for documentation remains **not established**.
+- **IMPI reference:** he says that in Mexico there is IMPI (Instituto Mexicano de la Propiedad Industrial), where audiovisual materials can be registered. Recorded as his statement only — **not validated or corrected**; no legal research was done on what IMPI registers or how it bears on AI-generated work.
+- **Product A beta invitation: SENT 2026-10-26, response PENDING.** SI8 invited him to join the beta by testing the developing tool on one of his real projects. He has **not** accepted, supplied a project, agreed to terms or shown willingness to pay. Product A is still under development; the message stated it does not replace legal review or guarantee authorization — no operational availability or certified clearance is implied.
+- **Attribution unchanged:** CRC Lifecycle R1 DUR; the Product A invitation is a manual follow-up, **not** a Product A campaign response.
+- **CRC:** `CRC_INTRODUCED=false` · `CRC_LINK_SENT=false` · `CRC_USAGE_VERIFIED=false`. No CRC link. *(Product A was first named in the 22:57 message as a developing concept and offered for beta in the 23:34 message below.)*
 
 ## Interaction log (reverse-chronological)
+
+### 2026-10-26 — manual follow-up (Product A beta invitation) — SENT (23:34 as displayed in Dripify)
+
+Sent from Angel's account in the existing thread; shown as an outgoing message in the user-supplied Dripify transcript. Delivery or reading is not independently verified. Invitation only — not accepted or agreed.
+
+**Message sent (exact):**
+
+```
+Entiendo, Rafael. Gracias por compartirlo.
+
+Justamente por ese tipo de preocupación estamos desarrollando una herramienta para crear algo parecido a un paquete de derechos y autorizaciones (*rights and clearances*) para producciones con IA.
+
+La idea es que puedas subir la documentación de un proyecto real — herramientas de IA utilizadas, licencias, condiciones de uso y materiales de origen — y recibir un informe que muestre qué está respaldado por la documentación y qué aspectos necesitan revisión adicional antes de entregar el trabajo al cliente.
+
+No sustituye una revisión legal ni garantiza que todo esté autorizado, pero busca hacer este proceso mucho más claro, organizado y fácil de presentar.
+
+Estamos buscando algunos productores que quieran colaborar con nosotros durante la fase beta, probando la herramienta con un proyecto real.
+
+¿Te interesaría participar y probarla con uno de tus proyectos?
+```
+
+**`last_contacted`** = 2026-10-26.
+
+**Next step (internal review 2026-10-30):** check for his answer to the beta invitation. No further follow-up decided; none is sent automatically.
+
+### 2026-10-26 — Rafael's second reply — inbound (23:10 as displayed)
+
+Inbound on LinkedIn / Dripify, answering the 22:57 question. Original Spanish logged verbatim (authoritative).
+
+**Rafael (exact):**
+> Yo como productor pero en México contamos con el IMPI que es el instituto mexicano de la propiedad industrial donde puedes registrar tus materiales audiovisuales
+
+*English interpretation (not authoritative):* it is his concern as a producer; in Mexico there is IMPI, the Mexican Institute of Industrial Property, where you can register your audiovisual materials.
 
 ### 2026-10-26 — manual follow-up — SENT (22:57 as displayed in Dripify)
 
@@ -63,7 +101,7 @@ Me interesa mucho lo que comentas: ¿tus clientes ya te piden algún tipo de doc
 
 **`last_contacted`** = 2026-10-26.
 
-**Next step (internal review 2026-10-30):** check for his answer. No further follow-up decided; none is sent automatically.
+**Next step (internal review 2026-10-30):** check for his answer. No further follow-up decided; none is sent automatically. *[Superseded 2026-10-26: he answered at 23:10 and the beta invitation followed at 23:34 — see above.]*
 
 ### 2026-10-26 — Rafael's reply — inbound (21:26 as displayed)
 
