@@ -1,0 +1,7 @@
+# Raw primary-source evidence captures must be preserved byte-for-byte.
+# Without this, the repo's core.autocrlf=true setting silently normalizes
+# line endings on add/checkout, causing the committed blob (and any future
+# checkout) to diverge from the SHA-256 values recorded in MANIFEST.md.
+*.html -text -diff binary
+*.pdf -text -diff binary
+*.json -text -diff binary
