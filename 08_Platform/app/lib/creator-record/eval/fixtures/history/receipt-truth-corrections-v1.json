@@ -1,0 +1,15 @@
+{
+  "corrections_version": "receipt-truth-corrections-v1",
+  "base_spec_version": "receipt-fixtures-v1",
+  "base_spec_sha256": "2974fa9ecbbea4ab09371623a9c372809a8527b21b9907dcde06a9951b97a904",
+  "policy": "Additive only: a correction may add an accepted value for a field whose truth status is 'present'. It may not change a status, remove an accepted value, change a declared scenario or expected comparison, or touch any threshold. Results scored with corrections are reported beside, never in place of, results under the original truth.",
+  "corrections": [
+    {
+      "fixture_id": "shot-runway-billing-history",
+      "field": "product_or_plan_name",
+      "add_value_accept": ["Standard"],
+      "adjudicated": "2026-10-22, during SPIKE-1B.2, before the pass-2 model run",
+      "rationale": "The rendered screenshot prints the plan in two places: the labelled field 'Current plan: Standard' (bold) and the payment row description 'Standard plan'. Both name the same product; 'plan' is a generic word, not part of the plan name. The original truth accepted only the row wording, so a faithful reading of the labelled plan field was scored wrong_value. The expected comparison (declared plan 'Standard' -> consistent) was already correct and is unchanged."
+    }
+  ]
+}
