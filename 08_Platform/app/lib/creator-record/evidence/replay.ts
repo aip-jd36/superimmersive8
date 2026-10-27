@@ -17,6 +17,8 @@ export interface ReplayFixture {
   fixture_id: string
   sha256: string
   media_type: string
+  /** Size of the fixture file (CR-V2-WORK-UAT-HARNESS-2); optional so ad-hoc test tables may omit it. */
+  bytes?: number
   /** Ground truth in the model's output shape (validated again on every replay). */
   parsed_output: unknown
 }

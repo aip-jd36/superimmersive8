@@ -11,6 +11,7 @@
  */
 
 import type { DraftRecordView as View } from '@/lib/creator-record/presentation/build-draft-record'
+import type { PublicUatView } from '@/lib/creator-record/public-uat/build-public-uat-draft'
 import { T } from '@/lib/creator-record/presentation/templates'
 
 const INK = '#1a1918'
@@ -36,7 +37,14 @@ function Field({ label, children, className = 'text-xs mt-2' }: { label: string;
   )
 }
 
-export function DraftRecordView({ view, showTrace = false }: { view: View; showTrace?: boolean }) {
+/**
+ * `view` is the admin prototype's view or the public UAT harness's view
+ * (CR-V2-WORK-UAT-HARNESS-2: designation added, internal trace and identifiers
+ * removed server-side). `showReferences` = false hides the per-card reference
+ * line; `showTrace` renders the internal trace only when the view carries one.
+ */
+export function DraftRecordView({ view, showTrace = false, showReferences = true }: { view: View | PublicUatView; showTrace?: boolean; showReferences?: boolean }) {
+  const trace = 'trace' in view ? view.trace : null
   return (
     <article style={{ color: INK }}>
       {view.banner && (
@@ -122,7 +130,7 @@ export function DraftRecordView({ view, showTrace = false }: { view: View; showT
             )}
             {c.caveats.map((cv) => <Field key={cv} label="Caveat">{cv}</Field>)}
             <p className="text-xs mt-2" style={{ color: MUTED }}>{c.source}</p>
-            <p className="text-xs mt-1" style={{ color: MUTED }}>Reference: {c.claim_id}</p>
+            {showReferences && <p className="text-xs mt-1" style={{ color: MUTED }}>Reference: {c.claim_id}</p>}
           </article>
         ))}
       </Section>
@@ -178,10 +186,10 @@ export function DraftRecordView({ view, showTrace = false }: { view: View; showT
         </dl>
       </Section>
 
-      {showTrace && (
+      {showTrace && trace && 'trace' in view && (
         <details className="mb-6 rounded-lg border bg-white p-4 text-xs" style={{ borderColor: LINE }}>
           <summary className="cursor-pointer font-semibold">Internal UAT trace (not part of a record)</summary>
-          <pre className="mt-3 overflow-x-auto whitespace-pre-wrap">{JSON.stringify(view.trace, null, 2)}</pre>
+          <pre className="mt-3 overflow-x-auto whitespace-pre-wrap">{JSON.stringify(trace, null, 2)}</pre>
           <p className="mt-3 font-semibold">Guidance provenance</p>
           <pre className="mt-1 overflow-x-auto whitespace-pre-wrap">{JSON.stringify(view.guidance.cards.map((c) => c.provenance), null, 2)}</pre>
         </details>

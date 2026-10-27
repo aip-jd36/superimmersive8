@@ -39,6 +39,29 @@ export const T = {
   record_banner_no_files: 'Nothing here has been saved, sent or charged. No files were uploaded and no AI model was called.',
   record_banner_files_replay:
     'Nothing here has been saved, sent or charged. Files you added were read on SI8’s server and then discarded; nothing was stored. No AI model was called: documents were described from recorded test data (fixture replay).',
+  /** CR-V2-WORK-UAT-HARNESS-2: the public UAT designation, on every public result. */
+  public_uat_designation: 'PUBLIC UAT — SYNTHETIC TEST DATA — NOT AN ISSUED CREATOR RECORD',
+  public_uat_record_title: 'Creator Record — PUBLIC UAT — SYNTHETIC TEST DATA — NOT AN ISSUED CREATOR RECORD',
+  public_uat_status: 'UAT draft — synthetic test data — not issued',
+  public_uat_summary_designation: 'PUBLIC UAT — SYNTHETIC TEST DATA — NOT AN ISSUED CREATOR RECORD. This is a test run of a prototype, prepared from test answers and SI8’s synthetic test documents. It cannot be relied on for any purpose.',
+  public_uat_summary_unapproved: 'All guidance shown is pilot wording that has not been approved for Creator Records and has not been reviewed by counsel.',
+  public_uat_banner_lines: [
+    'All guidance and wording in this harness are unapproved pilot drafts. None has been approved for Creator Records or reviewed by counsel.',
+    'Nothing here is saved, sent or charged. No file can be uploaded: documents are chosen from SI8’s synthetic test set and described from recorded test data. No AI model is called.',
+  ],
+  public_uat_page_intro: 'A public test harness for the Creator Record prototype. Use test answers only and do not enter real personal or customer information.',
+  public_uat_doc_origin_label: 'Where it came from',
+  public_uat_doc_origin: 'Chosen from SI8’s synthetic test set. No file was uploaded.',
+  public_uat_not_done: 'This is a public test run on synthetic test data. It is not an issued Creator Record and cannot be relied on.',
+  public_uat_method_registry: 'Pilot questionnaire (internal draft, unapproved)',
+  public_uat_method_ledger: 'Pilot guidance entries (internal drafts, unapproved)',
+  public_uat_method_run: 'Run',
+  public_uat_method_run_value: 'Public UAT harness (synthetic test data; not an issued record)',
+  public_uat_prepared: 'UAT draft prepared — synthetic test data — not an issued Creator Record',
+  public_uat_documents_choose: 'Choose a synthetic test document (optional)',
+  public_uat_documents_note: 'These are SI8’s own synthetic test documents. Nothing is uploaded.',
+  public_uat_closed: 'This test harness is not available.',
+
   record_banner_files_live:
     'Nothing here has been saved, sent or charged. Files you added were read by an AI model and then discarded; nothing was stored. The guidance in this record was composed without an AI model.',
 

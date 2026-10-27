@@ -104,3 +104,7 @@ npx tsx lib/creator-record/eval/build-replay-table.ts     # regenerates evidence
 ```
 
 Tests: `evidence-identity`, `evidence-examine`, `evidence-draft`, plus the boundaries and a11y tests.
+
+## public-uat/ — CR-V2-WORK-UAT-HARNESS-2
+
+Temporary, passwordless, synthetic-only harness at `/uat/creator-record-v2` + `POST /api/uat/creator-record-v2/draft` for cloud-browser UAT. **Closed unless armed** (`config.ts`: enabled flag + ≤ 14-day window, `null` = not armed). Reuses `buildCreatorRecordDraft` over `pilotSources()` unchanged; no upload (allowlisted fixture ids only, observations built server-side by `fixtures.ts` from the replay table); `toPublicUatView` adds the PUBLIC UAT designation and strips internal metadata without changing any interpretation. Runtime import closure excludes auth, Supabase, storage, email, payments, examination and any model (test-enforced). Operations, disable procedure and firewall recommendation: `08_Platform/implementation/CR_V2_PUBLIC_UAT_HARNESS.md`. Tests: `public-uat-harness`.

@@ -25,6 +25,7 @@ export interface ReplayTableEntry {
   fixture_id: string
   sha256: string
   media_type: string
+  bytes: number
   parsed_output: unknown
 }
 
@@ -40,7 +41,7 @@ export async function buildReplayEntries(generatedDir = DEFAULT_GENERATED_DIR): 
     const fixture = byId.get(m.id)
     if (!fixture) throw new Error(`manifest entry without a fixture: ${m.id}`)
     const response = await createOracleCaller(fixture)({ content: [], maxTokens: 0 })
-    entries.push({ fixture_id: m.id, sha256: m.sha256, media_type: m.media_type, parsed_output: response.parsed_output })
+    entries.push({ fixture_id: m.id, sha256: m.sha256, media_type: m.media_type, bytes: m.bytes, parsed_output: response.parsed_output })
   }
   return { spec_version: spec.spec_version, spec_sha256: manifest.spec_sha256, entries }
 }

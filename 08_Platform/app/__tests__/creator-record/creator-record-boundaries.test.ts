@@ -67,6 +67,8 @@ const CONTRACT_TYPE_ONLY_ALLOWED = ['@/lib/retrieval-engine/types', '@/lib/bound
 const SLICE_DIRS = ['governed', 'pilot', 'presentation', 'prototype'].map((d) => path.join(MODULE_ROOT, d))
 const SLICE_TYPE_ONLY_ALLOWED = ['@/lib/retrieval-engine/types']
 const inSlice = (f: string) => SLICE_DIRS.some((d) => f.startsWith(d + path.sep))
+/** CR-V2-WORK-UAT-HARNESS-2: the public harness module (its own, stricter rule below). */
+const PUBLIC_UAT_ROOT = path.join(MODULE_ROOT, 'public-uat')
 
 describe('lib/creator-record boundaries', () => {
   test('only examine.anthropic.ts imports the Anthropic SDK', () => {
@@ -94,6 +96,8 @@ describe('lib/creator-record boundaries', () => {
         .filter((i) => !(f.startsWith(CONTRACT_ROOT) && CONTRACT_TYPE_ONLY_ALLOWED.includes(i) && !runtime.has(i)))
         .filter((i) => !(f.startsWith(INTEGRATION_ROOT) && (INTEGRATION_RUNTIME_ALLOWED.includes(i) || (INTEGRATION_TYPE_ONLY_ALLOWED.includes(i) && !runtime.has(i)))))
         .filter((i) => !(inSlice(f) && SLICE_TYPE_ONLY_ALLOWED.includes(i) && !runtime.has(i)))
+        // CR-V2-WORK-UAT-HARNESS-2: public-uat/ may read the governed claim shape, type-only.
+        .filter((i) => !(f.startsWith(PUBLIC_UAT_ROOT + path.sep) && SLICE_TYPE_ONLY_ALLOWED.includes(i) && !runtime.has(i)))
         .map((i) => `${path.basename(f)} -> ${i}`)
     })
     expect(offenders).toEqual([])
@@ -182,6 +186,9 @@ describe('lib/creator-record boundaries', () => {
       'app/admin/creator-record-v2/page.tsx',
       'app/api/admin/creator-record-v2/draft/route.ts',
       'app/api/admin/creator-record-v2/examine/route.ts',
+      'app/api/uat/creator-record-v2/draft/route.ts',
+      'app/uat/creator-record-v2/PublicUatClient.tsx',
+      'app/uat/creator-record-v2/page.tsx',
       'components/creator-record/CreatorRecordQuestionnaire.tsx',
       'components/creator-record/DocumentReviewPanel.tsx',
       'components/creator-record/DraftRecordView.tsx',
@@ -250,6 +257,35 @@ describe('lib/creator-record boundaries', () => {
     expect(escaping).toEqual([])
   })
 
+  test('CR-V2-WORK-UAT-HARNESS-2: public-uat/ makes no runtime import outside lib/creator-record and reaches no examination, live, gate or SDK module', () => {
+    const files = walk(PUBLIC_UAT_ROOT)
+    expect(files.length).toBeGreaterThan(3)
+    const runtimeExternal = files.flatMap((f) => runtimeImports(readFileSync(f, 'utf8')).filter((i) => !i.startsWith('.')).map((i) => `${path.basename(f)} -> ${i}`))
+    expect(runtimeExternal).toEqual([])
+    const typeExternal = new Set(files.flatMap((f) => staticImports(readFileSync(f, 'utf8')).filter((i) => !i.startsWith('.'))))
+    expect(Array.from(typeExternal).every((i) => SLICE_TYPE_ONLY_ALLOWED.includes(i))).toBe(true)
+    const allowed = [
+      'contract/provenance',
+      'evidence/document-observations',
+      'evidence/replay',
+      'presentation/build-draft-record',
+      'presentation/templates',
+      'prototype/build-draft',
+      'prototype/form',
+      'prototype/parse-form-state',
+      'receipt-examination/prompt',
+      'receipt-examination/schema',
+    ]
+    for (const f of files) {
+      for (const i of staticImports(readFileSync(f, 'utf8')).filter((x) => x.startsWith('.'))) {
+        const t = path.relative(MODULE_ROOT, path.resolve(path.dirname(f), i)).split(path.sep).join('/')
+        expect([t, t.startsWith('public-uat/') || allowed.includes(t)]).toEqual([t, true])
+      }
+    }
+    // receipt-examination/prompt (it builds the model request) is reachable type-only.
+    for (const f of files) expect(runtimeImports(readFileSync(f, 'utf8')).some((i) => i.endsWith('receipt-examination/prompt'))).toBe(false)
+  })
+
   test('CR-V2-EVIDENCE-SLICE-1: identity/ loads only the two canonical registries and the contract', () => {
     const files = walk(path.join(MODULE_ROOT, 'identity'))
     expect(files.length).toBe(1)
@@ -300,7 +336,12 @@ describe('lib/creator-record boundaries', () => {
       .filter((f) => staticImports(readFileSync(f, 'utf8')).some((i) => /creator-record\/pilot\/|^\.\.?\/(\.\.\/)*pilot\//.test(i)))
       .map((f) => path.relative(APP_ROOT, f).split(path.sep).join('/'))
       .sort()
-    expect(importers).toEqual(['app/admin/creator-record-v2/CreatorRecordPrototypeClient.tsx', 'lib/creator-record/prototype/build-draft.ts'])
+    expect(importers).toEqual([
+      'app/admin/creator-record-v2/CreatorRecordPrototypeClient.tsx',
+      // CR-V2-WORK-UAT-HARNESS-2: the public harness client renders the same pilot questionnaire.
+      'app/uat/creator-record-v2/PublicUatClient.tsx',
+      'lib/creator-record/prototype/build-draft.ts',
+    ])
   })
 
   test('result vocabulary contains no assurance wording', () => {

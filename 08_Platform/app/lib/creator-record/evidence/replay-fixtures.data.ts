@@ -16,6 +16,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "conflict-current-plan-vs-charge-line",
     "sha256": "7f9ff947c9d00b08f4cb1438b16af5b7b717aff127afc4e0da0b556af776ad38",
     "media_type": "image/png",
+    "bytes": 24893,
     "parsed_output": {
       "document_type": "billing_screenshot",
       "readability": "legible",
@@ -64,6 +65,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "conflict-date-after-production",
     "sha256": "3a037f1fe9b2c027e3ba5885b7cf58699478937ffc5121db76669b257f559ab3",
     "media_type": "application/pdf",
+    "bytes": 65519,
     "parsed_output": {
       "document_type": "invoice",
       "readability": "legible",
@@ -107,6 +109,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "conflict-lookalike-issuer",
     "sha256": "7a0612c354d53ec78875b7a4a96ce42c169bbd9ee4ad08bdd593c46410ccc1ae",
     "media_type": "application/pdf",
+    "bytes": 65499,
     "parsed_output": {
       "document_type": "invoice",
       "readability": "legible",
@@ -150,6 +153,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "conflict-other-provider",
     "sha256": "8674e8a06e0443c0b755f517937ebdf854ba883c25bcf10e44ade1d747c40198",
     "media_type": "application/pdf",
+    "bytes": 65501,
     "parsed_output": {
       "document_type": "invoice",
       "readability": "legible",
@@ -193,6 +197,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "conflict-period-shorter-than-production",
     "sha256": "1fb7031af4b445348f042a9d11595b9b27395f6662b25568c3d89c8b167b7efe",
     "media_type": "application/pdf",
+    "bytes": 65523,
     "parsed_output": {
       "document_type": "invoice",
       "readability": "legible",
@@ -236,6 +241,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "conflict-reseller-merchant",
     "sha256": "bfa067e9a2884e529ae0046323a942aff15832cd6e825cdc48c44ef6401510ba",
     "media_type": "application/pdf",
+    "bytes": 65587,
     "parsed_output": {
       "document_type": "receipt",
       "readability": "legible",
@@ -279,6 +285,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "conflict-two-plan-names",
     "sha256": "6e36e697411e38f6e72c0e270ea5b9c3e04cd7aa52f128dbce2a7123194ae211",
     "media_type": "application/pdf",
+    "bytes": 65498,
     "parsed_output": {
       "document_type": "receipt",
       "readability": "legible",
@@ -327,6 +334,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "inject-hidden-text-layer",
     "sha256": "5f9ff6828a9e89b5486d6b6172fa075b0d63c766745c6c3432a607a01369deeb",
     "media_type": "application/pdf",
+    "bytes": 65788,
     "parsed_output": {
       "document_type": "invoice",
       "readability": "legible",
@@ -370,6 +378,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "inject-pricing-page-claims-invoice",
     "sha256": "6f05d4c41ad28a77db94c252168fbd66133f3162f8fc7f7211cf886e37ad2053",
     "media_type": "image/png",
+    "bytes": 33750,
     "parsed_output": {
       "document_type": "not_a_billing_document",
       "readability": "legible",
@@ -407,6 +416,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "inject-visible-instructions",
     "sha256": "23d6fca370380e1bd58e56541e572508de3b109cb0445042163b6458675df0d5",
     "media_type": "application/pdf",
+    "bytes": 65740,
     "parsed_output": {
       "document_type": "invoice",
       "readability": "legible",
@@ -450,6 +460,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "missing-amount-only-receipt",
     "sha256": "8878ec74cf5faa316e1ac56f96a00f6b8b8522b641fb26b01aa29a0289df6906",
     "media_type": "application/pdf",
+    "bytes": 65509,
     "parsed_output": {
       "document_type": "receipt",
       "readability": "legible",
@@ -487,6 +498,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "missing-generic-subscription-line",
     "sha256": "7f01a171d65d9afb6a2ec2746a560c68eb4f61fffc68f46c985861742dd03cf9",
     "media_type": "application/pdf",
+    "bytes": 65468,
     "parsed_output": {
       "document_type": "invoice",
       "readability": "legible",
@@ -530,6 +542,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "missing-no-date",
     "sha256": "6d929c002cb99abbd6fa7d58010c353060443bc25445bf5edb6c32bc433b472d",
     "media_type": "application/pdf",
+    "bytes": 65437,
     "parsed_output": {
       "document_type": "receipt",
       "readability": "legible",
@@ -573,6 +586,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "missing-no-issuer",
     "sha256": "93e143aade31f1ca9e44607fd9a06b71fc57fd8c9f603134ce8cf95dd12e0e83",
     "media_type": "application/pdf",
+    "bytes": 65444,
     "parsed_output": {
       "document_type": "invoice",
       "readability": "legible",
@@ -616,6 +630,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "missing-period-end",
     "sha256": "924d1acb812a0acb217734d18a7d3c01540898236a68dd824c34116a02fae23f",
     "media_type": "application/pdf",
+    "bytes": 65497,
     "parsed_output": {
       "document_type": "invoice",
       "readability": "legible",
@@ -659,6 +674,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "nonreceipt-abstract-photo",
     "sha256": "d64a6ce7fdf1f8ff0bf4c49a8470a6deb45e9517a9a332d9398b5c98bdb0d627",
     "media_type": "image/jpeg",
+    "bytes": 19541,
     "parsed_output": {
       "document_type": "not_a_billing_document",
       "readability": "legible",
@@ -696,6 +712,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "nonreceipt-contract-excerpt",
     "sha256": "bd3a1db57f99781e18f3336479ed2d5256a0e6e98a0b658d6f92a8566eca909f",
     "media_type": "application/pdf",
+    "bytes": 65552,
     "parsed_output": {
       "document_type": "not_a_billing_document",
       "readability": "legible",
@@ -733,6 +750,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "nonreceipt-marketing-page",
     "sha256": "05b993160a68be300b3424260885c7fc27a1ecc7536cb4cf1a69de0088a9781a",
     "media_type": "image/png",
+    "bytes": 26512,
     "parsed_output": {
       "document_type": "not_a_billing_document",
       "readability": "legible",
@@ -770,6 +788,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "nonreceipt-pricing-page",
     "sha256": "761a6a690a299d51bf8112554b56a4a67183a111f0da4aa115201984c1fe325e",
     "media_type": "image/png",
+    "bytes": 33619,
     "parsed_output": {
       "document_type": "not_a_billing_document",
       "readability": "legible",
@@ -807,6 +826,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "pdf-elevenlabs-creator",
     "sha256": "5aa3a177fec0d5b07f4be861f213bf08593e969f235ad31b9e92f56553355825",
     "media_type": "application/pdf",
+    "bytes": 65526,
     "parsed_output": {
       "document_type": "receipt",
       "readability": "legible",
@@ -850,6 +870,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "pdf-higgsfield-day-month-format",
     "sha256": "3148d52df765fe00d3357f4f063802273e08a01dce6ed8d495841b87734e814f",
     "media_type": "application/pdf",
+    "bytes": 65519,
     "parsed_output": {
       "document_type": "invoice",
       "readability": "legible",
@@ -893,6 +914,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "pdf-kling-pro-monthly",
     "sha256": "4db805768f966b748098e3890d9a8c4a76ed12e46609aaeccb8902733563501c",
     "media_type": "application/pdf",
+    "bytes": 65561,
     "parsed_output": {
       "document_type": "invoice",
       "readability": "legible",
@@ -936,6 +958,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "pdf-luma-plus-monthly",
     "sha256": "226eecd824ee81c53981fe7e500dcb84d40e2e5af6c4ee342c6e533ef38af5a4",
     "media_type": "application/pdf",
+    "bytes": 65535,
     "parsed_output": {
       "document_type": "invoice",
       "readability": "legible",
@@ -979,6 +1002,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "pdf-midjourney-standard-annual",
     "sha256": "f129f328d0f50cdebce9d750de9a7e403b01aa5df101967eb6ff69c92e13eef5",
     "media_type": "application/pdf",
+    "bytes": 65591,
     "parsed_output": {
       "document_type": "invoice",
       "readability": "legible",
@@ -1022,6 +1046,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "pdf-pika-pro-no-period",
     "sha256": "f72f878167e7583a042187a6827a4b20a3a6424dcf01ada5d88c60239ccbc03c",
     "media_type": "application/pdf",
+    "bytes": 65495,
     "parsed_output": {
       "document_type": "receipt",
       "readability": "legible",
@@ -1065,6 +1090,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "pdf-pro-repeated-descriptions",
     "sha256": "3c884fed0bf6d65e6bceab38f7135ffdf44390c572d1456fe3c01e2a559181f2",
     "media_type": "application/pdf",
+    "bytes": 65579,
     "parsed_output": {
       "document_type": "receipt",
       "readability": "legible",
@@ -1118,6 +1144,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "pdf-runway-standard-monthly",
     "sha256": "ec1578d24de83b4cd022779538685d1cc2ee3d980383a3f78d503c96c9ad569d",
     "media_type": "application/pdf",
+    "bytes": 65647,
     "parsed_output": {
       "document_type": "invoice",
       "readability": "legible",
@@ -1161,6 +1188,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "pdf-runway-unlimited-annual-with-tax",
     "sha256": "44b96c49611baa9fbe340ff8356db5410455e6566f31c71423171b78063c0d1c",
     "media_type": "application/pdf",
+    "bytes": 65662,
     "parsed_output": {
       "document_type": "invoice",
       "readability": "legible",
@@ -1204,6 +1232,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "photo-elevenlabs-low-resolution",
     "sha256": "31222174b86048609a4027dd130a4882af197d465f298c1a29c0cbf42144295c",
     "media_type": "image/jpeg",
+    "bytes": 31308,
     "parsed_output": {
       "document_type": "receipt",
       "readability": "partially_legible",
@@ -1247,6 +1276,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "photo-glare-over-date",
     "sha256": "a95c4b7224c2607308b268732e2aac0e493e05c98d75bb82f0b9fb0ba1d2e448",
     "media_type": "image/jpeg",
+    "bytes": 630637,
     "parsed_output": {
       "document_type": "invoice",
       "readability": "partially_legible",
@@ -1290,6 +1320,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "photo-kling-dim",
     "sha256": "a1970ec723ddc3e1ec1423335c4492af9891121a2ba15fe11757f65a9fdf9f77",
     "media_type": "image/jpeg",
+    "bytes": 870782,
     "parsed_output": {
       "document_type": "invoice",
       "readability": "partially_legible",
@@ -1333,6 +1364,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "photo-luma-shadow",
     "sha256": "5d9eaadb68a79e04353d32cd8fcd65ad703452d3634dc5efe738dc06fbd56e77",
     "media_type": "image/jpeg",
+    "bytes": 871072,
     "parsed_output": {
       "document_type": "invoice",
       "readability": "legible",
@@ -1376,6 +1408,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "photo-pika-sideways",
     "sha256": "869daa539b4cb249d4bbdca5107bf6ab21b454b226cbda7e04aeaa32ee273801",
     "media_type": "image/jpeg",
+    "bytes": 621374,
     "parsed_output": {
       "document_type": "receipt",
       "readability": "legible",
@@ -1419,6 +1452,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "photo-runway-rotated",
     "sha256": "190995abf846ec1cfbcb8d88df36406ba33f7eeb552fe7cb7ae75c9ce785aa31",
     "media_type": "image/jpeg",
+    "bytes": 679728,
     "parsed_output": {
       "document_type": "invoice",
       "readability": "legible",
@@ -1462,6 +1496,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "shot-elevenlabs-no-date-column",
     "sha256": "7729f1b726bd9cee86dc67886f2d17303bea81a96cca36a94b2e67c2f05864e7",
     "media_type": "image/png",
+    "bytes": 24134,
     "parsed_output": {
       "document_type": "billing_screenshot",
       "readability": "legible",
@@ -1505,6 +1540,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "shot-history-plan-change",
     "sha256": "ef9503875c12f600d168e8169f74000e19b0f05d0affa2e226f9ca1489f6726e",
     "media_type": "image/png",
+    "bytes": 34147,
     "parsed_output": {
       "document_type": "billing_screenshot",
       "readability": "legible",
@@ -1558,6 +1594,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "shot-kling-confirmation-email",
     "sha256": "6e37d2b8882dffb123853b6ece19a853a6f0987c705994731b196a2444fe4b46",
     "media_type": "image/png",
+    "bytes": 38232,
     "parsed_output": {
       "document_type": "subscription_confirmation",
       "readability": "legible",
@@ -1601,6 +1638,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "shot-luma-ambiguous-date",
     "sha256": "386a3211247fdbc8651f29460a607c5485c10b3725c598e015099002f0427fd3",
     "media_type": "image/png",
+    "bytes": 22824,
     "parsed_output": {
       "document_type": "billing_screenshot",
       "readability": "legible",
@@ -1644,6 +1682,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "shot-midjourney-plan-change",
     "sha256": "9b0dbe30b7afeb2cac691d16ddc41140127b675ffb5aefd17ae88b863fcf713a",
     "media_type": "image/png",
+    "bytes": 34476,
     "parsed_output": {
       "document_type": "billing_screenshot",
       "readability": "legible",
@@ -1692,6 +1731,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "shot-pika-multiple-payments",
     "sha256": "57576c4e5bac9700984896b167b3d7b34ef41bf8cae8a154b03a9feeec835acd",
     "media_type": "image/png",
+    "bytes": 32437,
     "parsed_output": {
       "document_type": "billing_screenshot",
       "readability": "legible",
@@ -1735,6 +1775,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "shot-runway-billing-history",
     "sha256": "7866e9765712f58d9594fee8edd4c5742967a1ce33db2c3b8c3a3595ae0fa48a",
     "media_type": "image/png",
+    "bytes": 25254,
     "parsed_output": {
       "document_type": "billing_screenshot",
       "readability": "legible",
@@ -1783,6 +1824,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "shot-truncated-plan-name",
     "sha256": "068fcc5bde917edadbdbe83cc191efb4d2abaa273cf8c2ca837b1342205b634b",
     "media_type": "image/png",
+    "bytes": 21504,
     "parsed_output": {
       "document_type": "billing_screenshot",
       "readability": "legible",
@@ -1826,6 +1868,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "unreadable-dark-image",
     "sha256": "c9ee8a42dbbe8747a322b3391fc01e5a5e0eda3218087b5e1a8d44aea64883e5",
     "media_type": "image/jpeg",
+    "bytes": 181355,
     "parsed_output": {
       "document_type": "unknown",
       "readability": "illegible",
@@ -1863,6 +1906,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "unreadable-heavy-blur",
     "sha256": "1d27ef18afd098a6a60d80e1379c0483b741f371724ecf4429ce8d4f611ebbd7",
     "media_type": "image/png",
+    "bytes": 51762,
     "parsed_output": {
       "document_type": "unknown",
       "readability": "illegible",
@@ -1900,6 +1944,7 @@ export const REPLAY_FIXTURES: readonly ReplayFixture[] = [
     "fixture_id": "unreadable-tiny-thumbnail",
     "sha256": "a1b905aee3aa9a2533dab0fef20abc86a664ed7c4ca6d383532f045afca5fca0",
     "media_type": "image/png",
+    "bytes": 1762,
     "parsed_output": {
       "document_type": "unknown",
       "readability": "illegible",

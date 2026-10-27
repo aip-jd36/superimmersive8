@@ -10,11 +10,16 @@
  * to show as THEIR OWN answer (the parent sets the plan answer), say they will
  * give their own answer, or ignore it. Nothing is chosen automatically.
  * Standard controls only (file input, buttons, radios); no hover or drag.
+ *
+ * CR-V2-WORK-UAT-HARNESS-2: with `fixtures`, the empty state is a native
+ * dropdown of SI8's synthetic test documents instead of a file input; nothing
+ * is uploaded and no consent to upload is needed.
  */
 
 import { useState } from 'react'
 import { adoptablePlanValues, DOCUMENT_FIELDS, type ExtractionMode, type ReviewDecision, type ToolDocument } from '@/lib/creator-record/evidence/document-observations'
 import { T } from '@/lib/creator-record/presentation/templates'
+import type { ExaminedDocument } from '@/lib/creator-record/evidence/document-observations'
 
 const MUTED = '#6b6560'
 const ERROR = '#b42318'
@@ -22,6 +27,9 @@ const ERROR = '#b42318'
 export interface DocumentReviewPanelProps {
   toolIndex: number
   doc: ToolDocument | null
+  /** Public UAT harness: choose from SI8's synthetic test documents instead of uploading. */
+  fixtures?: readonly { fixture_id: string; label: string; document: ExaminedDocument }[]
+  onSelectFixture?: (fixtureId: string) => void
   consented: boolean
   mode: ExtractionMode
   examining: boolean
@@ -35,6 +43,31 @@ export function DocumentReviewPanel(p: DocumentReviewPanelProps) {
   const [file, setFile] = useState<File | null>(null)
   const n = p.toolIndex + 1
   const id = `cr-doc-${p.toolIndex}`
+
+  if (!p.doc && p.fixtures) {
+    return (
+      <div role="group" aria-labelledby={`${id}-label`} className="mt-2 mb-2 rounded-md border p-3" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
+        <p id={`${id}-label`} className="text-sm font-medium">Tool {n}: {T.public_uat_documents_choose}</p>
+        <p id={`${id}-help`} className="text-xs mb-2" style={{ color: MUTED }}>{T.public_uat_documents_note}</p>
+        <select
+          id={`${id}-fixture`}
+          aria-labelledby={`${id}-label`}
+          aria-describedby={`${id}-help`}
+          className="w-full rounded-md border px-3 py-2 text-sm bg-white"
+          style={{ borderColor: 'rgba(0,0,0,0.15)' }}
+          value=""
+          onChange={(e) => e.target.value && p.onSelectFixture?.(e.target.value)}
+        >
+          <option value="">No document</option>
+          {p.fixtures.map((f) => (
+            <option key={f.fixture_id} value={f.fixture_id}>
+              {f.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    )
+  }
 
   if (!p.doc) {
     return (

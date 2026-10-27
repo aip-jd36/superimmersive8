@@ -21,6 +21,11 @@
  *     name it shows as their own answer, give their own answer, or ignore it.
  *     Changing the tool clears the plan answer and the document choice, so no
  *     stale answer survives a correction.
+ *
+ * CR-V2-WORK-UAT-HARNESS-2: with `fixtureDocuments` (and no `onExamine`) the
+ * document panel offers a choice from SI8's synthetic test set instead of a
+ * file input. The observations shown come from the server; on submit the
+ * caller sends only the chosen fixture id and the review.
  */
 
 import { useMemo, useState } from 'react'
@@ -30,6 +35,11 @@ import { visibleQuestions, visibleToolQuestions, type CreatorRecordFormState, ty
 import { DocumentReviewPanel } from './DocumentReviewPanel'
 
 export type ExamineResult = { ok: true; document: ExaminedDocument } | { ok: false; error: string }
+export interface FixtureDocumentOption {
+  fixture_id: string
+  label: string
+  document: ExaminedDocument
+}
 
 export interface QuestionnaireProps {
   registryInput: RegistryInput
@@ -46,6 +56,8 @@ export interface QuestionnaireProps {
   issues: FormIssue[]
   /** Examines one document; omitted → no document upload is offered. */
   onExamine?: (toolIndex: number, file: File) => Promise<ExamineResult>
+  /** Synthetic test documents to choose from instead of uploading (public UAT harness). */
+  fixtureDocuments?: readonly FixtureDocumentOption[]
   onSubmit: (state: CreatorRecordFormState, documents: ToolDocument[]) => void
 }
 
@@ -314,6 +326,11 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
   }
 
   const uploadsOffered = !!props.onExamine
+  const fixtureMode = !uploadsOffered && (props.fixtureDocuments ?? []).length > 0
+  const selectFixture = (index: number, fixtureId: string) => {
+    const f = (props.fixtureDocuments ?? []).find((x) => x.fixture_id === fixtureId)
+    setDoc(index, () => (f ? { tool_index: index, document: f.document, review: { document_id: f.document.document_id, decision: 'not_reviewed', adopted_value: null } } : null))
+  }
 
   return (
     <form
@@ -368,10 +385,12 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
                     )}
                   </div>
                   {visibleToolQuestions(config, state.answers, t).map((q) => field(q.q_id, t[q.q_id], (v) => setToolAnswer(i, q.q_id, v), i, `${q.q_id}-${i}`, t))}
-                  {uploadsOffered && i < props.maxTools && (
+                  {(uploadsOffered || fixtureMode) && i < props.maxTools && (
                     <DocumentReviewPanel
                       toolIndex={i}
                       doc={docs[i] ?? null}
+                      fixtures={fixtureMode ? props.fixtureDocuments : undefined}
+                      onSelectFixture={(id) => selectFixture(i, id)}
                       consented={consented}
                       mode={props.examinationMode ?? 'fixture_replay'}
                       examining={examining === i}
