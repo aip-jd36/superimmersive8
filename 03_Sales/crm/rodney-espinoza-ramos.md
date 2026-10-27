@@ -5,11 +5,9 @@ contacts:
     role: "AI Artist; headline: Lead AI Artist / Producciones híbridas o 100% GenAI (as displayed in Dripify)"
     email: "rdsrbln@gmail.com"
 slug: rodney-espinoza-ramos
-stage: lead_responded
+stage: nurturing
 source: stec_campaign
-next_action: "Await Rodney's answer to the 2026-10-26 question (whether the studios he works with ask him for AI rights documentation — AI tools used, commercial-use terms, source-material records — or handle it all themselves); internal review checkpoint 2026-10-31; no automatic follow-up"
-next_action_date: 2026-10-31
-last_contacted: 2026-10-26
+last_contacted: 2026-10-27
 blocked: false
 blocked_reason: null
 review_date: null
@@ -29,20 +27,51 @@ Account record created 2026-10-26 (CRM ID **B194**, new — no prior CRM record,
 
 **Standing Encore (STEC) status — CONFIRMED auto-ingested (read-only check, 2026-10-26):** DUR campaign mapping active (STEC campaign "SI8_CRC Lifecycle_DURING (4 Msg)"). Webhook event `21c3eb31-…` (received 2026-10-24, about two days after the reply) captured M1, M2 and his reply; inbound message `dede6f36-…` was bridged (`initial`, `succeeded`, attempt 1) into `lead_responses` **version 1** `d93a287a-b779-4543-8e7d-6c543a2b779f` (latest; `message_count` 2; after Message #2; Lead Responded; `drip_sequence`; no CSR notes; contains his reply text). The webhook rows' `processing_status = unmatched` comes from the legacy experiment-matching step, not the bridge. **Do not submit a manual CSR entry.** The 2026-10-26 follow-up was not yet in STEC at the time of the check (it postdates the last webhook) — outbound sync lag, not a missing inbound response.
 
+**STEC re-check (read-only, 2026-10-27, DB time 02:24 UTC) — CONFIRMED:** his 2026-10-27 reply (00:03 as displayed) was captured by webhook event `26253d80-…` (received 2026-10-26 16:50 UTC; a separate event `1b0d19b5-…` had captured the 2026-10-26 follow-up). Inbound message `041ac5d7-…` was bridged (`followup`, `succeeded`, attempt 1) into `lead_responses` **version 2** `85392b00-9c06-4e93-9f8c-381caec4b080` (parent `d93a287a-…`; latest; `message_count` 5; Lead Responded; no CSR notes; `conversation_raw` contains the reply verbatim). Version 1 `d93a287a-…` is now `is_latest_version = false`; these are the only two versions. **Do not submit a manual CSR entry.** The 2026-10-27 10:22 closing message was not yet in STEC (latest webhook from any campaign 2026-10-27 01:06 UTC) — outbound sync lag only.
+
 **Dates/times:** Dripify display times as supplied by the user. Timezone not verified; no UTC conversion is recorded here.
 
-**`next_action_date` choice:** 2026-10-31 is an **internal review checkpoint only** — five days after the follow-up, matching the MEDIUM practice. It is not a date Rodney agreed to and does not schedule any outbound message.
+**`next_action_date` choice:** 2026-10-31 is an **internal review checkpoint only** — five days after the follow-up, matching the MEDIUM practice. It is not a date Rodney agreed to and does not schedule any outbound message. *[Superseded 2026-10-27: he answered and the exchange was closed — checkpoint cleared; see Disposition below.]*
+
+**Disposition (2026-10-27):** discovery exchange **completed — no further proactive follow-up**. Stage set to `nurturing` (terminal, no open next action), following the B185 / B186 / B191 precedent for a closed conversation. This is **not** Closed Lost, a product rejection, disqualification, opt-out or blacklist: Product A was never pitched or offered, so nothing was rejected, and he can be re-engaged if he reaches out or circumstances change.
 
 ## Discovery interpretation (provisional)
 
 A reported **allocation-of-responsibility** finding — not direct evidence of commercial-use pain, and not a qualified commercial opportunity.
 
 - **CURRENT FACT (his own words):** he normally works with studios; he doesn't get too involved with the legal part; the studios handle it.
-- **Open discovery question:** the documentation handoff between AI artists and studios — whether studios ask him for AI-tool, licensing or source-material documentation. Asked 2026-10-26; **unanswered**.
-- **NOT ESTABLISHED:** that the studios perform comprehensive rights clearance; that any particular studio has a documented clearance process; that his AI-generated work is commercially cleared; that studios require a rights-and-clearances package for AI projects; any production delay, asset replacement, rights dispute or licensing failure; a personal need for Product A; that the studios are prospective Product A buyers; pilot interest, purchase intent, budget or buying authority.
-- **CRC / Product A:** `CRC_INTRODUCED=false` · `CRC_LINK_SENT=false` · `CRC_USAGE_VERIFIED=false`. No CRC link; Product A not named or offered.
+- **Discovery question — ANSWERED 2026-10-27:** the documentation handoff between AI artists and studios — whether studios ask him for AI-tool, licensing or source-material documentation. Asked 2026-10-26 *(previously recorded as unanswered)*. His answer: the studios "handle that themselves" because "they have legal teams that supervise what tools are used with what licences."
+- **REPORTED (his account of studio practice, not independently verified):** the studios he works with have legal teams that oversee which AI tools are used under which licences; in his reported workflow this oversight sits with studio legal, not with him as the AI artist.
+- **Commercial reading:** a **negative signal for an immediate Product A need from Rodney personally**. It is evidence about where responsibility sits in his reported workflow — **not** a Product A rejection (Product A was never pitched) and **not** proof that the studios have no need for external support.
+- **No further discovery question is outstanding.**
+- **NOT ESTABLISHED (updated 2026-10-27):** that any studio's clearance is comprehensive or legally sufficient; that every tool or output used is commercially authorized; that the studios maintain a particular documentation package; that Rodney never supplies any supporting documentation; that studio legal teams have no unmet needs; that Product A would or would not benefit these studios; that Rodney personally experiences rights-related production friction; that Rodney has rejected Product A. *Original list (2026-10-26):* that the studios perform comprehensive rights clearance; that any particular studio has a documented clearance process; that his AI-generated work is commercially cleared; that studios require a rights-and-clearances package for AI projects; any production delay, asset replacement, rights dispute or licensing failure; a personal need for Product A; that the studios are prospective Product A buyers; pilot interest, purchase intent, budget or buying authority.
+- **CRC / Product A:** `CRC_INTRODUCED=false` · `CRC_LINK_SENT=false` · `CRC_USAGE_VERIFIED=false`. No CRC link; Product A not named or offered — no pilot invitation and no rejection.
 
 ## Interaction log (reverse-chronological)
+
+### 2026-10-27 — closing message — SENT (10:22 as displayed in Dripify)
+
+Sent from Angel's account in the existing thread; shown as sent in the user-supplied Dripify transcript. Delivery or reading is not independently verified. Acknowledges his answer and closes the exchange; no question, no Product A, no CRC link.
+
+**Message sent (exact):**
+
+```
+Got it, Rodney — that makes sense. Sounds like the studios you work with already have legal teams overseeing AI tool and licensing decisions.
+
+That's really useful to know as we're exploring how different production teams handle this. Thanks for sharing your experience!
+```
+
+**`last_contacted`** = 2026-10-27. **Next step:** none — discovery exchange completed; no proactive follow-up.
+
+### 2026-10-27 — Rodney's second reply — inbound (00:03 as displayed)
+
+Inbound on LinkedIn / Dripify, answering the 2026-10-26 question. Logged verbatim — original lowercase "they", "cause" and "licences" preserved; no punctuation added.
+
+**Rodney (exact):**
+
+```
+they handle that themselves cause they have legal teams that supervise what tools are used with what licences
+```
 
 ### 2026-10-26 — manual follow-up — SENT (23:29 as displayed in Dripify)
 
@@ -64,7 +93,7 @@ Or do they generally handle all of that themselves?
 
 **`last_contacted`** = 2026-10-26.
 
-**Next step (internal review 2026-10-31):** check for his answer. No further follow-up decided; none is sent automatically.
+**Next step (internal review 2026-10-31):** check for his answer. No further follow-up decided; none is sent automatically. *[Superseded 2026-10-27: he answered at 00:03 and the exchange was closed at 10:22 — see above.]*
 
 ### 2026-10-22 — Rodney's reply — inbound (21:53 as displayed)
 
