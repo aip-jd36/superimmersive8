@@ -4,10 +4,8 @@ contacts:
   - name: "Sunil Thomas"
     role: "Film and Commercials Director (as displayed in Dripify)"
 slug: sunil-thomas
-stage: lead_responded
+stage: nurturing
 source: stec_campaign
-next_action: "Await Sunil's answer to the 2026-10-20 question (whether agencies/clients ask him for rights/clearances documentation covering AI tools, generated content or source materials); internal review checkpoint 2026-10-25; no automatic follow-up"
-next_action_date: 2026-10-25
 last_contacted: 2026-10-20
 blocked: false
 blocked_reason: null
@@ -24,16 +22,49 @@ Account record created 2026-10-14 (CRM ID **B181**) on graduation from the CRC L
 
 **Arm vs. follow-up treatment:** the randomized POST arm governs the automated M1–M4 sequence. The Oct 14 manual follow-up is observational discovery activity, not a randomized treatment, and does not change the arm assignment or experiment denominators. **Sequence state:** his individual Dripify lead sequence displayed **Paused** after his reply — a per-lead state, not the whole campaign. Do not resume it.
 
-**`next_action_date` choice (2026-10-20):** 2026-10-25 is an **internal review checkpoint only** — five days after the follow-up, matching the MEDIUM practice used for other leads (e.g. B189, B190, B191). It is not a date Sunil agreed to and does not schedule any outbound message.
+**`next_action_date` choice (2026-10-20):** 2026-10-25 is an **internal review checkpoint only** — five days after the follow-up, matching the MEDIUM practice used for other leads (e.g. B189, B190, B191). It is not a date Sunil agreed to and does not schedule any outbound message. *[Superseded 2026-10-27: he answered on 2026-10-20 and the exchange was closed — checkpoint cleared; see Disposition below.]*
+
+**Standing Encore (STEC) status — CONFIRMED auto-ingested, all three replies (read-only check, 2026-10-27, DB time 03:23 UTC):** POST campaign mapping active (`automation_enabled = true`, STEC campaign "SI8_CRC Lifecycle_POST (4 Msg)"). Identity matched by LinkedIn URL (`/in/sunil-thomas1`) and name. Each reply was bridged (`succeeded`, attempt 1) into its own `lead_responses` version:
+- v1 `5b09696d-5cde-49a6-9672-882d07be0a49` — 2026-10-12 reply (`initial`; webhook `33e38d1f-…`).
+- v2 `e63ee7b9-b04d-4f3a-be47-c074b6d4ad74` — 2026-10-14 reply (`followup`; webhook `2252fccc-…`).
+- **v3 `afec738c-f68b-44bb-a5a2-db637c406768` — 2026-10-20 reply** (`followup`; webhook `a4584ef0-…` received 2026-10-20 12:07 UTC; bridge event `f153eabf-…`; parent `e63ee7b9-…`; **latest**; `message_count` 6; Lead Responded; no CSR notes; `conversation_raw` ends with the 2026-10-20 15:05 follow-up and his reply verbatim).
+
+These are the only three versions. **Do not submit a manual CSR entry.**
+
+**Disposition (2026-10-27, internal SI8 decision):** Discovery exchange closed by SI8. No further outreach planned. Sunil reports that his producer handles the documentation workflow while he acts as director. No Product A pitch, rejection or introduction request. Stage set to `nurturing` (terminal, no open next action), following the B185 / B186 / B191 / B194 precedent for a closed conversation. This is **not** Closed Lost, a product rejection, disqualification, opt-out or blacklist; he can be re-engaged if he reaches out or circumstances change. `last_contacted` stays 2026-10-20 — no outbound message was sent after that date.
+
+## Discovery conclusion (2026-10-27)
+
+**Completed discovery with no demonstrated personal Product A need** — not a commercial rejection.
+
+- **CURRENT FACT (his own words, in sequence):** "I had no problems" (2026-10-12); "agency and client takes responsibility" (2026-10-14); "no idea, i have a producer that handles this im the director" (2026-10-20).
+- **REPORTED (his account, not verified):** a producer handles the documentation-related workflow on his projects; he works as the director; he does not know whether agencies or clients request AI rights/clearances documentation.
+- **2026-10-20 documentation-demand question:** answered — **unknown to him**; he points to his producer. Agency/client documentation demand therefore remains **not established** either way.
+- **NOT ESTABLISHED:** that the producer has completed adequate rights clearance; that the agency or client has verified commercial-use permissions; that a particular documentation package exists; that Sunil personally experiences licensing friction; that the producer has an unmet Product A need; that Sunil rejected Product A; that Sunil agreed to make an introduction (none was requested).
+- **CRC / Product A:** `CRC_INTRODUCED=false` · `CRC_LINK_SENT=false` · `CRC_USAGE_VERIFIED=false`. Product A never pitched; no pilot invitation.
 
 ## Interaction log (reverse-chronological)
+
+### 2026-10-27 — internal closure decision (no message sent)
+
+Discovery exchange closed by SI8. No further outreach planned. Sunil reports that his producer handles the documentation workflow while he acts as director. No Product A pitch, rejection or introduction request. No LinkedIn message was sent; the Dripify sequence was not resumed.
+
+### 2026-10-20 — Sunil's third reply — inbound (15:21 as displayed)
+
+Inbound on LinkedIn / Dripify, answering the 2026-10-20 15:05 follow-up below. Logged verbatim — lowercase "no", "i" and "im" preserved; no punctuation added. Logged 2026-10-27 from the user-supplied Dripify thread, and confirmed in STEC (v3 above).
+
+**Sunil (exact):**
+
+```
+no idea, i have a producer that handles this im the director
+```
 
 ### 2026-10-20 — manual follow-up — SENT (03:05 PM as displayed in Dripify)
 
 Sent from Angel's account in the existing thread; shown as sent in the user-supplied Dripify thread, 2026-10-20 (timezone not verified; delivery not independently verified). This is the reply to his 2026-10-14 answer.
 
 - **Follow-up treatment:** discovery question on agency/client documentation demand (closest existing label: WORKFLOW_DISCOVERY) — asks whether agencies or clients ask **him** for an AI equivalent of a traditional rights and clearances package (talent releases, music licenses, third-party asset permissions).
-- **Hypothesis tested — OPEN / UNTESTED:** that agencies/clients request AI-related rights and clearances documentation. Sunil has **not** answered. No request for, or delivery of, such a package is claimed.
+- **Hypothesis tested — OPEN / UNTESTED:** that agencies/clients request AI-related rights and clearances documentation. Sunil has **not** answered. *[Superseded 2026-10-27: answered 2026-10-20 15:21 — "no idea"; his producer handles it. Hypothesis remains untested for agencies/clients.]* No request for, or delivery of, such a package is claimed.
 - **Responsibility vs. evidence:** his 2026-10-14 statement is about **who takes responsibility** for commercial-use checks. This question is about **who supplies supporting evidence**. These are kept separate; it is not inferred that he personally supplies documentation or that the agency/client performs any specific verification.
 - **CRC / Product A:** `CRC_INTRODUCED=false` · `CRC_LINK_SENT=false` · `CRC_USAGE_VERIFIED=false`. No CRC link; no Product A proposition introduced. Attribution stays CRC Lifecycle R1 POST; not a Product A response or a CRC completion.
 
@@ -49,7 +80,7 @@ When you deliver AI-generated work, do they ever ask you for similar documentati
 
 **`last_contacted`** = 2026-10-20.
 
-**Next step (internal review 2026-10-25):** check for his answer. No further follow-up decided; none is sent automatically. Do not resume the paused sequence.
+**Next step (internal review 2026-10-25):** check for his answer. No further follow-up decided; none is sent automatically. Do not resume the paused sequence. *[Superseded 2026-10-27: he answered at 15:21; exchange closed — see above.]*
 
 ### 2026-10-14 — Sunil's reply to the manual follow-up — inbound (5:17 PM as displayed)
 
