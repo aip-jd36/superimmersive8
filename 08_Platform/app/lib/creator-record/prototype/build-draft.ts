@@ -24,7 +24,8 @@ import { buildDraftRecord, type DraftRecordView } from '../presentation/build-dr
 import { PILOT_CAVEATS, PILOT_DEPENDENCY_LABELS, PILOT_LEDGER_VERSION, PILOT_PUBLICATION_LEDGER } from '../pilot/pilot-ledger'
 import { PILOT_ACKNOWLEDGEMENTS, PILOT_MAX_TOOLS, PILOT_QUESTION_META, PILOT_REGISTRY_INPUT, PILOT_REGISTRY_VERSION, type PilotQuestionMeta } from '../pilot/pilot-registry'
 import type { TopicClaim } from '@/lib/retrieval-engine/types'
-import { formToObservations, validateForm, visibleQuestions, type CreatorRecordFormState, type FormConfig, type FormIssue } from './form'
+import { isStaleReview, toDocumentObservations, type ToolDocument } from '../evidence/document-observations'
+import { formToObservations, shownToolQuestionIds, validateForm, visibleQuestions, type CreatorRecordFormState, type FormConfig, type FormIssue } from './form'
 
 export interface CreatorRecordSources {
   kind: 'governed' | 'pilot'
@@ -80,6 +81,11 @@ export interface BuildDraftInput {
   topicClaims: TopicClaim[]
   as_of: string
   record: RecordContext
+  /**
+   * Documents the creator added (CR-V2-EVIDENCE-SLICE-1), already strictly
+   * parsed. DISPLAY-ONLY: they are never passed to the guidance pipeline.
+   */
+  documents?: readonly ToolDocument[]
 }
 
 export type BuildDraftResult =
@@ -88,11 +94,17 @@ export type BuildDraftResult =
 
 export function buildCreatorRecordDraft(input: BuildDraftInput): BuildDraftResult {
   const config = loadFormConfig(input.sources)
+  const documents = input.documents ?? []
   const issues = validateForm(config, input.state)
+  // An "adopted" review must still describe the creator's current answer; otherwise refuse rather than record it as adopted.
+  for (const d of documents) {
+    if (isStaleReview(d, (input.state.tools[d.tool_index]?.T3 ?? [])[0])) issues.push({ q_id: 'T3', tool_index: d.tool_index, issue: 'stale_document_review' })
+  }
   if (issues.length > 0) return { ok: false, issues }
 
   const { observations, discarded } = formToObservations(config, input.state, input.record)
   const labels = input.sources.dependency_labels
+  // Only customer declarations reach the guidance pipeline. Documents are not an input.
   const guidance = runCreatorRecordGuidance({
     observations,
     topicClaims: input.topicClaims,
@@ -107,7 +119,7 @@ export function buildCreatorRecordDraft(input: BuildDraftInput): BuildDraftResul
     state: input.state,
     presentation: input.sources.presentation,
     question_order: Array.from(config.registry.questions.keys()),
-    shown: { single: shown.single.map((q) => q.q_id), per_tool: shown.per_tool.map((q) => q.q_id) },
+    shown: { single: shown.single.map((q) => q.q_id), per_tool: shownToolQuestionIds(config, input.state) },
     observations,
     discarded,
     guidance,
@@ -117,6 +129,8 @@ export function buildCreatorRecordDraft(input: BuildDraftInput): BuildDraftResul
     record: { record_id: input.record.record_id, version: input.record.record_version, prepared_on: input.as_of },
     versions: { ...input.sources.versions, as_of: input.as_of },
     pilot: input.sources.kind === 'pilot',
+    documents,
+    document_observations: documents.flatMap((d) => toDocumentObservations(input.record, d)),
   })
   return { ok: true, view, guidance }
 }

@@ -6,13 +6,19 @@
  * returned draft record. "Edit answers" returns to the questionnaire with the
  * previous answers, so a changed answer produces a fresh draft. No state is
  * stored anywhere but this component.
+ *
+ * CR-V2-EVIDENCE-SLICE-1: a document added to a tool block is sent to the
+ * admin examine route, which returns what it appears to show; the creator's
+ * review of it travels with the answers to the draft route for display only.
+ * Nothing is kept anywhere but this component's memory (a reload clears it).
  */
 
 import { useState } from 'react'
-import { CreatorRecordQuestionnaire } from '@/components/creator-record/CreatorRecordQuestionnaire'
+import { CreatorRecordQuestionnaire, type ExamineResult } from '@/components/creator-record/CreatorRecordQuestionnaire'
 import { DraftRecordView } from '@/components/creator-record/DraftRecordView'
 import { PILOT_ACKNOWLEDGEMENTS, PILOT_MAX_TOOLS, PILOT_QUESTION_META, PILOT_REGISTRY_INPUT } from '@/lib/creator-record/pilot/pilot-registry'
 import type { DraftRecordView as View } from '@/lib/creator-record/presentation/build-draft-record'
+import type { ExtractionMode, ToolDocument } from '@/lib/creator-record/evidence/document-observations'
 import type { CreatorRecordFormState, FormIssue } from '@/lib/creator-record/prototype/form'
 import { T } from '@/lib/creator-record/presentation/templates'
 
@@ -25,8 +31,30 @@ const SECTION_TITLES: Record<string, string> = {
   contribution: 'Your contribution',
 }
 
-export function CreatorRecordPrototypeClient() {
+export interface PrototypeClientProps {
+  planSuggestions: Record<string, string[]>
+  examinationMode: ExtractionMode
+}
+
+async function examineDocument(toolIndex: number, file: File): Promise<ExamineResult> {
+  const body = new FormData()
+  body.append('file', file)
+  body.append('tool_index', String(toolIndex))
+  try {
+    const res = await fetch('/api/admin/creator-record-v2/examine', { method: 'POST', body })
+    const data = await res.json().catch(() => null)
+    if (res.ok && data?.ok && data.document) return { ok: true, document: data.document }
+    if (res.status === 401 || res.status === 403) return { ok: false, error: 'You do not have access to this prototype.' }
+    if (res.status === 413) return { ok: false, error: 'This file is larger than the 4 MB limit.' }
+    return { ok: false, error: 'The document could not be examined. Please try again.' }
+  } catch {
+    return { ok: false, error: 'The document could not be examined. Please try again.' }
+  }
+}
+
+export function CreatorRecordPrototypeClient({ planSuggestions, examinationMode }: PrototypeClientProps) {
   const [lastState, setLastState] = useState<CreatorRecordFormState | undefined>(undefined)
+  const [lastDocuments, setLastDocuments] = useState<ToolDocument[]>([])
   const [view, setView] = useState<View | null>(null)
   const [issues, setIssues] = useState<FormIssue[]>([])
   const [submitting, setSubmitting] = useState(false)
@@ -36,6 +64,7 @@ export function CreatorRecordPrototypeClient() {
   const startNewTest = () => {
     setView(null)
     setLastState(undefined)
+    setLastDocuments([])
     setIssues([])
     setError(null)
     setFormKey((k) => k + 1)
@@ -43,12 +72,17 @@ export function CreatorRecordPrototypeClient() {
   }
   const buttonClass = 'rounded-md border px-4 py-2 text-sm font-medium bg-white'
 
-  const submit = async (state: CreatorRecordFormState) => {
+  const submit = async (state: CreatorRecordFormState, documents: ToolDocument[]) => {
     setSubmitting(true)
     setError(null)
     setLastState(state)
+    setLastDocuments(documents)
     try {
-      const res = await fetch('/api/admin/creator-record-v2/draft', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(state) })
+      const res = await fetch('/api/admin/creator-record-v2/draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...state, documents }),
+      })
       const data = await res.json().catch(() => null)
       if (res.status === 422 && data?.issues) {
         setIssues(data.issues)
@@ -107,9 +141,13 @@ export function CreatorRecordPrototypeClient() {
         sectionTitles={SECTION_TITLES}
         acknowledgements={PILOT_ACKNOWLEDGEMENTS}
         maxTools={PILOT_MAX_TOOLS}
+        planSuggestions={planSuggestions}
+        examinationMode={examinationMode}
         initialState={lastState}
+        initialDocuments={lastDocuments}
         submitting={submitting}
         issues={issues}
+        onExamine={examineDocument}
         onSubmit={submit}
       />
     </div>

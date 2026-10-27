@@ -26,7 +26,7 @@ const ARTLIST = 'CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1'
 const RECORD = { record_id: 'UAT-TEST', record_version: 1, captured_at: '2026-10-26T00:00:00Z' }
 const base = (over: Partial<CreatorRecordFormState> = {}): CreatorRecordFormState => ({
   answers: { P1: ['Night Market'], P3: ['own_channels'], F1: ['TW'], F2: ['online_worldwide'], L1: ['no'], M0: ['none'], H1: ['wrote_script', 'edited'] },
-  tools: [{ T1: ['Pika'], T3: ['Pro'], T4: ['March–May 2026'] }],
+  tools: [{ T1: ['pika'], T3: ['Pro'], T4: ['March–May 2026'] }],
   acknowledgements: { A1: true, A2: true },
   ...over,
 })
@@ -84,7 +84,7 @@ describe('1. normal questionnaire-to-record journey (Pika, Pro plan)', () => {
 describe('2. changing an earlier answer', () => {
   test('changing the plan from Pro to Standard changes which plan guidance is shown', () => {
     const pro = draft(base())
-    const std = draft(base({ tools: [{ T1: ['Pika'], T3: ['Standard'], T4: ['May 2026'] }] }))
+    const std = draft(base({ tools: [{ T1: ['pika'], T3: ['Standard'], T4: ['May 2026'] }] }))
     expect(cardIds(pro)).toContain(PIKA_PRO)
     expect(cardIds(std)).toEqual([PIKA_BASE, PIKA_STD])
     expect(std.view.not_shown.lines).toContain('Pika (AI tool): not included, because on what you told us this guidance concerns a different Pika plan (“Pro”).')
@@ -112,7 +112,7 @@ describe('2. changing an earlier answer', () => {
 
 describe('3. missing or conflicting subscription-plan information', () => {
   test('plan "Not sure": baseline shown; every paid-plan claim held unresolved and says which plan it is about', () => {
-    const r = draft(base({ tools: [{ T1: ['Pika'], T3: ['not_sure'], T4: ['May 2026'] }] }))
+    const r = draft(base({ tools: [{ T1: ['pika'], T3: ['not_sure'], T4: ['May 2026'] }] }))
     expect(cardIds(r).sort()).toEqual([PIKA_BASE, PIKA_STD, PIKA_PRO, PIKA_FANCY].sort())
     for (const id of [PIKA_STD, PIKA_PRO, PIKA_FANCY]) expect(card(r, id).conclusion).toBe('relevant_applicability_unresolved')
     expect(card(r, PIKA_PRO).depends_on).toEqual(['This guidance is about the Pika “Pro” plan. You did not tell us which Pika plan you were on.'])
@@ -121,13 +121,13 @@ describe('3. missing or conflicting subscription-plan information', () => {
   })
 
   test('a plan name no guidance refers to is not used, and the record says so', () => {
-    const r = draft(base({ tools: [{ T1: ['Pika'], T3: ['Ultra Max'], T4: ['May 2026'] }] }))
+    const r = draft(base({ tools: [{ T1: ['pika'], T3: ['Ultra Max'], T4: ['May 2026'] }] }))
     expect(r.view.declarations.groups.find((g) => g.id === 'tools')!.rows[1].note).toBe(T.plan_not_a_plan_name)
     expect(card(r, PIKA_PRO).depends_on).toEqual(['This guidance is about the Pika “Pro” plan. The plan name you gave (“Ultra Max”) is not one this guidance refers to.'])
   })
 
   test('two different plans for the same tool: neither is used; plan claims held unresolved', () => {
-    const r = draft(base({ tools: [{ T1: ['Pika'], T3: ['Pro'], T4: ['May 2026'] }, { T1: ['Pika'], T3: ['Standard'], T4: ['May 2026'] }] }))
+    const r = draft(base({ tools: [{ T1: ['pika'], T3: ['Pro'], T4: ['May 2026'] }, { T1: ['pika'], T3: ['Standard'], T4: ['May 2026'] }] }))
     expect(r.guidance.facts.provenance.plans.every((p) => !p.passed_to_applicability)).toBe(true)
     for (const id of [PIKA_STD, PIKA_PRO, PIKA_FANCY]) expect(card(r, id).conclusion).toBe('relevant_applicability_unresolved')
     expect(card(r, PIKA_PRO).depends_on).toEqual(['This guidance is about the Pika “Pro” plan. You gave more than one plan for Pika.'])
@@ -159,7 +159,7 @@ describe('4. claims that are not applicable on what the creator told us', () => 
 
 describe('5. claims without Creator Record publication authorization', () => {
   test('Runway and Higgsfield have no pilot entry: their guidance never reaches BI and the record says none is approved yet', () => {
-    const r = draft(base({ tools: [{ T1: ['Runway'], T3: ['Standard'], T4: ['May 2026'] }, { T1: ['Higgsfield'], T3: ['not_sure'], T4: ['May 2026'] }] }))
+    const r = draft(base({ tools: [{ T1: ['runway-gen3'], T3: ['Standard'], T4: ['May 2026'] }, { T1: ['higgsfield'], T3: ['not_sure'], T4: ['May 2026'] }] }))
     expect(r.view.guidance.cards).toEqual([])
     expect(r.view.guidance.empty).toBe(T.guidance_none)
     const refused = r.view.trace.objectives.flatMap((o) => o.refused_before_bi)
@@ -176,10 +176,13 @@ describe('5. claims without Creator Record publication authorization', () => {
   })
 
   test('an unrecognized tool name contributes nothing and is reported', () => {
-    const r = draft(base({ tools: [{ T1: ['Vidmagic 9000'], T3: ['Pro'], T4: ['May 2026'] }] }))
+    const r = draft(base({ tools: [{ T1: ['other_tool'], T1X: ['Vidmagic 9000'], T3: ['Pro'], T4: ['May 2026'] }] }))
     expect(r.view.guidance.cards).toEqual([])
     expect(r.view.not_shown.lines).toContain('“Vidmagic 9000”: SI8 did not recognize this name, so no guidance about it is included.')
-    expect(r.view.declarations.groups.find((g) => g.id === 'tools')!.rows[0].note).toBe(T.tool_not_recognized)
+    // CR-V2-EVIDENCE-SLICE-1: the tool is chosen as "not listed" and its name is kept exactly as typed.
+    const rows = r.view.declarations.groups.find((g) => g.id === 'tools')!.rows
+    expect(rows[0].note).toBe(T.tool_not_listed)
+    expect(rows[1]).toEqual(expect.objectContaining({ value: 'Vidmagic 9000', note: T.tool_not_recognized }))
   })
 
   test('the AUTHORITATIVE ledger is empty and fails closed: the same declarations publish nothing', () => {
@@ -208,7 +211,7 @@ describe('5. claims without Creator Record publication authorization', () => {
 })
 
 describe('6. missing evidence and unresolved dependencies', () => {
-  const r = draft(withAnswers({ M0: ['music', 'stock'], M1: ['Artlist'], M2: ['yes'], M3: ['Getty Images'], M3D: ['yes'] }))
+  const r = draft(withAnswers({ M0: ['music', 'stock'], M1: ['artlist'], M2: ['yes'], M3: ['getty'], M3D: ['yes'] }))
 
   test('Getty and Artlist guidance is shown capped at "may be relevant", with every dependency open', () => {
     expect(card(r, GETTY).conclusion).toBe('relevant_applicability_unresolved')
@@ -246,7 +249,7 @@ describe('6. missing evidence and unresolved dependencies', () => {
 
 describe('7. multi-tool records (BI narrows per objective)', () => {
   test('one unresolved claim in an objective holds every claim in that objective at "may be relevant"', () => {
-    const r = draft(base({ tools: [{ T1: ['Pika'], T3: ['Pro'], T4: ['May 2026'] }, { T1: ['Kling'], T3: ['Standard'], T4: ['May 2026'] }] }))
+    const r = draft(base({ tools: [{ T1: ['pika'], T3: ['Pro'], T4: ['May 2026'] }, { T1: ['kling'], T3: ['Standard'], T4: ['May 2026'] }] }))
     expect(cardIds(r)).toEqual(expect.arrayContaining([PIKA_BASE, PIKA_PRO, KLING_BASE, KLING_MEMBER]))
     expect(r.view.guidance.cards.every((c) => c.conclusion === 'relevant_applicability_unresolved')).toBe(true)
     expect(card(r, KLING_MEMBER).depends_on).toEqual(['This guidance is about a Kling account type (“Member Account”). This record does not ask about account types.'])

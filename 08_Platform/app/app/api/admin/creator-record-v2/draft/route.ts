@@ -8,7 +8,9 @@
  *
  * No database read or write beyond the admin check, no upload, no payment,
  * no email, no PDF, no AI model call, no persistence: the draft exists only
- * in the response.
+ * in the response. Documents examined earlier (CR-V2-EVIDENCE-SLICE-1,
+ * `../examine`) come back in the body, are re-validated strictly, and are
+ * only displayed; they never reach the guidance pipeline.
  *
  * Authorization reuses the existing fail-closed admin gate
  * (`checkReviewerContextAccess`: authenticated user with `users.is_admin`),
@@ -21,6 +23,7 @@ import { checkReviewerContextAccess } from '@/lib/reviewer-context/auth'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { buildCreatorRecordDraft, pilotSources } from '@/lib/creator-record/prototype/build-draft'
 import { MAX_BODY_BYTES, parseFormState } from '@/lib/creator-record/prototype/parse-form-state'
+import { verifyReturnedDocuments } from '@/lib/creator-record/evidence/verify-returned-documents'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,6 +41,8 @@ export async function POST(req: NextRequest) {
   }
   const parsed = parseFormState(body)
   if (!parsed.ok) return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+  // Returned documents are checked against SI8's own replay table, never trusted as sent.
+  if (!verifyReturnedDocuments(parsed.documents)) return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
 
   const now = new Date()
   const result = buildCreatorRecordDraft({
@@ -46,6 +51,7 @@ export async function POST(req: NextRequest) {
     topicClaims: TOPIC_CLAIMS_FIXTURE,
     as_of: now.toISOString().slice(0, 10),
     record: { record_id: `PROTOTYPE-${randomUUID().slice(0, 8).toUpperCase()}`, record_version: 1, captured_at: now.toISOString() },
+    documents: parsed.documents,
   })
   if (!result.ok) return NextResponse.json({ ok: false, issues: result.issues }, { status: 422 })
   return NextResponse.json({ ok: true, view: result.view })

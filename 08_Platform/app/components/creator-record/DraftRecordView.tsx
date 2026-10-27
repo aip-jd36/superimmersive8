@@ -79,6 +79,30 @@ export function DraftRecordView({ view, showTrace = false }: { view: View; showT
         ))}
       </Section>
 
+      <Section id="documents" title={T.section_documents}>
+        <p className="text-sm mb-4" style={{ color: MUTED }}>{view.documents.intro}</p>
+        {view.documents.empty && <p className="text-sm">{view.documents.empty}</p>}
+        {view.documents.items.map((d) => (
+          <article key={d.document_id} aria-labelledby={`doc-${d.document_id}`} data-document-id={d.document_id} className="mb-4 rounded-md border p-4" style={{ borderColor: LINE }}>
+            <h3 id={`doc-${d.document_id}`} className="text-sm font-semibold">{d.heading}</h3>
+            <dl className="text-xs mt-2">
+              {d.rows.map((r) => (
+                <div key={r.label} className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-4 py-1 border-b" style={{ borderColor: LINE }}>
+                  <dt style={{ color: MUTED }}>{r.label}</dt>
+                  <dd className="sm:col-span-2 break-words">
+                    {r.value}
+                    {r.note && <span className="block mt-0.5" style={{ color: MUTED }}>{r.note}</span>}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            {d.notes.map((n) => <p key={n} className="text-xs mt-2">{n}</p>)}
+            <Field label="Your choice">{d.review}</Field>
+            <p className="text-xs mt-2" style={{ color: MUTED }}>{d.not_compared}</p>
+          </article>
+        ))}
+      </Section>
+
       <Section id="guidance" title={T.section_guidance}>
         <p className="text-sm mb-4" style={{ color: MUTED }}>{view.guidance.intro}</p>
         {view.guidance.empty && <p className="text-sm">{view.guidance.empty}</p>}

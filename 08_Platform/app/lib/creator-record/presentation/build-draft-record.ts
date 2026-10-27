@@ -7,22 +7,30 @@
  *     composition items, their dependency rows, omissions, and the per-
  *     objective trace — never re-derived here;
  *   - ledger explanations, labels, evidence notes and caveats (passed in);
- *   - the fixed templates in `./templates`.
+ *   - the fixed templates in `./templates`;
+ *   - (CR-V2-EVIDENCE-SLICE-1) the documents the creator added, shown ONLY
+ *     as what each appears to show, beside — never compared with — the
+ *     creator's answers.
  * It never evaluates applicability, never reads Bounded Interpretation prose,
  * and never upgrades a conclusion: the conclusion label is a fixed mapping of
- * composition's own (already narrowed) conclusion.
+ * composition's own (already narrowed) conclusion. Documents cannot change a
+ * conclusion: guidance is computed before this module and only from
+ * declarations.
  *
  * Statement types are kept apart, as the PRD requires (v0.3 §4.1):
- * declarations / guidance / open items and missing evidence / matters for
- * independent review / what SI8 did not do.
+ * declarations / documents / guidance / open items and missing evidence /
+ * matters for independent review / what SI8 did not do.
  */
 
 import type { CreatorRecordConclusion, GuidanceItem } from '../contract/compose'
-import type { DeclaredObservation } from '../contract/provenance'
+import type { DeclaredObservation, DocumentObservation } from '../contract/provenance'
+import type { ToolDocument } from '../evidence/document-observations'
 import type { CreatorRecordGuidanceResult } from '../integration/run-creator-record-guidance'
 import type { ApplicabilityRequirement, TopicClaim } from '@/lib/retrieval-engine/types'
 import type { CreatorRecordFormState, DiscardedAnswer, QuestionPresentation } from '../prototype/form'
 import { toolInstance } from '../prototype/form'
+import { identityLabel, OTHER_PROVIDER, OTHER_TOOL } from '../identity/selectable-identities'
+import { DOCUMENT_FIELDS } from '../evidence/document-observations'
 import { T } from './templates'
 
 export interface DraftRow {
@@ -63,12 +71,22 @@ export interface DraftOpenItem {
   for_guidance: string[]
 }
 
+export interface DraftDocument {
+  document_id: string
+  heading: string
+  rows: DraftRow[]
+  notes: string[]
+  review: string
+  not_compared: string
+}
+
 export interface DraftRecordView {
   pilot: boolean
   banner: { title: string; lines: string[] } | null
   header: { title: string; record_title: string; record_id: string; version: number; prepared_on: string; status: string }
   summary: string[]
   declarations: { intro: string; groups: DraftDeclarationGroup[] }
+  documents: { intro: string; items: DraftDocument[]; empty: string | null }
   guidance: { intro: string; cards: DraftGuidanceCard[]; empty: string | null }
   open_items: { intro: string; items: DraftOpenItem[]; empty: string | null; documents_mentioned: DraftRow[] }
   not_shown: { intro: string; lines: string[] }
@@ -82,6 +100,9 @@ export interface DraftRecordView {
     governance_gaps: CreatorRecordGuidanceResult['governance_gaps']
     dropped_facts: CreatorRecordGuidanceResult['facts']['provenance']['dropped']
     discarded_answers: DiscardedAnswer[]
+    /** Display-only document observations. None of them was an input to guidance. */
+    document_observations: DocumentObservation[]
+    document_reviews: { document_id: string; tool_index: number; decision: string; adopted_value: string | null }[]
   }
 }
 
@@ -90,8 +111,8 @@ export interface DraftRecordInput {
   presentation: Readonly<Record<string, QuestionPresentation & { section: string; text: string }>>
   /** Question order (registry order). */
   question_order: readonly string[]
-  /** Questions shown at submission; anything else is "not asked". */
-  shown: { single: readonly string[]; per_tool: readonly string[] }
+  /** Questions shown at submission; anything else is "not asked". `per_tool` is per tool block. */
+  shown: { single: readonly string[]; per_tool: readonly (readonly string[])[] }
   observations: readonly DeclaredObservation[]
   discarded: readonly DiscardedAnswer[]
   guidance: CreatorRecordGuidanceResult
@@ -101,10 +122,15 @@ export interface DraftRecordInput {
   record: { record_id: string; version: number; prepared_on: string }
   versions: { registry: string; ledger: string; as_of: string }
   pilot: boolean
+  /** Documents the creator added, already validated. Display-only. */
+  documents?: readonly ToolDocument[]
+  document_observations?: readonly DocumentObservation[]
 }
 
 const EXISTENCE_QUESTIONS = new Set(['L3', 'M2', 'M3D', 'M4'])
 const SECTION_ORDER = ['project', 'locations', 'tools', 'people', 'materials', 'contribution']
+/** Free-text names typed for something not in SI8's lists. Kept verbatim; never resolved. */
+const UNLISTED_NAME_QUESTIONS = new Set(['T1X', 'M1X', 'M3X'])
 
 function existenceSentence(value: string | undefined): string {
   switch (value) {
@@ -121,18 +147,24 @@ function existenceSentence(value: string | undefined): string {
 
 function answerText(p: QuestionPresentation, values: readonly string[] | undefined): string {
   if (!values || values.length === 0 || values.every((v) => v.trim() === '')) return T.not_answered
-  if (p.input === 'text' || p.input === 'textarea') return values[0] === 'not_sure' ? 'Not sure' : values[0].trim()
+  if (p.input === 'text' || p.input === 'textarea' || p.input === 'plan') return values[0] === 'not_sure' ? 'Not sure' : values[0].trim()
   return values.map((v) => p.option_labels[v] ?? v).join('; ')
+}
+
+function providerNote(value: string | undefined): string | undefined {
+  if (value === OTHER_PROVIDER) return T.provider_not_listed
+  return undefined
 }
 
 export function buildDraftRecord(input: DraftRecordInput): DraftRecordView {
   const { guidance, state } = input
   const prov = guidance.facts.provenance
   const claimsById = new Map(input.topicClaims.map((c) => [c.claim_id, c]))
+  const documents = input.documents ?? []
 
-  // Names as the creator typed them, per canonical id.
-  const toolName = (id: string) => prov.tools.find((t) => t.tool_id === id)?.declared ?? id
-  const providerName = (id: string) => prov.providers.find((p) => p.provider_id === id)?.declared ?? id
+  // Canonical identities are named by their display label; anything else as declared.
+  const toolName = (id: string) => (identityLabel(id) !== id ? identityLabel(id) : prov.tools.find((t) => t.tool_id === id)?.declared ?? id)
+  const providerName = (id: string) => (identityLabel(id) !== id ? identityLabel(id) : prov.providers.find((p) => p.provider_id === id)?.declared ?? id)
   const subjectOf = (claim: TopicClaim | undefined): string => {
     if (!claim) return T.subject_general
     const tool = (claim.tool_scope ?? []).find((t) => prov.tools.some((x) => x.tool_id === t))
@@ -150,12 +182,18 @@ export function buildDraftRecord(input: DraftRecordInput): DraftRecordView {
       state.tools.forEach((t, i) => {
         const instance = toolInstance(i)
         const toolRec = prov.tools.find((x) => x.instance === instance)
-        for (const q_id of input.shown.per_tool) {
+        const adopted = documents.some((d) => d.tool_index === i && d.review.decision === 'adopted')
+        for (const q_id of input.shown.per_tool[i] ?? []) {
           const p = input.presentation[q_id]
           const value = answerText(p, t[q_id])
           let note: string | undefined
-          if (q_id === 'T1') note = toolRec?.tool_id ? T.tool_recognized(toolName(toolRec.tool_id)) : T.tool_not_recognized
+          if (q_id === 'T1') {
+            const code = (t.T1 ?? [])[0]
+            note = toolRec?.tool_id ? T.tool_recognized(toolName(toolRec.tool_id)) : code === OTHER_TOOL ? T.tool_not_listed : code === 'not_sure' ? T.tool_unsure : T.tool_not_recognized
+          }
+          if (q_id === 'T1X') note = T.tool_not_recognized
           if (q_id === 'T3' && toolRec?.tool_id) note = planNote(prov, instance, t[q_id])
+          if (q_id === 'T3' && adopted) note = note ? `${note} ${T.plan_adopted_note}` : T.plan_adopted_note
           rows.push({ label: `${T.tool_heading(i + 1)} — ${p.text}`, value, ...(note ? { note } : {}) })
         }
       })
@@ -166,12 +204,20 @@ export function buildDraftRecord(input: DraftRecordInput): DraftRecordView {
         const values = state.answers[q_id]
         const row: DraftRow = { label: p.text, value: answerText(p, values) }
         if (EXISTENCE_QUESTIONS.has(q_id) && values && values.length > 0) row.note = existenceSentence(values[0])
+        if ((q_id === 'M1' || q_id === 'M3') && values && values.length > 0) {
+          const n = providerNote(values[0])
+          if (n) row.note = n
+        }
+        if (UNLISTED_NAME_QUESTIONS.has(q_id) && values && values.length > 0) row.note = T.provider_not_recognized
         rows.push(row)
       }
     }
     if (rows.length === 0) continue
     groups.push({ id: section, heading: T.declaration_group[section], rows, ...(section === 'locations' ? { note: T.locations_note } : {}) })
   }
+
+  // ── Documents (display-only; never an input to guidance) ──
+  const documentItems: DraftDocument[] = documents.map((d) => documentView(d))
 
   // ── Guidance ──
   const cards: DraftGuidanceCard[] = guidance.composition.items.map((item) => guidanceCard(item, claimsById.get(item.claim_id), subjectOf, toolName, prov, input))
@@ -211,6 +257,11 @@ export function buildDraftRecord(input: DraftRecordInput): DraftRecordView {
   const shownIds = new Set(guidance.composition.items.map((i) => i.claim_id))
   for (const t of prov.tools) if (t.tool_id === null && t.declared.trim() !== '' && t.declared !== 'not_sure') add(T.not_shown_unrecognized(t.declared))
   for (const p of prov.providers) if (p.provider_id === null && p.declared.trim() !== '' && p.declared !== 'not_sure') add(T.not_shown_unrecognized(p.declared))
+  // Names typed for a tool or service not in SI8's lists (kept exactly as typed).
+  state.tools.forEach((t, i) => {
+    if ((input.shown.per_tool[i] ?? []).includes('T1X') && (t.T1X ?? []).some((v) => v.trim() !== '')) add(T.not_shown_unrecognized(t.T1X[0].trim()))
+  })
+  for (const q of ['M1X', 'M3X']) if (input.shown.single.includes(q) && (state.answers[q] ?? []).some((v) => v.trim() !== '')) add(T.not_shown_unrecognized(state.answers[q][0].trim()))
   for (const tr of guidance.objectives) {
     for (const id of tr.excluded_not_met) {
       const claim = claimsById.get(id)
@@ -238,23 +289,29 @@ export function buildDraftRecord(input: DraftRecordInput): DraftRecordView {
 
   const title = answerText(input.presentation.P1 ?? { q_id: 'P1', input: 'text', required: true, per_tool: false, option_labels: {}, allow_not_sure: false }, state.answers.P1)
 
+  const anyLive = documents.some((d) => d.document.extraction_mode === 'live_model' && d.document.model_calls > 0)
+  const bannerSecond = documents.length === 0 ? T.record_banner_no_files : anyLive ? T.record_banner_files_live : T.record_banner_files_replay
+  const documentMethod = documentMethodRow(documents)
+
   return {
     pilot: input.pilot,
-    banner: input.pilot ? { title: T.prototype_banner_title, lines: [...T.prototype_banner_lines] } : null,
+    banner: input.pilot ? { title: T.prototype_banner_title, lines: [T.record_banner_pilot, bannerSecond] } : null,
     header: { title, record_title: T.record_title, record_id: input.record.record_id, version: input.record.version, prepared_on: input.record.prepared_on, status: T.status_draft },
     summary: [T.summary_intro, T.summary_counts(cards.length, openItems.length), T.summary_not_assessment],
     declarations: { intro: T.declarations_intro, groups },
+    documents: { intro: T.documents_intro, items: documentItems, empty: documentItems.length === 0 ? T.documents_none : null },
     guidance: { intro: T.guidance_intro, cards, empty: cards.length === 0 ? T.guidance_none : null },
     open_items: { intro: T.open_items_intro, items: openItems, empty: openItems.length === 0 ? T.open_none : null, documents_mentioned: documentsMentioned },
     not_shown: { intro: T.not_shown_intro, lines: notShown.length > 0 ? notShown : [T.not_shown_none] },
     independent_review: { intro: T.independent_review_intro, lines: review },
-    not_done: [...T.not_done],
+    not_done: documents.length > 0 ? [...T.not_done, T.not_done_documents] : [...T.not_done],
     method: [
       { label: T.method_record, value: `${input.record.record_id} v${input.record.version}` },
       { label: T.method_registry, value: input.versions.registry },
       { label: T.method_ledger, value: input.versions.ledger },
       { label: T.method_as_of, value: input.versions.as_of },
       { label: T.method_engine, value: T.method_engine_value },
+      ...(documentMethod ? [documentMethod] : []),
     ],
     trace: {
       objectives: guidance.objectives,
@@ -262,8 +319,55 @@ export function buildDraftRecord(input: DraftRecordInput): DraftRecordView {
       governance_gaps: guidance.governance_gaps,
       dropped_facts: prov.dropped,
       discarded_answers: [...input.discarded],
+      document_observations: [...(input.document_observations ?? [])],
+      document_reviews: documents.map((d) => ({ document_id: d.document.document_id, tool_index: d.tool_index, decision: d.review.decision, adopted_value: d.review.adopted_value })),
     },
   }
+}
+
+function documentMethodRow(documents: readonly ToolDocument[]): DraftRow | null {
+  const examined = documents.filter((d) => d.document.outcome === 'document_examined')
+  if (examined.length === 0) return null
+  const values = Array.from(
+    new Set(
+      examined.map((d) =>
+        d.document.extraction_mode === 'live_model'
+          ? T.method_documents_live(d.document.versions.schema, d.document.versions.prompt ?? '')
+          : T.method_documents_replay(d.document.versions.schema, d.document.versions.replay_set ?? ''),
+      ),
+    ),
+  )
+  return { label: T.method_documents, value: values.join('; ') }
+}
+
+function documentView(td: ToolDocument): DraftDocument {
+  const d = td.document
+  const rows: DraftRow[] = [{ label: T.doc_fingerprint_label, value: d.sha256, note: T.doc_fingerprint_note }]
+  const notes: string[] = []
+  if (d.outcome !== 'document_examined' || !d.extraction) {
+    rows.push({ label: T.doc_read_label, value: T.doc_not_read[d.reason ?? 'model_error'] ?? T.doc_not_read.model_error })
+  } else {
+    const ex = d.extraction
+    rows.push({ label: T.doc_read_label, value: d.extraction_mode === 'fixture_replay' ? T.doc_read_replay : T.doc_read_live(d.model_calls) })
+    rows.push({ label: T.doc_type_label, value: T.doc_type[ex.document_type] ?? T.doc_type.unknown })
+    rows.push({ label: T.doc_readability_label, value: T.doc_readability[ex.readability] ?? ex.readability })
+    for (const name of DOCUMENT_FIELDS) {
+      const f = ex[name]
+      const row: DraftRow =
+        f.status === 'present'
+          ? { label: T.doc_field_label[name], value: T.doc_field_present(f.value as string), ...(f.evidence ? { note: T.doc_field_excerpt(f.evidence) } : {}) }
+          : { label: T.doc_field_label[name], value: T.doc_field_status[f.status] }
+      if (name === 'issuer_name' && f.status === 'present') row.note = row.note ? `${row.note} ${T.doc_issuer_note}` : T.doc_issuer_note
+      rows.push(row)
+    }
+    rows.push({ label: T.doc_plan_names_label, value: ex.plan_candidates.length > 0 ? ex.plan_candidates.map((c) => `“${c.text}”`).join('; ') : T.doc_plan_names_none })
+    if (ex.multiple_plans_shown) notes.push(T.doc_multiple_plans)
+    if (ex.instruction_like_text_present) notes.push(T.doc_instruction_text)
+  }
+  const r = td.review
+  const review =
+    r.decision === 'adopted' ? T.doc_review.adopted(r.adopted_value as string) : r.decision === 'entered_different' ? T.doc_review.entered_different : r.decision === 'ignored' ? T.doc_review.ignored : T.doc_review.not_reviewed
+  return { document_id: d.document_id, heading: T.doc_heading(td.tool_index + 1, d.file_name), rows, notes, review, not_compared: T.doc_not_compared }
 }
 
 type Prov = CreatorRecordGuidanceResult['facts']['provenance']

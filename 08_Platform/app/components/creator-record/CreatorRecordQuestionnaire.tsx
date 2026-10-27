@@ -6,14 +6,30 @@
  *
  * Generic: it renders whatever the supplied registry and presentation define.
  * Which questions are shown is decided ONLY by the contract's
- * `eligibleQuestions()` (via `visibleQuestions`), recomputed on every change,
- * so changing an earlier answer hides dependent questions immediately. It
- * holds no governance, applicability or guidance logic.
+ * `eligibleQuestions()` (via `visibleQuestions` / `visibleToolQuestions`),
+ * recomputed on every change, so changing an earlier answer hides dependent
+ * questions immediately. It holds no governance, applicability or guidance
+ * logic.
+ *
+ * CR-V2-EVIDENCE-SLICE-1:
+ *   - `select` questions are native dropdowns (tools and services come from
+ *     the canonical identity registries via the pilot registry);
+ *   - the `plan` question offers the governed plan names for the chosen tool
+ *     as PARTIAL suggestions, plus "Another plan" (typed) and "Not sure";
+ *   - each tool block can carry one optional billing document. What it
+ *     appears to show is displayed read-only; the creator may adopt a plan
+ *     name it shows as their own answer, give their own answer, or ignore it.
+ *     Changing the tool clears the plan answer and the document choice, so no
+ *     stale answer survives a correction.
  */
 
 import { useMemo, useState } from 'react'
 import { loadQuestionRegistry, NOT_SURE, type RegistryInput } from '@/lib/creator-record/contract/question-registry'
-import { visibleQuestions, type CreatorRecordFormState, type FormConfig, type FormIssue, type QuestionPresentation } from '@/lib/creator-record/prototype/form'
+import type { ExaminedDocument, ExtractionMode, ReviewDecision, ToolDocument } from '@/lib/creator-record/evidence/document-observations'
+import { visibleQuestions, visibleToolQuestions, type CreatorRecordFormState, type FormConfig, type FormIssue, type QuestionPresentation } from '@/lib/creator-record/prototype/form'
+import { DocumentReviewPanel } from './DocumentReviewPanel'
+
+export type ExamineResult = { ok: true; document: ExaminedDocument } | { ok: false; error: string }
 
 export interface QuestionnaireProps {
   registryInput: RegistryInput
@@ -21,14 +37,22 @@ export interface QuestionnaireProps {
   sectionTitles: Readonly<Record<string, string>>
   acknowledgements: Readonly<Record<string, string>>
   maxTools: number
+  /** Partial plan-name suggestions per canonical tool id (server-computed). */
+  planSuggestions?: Readonly<Record<string, readonly string[]>>
+  examinationMode?: ExtractionMode
   initialState?: CreatorRecordFormState
+  initialDocuments?: readonly ToolDocument[]
   submitting: boolean
   issues: FormIssue[]
-  onSubmit: (state: CreatorRecordFormState) => void
+  /** Examines one document; omitted → no document upload is offered. */
+  onExamine?: (toolIndex: number, file: File) => Promise<ExamineResult>
+  onSubmit: (state: CreatorRecordFormState, documents: ToolDocument[]) => void
 }
 
 const SECTION_ORDER = ['project', 'locations', 'tools', 'people', 'materials', 'contribution']
 const EMPTY: CreatorRecordFormState = { answers: {}, tools: [{}], acknowledgements: {} }
+const ANOTHER = '__another_plan'
+const UNSURE = '__not_sure'
 
 const ISSUE_TEXT: Record<FormIssue['issue'], string> = {
   required: 'Please answer this question.',
@@ -39,10 +63,21 @@ const ISSUE_TEXT: Record<FormIssue['issue'], string> = {
   no_tools: 'Please add at least one tool.',
   acknowledgement_required: 'Please confirm this statement.',
   unknown_question: 'Unexpected answer.',
+  stale_document_review: 'Your plan answer is no longer the value you chose from the document. Please make your choice about the document again.',
 }
 
+const docsFrom = (tools: number, initial: readonly ToolDocument[] | undefined): (ToolDocument | null)[] =>
+  Array.from({ length: tools }, (_, i) => initial?.find((d) => d.tool_index === i) ?? null)
+
 export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
-  const [state, setState] = useState<CreatorRecordFormState>(props.initialState ?? EMPTY)
+  const initial = props.initialState ?? EMPTY
+  const [state, setState] = useState<CreatorRecordFormState>(initial)
+  const [docs, setDocs] = useState<(ToolDocument | null)[]>(() => docsFrom(initial.tools.length, props.initialDocuments))
+  const [anotherPlan, setAnotherPlan] = useState<boolean[]>(() => initial.tools.map(() => false))
+  const [consented, setConsented] = useState<boolean>((props.initialDocuments ?? []).length > 0)
+  const [examining, setExamining] = useState<number | null>(null)
+  const [docErrors, setDocErrors] = useState<Record<number, string>>({})
+
   const config: FormConfig = useMemo(() => {
     const r = loadQuestionRegistry(props.registryInput)
     if (!r.ok) throw new Error(r.errors.join('; '))
@@ -53,10 +88,58 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
   const issueFor = (q_id: string, tool_index: number | null) => props.issues.find((i) => i.q_id === q_id && i.tool_index === tool_index)
 
   const setAnswer = (q_id: string, values: string[]) => setState((s) => ({ ...s, answers: { ...s.answers, [q_id]: values } }))
-  const setToolAnswer = (index: number, q_id: string, values: string[]) =>
-    setState((s) => ({ ...s, tools: s.tools.map((t, i) => (i === index ? { ...t, [q_id]: values } : t)) }))
+  const setDoc = (index: number, f: (d: ToolDocument | null) => ToolDocument | null) => setDocs((ds) => ds.map((d, i) => (i === index ? f(d) : d)))
+  const setReview = (index: number, decision: ReviewDecision, adopted_value: string | null) =>
+    setDoc(index, (d) => (d ? { ...d, review: { document_id: d.document.document_id, decision, adopted_value } } : d))
 
-  const field = (q_id: string, values: string[] | undefined, onChange: (v: string[]) => void, tool_index: number | null, key: string) => {
+  const setToolAnswer = (index: number, q_id: string, values: string[]) => {
+    setState((s) => ({
+      ...s,
+      tools: s.tools.map((t, i) => {
+        if (i !== index) return t
+        const next = { ...t, [q_id]: values }
+        // A different tool: the plan answer and any typed tool name belonged to the old one.
+        if (q_id === 'T1' && (t.T1 ?? [])[0] !== values[0]) {
+          delete next.T3
+          if (values[0] !== 'other_tool') delete next.T1X
+        }
+        return next
+      }),
+    }))
+    if (q_id === 'T1') {
+      setAnotherPlan((a) => a.map((v, i) => (i === index ? false : v)))
+      setDoc(index, (d) => (d ? { ...d, review: { document_id: d.document.document_id, decision: 'not_reviewed', adopted_value: null } } : d))
+    }
+    if (q_id === 'T3') {
+      // Editing the plan after adopting a document value makes it the creator's own, different answer.
+      setDoc(index, (d) =>
+        d && d.review.decision === 'adopted' && d.review.adopted_value !== values[0] ? { ...d, review: { document_id: d.document.document_id, decision: 'entered_different', adopted_value: null } } : d,
+      )
+    }
+  }
+
+  const examine = async (index: number, file: File) => {
+    if (!props.onExamine) return
+    setExamining(index)
+    setDocErrors((e) => ({ ...e, [index]: '' }))
+    const r = await props.onExamine(index, file)
+    setExamining(null)
+    if (r.ok) setDoc(index, () => ({ tool_index: index, document: r.document, review: { document_id: r.document.document_id, decision: 'not_reviewed', adopted_value: null } }))
+    else setDocErrors((e) => ({ ...e, [index]: r.error }))
+  }
+
+  const review = (index: number, decision: ReviewDecision, value: string | null) => {
+    if (decision === 'adopted' && value !== null) {
+      setState((s) => ({ ...s, tools: s.tools.map((t, i) => (i === index ? { ...t, T3: [value] } : t)) }))
+      const tool = (state.tools[index]?.T1 ?? [])[0] ?? ''
+      const suggestions = props.planSuggestions?.[tool] ?? []
+      setAnotherPlan((a) => a.map((v, i) => (i === index ? !suggestions.includes(value) : v)))
+    }
+    if (decision === 'entered_different') setAnotherPlan((a) => a.map((v, i) => (i === index ? true : v)))
+    setReview(index, decision, value)
+  }
+
+  const field = (q_id: string, values: string[] | undefined, onChange: (v: string[]) => void, tool_index: number | null, key: string, toolAnswers?: Record<string, string[]>) => {
     const p = props.presentation[q_id]
     const q = config.registry.questions.get(q_id)!
     const issue = issueFor(q_id, tool_index)
@@ -65,6 +148,59 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
     const options = q.options === 'free_text' ? [] : q.options
     const id = `cr-${key}`
     const describedBy = [p.help ? `${id}-help` : null, issue ? `${id}-error` : null].filter(Boolean).join(' ') || undefined
+    const selectClass = 'w-full rounded-md border px-3 py-2 text-sm bg-white'
+    const renderPlan = () => {
+      if (tool_index === null) return null
+      const suggestions = props.planSuggestions?.[(toolAnswers?.T1 ?? [])[0] ?? ''] ?? []
+      const v = current[0] ?? ''
+      const selectValue = v === NOT_SURE ? UNSURE : suggestions.includes(v) ? v : v !== '' || anotherPlan[tool_index] ? ANOTHER : ''
+      return (
+        <div className="space-y-2">
+          <select
+            id={`${id}-input`}
+            aria-labelledby={`${id}-legend`}
+            aria-describedby={describedBy}
+            aria-required={p.required}
+            className={selectClass}
+            style={{ borderColor: 'rgba(0,0,0,0.15)' }}
+            value={selectValue}
+            onChange={(e) => {
+              const next = e.target.value
+              setAnotherPlan((a) => a.map((x, i) => (i === tool_index ? next === ANOTHER : x)))
+              if (next === '' || next === ANOTHER) onChange([])
+              else if (next === UNSURE) onChange([NOT_SURE])
+              else onChange([next])
+            }}
+          >
+            <option value="">Choose…</option>
+            {suggestions.length > 0 && (
+              <optgroup label="Some plan names SI8 has guidance about (not a full list)">
+                {suggestions.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </optgroup>
+            )}
+            <option value={ANOTHER}>Another plan (type its name)</option>
+            <option value={UNSURE}>Not sure</option>
+          </select>
+          {selectValue === ANOTHER && (
+            <input
+              type="text"
+              id={`${id}-other`}
+              aria-label={`Tool ${tool_index + 1}: plan name`}
+              aria-describedby={describedBy}
+              className="w-full rounded-md border px-3 py-2 text-sm bg-white"
+              style={{ borderColor: 'rgba(0,0,0,0.15)' }}
+              maxLength={500}
+              value={v}
+              onChange={(e) => onChange(e.target.value === '' ? [] : [e.target.value])}
+            />
+          )}
+        </div>
+      )
+    }
     return (
       <fieldset key={key} id={id} className="mb-6" aria-invalid={!!issue} aria-describedby={describedBy} data-question-id={q_id}>
         <legend id={`${id}-legend`} className="text-sm font-medium mb-1" style={{ color: '#1a1918' }}>
@@ -110,6 +246,26 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
             )}
           </div>
         )}
+        {p.input === 'select' && (
+          <select
+            id={`${id}-input`}
+            aria-labelledby={`${id}-legend`}
+            aria-describedby={describedBy}
+            aria-required={p.required}
+            className={selectClass}
+            style={{ borderColor: 'rgba(0,0,0,0.15)' }}
+            value={current[0] ?? ''}
+            onChange={(e) => onChange(e.target.value === '' ? [] : [e.target.value])}
+          >
+            <option value="">Choose…</option>
+            {options.map((o) => (
+              <option key={o} value={o}>
+                {p.option_labels[o] ?? o}
+              </option>
+            ))}
+          </select>
+        )}
+        {p.input === 'plan' && renderPlan()}
         {p.input === 'single' && (
           <div className="space-y-1">
             {options.map((o) => (
@@ -146,13 +302,26 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
     return `${i.tool_index !== null ? `Tool ${i.tool_index + 1}: ` : ''}${text}`
   }
 
+  const removeTool = (index: number) => {
+    setState((s) => ({ ...s, tools: s.tools.filter((_, j) => j !== index) }))
+    setDocs((ds) => ds.filter((_, j) => j !== index).map((d, j) => (d ? { ...d, tool_index: j } : d)))
+    setAnotherPlan((a) => a.filter((_, j) => j !== index))
+  }
+  const addTool = () => {
+    setState((s) => ({ ...s, tools: [...s.tools, {}] }))
+    setDocs((ds) => [...ds, null])
+    setAnotherPlan((a) => [...a, false])
+  }
+
+  const uploadsOffered = !!props.onExamine
+
   return (
     <form
       noValidate
       aria-label="Creator Record questionnaire"
       onSubmit={(e) => {
         e.preventDefault()
-        props.onSubmit(state)
+        props.onSubmit(state, docs.filter((d): d is ToolDocument => d !== null))
       }}
     >
       {props.issues.length > 0 && (
@@ -167,28 +336,55 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
       )}
       {SECTION_ORDER.map((section) => {
         const singles = shown.single.filter((q) => props.presentation[q.q_id].section === section)
-        const perTool = section === 'tools' ? shown.per_tool : []
-        if (singles.length === 0 && perTool.length === 0) return null
+        const hasTools = section === 'tools' && shown.per_tool.length > 0
+        if (singles.length === 0 && !hasTools) return null
         return (
           <section key={section} aria-labelledby={`cr-section-${section}`} className="mb-8 rounded-lg border bg-white p-6" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
             <h2 id={`cr-section-${section}`} className="font-display text-lg font-semibold mb-4" style={{ color: '#1a1918' }}>{props.sectionTitles[section] ?? section}</h2>
             {singles.map((q) => field(q.q_id, state.answers[q.q_id], (v) => setAnswer(q.q_id, v), null, q.q_id))}
-            {perTool.length > 0 &&
+            {hasTools && uploadsOffered && (
+              <div className="mb-6 rounded-md border p-3" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
+                <p className="text-sm font-medium">Before you add a document</p>
+                <label className="flex items-start gap-2 text-sm mt-2">
+                  <input type="checkbox" className="mt-1" checked={consented} onChange={(e) => setConsented(e.target.checked)} />
+                  <span>
+                    I will add only synthetic test documents. I understand that a file I add is read on SI8’s server to describe what it appears to show, and is then discarded.
+                    {props.examinationMode === 'live_model'
+                      ? ' Automated reading is turned on: the file is sent to an AI model provider to be read.'
+                      : ' Automated reading is turned off: only SI8’s own synthetic test documents can be described, from recorded test data, and no AI model is used.'}
+                  </span>
+                </label>
+              </div>
+            )}
+            {hasTools &&
               state.tools.map((t, i) => (
                 <div key={i} role="group" aria-labelledby={`cr-tool-${i}`} className="mb-6 rounded-md border p-4" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
                   <div className="flex items-center justify-between mb-3">
                     <h3 id={`cr-tool-${i}`} className="text-sm font-semibold">Tool {i + 1}</h3>
                     {state.tools.length > 1 && (
-                      <button type="button" className="rounded-md border px-3 py-1 text-xs" onClick={() => setState((s) => ({ ...s, tools: s.tools.filter((_, j) => j !== i) }))}>
+                      <button type="button" className="rounded-md border px-3 py-1 text-xs" onClick={() => removeTool(i)}>
                         Remove tool {i + 1}
                       </button>
                     )}
                   </div>
-                  {perTool.map((q) => field(q.q_id, t[q.q_id], (v) => setToolAnswer(i, q.q_id, v), i, `${q.q_id}-${i}`))}
+                  {visibleToolQuestions(config, state.answers, t).map((q) => field(q.q_id, t[q.q_id], (v) => setToolAnswer(i, q.q_id, v), i, `${q.q_id}-${i}`, t))}
+                  {uploadsOffered && i < props.maxTools && (
+                    <DocumentReviewPanel
+                      toolIndex={i}
+                      doc={docs[i] ?? null}
+                      consented={consented}
+                      mode={props.examinationMode ?? 'fixture_replay'}
+                      examining={examining === i}
+                      error={docErrors[i] || null}
+                      onExamine={(file) => examine(i, file)}
+                      onRemove={() => setDoc(i, () => null)}
+                      onReview={(decision, value) => review(i, decision, value)}
+                    />
+                  )}
                 </div>
               ))}
-            {perTool.length > 0 && state.tools.length < props.maxTools && (
-              <button type="button" className="rounded-md border px-3 py-1.5 text-sm" onClick={() => setState((s) => ({ ...s, tools: [...s.tools, {}] }))}>
+            {hasTools && state.tools.length < props.maxTools && (
+              <button type="button" className="rounded-md border px-3 py-1.5 text-sm" onClick={addTool}>
                 Add another tool
               </button>
             )}
@@ -217,7 +413,7 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
 
       <button
         type="submit"
-        disabled={props.submitting}
+        disabled={props.submitting || examining !== null}
         className="rounded-md px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
         style={{ backgroundColor: '#1a1918' }}
       >

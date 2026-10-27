@@ -11,12 +11,17 @@ jest.mock('@/lib/reviewer-context/auth', () => ({ checkReviewerContextAccess }))
 
 import * as buildModule from '@/lib/creator-record/prototype/build-draft'
 import { POST } from '@/app/api/admin/creator-record-v2/draft/route'
+import { documentIdFor } from '@/lib/creator-record/evidence/document-observations'
+import { examineUpload } from '@/lib/creator-record/evidence/examine-upload'
+import { REPLAY_SET_VERSION } from '@/lib/creator-record/evidence/replay'
+import { REPLAY_FIXTURES } from '@/lib/creator-record/evidence/replay-fixtures.data'
+import { RECEIPT_EXTRACTION_SCHEMA_VERSION, validateReceiptExtraction } from '@/lib/creator-record/receipt-examination/schema'
 
 const APP = path.resolve(__dirname, '..', '..')
 const req = (body: unknown) => ({ text: async () => (typeof body === 'string' ? body : JSON.stringify(body)) }) as any
 const VALID = {
   answers: { P1: ['Night Market'], P3: ['own_channels'], F1: ['TW'], F2: ['online_worldwide'], L1: ['no'], M0: ['none'], H1: ['edited'] },
-  tools: [{ T1: ['Pika'], T3: ['Pro'], T4: ['May 2026'] }],
+  tools: [{ T1: ['pika'], T3: ['Pro'], T4: ['May 2026'] }],
   acknowledgements: { A1: true, A2: true },
 }
 const stripComments = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1')
@@ -100,6 +105,64 @@ describe('request handling', () => {
     const res = await POST(req('x'.repeat(40_000)))
     expect(res.status).toBe(413)
   })
+
+  // CR-V2-EVIDENCE-SLICE-1 / -PROD-UAT-1: documents travel back for display only, and are checked
+  // against SI8's own replay table. A legitimate replayed document is exactly what the examine route
+  // returns for the real synthetic fixture file (same SHA-256, same validated extraction).
+  const legitDocument = (fixtureId = 'pdf-pika-pro-no-period') => {
+    const f = REPLAY_FIXTURES.find((x) => x.fixture_id === fixtureId)!
+    return JSON.parse(
+      JSON.stringify({
+        document_id: documentIdFor(f.sha256),
+        file_name: `${fixtureId}.pdf`,
+        sha256: f.sha256,
+        bytes: 65000,
+        detected_media_type: 'application/pdf',
+        outcome: 'document_examined',
+        reason: null,
+        extraction_mode: 'fixture_replay',
+        replay_fixture_id: f.fixture_id,
+        versions: { schema: RECEIPT_EXTRACTION_SCHEMA_VERSION, prompt: null, replay_set: REPLAY_SET_VERSION },
+        model_calls: 0,
+        extraction: validateReceiptExtraction(f.parsed_output),
+      }),
+    )
+  }
+  const withDoc = (document: { document_id: string }) => ({ ...VALID, documents: [{ tool_index: 0, document, review: { document_id: document.document_id, decision: 'ignored', adopted_value: null } }] })
+
+  test('authorized + valid with a replayed document → 200; the document is shown and guidance is unchanged', async () => {
+    const plain = await (await POST(req(VALID))).json()
+    const res = await POST(req(withDoc(legitDocument())))
+    expect(res.status).toBe(200)
+    const data = await res.json()
+    expect(data.view.documents.items).toHaveLength(1)
+    expect(data.view.guidance.cards.map((c: { claim_id: string }) => c.claim_id)).toEqual(plain.view.guidance.cards.map((c: { claim_id: string }) => c.claim_id))
+  })
+
+  test.each([
+    ['an edited but schema-valid extraction', (d: any) => (d.extraction.product_or_plan_name = { status: 'present', value: 'Enterprise', evidence: 'Enterprise' })],
+    ['a schema-invalid extraction', (d: any) => (d.extraction.product_or_plan_name.evidence = null)],
+    ['a "live_model" label (live is locked off in this build)', (d: any) => ((d.extraction_mode = 'live_model'), (d.replay_fixture_id = null), (d.model_calls = 1), (d.versions.prompt = 'receipt-prompt-v2'), (d.versions.replay_set = null))],
+    ['another fixture’s id', (d: any) => (d.replay_fixture_id = 'conflict-two-plan-names')],
+    ['a stale replay-set version', (d: any) => (d.versions.replay_set = 'receipt-fixtures-v1/oracle-replay')],
+    ['an unknown file claimed as examined', (d: any) => ((d.sha256 = 'f'.repeat(64)), (d.document_id = documentIdFor('f'.repeat(64))))],
+    ['a known fixture claimed as "not read"', (d: any) => ((d.outcome = 'document_provided_not_examined'), (d.reason = 'no_replay_fixture'), (d.extraction = null), (d.replay_fixture_id = null))],
+  ])('a returned document with %s → 400', async (_name, edit) => {
+    const d = legitDocument()
+    edit(d)
+    const res = await POST(req(withDoc(d)))
+    expect(res.status).toBe(400)
+  })
+
+  test('a genuinely unknown file ("received but not read") and a rejected format are accepted for display', async () => {
+    for (const document of [
+      await examineUpload(new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, ...Buffer.from('route-unknown')]), 'other.png', { mode: 'fixture_replay' }),
+      await examineUpload(new Uint8Array(Buffer.from('not a document')), 'fake.pdf', { mode: 'fixture_replay' }),
+    ]) {
+      const res = await POST(req(withDoc(JSON.parse(JSON.stringify(document)))))
+      expect(res.status).toBe(200)
+    }
+  })
 })
 
 describe('no side effects', () => {
@@ -116,9 +179,12 @@ describe('no side effects', () => {
       expect(src).not.toMatch(/\.(insert|update|upsert|delete|rpc)\(|storage\.|@\/lib\/supabase\/admin|stripe|resend|@\/lib\/emails|@\/lib\/pdf|@anthropic-ai|localStorage|sessionStorage|cookies\(\)/i)
     }
   })
-  test('the browser calls only the admin draft route', () => {
+  test('the browser calls only the two admin prototype routes (examine, then draft)', () => {
     const client = stripComments(readFileSync(path.join(APP, 'app/admin/creator-record-v2/CreatorRecordPrototypeClient.tsx'), 'utf8'))
     const urls = Array.from(client.matchAll(/fetch\('([^']+)'/g)).map((m) => m[1])
-    expect(urls).toEqual(['/api/admin/creator-record-v2/draft'])
+    expect(urls).toEqual(['/api/admin/creator-record-v2/examine', '/api/admin/creator-record-v2/draft'])
+    for (const f of ['components/creator-record/CreatorRecordQuestionnaire.tsx', 'components/creator-record/DocumentReviewPanel.tsx', 'components/creator-record/DraftRecordView.tsx']) {
+      expect(stripComments(readFileSync(path.join(APP, f), 'utf8'))).not.toMatch(/fetch\(/)
+    }
   })
 })

@@ -115,6 +115,8 @@ describe('lib/creator-record boundaries', () => {
       '@/lib/retrieval-engine/types',
       '@/lib/reviewer-lk/select-reviewer-claims',
       '@/lib/reviewer-lk/types',
+      // CR-V2-EVIDENCE-SLICE-1: the canonical identity registries (identity/ only).
+      '@/lib/tool-identity/registry',
       '@/types/interview-engine',
     ])
   })
@@ -177,25 +179,47 @@ describe('lib/creator-record boundaries', () => {
       .sort()
     expect(importers).toEqual([
       'app/admin/creator-record-v2/CreatorRecordPrototypeClient.tsx',
+      'app/admin/creator-record-v2/page.tsx',
       'app/api/admin/creator-record-v2/draft/route.ts',
+      'app/api/admin/creator-record-v2/examine/route.ts',
       'components/creator-record/CreatorRecordQuestionnaire.tsx',
+      'components/creator-record/DocumentReviewPanel.tsx',
       'components/creator-record/DraftRecordView.tsx',
     ])
   })
 
   test('CR-V2-VERTICAL-SLICE-1: only the server route loads the guidance engine; browser code gets pure modules only', () => {
     const importsOf = (rel: string) => staticImports(readFileSync(path.join(APP_ROOT, rel), 'utf8')).filter((i) => i.includes('creator-record/'))
-    expect(importsOf('app/api/admin/creator-record-v2/draft/route.ts').sort()).toEqual(['@/lib/creator-record/prototype/build-draft', '@/lib/creator-record/prototype/parse-form-state'])
+    expect(importsOf('app/api/admin/creator-record-v2/draft/route.ts').sort()).toEqual([
+      '@/lib/creator-record/evidence/verify-returned-documents',
+      '@/lib/creator-record/prototype/build-draft',
+      '@/lib/creator-record/prototype/parse-form-state',
+    ])
+    // CR-V2-EVIDENCE-SLICE-1: the examine route loads only the evidence module; the page only the gate and the plan suggestions.
+    expect(importsOf('app/api/admin/creator-record-v2/examine/route.ts').sort()).toEqual([
+      '@/lib/creator-record/evidence/config',
+      '@/lib/creator-record/evidence/document-observations',
+      '@/lib/creator-record/evidence/examine-upload',
+      '@/lib/creator-record/evidence/live-caller',
+    ])
+    expect(importsOf('app/admin/creator-record-v2/page.tsx').sort()).toEqual(['@/lib/creator-record/evidence/config', '@/lib/creator-record/integration/plan-suggestions'])
     const BROWSER_ALLOWED = [
       '@/lib/creator-record/contract/question-registry',
+      '@/lib/creator-record/evidence/document-observations',
       '@/lib/creator-record/pilot/pilot-registry',
       '@/lib/creator-record/presentation/build-draft-record',
       '@/lib/creator-record/presentation/templates',
       '@/lib/creator-record/prototype/form',
       '@/components/creator-record/CreatorRecordQuestionnaire',
+      '@/components/creator-record/DocumentReviewPanel',
       '@/components/creator-record/DraftRecordView',
     ]
-    for (const f of ['app/admin/creator-record-v2/CreatorRecordPrototypeClient.tsx', 'components/creator-record/CreatorRecordQuestionnaire.tsx', 'components/creator-record/DraftRecordView.tsx']) {
+    for (const f of [
+      'app/admin/creator-record-v2/CreatorRecordPrototypeClient.tsx',
+      'components/creator-record/CreatorRecordQuestionnaire.tsx',
+      'components/creator-record/DocumentReviewPanel.tsx',
+      'components/creator-record/DraftRecordView.tsx',
+    ]) {
       const src = readFileSync(path.join(APP_ROOT, f), 'utf8')
       const runtime = runtimeImports(src).filter((i) => i.includes('creator-record'))
       for (const i of runtime) expect(BROWSER_ALLOWED).toContain(i)
@@ -217,11 +241,51 @@ describe('lib/creator-record boundaries', () => {
         .filter((i) => i.startsWith('.'))
         .filter((i) => {
           const t = path.resolve(path.dirname(f), i)
-          return !t.startsWith(MODULE_ROOT) || t.includes(`${path.sep}testing${path.sep}`) || t.includes(`${path.sep}receipt-examination`) || t.includes(`${path.sep}eval`)
+          // CR-V2-EVIDENCE-SLICE-1: of evidence/, only the pure observation module is reachable from the slice.
+          const evidenceOtherThanObservations = t.includes(`${path.sep}evidence${path.sep}`) && !t.endsWith(`${path.sep}evidence${path.sep}document-observations`)
+          return !t.startsWith(MODULE_ROOT) || t.includes(`${path.sep}testing${path.sep}`) || t.includes(`${path.sep}receipt-examination`) || t.includes(`${path.sep}eval`) || evidenceOtherThanObservations
         })
         .map((i) => `${path.basename(f)} -> ${i}`),
     )
     expect(escaping).toEqual([])
+  })
+
+  test('CR-V2-EVIDENCE-SLICE-1: identity/ loads only the two canonical registries and the contract', () => {
+    const files = walk(path.join(MODULE_ROOT, 'identity'))
+    expect(files.length).toBe(1)
+    const imports = files.flatMap((f) => staticImports(readFileSync(f, 'utf8')))
+    expect(imports.filter((i) => !i.startsWith('.')).sort()).toEqual(['@/lib/tool-identity/registry', '@/types/interview-engine'])
+    expect(imports.filter((i) => i.startsWith('.'))).toEqual(['../contract/question-registry'])
+    // Identity is never derived from a publication ledger or from alias resolution.
+    expect(imports.some((i) => /pilot|governed|ledger|extraction/.test(i))).toBe(false)
+  })
+
+  test('CR-V2-EVIDENCE-SLICE-1: evidence/ makes no storage, database, network or SDK import; the live adapter only behind the gate', () => {
+    const files = walk(path.join(MODULE_ROOT, 'evidence'))
+    const external = files.flatMap((f) => staticImports(readFileSync(f, 'utf8')).filter((i) => !i.startsWith('.')).map((i) => `${path.basename(f)} -> ${i}`))
+    expect(external).toEqual(['examine-upload.ts -> node:crypto'])
+    const relativeTargets = new Set(
+      files.flatMap((f) =>
+        staticImports(readFileSync(f, 'utf8'))
+          .filter((i) => i.startsWith('.'))
+          .map((i) => path.relative(MODULE_ROOT, path.resolve(path.dirname(f), i)).split(path.sep).join('/')),
+      ),
+    )
+    for (const t of Array.from(relativeTargets)) {
+      expect(['contract/provenance', 'receipt-examination/examine', 'receipt-examination/prompt', 'receipt-examination/schema'].includes(t) || t.startsWith('evidence/')).toBe(true)
+    }
+    for (const f of files) expect(staticImports(readFileSync(f, 'utf8')).some((i) => i.includes('examine.anthropic'))).toBe(false)
+    const live = readFileSync(path.join(MODULE_ROOT, 'evidence', 'live-caller.ts'), 'utf8')
+    const gate = live.indexOf('if (!liveExtractionEnabled(env))')
+    const load = live.indexOf("await import('../receipt-examination/examine.anthropic')")
+    expect(gate).toBeGreaterThan(-1)
+    expect(load).toBeGreaterThan(gate)
+    // Nothing else in the app reaches the adapter, except the eval runner.
+    const reachers = [...moduleFiles, ...walk(path.join(APP_ROOT, 'app')), ...walk(path.join(APP_ROOT, 'components'))]
+      .filter((f) => !f.endsWith('examine.anthropic.ts') && /examine\.anthropic'/.test(readFileSync(f, 'utf8')))
+      .map((f) => path.relative(APP_ROOT, f).split(path.sep).join('/'))
+      .sort()
+    expect(reachers).toEqual(['lib/creator-record/eval/run-receipt-eval.ts', 'lib/creator-record/evidence/live-caller.ts'])
   })
 
   test('CR-V2-VERTICAL-SLICE-1: the authoritative sources never import the pilot and carry no pilot marker', () => {

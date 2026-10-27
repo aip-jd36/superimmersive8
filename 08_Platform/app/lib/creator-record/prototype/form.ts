@@ -10,6 +10,11 @@
  * to L1 hides L3). An answer to a question that is no longer shown is
  * DISCARDED before mapping, and reported, so a stale answer can never reach
  * the record (`mapAnswer` would refuse it anyway).
+ *
+ * Per-tool questions (CR-V2-EVIDENCE-SLICE-1) may carry a display condition
+ * on an earlier answer IN THE SAME TOOL BLOCK (e.g. T1X "What is the tool
+ * called?" only when T1 is "not listed"). Their eligibility is evaluated per
+ * block, over the block's own shown answers plus the shown single answers.
  */
 
 import type { DeclaredObservation, RecordContext } from '../contract/provenance'
@@ -19,7 +24,7 @@ export const MAX_TEXT_LENGTH = 500
 
 export interface QuestionPresentation {
   q_id: string
-  input: 'text' | 'textarea' | 'single' | 'multi'
+  input: 'text' | 'textarea' | 'single' | 'multi' | 'select' | 'plan'
   required: boolean
   per_tool: boolean
   option_labels: Readonly<Record<string, string>>
@@ -44,7 +49,7 @@ export interface FormConfig {
 export interface FormIssue {
   q_id: string | null
   tool_index: number | null
-  issue: 'required' | 'invalid_option' | 'too_long' | 'single_choice_only' | 'too_many_tools' | 'no_tools' | 'acknowledgement_required' | 'unknown_question'
+  issue: 'required' | 'invalid_option' | 'too_long' | 'single_choice_only' | 'too_many_tools' | 'no_tools' | 'acknowledgement_required' | 'unknown_question' | 'stale_document_review'
 }
 
 export interface DiscardedAnswer {
@@ -54,16 +59,52 @@ export interface DiscardedAnswer {
 
 export const toolInstance = (index: number) => `tool-${index + 1}`
 
-/** Questions currently shown, in registry order, split into single questions and the per-tool block. */
+const isAnswered = (values: readonly string[] | undefined) => !!values && values.some((v) => v.trim() !== '')
+const isPerTool = (config: FormConfig, q_id: string) => config.presentation[q_id]?.per_tool === true
+
+/**
+ * Questions currently shown, in registry order, split into single questions
+ * and the per-tool questions shown on the single answers alone. A per-tool
+ * question conditioned on a block's own answers appears only through
+ * `visibleToolQuestions` for that block.
+ */
 export function visibleQuestions(config: FormConfig, answers: Answers): { single: QuestionEntry[]; per_tool: QuestionEntry[] } {
   const shown = eligibleQuestions(config.registry, answers).filter((q) => config.presentation[q.q_id] !== undefined)
   return {
-    single: shown.filter((q) => !config.presentation[q.q_id].per_tool),
-    per_tool: shown.filter((q) => config.presentation[q.q_id].per_tool),
+    single: shown.filter((q) => !isPerTool(config, q.q_id)),
+    per_tool: shown.filter((q) => isPerTool(config, q.q_id)),
   }
 }
 
-const isAnswered = (values: readonly string[] | undefined) => !!values && values.some((v) => v.trim() !== '')
+/** Single answers to questions that are currently shown. Only these may steer display conditions. */
+function shownSingleAnswers(config: FormConfig, answers: Answers): Record<string, readonly string[]> {
+  const shown = new Set(visibleQuestions(config, answers).single.map((q) => q.q_id))
+  return Object.fromEntries(Object.entries(answers).filter(([id, v]) => shown.has(id) && isAnswered(v)))
+}
+
+/**
+ * The answers that decide eligibility inside one tool block: the shown single
+ * answers plus the block's own answers to questions that are themselves
+ * shown. Iterated to a fixed point, so a hidden answer can never reveal a
+ * question.
+ */
+function toolScope(config: FormConfig, answers: Answers, tool: Answers): Record<string, readonly string[]> {
+  const base = shownSingleAnswers(config, answers)
+  let scope: Record<string, readonly string[]> = { ...base }
+  for (let i = 0; i <= Object.keys(tool).length; i++) {
+    const eligible = new Set(eligibleQuestions(config.registry, scope).filter((q) => isPerTool(config, q.q_id)).map((q) => q.q_id))
+    const own = Object.fromEntries(Object.entries(tool).filter(([id, v]) => eligible.has(id) && isAnswered(v)))
+    const next: Record<string, readonly string[]> = { ...base, ...own }
+    if (JSON.stringify(next) === JSON.stringify(scope)) break
+    scope = next
+  }
+  return scope
+}
+
+/** Per-tool questions shown for one tool block, in registry order. */
+export function visibleToolQuestions(config: FormConfig, answers: Answers, tool: Answers): QuestionEntry[] {
+  return eligibleQuestions(config.registry, toolScope(config, answers, tool)).filter((q) => isPerTool(config, q.q_id))
+}
 
 function checkValues(q: QuestionEntry, p: QuestionPresentation, values: readonly string[] | undefined, tool_index: number | null): FormIssue[] {
   const issues: FormIssue[] = []
@@ -77,7 +118,7 @@ function checkValues(q: QuestionEntry, p: QuestionPresentation, values: readonly
     if (vs.some((v) => v.length > MAX_TEXT_LENGTH)) issues.push({ q_id: q.q_id, tool_index, issue: 'too_long' })
   } else {
     if (vs.some((v) => !(q.options as string[]).includes(v))) issues.push({ q_id: q.q_id, tool_index, issue: 'invalid_option' })
-    if (p.input === 'single' && vs.length > 1) issues.push({ q_id: q.q_id, tool_index, issue: 'single_choice_only' })
+    if ((p.input === 'single' || p.input === 'select') && vs.length > 1) issues.push({ q_id: q.q_id, tool_index, issue: 'single_choice_only' })
   }
   return issues
 }
@@ -96,7 +137,7 @@ export function validateForm(config: FormConfig, state: CreatorRecordFormState):
   if (state.tools.length === 0) issues.push({ q_id: null, tool_index: null, issue: 'no_tools' })
   if (state.tools.length > config.max_tools) issues.push({ q_id: null, tool_index: null, issue: 'too_many_tools' })
   state.tools.slice(0, config.max_tools).forEach((t, i) => {
-    for (const q of shown.per_tool) issues.push(...checkValues(q, config.presentation[q.q_id], t[q.q_id], i))
+    for (const q of visibleToolQuestions(config, state.answers, t)) issues.push(...checkValues(q, config.presentation[q.q_id], t[q.q_id], i))
   })
   for (const a of config.acknowledgement_ids) if (state.acknowledgements[a] !== true) issues.push({ q_id: a, tool_index: null, issue: 'acknowledgement_required' })
   return issues
@@ -105,6 +146,11 @@ export function validateForm(config: FormConfig, state: CreatorRecordFormState):
 function verbatimFor(q: QuestionEntry, p: QuestionPresentation, values: readonly string[]): string {
   if (q.options === 'free_text') return values[0] === NOT_SURE ? 'Not sure' : values[0].trim()
   return values.map((v) => p.option_labels[v] ?? v).join('; ')
+}
+
+/** The per-tool question ids shown for each tool block (index-aligned with `state.tools`, capped at `max_tools`). */
+export function shownToolQuestionIds(config: FormConfig, state: CreatorRecordFormState): string[][] {
+  return state.tools.slice(0, config.max_tools).map((t) => visibleToolQuestions(config, state.answers, t).map((q) => q.q_id))
 }
 
 /**
@@ -116,27 +162,30 @@ function verbatimFor(q: QuestionEntry, p: QuestionPresentation, values: readonly
 export function formToObservations(config: FormConfig, state: CreatorRecordFormState, ctx: RecordContext): { observations: DeclaredObservation[]; discarded: DiscardedAnswer[] } {
   const shown = visibleQuestions(config, state.answers)
   const shownSingle = new Set(shown.single.map((q) => q.q_id))
-  const shownPerTool = new Set(shown.per_tool.map((q) => q.q_id))
   const discarded: DiscardedAnswer[] = []
   for (const [id, v] of Object.entries(state.answers)) if (isAnswered(v) && !shownSingle.has(id)) discarded.push({ q_id: id, tool_index: null })
+  const toolsInScope = state.tools.slice(0, config.max_tools)
+  const shownPerTool = toolsInScope.map((t) => visibleToolQuestions(config, state.answers, t))
   state.tools.forEach((t, i) => {
-    for (const [id, v] of Object.entries(t)) if (isAnswered(v) && !shownPerTool.has(id)) discarded.push({ q_id: id, tool_index: i })
+    const mine = new Set((shownPerTool[i] ?? []).map((q) => q.q_id))
+    for (const [id, v] of Object.entries(t)) if (isAnswered(v) && !mine.has(id)) discarded.push({ q_id: id, tool_index: i })
   })
 
   // Only shown answers can steer display conditions.
-  const effective: Answers = Object.fromEntries(Object.entries(state.answers).filter(([id, v]) => shownSingle.has(id) && isAnswered(v)))
+  const effective: Answers = shownSingleAnswers(config, state.answers)
   const observations: DeclaredObservation[] = []
-  const run = (q: QuestionEntry, values: readonly string[] | undefined, instance?: string) => {
+  const run = (q: QuestionEntry, values: readonly string[] | undefined, scope: Answers, instance?: string) => {
     if (!isAnswered(values)) return
     const p = config.presentation[q.q_id]
     const vs = q.options === 'free_text' ? [(values as readonly string[])[0].trim()] : [...(values as readonly string[])]
-    const r = mapAnswer(config.registry, effective, ctx, { q_id: q.q_id, q_version: q.version, values: vs, verbatim: verbatimFor(q, p, vs), instance })
+    const r = mapAnswer(config.registry, scope, ctx, { q_id: q.q_id, q_version: q.version, values: vs, verbatim: verbatimFor(q, p, vs), instance })
     if (!r.ok) throw new Error(`answer to ${q.q_id} refused by the contract: ${r.reason}`)
     observations.push(...r.observations)
   }
-  for (const q of shown.single) run(q, state.answers[q.q_id])
-  state.tools.slice(0, config.max_tools).forEach((t, i) => {
-    for (const q of shown.per_tool) run(q, t[q.q_id], toolInstance(i))
+  for (const q of shown.single) run(q, state.answers[q.q_id], effective)
+  toolsInScope.forEach((t, i) => {
+    const scope = toolScope(config, state.answers, t)
+    for (const q of shownPerTool[i]) run(q, t[q.q_id], scope, toolInstance(i))
   })
   return { observations, discarded }
 }

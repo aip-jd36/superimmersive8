@@ -24,10 +24,26 @@
  *  - Existence questions (L3, M2, M3D, M4) are record-only: they attach to
  *    nothing governed (v0.3 §2.4, §2.5).
  *  - Location answers are recorded only; they never reach `jurisdiction`.
+ *  - CR-V2-EVIDENCE-SLICE-1: tools (T1) and asset providers (M1, M3) are
+ *    chosen from the canonical identity registries (`../identity/`), never
+ *    from a publication ledger. Only a registered identity option attaches to
+ *    an identity; "not listed" and "not sure" are record-only, and the name a
+ *    creator types for an unlisted tool or service (T1X, M1X, M3X) is kept
+ *    verbatim and attaches to nothing.
  */
 
 import type { ObservationMapEntry, QuestionEntry, RegistryInput } from '../contract/question-registry'
 import type { GovernanceApproval } from '../contract/types'
+import {
+  ASSET_PROVIDER_OPTION_CODES,
+  ASSET_PROVIDER_OPTION_LABELS,
+  CANONICAL_ASSET_PROVIDER_ID_LIST,
+  CANONICAL_TOOL_ID_LIST,
+  OTHER_PROVIDER,
+  OTHER_TOOL,
+  TOOL_OPTION_CODES,
+  TOOL_OPTION_LABELS,
+} from '../identity/selectable-identities'
 
 export const PILOT_MARKER = 'PILOT-UAT'
 export const PILOT_REGISTRY_VERSION = 'PILOT-UAT-REGISTRY-1'
@@ -45,7 +61,7 @@ export function isPilotApproval(a: GovernanceApproval | null | undefined): boole
 }
 
 /** How the questionnaire renders a question. Presentation metadata only; the contract never reads it. */
-export type PilotInput = 'text' | 'textarea' | 'single' | 'multi'
+export type PilotInput = 'text' | 'textarea' | 'single' | 'multi' | 'select' | 'plan'
 
 export interface PilotQuestionMeta {
   q_id: string
@@ -109,15 +125,18 @@ const QUESTIONS: QuestionEntry[] = [
   q({ q_id: 'F1', options: LOCATION_CODES }),
   q({ q_id: 'F2', options: LOCATION_CODES }),
   q({ q_id: 'F3', options: LOCATION_CODES, display_condition: showWhen('P3', ['client_work', 'paid_advertising']) }),
-  q({ q_id: 'T1' }),
+  q({ q_id: 'T1', options: [...TOOL_OPTION_CODES] }),
+  q({ q_id: 'T1X', display_condition: showWhen('T1', [OTHER_TOOL]) }),
   q({ q_id: 'T3' }),
   q({ q_id: 'T4' }),
   q({ q_id: 'L1', question_kind: 'factual_presence', options: YES_NO }),
   q({ q_id: 'L3', question_kind: 'document_existence', options: YES_NO, display_condition: showWhen('L1', ['yes']) }),
   q({ q_id: 'M0', question_kind: 'factual_presence', options: ['music', 'stock', 'brands', 'client_material', 'none', 'not_sure'] }),
-  q({ q_id: 'M1', display_condition: showWhen('M0', ['music']) }),
+  q({ q_id: 'M1', options: [...ASSET_PROVIDER_OPTION_CODES], display_condition: showWhen('M0', ['music']) }),
+  q({ q_id: 'M1X', display_condition: { kind: 'all', conditions: [showWhen('M0', ['music']), showWhen('M1', [OTHER_PROVIDER])] } }),
   q({ q_id: 'M2', question_kind: 'document_existence', options: YES_NO, display_condition: showWhen('M0', ['music']) }),
-  q({ q_id: 'M3', display_condition: showWhen('M0', ['stock']) }),
+  q({ q_id: 'M3', options: [...ASSET_PROVIDER_OPTION_CODES], display_condition: showWhen('M0', ['stock']) }),
+  q({ q_id: 'M3X', display_condition: { kind: 'all', conditions: [showWhen('M0', ['stock']), showWhen('M3', [OTHER_PROVIDER])] } }),
   q({ q_id: 'M3D', question_kind: 'document_existence', options: YES_NO, display_condition: showWhen('M0', ['stock']) }),
   q({ q_id: 'M4', question_kind: 'document_existence', options: ['yes', 'some', 'no', 'not_sure'], display_condition: showWhen('M0', ['brands', 'client_material']) }),
   q({
@@ -133,13 +152,14 @@ const OBSERVATION_MAP: ObservationMapEntry[] = [
   o({ o_id: 'PILOT-O-F1', q_id: 'F1', target: { kind: 'location', role: 'creator_base' } }),
   o({ o_id: 'PILOT-O-F2', q_id: 'F2', target: { kind: 'location', role: 'distribution_market' } }),
   o({ o_id: 'PILOT-O-F3', q_id: 'F3', target: { kind: 'location', role: 'client_base' } }),
-  o({ o_id: 'PILOT-O-T1', q_id: 'T1', target: { kind: 'tool_identity' } }),
+  // One entry per registered tool identity: only a canonical option attaches to an identity.
+  ...CANONICAL_TOOL_ID_LIST.map((id) => o({ o_id: `PILOT-O-T1-${id}`, q_id: 'T1', applies_to: { kind: 'option', value: id }, target: { kind: 'tool_identity' } })),
   // Bound to the tool declared in the same tool block (answer instance).
   o({ o_id: 'PILOT-O-T3', q_id: 'T3', target: { kind: 'applicability_fact', fact: 'tool_plan_tier' } }),
   o({ o_id: 'PILOT-O-L1', q_id: 'L1', applies_to: { kind: 'option', value: 'yes' }, observation_kind: 'declared_presence', target: { kind: 'dependency', dependency_id: 'synthetic_performer_present_confirmed' } }),
-  o({ o_id: 'PILOT-O-M1-PROVIDER', q_id: 'M1', target: { kind: 'asset_provider_identity' } }),
+  ...CANONICAL_ASSET_PROVIDER_ID_LIST.map((id) => o({ o_id: `PILOT-O-M1-PROVIDER-${id}`, q_id: 'M1', applies_to: { kind: 'option', value: id }, target: { kind: 'asset_provider_identity' } })),
   o({ o_id: 'PILOT-O-M1-DEP', q_id: 'M1', target: { kind: 'dependency', dependency_id: 'which_music_provider' } }),
-  o({ o_id: 'PILOT-O-M3-PROVIDER', q_id: 'M3', target: { kind: 'asset_provider_identity' } }),
+  ...CANONICAL_ASSET_PROVIDER_ID_LIST.map((id) => o({ o_id: `PILOT-O-M3-PROVIDER-${id}`, q_id: 'M3', applies_to: { kind: 'option', value: id }, target: { kind: 'asset_provider_identity' } })),
   o({ o_id: 'PILOT-O-M3-DEP', q_id: 'M3', target: { kind: 'dependency', dependency_id: 'which_provider' } }),
   o({ o_id: 'PILOT-O-H1', q_id: 'H1', observation_kind: 'declared_description', target: { kind: 'dependency', dependency_id: 'human_contribution_description' } }),
 ]
@@ -204,16 +224,26 @@ export const PILOT_QUESTION_META: Readonly<Record<string, PilotQuestionMeta>> = 
   F1: meta({ q_id: 'F1', section: 'locations', input: 'single', required: true, text: 'Where are you or your business based?', option_labels: LOCATION_LABELS }),
   F2: meta({ q_id: 'F2', section: 'locations', input: 'multi', required: true, text: 'Where do you expect the video to be published or shown? Select all that apply.', option_labels: LOCATION_LABELS }),
   F3: meta({ q_id: 'F3', section: 'locations', input: 'single', required: false, text: 'Where is the client or advertiser based?', option_labels: LOCATION_LABELS }),
-  T1: meta({ q_id: 'T1', section: 'tools', input: 'text', required: true, per_tool: true, text: 'Which AI tool did you use?', help: 'Name it as it appears on the tool’s website, for example Pika or Kling.' }),
+  T1: meta({
+    q_id: 'T1',
+    section: 'tools',
+    input: 'select',
+    required: true,
+    per_tool: true,
+    text: 'Which AI tool did you use?',
+    help: 'Choose it from the list. If it is not listed, choose “My tool isn’t listed” and type its name.',
+    option_labels: TOOL_OPTION_LABELS,
+  }),
+  T1X: meta({ q_id: 'T1X', section: 'tools', input: 'text', required: true, per_tool: true, text: 'What is the tool called?', help: 'Type the name as it appears on the tool’s website.' }),
   T3: meta({
     q_id: 'T3',
     section: 'tools',
-    input: 'text',
+    input: 'plan',
     required: true,
     per_tool: true,
     allow_not_sure: true,
     text: 'Which plan were you on with this tool while you made the video?',
-    help: 'Type the plan name as the tool shows it in your account or on your invoice.',
+    help: 'The list shows only some plan names SI8 has guidance about, and may not include yours. If your plan is not listed, choose “Another plan” and type its name as the tool shows it.',
   }),
   T4: meta({ q_id: 'T4', section: 'tools', input: 'text', required: true, per_tool: true, allow_not_sure: true, text: 'When did you use this tool for the video?', help: 'Month and year, for example March–May 2026.' }),
   L1: meta({ q_id: 'L1', section: 'people', input: 'single', required: true, text: 'Does the video include the likeness or voice of a real person?', option_labels: YES_NO_LABELS }),
@@ -233,9 +263,27 @@ export const PILOT_QUESTION_META: Readonly<Record<string, PilotQuestionMeta>> = 
       not_sure: 'Not sure',
     },
   }),
-  M1: meta({ q_id: 'M1', section: 'materials', input: 'text', required: false, allow_not_sure: true, text: 'Where did the music come from?', help: 'For example, the music library or service you used.' }),
+  M1: meta({
+    q_id: 'M1',
+    section: 'materials',
+    input: 'select',
+    required: false,
+    text: 'Where did the music come from?',
+    help: 'Choose the music library or service you used. If it is not listed, choose “My service isn’t listed”.',
+    option_labels: ASSET_PROVIDER_OPTION_LABELS,
+  }),
+  M1X: meta({ q_id: 'M1X', section: 'materials', input: 'text', required: true, text: 'What is the music service called?' }),
   M2: meta({ q_id: 'M2', section: 'materials', input: 'single', required: false, text: 'Do you have a licence or download receipt for the music?', option_labels: YES_NO_LABELS }),
-  M3: meta({ q_id: 'M3', section: 'materials', input: 'text', required: false, allow_not_sure: true, text: 'Which stock service did the stock material come from?', help: 'For example, the stock library you downloaded it from.' }),
+  M3: meta({
+    q_id: 'M3',
+    section: 'materials',
+    input: 'select',
+    required: false,
+    text: 'Which stock service did the stock material come from?',
+    help: 'Choose the stock library you downloaded it from. If it is not listed, choose “My service isn’t listed”.',
+    option_labels: ASSET_PROVIDER_OPTION_LABELS,
+  }),
+  M3X: meta({ q_id: 'M3X', section: 'materials', input: 'text', required: true, text: 'What is the stock service called?' }),
   M3D: meta({ q_id: 'M3D', section: 'materials', input: 'single', required: false, text: 'Do you have the licence, receipt or download history for the stock material?', option_labels: YES_NO_LABELS }),
   M4: meta({
     q_id: 'M4',

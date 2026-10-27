@@ -65,19 +65,19 @@ const RECORD = { record_id: 'UAT-WORDING', record_version: 1, captured_at: '2026
 const ACK = { A1: true, A2: true }
 const ANS = { P1: ['Test'], P3: ['client_work', 'paid_advertising'], F1: ['US'], F2: ['EU', 'online_worldwide'], F3: ['GB'], L1: ['yes'], L3: ['no'], H1: ['edited'] }
 const SCENARIOS: Record<string, CreatorRecordFormState> = {
-  pika_pro: { answers: { ...ANS, M0: ['none'] }, tools: [{ T1: ['Pika'], T3: ['Pro'], T4: ['May 2026'] }], acknowledgements: ACK },
-  pika_unknown_plan: { answers: { ...ANS, M0: ['not_sure'] }, tools: [{ T1: ['Pika'], T3: ['not_sure'], T4: ['not_sure'] }], acknowledgements: ACK },
+  pika_pro: { answers: { ...ANS, M0: ['none'] }, tools: [{ T1: ['pika'], T3: ['Pro'], T4: ['May 2026'] }], acknowledgements: ACK },
+  pika_unknown_plan: { answers: { ...ANS, M0: ['not_sure'] }, tools: [{ T1: ['pika'], T3: ['not_sure'], T4: ['not_sure'] }], acknowledgements: ACK },
   pika_conflict_and_kling: {
     answers: { ...ANS, M0: ['brands', 'client_material'], M4: ['some'] },
-    tools: [{ T1: ['Pika'], T3: ['Pro'], T4: ['May 2026'] }, { T1: ['Pika'], T3: ['Fancy'], T4: ['May 2026'] }, { T1: ['Kling'], T3: ['Pro'], T4: ['May 2026'] }],
+    tools: [{ T1: ['pika'], T3: ['Pro'], T4: ['May 2026'] }, { T1: ['pika'], T3: ['Fancy'], T4: ['May 2026'] }, { T1: ['kling'], T3: ['Pro'], T4: ['May 2026'] }],
     acknowledgements: ACK,
   },
   stock_and_music: {
-    answers: { ...ANS, M0: ['music', 'stock'], M1: ['Artlist'], M2: ['not_sure'], M3: ['Getty Images'], M3D: ['yes'] },
-    tools: [{ T1: ['Kling'], T3: ['not_sure'], T4: ['May 2026'] }],
+    answers: { ...ANS, M0: ['music', 'stock'], M1: ['artlist'], M2: ['not_sure'], M3: ['getty'], M3D: ['yes'] },
+    tools: [{ T1: ['kling'], T3: ['not_sure'], T4: ['May 2026'] }],
     acknowledgements: ACK,
   },
-  unapproved_tools: { answers: { ...ANS, M0: ['none'] }, tools: [{ T1: ['Runway'], T3: ['Enterprise'], T4: ['May 2026'] }, { T1: ['Higgsfield'], T3: ['not_sure'], T4: ['May 2026'] }, { T1: ['Unknown Tool X'], T3: ['Pro'], T4: ['May 2026'] }], acknowledgements: ACK },
+  unapproved_tools: { answers: { ...ANS, M0: ['none'] }, tools: [{ T1: ['runway-gen3'], T3: ['Enterprise'], T4: ['May 2026'] }, { T1: ['higgsfield'], T3: ['not_sure'], T4: ['May 2026'] }, { T1: ['other_tool'], T1X: ['Unknown Tool X'], T3: ['Pro'], T4: ['May 2026'] }], acknowledgements: ACK },
 }
 const views = Object.fromEntries(
   Object.entries(SCENARIOS).map(([name, state]) => {

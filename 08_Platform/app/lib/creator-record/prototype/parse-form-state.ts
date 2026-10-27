@@ -1,17 +1,25 @@
 /**
  * CR-V2-VERTICAL-SLICE-1 — strict request-body parsing for the internal
- * prototype route. Accepts only the questionnaire form state; any other field
- * or shape is rejected (the route answers 400).
+ * prototype route. Accepts only the questionnaire form state and (since
+ * CR-V2-EVIDENCE-SLICE-1) the display-only documents returned by the examine
+ * route with the creator's review; any other field or shape is rejected (the
+ * route answers 400).
+ *
+ * Documents come back from the browser because nothing is stored server-side.
+ * They are re-validated strictly here (including the extraction schema) and
+ * can only ever be DISPLAYED: they never reach the guidance pipeline.
  */
 
+import { MAX_DOCUMENTS_PER_TOOL, parseDocumentReview, parseExaminedDocument, type ToolDocument } from '../evidence/document-observations'
 import type { CreatorRecordFormState } from './form'
 
-/** Upper bound on the raw body: a full questionnaire is a few KB. */
+/** Upper bound on the raw body: a full questionnaire is a few KB; three documents add under 10 KB. */
 export const MAX_BODY_BYTES = 32_000
 const MAX_VALUES_PER_ANSWER = 12
 const MAX_TOOL_BLOCKS = 10
+const MAX_DOCUMENTS = 3
 
-type ParseResult = { ok: true; state: CreatorRecordFormState } | { ok: false }
+type ParseResult = { ok: true; state: CreatorRecordFormState; documents: ToolDocument[] } | { ok: false }
 
 function stringArrayMap(v: unknown): Record<string, string[]> | null {
   if (!v || typeof v !== 'object' || Array.isArray(v)) return null
@@ -24,11 +32,30 @@ function stringArrayMap(v: unknown): Record<string, string[]> | null {
   return out
 }
 
-/** Strict shape check. Anything unexpected → 400; no field outside the form state is accepted. */
+function parseDocuments(v: unknown, toolCount: number): ToolDocument[] | null {
+  if (v === undefined) return []
+  if (!Array.isArray(v) || v.length > MAX_DOCUMENTS) return null
+  const out: ToolDocument[] = []
+  for (const item of v) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return null
+    const o = item as Record<string, unknown>
+    if (Object.keys(o).length !== 3 || !('tool_index' in o) || !('document' in o) || !('review' in o)) return null
+    const tool_index = o.tool_index
+    if (typeof tool_index !== 'number' || !Number.isInteger(tool_index) || tool_index < 0 || tool_index >= toolCount) return null
+    const document = parseExaminedDocument(o.document)
+    const review = parseDocumentReview(o.review)
+    if (!document || !review || review.document_id !== document.document_id) return null
+    if (out.filter((d) => d.tool_index === tool_index).length >= MAX_DOCUMENTS_PER_TOOL) return null
+    out.push({ tool_index, document, review })
+  }
+  return out
+}
+
+/** Strict shape check. Anything unexpected → 400; no field outside the form state and documents is accepted. */
 export function parseFormState(body: unknown): ParseResult {
   if (!body || typeof body !== 'object' || Array.isArray(body)) return { ok: false }
   const b = body as Record<string, unknown>
-  if (Object.keys(b).some((k) => !['answers', 'tools', 'acknowledgements'].includes(k))) return { ok: false }
+  if (Object.keys(b).some((k) => !['answers', 'tools', 'acknowledgements', 'documents'].includes(k))) return { ok: false }
   const answers = stringArrayMap(b.answers)
   if (!answers) return { ok: false }
   if (!Array.isArray(b.tools) || b.tools.length > MAX_TOOL_BLOCKS) return { ok: false }
@@ -45,6 +72,7 @@ export function parseFormState(body: unknown): ParseResult {
     if (!/^A[0-9]$/.test(k) || typeof v !== 'boolean') return { ok: false }
     acknowledgements[k] = v
   }
-  return { ok: true, state: { answers, tools, acknowledgements } }
+  const documents = parseDocuments(b.documents, tools.length)
+  if (!documents) return { ok: false }
+  return { ok: true, state: { answers, tools, acknowledgements }, documents }
 }
-
