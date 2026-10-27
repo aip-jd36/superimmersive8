@@ -8,7 +8,9 @@
  * Order (each step fails closed before the next):
  *   1. admin authorization (`checkReviewerContextAccess`) — before any byte of
  *      the body is read;
- *   2. size: declared Content-Length, then a streamed hard limit;
+ *   2. server-enforced consent (CR-V2-MVP-1): the request must carry the exact
+ *      consent statement header, or it is refused before the body is read;
+ *   3. size: declared Content-Length, then a streamed hard limit;
  *   3. strict multipart shape: exactly `file` and `tool_index`;
  *   4. examination (`examineUpload`): byte-sniffed format and size checks
  *      before any model call; fixture replay by default (zero model calls);
@@ -22,7 +24,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { checkReviewerContextAccess } from '@/lib/reviewer-context/auth'
-import { MAX_EXAMINE_REQUEST_BYTES, MAX_UPLOAD_BYTES } from '@/lib/creator-record/evidence/document-observations'
+import { DOCUMENT_CONSENT_HEADER, DOCUMENT_CONSENT_VALUE, MAX_EXAMINE_REQUEST_BYTES, MAX_UPLOAD_BYTES } from '@/lib/creator-record/evidence/document-observations'
 import { extractionMode } from '@/lib/creator-record/evidence/config'
 import { examineUpload } from '@/lib/creator-record/evidence/examine-upload'
 import { loadLiveCaller } from '@/lib/creator-record/evidence/live-caller'
@@ -67,6 +69,7 @@ export async function POST(req: NextRequest) {
   const access = await checkReviewerContextAccess()
   if (!access.ok) return NextResponse.json({ error: access.status === 401 ? 'Unauthorized' : 'Forbidden' }, { status: access.status })
 
+  if (req.headers.get(DOCUMENT_CONSENT_HEADER) !== DOCUMENT_CONSENT_VALUE) return NextResponse.json({ error: 'Consent required' }, { status: 428 })
   const contentType = req.headers.get('content-type') ?? ''
   if (!contentType.toLowerCase().startsWith('multipart/form-data')) return invalid()
   const declared = Number(req.headers.get('content-length') ?? '')
@@ -100,6 +103,7 @@ export async function POST(req: NextRequest) {
       liveCaller = undefined // examineUpload fails closed (model_error) without a caller
     }
   }
+  // CR-V2-MVP-6: the G-R2 text-layer cross-check is deferred; no plan scope is passed, so it is recorded as not run.
   const document = await examineUpload(bytes, 'name' in file ? (file as File).name : null, { mode, liveCaller })
   return NextResponse.json({ ok: true, tool_index, document })
 }

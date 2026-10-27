@@ -5,11 +5,11 @@
  * add a file, have it examined, see what it appears to show, and make an
  * explicit choice about it.
  *
- * The document observation is shown read-only and is never edited here. The
- * only things the creator can do are: adopt a plan name the document appears
- * to show as THEIR OWN answer (the parent sets the plan answer), say they will
- * give their own answer, or ignore it. Nothing is chosen automatically.
- * Standard controls only (file input, buttons, radios); no hover or drag.
+ * The document observation is shown read-only and is never edited here.
+ * CR-V2-MVP-6 (Option C): nothing it shows can become or change an answer;
+ * the only action is removing the document. The provisional comparison with
+ * the creator's answers is computed on the server, in the draft record.
+ * Standard controls only (file input, buttons); no hover or drag.
  *
  * CR-V2-WORK-UAT-HARNESS-2: with `fixtures`, the empty state is a native
  * dropdown of SI8's synthetic test documents instead of a file input; nothing
@@ -17,7 +17,7 @@
  */
 
 import { useState } from 'react'
-import { adoptablePlanValues, DOCUMENT_FIELDS, type ExtractionMode, type ReviewDecision, type ToolDocument } from '@/lib/creator-record/evidence/document-observations'
+import { DOCUMENT_FIELDS, type ExtractionMode, type ToolDocument } from '@/lib/creator-record/evidence/document-observations'
 import { T } from '@/lib/creator-record/presentation/templates'
 import type { ExaminedDocument } from '@/lib/creator-record/evidence/document-observations'
 
@@ -36,7 +36,6 @@ export interface DocumentReviewPanelProps {
   error: string | null
   onExamine: (file: File) => void
   onRemove: () => void
-  onReview: (decision: ReviewDecision, adoptedValue: string | null) => void
 }
 
 export function DocumentReviewPanel(p: DocumentReviewPanelProps) {
@@ -105,9 +104,6 @@ export function DocumentReviewPanel(p: DocumentReviewPanelProps) {
 
   const d = p.doc.document
   const ex = d.extraction
-  const adoptable = adoptablePlanValues(d)
-  const decision = p.doc.review.decision
-  const adoptedValue = p.doc.review.adopted_value
 
   return (
     <section aria-labelledby={`${id}-heading`} data-document-id={d.document_id} className="mt-2 mb-2 rounded-md border p-3" style={{ borderColor: 'rgba(0,0,0,0.15)' }}>
@@ -138,26 +134,8 @@ export function DocumentReviewPanel(p: DocumentReviewPanelProps) {
       )}
       {ex?.multiple_plans_shown && <p className="text-xs mt-2">{T.doc_multiple_plans}</p>}
       {ex?.instruction_like_text_present && <p className="text-xs mt-2">{T.doc_instruction_text}</p>}
-      <p className="text-xs mt-2" style={{ color: MUTED }}>{T.doc_not_compared}</p>
+      <p className="text-xs mt-2" style={{ color: MUTED }}>{T.doc_panel_separate}</p>
 
-      <fieldset className="mt-3" aria-describedby={`${id}-review-help`}>
-        <legend className="text-sm font-medium">Tool {n}: what would you like to do with what this document appears to show?</legend>
-        <p id={`${id}-review-help`} className="text-xs mb-1" style={{ color: MUTED }}>Your plan answer is always your own statement. Nothing is used unless you choose it.</p>
-        {adoptable.map((v) => (
-          <label key={v} className="flex items-center gap-2 text-sm">
-            <input type="radio" name={`${id}-review`} checked={decision === 'adopted' && adoptedValue === v} onChange={() => p.onReview('adopted', v)} />
-            Use “{v}” as my plan answer
-          </label>
-        ))}
-        <label className="flex items-center gap-2 text-sm">
-          <input type="radio" name={`${id}-review`} checked={decision === 'entered_different'} onChange={() => p.onReview('entered_different', null)} />
-          I’ll give my own plan answer
-        </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input type="radio" name={`${id}-review`} checked={decision === 'ignored'} onChange={() => p.onReview('ignored', null)} />
-          Ignore what this document appears to show
-        </label>
-      </fieldset>
       <div className="mt-3">
         <button type="button" className="rounded-md border px-3 py-1 text-xs bg-white" onClick={p.onRemove}>
           Remove document for Tool {n}

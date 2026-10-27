@@ -18,7 +18,7 @@ import { CreatorRecordQuestionnaire, type ExamineResult } from '@/components/cre
 import { DraftRecordView } from '@/components/creator-record/DraftRecordView'
 import { PILOT_ACKNOWLEDGEMENTS, PILOT_MAX_TOOLS, PILOT_QUESTION_META, PILOT_REGISTRY_INPUT } from '@/lib/creator-record/pilot/pilot-registry'
 import type { DraftRecordView as View } from '@/lib/creator-record/presentation/build-draft-record'
-import type { ExtractionMode, ToolDocument } from '@/lib/creator-record/evidence/document-observations'
+import { DOCUMENT_CONSENT_HEADER, DOCUMENT_CONSENT_VALUE, type ExtractionMode, type ToolDocument } from '@/lib/creator-record/evidence/document-observations'
 import type { CreatorRecordFormState, FormIssue } from '@/lib/creator-record/prototype/form'
 import { T } from '@/lib/creator-record/presentation/templates'
 
@@ -41,11 +41,13 @@ async function examineDocument(toolIndex: number, file: File): Promise<ExamineRe
   body.append('file', file)
   body.append('tool_index', String(toolIndex))
   try {
-    const res = await fetch('/api/admin/creator-record-v2/examine', { method: 'POST', body })
+    // Sent only from the document panel, which is enabled only after the consent statement is ticked.
+    const res = await fetch('/api/admin/creator-record-v2/examine', { method: 'POST', headers: { [DOCUMENT_CONSENT_HEADER]: DOCUMENT_CONSENT_VALUE }, body })
     const data = await res.json().catch(() => null)
     if (res.ok && data?.ok && data.document) return { ok: true, document: data.document }
     if (res.status === 401 || res.status === 403) return { ok: false, error: 'You do not have access to this prototype.' }
     if (res.status === 413) return { ok: false, error: 'This file is larger than the 4 MB limit.' }
+    if (res.status === 428) return { ok: false, error: 'Please confirm the statement under “Before you add a document” first.' }
     return { ok: false, error: 'The document could not be examined. Please try again.' }
   } catch {
     return { ok: false, error: 'The document could not be examined. Please try again.' }

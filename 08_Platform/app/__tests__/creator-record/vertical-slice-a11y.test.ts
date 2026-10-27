@@ -53,14 +53,13 @@ test('validation errors are visible text, summarised in an alert, and tied to th
   expect(Q).toMatch(/Error: \{ISSUE_TEXT/)
 })
 
-test('the document panel uses a file input, buttons and radios, with visible status and errors', () => {
+test('the document panel uses a file input and buttons, with visible status and errors (CR-V2-MVP-6: no choice to adopt)', () => {
   expect(D).toMatch(/type="file"/)
   expect(D).toMatch(/accept="application\/pdf,image\/png,image\/jpeg"/)
   expect(D).toMatch(/Read document for Tool \$\{n\}/)
   expect(D).toMatch(/role="status"/)
   expect(D).toMatch(/role="alert"/)
-  expect(D).toMatch(/type="radio"/)
-  expect(D).toMatch(/<legend/)
+  expect(D).not.toMatch(/type="radio"|<legend|<fieldset/)
   expect(D).toMatch(/Remove document for Tool \{n\}/)
   // The consent statement is a visible checkbox before any document can be added.
   expect(Q).toMatch(/Before you add a document/)
@@ -74,12 +73,12 @@ test('submission produces a clear completion state and Start new test is always 
 })
 
 test('the record is plain page text with labelled, distinguishable sections', () => {
-  for (const id of ['summary', 'declarations', 'documents', 'guidance', 'open-items', 'not-included', 'independent-review', 'not-done', 'method']) {
+  for (const id of ['summary', 'declarations', 'documents', 'reconciliation', 'guidance', 'open-items', 'not-included', 'independent-review', 'not-done', 'method']) {
     expect(V).toContain(`<Section id="${id}"`)
   }
   expect(V).toMatch(/aria-labelledby=\{`record-\$\{id\}`\}/)
   expect(V).toMatch(/Guidance: \{c.subject\}/)
   expect(V).toMatch(/Open item: \{o.label\}/)
-  for (const label of ['Relevance', 'Guidance', 'Based on what you told us', 'Caveat', 'Your choice']) expect(V).toContain(`label="${label}"`)
+  for (const label of ['Relevance', 'Guidance', 'Based on what you told us', 'Caveat']) expect(V).toContain(`label="${label}"`)
   expect(V).not.toMatch(/<canvas|<img|<svg/i)
 })

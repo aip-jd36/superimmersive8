@@ -75,8 +75,20 @@ export const T = {
   section_method: 'Method and versions',
 
   summary_intro: 'This record sets out what you told SI8 about this AI video, the general commercial-use guidance SI8 holds about the tools and materials you named, and what remains open.',
-  summary_counts: (guidance: number, open: number) =>
-    `${guidance} ${guidance === 1 ? 'piece' : 'pieces'} of guidance included; ${open} open ${open === 1 ? 'item' : 'items'}.`,
+  /**
+   * CR-V2-COMP-001: the count separates guidance that may be relevant only on
+   * information this record does not establish, and counts BOTH kinds of open
+   * item (information not established, and missing evidence). It never implies
+   * completeness beyond "on what you told us".
+   */
+  summary_counts: (guidance: number, unresolved: number, open: number) =>
+    `${guidance} ${guidance === 1 ? 'piece' : 'pieces'} of guidance included` +
+    (guidance === 0
+      ? '. This record therefore makes no statement about commercial use of the tools and materials you named.'
+      : unresolved === 0
+        ? '. None of it depends on information this record does not establish, on what you told us (which SI8 has not checked).'
+        : `. ${unresolved} of ${guidance} may be relevant only depending on information this record does not establish.`) +
+    ` ${open} open ${open === 1 ? 'item' : 'items'}.`,
   summary_not_assessment: 'It records your own statements. SI8 has not checked them.',
 
   declarations_intro: 'These are your own answers, recorded as you gave them. SI8 has not checked them.',
@@ -96,7 +108,6 @@ export const T = {
   plan_not_a_plan_name: 'SI8 holds no guidance that refers to this plan name, so it was not used to choose guidance.',
   plan_conflicting: 'You gave more than one plan for this tool, so none of them was used to choose guidance.',
   plan_not_sure: 'You were not sure of the plan, so it was not used to choose guidance.',
-  plan_adopted_note: 'You chose this after reviewing a document you added. It is still your own statement; SI8 has not checked it.',
   tool_not_listed: 'You told us the tool is not in SI8’s list.',
   tool_unsure: 'You were not sure which tool, so no tool guidance is linked to it.',
   provider_not_listed: 'You told us the service is not in SI8’s list.',
@@ -120,6 +131,7 @@ export const T = {
   depends_account: (tool: string, value: string) => `This guidance is about a ${tool} account type (“${value}”). This record does not ask about account types.`,
   depends_other: 'This guidance depends on information this record does not collect.',
   depends_open_items: 'Open items listed below affect how this guidance relates to your project.',
+  depends_shared_purpose: 'Other guidance for the same purpose in this record depends on information this record does not establish, so this guidance is shown at the same level.',
   source_line: (lastReviewed: string) => `Source: provider terms as last reviewed by SI8 on ${lastReviewed}.`,
   subject_tool: (name: string) => `${name} (AI tool)`,
   subject_provider: (name: string) => `${name} (music or stock service)`,
@@ -127,8 +139,16 @@ export const T = {
 
   open_items_intro: 'These are matters the guidance depends on that this record cannot settle. Each stays open: this record does not assess whether any document is sufficient.',
   open_none: 'No open items for the guidance included.',
+  not_established_heading: 'Information this record does not establish',
+  not_established_plan: (tool: string) => `Which ${tool} plan you were on`,
+  not_established_account: (tool: string) => `Which ${tool} account type applies`,
+  not_established_other: 'Information this guidance depends on that this record does not collect',
+  not_established_told_plan_none: 'You were not sure, or did not say.',
+  documents_needed_heading: 'Missing evidence',
   open_told_us_none: 'Not asked in this record.',
   open_documents_none: 'No document for this was provided. This prototype accepts billing documents for AI tools only.',
+  /** CR-V2-MVP-6: at least one document was added; it is described separately and never establishes an open item. */
+  open_documents_some: 'Any document you added is described under “Documents you added” and compared, provisionally, under “Your answers beside your documents”. A document does not establish this.',
   open_evidence_default: 'This can only be shown with supporting documents.',
   open_sufficiency: 'Not assessed by this record.',
   open_status: 'Open',
@@ -148,13 +168,14 @@ export const T = {
 
   independent_review_intro: 'These questions need a person to review the actual documents and facts. SI8’s Commercial Assurance Assessment is a separate, human-reviewed service for this.',
   review_open_items: 'Whether the open items above are supported by documents.',
+  review_not_established: 'The information listed above as not established by this record.',
   review_likeness: 'The use of a real person’s likeness or voice, and any release or consent.',
   review_third_party: 'The use of brands, characters, logos or material supplied by others, and any permission for it.',
   review_laws: 'Which laws apply to this project. This record recorded your locations but did not decide that.',
 
   section_documents: 'Documents you added',
   documents_intro:
-    'Each file you added is described only by what it appears to show. SI8 did not check whether any document is genuine, complete or current, and did not compare any document with your answers. Only your own answers were used to choose guidance.',
+    'Each file you added is described only by what it appears to show. Nothing a document appears to show was used as one of your answers. SI8 did not check whether any document is genuine, complete or current. Only your own answers were used to choose guidance.',
   documents_none: 'You did not add any documents.',
   doc_heading: (tool: number, name: string) => `Document for Tool ${tool}: ${name}`,
   doc_fingerprint_label: 'Fingerprint (SHA-256)',
@@ -196,20 +217,60 @@ export const T = {
     unreadable: 'Could not be read',
     ambiguous: 'Could not be determined (more than one reading is possible)',
   } as Record<string, string>,
-  doc_issuer_note: 'The seller shown is not used to identify the tool. The tool is the one you chose.',
+  doc_issuer_note: 'The seller shown never changes which tool your guidance is about: that is the tool you chose.',
   doc_plan_names_label: 'Plan names printed on it',
   doc_plan_names_none: 'None printed',
   doc_multiple_plans: 'It appears to show more than one plan, so no single plan can be taken from it.',
+  /** CR-V2-MVP-6: shown under a document in the questionnaire. */
+  doc_panel_separate: 'What this document appears to show is kept separate from your answers and never changes them. The draft record compares the two, provisionally.',
   doc_instruction_text: 'It contains text addressed to an automated reader. That text was treated as part of the document and changed nothing.',
-  doc_review_label: 'Your choice',
-  doc_review: {
-    adopted: (value: string) => `You chose to use “${value}”, which the document appears to show, as your plan answer. That answer is still your own statement.`,
-    entered_different: 'You chose to give your own plan answer instead.',
-    ignored: 'You chose to ignore what this document appears to show.',
-    not_reviewed: 'You did not make a choice about this document.',
-  },
-  doc_not_compared: 'SI8 did not compare this document with your answers.',
-  not_done_documents: 'SI8 did not check whether any document you added is genuine, complete or current, or compare it with your answers.',
+  /**
+   * CR-V2-MVP-6 (Option C): the provisional comparison between the creator's
+   * declarations and what a document appears to show. Kept out of the
+   * document section (a separate statement type). Every "appears" result is
+   * always followed by its limitation; none is a check, a finding or a
+   * statement about rights.
+   */
+  section_reconciliation: 'Your answers beside your documents',
+  recon_intro:
+    'For each tool, an automated, provisional comparison of your answers with what a document you added appears to show. It never changed your answers and was not used to choose guidance. It is not a check of the document and says nothing about whether any use is permitted.',
+  recon_heading: (tool: number) => `Tool ${tool}`,
+  recon_provider_label: 'Seller and the tool you named',
+  recon_plan_label: 'Plan and your plan answer',
+  recon_result: {
+    appears_consistent: 'Appears consistent',
+    appears_to_conflict: 'Appears to conflict',
+    does_not_establish: 'Does not establish it',
+    not_assessed: 'Not assessed',
+  } as Record<string, string>,
+  recon_reason: {
+    no_document: 'You did not add a document for this tool. That is recorded as a limitation; you can continue without one.',
+    document_not_read: 'The document for this tool was not read, so nothing was compared.',
+    tool_not_identified: 'Your tool answer is not one of the tools in SI8’s list, so nothing was compared.',
+    plan_not_declared: 'You did not give a plan (or said you are not sure), so no plan was compared.',
+    not_a_billing_document: 'The document does not appear to be a billing document.',
+    document_not_readable: 'The document could not be read clearly.',
+    seller_not_read: 'No seller could be read on the document.',
+    seller_not_recognized: 'The seller shown is not a name SI8 recognises for a tool in its list, so it was not linked to the tool you named.',
+    seller_ambiguous: 'The seller shown could refer to more than one tool, so it was not linked to the tool you named.',
+    same_tool: 'The seller shown is a name SI8 recognises for the tool you named.',
+    different_tool: 'The seller shown is a name SI8 recognises for a different tool from the one you named.',
+    seller_not_established: 'The plan was not compared because the document was not linked to the tool you named.',
+    plan_not_read: 'No single plan could be read on the document.',
+    plan_incomplete: 'The plan name on the document appears cut off or incomplete.',
+    plan_not_in_excerpt: 'The plan name reported is not supported by the text it was read from.',
+    plan_not_listed: 'The plan reported is not among the plan names read from the document.',
+    more_than_one_plan: 'The document appears to name more than one plan.',
+    plan_not_identifiable: 'The plan names could not be compared.',
+    same_plan_name: 'The plan name read from the document is the same plan name as your answer.',
+    different_plan_name: 'The plan name read from the document is a different plan name from your answer.',
+  } as Record<string, string>,
+  recon_limit_consistent:
+    'An automated reading can miss or misread names printed elsewhere on a document, so this does not rule out another plan or seller on it. It does not show which plan was purchased, that it was active when you made the video, or that any use is permitted.',
+  recon_limit_conflict:
+    'The automated reading may be incomplete or wrong. Your answer has not been changed. You can correct it yourself, add a different document, or leave it as it is; the difference stays in this record.',
+  recon_none: 'You did not add any documents, so nothing was compared. You can continue without documents; this is recorded as a limitation.',
+  not_done_documents: 'SI8 did not check whether any document you added is genuine, complete or current. The comparison with your answers is automated and provisional; SI8 did not review it.',
   method_documents: 'Document reading',
   method_documents_replay: (schema: string, replaySet: string) => `Fixture replay of recorded test data (${schema}; ${replaySet}); no AI model`,
   method_documents_live: (schema: string, prompt: string) => `AI model reading (${schema}; ${prompt})`,
@@ -229,6 +290,8 @@ export const T = {
   method_engine: 'Composition',
   method_engine_value: 'Creator Record guidance pipeline (deterministic; no AI model)',
 } as const
+
+/** Mechanical formatting (not a sentence): names in curly quotes, comma-separated. */
 
 /**
  * Fixed sentences that legitimately contain a banned stem only as a negation.

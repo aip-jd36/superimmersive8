@@ -25,7 +25,7 @@ jest.mock('@/lib/creator-record/receipt-examination/examine.anthropic', () => {
 
 import { POST } from '@/app/api/admin/creator-record-v2/examine/route'
 import { LIVE_EXTRACTION_ENV, LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD, extractionMode, liveExtractionEnabled } from '@/lib/creator-record/evidence/config'
-import { MAX_UPLOAD_BYTES, parseExaminedDocument } from '@/lib/creator-record/evidence/document-observations'
+import { DOCUMENT_CONSENT_HEADER, DOCUMENT_CONSENT_VALUE, MAX_LIVE_UPLOAD_BYTES, MAX_UPLOAD_BYTES, parseExaminedDocument } from '@/lib/creator-record/evidence/document-observations'
 import { examineUpload } from '@/lib/creator-record/evidence/examine-upload'
 import { loadLiveCaller } from '@/lib/creator-record/evidence/live-caller'
 import { buildReplayTable, DEFAULT_REPLAY_TABLE, type ReplayFixture } from '@/lib/creator-record/evidence/replay'
@@ -39,10 +39,11 @@ const entry = (id: string) => REPLAY_FIXTURES.find((f) => f.fixture_id === id)!
 /** A one-entry replay table keyed by these exact bytes (deterministic; no generated files needed). */
 const tableFor = (bytes: Uint8Array, fixtureId: string) => buildReplayTable([{ ...entry(fixtureId), sha256: sha(bytes) } as ReplayFixture])
 
-function multipart(parts: Record<string, Blob | string>): Request {
+const CONSENT = { [DOCUMENT_CONSENT_HEADER]: DOCUMENT_CONSENT_VALUE }
+function multipart(parts: Record<string, Blob | string>, headers: Record<string, string> = CONSENT): Request {
   const form = new FormData()
   for (const [k, v] of Object.entries(parts)) form.append(k, v)
-  return new Request('http://localhost/api/admin/creator-record-v2/examine', { method: 'POST', body: form })
+  return new Request('http://localhost/api/admin/creator-record-v2/examine', { method: 'POST', headers, body: form })
 }
 const fileBlob = (bytes: Uint8Array, name = 'receipt.png', type = 'image/png') => new File([bytes as BlobPart], name, { type })
 
@@ -175,7 +176,7 @@ describe('examineUpload — fixture replay', () => {
       const d = await examineUpload(new Uint8Array(readFileSync(path.join(dir, m.file))), m.file, { mode: 'fixture_replay' })
       expect(d.replay_fixture_id).toBe(m.id)
       const roundTripped = parseExaminedDocument(JSON.parse(JSON.stringify(d)))!
-      expect(verifyReturnedDocument({ tool_index: 0, document: roundTripped, review: { document_id: d.document_id, decision: 'not_reviewed', adopted_value: null } })).toBe(true)
+      expect(verifyReturnedDocument({ tool_index: 0, document: roundTripped })).toBe(true)
     }
   })
 })
@@ -202,6 +203,17 @@ describe('examineUpload — live mode (scripted caller; no real model)', () => {
     const d = await examineUpload(pngBytes('live-error'), 'l.png', { mode: 'live_model', liveCaller: caller })
     expect(caller).toHaveBeenCalledTimes(1)
     expect(d.reason).toBe('model_error')
+  })
+
+  test('CR-V2-MVP-1: live reading refuses files over the 1 MB live limit before any call', async () => {
+    const caller = jest.fn()
+    const big = new Uint8Array(MAX_LIVE_UPLOAD_BYTES + 1)
+    big.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+    const d = await examineUpload(big, 'big.png', { mode: 'live_model', liveCaller: caller })
+    expect(d).toEqual(expect.objectContaining({ outcome: 'could_not_examine', reason: 'file_too_large', model_calls: 0 }))
+    expect(caller).not.toHaveBeenCalled()
+    // The same file is still accepted for (zero-cost) replay checks.
+    expect((await examineUpload(big, 'big.png', { mode: 'fixture_replay' })).reason).toBe('no_replay_fixture')
   })
 
   test('live mode without a caller fails closed with no call', async () => {
@@ -238,10 +250,37 @@ describe('POST /api/admin/creator-record-v2/examine', () => {
     expect(touched).toEqual({ body: false, formData: false, text: false })
   })
 
+  test.each([
+    ['no consent statement', {}],
+    ['a different consent statement', { [DOCUMENT_CONSENT_HEADER]: 'yes' }],
+    ['an older or future statement version', { [DOCUMENT_CONSENT_HEADER]: 'synthetic-test-documents-v2' }],
+  ])('CR-V2-MVP-1 server-enforced consent: %s → 428 before the body is read, no examination', async (_n, headers) => {
+    const touched = { body: false }
+    const req = {
+      headers: new Headers({ 'content-type': 'multipart/form-data; boundary=x', ...(headers as Record<string, string>) }),
+      get body() {
+        touched.body = true
+        return null
+      },
+    }
+    const res = await POST(req as any)
+    expect(res.status).toBe(428)
+    expect(touched.body).toBe(false)
+    expect(adapterLoads.count).toBe(0)
+  })
+
+  test('the admin client sends the consent statement only on the examine request', () => {
+    const client = readFileSync(path.join(APP, 'app', 'admin', 'creator-record-v2', 'CreatorRecordPrototypeClient.tsx'), 'utf8')
+    expect(client).toMatch(/fetch\('\/api\/admin\/creator-record-v2\/examine', \{ method: 'POST', headers: \{ \[DOCUMENT_CONSENT_HEADER\]: DOCUMENT_CONSENT_VALUE \}/)
+    // The document panel only allows reading after the consent box is ticked.
+    const panel = readFileSync(path.join(APP, 'components', 'creator-record', 'DocumentReviewPanel.tsx'), 'utf8')
+    expect(panel).toMatch(/disabled=\{!p\.consented \|\| !file \|\| p\.examining\}/)
+  })
+
   test('declared Content-Length over the limit → 413 before the body is read', async () => {
     const touched = { body: false }
     const req = {
-      headers: new Headers({ 'content-type': 'multipart/form-data; boundary=x', 'content-length': String(MAX_UPLOAD_BYTES * 2) }),
+      headers: new Headers({ 'content-type': 'multipart/form-data; boundary=x', 'content-length': String(MAX_UPLOAD_BYTES * 2), ...CONSENT }),
       get body() {
         touched.body = true
         return null
@@ -260,13 +299,13 @@ describe('POST /api/admin/creator-record-v2/examine', () => {
         c.close()
       },
     })
-    const req = { headers: new Headers({ 'content-type': 'multipart/form-data; boundary=x' }), body: stream }
+    const req = { headers: new Headers({ 'content-type': 'multipart/form-data; boundary=x', ...CONSENT }), body: stream }
     const res = await POST(req as any)
     expect(res.status).toBe(413)
   })
 
   test.each([
-    ['not multipart', () => new Request('http://localhost/x', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' })],
+    ['not multipart', () => new Request('http://localhost/x', { method: 'POST', headers: { 'content-type': 'application/json', ...CONSENT }, body: '{}' })],
     ['missing tool_index', () => multipart({ file: fileBlob(pngBytes('a')) })],
     ['extra field', () => multipart({ file: fileBlob(pngBytes('a')), tool_index: '0', note: 'x' })],
     ['tool_index out of range', () => multipart({ file: fileBlob(pngBytes('a')), tool_index: '7' })],

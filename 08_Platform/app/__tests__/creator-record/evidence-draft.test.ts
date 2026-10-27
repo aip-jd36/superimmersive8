@@ -1,7 +1,10 @@
 /**
  * CR-V2-EVIDENCE-SLICE-1 — documents in the draft Creator Record: the E1–E14
- * scenarios (deterministic, fixture replay), creator review and correction,
- * the interpretation boundary (documents never drive guidance) and wording.
+ * scenarios (deterministic, fixture replay), correction, the interpretation
+ * boundary (documents never drive guidance) and wording.
+ * CR-V2-MVP-6 (Option C): there is no adoption and no review; documents are
+ * compared provisionally on the server and never change a declaration
+ * (see also evidence-reconciliation.test.ts).
  *
  * What this proves: the interface, the boundaries and the wording, given a
  * document observation. What it CANNOT prove: that a model extracts these
@@ -14,7 +17,7 @@ import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import * as guidanceModule from '@/lib/creator-record/integration/run-creator-record-guidance'
-import { adoptablePlanValues, parseExaminedDocument, type ReviewDecision, type ToolDocument } from '@/lib/creator-record/evidence/document-observations'
+import { parseExaminedDocument, type ToolDocument } from '@/lib/creator-record/evidence/document-observations'
 import { examineUpload } from '@/lib/creator-record/evidence/examine-upload'
 import { buildReplayTable, type ReplayFixture } from '@/lib/creator-record/evidence/replay'
 import { REPLAY_FIXTURES } from '@/lib/creator-record/evidence/replay-fixtures.data'
@@ -38,9 +41,8 @@ async function examined(fixtureId: string, tag = fixtureId) {
   const table = buildReplayTable([{ ...fixture, sha256: sha(bytes) } as ReplayFixture])
   return examineUpload(bytes, `${fixtureId}.png`, { mode: 'fixture_replay', replayTable: table })
 }
-async function toolDoc(fixtureId: string, tool_index = 0, decision: ReviewDecision = 'not_reviewed', adopted_value: string | null = null): Promise<ToolDocument> {
-  const document = await examined(fixtureId)
-  return { tool_index, document, review: { document_id: document.document_id, decision, adopted_value } }
+async function toolDoc(fixtureId: string, tool_index = 0): Promise<ToolDocument> {
+  return { tool_index, document: await examined(fixtureId) }
 }
 const state = (tools: Record<string, string[]>[], answers: Record<string, string[]> = {}): CreatorRecordFormState => ({ answers: { ...ANS, ...answers }, tools, acknowledgements: ACK })
 const pika = (plan: string) => ({ T1: ['pika'], T3: [plan], T4: ['May 2026'] })
@@ -72,12 +74,16 @@ describe('documents never drive guidance', () => {
   test('guidance, open items and not-included lines are identical whatever the document shows', async () => {
     const s = state([pika('Standard')])
     const base = draft(s).view
-    for (const f of ['pdf-pika-pro-no-period', 'conflict-reseller-merchant', 'inject-pricing-page-claims-invoice', 'unreadable-dark-image']) {
+    // Only the open items' "Documents" line differs: it now says that a document was added (CR-V2-MVP-6).
+    const withoutDocLine = (o: DraftRecordView['open_items']) => ({ ...o, items: o.items.map(({ documents: _d, ...rest }) => rest) })
+    for (const f of ['pdf-pika-pro-no-period', 'conflict-reseller-merchant', 'inject-pricing-page-claims-invoice', 'unreadable-dark-image', 'conflict-other-provider']) {
       const v = draft(s, [await toolDoc(f)]).view
       expect(v.guidance).toEqual(base.guidance)
-      expect(v.open_items).toEqual(base.open_items)
+      expect(withoutDocLine(v.open_items)).toEqual(withoutDocLine(base.open_items))
+      expect(v.open_items.items.every((o) => o.documents === T.open_documents_some)).toBe(true)
       expect(v.not_shown).toEqual(base.not_shown)
     }
+    expect(base.open_items.items.every((o) => o.documents === T.open_documents_none)).toBe(true)
   })
 
   test('document observations are kept in the trace as document_examined provenance, never as declarations', async () => {
@@ -101,7 +107,7 @@ describe('documents never drive guidance', () => {
 // ─────────────────────────────────────────────── E1–E14 (fixture replay)
 
 describe('E1–E14 (deterministic fixture replay)', () => {
-  test('E1 Pika Pro + matching synthetic receipt: document shown beside the answer; guidance unchanged; nothing compared', async () => {
+  test('E1 Pika Pro + synthetic receipt: document shown; guidance unchanged; the seller as printed is not a recognised name, so nothing is established', async () => {
     const r = draft(state([pika('Pro')]), [await toolDoc('pdf-pika-pro-no-period')])
     expect(ids(r.view)).toEqual(ids(draft(state([pika('Pro')])).view))
     const d = r.view.documents.items[0]
@@ -109,7 +115,7 @@ describe('E1–E14 (deterministic fixture replay)', () => {
     expect(d.rows).toContainEqual(expect.objectContaining({ label: T.doc_field_label.product_or_plan_name, value: 'Appears to show “Pro”' }))
     expect(d.rows).toContainEqual(expect.objectContaining({ label: T.doc_read_label, value: T.doc_read_replay }))
     expect(d.rows).toContainEqual(expect.objectContaining({ label: T.doc_fingerprint_label, note: T.doc_fingerprint_note }))
-    expect(d.not_compared).toBe(T.doc_not_compared)
+    expect(r.view.trace.evidence_reconciliation[0]).toEqual({ tool_index: 0, document_id: d.document_id, provider: { result: 'does_not_establish', reason: 'seller_not_recognized' }, plan: { result: 'does_not_establish', reason: 'seller_not_established' } })
     expect(r.view.banner!.lines[1]).toBe(T.record_banner_files_replay)
     expect(r.view.not_done).toContain(T.not_done_documents)
     expect(r.view.method).toContainEqual(expect.objectContaining({ label: T.method_documents }))
@@ -124,26 +130,21 @@ describe('E1–E14 (deterministic fixture replay)', () => {
     expect(documentText).not.toMatch(/differ|mismatch|contradict|inconsistent|does not agree/i)
   })
 
-  test('E3 plan "Not sure", then adopt "Pro" from the document: still a declaration, "on what you told us"', async () => {
-    const doc = await toolDoc('pdf-pika-pro-no-period', 0, 'adopted', 'Pro')
-    const r = draft(state([pika('Pro')]), [doc])
-    const proCard = r.view.guidance.cards.find((c) => c.claim_id === 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-PRO-001-v1')!
-    expect(proCard.conclusion_label).toBe(T.conclusion_label.relevant_on_declared_facts)
-    expect(proCard.basis).toEqual([T.basis_plan('Pika', 'Pro')])
-    const planRow = toolRows(r.view).find((x) => x.value === 'Pro')!
-    expect(planRow.note).toContain(T.plan_adopted_note)
-    expect(r.view.documents.items[0].review).toBe(T.doc_review.adopted('Pro'))
-    // The declaration records the creator's answer, not the document.
-    const declaredPlan = r.guidance.facts.provenance.plans[0]
-    expect(declaredPlan.declared).toBe('Pro')
-    expect(declaredPlan.observation_id).not.toContain(':DOC:')
+  test('E3 plan "Not sure" and a receipt showing "Pro": the answer stays "Not sure"; Pro is never taken from the document', async () => {
+    const doc = await toolDoc('pdf-pika-pro-no-period')
+    const r = draft(state([pika('not_sure')]), [doc])
+    expect(ids(r.view)).toEqual(ids(draft(state([pika('not_sure')])).view))
+    expect(r.view.guidance.cards.find((c) => c.claim_id === 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-PRO-001-v1')?.conclusion).not.toBe('relevant_on_declared_facts')
+    expect(toolRows(r.view).some((x) => x.value === 'Pro')).toBe(false)
+    expect(r.guidance.facts.provenance.plans.every((p) => p.declared !== 'Pro')).toBe(true)
+    expect(r.view.trace.evidence_reconciliation[0].plan).toEqual({ result: 'not_assessed', reason: 'plan_not_declared' })
   })
 
   test('E4 truncated plan name: shown as "could not be determined"; the creator enters their own answer', async () => {
-    const doc = await toolDoc('shot-truncated-plan-name', 0, 'entered_different')
+    const doc = await toolDoc('shot-truncated-plan-name')
     const r = draft(state([pika('Pro')]), [doc])
     expect(r.view.documents.items[0].rows).toContainEqual(expect.objectContaining({ label: T.doc_field_label.product_or_plan_name, value: T.doc_field_status.ambiguous }))
-    expect(r.view.documents.items[0].review).toBe(T.doc_review.entered_different)
+    expect(r.view.trace.evidence_reconciliation[0].plan.result).toBe('does_not_establish')
     expect(ids(r.view)).toContain('CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-PRO-001-v1')
   })
 
@@ -162,10 +163,10 @@ describe('E1–E14 (deterministic fixture replay)', () => {
     const d = r.view.documents.items[0]
     expect(d.rows).toContainEqual(expect.objectContaining({ label: T.doc_type_label, value: T.doc_type.not_a_billing_document }))
     expect(d.notes).toContain(T.doc_instruction_text)
-    expect(adoptablePlanValues(doc.document)).toEqual([])
+    expect(r.view.trace.evidence_reconciliation[0]).toEqual(expect.objectContaining({ provider: { result: 'does_not_establish', reason: 'not_a_billing_document' }, plan: { result: 'does_not_establish', reason: 'not_a_billing_document' } }))
   })
 
-  test('E7 a photo that is not a receipt, and E8 an unreadable image: no value shown, nothing adoptable', async () => {
+  test('E7 a photo that is not a receipt, and E8 an unreadable image: no value shown, nothing established', async () => {
     const photo = await toolDoc('nonreceipt-abstract-photo')
     const dark = await toolDoc('unreadable-dark-image')
     const r = draft(state([pika('Pro'), { T1: ['kling'], T3: ['not_sure'], T4: ['May 2026'] }]), [photo, { ...dark, tool_index: 1 }])
@@ -174,27 +175,28 @@ describe('E1–E14 (deterministic fixture replay)', () => {
     expect(k.rows).toContainEqual(expect.objectContaining({ label: T.doc_readability_label, value: T.doc_readability.illegible }))
     expect(k.rows).toContainEqual(expect.objectContaining({ label: T.doc_field_label.issuer_name, value: T.doc_field_status.unreadable }))
     expect(docText(r.view)).not.toMatch(/Appears to show/)
-    expect(adoptablePlanValues(photo.document)).toEqual([])
-    expect(adoptablePlanValues(dark.document)).toEqual([])
+    expect(r.view.trace.evidence_reconciliation.map((x) => x.provider.result)).toEqual(['does_not_establish', 'does_not_establish'])
+    expect(r.view.trace.evidence_reconciliation[1].plan).toEqual({ result: 'not_assessed', reason: 'plan_not_declared' })
   })
 
   test('E9/E10 a rejected file is listed as not read, with zero model calls', async () => {
     const bytes = new Uint8Array(Buffer.from('plain text pretending to be a pdf'))
     const document = await examineUpload(bytes, 'fake.pdf', { mode: 'fixture_replay' })
-    const r = draft(state([pika('Pro')]), [{ tool_index: 0, document, review: { document_id: document.document_id, decision: 'not_reviewed', adopted_value: null } }])
+    const r = draft(state([pika('Pro')]), [{ tool_index: 0, document }])
     expect(r.view.documents.items[0].rows).toContainEqual(expect.objectContaining({ label: T.doc_read_label, value: T.doc_not_read.unsupported_format }))
     expect(document.model_calls).toBe(0)
   })
 
   test('E11 reseller as merchant: the seller is shown as printed and never identifies the tool', async () => {
-    const doc = await toolDoc('conflict-reseller-merchant', 0, 'adopted', 'Pika Pro (Monthly)')
+    const doc = await toolDoc('conflict-reseller-merchant')
     const r = draft(state([pika('Pika Pro (Monthly)')]), [doc])
     const issuer = r.view.documents.items[0].rows.find((x) => x.label === T.doc_field_label.issuer_name)!
     expect(issuer.value).toBe('Appears to show “ResellerHub Payments Ltd”')
     expect(issuer.note).toContain(T.doc_issuer_note)
     expect(r.guidance.facts.activeToolIds).toEqual(['pika'])
-    // Adopting a non-governed plan text from a document does not make it a governed plan:
+    // A non-governed plan text typed by the creator does not become a governed plan:
     // no plan card is "relevant on what you told us"; every plan card stays "may be relevant".
+    expect(r.view.trace.evidence_reconciliation[0].provider).toEqual({ result: 'does_not_establish', reason: 'seller_not_recognized' })
     expect(r.guidance.facts.provenance.plans[0].passed_to_applicability).toBe(false)
     const planCards = r.view.guidance.cards.filter((c) => c.claim_id.includes('PAID-PLAN'))
     expect(planCards.length).toBeGreaterThan(0)
@@ -215,39 +217,35 @@ describe('E1–E14 (deterministic fixture replay)', () => {
   })
 })
 
-// ─────────────────────────────────────────────── review integrity and corrections
+// ─────────────────────────────────────────────── corrections and request integrity
 
-describe('creator review: explicit, immutable, no stale facts', () => {
-  test('an "adopted" review whose value is no longer the plan answer is refused (stale), not recorded as adopted', async () => {
-    const doc = await toolDoc('pdf-pika-pro-no-period', 0, 'adopted', 'Pro')
-    const r = buildCreatorRecordDraft({ state: state([pika('Standard')]), sources: pilotSources(), topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: '2026-10-27', record: RECORD, documents: [doc] })
-    expect(r.ok).toBe(false)
-    if (!r.ok) expect(r.issues).toContainEqual({ q_id: 'T3', tool_index: 0, issue: 'stale_document_review' })
+describe('declarations are only what the creator enters', () => {
+  test('correcting the plan answer changes guidance; the document and its observation are unchanged', async () => {
+    const doc = await toolDoc('pdf-pika-pro-no-period')
+    const before = draft(state([pika('Pro')]), [doc])
+    const after = draft(state([pika('Standard')]), [doc])
+    expect(ids(after.view)).not.toContain('CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-PRO-001-v1')
+    expect(after.guidance.facts.provenance.plans.map((p) => p.declared)).toEqual(['Standard'])
+    expect(after.view.documents).toEqual(before.view.documents)
   })
 
-  test('adopting a value the document does not appear to show is refused', async () => {
-    const doc = await toolDoc('pdf-pika-pro-no-period', 0, 'adopted', 'Fancy')
-    const r = buildCreatorRecordDraft({ state: state([pika('Fancy')]), sources: pilotSources(), topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: '2026-10-27', record: RECORD, documents: [doc] })
-    expect(r.ok).toBe(false)
-  })
-
-  test('correcting after adoption ("entered_different") leaves only the corrected plan in the record', async () => {
-    const doc = await toolDoc('pdf-pika-pro-no-period', 0, 'entered_different')
-    const r = draft(state([pika('Standard')]), [doc])
-    expect(ids(r.view)).not.toContain('CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-PRO-001-v1')
-    expect(r.guidance.facts.provenance.plans.map((p) => p.declared)).toEqual(['Standard'])
-    expect(toolRows(r.view).find((x) => x.value === 'Standard')!.note ?? '').not.toContain(T.plan_adopted_note)
-  })
-
-  test('"ignored" shows the document with the creator’s choice; nothing else changes', async () => {
-    const r = draft(state([pika('Pro')]), [await toolDoc('pdf-pika-pro-no-period', 0, 'ignored')])
-    expect(r.view.documents.items[0].review).toBe(T.doc_review.ignored)
-    expect(ids(r.view)).toEqual(ids(draft(state([pika('Pro')])).view))
+  test('a review, an adoption or a reconciliation sent with a document is refused (400)', async () => {
+    const doc = JSON.parse(JSON.stringify(await toolDoc('pdf-pika-pro-no-period')))
+    const s = state([pika('Pro')])
+    expect(parseFormState({ ...s, documents: [doc] }).ok).toBe(true)
+    for (const extra of [
+      { review: { document_id: doc.document.document_id, decision: 'adopted', adopted_value: 'Pro' } },
+      { adopted_value: 'Pro' },
+      { reconciliation: { provider: { result: 'appears_consistent', reason: 'same_tool' } } },
+    ]) {
+      expect(parseFormState({ ...s, documents: [{ ...doc, ...extra }] }).ok).toBe(false)
+    }
+    expect(parseFormState({ ...s, documents: [doc], reconciliation: [] }).ok).toBe(false)
   })
 
   test('a document sent back with an edited extraction, a forged id, a fake model count or extra fields is refused (400)', async () => {
     const doc = await toolDoc('pdf-pika-pro-no-period')
-    const body = (d: unknown) => ({ ...state([pika('Pro')]), documents: [{ tool_index: 0, document: d, review: doc.review }] })
+    const body = (d: unknown) => ({ ...state([pika('Pro')]), documents: [{ tool_index: 0, document: d }] })
     const plain = JSON.parse(JSON.stringify(doc.document))
     expect(parseFormState(body(plain)).ok).toBe(true)
     const edits: ((d: any) => void)[] = [
@@ -268,13 +266,11 @@ describe('creator review: explicit, immutable, no stale facts', () => {
     }
   })
 
-  test('documents must belong to an existing tool block, one per block, with a matching review', async () => {
+  test('documents must belong to an existing tool block, one per block', async () => {
     const doc = JSON.parse(JSON.stringify(await toolDoc('pdf-pika-pro-no-period')))
     const s = state([pika('Pro')])
     expect(parseFormState({ ...s, documents: [{ ...doc, tool_index: 1 }] }).ok).toBe(false)
     expect(parseFormState({ ...s, documents: [doc, doc] }).ok).toBe(false)
-    expect(parseFormState({ ...s, documents: [{ ...doc, review: { ...doc.review, document_id: 'DOC-ABCDEF123456' } }] }).ok).toBe(false)
-    expect(parseFormState({ ...s, documents: [{ ...doc, review: { ...doc.review, decision: 'approved' } }] }).ok).toBe(false)
   })
 })
 
@@ -300,14 +296,13 @@ describe('document wording', () => {
 
   test('no document-related template or rendered document text asserts a match, confirmation, proof or verification', async () => {
     const templates = Object.entries(T)
-      .filter(([k]) => k.startsWith('doc') || k.startsWith('documents') || k.startsWith('record_banner') || k.includes('documents') || k === 'plan_adopted_note' || k.startsWith('tool_') || k.startsWith('provider_'))
+      .filter(([k]) => k.startsWith('doc') || k.startsWith('documents') || k.startsWith('record_banner') || k.includes('documents') || k.startsWith('tool_') || k.startsWith('provider_'))
       .map(([, v]) => (typeof v === 'function' ? (v as (...a: unknown[]) => string)('X', 'Y') : JSON.stringify(v)))
     const docs = await Promise.all(['pdf-pika-pro-no-period', 'shot-truncated-plan-name', 'conflict-two-plan-names', 'inject-pricing-page-claims-invoice', 'unreadable-dark-image', 'conflict-reseller-merchant'].map((f) => toolDoc(f)))
     const rendered = docs.map((d) => JSON.stringify(draft(state([pika('Pro')]), [d]).view.documents))
-    const review = [T.doc_review.adopted('Pro'), T.doc_review.entered_different, T.doc_review.ignored, T.doc_review.not_reviewed]
     const panel = readFileSync(path.join(__dirname, '..', '..', 'components', 'creator-record', 'DocumentReviewPanel.tsx'), 'utf8')
     const panelText = Array.from(panel.matchAll(/>([^<>{}]+)</g)).map((m) => m[1])
-    const offenders = [...templates, ...rendered, ...review, ...panelText].flatMap((t) => BANNED.filter(([, re]) => re.test(clean(t))).map(([n]) => `${n}: ${t.slice(0, 160)}`))
+    const offenders = [...templates, ...rendered, ...panelText].flatMap((t) => BANNED.filter(([, re]) => re.test(clean(t))).map(([n]) => `${n}: ${t.slice(0, 160)}`))
     expect(offenders).toEqual([])
   })
 })

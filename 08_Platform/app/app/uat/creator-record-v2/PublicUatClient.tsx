@@ -5,7 +5,7 @@
  * Creator Record questionnaire and record view unchanged; differs from the
  * admin client only in what it sends and shows:
  *   - documents are chosen from SI8's synthetic test set (no upload); on
- *     submit only `{ tool_index, fixture_id, review }` is sent — the server
+ *     submit only `{ tool_index, fixture_id }` is sent — the server
  *     rebuilds every observation itself;
  *   - the record is rendered without trace or internal references;
  *   - GA4 measurement is disabled for this page (also set by the root layout
@@ -38,11 +38,11 @@ export interface PublicUatClientProps {
   closesAt: string
 }
 
-/** Only fixture ids and the creator's choice leave the browser. */
+/** Only fixture ids leave the browser (CR-V2-MVP-6: no review or adoption). */
 export const toFixtureRefs = (documents: readonly ToolDocument[]) =>
   documents
     .filter((d) => d.document.replay_fixture_id !== null)
-    .map((d) => ({ tool_index: d.tool_index, fixture_id: d.document.replay_fixture_id as string, review: { decision: d.review.decision, adopted_value: d.review.adopted_value } }))
+    .map((d) => ({ tool_index: d.tool_index, fixture_id: d.document.replay_fixture_id as string }))
 
 export function PublicUatClient({ planSuggestions, fixtureDocuments, closesAt }: PublicUatClientProps) {
   const [lastState, setLastState] = useState<CreatorRecordFormState | undefined>(undefined)

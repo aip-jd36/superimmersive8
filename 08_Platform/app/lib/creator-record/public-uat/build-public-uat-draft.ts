@@ -30,14 +30,14 @@ export type PublicUatCard = Omit<DraftGuidanceCard, 'provenance'>
 export type PublicUatView = Omit<DraftRecordView, 'trace' | 'guidance' | 'open_items'> & {
   public_uat: true
   guidance: { intro: string; cards: PublicUatCard[]; empty: string | null }
-  open_items: { intro: string; items: DraftOpenItem[]; empty: string | null; documents_mentioned: DraftRecordView['open_items']['documents_mentioned'] }
+  open_items: { intro: string; not_established: DraftRecordView['open_items']['not_established']; items: DraftOpenItem[]; empty: string | null; documents_mentioned: DraftRecordView['open_items']['documents_mentioned'] }
 }
 
 /** Server-side: each fixture reference becomes a document observation built from the replay table. */
 export function documentsFromRefs(refs: readonly PublicDocumentRef[]): ToolDocument[] {
   return refs.map((r) => {
     const document = documentForFixture(r.fixture_id)
-    return { tool_index: r.tool_index, document, review: { document_id: document.document_id, decision: r.review.decision, adopted_value: r.review.adopted_value } }
+    return { tool_index: r.tool_index, document }
   })
 }
 
@@ -60,7 +60,11 @@ export function toPublicUatView(view: DraftRecordView): PublicUatView {
       ...guidance,
       cards: guidance.cards.map(({ provenance: _p, ...c }, i) => ({ ...c, claim_id: `guidance-${i + 1}` })),
     },
-    open_items: { ...open_items, items: open_items.items.map((o, i) => ({ ...o, dependency_id: `open-item-${i + 1}` })) },
+    open_items: {
+      ...open_items,
+      not_established: open_items.not_established.map((n, i) => ({ ...n, key: `not-established-${i + 1}` })),
+      items: open_items.items.map((o, i) => ({ ...o, dependency_id: `open-item-${i + 1}` })),
+    },
     not_done: [...view.not_done, T.public_uat_not_done],
     // Internal version identifiers are replaced by what they mean; the rows themselves stay.
     method: [

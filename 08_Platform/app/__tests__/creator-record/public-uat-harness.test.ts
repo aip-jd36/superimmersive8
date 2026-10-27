@@ -4,7 +4,7 @@
  * H1 fail-closed switch and expiry · H2 runtime dependency closure · H3 admin
  * routes keep their protection · H4 size limits · H5 strict request (no
  * uploads, no observations, allowlisted fixtures only) · H6 parity with the
- * admin prototype · H7 replay/origin labels · H8 review flows · H9 wording and
+ * admin prototype · H7 replay/origin labels · H8 declare-first (no adoption) · H9 wording and
  * designation · H10 no internal metadata · analytics exclusion · noindex.
  * H11 (Production smoke) and H12 (a real ChatGPT Work run) are not locally
  * testable.
@@ -21,7 +21,6 @@ jest.mock('@/lib/creator-record/public-uat/config', () => {
 
 import { POST } from '@/app/api/uat/creator-record-v2/draft/route'
 import { GA_INLINE_SNIPPET, GA_MEASUREMENT_ID, isGaExcludedPath } from '@/lib/analytics/ga-snippet'
-import type { ReviewDecision } from '@/lib/creator-record/evidence/document-observations'
 import { examineUpload } from '@/lib/creator-record/evidence/examine-upload'
 import { verifyReturnedDocument } from '@/lib/creator-record/evidence/verify-returned-documents'
 import { REPLAY_FIXTURES } from '@/lib/creator-record/evidence/replay-fixtures.data'
@@ -46,7 +45,7 @@ const closedHarness = (config: { enabled: boolean; window: { opens_at: string; c
 const ACK = { A1: true, A2: true }
 const ANS = { P1: ['UAT test video'], P3: ['own_channels'], F1: ['TW'], F2: ['online_worldwide'], L1: ['no'], M0: ['none'], H1: ['edited'] }
 const state = (tools: Record<string, string[]>[] = [{ T1: ['pika'], T3: ['Pro'], T4: ['May 2026'] }], answers: Record<string, string[]> = {}): CreatorRecordFormState => ({ answers: { ...ANS, ...answers }, tools, acknowledgements: ACK })
-const ref = (fixture_id: string, tool_index = 0, decision: string = 'not_reviewed', adopted_value: string | null = null) => ({ tool_index, fixture_id, review: { decision: decision as ReviewDecision, adopted_value } })
+const ref = (fixture_id: string, tool_index = 0) => ({ tool_index, fixture_id })
 const RECORD = { record_id: 'UAT-TEST0001', record_version: 1, captured_at: '2026-10-28T00:00:00Z' }
 
 function jsonRequest(body: unknown, headers: Record<string, string> = {}) {
@@ -256,11 +255,13 @@ describe('H5 — no uploads, no browser-supplied observations, allowlisted fixtu
     ['not JSON', () => post('not json')],
     ['unknown fixture id', () => post({ ...state(), documents: [ref('my-own-receipt')] })],
     ['a replay fixture that is not allowlisted', () => post({ ...state(), documents: [ref('pdf-runway-standard-monthly')] })],
-    ['a browser-supplied observation', () => post({ ...state(), documents: [{ tool_index: 0, document: doc, review: { document_id: doc.document_id, decision: 'not_reviewed', adopted_value: null } }] })],
+    ['a browser-supplied observation', () => post({ ...state(), documents: [{ tool_index: 0, document: doc }] })],
     ['an extraction next to the fixture id', () => post({ ...state(), documents: [{ ...ref('pdf-pika-pro-no-period'), extraction: doc.extraction }] })],
     ['a hash next to the fixture id', () => post({ ...state(), documents: [{ ...ref('pdf-pika-pro-no-period'), sha256: doc.sha256 }] })],
-    ['a document id in the review', () => post({ ...state(), documents: [{ ...ref('pdf-pika-pro-no-period'), review: { document_id: doc.document_id, decision: 'ignored', adopted_value: null } }] })],
-    ['an unknown review decision', () => post({ ...state(), documents: [ref('pdf-pika-pro-no-period', 0, 'approved')] })],
+    ['a review (CR-V2-MVP-6: no review or adoption exists)', () => post({ ...state(), documents: [{ ...ref('pdf-pika-pro-no-period'), review: { decision: 'not_reviewed', adopted_value: null } }] })],
+    ['an adopted plan value', () => post({ ...state(), documents: [{ ...ref('pdf-pika-pro-no-period'), review: { decision: 'adopted', adopted_value: 'Pro' } }] })],
+    ['a client-supplied reconciliation', () => post({ ...state(), documents: [{ ...ref('pdf-pika-pro-no-period'), reconciliation: { plan: 'appears_consistent' } }] })],
+    ['a top-level reconciliation', () => post({ ...state(), reconciliation: [] })],
     ['a document for a tool block that does not exist', () => post({ ...state(), documents: [ref('pdf-pika-pro-no-period', 1)] })],
     ['two documents for one tool', () => post({ ...state(), documents: [ref('pdf-pika-pro-no-period'), ref('conflict-reseller-merchant')] })],
     ['an unexpected top-level field (sources)', () => post({ ...state(), sources: 'governed' })],
@@ -276,9 +277,9 @@ describe('H5 — no uploads, no browser-supplied observations, allowlisted fixtu
       const entry = REPLAY_FIXTURES.find((x) => x.fixture_id === f.fixture_id)!
       expect(d.sha256).toBe(entry.sha256)
       expect(d).toEqual(expect.objectContaining({ extraction_mode: 'fixture_replay', model_calls: 0, replay_fixture_id: f.fixture_id }))
-      expect(verifyReturnedDocument({ tool_index: 0, document: d, review: { document_id: d.document_id, decision: 'not_reviewed', adopted_value: null } })).toBe(true)
+      expect(verifyReturnedDocument({ tool_index: 0, document: d })).toBe(true)
     }
-    const parsed = parsePublicUatRequest({ ...state(), documents: [ref('pdf-pika-pro-no-period', 0, 'adopted', 'Pro')] })
+    const parsed = parsePublicUatRequest({ ...state(), documents: [ref('pdf-pika-pro-no-period')] })
     expect(parsed.ok && documentsFromRefs(parsed.documents)[0].document).toEqual(documentForFixture('pdf-pika-pro-no-period'))
   })
 
@@ -294,7 +295,9 @@ describe('H5 — no uploads, no browser-supplied observations, allowlisted fixtu
       const m = manifest.documents.find((x) => x.id === f.fixture_id)!
       const examined = await examineUpload(new Uint8Array(readFileSync(path.join(generated, m.file))), 'x', { mode: 'fixture_replay' })
       const built = documentForFixture(f.fixture_id)
-      expect({ ...built, file_name: 'x' }).toEqual({ ...examined, file_name: 'x' })
+      // The selected fixture carries no bytes, so its G-R2 cross-check is reported as not run (by design).
+      expect(built.cross_check).toEqual(expect.objectContaining({ status: 'not_run', reason: 'selected_synthetic_fixture' }))
+      expect({ ...built, file_name: 'x', cross_check: null }).toEqual({ ...examined, file_name: 'x', cross_check: null })
     }
   })
 })
@@ -307,8 +310,8 @@ describe('H6 — the public harness and the admin prototype produce the same gov
     ['Pika Pro + Kling', state([{ T1: ['pika'], T3: ['Pro'], T4: ['May 2026'] }, { T1: ['kling'], T3: ['Standard'], T4: ['May 2026'] }]), []],
     ['music + stock open items', state([{ T1: ['kling'], T3: ['not_sure'], T4: ['May 2026'] }], { M0: ['music', 'stock'], M1: ['artlist'], M2: ['yes'], M3: ['getty'], M3D: ['yes'] }), []],
     ['unlisted tool', state([{ T1: ['other_tool'], T1X: ['Vidmagic 9000'], T3: ['Pro'], T4: ['May 2026'] }]), []],
-    ['adopted plan from a fixture', state(), [ref('pdf-pika-pro-no-period', 0, 'adopted', 'Pro')]],
-    ['two fixtures', state([{ T1: ['pika'], T3: ['Standard'], T4: ['May 2026'] }, { T1: ['runway-gen3'], T3: ['not_sure'], T4: ['May 2026'] }]), [ref('conflict-reseller-merchant'), ref('conflict-two-plan-names', 1, 'ignored')]],
+    ['a fixture document', state(), [ref('pdf-pika-pro-no-period')]],
+    ['two fixtures', state([{ T1: ['pika'], T3: ['Standard'], T4: ['May 2026'] }, { T1: ['runway-gen3'], T3: ['not_sure'], T4: ['May 2026'] }]), [ref('conflict-reseller-merchant'), ref('conflict-two-plan-names', 1)]],
   ]
 
   test.each(cases)('%s', (_n, s, refs) => {
@@ -323,6 +326,7 @@ describe('H6 — the public harness and the admin prototype produce the same gov
     expect(strip(pub.view.guidance.cards)).toEqual(strip(admin.view.guidance.cards))
     expect(pub.view.guidance.empty).toBe(admin.view.guidance.empty)
     expect(pub.view.open_items.items.map(({ dependency_id: _d, ...o }) => o)).toEqual(admin.view.open_items.items.map(({ dependency_id: _d, ...o }) => o))
+    expect(pub.view.open_items.not_established.map(({ key: _k, ...n }) => n)).toEqual(admin.view.open_items.not_established.map(({ key: _k, ...n }) => n))
     expect(pub.view.not_shown).toEqual(admin.view.not_shown)
     expect(pub.view.declarations).toEqual(admin.view.declarations)
     expect(pub.view.independent_review).toEqual(admin.view.independent_review)
@@ -333,7 +337,7 @@ describe('H6 — the public harness and the admin prototype produce the same gov
   test('document observations stay display-only: the guidance is the same with and without fixtures', () => {
     const without = buildPublicUatDraft({ state: state(), refs: [], topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: '2026-10-28', record: RECORD })
     for (const f of PUBLIC_UAT_FIXTURES) {
-      const withDoc = buildPublicUatDraft({ state: state(), refs: [ref(f.fixture_id, 0, 'ignored')], topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: '2026-10-28', record: RECORD })
+      const withDoc = buildPublicUatDraft({ state: state(), refs: [ref(f.fixture_id)], topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: '2026-10-28', record: RECORD })
       if (!without.ok || !withDoc.ok) throw new Error('must succeed')
       expect(withDoc.view.guidance).toEqual(without.view.guidance)
       expect(withDoc.internal.guidance.facts).toEqual(without.internal.guidance.facts)
@@ -361,19 +365,17 @@ describe('H7–H10 — through the public route', () => {
     }
   })
 
-  test('H8: adopt, own answer and ignore behave as in the admin prototype; a stale adoption is refused (422)', async () => {
-    const adopted = await draft({ ...state(), documents: [ref('pdf-pika-pro-no-period', 0, 'adopted', 'Pro')] })
-    expect(adopted.res.status).toBe(200)
-    expect(adopted.data.view.documents.items[0].review).toBe(T.doc_review.adopted('Pro'))
-    const pro = adopted.data.view.guidance.cards.find((c: { explanation: string }) => /Pro plan/.test(c.explanation))
-    expect(pro.conclusion_label).toBe(T.conclusion_label.relevant_on_declared_facts)
-    const stale = await draft({ ...state([{ T1: ['pika'], T3: ['Standard'], T4: ['May 2026'] }]), documents: [ref('pdf-pika-pro-no-period', 0, 'adopted', 'Pro')] })
-    expect(stale.res.status).toBe(422)
-    expect(stale.data.issues).toContainEqual({ q_id: 'T3', tool_index: 0, issue: 'stale_document_review' })
-    const notShown = await draft({ ...state([{ T1: ['pika'], T3: ['Enterprise'], T4: ['May 2026'] }]), documents: [ref('pdf-pika-pro-no-period', 0, 'adopted', 'Enterprise')] })
-    expect(notShown.res.status).toBe(422)
-    const own = await draft({ ...state([{ T1: ['pika'], T3: ['Standard'], T4: ['May 2026'] }]), documents: [ref('pdf-pika-pro-no-period', 0, 'entered_different')] })
-    expect(own.data.view.documents.items[0].review).toBe(T.doc_review.entered_different)
+  test('H8: declare first — a fixture document never sets or changes the plan answer; reconciliation is computed on the server', async () => {
+    const notSure = await draft({ ...state([{ T1: ['pika'], T3: ['not_sure'], T4: ['May 2026'] }]), documents: [ref('pdf-pika-pro-no-period')] })
+    expect(notSure.res.status).toBe(200)
+    const pro = notSure.data.view.guidance.cards.find((c: { explanation: string; conclusion_label: string }) => /Pro plan/.test(c.explanation))
+    expect(pro?.conclusion_label).not.toBe(T.conclusion_label.relevant_on_declared_facts)
+    expect(notSure.data.view.reconciliation.items[0].rows[1]).toEqual(expect.objectContaining({ label: T.recon_plan_label, value: T.recon_result.not_assessed }))
+    const standard = await draft({ ...state([{ T1: ['pika'], T3: ['Standard'], T4: ['May 2026'] }]), documents: [ref('pdf-pika-pro-no-period')] })
+    expect(standard.res.status).toBe(200)
+    // Seller "Pika Labs, Inc." is not an existing alias: nothing is established, and no conflict is claimed.
+    expect(standard.data.view.reconciliation.items[0].rows.map((r: { value: string }) => r.value)).toEqual([T.recon_result.does_not_establish, T.recon_result.does_not_establish])
+    expect(JSON.stringify(standard.data.view)).not.toMatch(/evidence_reconciliation|trace/)
   })
 
   test('H9: the designation is in the record title, status, banner, summary, method and "what SI8 did not do"; the unapproved/counsel statement is in the summary', async () => {

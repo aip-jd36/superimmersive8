@@ -267,6 +267,7 @@ describe('lib/creator-record boundaries', () => {
     const allowed = [
       'contract/provenance',
       'evidence/document-observations',
+      'evidence/plan-cross-check',
       'evidence/replay',
       'presentation/build-draft-record',
       'presentation/templates',
@@ -299,7 +300,7 @@ describe('lib/creator-record boundaries', () => {
   test('CR-V2-EVIDENCE-SLICE-1: evidence/ makes no storage, database, network or SDK import; the live adapter only behind the gate', () => {
     const files = walk(path.join(MODULE_ROOT, 'evidence'))
     const external = files.flatMap((f) => staticImports(readFileSync(f, 'utf8')).filter((i) => !i.startsWith('.')).map((i) => `${path.basename(f)} -> ${i}`))
-    expect(external).toEqual(['examine-upload.ts -> node:crypto'])
+    expect(external.sort()).toEqual(['examine-upload.ts -> node:crypto', 'pdf-text-layer.ts -> node:zlib'])
     const relativeTargets = new Set(
       files.flatMap((f) =>
         staticImports(readFileSync(f, 'utf8'))
@@ -308,7 +309,7 @@ describe('lib/creator-record boundaries', () => {
       ),
     )
     for (const t of Array.from(relativeTargets)) {
-      expect(['contract/provenance', 'receipt-examination/examine', 'receipt-examination/prompt', 'receipt-examination/schema'].includes(t) || t.startsWith('evidence/')).toBe(true)
+      expect(['contract/provenance', 'receipt-examination/examine', 'receipt-examination/plan-tokens', 'receipt-examination/prompt', 'receipt-examination/schema'].includes(t) || t.startsWith('evidence/')).toBe(true)
     }
     for (const f of files) expect(staticImports(readFileSync(f, 'utf8')).some((i) => i.includes('examine.anthropic'))).toBe(false)
     const live = readFileSync(path.join(MODULE_ROOT, 'evidence', 'live-caller.ts'), 'utf8')

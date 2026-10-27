@@ -1,6 +1,6 @@
 /**
- * CR-V2-EVIDENCE-SLICE-1 — what an uploaded document APPEARS TO SHOW, and how
- * the creator reviewed it. Pure and browser-safe (no Node API, no SDK).
+ * CR-V2-EVIDENCE-SLICE-1 — what an uploaded document APPEARS TO SHOW, and how it
+ * relates (provisionally) to the creator's declaration. Pure and browser-safe (no Node API, no SDK).
  *
  * Authority rules (test-enforced):
  *   - An examined document is an OBSERVATION, never a fact. It records what a
@@ -9,14 +9,14 @@
  *   - Document observations are display-only. They never reach facts,
  *     applicability, Bounded Interpretation or composition. Only customer
  *     declarations do (`prototype/form.ts` → `integration/facts.ts`).
- *   - The creator may ADOPT a value the document appears to show as their own
- *     answer. The result is still a customer declaration ("on what you told
- *     us"); the document observation itself is never changed.
- *   - Nothing here compares a document with a declaration. The only check
- *     between them is an integrity check on the review itself: an "adopted"
- *     review must name a value the document appears to show, and the answer
- *     it claims to have set (see `isStaleReview`). Its result is never shown
- *     as a statement about the document.
+ *   - CR-V2-MVP-6 (Option C, declare first): nothing a document appears to
+ *     show can become, fill or change a declaration. There is no adoption.
+ *   - `reconcileToolEvidence` describes, provisionally, how a document's
+ *     observations relate to the creator's declaration for one tool:
+ *     appears consistent / appears to conflict / does not establish / not
+ *     assessed. It is computed on the server from the declarations and the
+ *     server-checked observation, is never an input to guidance and is never
+ *     a verification.
  *   - Fixture replay and live model examination are always labelled
  *     (`extraction_mode`). Replay returns recorded ground truth for SI8's own
  *     synthetic test documents and says nothing about extraction quality.
@@ -30,6 +30,8 @@ import {
   type ReceiptExtraction,
 } from '../receipt-examination/schema'
 import type { DocumentObservation, RecordContext } from '../contract/provenance'
+import { distinctPlanObservations, planTokens } from '../receipt-examination/plan-tokens'
+import { CROSS_CHECK_STATUSES, type PlanCrossCheck } from './plan-cross-check'
 import type { CouldNotExamineReason } from '../receipt-examination/examine'
 import type { ReceiptMediaType } from '../receipt-examination/prompt'
 
@@ -40,6 +42,19 @@ export const MAX_UPLOAD_BYTES = 4 * 1024 * 1024
 /** Multipart overhead allowance on top of the file itself. */
 export const MAX_EXAMINE_REQUEST_BYTES = MAX_UPLOAD_BYTES + 64 * 1024
 export const MAX_DOCUMENTS_PER_TOOL = 1
+/**
+ * CR-V2-MVP-1: live model reading is held to a smaller file (input cost scales
+ * with the document; the largest synthetic fixture is under 0.9 MB).
+ */
+export const MAX_LIVE_UPLOAD_BYTES = 1024 * 1024
+/**
+ * CR-V2-MVP-1 server-enforced consent: the examine route refuses any upload
+ * whose request does not carry this exact statement, sent by the page only
+ * after the creator ticks "Before you add a document". The value names the
+ * statement version agreed to.
+ */
+export const DOCUMENT_CONSENT_HEADER = 'x-cr-document-consent'
+export const DOCUMENT_CONSENT_VALUE = 'synthetic-test-documents-v1'
 export const MAX_FILE_NAME_CHARS = 120
 
 export const EXTRACTION_MODES = ['fixture_replay', 'live_model'] as const
@@ -73,24 +88,17 @@ export interface ExaminedDocument {
   model_calls: number
   /** What the document appears to show. Null unless `outcome` is `document_examined`. */
   extraction: ReceiptExtraction | null
+  /**
+   * CR-V2-MVP-3 (G-R2): the plan cross-check against the document's own text
+   * layer. Separate from, and never altering, the reading above.
+   */
+  cross_check: PlanCrossCheck
 }
 
-export const REVIEW_DECISIONS = ['not_reviewed', 'adopted', 'entered_different', 'ignored'] as const
-export type ReviewDecision = (typeof REVIEW_DECISIONS)[number]
-
-/** The creator's explicit choice about one document. The document itself is never edited. */
-export interface DocumentReview {
-  document_id: string
-  decision: ReviewDecision
-  /** The value adopted as the creator's own answer; only for `adopted`. */
-  adopted_value: string | null
-}
-
-/** One uploaded document attached to one tool block, with the creator's review. */
+/** One uploaded document attached to one tool block. The document itself is never edited. */
 export interface ToolDocument {
   tool_index: number
   document: ExaminedDocument
-  review: DocumentReview
 }
 
 export const documentIdFor = (sha256: string) => `DOC-${sha256.slice(0, 12).toUpperCase()}`
@@ -103,29 +111,144 @@ export function sanitizeFileName(name: string | null | undefined): string {
 }
 
 /**
- * Plan names the creator may adopt from a document: the plan/product name it
- * appears to show plus every printed plan-name observation, exactly as
- * extracted. Only for an examined billing document that is not illegible. The
- * creator decides; nothing is chosen for them.
+ * CR-V2-MVP-6 — provisional evidence reconciliation for one tool block.
+ *
+ * Fail-closed rules (anything short of them → "does not establish" or "not
+ * assessed", never a positive description):
+ *   - Seller: the seller name exactly as read must resolve, under SI8's
+ *     EXISTING tool-identity resolution (supplied by the caller; exact
+ *     aliases only, no suffix stripping or fuzzy matching), to one canonical
+ *     tool. Unrecognised or ambiguous → does not establish.
+ *   - Plan: compared only when the seller appears consistent with the
+ *     declared tool, and only for a single, fully read plan: the plan field
+ *     read as present, no cut-off marker, the value found in its own
+ *     excerpt, listed among the printed plan names, and no second plan
+ *     anywhere in the reading (receipt-comparison-v2 plan tokens).
+ *   - "Not sure", a missing answer or a tool outside SI8's list → not assessed.
+ * A single reported plan never shows that the document names no other plan:
+ * every "appears" result is presented with that limitation.
  */
-export function adoptablePlanValues(doc: ExaminedDocument): string[] {
+export const RECONCILIATION_RESULTS = ['appears_consistent', 'appears_to_conflict', 'does_not_establish', 'not_assessed'] as const
+export type ReconciliationResult = (typeof RECONCILIATION_RESULTS)[number]
+
+export type ReconciliationReason =
+  | 'no_document'
+  | 'document_not_read'
+  | 'tool_not_identified'
+  | 'plan_not_declared'
+  | 'not_a_billing_document'
+  | 'document_not_readable'
+  | 'seller_not_read'
+  | 'seller_not_recognized'
+  | 'seller_ambiguous'
+  | 'same_tool'
+  | 'different_tool'
+  | 'seller_not_established'
+  | 'plan_not_read'
+  | 'plan_incomplete'
+  | 'plan_not_in_excerpt'
+  | 'plan_not_listed'
+  | 'more_than_one_plan'
+  | 'plan_not_identifiable'
+  | 'same_plan_name'
+  | 'different_plan_name'
+
+export interface FieldReconciliation {
+  result: ReconciliationResult
+  reason: ReconciliationReason
+}
+
+export interface EvidenceReconciliation {
+  tool_index: number
+  document_id: string | null
+  provider: FieldReconciliation
+  plan: FieldReconciliation
+}
+
+/** The caller's exact, existing tool-identity resolution of a seller name. */
+export type SellerIdentity = { kind: 'canonical'; tool_id: string } | { kind: 'ambiguous' } | { kind: 'unrecognized' }
+
+export interface ToolEvidenceInput {
+  tool_index: number
+  document: ExaminedDocument | null
+  /** The canonical tool the creator's own answer resolved to, or null. */
+  declared_tool_id: string | null
+  /** The creator's plan answer as given; null or "not_sure" when none. */
+  declared_plan: string | null
+}
+
+const INCOMPLETE = /…|\.\.\.|\uFFFD/
+const r = (result: ReconciliationResult, reason: ReconciliationReason): FieldReconciliation => ({ result, reason })
+
+export function reconcileToolEvidence(input: ToolEvidenceInput, resolveSeller: (name: string) => SellerIdentity): EvidenceReconciliation {
+  const out = (provider: FieldReconciliation, plan: FieldReconciliation): EvidenceReconciliation => ({ tool_index: input.tool_index, document_id: input.document?.document_id ?? null, provider, plan })
+  const doc = input.document
+  if (!doc) return out(r('not_assessed', 'no_document'), r('not_assessed', 'no_document'))
   const ex = doc.extraction
-  if (doc.outcome !== 'document_examined' || !ex) return []
-  if (!BILLING_DOCUMENT_TYPES.includes(ex.document_type) || ex.readability === 'illegible') return []
-  const out: string[] = []
-  const push = (v: string | null) => {
-    if (v && v.trim() !== '' && !out.includes(v)) out.push(v)
+  if (doc.outcome !== 'document_examined' || !ex) return out(r('not_assessed', 'document_not_read'), r('not_assessed', 'document_not_read'))
+  const plan = (input.declared_plan ?? '').trim()
+  const planDeclared = plan !== '' && plan !== 'not_sure'
+
+  const gate: FieldReconciliation | null = !BILLING_DOCUMENT_TYPES.includes(ex.document_type) ? r('does_not_establish', 'not_a_billing_document') : ex.readability === 'illegible' ? r('does_not_establish', 'document_not_readable') : null
+
+  let provider: FieldReconciliation
+  if (!input.declared_tool_id) provider = r('not_assessed', 'tool_not_identified')
+  else if (gate) provider = gate
+  else if (ex.issuer_name.status !== 'present' || !ex.issuer_name.value) provider = r('does_not_establish', 'seller_not_read')
+  else {
+    const seller = resolveSeller(ex.issuer_name.value)
+    provider =
+      seller.kind === 'unrecognized'
+        ? r('does_not_establish', 'seller_not_recognized')
+        : seller.kind === 'ambiguous'
+          ? r('does_not_establish', 'seller_ambiguous')
+          : seller.tool_id === input.declared_tool_id
+            ? r('appears_consistent', 'same_tool')
+            : r('appears_to_conflict', 'different_tool')
   }
-  if (ex.product_or_plan_name.status === 'present') push(ex.product_or_plan_name.value)
-  for (const c of ex.plan_candidates) push(c.text)
-  return out
+
+  const planResult = ((): FieldReconciliation => {
+    if (!planDeclared) return r('not_assessed', 'plan_not_declared')
+    if (!input.declared_tool_id) return r('not_assessed', 'tool_not_identified')
+    if (gate) return gate
+    if (provider.result !== 'appears_consistent') return r('does_not_establish', 'seller_not_established')
+    const p = ex.product_or_plan_name
+    if (p.status !== 'present' || !p.value) return r('does_not_establish', 'plan_not_read')
+    if (INCOMPLETE.test(p.value) || ex.plan_candidates.some((c) => INCOMPLETE.test(c.text))) return r('does_not_establish', 'plan_incomplete')
+    if (!p.evidence || !p.evidence.normalize('NFKC').toLowerCase().includes(p.value.normalize('NFKC').toLowerCase())) return r('does_not_establish', 'plan_not_in_excerpt')
+    const providers = [ex.issuer_name.value, input.declared_tool_id]
+    if (ex.multiple_plans_shown || distinctPlanObservations(ex, providers).length > 1) return r('does_not_establish', 'more_than_one_plan')
+    const docKey = planTokens(p.value, providers).join(' ')
+    if (!ex.plan_candidates.some((c) => planTokens(c.text, providers).join(' ') === docKey)) return r('does_not_establish', 'plan_not_listed')
+    const declaredKey = planTokens(plan, providers).join(' ')
+    if (docKey === '' || declaredKey === '') return r('does_not_establish', 'plan_not_identifiable')
+    return docKey === declaredKey ? r('appears_consistent', 'same_plan_name') : r('appears_to_conflict', 'different_plan_name')
+  })()
+  return out(provider, planResult)
 }
 
 // ───────────────────────────────────────────── strict parsing (request bodies)
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v)
 const exactKeys = (o: Record<string, unknown>, keys: readonly string[]) => Object.keys(o).length === keys.length && keys.every((k) => Object.prototype.hasOwnProperty.call(o, k))
-const DOCUMENT_KEYS = ['document_id', 'file_name', 'sha256', 'bytes', 'detected_media_type', 'outcome', 'reason', 'extraction_mode', 'replay_fixture_id', 'versions', 'model_calls', 'extraction'] as const
+const DOCUMENT_KEYS = ['document_id', 'file_name', 'sha256', 'bytes', 'detected_media_type', 'outcome', 'reason', 'extraction_mode', 'replay_fixture_id', 'versions', 'model_calls', 'extraction', 'cross_check'] as const
+
+function parseCrossCheck(raw: unknown): PlanCrossCheck | null {
+  if (!isObj(raw) || !exactKeys(raw, ['version', 'status', 'other_plan_names', 'reason', 'provider'])) return null
+  const { version, status, other_plan_names, reason, provider } = raw
+  if (!SHORT(version) || typeof status !== 'string' || !(CROSS_CHECK_STATUSES as readonly string[]).includes(status)) return null
+  if (reason !== null && !SHORT(reason)) return null
+  if (provider !== null && !SHORT(provider, 40)) return null
+  if ((provider !== null) !== (status === 'other_plan_names_found' || status === 'no_other_plan_names_found')) return null
+  if (!Array.isArray(other_plan_names) || other_plan_names.length > 8) return null
+  const names: PlanCrossCheck['other_plan_names'] = []
+  for (const n of other_plan_names) {
+    if (!isObj(n) || !exactKeys(n, ['name', 'excerpt']) || !SHORT(n.name, 60) || !SHORT(n.excerpt, 80)) return null
+    names.push({ name: n.name as string, excerpt: n.excerpt as string })
+  }
+  if ((status === 'other_plan_names_found') !== names.length > 0) return null
+  return { version: version as string, status: status as PlanCrossCheck['status'], other_plan_names: names, reason: reason as string | null, provider: provider as string | null }
+}
 const SHORT = (v: unknown, max = 80) => typeof v === 'string' && v.length > 0 && v.length <= max
 
 /**
@@ -135,6 +258,8 @@ const SHORT = (v: unknown, max = 80) => typeof v === 'string' && v.length > 0 &&
 export function parseExaminedDocument(raw: unknown): ExaminedDocument | null {
   if (!isObj(raw) || !exactKeys(raw, DOCUMENT_KEYS)) return null
   const { document_id, file_name, sha256, bytes, detected_media_type, outcome, reason, extraction_mode, replay_fixture_id, versions, model_calls, extraction } = raw
+  const cross_check = parseCrossCheck(raw.cross_check)
+  if (!cross_check) return null
   if (typeof sha256 !== 'string' || !/^[0-9a-f]{64}$/.test(sha256)) return null
   if (document_id !== documentIdFor(sha256)) return null
   if (typeof file_name !== 'string' || file_name !== sanitizeFileName(file_name)) return null
@@ -174,35 +299,12 @@ export function parseExaminedDocument(raw: unknown): ExaminedDocument | null {
     versions: { schema: versions.schema as string, prompt: versions.prompt as string | null, replay_set: versions.replay_set as string | null },
     model_calls,
     extraction: parsedExtraction,
+    cross_check,
   }
-}
-
-export function parseDocumentReview(raw: unknown): DocumentReview | null {
-  if (!isObj(raw) || !exactKeys(raw, ['document_id', 'decision', 'adopted_value'])) return null
-  const { document_id, decision, adopted_value } = raw
-  if (typeof document_id !== 'string' || !/^DOC-[0-9A-F]{12}$/.test(document_id)) return null
-  if (typeof decision !== 'string' || !(REVIEW_DECISIONS as readonly string[]).includes(decision)) return null
-  if (decision === 'adopted') {
-    if (typeof adopted_value !== 'string' || adopted_value.trim() === '' || adopted_value.length > 120) return null
-  } else if (adopted_value !== null) return null
-  return { document_id, decision: decision as ReviewDecision, adopted_value: adopted_value as string | null }
 }
 
 /** Every extracted field, in schema order. */
 export const DOCUMENT_FIELDS: readonly ExtractedFieldName[] = EXTRACTED_FIELD_NAMES
-
-/**
- * Integrity of a review against the document and the creator's current plan
- * answer. An `adopted` review whose value the document does not appear to
- * show, or whose value is no longer the creator's answer, is stale: the draft
- * is refused rather than recorded as adopted.
- */
-export function isStaleReview(td: ToolDocument, currentPlanAnswer: string | undefined): boolean {
-  if (td.review.document_id !== td.document.document_id) return true
-  if (td.review.decision !== 'adopted') return false
-  const v = td.review.adopted_value as string
-  return !adoptablePlanValues(td.document).includes(v) || (currentPlanAnswer ?? '').trim() !== v.trim()
-}
 
 /**
  * The contract-level provenance of one document (PRD v0.3 §2.8): one
