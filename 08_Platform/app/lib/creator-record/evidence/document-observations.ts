@@ -99,6 +99,12 @@ export interface ExaminedDocument {
 export interface ToolDocument {
   tool_index: number
   document: ExaminedDocument
+  /**
+   * CR-V2-MVP-7: the server-issued attestation of a LIVE observation
+   * (`./attestation.ts`), opaque to the browser. Absent for fixture replay,
+   * which is checked against SI8's own replay table instead.
+   */
+  attestation?: string
 }
 
 export const documentIdFor = (sha256: string) => `DOC-${sha256.slice(0, 12).toUpperCase()}`

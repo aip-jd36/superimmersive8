@@ -27,6 +27,8 @@ import { checkReviewerContextAccess } from '@/lib/reviewer-context/auth'
 import { DOCUMENT_CONSENT_HEADER, DOCUMENT_CONSENT_VALUE, MAX_EXAMINE_REQUEST_BYTES, MAX_UPLOAD_BYTES } from '@/lib/creator-record/evidence/document-observations'
 import { extractionMode } from '@/lib/creator-record/evidence/config'
 import { examineUpload } from '@/lib/creator-record/evidence/examine-upload'
+import { evidenceSigningKey, issueAttestation } from '@/lib/creator-record/evidence/attestation'
+import { getVerifiedSessionContext } from '@/lib/reviewer-context/session-context'
 import { loadLiveCaller } from '@/lib/creator-record/evidence/live-caller'
 
 export const dynamic = 'force-dynamic'
@@ -70,6 +72,13 @@ export async function POST(req: NextRequest) {
   if (!access.ok) return NextResponse.json({ error: access.status === 401 ? 'Unauthorized' : 'Forbidden' }, { status: access.status })
 
   if (req.headers.get(DOCUMENT_CONSENT_HEADER) !== DOCUMENT_CONSENT_VALUE) return NextResponse.json({ error: 'Consent required' }, { status: 428 })
+  // CR-V2-MVP-7: a live reading is attested to this admin session; without a signing key or a verified
+  // session, refuse BEFORE the body is read, so no model call is ever made for an observation that could not be accepted.
+  const mode = extractionMode()
+  const signingKey = mode === 'live_model' ? evidenceSigningKey() : null
+  const session = mode === 'live_model' ? await getVerifiedSessionContext(access.userId) : null
+  if (mode === 'live_model' && !signingKey) return NextResponse.json({ error: 'Live document reading is not configured' }, { status: 503 })
+  if (mode === 'live_model' && !session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const contentType = req.headers.get('content-type') ?? ''
   if (!contentType.toLowerCase().startsWith('multipart/form-data')) return invalid()
   const declared = Number(req.headers.get('content-length') ?? '')
@@ -94,7 +103,6 @@ export async function POST(req: NextRequest) {
   if (file.size > MAX_UPLOAD_BYTES) return tooLarge()
 
   const bytes = new Uint8Array(await file.arrayBuffer())
-  const mode = extractionMode()
   let liveCaller
   if (mode === 'live_model') {
     try {
@@ -105,5 +113,8 @@ export async function POST(req: NextRequest) {
   }
   // CR-V2-MVP-6: the G-R2 text-layer cross-check is deferred; no plan scope is passed, so it is recorded as not run.
   const document = await examineUpload(bytes, 'name' in file ? (file as File).name : null, { mode, liveCaller })
+  if (mode === 'live_model' && signingKey && session) {
+    return NextResponse.json({ ok: true, tool_index, document, attestation: issueAttestation(document, session, signingKey, Date.now()) })
+  }
   return NextResponse.json({ ok: true, tool_index, document })
 }

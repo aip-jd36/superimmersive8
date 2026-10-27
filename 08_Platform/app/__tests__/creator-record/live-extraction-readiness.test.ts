@@ -21,6 +21,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { liveExtractionEnabled, LIVE_EXTRACTION_ENV, LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD } from '@/lib/creator-record/evidence/config'
+import { issueAttestation } from '@/lib/creator-record/evidence/attestation'
 import { type ExaminedDocument, type ToolDocument } from '@/lib/creator-record/evidence/document-observations'
 import { examineUpload } from '@/lib/creator-record/evidence/examine-upload'
 import { LIVE_EXTRACTION_API_KEY_ENV, LIVE_EXTRACTION_MODEL, LIVE_MAX_MODEL_CALLS_PER_INSTANCE, loadLiveCaller, withInstanceBudget } from '@/lib/creator-record/evidence/live-caller'
@@ -96,11 +97,17 @@ describe('B — live path safeguards (no model call)', () => {
 
     test('returned live documents: refused in the locked build, accepted (strictly) only where live is permitted', async () => {
       const d = await liveDoc(replayed('pdf-pika-pro-no-period'))
-      const td: ToolDocument = { tool_index: 0, document: d }
+      // CR-V2-MVP-7: where live is permitted, a live observation also needs its server attestation (see live-evidence-attestation.test.ts).
+      const key = Buffer.from('test-only-signing-key-0123456789abcdef-not-a-secret')
+      const ctx = { user_id: 'admin-1', session_id: 'session-A' }
+      const now = Date.now()
+      const live = { context: ctx, key, now_ms: now }
+      const td: ToolDocument = { tool_index: 0, document: d, attestation: issueAttestation(d, ctx, key, now) }
       expect(verifyReturnedDocument(td)).toBe(false)
-      expect(verifyReturnedDocument(td, undefined, 'live_model')).toBe(true)
+      expect(verifyReturnedDocument(td, undefined, 'live_model')).toBe(false)
+      expect(verifyReturnedDocument(td, undefined, 'live_model', live)).toBe(true)
       for (const bad of [{ ...d, model_calls: 0 }, { ...d, replay_fixture_id: 'pdf-pika-pro-no-period' }, { ...d, versions: { ...d.versions, prompt: 'receipt-prompt-v1' } }, { ...d, extraction: { ...d.extraction!, readability: 'perfect' } } as unknown as ExaminedDocument]) {
-        expect(verifyReturnedDocument({ ...td, document: bad }, undefined, 'live_model')).toBe(false)
+        expect(verifyReturnedDocument({ ...td, document: bad }, undefined, 'live_model', live)).toBe(false)
       }
     })
 

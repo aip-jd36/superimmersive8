@@ -12,6 +12,10 @@
  * `../examine`) come back in the body, are re-validated strictly, and are
  * only displayed; they never reach the guidance pipeline.
  *
+ * CR-V2-MVP-7: a live observation is accepted only with a valid attestation
+ * bound to this admin's verified session (`getVerifiedSessionContext`);
+ * the session is looked up only when a live observation is present.
+ *
  * Authorization reuses the existing fail-closed admin gate
  * (`checkReviewerContextAccess`: authenticated user with `users.is_admin`),
  * the same gate the other `/api/admin/*` reviewer surfaces use.
@@ -23,7 +27,9 @@ import { checkReviewerContextAccess } from '@/lib/reviewer-context/auth'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { buildCreatorRecordDraft, pilotSources } from '@/lib/creator-record/prototype/build-draft'
 import { MAX_BODY_BYTES, parseFormState } from '@/lib/creator-record/prototype/parse-form-state'
-import { verifyReturnedDocuments } from '@/lib/creator-record/evidence/verify-returned-documents'
+import { verifyReturnedDocuments, type LiveEvidenceCheck } from '@/lib/creator-record/evidence/verify-returned-documents'
+import { evidenceSigningKey } from '@/lib/creator-record/evidence/attestation'
+import { getVerifiedSessionContext } from '@/lib/reviewer-context/session-context'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,8 +47,11 @@ export async function POST(req: NextRequest) {
   }
   const parsed = parseFormState(body)
   if (!parsed.ok) return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
-  // Returned documents are checked against SI8's own replay table, never trusted as sent.
-  if (!verifyReturnedDocuments(parsed.documents)) return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+  // Returned documents are checked against SI8's own replay table (replay) or their server attestation (live), never trusted as sent.
+  const live: LiveEvidenceCheck | undefined = parsed.documents.some((d) => d.document.extraction_mode === 'live_model')
+    ? { context: await getVerifiedSessionContext(access.userId), key: evidenceSigningKey(), now_ms: Date.now() }
+    : undefined
+  if (!verifyReturnedDocuments(parsed.documents, undefined, undefined, live)) return NextResponse.json({ error: 'document_not_accepted' }, { status: 400 })
 
   const now = new Date()
   const result = buildCreatorRecordDraft({

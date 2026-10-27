@@ -198,12 +198,15 @@ describe('lib/creator-record boundaries', () => {
   test('CR-V2-VERTICAL-SLICE-1: only the server route loads the guidance engine; browser code gets pure modules only', () => {
     const importsOf = (rel: string) => staticImports(readFileSync(path.join(APP_ROOT, rel), 'utf8')).filter((i) => i.includes('creator-record/'))
     expect(importsOf('app/api/admin/creator-record-v2/draft/route.ts').sort()).toEqual([
+      // CR-V2-MVP-7: the server-only live-observation attestation (signing key read on the server).
+      '@/lib/creator-record/evidence/attestation',
       '@/lib/creator-record/evidence/verify-returned-documents',
       '@/lib/creator-record/prototype/build-draft',
       '@/lib/creator-record/prototype/parse-form-state',
     ])
     // CR-V2-EVIDENCE-SLICE-1: the examine route loads only the evidence module; the page only the gate and the plan suggestions.
     expect(importsOf('app/api/admin/creator-record-v2/examine/route.ts').sort()).toEqual([
+      '@/lib/creator-record/evidence/attestation',
       '@/lib/creator-record/evidence/config',
       '@/lib/creator-record/evidence/document-observations',
       '@/lib/creator-record/evidence/examine-upload',
@@ -300,7 +303,7 @@ describe('lib/creator-record boundaries', () => {
   test('CR-V2-EVIDENCE-SLICE-1: evidence/ makes no storage, database, network or SDK import; the live adapter only behind the gate', () => {
     const files = walk(path.join(MODULE_ROOT, 'evidence'))
     const external = files.flatMap((f) => staticImports(readFileSync(f, 'utf8')).filter((i) => !i.startsWith('.')).map((i) => `${path.basename(f)} -> ${i}`))
-    expect(external.sort()).toEqual(['examine-upload.ts -> node:crypto', 'pdf-text-layer.ts -> node:zlib'])
+    expect(external.sort()).toEqual(['attestation.ts -> node:crypto', 'examine-upload.ts -> node:crypto', 'pdf-text-layer.ts -> node:zlib'])
     const relativeTargets = new Set(
       files.flatMap((f) =>
         staticImports(readFileSync(f, 'utf8'))

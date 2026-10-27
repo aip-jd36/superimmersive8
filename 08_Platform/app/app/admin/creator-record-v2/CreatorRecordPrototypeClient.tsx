@@ -44,7 +44,8 @@ async function examineDocument(toolIndex: number, file: File): Promise<ExamineRe
     // Sent only from the document panel, which is enabled only after the consent statement is ticked.
     const res = await fetch('/api/admin/creator-record-v2/examine', { method: 'POST', headers: { [DOCUMENT_CONSENT_HEADER]: DOCUMENT_CONSENT_VALUE }, body })
     const data = await res.json().catch(() => null)
-    if (res.ok && data?.ok && data.document) return { ok: true, document: data.document }
+    // CR-V2-MVP-7: a live observation comes with an opaque server attestation, sent back unchanged with the draft.
+    if (res.ok && data?.ok && data.document) return { ok: true, document: data.document, ...(typeof data.attestation === 'string' ? { attestation: data.attestation } : {}) }
     if (res.status === 401 || res.status === 403) return { ok: false, error: 'You do not have access to this prototype.' }
     if (res.status === 413) return { ok: false, error: 'This file is larger than the 4 MB limit.' }
     if (res.status === 428) return { ok: false, error: 'Please confirm the statement under “Before you add a document” first.' }
@@ -91,7 +92,13 @@ export function CreatorRecordPrototypeClient({ planSuggestions, examinationMode 
         setError('Some answers need attention.')
         window.scrollTo({ top: 0 })
       } else if (!res.ok || !data?.ok) {
-        setError(res.status === 401 || res.status === 403 ? 'You do not have access to this prototype.' : 'The draft could not be prepared. Please try again.')
+        setError(
+          res.status === 401 || res.status === 403
+            ? 'You do not have access to this prototype.'
+            : data?.error === 'document_not_accepted'
+              ? 'A document could not be accepted (for example, its reading has expired or you signed in again). Remove it and add it again.'
+              : 'The draft could not be prepared. Please try again.',
+        )
       } else {
         setIssues([])
         setView(data.view)

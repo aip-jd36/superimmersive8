@@ -34,7 +34,7 @@ import type { ExaminedDocument, ExtractionMode, ToolDocument } from '@/lib/creat
 import { visibleQuestions, visibleToolQuestions, type CreatorRecordFormState, type FormConfig, type FormIssue, type QuestionPresentation } from '@/lib/creator-record/prototype/form'
 import { DocumentReviewPanel } from './DocumentReviewPanel'
 
-export type ExamineResult = { ok: true; document: ExaminedDocument } | { ok: false; error: string }
+export type ExamineResult = { ok: true; document: ExaminedDocument; attestation?: string } | { ok: false; error: string }
 export interface FixtureDocumentOption {
   fixture_id: string
   label: string
@@ -124,7 +124,7 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
     setDocErrors((e) => ({ ...e, [index]: '' }))
     const r = await props.onExamine(index, file)
     setExamining(null)
-    if (r.ok) setDoc(index, () => ({ tool_index: index, document: r.document }))
+    if (r.ok) setDoc(index, () => ({ tool_index: index, document: r.document, ...(r.attestation ? { attestation: r.attestation } : {}) }))
     else setDocErrors((e) => ({ ...e, [index]: r.error }))
   }
 

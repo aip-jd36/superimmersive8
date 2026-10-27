@@ -40,13 +40,16 @@ function parseDocuments(v: unknown, toolCount: number): ToolDocument[] | null {
   for (const item of v) {
     if (!item || typeof item !== 'object' || Array.isArray(item)) return null
     const o = item as Record<string, unknown>
-    if (Object.keys(o).length !== 2 || !('tool_index' in o) || !('document' in o)) return null
+    // CR-V2-MVP-7: an optional opaque attestation (live observations only); its validity is checked by the route.
+    const keys = Object.keys(o)
+    if (!('tool_index' in o) || !('document' in o) || !keys.every((k) => k === 'tool_index' || k === 'document' || k === 'attestation')) return null
+    if ('attestation' in o && (typeof o.attestation !== 'string' || o.attestation.length === 0 || o.attestation.length > 1024 || !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(o.attestation))) return null
     const tool_index = o.tool_index
     if (typeof tool_index !== 'number' || !Number.isInteger(tool_index) || tool_index < 0 || tool_index >= toolCount) return null
     const document = parseExaminedDocument(o.document)
     if (!document) return null
     if (out.filter((d) => d.tool_index === tool_index).length >= MAX_DOCUMENTS_PER_TOOL) return null
-    out.push({ tool_index, document })
+    out.push({ tool_index, document, ...(typeof o.attestation === 'string' ? { attestation: o.attestation } : {}) })
   }
   return out
 }
