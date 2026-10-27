@@ -105,8 +105,27 @@ export function DraftRecordView({ view, showTrace = false, showReferences = true
               ))}
             </dl>
             {d.notes.map((n) => <p key={n} className="text-xs mt-2">{n}</p>)}
-            <Field label="Your choice">{d.review}</Field>
-            <p className="text-xs mt-2" style={{ color: MUTED }}>{d.not_compared}</p>
+          </article>
+        ))}
+      </Section>
+
+      <Section id="reconciliation" title={T.section_reconciliation}>
+        <p className="text-sm mb-4" style={{ color: MUTED }}>{view.reconciliation.intro}</p>
+        {view.reconciliation.empty && <p className="text-sm">{view.reconciliation.empty}</p>}
+        {view.reconciliation.items.map((r) => (
+          <article key={r.tool_index} aria-labelledby={`recon-${r.tool_index}`} className="mb-4 rounded-md border p-4" style={{ borderColor: LINE }}>
+            <h3 id={`recon-${r.tool_index}`} className="text-sm font-semibold">{r.heading}</h3>
+            <dl className="text-xs mt-2">
+              {r.rows.map((row) => (
+                <div key={row.label} className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-4 py-1 border-b" style={{ borderColor: LINE }}>
+                  <dt style={{ color: MUTED }}>{row.label}</dt>
+                  <dd className="sm:col-span-2 break-words">
+                    {row.value}
+                    {row.note && <span className="block mt-0.5" style={{ color: MUTED }}>{row.note}</span>}
+                  </dd>
+                </div>
+              ))}
+            </dl>
           </article>
         ))}
       </Section>
@@ -138,6 +157,22 @@ export function DraftRecordView({ view, showTrace = false, showReferences = true
       <Section id="open-items" title={T.section_open_items}>
         <p className="text-sm mb-4" style={{ color: MUTED }}>{view.open_items.intro}</p>
         {view.open_items.empty && <p className="text-sm">{view.open_items.empty}</p>}
+        {view.open_items.not_established.length > 0 && (
+          <div data-open-items-kind="not-established" className="mb-4">
+            <h3 className="text-sm font-semibold mb-2">{T.not_established_heading}</h3>
+            {view.open_items.not_established.map((n) => (
+              <div key={n.key} data-not-established={n.key} className="mb-3 rounded-md border p-4 text-sm" style={{ borderColor: LINE }}>
+                <h4 className="font-semibold">Open item: {n.label}</h4>
+                <dl className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-1 text-xs">
+                  <dt style={{ color: MUTED }}>What you told us</dt><dd className="sm:col-span-2">{n.told_us}</dd>
+                  <dt style={{ color: MUTED }}>Status</dt><dd className="sm:col-span-2">{n.status}</dd>
+                  <dt style={{ color: MUTED }}>Relates to</dt><dd className="sm:col-span-2">{n.for_guidance.join('; ')}</dd>
+                </dl>
+              </div>
+            ))}
+          </div>
+        )}
+        {view.open_items.items.length > 0 && view.open_items.not_established.length > 0 && <h3 className="text-sm font-semibold mb-2">{T.documents_needed_heading}</h3>}
         {view.open_items.items.map((o) => (
           <div key={o.dependency_id} data-open-item={o.dependency_id} className="mb-3 rounded-md border p-4 text-sm" style={{ borderColor: LINE }}>
             <h3 className="font-semibold">Open item: {o.label}</h3>

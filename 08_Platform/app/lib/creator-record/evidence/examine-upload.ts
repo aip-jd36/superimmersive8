@@ -19,7 +19,9 @@ import { createHash } from 'node:crypto'
 import { detectMediaType, examineReceiptDocument, type ReceiptModelCaller } from '../receipt-examination/examine'
 import { RECEIPT_PROMPT_VERSION } from '../receipt-examination/prompt'
 import { RECEIPT_EXTRACTION_SCHEMA_VERSION } from '../receipt-examination/schema'
-import { documentIdFor, MAX_UPLOAD_BYTES, sanitizeFileName, type ExaminedDocument, type ExtractionMode, type NotExaminedReason } from './document-observations'
+import { documentIdFor, MAX_LIVE_UPLOAD_BYTES, MAX_UPLOAD_BYTES, sanitizeFileName, type ExaminedDocument, type ExtractionMode, type NotExaminedReason } from './document-observations'
+import { extractPdfTextLayer } from './pdf-text-layer'
+import { crossCheckPlan, notRun, type PlanScope } from './plan-cross-check'
 import { DEFAULT_REPLAY_TABLE, REPLAY_SET_VERSION, type ReplayFixture, type ReplayTable } from './replay'
 
 export interface ExamineUploadDeps {
@@ -27,6 +29,13 @@ export interface ExamineUploadDeps {
   /** Required for `live_model`; never used in replay. */
   liveCaller?: ReceiptModelCaller
   replayTable?: ReplayTable
+  /**
+   * CR-V2-MVP-3 / -MVP-4 (G-R2): resolves the reported seller name to the
+   * provider-scoped plan-name vocabulary for the text-layer cross-check.
+   * Without it the cross-check is reported as not run — never as "nothing
+   * else found".
+   */
+  planScope?: (seller: string | null) => PlanScope
 }
 
 const replayCaller = (fixture: ReplayFixture): ReceiptModelCaller => async () => ({
@@ -61,11 +70,22 @@ export async function examineUpload(bytes: Uint8Array, rawFileName: string | nul
     versions: versions(deps.mode === 'fixture_replay'),
     model_calls,
     extraction: null,
+    cross_check: notRun('not_examined'),
   })
+  /** G-R2 on the same bytes, for whichever reading was made (replay or live). Deterministic; no model. */
+  const crossCheck = (extraction: ExaminedDocument['extraction']) =>
+    deps.planScope
+      ? crossCheckPlan(
+          extraction,
+          media === 'application/pdf' ? extractPdfTextLayer(bytes) : { status: 'unavailable', reason: 'not_pdf' },
+          deps.planScope(extraction && extraction.issuer_name.status === 'present' ? extraction.issuer_name.value : null),
+        )
+      : notRun('no_vocabulary')
 
   // Input checks: always before any model call.
   if (bytes.length === 0) return notExamined('empty_file')
   if (bytes.length > MAX_UPLOAD_BYTES) return notExamined('file_too_large')
+  if (deps.mode === 'live_model' && bytes.length > MAX_LIVE_UPLOAD_BYTES) return notExamined('file_too_large')
   if (!media) return notExamined('unsupported_format')
 
   if (deps.mode === 'fixture_replay') {
@@ -73,12 +93,12 @@ export async function examineUpload(bytes: Uint8Array, rawFileName: string | nul
     if (!fixture) return notExamined('no_replay_fixture', 'document_provided_not_examined')
     const outcome = await examineReceiptDocument(bytes, { callModel: replayCaller(fixture) })
     if (outcome.status !== 'examined') return notExamined(outcome.reason, 'could_not_examine', 0, fixture.fixture_id)
-    return { ...base, outcome: 'document_examined', reason: null, replay_fixture_id: fixture.fixture_id, versions: versions(true), model_calls: 0, extraction: outcome.extraction }
+    return { ...base, outcome: 'document_examined', reason: null, replay_fixture_id: fixture.fixture_id, versions: versions(true), model_calls: 0, extraction: outcome.extraction, cross_check: crossCheck(outcome.extraction) }
   }
 
   if (!deps.liveCaller) return notExamined('model_error')
   const outcome = await examineReceiptDocument(bytes, { callModel: deps.liveCaller })
   const calls = outcome.usage.attempts
   if (outcome.status !== 'examined') return notExamined(outcome.reason, 'could_not_examine', calls)
-  return { ...base, outcome: 'document_examined', reason: null, replay_fixture_id: null, versions: versions(false), model_calls: calls, extraction: outcome.extraction }
+  return { ...base, outcome: 'document_examined', reason: null, replay_fixture_id: null, versions: versions(false), model_calls: calls, extraction: outcome.extraction, cross_check: crossCheck(outcome.extraction) }
 }

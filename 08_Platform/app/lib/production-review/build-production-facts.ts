@@ -78,7 +78,8 @@ export function governedPlanValuesByTool(topicClaims: TopicClaim[]): Map<string,
   return governedToolFactValues(topicClaims, 'tool_plan_tier')
 }
 
-function resolveIdentity(rawName: string | null): DeclaredToolIdentity {
+/** Exported for CR-V2-MVP-4 (document seller → tool, same fail-closed resolution). */
+export function resolveIdentity(rawName: string | null): DeclaredToolIdentity {
   if (!rawName) return { kind: 'unresolved', reason: 'missing_name' }
   const result = normalizeCandidate({
     kind: 'tool_mention',

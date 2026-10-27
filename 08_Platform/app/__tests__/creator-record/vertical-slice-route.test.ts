@@ -125,10 +125,11 @@ describe('request handling', () => {
         versions: { schema: RECEIPT_EXTRACTION_SCHEMA_VERSION, prompt: null, replay_set: REPLAY_SET_VERSION },
         model_calls: 0,
         extraction: validateReceiptExtraction(f.parsed_output),
+        cross_check: { version: 'plan-cross-check-v1/pdf-text-layer-v1', status: 'not_run', other_plan_names: [], reason: 'no_vocabulary', provider: null },
       }),
     )
   }
-  const withDoc = (document: { document_id: string }) => ({ ...VALID, documents: [{ tool_index: 0, document, review: { document_id: document.document_id, decision: 'ignored', adopted_value: null } }] })
+  const withDoc = (document: { document_id: string }) => ({ ...VALID, documents: [{ tool_index: 0, document }] })
 
   test('authorized + valid with a replayed document → 200; the document is shown and guidance is unchanged', async () => {
     const plain = await (await POST(req(VALID))).json()
@@ -146,11 +147,22 @@ describe('request handling', () => {
     ['another fixture’s id', (d: any) => (d.replay_fixture_id = 'conflict-two-plan-names')],
     ['a stale replay-set version', (d: any) => (d.versions.replay_set = 'receipt-fixtures-v1/oracle-replay')],
     ['an unknown file claimed as examined', (d: any) => ((d.sha256 = 'f'.repeat(64)), (d.document_id = documentIdFor('f'.repeat(64))))],
+    // CR-V2-MVP-6: G-R2 is deferred; any cross-check other than "not run" is forged or stale.
+    ['a forged cross-check result', (d: any) => (d.cross_check = { version: 'plan-cross-check-v1/pdf-text-layer-v1', status: 'no_other_plan_names_found', other_plan_names: [], reason: null, provider: 'pika' })],
     ['a known fixture claimed as "not read"', (d: any) => ((d.outcome = 'document_provided_not_examined'), (d.reason = 'no_replay_fixture'), (d.extraction = null), (d.replay_fixture_id = null))],
   ])('a returned document with %s → 400', async (_name, edit) => {
     const d = legitDocument()
     edit(d)
     const res = await POST(req(withDoc(d)))
+    expect(res.status).toBe(400)
+  })
+
+  test.each([
+    ['a review', { review: { document_id: 'x', decision: 'adopted', adopted_value: 'Pro' } }],
+    ['a reconciliation', { reconciliation: { plan: { result: 'appears_consistent', reason: 'same_plan_name' } } }],
+  ])('CR-V2-MVP-6: a document sent with %s → 400 (no adoption; reconciliation is server-computed)', async (_n, extra) => {
+    const body = withDoc(legitDocument())
+    const res = await POST(req({ ...body, documents: [{ ...body.documents[0], ...extra }] }))
     expect(res.status).toBe(400)
   })
 

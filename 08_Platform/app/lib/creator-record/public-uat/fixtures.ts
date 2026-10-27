@@ -12,6 +12,7 @@
  */
 
 import { documentIdFor, sanitizeFileName, type ExaminedDocument } from '../evidence/document-observations'
+import { notRun } from '../evidence/plan-cross-check'
 import { DEFAULT_REPLAY_TABLE, REPLAY_SET_VERSION, type ReplayFixture, type ReplayTable } from '../evidence/replay'
 import type { ReceiptMediaType } from '../receipt-examination/prompt'
 import { RECEIPT_EXTRACTION_SCHEMA_VERSION, validateReceiptExtraction } from '../receipt-examination/schema'
@@ -66,6 +67,8 @@ export function documentForFixture(fixtureId: string, table: ReplayTable = DEFAU
     replay_fixture_id: entry.fixture_id,
     versions: { schema: RECEIPT_EXTRACTION_SCHEMA_VERSION, prompt: null, replay_set: REPLAY_SET_VERSION },
     model_calls: 0,
+    // No bytes are handled here, so the text-layer cross-check is honestly reported as not run.
+    cross_check: notRun('selected_synthetic_fixture'),
   }
   return extraction
     ? { ...base, outcome: 'document_examined', reason: null, extraction }

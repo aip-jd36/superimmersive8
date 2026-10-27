@@ -17,20 +17,20 @@
  *   - the `plan` question offers the governed plan names for the chosen tool
  *     as PARTIAL suggestions, plus "Another plan" (typed) and "Not sure";
  *   - each tool block can carry one optional billing document. What it
- *     appears to show is displayed read-only; the creator may adopt a plan
- *     name it shows as their own answer, give their own answer, or ignore it.
- *     Changing the tool clears the plan answer and the document choice, so no
- *     stale answer survives a correction.
+ *     appears to show is displayed read-only. CR-V2-MVP-6 (Option C): it can
+ *     never fill or change an answer; the creator's answers are only ever
+ *     what the creator enters. The comparison is made on the server, in the
+ *     draft record. Changing the tool clears the plan answer.
  *
  * CR-V2-WORK-UAT-HARNESS-2: with `fixtureDocuments` (and no `onExamine`) the
  * document panel offers a choice from SI8's synthetic test set instead of a
  * file input. The observations shown come from the server; on submit the
- * caller sends only the chosen fixture id and the review.
+ * caller sends only the chosen fixture id.
  */
 
 import { useMemo, useState } from 'react'
 import { loadQuestionRegistry, NOT_SURE, type RegistryInput } from '@/lib/creator-record/contract/question-registry'
-import type { ExaminedDocument, ExtractionMode, ReviewDecision, ToolDocument } from '@/lib/creator-record/evidence/document-observations'
+import type { ExaminedDocument, ExtractionMode, ToolDocument } from '@/lib/creator-record/evidence/document-observations'
 import { visibleQuestions, visibleToolQuestions, type CreatorRecordFormState, type FormConfig, type FormIssue, type QuestionPresentation } from '@/lib/creator-record/prototype/form'
 import { DocumentReviewPanel } from './DocumentReviewPanel'
 
@@ -75,7 +75,6 @@ const ISSUE_TEXT: Record<FormIssue['issue'], string> = {
   no_tools: 'Please add at least one tool.',
   acknowledgement_required: 'Please confirm this statement.',
   unknown_question: 'Unexpected answer.',
-  stale_document_review: 'Your plan answer is no longer the value you chose from the document. Please make your choice about the document again.',
 }
 
 const docsFrom = (tools: number, initial: readonly ToolDocument[] | undefined): (ToolDocument | null)[] =>
@@ -101,8 +100,6 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
 
   const setAnswer = (q_id: string, values: string[]) => setState((s) => ({ ...s, answers: { ...s.answers, [q_id]: values } }))
   const setDoc = (index: number, f: (d: ToolDocument | null) => ToolDocument | null) => setDocs((ds) => ds.map((d, i) => (i === index ? f(d) : d)))
-  const setReview = (index: number, decision: ReviewDecision, adopted_value: string | null) =>
-    setDoc(index, (d) => (d ? { ...d, review: { document_id: d.document.document_id, decision, adopted_value } } : d))
 
   const setToolAnswer = (index: number, q_id: string, values: string[]) => {
     setState((s) => ({
@@ -118,16 +115,7 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
         return next
       }),
     }))
-    if (q_id === 'T1') {
-      setAnotherPlan((a) => a.map((v, i) => (i === index ? false : v)))
-      setDoc(index, (d) => (d ? { ...d, review: { document_id: d.document.document_id, decision: 'not_reviewed', adopted_value: null } } : d))
-    }
-    if (q_id === 'T3') {
-      // Editing the plan after adopting a document value makes it the creator's own, different answer.
-      setDoc(index, (d) =>
-        d && d.review.decision === 'adopted' && d.review.adopted_value !== values[0] ? { ...d, review: { document_id: d.document.document_id, decision: 'entered_different', adopted_value: null } } : d,
-      )
-    }
+    if (q_id === 'T1') setAnotherPlan((a) => a.map((v, i) => (i === index ? false : v)))
   }
 
   const examine = async (index: number, file: File) => {
@@ -136,19 +124,8 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
     setDocErrors((e) => ({ ...e, [index]: '' }))
     const r = await props.onExamine(index, file)
     setExamining(null)
-    if (r.ok) setDoc(index, () => ({ tool_index: index, document: r.document, review: { document_id: r.document.document_id, decision: 'not_reviewed', adopted_value: null } }))
+    if (r.ok) setDoc(index, () => ({ tool_index: index, document: r.document }))
     else setDocErrors((e) => ({ ...e, [index]: r.error }))
-  }
-
-  const review = (index: number, decision: ReviewDecision, value: string | null) => {
-    if (decision === 'adopted' && value !== null) {
-      setState((s) => ({ ...s, tools: s.tools.map((t, i) => (i === index ? { ...t, T3: [value] } : t)) }))
-      const tool = (state.tools[index]?.T1 ?? [])[0] ?? ''
-      const suggestions = props.planSuggestions?.[tool] ?? []
-      setAnotherPlan((a) => a.map((v, i) => (i === index ? !suggestions.includes(value) : v)))
-    }
-    if (decision === 'entered_different') setAnotherPlan((a) => a.map((v, i) => (i === index ? true : v)))
-    setReview(index, decision, value)
   }
 
   const field = (q_id: string, values: string[] | undefined, onChange: (v: string[]) => void, tool_index: number | null, key: string, toolAnswers?: Record<string, string[]>) => {
@@ -329,7 +306,7 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
   const fixtureMode = !uploadsOffered && (props.fixtureDocuments ?? []).length > 0
   const selectFixture = (index: number, fixtureId: string) => {
     const f = (props.fixtureDocuments ?? []).find((x) => x.fixture_id === fixtureId)
-    setDoc(index, () => (f ? { tool_index: index, document: f.document, review: { document_id: f.document.document_id, decision: 'not_reviewed', adopted_value: null } } : null))
+    setDoc(index, () => (f ? { tool_index: index, document: f.document } : null))
   }
 
   return (
@@ -397,7 +374,6 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
                       error={docErrors[i] || null}
                       onExamine={(file) => examine(i, file)}
                       onRemove={() => setDoc(i, () => null)}
-                      onReview={(decision, value) => review(i, decision, value)}
                     />
                   )}
                 </div>

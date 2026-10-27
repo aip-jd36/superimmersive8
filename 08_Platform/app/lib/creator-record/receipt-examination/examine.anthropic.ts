@@ -23,6 +23,13 @@ export interface AnthropicReceiptCallerOptions {
   model?: string
   /** Per-request timeout. Defaults to 55 s, under the 60 s route ceiling used elsewhere. */
   timeoutMs?: number
+  /**
+   * Environment variable holding the API key (CR-V2-MVP-1). Defaults to
+   * `ANTHROPIC_API_KEY` for the eval runner; the app's live path uses a
+   * dedicated key so its spend can be capped separately. The key is read
+   * here only and never logged or returned.
+   */
+  apiKeyEnv?: string
 }
 
 export function resolveReceiptModel(options?: AnthropicReceiptCallerOptions): string {
@@ -30,9 +37,10 @@ export function resolveReceiptModel(options?: AnthropicReceiptCallerOptions): st
 }
 
 export function createAnthropicReceiptCaller(options?: AnthropicReceiptCallerOptions): ReceiptModelCaller {
-  const apiKey = process.env.ANTHROPIC_API_KEY
+  const keyEnv = options?.apiKeyEnv ?? 'ANTHROPIC_API_KEY'
+  const apiKey = process.env[keyEnv]
   if (!apiKey) {
-    throw new Error('ANTHROPIC_API_KEY is not set in this process environment. Live receipt evaluation cannot run.')
+    throw new Error(`${keyEnv} is not set in this process environment. Live receipt examination cannot run.`)
   }
   const model = resolveReceiptModel(options)
   const client = new Anthropic({ apiKey, timeout: options?.timeoutMs ?? 55_000, maxRetries: 0 })

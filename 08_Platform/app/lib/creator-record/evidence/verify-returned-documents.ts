@@ -14,8 +14,21 @@
  *   - versions must be the current ones.
  * Display-only either way; this only prevents a page from showing a forged or
  * mislabelled observation. Server-only (loads the replay table).
+ *
+ * CR-V2-MVP-1: in a build that PERMITS live extraction (code lock lifted and
+ * the environment set), a `live_model` document cannot be re-derived (nothing
+ * is stored), so it is accepted only in its strictly parsed form, labelled
+ * live, with 1–2 model calls, the current schema and prompt versions and no
+ * replay id. It stays display-only: it never reaches the guidance pipeline.
+ * In the locked build (the default) a `live_model` document is refused.
+ *
+ * CR-V2-MVP-6: the G-R2 text-layer cross-check is deferred (unwired from the
+ * MVP path), so a returned document must carry the "not run" result the
+ * examine route now always produces. Any other cross-check result is a
+ * forged or stale field and is refused.
  */
 
+import { RECEIPT_PROMPT_VERSION } from '../receipt-examination/prompt'
 import { RECEIPT_EXTRACTION_SCHEMA_VERSION, validateReceiptExtraction } from '../receipt-examination/schema'
 import { extractionMode } from './config'
 import type { ToolDocument } from './document-observations'
@@ -25,7 +38,13 @@ const canonical = (v: unknown) => JSON.stringify(v)
 
 export function verifyReturnedDocument(td: ToolDocument, table: ReplayTable = DEFAULT_REPLAY_TABLE, mode = extractionMode()): boolean {
   const d = td.document
-  if (mode !== 'fixture_replay' || d.extraction_mode !== 'fixture_replay' || d.model_calls !== 0) return false
+  if (d.cross_check.status !== 'not_run' || d.cross_check.other_plan_names.length > 0 || d.cross_check.provider !== null) return false
+  if (d.extraction_mode === 'live_model') {
+    if (mode !== 'live_model' || d.replay_fixture_id !== null || d.model_calls < 1 || d.model_calls > 2) return false
+    if (d.versions.schema !== RECEIPT_EXTRACTION_SCHEMA_VERSION || d.versions.prompt !== RECEIPT_PROMPT_VERSION || d.versions.replay_set !== null) return false
+    return d.outcome === 'document_examined' ? validateReceiptExtraction(d.extraction) !== null : d.extraction === null
+  }
+  if (d.extraction_mode !== 'fixture_replay' || d.model_calls !== 0) return false
   if (d.versions.schema !== RECEIPT_EXTRACTION_SCHEMA_VERSION || d.versions.prompt !== null || d.versions.replay_set !== REPLAY_SET_VERSION) return false
   const entry = table.get(d.sha256)
   switch (d.outcome) {

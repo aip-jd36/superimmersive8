@@ -49,7 +49,7 @@ export interface FormConfig {
 export interface FormIssue {
   q_id: string | null
   tool_index: number | null
-  issue: 'required' | 'invalid_option' | 'too_long' | 'single_choice_only' | 'too_many_tools' | 'no_tools' | 'acknowledgement_required' | 'unknown_question' | 'stale_document_review'
+  issue: 'required' | 'invalid_option' | 'too_long' | 'single_choice_only' | 'too_many_tools' | 'no_tools' | 'acknowledgement_required' | 'unknown_question'
 }
 
 export interface DiscardedAnswer {

@@ -9,8 +9,10 @@
  *   - ledger explanations, labels, evidence notes and caveats (passed in);
  *   - the fixed templates in `./templates`;
  *   - (CR-V2-EVIDENCE-SLICE-1) the documents the creator added, shown ONLY
- *     as what each appears to show, beside — never compared with — the
- *     creator's answers.
+ *     as what each appears to show;
+ *   - (CR-V2-MVP-6) the server-computed, provisional evidence reconciliation
+ *     (`reconcileToolEvidence`), shown as its own statement type, always with
+ *     its limitation.
  * It never evaluates applicability, never reads Bounded Interpretation prose,
  * and never upgrades a conclusion: the conclusion label is a fixed mapping of
  * composition's own (already narrowed) conclusion. Documents cannot change a
@@ -24,7 +26,7 @@
 
 import type { CreatorRecordConclusion, GuidanceItem } from '../contract/compose'
 import type { DeclaredObservation, DocumentObservation } from '../contract/provenance'
-import type { ToolDocument } from '../evidence/document-observations'
+import type { EvidenceReconciliation, FieldReconciliation, ToolDocument } from '../evidence/document-observations'
 import type { CreatorRecordGuidanceResult } from '../integration/run-creator-record-guidance'
 import type { ApplicabilityRequirement, TopicClaim } from '@/lib/retrieval-engine/types'
 import type { CreatorRecordFormState, DiscardedAnswer, QuestionPresentation } from '../prototype/form'
@@ -71,13 +73,34 @@ export interface DraftOpenItem {
   for_guidance: string[]
 }
 
+/**
+ * CR-V2-MVP-1 (CR-V2-COMP-001): information a piece of guidance depends on
+ * that this record does not establish — Bounded Interpretation's unresolved
+ * applicability (`material_unresolved`), aggregated per fact and tool. Distinct
+ * from evidence dependencies (`DraftOpenItem`). Never a new obligation: each
+ * entry comes from a requirement already on a governed claim shown here.
+ */
+export interface DraftNotEstablished {
+  key: string
+  label: string
+  told_us: string
+  status: string
+  for_guidance: string[]
+}
+
 export interface DraftDocument {
   document_id: string
   heading: string
   rows: DraftRow[]
   notes: string[]
-  review: string
-  not_compared: string
+}
+
+/** CR-V2-MVP-6: one tool's provisional comparison of declarations with a document. */
+export interface DraftReconciliation {
+  tool_index: number
+  heading: string
+  document_id: string | null
+  rows: DraftRow[]
 }
 
 export interface DraftRecordView {
@@ -87,8 +110,9 @@ export interface DraftRecordView {
   summary: string[]
   declarations: { intro: string; groups: DraftDeclarationGroup[] }
   documents: { intro: string; items: DraftDocument[]; empty: string | null }
+  reconciliation: { intro: string; items: DraftReconciliation[]; empty: string | null }
   guidance: { intro: string; cards: DraftGuidanceCard[]; empty: string | null }
-  open_items: { intro: string; items: DraftOpenItem[]; empty: string | null; documents_mentioned: DraftRow[] }
+  open_items: { intro: string; not_established: DraftNotEstablished[]; items: DraftOpenItem[]; empty: string | null; documents_mentioned: DraftRow[] }
   not_shown: { intro: string; lines: string[] }
   independent_review: { intro: string; lines: string[] }
   not_done: string[]
@@ -102,7 +126,8 @@ export interface DraftRecordView {
     discarded_answers: DiscardedAnswer[]
     /** Display-only document observations. None of them was an input to guidance. */
     document_observations: DocumentObservation[]
-    document_reviews: { document_id: string; tool_index: number; decision: string; adopted_value: string | null }[]
+    /** Server-computed; never an input to guidance. */
+    evidence_reconciliation: EvidenceReconciliation[]
   }
 }
 
@@ -125,6 +150,8 @@ export interface DraftRecordInput {
   /** Documents the creator added, already validated. Display-only. */
   documents?: readonly ToolDocument[]
   document_observations?: readonly DocumentObservation[]
+  /** Server-computed provisional reconciliation, one per tool block. Display-only. */
+  reconciliation?: readonly EvidenceReconciliation[]
 }
 
 const EXISTENCE_QUESTIONS = new Set(['L3', 'M2', 'M3D', 'M4'])
@@ -182,7 +209,6 @@ export function buildDraftRecord(input: DraftRecordInput): DraftRecordView {
       state.tools.forEach((t, i) => {
         const instance = toolInstance(i)
         const toolRec = prov.tools.find((x) => x.instance === instance)
-        const adopted = documents.some((d) => d.tool_index === i && d.review.decision === 'adopted')
         for (const q_id of input.shown.per_tool[i] ?? []) {
           const p = input.presentation[q_id]
           const value = answerText(p, t[q_id])
@@ -193,7 +219,6 @@ export function buildDraftRecord(input: DraftRecordInput): DraftRecordView {
           }
           if (q_id === 'T1X') note = T.tool_not_recognized
           if (q_id === 'T3' && toolRec?.tool_id) note = planNote(prov, instance, t[q_id])
-          if (q_id === 'T3' && adopted) note = note ? `${note} ${T.plan_adopted_note}` : T.plan_adopted_note
           rows.push({ label: `${T.tool_heading(i + 1)} — ${p.text}`, value, ...(note ? { note } : {}) })
         }
       })
@@ -218,6 +243,9 @@ export function buildDraftRecord(input: DraftRecordInput): DraftRecordView {
 
   // ── Documents (display-only; never an input to guidance) ──
   const documentItems: DraftDocument[] = documents.map((d) => documentView(d))
+  // ── Provisional reconciliation (server-computed; display-only) ──
+  const reconciliation = input.reconciliation ?? []
+  const reconItems: DraftReconciliation[] = documents.length === 0 ? [] : reconciliation.map((r) => reconciliationView(r))
 
   // ── Guidance ──
   const cards: DraftGuidanceCard[] = guidance.composition.items.map((item) => guidanceCard(item, claimsById.get(item.claim_id), subjectOf, toolName, prov, input))
@@ -236,7 +264,7 @@ export function buildDraftRecord(input: DraftRecordInput): DraftRecordView {
         dependency_id: row.dependency_id,
         label: row.label ?? T.open_unlabelled,
         told_us: row.declarations.length > 0 ? row.declarations.map((d) => d.answer_verbatim).join('; ') : T.open_told_us_none,
-        documents: T.open_documents_none,
+        documents: documents.length > 0 ? T.open_documents_some : T.open_documents_none,
         evidence: row.evidence_note ?? T.open_evidence_default,
         sufficiency: T.open_sufficiency,
         status: T.open_status,
@@ -245,6 +273,28 @@ export function buildDraftRecord(input: DraftRecordInput): DraftRecordView {
     }
   }
   const openItems = Array.from(openById.values())
+
+  // ── Information not established (unresolved applicability, CR-V2-COMP-001) ──
+  const notEstablishedByKey = new Map<string, DraftNotEstablished>()
+  for (const item of guidance.composition.items) {
+    const subject = subjectOf(claimsById.get(item.claim_id))
+    for (const r of item.applicability.material_unresolved) {
+      const key = `${r.fact}:${r.tool ?? ''}`
+      const existing = notEstablishedByKey.get(key)
+      if (existing) {
+        if (!existing.for_guidance.includes(subject)) existing.for_guidance.push(subject)
+        continue
+      }
+      const tool = r.tool ? toolName(r.tool) : null
+      const declaredPlans = r.tool ? Array.from(new Set(prov.plans.filter((p) => p.tool_id === r.tool).map((p) => p.declared))) : []
+      const label =
+        r.fact === 'tool_plan_tier' && tool ? T.not_established_plan(tool) : r.fact === 'tool_account_status' && tool ? T.not_established_account(tool) : T.not_established_other
+      const told_us = r.fact === 'tool_plan_tier' ? (declaredPlans.length > 0 ? declaredPlans.join('; ') : T.not_established_told_plan_none) : T.open_told_us_none
+      notEstablishedByKey.set(key, { key, label, told_us, status: T.open_status, for_guidance: [subject] })
+    }
+  }
+  const notEstablished = Array.from(notEstablishedByKey.values())
+  const unresolvedGuidance = cards.filter((c) => c.conclusion === 'relevant_applicability_unresolved').length
   const documentsMentioned: DraftRow[] = input.question_order
     .filter((q) => EXISTENCE_QUESTIONS.has(q) && input.shown.single.includes(q) && (state.answers[q] ?? []).length > 0)
     .map((q) => ({ label: input.presentation[q].text, value: answerText(input.presentation[q], state.answers[q]), note: existenceSentence(state.answers[q][0]) }))
@@ -282,6 +332,7 @@ export function buildDraftRecord(input: DraftRecordInput): DraftRecordView {
 
   // ── Independent review ──
   const review: string[] = []
+  if (notEstablished.length > 0) review.push(T.review_not_established)
   if (openItems.length > 0) review.push(T.review_open_items)
   if ((state.answers.L1 ?? []).includes('yes') && input.shown.single.includes('L1')) review.push(T.review_likeness)
   if ((state.answers.M0 ?? []).some((v) => v === 'brands' || v === 'client_material') && input.shown.single.includes('M0')) review.push(T.review_third_party)
@@ -297,11 +348,18 @@ export function buildDraftRecord(input: DraftRecordInput): DraftRecordView {
     pilot: input.pilot,
     banner: input.pilot ? { title: T.prototype_banner_title, lines: [T.record_banner_pilot, bannerSecond] } : null,
     header: { title, record_title: T.record_title, record_id: input.record.record_id, version: input.record.version, prepared_on: input.record.prepared_on, status: T.status_draft },
-    summary: [T.summary_intro, T.summary_counts(cards.length, openItems.length), T.summary_not_assessment],
+    summary: [T.summary_intro, T.summary_counts(cards.length, unresolvedGuidance, notEstablished.length + openItems.length), T.summary_not_assessment],
     declarations: { intro: T.declarations_intro, groups },
     documents: { intro: T.documents_intro, items: documentItems, empty: documentItems.length === 0 ? T.documents_none : null },
+    reconciliation: { intro: T.recon_intro, items: reconItems, empty: reconItems.length === 0 ? T.recon_none : null },
     guidance: { intro: T.guidance_intro, cards, empty: cards.length === 0 ? T.guidance_none : null },
-    open_items: { intro: T.open_items_intro, items: openItems, empty: openItems.length === 0 ? T.open_none : null, documents_mentioned: documentsMentioned },
+    open_items: {
+      intro: T.open_items_intro,
+      not_established: notEstablished,
+      items: openItems,
+      empty: openItems.length === 0 && notEstablished.length === 0 ? T.open_none : null,
+      documents_mentioned: documentsMentioned,
+    },
     not_shown: { intro: T.not_shown_intro, lines: notShown.length > 0 ? notShown : [T.not_shown_none] },
     independent_review: { intro: T.independent_review_intro, lines: review },
     not_done: documents.length > 0 ? [...T.not_done, T.not_done_documents] : [...T.not_done],
@@ -320,7 +378,7 @@ export function buildDraftRecord(input: DraftRecordInput): DraftRecordView {
       dropped_facts: prov.dropped,
       discarded_answers: [...input.discarded],
       document_observations: [...(input.document_observations ?? [])],
-      document_reviews: documents.map((d) => ({ document_id: d.document.document_id, tool_index: d.tool_index, decision: d.review.decision, adopted_value: d.review.adopted_value })),
+      evidence_reconciliation: [...reconciliation],
     },
   }
 }
@@ -364,10 +422,22 @@ function documentView(td: ToolDocument): DraftDocument {
     if (ex.multiple_plans_shown) notes.push(T.doc_multiple_plans)
     if (ex.instruction_like_text_present) notes.push(T.doc_instruction_text)
   }
-  const r = td.review
-  const review =
-    r.decision === 'adopted' ? T.doc_review.adopted(r.adopted_value as string) : r.decision === 'entered_different' ? T.doc_review.entered_different : r.decision === 'ignored' ? T.doc_review.ignored : T.doc_review.not_reviewed
-  return { document_id: d.document_id, heading: T.doc_heading(td.tool_index + 1, d.file_name), rows, notes, review, not_compared: T.doc_not_compared }
+  return { document_id: d.document_id, heading: T.doc_heading(td.tool_index + 1, d.file_name), rows, notes }
+}
+
+/** One fixed result label + its fixed reason, then the limitation for any "appears" result. */
+function reconciliationRow(label: string, f: FieldReconciliation): DraftRow {
+  const limit = f.result === 'appears_consistent' ? T.recon_limit_consistent : f.result === 'appears_to_conflict' ? T.recon_limit_conflict : null
+  return { label, value: T.recon_result[f.result], note: limit ? `${T.recon_reason[f.reason]} ${limit}` : T.recon_reason[f.reason] }
+}
+
+function reconciliationView(r: EvidenceReconciliation): DraftReconciliation {
+  return {
+    tool_index: r.tool_index,
+    heading: T.recon_heading(r.tool_index + 1),
+    document_id: r.document_id,
+    rows: [reconciliationRow(T.recon_provider_label, r.provider), reconciliationRow(T.recon_plan_label, r.plan)],
+  }
 }
 
 type Prov = CreatorRecordGuidanceResult['facts']['provenance']
@@ -414,6 +484,9 @@ function guidanceCard(
     else depends.push(T.depends_other)
   }
   if (item.dependency_rows.length > 0) depends.push(T.depends_open_items)
+  // Bounded Interpretation holds this guidance at "may be relevant" for its whole purpose (objective),
+  // although none of its own conditions is unresolved: say why rather than show nothing (CR-V2-COMP-001).
+  if (item.conclusion === 'relevant_applicability_unresolved' && depends.length === 0) depends.push(T.depends_shared_purpose)
 
   return {
     claim_id: item.claim_id,

@@ -2,15 +2,16 @@
  * CR-V2-VERTICAL-SLICE-1 — strict request-body parsing for the internal
  * prototype route. Accepts only the questionnaire form state and (since
  * CR-V2-EVIDENCE-SLICE-1) the display-only documents returned by the examine
- * route with the creator's review; any other field or shape is rejected (the
- * route answers 400).
+ * route; any other field or shape is rejected (the route answers 400).
+ * CR-V2-MVP-6: a document carries no review, adoption or reconciliation: those
+ * fields are rejected like any other unexpected field.
  *
  * Documents come back from the browser because nothing is stored server-side.
  * They are re-validated strictly here (including the extraction schema) and
  * can only ever be DISPLAYED: they never reach the guidance pipeline.
  */
 
-import { MAX_DOCUMENTS_PER_TOOL, parseDocumentReview, parseExaminedDocument, type ToolDocument } from '../evidence/document-observations'
+import { MAX_DOCUMENTS_PER_TOOL, parseExaminedDocument, type ToolDocument } from '../evidence/document-observations'
 import type { CreatorRecordFormState } from './form'
 
 /** Upper bound on the raw body: a full questionnaire is a few KB; three documents add under 10 KB. */
@@ -39,14 +40,13 @@ function parseDocuments(v: unknown, toolCount: number): ToolDocument[] | null {
   for (const item of v) {
     if (!item || typeof item !== 'object' || Array.isArray(item)) return null
     const o = item as Record<string, unknown>
-    if (Object.keys(o).length !== 3 || !('tool_index' in o) || !('document' in o) || !('review' in o)) return null
+    if (Object.keys(o).length !== 2 || !('tool_index' in o) || !('document' in o)) return null
     const tool_index = o.tool_index
     if (typeof tool_index !== 'number' || !Number.isInteger(tool_index) || tool_index < 0 || tool_index >= toolCount) return null
     const document = parseExaminedDocument(o.document)
-    const review = parseDocumentReview(o.review)
-    if (!document || !review || review.document_id !== document.document_id) return null
+    if (!document) return null
     if (out.filter((d) => d.tool_index === tool_index).length >= MAX_DOCUMENTS_PER_TOOL) return null
-    out.push({ tool_index, document, review })
+    out.push({ tool_index, document })
   }
   return out
 }

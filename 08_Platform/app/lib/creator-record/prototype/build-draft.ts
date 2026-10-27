@@ -10,6 +10,12 @@
  *       → not_met excluded → Creator Record publication authorization → BI → composeGuidance)
  *     → buildDraftRecord (fixed templates)
  *
+ * CR-V2-MVP-6 (Option C): documents never change a declaration. After
+ * guidance is computed (from declarations only), each tool block gets a
+ * provisional evidence reconciliation computed HERE, on the server, from the
+ * declarations and the server-checked document observation. No reconciliation
+ * is ever accepted from a request.
+ *
  * The governance SOURCES are an explicit input. `governedSources()` returns the
  * authoritative (empty, fail-closed) sources; `pilotSources()` returns the
  * internal, unapproved pilot set. They are never merged.
@@ -24,8 +30,9 @@ import { buildDraftRecord, type DraftRecordView } from '../presentation/build-dr
 import { PILOT_CAVEATS, PILOT_DEPENDENCY_LABELS, PILOT_LEDGER_VERSION, PILOT_PUBLICATION_LEDGER } from '../pilot/pilot-ledger'
 import { PILOT_ACKNOWLEDGEMENTS, PILOT_MAX_TOOLS, PILOT_QUESTION_META, PILOT_REGISTRY_INPUT, PILOT_REGISTRY_VERSION, type PilotQuestionMeta } from '../pilot/pilot-registry'
 import type { TopicClaim } from '@/lib/retrieval-engine/types'
-import { isStaleReview, toDocumentObservations, type ToolDocument } from '../evidence/document-observations'
-import { formToObservations, shownToolQuestionIds, validateForm, visibleQuestions, type CreatorRecordFormState, type FormConfig, type FormIssue } from './form'
+import { reconcileToolEvidence, toDocumentObservations, type EvidenceReconciliation, type ToolDocument } from '../evidence/document-observations'
+import { resolveSellerIdentity } from '../integration/seller-identity'
+import { formToObservations, shownToolQuestionIds, toolInstance, validateForm, visibleQuestions, type CreatorRecordFormState, type FormConfig, type FormIssue } from './form'
 
 export interface CreatorRecordSources {
   kind: 'governed' | 'pilot'
@@ -96,10 +103,6 @@ export function buildCreatorRecordDraft(input: BuildDraftInput): BuildDraftResul
   const config = loadFormConfig(input.sources)
   const documents = input.documents ?? []
   const issues = validateForm(config, input.state)
-  // An "adopted" review must still describe the creator's current answer; otherwise refuse rather than record it as adopted.
-  for (const d of documents) {
-    if (isStaleReview(d, (input.state.tools[d.tool_index]?.T3 ?? [])[0])) issues.push({ q_id: 'T3', tool_index: d.tool_index, issue: 'stale_document_review' })
-  }
   if (issues.length > 0) return { ok: false, issues }
 
   const { observations, discarded } = formToObservations(config, input.state, input.record)
@@ -111,6 +114,21 @@ export function buildCreatorRecordDraft(input: BuildDraftInput): BuildDraftResul
     ledger: input.sources.ledger,
     dependencyLabel: (id) => (Object.prototype.hasOwnProperty.call(labels, id) ? labels[id] : undefined),
     as_of: input.as_of,
+  })
+
+  // Provisional evidence reconciliation, one per tool block. After guidance; never an input to it.
+  const prov = guidance.facts.provenance
+  const reconciliation: EvidenceReconciliation[] = input.state.tools.map((t, i) => {
+    const ids = Array.from(new Set(prov.tools.filter((x) => x.instance === toolInstance(i)).map((x) => x.tool_id)))
+    return reconcileToolEvidence(
+      {
+        tool_index: i,
+        document: documents.find((d) => d.tool_index === i)?.document ?? null,
+        declared_tool_id: ids.length === 1 ? ids[0] : null,
+        declared_plan: (t.T3 ?? [])[0] ?? null,
+      },
+      resolveSellerIdentity,
+    )
   })
 
   const shown = visibleQuestions(config, Object.fromEntries(Object.entries(input.state.answers).filter(([, v]) => v.some((x) => x.trim() !== ''))))
@@ -131,6 +149,7 @@ export function buildCreatorRecordDraft(input: BuildDraftInput): BuildDraftResul
     pilot: input.sources.kind === 'pilot',
     documents,
     document_observations: documents.flatMap((d) => toDocumentObservations(input.record, d)),
+    reconciliation,
   })
   return { ok: true, view, guidance }
 }
