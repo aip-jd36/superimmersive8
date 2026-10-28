@@ -180,6 +180,14 @@ describe('H2 — the public harness reaches no privileged capability', () => {
     expect(external.some((e) => /supabase|anthropic|stripe|resend|react-pdf|typst/.test(e))).toBe(false)
   })
 
+  // CR-V2-MVP-14: the root layout is served with the public page too.
+  test('the root layout reaches only its CSS, fonts and the analytics snippet', () => {
+    const { files, external } = runtimeClosure(['app/layout.tsx'])
+    expect(files).toEqual(['app/globals.css', 'app/layout.tsx', 'lib/analytics/ga-snippet.ts'])
+    expect(external).toEqual(['next/font/google'])
+    expect(readFileSync(path.join(APP, 'lib', 'analytics', 'ga-snippet.ts'), 'utf8')).not.toMatch(/process\.env|fetch\(|import /)
+  })
+
   test('positive control: the same closure walk DOES find the privileged modules of the admin routes', () => {
     const admin = runtimeClosure(['app/api/admin/creator-record-v2/draft/route.ts', 'app/api/admin/creator-record-v2/examine/route.ts'])
     expect(admin.files).toEqual(expect.arrayContaining(['lib/reviewer-context/auth.ts', 'lib/creator-record/evidence/live-caller.ts', 'lib/creator-record/evidence/examine-upload.ts']))
@@ -262,6 +270,10 @@ describe('H5 — no uploads, no browser-supplied observations, allowlisted fixtu
     ['an adopted plan value', () => post({ ...state(), documents: [{ ...ref('pdf-pika-pro-no-period'), review: { decision: 'adopted', adopted_value: 'Pro' } }] })],
     ['a client-supplied reconciliation', () => post({ ...state(), documents: [{ ...ref('pdf-pika-pro-no-period'), reconciliation: { plan: 'appears_consistent' } }] })],
     ['a top-level reconciliation', () => post({ ...state(), reconciliation: [] })],
+    // CR-V2-MVP-14
+    ['a top-level review', () => post({ ...state(), review: { decision: 'adopted', adopted_value: 'Pro' } })],
+    ['an attestation next to the fixture id', () => post({ ...state(), documents: [{ ...ref('pdf-pika-pro-no-period'), attestation: 'a.b' }] })],
+    ['a live-model observation in place of a fixture id', () => post({ ...state(), documents: [{ tool_index: 0, document: { ...doc, extraction_mode: 'live_model', model_calls: 1, replay_fixture_id: null } }] })],
     ['a document for a tool block that does not exist', () => post({ ...state(), documents: [ref('pdf-pika-pro-no-period', 1)] })],
     ['two documents for one tool', () => post({ ...state(), documents: [ref('pdf-pika-pro-no-period'), ref('conflict-reseller-merchant')] })],
     ['an unexpected top-level field (sources)', () => post({ ...state(), sources: 'governed' })],
@@ -469,5 +481,79 @@ describe('analytics exclusion and noindex', () => {
     ])
     const page = readFileSync(path.join(APP, 'app', 'uat', 'creator-record-v2', 'page.tsx'), 'utf8')
     expect(page).toMatch(/robots: \{ index: false, follow: false/)
+  })
+})
+
+// ───────────────────────────────────────────── CR-V2-MVP-14 browser-UAT scenarios, through the public route
+
+describe('MVP-14 — the public UAT scenarios (R1–R6, Kling E, correction), through the public route', () => {
+  type Row = { label: string; value: string; note?: string }
+  type Item = { tool_index: number; rows: Row[] }
+  const R = T.recon_result
+  const draft = async (body: unknown) => {
+    const res = await post(body)
+    expect(res.status).toBe(200)
+    return (await res.json()).view
+  }
+  const tool = (T1: string, T3: string) => ({ T1: [T1], T3: [T3], T4: ['May 2026'] })
+  const results = (view: { reconciliation: { items: Item[] } }) => view.reconciliation.items.map((i) => [i.tool_index, ...i.rows.map((r) => r.value)])
+  /** Every "appears" row carries its fixed limitation sentence. */
+  const limitationsPresent = (view: { reconciliation: { items: Item[] } }) => {
+    for (const r of view.reconciliation.items.flatMap((i) => i.rows)) {
+      if (r.value === R.appears_consistent) expect(r.note).toContain(T.recon_limit_consistent)
+      if (r.value === R.appears_to_conflict) expect(r.note).toContain(T.recon_limit_conflict)
+    }
+  }
+  /** The document never changes the declarations or the guidance: compare with the same answers and no document. */
+  const sameAsWithoutDocuments = async (tools: Record<string, string[]>[], view: { declarations: unknown; guidance: unknown }) => {
+    const bare = await draft({ ...state(tools) })
+    expect(view.declarations).toEqual(bare.declarations)
+    expect(view.guidance).toEqual(bare.guidance)
+  }
+
+  test.each<[string, Record<string, string[]>[], { tool_index: number; fixture_id: string }[], (string | number)[][]]>([
+    ['R1 Pika / Pro + A', [tool('pika', 'Pro')], [ref('pdf-pika-pro-no-period')], [[0, R.does_not_establish, R.does_not_establish]]],
+    ['R2 Pika / Not sure + A', [tool('pika', 'not_sure')], [ref('pdf-pika-pro-no-period')], [[0, R.does_not_establish, R.not_assessed]]],
+    ['R4 Pika / Pro + Kling / Standard, A on tool 1 only', [tool('pika', 'Pro'), tool('kling', 'Standard')], [ref('pdf-pika-pro-no-period')], [[0, R.does_not_establish, R.does_not_establish], [1, R.not_assessed, R.not_assessed]]],
+    ['R5 Runway / Pro + F', [tool('runway-gen3', 'Pro')], [ref('conflict-two-plan-names')], [[0, R.does_not_establish, R.does_not_establish]]],
+    ['R6 Pika / Pro + C (reseller)', [tool('pika', 'Pro')], [ref('conflict-reseller-merchant')], [[0, R.does_not_establish, R.does_not_establish]]],
+    ['B Pika / Pro + B (plan name cut off)', [tool('pika', 'Pro')], [ref('shot-truncated-plan-name')], [[0, R.appears_consistent, R.does_not_establish]]],
+    ['E Kling / Pro + E: qualified apparent consistency', [tool('kling', 'Pro')], [ref('pdf-kling-pro-monthly')], [[0, R.appears_consistent, R.appears_consistent]]],
+    ['E2 Kling / Standard + E: apparent conflict, declaration unchanged', [tool('kling', 'Standard')], [ref('pdf-kling-pro-monthly')], [[0, R.appears_consistent, R.appears_to_conflict]]],
+  ])('%s', async (_n, tools, refs, expected) => {
+    const view = await draft({ ...state(tools), documents: refs })
+    expect(results(view)).toEqual(expected)
+    limitationsPresent(view)
+    await sameAsWithoutDocuments(tools, view)
+  })
+
+  test('R3 Pika / Pro, no document: nothing compared, the limitation is stated', async () => {
+    const view = await draft({ ...state([tool('pika', 'Pro')]) })
+    expect(view.reconciliation.items).toEqual([])
+    expect(view.reconciliation.empty).toBe(T.recon_none)
+  })
+
+  test('E2: the conflict note says the answer was not changed, and the declared plan stays Standard', async () => {
+    const view = await draft({ ...state([tool('kling', 'Standard')]), documents: [ref('pdf-kling-pro-monthly')] })
+    expect(view.reconciliation.items[0].rows[1].note).toMatch(/Your answer has not been changed/)
+    expect(JSON.stringify(view.declarations)).toMatch(/Standard/)
+    expect(JSON.stringify(view.declarations)).not.toMatch(/"Pro"/)
+  })
+
+  test('correction: Pika / Pro → Not sure with document A kept — plan becomes "Not assessed", the document section is unchanged', async () => {
+    const before = await draft({ ...state([tool('pika', 'Pro')]), documents: [ref('pdf-pika-pro-no-period')] })
+    const after = await draft({ ...state([tool('pika', 'not_sure')]), documents: [ref('pdf-pika-pro-no-period')] })
+    expect(before.reconciliation.items[0].rows[1].value).toBe(R.does_not_establish)
+    expect(after.reconciliation.items[0].rows[1]).toEqual(expect.objectContaining({ value: R.not_assessed, note: T.recon_reason.plan_not_declared }))
+    expect(after.documents).toEqual(before.documents)
+    expect(after.declarations).not.toEqual(before.declarations)
+  })
+
+  test('the public page imports no adoption control and no Supabase sign-in (no auth module reachable)', () => {
+    const code = (f: string) => readFileSync(path.join(APP, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
+    for (const f of ['app/uat/creator-record-v2/PublicUatClient.tsx', 'components/creator-record/CreatorRecordQuestionnaire.tsx', 'components/creator-record/DocumentReviewPanel.tsx']) {
+      expect([f, /adopt|onReview|Use this value/i.test(code(f))]).toEqual([f, false])
+    }
+    expect(runtimeClosure(['app/uat/creator-record-v2/page.tsx']).files.filter((f) => /^lib\/(supabase|auth)\//.test(f))).toEqual([])
   })
 })
