@@ -3,10 +3,11 @@
  */
 import {
   claimFulfillment, markFulfillmentStep, finishFulfillment, loadFulfillmentSubmission,
-  hasCreatorRecordPdf, loadUserContact, type FulfillmentSubmission,
+  loadUserContact, type FulfillmentSubmission,
 } from './repository'
 import type { FulfillmentDeps } from './run-payment-fulfillment'
 import { generateCreatorRecordPDF } from '@/lib/pdf/generateChainOfTitle'
+import { creatorRecordComplete, issueCreatorRecord } from '@/lib/creator-record-artifacts/production'
 import {
   sendCreatorRecordReadyPaymentEmail, sendCertifiedPaymentReceivedEmail,
   notifyAdminPaymentFulfillment, sendPaymentLedgerAdminAlert,
@@ -38,8 +39,10 @@ export function productionFulfillmentDeps(): FulfillmentDeps {
       markFulfillmentStep(s, t, step, status, providerId, errorText),
     finish: finishFulfillment,
     loadSubmission: loadFulfillmentSubmission,
-    hasCreatorRecordPdf,
-    generateCreatorRecordPdf: generateFromSubmission,
+    // CR-ARTIFACT-1: explicit precedence (private artifact → legacy PDF → rollout gate → legacy generator).
+    // Ordinary customers stay on the legacy generator until cutover (lib/creator-record-artifacts/config.ts).
+    hasCreatorRecordPdf: creatorRecordComplete,
+    generateCreatorRecordPdf: (sub) => issueCreatorRecord(sub, () => generateFromSubmission(sub)),
     loadUserContact,
     sendCreatorRecordEmail: sendCreatorRecordReadyPaymentEmail,
     sendCertifiedReceivedEmail: sendCertifiedPaymentReceivedEmail,

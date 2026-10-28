@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { generateCreatorRecordPDF } from '@/lib/pdf/generateChainOfTitle'
+import { hasCreatorRecordPdf, type FulfillmentSubmission } from '@/lib/payments/repository'
+import { issueCreatorRecordArtifact } from '@/lib/creator-record-artifacts/issue'
+import { EligibilityUnknownError, issuancePath, type IssuancePath } from '@/lib/creator-record-artifacts/precedence'
+import { issueDepsFor } from '@/lib/creator-record-artifacts/production'
+import { artifactGateDecision, artifactStatus } from '@/lib/creator-record-artifacts/store'
 
 type RouteContext = { params: { id: string } }
 
@@ -37,6 +42,31 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
 
     if ((submission as any).tier !== 'creator_record') {
       return NextResponse.json({ error: 'This endpoint is for Creator Record submissions only' }, { status: 400 })
+    }
+
+    // CR-ARTIFACT-1: submissions on the private artifact path (an artifact row exists, or the rollout
+    // gate is open and no legacy PDF exists) are resumed through the same issuance procedure as
+    // fulfilment. An issued artifact is immutable: `force` never replaces it. Legacy submissions
+    // continue below, unchanged.
+    // CR-ARTIFACT-1C: if eligibility or artifact state cannot be established, issue nothing on either path.
+    let path: IssuancePath
+    try {
+      path = await issuancePath(params.id, { artifactStatus, legacyHasPdf: hasCreatorRecordPdf, gate: (id) => artifactGateDecision(id) })
+    } catch (err) {
+      const unknown = err instanceof EligibilityUnknownError
+      return NextResponse.json({ error: unknown ? 'Issuance eligibility could not be established; nothing was issued. Try again later.' : 'Issuance state could not be established; nothing was issued.', status: 'unavailable' }, { status: 503 })
+    }
+    if (path === 'artifact') {
+      if ((submission as any).status !== 'approved') {
+        return NextResponse.json({ error: 'Creator Record is not approved (paid) yet' }, { status: 409 })
+      }
+      const result = await issueCreatorRecordArtifact(params.id, issueDepsFor(submission as FulfillmentSubmission))
+      if (result.outcome === 'issued') return NextResponse.json({ success: true, status: 'issued', recordId: result.artifact.record_id })
+      if (result.outcome === 'already_issued') {
+        return NextResponse.json({ error: 'This Creator Record has already been issued and cannot be replaced.', status: 'issued', recordId: result.artifact.record_id }, { status: 409 })
+      }
+      if (result.outcome === 'contended') return NextResponse.json({ error: 'Issuance is in progress. Try again shortly.', status: 'in_progress' }, { status: 409 })
+      return NextResponse.json({ error: 'Stored document does not match its record; nothing was changed.', status: 'integrity_conflict' }, { status: 500 })
     }
 
     // Check if already generated — admin can force-regenerate by passing ?force=true
