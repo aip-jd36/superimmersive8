@@ -1,0 +1,51 @@
+SOURCE / PROVENANCE
+- Channel: LINE, JD <-> 馮鈺婷 (Alice Feng, Anchor Film, CRM B164)
+- Date: 2026-10-28 (Wed). Timestamps are Taiwan local time (UTC+8), as supplied by JD.
+- Provenance: text supplied by JD in the 2026-10-28 CRM-update task brief. NOT a native LINE export; not independently authenticated.
+- Everything between the BEGIN/END markers is the user-supplied text, preserved exactly as provided (wording, punctuation, typos such as "娜天" and "辦公司", line breaks, order). Nothing corrected.
+- Logged: 2026-10-28. Canonical record: 03_Sales/crm/anchor-film.md
+
+----- BEGIN VERBATIM TRANSCRIPT -----
+
+17:50 JD
+Hi Alice～我今天有聽完說明會，覺得有些資訊滿值得討論的！
+
+想說找個時間一起聊聊，看怎麼規劃提案比較好
+
+妳下週什麼時候比較方便？
+
+17:55 Alice
+好呀~~
+
+17:55 Alice
+拍謝娜天AI片場活動都還沒跟你多聊到 超謝謝你來~~
+
+17:56 Alice
+我今天正好有別的會 我有請同事幫忙聽
+
+17:59 JD
+上週四的 AI 片場活動很棒耶！可惜我那天要提早去接小孩，沒辦法多聊 ~ 謝謝妳邀請我！
+
+對了，我今天有錄說明會，如果妳需要的話，我可以傳逐字稿給妳，或整理一份重點摘要
+
+下週一或四下午妳方便嗎？我可以過去妳們辦公室聊聊
+
+18:00 Alice
+哈哈上週live demo 壓力超大的~~
+
+18:01 JD
+Demo的很好！
+
+18:01 Alice
+11/2(一)16:00-17:00 可以嗎?
+
+18:02 JD
+可以
+
+18:03 JD
+那下週一 16:00-17:00 在妳辦公司見
+
+18:05 Alice
+好~
+
+----- END VERBATIM TRANSCRIPT -----

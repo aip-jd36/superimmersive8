@@ -6,9 +6,9 @@ contacts:
 slug: anchor-film
 stage: evaluating
 source: event
-next_action: "Register for (or otherwise get access to) the Oct 28 Taipei Cross-Domain R&D briefing, 14:30–16:30, online participation advertised; JD told Alice he will register, registration not yet confirmed. Attend it and get the official program materials. Use them to resolve capital/consortium eligibility, eligible costs, the AI supply-chain rule and conflict-of-interest/independence implications. Then arrange the post-briefing discussion with Alice JD proposed. Application deadline Dec 7, 2026 17:30 (per forwarded announcement) is a planning constraint only. SI8 has not agreed to apply or to any third member (主張數據 is a possible participant only). See 2026-10-19 log entry."
-next_action_date: 2026-10-28
-last_contacted: 2026-10-19
+next_action: "Prepare for and attend the CONFIRMED in-person meeting with Alice on Mon 2026-11-02, 16:00–17:00 Taiwan time, at Anchor Film's office (address not on file). Purpose: discuss the 116 Cross-Domain R&D subsidy and a possible joint application. Use the preparation section below; its topics are SI8's proposed topics, not an agreed agenda. Do NOT commit to a consortium, lead applicant, budget, IP terms or third member at the meeting. The transcript/summary JD offered on 2026-10-28 has not been requested or sent. Application deadline 2026-12-07 17:30 is a planning constraint only."
+next_action_date: 2026-11-02
+last_contacted: 2026-10-28
 blocked: false
 blocked_reason: null
 review_date: null
@@ -20,7 +20,104 @@ created: 2026-08-15
 
 Graduated from `03_Sales/CRM.md` (row B164) on 2026-08-15 — an active, developing strategic-partnership discovery conversation, well past a reply-only signal.
 
+**Current state (2026-10-28):**
+- Active **potential** strategic collaboration, with a government grant (116年度企業跨域研發補助) under evaluation.
+- Positive recent engagement, and an in-person working meeting confirmed for 2026-11-02.
+- **Not** in place:
+  - a consortium agreement;
+  - an application decision;
+  - a grant submission;
+  - a budget, work-share or IP terms;
+  - a signed commercial agreement.
+- Stage stays `evaluating` (the record's established stage; no new stage invented). The row's stage "Strategic Partner Discovery" is unchanged. A scheduled meeting does not make this a commercial opportunity.
+
+## Upcoming — 2026-11-02 in-person meeting (CONFIRMED)
+
+| Item | Detail |
+|---|---|
+| Date / time | **Mon 2026-11-02, 16:00–17:00 Taiwan time** (Alice proposed "11/2(一)16:00-17:00", JD accepted, Alice confirmed "好~") |
+| Location | Anchor Film's office. **Address not established** by the conversation and not on file in this repo. Confirm before travelling. |
+| Participants | JD and Alice Feng (confirmed by the conversation). Others not established. |
+| Purpose | Discuss the 116 Cross-Domain R&D subsidy and a possible joint application. |
+| Source | `03_Sales/crm/raw/anchor-film/2026-10-28-line-alice-briefing-followup-meeting-confirmed.txt` |
+
+**Preparation — SI8's proposed discussion topics.** Not an agenda agreed with Alice.
+
+1. What Anchor has actually built for the 創作履歷 (creation record) since Aug 21: maturity, users, data captured, and who owns the IP.
+2. How it relates to SI8's Creator Record and Commercial Assurance Assessment: overlap versus complement.
+   - Creator-declared production records are not independent rights verification.
+   - CRC is educational.
+   - The Commercial Assurance Assessment is human-reviewed.
+   - JD to confirm what the brief's "Rights Verified" refers to; see the briefing record §10.
+3. What **genuinely new** joint capabilities could be built in the execution period (first day of the award month — Feb 2027 only if awarded in February — to 2027-10-15).
+   - Anything SI8 or Anchor finishes or sells before the project start is an *existing* product.
+   - Revenue from existing products does not count toward the grant.
+4. Whether the new products can reach **paying customers by 2027-10-15**: who buys, at what price, and on separate invoices.
+   - The KPIs need non-zero commercial revenue, ideally ≥ the subsidy.
+   - They also need ≥ 3 new products or services, ≥ 5 trained R&D staff, ≥ 1 patent and ≥ 1 security test.
+5. Whether a **two-company consortium** works. The official rule is 補助款 ≦ 自籌款 ≦ 實收資本額, applied per company per the Q&A.
+   - Illustrative ceiling ≈ NT$7.55M on unverified capital figures; not a budget.
+   - Verify each company's paid-in capital, tax clearance and related-party status.
+6. Whether 主張數據 brings a **necessary third capability**, not just capital. It is not a confirmed participant.
+7. Preliminary responsibilities, budget feasibility, matching funds and IP boundaries. Points to raise:
+   - joint and several liability for self-funding;
+   - pre-funding before tranches (30% held back until the end);
+   - Taiwan-based, labour-insured R&D staff;
+   - independence of SI8 if it later assesses Anchor-produced work (PQ-006);
+   - whether either company has government or public-agency customers, which would trigger the non-red supply-chain undertaking for every member.
+8. Questions both companies want the programme office to answer. See briefing record §12.
+9. Housekeeping: Alice has not asked for the briefing transcript or summary JD offered. Share only if she asks; redistribution of the recording was not assessed. Ask what her colleague took from the briefing.
+
+**Prepared materials:** `01_Business/research/TAIWAN-CROSSDOMAIN-RD-BRIEFING-2026-10-28.md` (briefing + official-document analysis; GO/HOLD assessment in §11).
+
 ## Interaction log (reverse-chronological)
+
+### 2026-10-28 — JD attends the official briefing online; LINE follow-up; in-person meeting confirmed for 2026-11-02
+
+**Briefing.** JD attended the 116年度企業跨域研發補助 Taipei briefing (亮點案例交流分享暨116年度企業推廣說明會（臺北場）) **online** and recorded it ("我今天有錄說明會").
+- Recording and full automatic transcript: `03_Sales/transcripts/crossdomain-rd-briefing-taipei-102826*` (the audio is local only, gitignored, **not durably archived**; checksum in the source manifest; off-machine backup is an unresolved action).
+- Official 116 documents retrieved the same day: guidelines, FAQ, accounting annex and official slides.
+- Full analysis: `01_Business/research/TAIWAN-CROSSDOMAIN-RD-BRIEFING-2026-10-28.md`. Sources: `01_Business/research/sources/crossdomain-rd-116/SOURCE-MANIFEST.md`.
+- Headline for this relationship: the official rule is **補助款 ≦ 自籌款 ≦ 實收資本額**. The Q&A said this applies **per company, not summed** ([1:46:00]–[1:47:00]). Kei's Oct 5 ">NT$9M combined capital" claim is therefore **not supported** by the written rules or the Q&A, and **a third company is not required** (two SMEs suffice). The online system's actual behaviour is still unverified. Illustrative SI8 + Anchor ceiling ≈ NT$7.55M (SI8 ~1.55M + Anchor ~6M, both unverified). This is not an approved amount or budget.
+- ⚠ The transcript calls the 中華徵信所 case-study speaker "Alice" at [1:30:01]/[1:31:00]. That is **not** Alice Feng, who did not attend.
+
+**LINE, Oct 28 (Wed), verbatim** (source `03_Sales/crm/raw/anchor-film/2026-10-28-line-alice-briefing-followup-meeting-confirmed.txt`; text supplied by JD, not a native export; Taiwan time):
+- 17:50 JD: "Hi Alice～我今天有聽完說明會，覺得有些資訊滿值得討論的！ / 想說找個時間一起聊聊，看怎麼規劃提案比較好 / 妳下週什麼時候比較方便？" (I listened to the whole briefing today; some information is worth discussing. Let's find time to talk about how to plan the proposal. When are you free next week?)
+- 17:55 Alice: "好呀~~"
+- 17:55 Alice: "拍謝娜天AI片場活動都還沒跟你多聊到 超謝謝你來~~" (sorry I didn't get to talk with you much at the AI 片場 event that day; thanks so much for coming)
+- 17:56 Alice: "我今天正好有別的會 我有請同事幫忙聽" (I had another meeting today; I asked a colleague to listen in)
+- 17:59 JD: "上週四的 AI 片場活動很棒耶！可惜我那天要提早去接小孩，沒辦法多聊 ~ 謝謝妳邀請我！ / 對了，我今天有錄說明會，如果妳需要的話，我可以傳逐字稿給妳，或整理一份重點摘要 / 下週一或四下午妳方便嗎？我可以過去妳們辦公室聊聊" (Last Thursday's AI 片場 event was great; pity I had to leave early to pick up my kids. Thanks for inviting me! I recorded today's briefing; I can send you the transcript or a summary if you need it. Are Monday or Thursday afternoon next week OK? I can come to your office.)
+- 18:00 Alice: "哈哈上週live demo 壓力超大的~~" (the live demo last week was super stressful)
+- 18:01 JD: "Demo的很好！" (the demo went really well)
+- 18:01 Alice: "11/2(一)16:00-17:00 可以嗎?"
+- 18:02 JD: "可以"
+- 18:03 JD: "那下週一 16:00-17:00 在妳辦公司見" ("辦公司" sic — see you at your office)
+- 18:05 Alice: "好~"
+
+**Classification:**
+- **CURRENT FACT:** the in-person meeting is **confirmed** — Mon 2026-11-02, 16:00–17:00, Anchor Film's office, JD + Alice. Purpose: the subsidy and a possible joint application. Address not established.
+- **CURRENT FACT:** Alice did not attend the briefing herself (another meeting); she asked a colleague to listen.
+- **CURRENT FACT:** JD **offered** the briefing transcript or a summary. Alice has **not** requested either, and **nothing has been sent**.
+- **CURRENT FACT:** Alice apologised for not talking more at the Oct 22 workshop and thanked JD for coming; JD thanked her for the invitation and praised the event and the demo.
+- **Not established:**
+  - any consortium commitment, lead applicant, budget or work-share;
+  - IP terms;
+  - a decision to apply;
+  - 主張數據's participation;
+  - any commercial agreement.
+- Signal read: Alice moved quickly to fix a specific slot (proposed within 11 minutes of JD's ask). That is a positive engagement indicator, not a commitment.
+
+**Supersedes:** the 2026-10-19 next actions ("register for / attend the Oct 28 briefing", "arrange the post-briefing discussion"). Both are now done, and the next action is preparation for and attendance at 2026-11-02.
+
+### 2026-10-22 (Thu) — JD attends Anchor's AI production workshop「AI 片場—即拍即剪影音新製程體驗工作坊」
+
+**Source:** JD's own account in the 2026-10-28 task brief, corroborated by the 2026-10-28 LINE exchange (Alice: "拍謝娜天AI片場活動都還沒跟你多聊到 超謝謝你來"; JD: "上週四的 AI 片場活動很棒耶！"; Alice: "上週live demo 壓力超大的"). No event materials, recording or notes are on file.
+
+- **CURRENT FACT:** JD attended. The workshop included a **live demonstration** by Anchor.
+- JD left early to pick up his children and had little opportunity to talk with Alice.
+- JD found the workshop valuable and later complimented Alice on the demo ("Demo的很好！").
+- **Not inferred:** technical performance results, product maturity, which tools or workflows were demonstrated, whether the 創作履歷 creation-record was shown, attendee numbers, or any commercial validation. Positive feedback from JD is not evidence about Anchor's product.
+- No earlier record of this workshop existed in the repo; this entry is the first. How the invitation reached JD is not documented.
 
 ### 2026-10-19 — Alice forwards the official ROC 116 Cross-Domain R&D call; JD will register for the Oct 28 online briefing; Alice has also approached 主張數據
 
@@ -72,7 +169,7 @@ Graduated from `03_Sales/CRM.md` (row B164) on 2026-08-15 — an active, develop
   - lead applicant, workshare, budget and IP;
   - the September MODA question (still unanswered).
 
-**Next actions (internal, not commitments from Alice):**
+**Next actions (internal, not commitments from Alice):** *[Superseded 2026-10-28: JD attended the briefing online, the official materials were retrieved, and the post-briefing meeting is confirmed for 2026-11-02 — see the 2026-10-28 entry. Kept as originally recorded.]*
 1. Register for, or otherwise get access to, the Oct 28 Taipei briefing (online advertised). Internal checkpoint is the briefing date itself.
 2. Attend it; obtain the official program materials from https://sbir.sme.gov.tw/cross/info.
 3. Arrange the post-briefing discussion with Alice that JD proposed. No date agreed.

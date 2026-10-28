@@ -111,3 +111,23 @@ On 2026-10-19 Alice forwarded the official call-for-proposals announcement via L
 - Official info page: https://sbir.sme.gov.tw/cross/info
 
 **Not changed by this addendum:** the announcement text doesn't restate the capital rule, consortium capital calculation, eligible costs or the non-PRC supply-chain requirement. §2 and §7 still describe **draft** rules. The Oct 5 capital-threshold conflict is still open (Kei's ">NT$9M combined" vs. the draft's 補助款 ≤ 自籌款 ≤ 實收資本額; see `03_Sales/crm/anchor-film.md`). Verify all of it against the official materials before relying on it.
+
+## 10. Official 116 documents + Oct 28 briefing (addendum, 2026-10-28)
+
+JD attended the 2026-10-28 Taipei briefing online and recorded it. The official 116 documents were retrieved the same day: 申請須知 (核定版 2026-10-14), FAQ, Annex H, and the official briefing slides. Full analysis, with timestamps and evidence classes, is in **`01_Business/research/TAIWAN-CROSSDOMAIN-RD-BRIEFING-2026-10-28.md`**. Sources and checksums are in `01_Business/research/sources/crossdomain-rd-116/SOURCE-MANIFEST.md`. §§1–9 above are preserved as written in the draft era. The official text updates them as follows (see the briefing record for citations):
+
+- **Capital (resolves the Oct 5 conflict):** written rule 補助款 ≦ 自籌款 ≦ 實收資本額, with paid-in capital measured as of the application deadline. Q&A [1:46:00]–[1:47:00] says it is applied **per company, not summed**, with no combined-capital threshold. Kei's ">NT$9M combined regardless of request" is not supported by the written rules or the Q&A. Online-system behaviour is still unverified.
+- **Execution period:** from the first day of the approval month to **2027-10-15**, not 2027-10-31 as in the draft. No extensions.
+- **非紅供應鏈 scope (corrects the §7 reading):** mandatory only if any member's service users include government or public agencies; otherwise encouraged and earns bonus points. The §7 audit list is still the right checklist if it applies.
+- **Scenario #12** (專業服務文件審閱與法遵作業) is still in the official slide deck. The draft's "不以具備完整代理能力為申請門檻" wording was **not found** in the extracted text of the official slides or guidelines. The official definition (B1 p.2) requires intent understanding, task decomposition, tool calling and automated execution, built on existing systems. Treat the lowered-threshold reading as unconfirmed.
+- **OQ #2/#7 updated:** SME = paid-in capital ≤ NT$100M or < 200 employees. Foreign-owned Taiwan companies are eligible if there is no 陸資. Deadline 2026-12-07 17:30. **OQ #6:** IP belongs to the funded applicants, with a government non-exclusive research licence; allocation among members is for the consortium agreement (Annex G, not yet retrieved).
+- **New hard requirements not in the drafts:**
+  - ≥ 3 new products or services;
+  - ≥ 5 R&D personnel trained;
+  - ≥ 1 patent application;
+  - ≥ 1 security test;
+  - non-zero commercial revenue, with reduced-price acceptance if KPIs are missed;
+  - joint and several liability for self-funding;
+  - Taiwan-based, insured R&D staff;
+  - 12 person-months per person per year across government projects;
+  - no membership changes after submission.
