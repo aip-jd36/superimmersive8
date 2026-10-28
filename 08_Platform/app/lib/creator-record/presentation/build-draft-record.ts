@@ -115,7 +115,8 @@ export interface DraftRecordView {
   reconciliation: { intro: string; items: DraftReconciliation[]; empty: string | null }
   guidance: { intro: string; cards: DraftGuidanceCard[]; empty: string | null }
   open_items: { intro: string; not_established: DraftNotEstablished[]; items: DraftOpenItem[]; empty: string | null; documents_mentioned: DraftRow[] }
-  not_shown: { intro: string; lines: string[] }
+  /** CR-V2-MVP-20: `intro` only when something was left out; otherwise `lines` is empty and `empty` says so. */
+  not_shown: { intro: string | null; lines: string[]; empty: string | null }
   independent_review: { intro: string; lines: string[] }
   not_done: string[]
   method: DraftRow[]
@@ -385,7 +386,7 @@ export function buildDraftRecord(input: DraftRecordInput): DraftRecordView {
       empty: openItems.length === 0 && notEstablished.length === 0 ? T.open_none : null,
       documents_mentioned: documentsMentioned,
     },
-    not_shown: { intro: T.not_shown_intro, lines: notShown.length > 0 ? notShown : [T.not_shown_none] },
+    not_shown: notShown.length > 0 ? { intro: T.not_shown_intro, lines: notShown, empty: null } : { intro: null, lines: [], empty: T.not_shown_none },
     independent_review: { intro: T.independent_review_intro, lines: review },
     not_done: documents.length > 0 ? [...T.not_done, T.not_done_documents] : [...T.not_done],
     method: [

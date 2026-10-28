@@ -16,7 +16,7 @@ import { buildPublicUatDraft, type PublicUatView } from '@/lib/creator-record/pu
 import { documentForFixture } from '@/lib/creator-record/public-uat/fixtures'
 import { buildCreatorRecordDraft, pilotSources } from '@/lib/creator-record/prototype/build-draft'
 import { displayObservedText, MAX_OBSERVED_TEXT_CHARS } from '@/lib/creator-record/presentation/build-draft-record'
-import { NEGATION_ALLOWLIST, T } from '@/lib/creator-record/presentation/templates'
+import { EDIT_ANSWERS_LABEL, NEGATION_ALLOWLIST, T } from '@/lib/creator-record/presentation/templates'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 
 const ANS = { P1: ['UAT test video'], P3: ['own_channels'], F1: ['TW'], F2: ['online_worldwide'], L1: ['no'], M0: ['none'], H1: ['edited'] }
@@ -150,9 +150,8 @@ describe('P3 — next steps for unresolved conditions', () => {
 
   test('plan: points the creator to their own answer; no question is added', () => {
     const v = view([tool('pika', 'not_sure')])
-    expect(v.open_items.not_established[0].next).toMatch(/^The guidance refers to the Pika “\w+”, “\w+” and “\w+” plans\. You can change your plan answer under “What you told us”\.$/)
-    expect(T.not_established_next_plan('Pika', ['Pro'])).toBe('The guidance refers to the Pika “Pro” plan. You can change your plan answer under “What you told us”.')
-    expect(T.section_declarations).toBe('What you told us')
+    expect(v.open_items.not_established[0].next).toMatch(/^The guidance refers to the Pika “\w+”, “\w+” and “\w+” plans\. To update your Pika plan, select ‘Edit answers’ and change your plan selection\.$/)
+    expect(T.not_established_next_plan('Pika', ['Pro'])).toBe('The guidance refers to the Pika “Pro” plan. To update your Pika plan, select ‘Edit answers’ and change your plan selection.')
   })
 
   test('no provider-specific advice about where account status can be found', () => {
@@ -229,5 +228,60 @@ describe('P5 — shared caveats and source sit directly under the group heading'
     const cards = g.indexOf('g.cards.map')
     expect(heading).toBeGreaterThan(-1)
     expect([heading < shared, shared < source, source < cards]).toEqual([true, true, true])
+  })
+})
+
+// ───────────────────────────────────────────── CR-V2-MVP-20 browser-UAT copy corrections
+
+describe('MVP-20 — copy corrections', () => {
+  const read = (f: string) => readFileSync(path.join(__dirname, '..', '..', f), 'utf8')
+
+  test('the plan instruction names the existing "Edit answers" control, never the read-only "What you told us" section', () => {
+    expect(T.not_established_next_plan('Pika', ['Pro'])).toBe('The guidance refers to the Pika “Pro” plan. To update your Pika plan, select ‘Edit answers’ and change your plan selection.')
+    // The label is the real button text on both clients (no new control).
+    for (const f of ['app/uat/creator-record-v2/PublicUatClient.tsx', 'app/admin/creator-record-v2/CreatorRecordPrototypeClient.tsx']) expect(read(f)).toContain(`>${EDIT_ANSWERS_LABEL}</button>`)
+    for (const v of [view([tool('pika', 'not_sure')]), view([tool('pika', 'Pro'), tool('pika', 'Standard')])]) {
+      for (const n of v.open_items.not_established) {
+        expect(n.next).not.toMatch(/What you told us/)
+        if (n.label.startsWith('Which Pika plan')) expect(n.next).toMatch(/select ‘Edit answers’ and change your plan selection\.$/)
+      }
+    }
+  })
+
+  test('"Guidance not included": no omission intro when nothing was left out', () => {
+    const none = view([tool('kling', 'Pro')])
+    expect(none.not_shown).toEqual({ intro: null, lines: [], empty: T.not_shown_none })
+    const some = view([tool('pika', 'Pro')]) // the Fancy and Standard plan guidance is left out on a Pro answer
+    expect(some.not_shown.intro).toBe(T.not_shown_intro)
+    expect(some.not_shown.lines.length).toBeGreaterThan(0)
+    expect(some.not_shown.empty).toBeNull()
+    expect(some.not_shown.lines).not.toContain(T.not_shown_none)
+    // The component shows the intro and list only when there is something to list.
+    const V = read('components/creator-record/DraftRecordView.tsx')
+    const section = V.slice(V.indexOf('<Section id="not-included"'), V.indexOf('</Section>', V.indexOf('<Section id="not-included"')))
+    expect(section).toMatch(/\{view\.not_shown\.intro && /)
+    expect(section).toMatch(/\{view\.not_shown\.lines\.length > 0 && /)
+    expect(section).toMatch(/\{view\.not_shown\.empty && /)
+  })
+
+  test('which guidance is left out is unchanged: the same lines as before, only the empty case differs', () => {
+    expect(view([tool('pika', 'Pro')]).not_shown.lines).toEqual([
+      'Pika (AI tool): not included, because on what you told us this guidance concerns a different Pika plan (“Fancy”).',
+      'Pika (AI tool): not included, because on what you told us this guidance concerns a different Pika plan (“Standard”).',
+    ])
+  })
+
+  test('the summary has no nested negative, and never says SI8 checked the answers', () => {
+    const v = view([tool('pika', 'Pro')])
+    expect(v.summary[3]).toBe('2 pieces of guidance included. They were selected using your own answers, which SI8 has not checked.')
+    expect(T.summary_counts(1, 0)).toBe('1 piece of guidance included. It was selected using your own answers, which SI8 has not checked.')
+    expect(v.summary.join(' ')).not.toMatch(/None of it depends/)
+    // Conditions, evidence limits and commercial-use uncertainty stay in their own lines.
+    expect(v.summary).toContain(T.summary_conditions(0))
+    expect(v.summary).toContain(T.recon_none)
+    for (const l of v.summary) expect(l).not.toMatch(/SI8 (has )?checked|verified|confirmed/i)
+    // Unchanged branches.
+    expect(T.summary_counts(4, 4)).toBe('4 pieces of guidance included. 4 of 4 may be relevant only depending on information this record does not establish.')
+    expect(T.summary_counts(0, 0)).toBe('0 pieces of guidance included. This record therefore makes no statement about commercial use of the tools and materials you named.')
   })
 })

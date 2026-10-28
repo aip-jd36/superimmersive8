@@ -33,6 +33,9 @@ const RECON_RESULT_LABELS = {
   not_assessed: 'Not assessed',
 } as const
 
+/** The label of the existing control that returns the creator to the questionnaire (public and admin clients). */
+export const EDIT_ANSWERS_LABEL = 'Edit answers'
+
 /** “A”, “A” and “B”, “A”, “B” and “C”. (A lone string is a one-item list, so the wording lock can sample it.) */
 const listQuoted = (xs: readonly string[] | string) => {
   const q = (typeof xs === 'string' ? [xs] : xs).map((x) => `“${x}”`)
@@ -100,7 +103,8 @@ export const T = {
     (guidance === 0
       ? '. This record therefore makes no statement about commercial use of the tools and materials you named.'
       : unresolved === 0
-        ? '. None of it depends on information this record does not establish, on what you told us (which SI8 has not checked).'
+        ? // CR-V2-MVP-20 (proposed, pending PM approval): replaces the nested negative "None of it depends on information this record does not establish, on what you told us (which SI8 has not checked)."
+          `. ${guidance === 1 ? 'It was' : 'They were'} selected using your own answers, which SI8 has not checked.`
         : `. ${unresolved} of ${guidance} may be relevant only depending on information this record does not establish.`),
   /**
    * CR-V2-MVP-17 (PM-approved wording): guidance conditions, counted exactly as
@@ -194,8 +198,9 @@ export const T = {
   not_established_next_account: (tool: string, value: string) =>
     `The guidance depends on whether your ${tool} account meets the ‘${value}’ condition. This record has not established that condition. You can review the account information available to you and provide relevant supporting evidence for independent review. SI8’s Commercial Assurance Assessment is a separate, human-reviewed service.`,
   /** CR-V2-MVP-17 (PM-approved): the plan answer is the creator's own, and can be edited. */
+  // CR-V2-MVP-20 (PM-approved intent): points to the existing "Edit answers" control, not the read-only "What you told us" section.
   not_established_next_plan: (tool: string, plans: readonly string[] | string) =>
-    `The guidance refers to the ${tool} ${listQuoted(plans)} ${typeof plans === 'string' || plans.length === 1 ? 'plan' : 'plans'}. You can change your plan answer under “What you told us”.`,
+    `The guidance refers to the ${tool} ${listQuoted(plans)} ${typeof plans === 'string' || plans.length === 1 ? 'plan' : 'plans'}. To update your ${tool} plan, select ‘${EDIT_ANSWERS_LABEL}’ and change your plan selection.`,
   documents_needed_heading: 'Missing evidence',
   open_told_us_none: 'Not asked in this record.',
   open_documents_none: 'No document for this was provided. This prototype accepts billing documents for AI tools only.',

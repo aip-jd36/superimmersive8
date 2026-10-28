@@ -207,8 +207,9 @@ export function DraftRecordView({ view, showTrace = false, showReferences = true
       </Section>
 
       <Section id="not-included" title={T.section_not_shown}>
-        <p className="text-sm mb-2" style={{ color: MUTED }}>{view.not_shown.intro}</p>
-        <ul className="text-sm list-disc pl-5">{view.not_shown.lines.map((l) => <li key={l}>{l}</li>)}</ul>
+        {view.not_shown.intro && <p className="text-sm mb-2" style={{ color: MUTED }}>{view.not_shown.intro}</p>}
+        {view.not_shown.lines.length > 0 && <ul className="text-sm list-disc pl-5">{view.not_shown.lines.map((l) => <li key={l}>{l}</li>)}</ul>}
+        {view.not_shown.empty && <p className="text-sm">{view.not_shown.empty}</p>}
       </Section>
 
       <Section id="independent-review" title={T.section_independent_review}>

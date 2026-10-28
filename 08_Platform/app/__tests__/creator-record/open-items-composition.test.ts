@@ -51,7 +51,7 @@ describe('1 — an unknown plan with conditional guidance is not presented as co
         told_us: T.not_established_told_plan_none,
         status: 'Open',
         for_guidance: ['Pika (AI tool)'],
-        next: expect.stringMatching(/^The guidance refers to the Pika “(Fancy|Pro|Standard)”, “(Fancy|Pro|Standard)” and “(Fancy|Pro|Standard)” plans\. You can change your plan answer under “What you told us”\.$/),
+        next: expect.stringMatching(/^The guidance refers to the Pika “(Fancy|Pro|Standard)”, “(Fancy|Pro|Standard)” and “(Fancy|Pro|Standard)” plans\. To update your Pika plan, select ‘Edit answers’ and change your plan selection\.$/),
       },
     ])
     for (const p of ['Fancy', 'Pro', 'Standard']) expect(r.view.open_items.not_established[0].next).toContain(`“${p}”`)
@@ -77,7 +77,7 @@ describe('1 — an unknown plan with conditional guidance is not presented as co
 describe('2 — a known plan with no outstanding dependency is described accurately, without implying clearance', () => {
   const r = draft(s([tool('pika', 'Pro')]))
   test('summary and open items', () => {
-    expect(summary(r)).toBe('2 pieces of guidance included. None of it depends on information this record does not establish, on what you told us (which SI8 has not checked).')
+    expect(summary(r)).toBe('2 pieces of guidance included. They were selected using your own answers, which SI8 has not checked.')
     // CR-V2-MVP-17: zero conditions is stated without implying usability or sufficient evidence.
     expect(r.view.summary[2]).toBe(T.summary_conditions(0))
     expect(r.view.summary[2]).toMatch(/does not establish whether your project can be used commercially or whether your supporting evidence is sufficient/)
