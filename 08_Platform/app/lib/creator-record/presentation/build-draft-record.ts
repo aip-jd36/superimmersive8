@@ -86,6 +86,8 @@ export interface DraftNotEstablished {
   told_us: string
   status: string
   for_guidance: string[]
+  /** CR-V2-MVP-17: what remains open and what the creator can do, from the governed requirement's own fact and value. Absent when no approved wording exists for the fact. */
+  next?: string
 }
 
 export interface DraftDocument {
@@ -245,7 +247,11 @@ export function buildDraftRecord(input: DraftRecordInput): DraftRecordView {
   const documentItems: DraftDocument[] = documents.map((d) => documentView(d))
   // ── Provisional reconciliation (server-computed; display-only) ──
   const reconciliation = input.reconciliation ?? []
-  const reconItems: DraftReconciliation[] = documents.length === 0 ? [] : reconciliation.map((r) => reconciliationView(r))
+  const declaredToolName = (index: number): string | null => {
+    const id = prov.tools.find((x) => x.instance === toolInstance(index))?.tool_id
+    return id ? toolName(id) : null
+  }
+  const reconItems: DraftReconciliation[] = documents.length === 0 ? [] : reconciliation.map((r) => reconciliationView(r, documents, declaredToolName))
 
   // ── Guidance ──
   const cards: DraftGuidanceCard[] = guidance.composition.items.map((item) => guidanceCard(item, claimsById.get(item.claim_id), subjectOf, toolName, prov, input))
@@ -276,10 +282,16 @@ export function buildDraftRecord(input: DraftRecordInput): DraftRecordView {
 
   // ── Information not established (unresolved applicability, CR-V2-COMP-001) ──
   const notEstablishedByKey = new Map<string, DraftNotEstablished>()
+  // CR-V2-MVP-17: the governed values each unresolved requirement refers to, for the "what remains open" line.
+  const requiredValues = new Map<string, { fact: string; tool: string | null; values: string[] }>()
   for (const item of guidance.composition.items) {
     const subject = subjectOf(claimsById.get(item.claim_id))
     for (const r of item.applicability.material_unresolved) {
       const key = `${r.fact}:${r.tool ?? ''}`
+      const req = requiredValues.get(key) ?? { fact: r.fact, tool: r.tool ? toolName(r.tool) : null, values: [] }
+      const value = String(r.value)
+      if (r.value !== null && r.value !== undefined && !req.values.includes(value)) req.values.push(value)
+      requiredValues.set(key, req)
       const existing = notEstablishedByKey.get(key)
       if (existing) {
         if (!existing.for_guidance.includes(subject)) existing.for_guidance.push(subject)
@@ -292,6 +304,12 @@ export function buildDraftRecord(input: DraftRecordInput): DraftRecordView {
       const told_us = r.fact === 'tool_plan_tier' ? (declaredPlans.length > 0 ? declaredPlans.join('; ') : T.not_established_told_plan_none) : T.open_told_us_none
       notEstablishedByKey.set(key, { key, label, told_us, status: T.open_status, for_guidance: [subject] })
     }
+  }
+  for (const [key, n] of notEstablishedByKey) {
+    const req = requiredValues.get(key)
+    if (!req || !req.tool || req.values.length === 0) continue
+    if (req.fact === 'tool_account_status') n.next = req.values.map((v) => T.not_established_next_account(req.tool as string, v)).join(' ')
+    else if (req.fact === 'tool_plan_tier') n.next = T.not_established_next_plan(req.tool, req.values)
   }
   const notEstablished = Array.from(notEstablishedByKey.values())
   const unresolvedGuidance = cards.filter((c) => c.conclusion === 'relevant_applicability_unresolved').length
@@ -348,7 +366,14 @@ export function buildDraftRecord(input: DraftRecordInput): DraftRecordView {
     pilot: input.pilot,
     banner: input.pilot ? { title: T.prototype_banner_title, lines: [T.record_banner_pilot, bannerSecond] } : null,
     header: { title, record_title: T.record_title, record_id: input.record.record_id, version: input.record.version, prepared_on: input.record.prepared_on, status: T.status_draft },
-    summary: [T.summary_intro, T.summary_counts(cards.length, unresolvedGuidance, notEstablished.length + openItems.length), T.summary_not_assessment],
+    summary: [
+      T.summary_intro,
+      T.summary_counts(cards.length, unresolvedGuidance),
+      // CR-V2-MVP-17: guidance conditions and document comparisons are stated separately.
+      ...(cards.length > 0 ? [T.summary_conditions(notEstablished.length + openItems.length)] : []),
+      ...documentSummaryLines(documents.length, reconciliation),
+      T.summary_not_assessment,
+    ],
     declarations: { intro: T.declarations_intro, groups },
     documents: { intro: T.documents_intro, items: documentItems, empty: documentItems.length === 0 ? T.documents_none : null },
     reconciliation: { intro: T.recon_intro, items: reconItems, empty: reconItems.length === 0 ? T.recon_none : null },
@@ -431,13 +456,54 @@ function reconciliationRow(label: string, f: FieldReconciliation): DraftRow {
   return { label, value: T.recon_result[f.result], note: limit ? `${T.recon_reason[f.reason]} ${limit}` : T.recon_reason[f.reason] }
 }
 
-function reconciliationView(r: EvidenceReconciliation): DraftReconciliation {
+function reconciliationView(r: EvidenceReconciliation, documents: readonly ToolDocument[], declaredToolName: (index: number) => string | null): DraftReconciliation {
+  const provider = reconciliationRow(T.recon_provider_label, r.provider)
+  // CR-V2-MVP-17: an unrecognised seller is named, as read from the document. Display only: matching is unchanged.
+  if (r.provider.reason === 'seller_not_recognized') {
+    const issuer = documents.find((d) => d.document.document_id === r.document_id)?.document.extraction?.issuer_name
+    const seller = issuer && issuer.status === 'present' && typeof issuer.value === 'string' ? displayObservedText(issuer.value) : ''
+    const tool = declaredToolName(r.tool_index)
+    if (seller && tool) provider.note = T.recon_seller_not_linked(seller, tool)
+  }
   return {
     tool_index: r.tool_index,
     heading: T.recon_heading(r.tool_index + 1),
     document_id: r.document_id,
-    rows: [reconciliationRow(T.recon_provider_label, r.provider), reconciliationRow(T.recon_plan_label, r.plan)],
+    rows: [provider, reconciliationRow(T.recon_plan_label, r.plan)],
   }
+}
+
+/** Longest document-read text shown inside a sentence. */
+export const MAX_OBSERVED_TEXT_CHARS = 120
+
+/**
+ * Text read from a document, made safe to place inside a fixed sentence: control
+ * and bidirectional-formatting characters removed, whitespace collapsed, quote
+ * marks of the surrounding sentence replaced, capped. Rendered as plain text
+ * (React escapes it); never interpreted.
+ */
+export function displayObservedText(raw: string): string {
+  const cleaned = raw
+    .replace(/[\u0000-\u001f\u007f-\u009f​-‏‪-‮⁦-⁩﻿]/g, ' ')
+    .replace(/[‘’]/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim()
+  const chars = Array.from(cleaned)
+  return chars.length > MAX_OBSERVED_TEXT_CHARS ? `${chars.slice(0, MAX_OBSERVED_TEXT_CHARS - 1).join('').trimEnd()}…` : cleaned
+}
+
+/** CR-V2-MVP-17: the summary's document lines, from the server-computed reconciliation only. */
+function documentSummaryLines(documentCount: number, reconciliation: readonly EvidenceReconciliation[]): string[] {
+  if (documentCount === 0) return [T.recon_none]
+  const rows = reconciliation.flatMap((r) => [r.provider, r.plan]).filter((f) => f.reason !== 'no_document')
+  const count = (result: string) => rows.filter((f) => f.result === result).length
+  const lines: string[] = []
+  if (rows.length > 0) {
+    lines.push(T.summary_comparisons(rows.length, { consistent: count('appears_consistent'), conflict: count('appears_to_conflict'), not_established: count('does_not_establish'), not_assessed: count('not_assessed') }))
+  }
+  const withoutDocument = reconciliation.filter((r) => r.provider.reason === 'no_document').length
+  if (withoutDocument > 0) lines.push(T.summary_tools_without_documents(withoutDocument, reconciliation.length))
+  return lines
 }
 
 type Prov = CreatorRecordGuidanceResult['facts']['provenance']

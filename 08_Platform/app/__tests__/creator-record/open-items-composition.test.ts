@@ -34,17 +34,27 @@ const summary = (r: ReturnType<typeof draft>) => r.view.summary[1]
 describe('1 — an unknown plan with conditional guidance is not presented as complete', () => {
   const r = draft(s([tool('pika', 'not_sure')]))
 
-  test('the summary counts the conditional guidance and the open item; it never says "0 open items"', () => {
-    expect(summary(r)).toBe(T.summary_counts(4, 4, 1))
-    expect(summary(r)).toBe('4 pieces of guidance included. 4 of 4 may be relevant only depending on information this record does not establish. 1 open item.')
-    expect(summary(r)).not.toMatch(/0 open items/)
+  test('the summary counts the conditional guidance and, separately (CR-V2-MVP-17), the one unresolved matter', () => {
+    expect(summary(r)).toBe(T.summary_counts(4, 4))
+    expect(summary(r)).toBe('4 pieces of guidance included. 4 of 4 may be relevant only depending on information this record does not establish.')
+    expect(r.view.summary[2]).toBe(T.summary_conditions(1))
+    expect(r.view.summary[2]).toBe('1 matter remains unresolved for the guidance shown here. See ‘Open items and missing evidence’ for details.')
+    expect(r.view.summary.join(' ')).not.toMatch(/0 open items/)
     expect(r.view.open_items.empty).toBeNull()
   })
 
-  test('the unresolved plan is listed as information this record does not establish, with what the creator said', () => {
+  test('the unresolved plan is listed as information this record does not establish, with what the creator said and the plans the guidance refers to', () => {
     expect(r.view.open_items.not_established).toEqual([
-      { key: 'tool_plan_tier:pika', label: 'Which Pika plan you were on', told_us: T.not_established_told_plan_none, status: 'Open', for_guidance: ['Pika (AI tool)'] },
+      {
+        key: 'tool_plan_tier:pika',
+        label: 'Which Pika plan you were on',
+        told_us: T.not_established_told_plan_none,
+        status: 'Open',
+        for_guidance: ['Pika (AI tool)'],
+        next: expect.stringMatching(/^The guidance refers to the Pika “(Fancy|Pro|Standard)”, “(Fancy|Pro|Standard)” and “(Fancy|Pro|Standard)” plans\. You can change your plan answer under “What you told us”\.$/),
+      },
     ])
+    for (const p of ['Fancy', 'Pro', 'Standard']) expect(r.view.open_items.not_established[0].next).toContain(`“${p}”`)
     // It is not presented as missing evidence: no evidence dependency is invented.
     expect(r.view.open_items.items).toEqual([])
     expect(r.view.independent_review.lines).toContain(T.review_not_established)
@@ -67,7 +77,11 @@ describe('1 — an unknown plan with conditional guidance is not presented as co
 describe('2 — a known plan with no outstanding dependency is described accurately, without implying clearance', () => {
   const r = draft(s([tool('pika', 'Pro')]))
   test('summary and open items', () => {
-    expect(summary(r)).toBe('2 pieces of guidance included. None of it depends on information this record does not establish, on what you told us (which SI8 has not checked). 0 open items.')
+    expect(summary(r)).toBe('2 pieces of guidance included. None of it depends on information this record does not establish, on what you told us (which SI8 has not checked).')
+    // CR-V2-MVP-17: zero conditions is stated without implying usability or sufficient evidence.
+    expect(r.view.summary[2]).toBe(T.summary_conditions(0))
+    expect(r.view.summary[2]).toMatch(/does not establish whether your project can be used commercially or whether your supporting evidence is sufficient/)
+    expect(r.view.summary[3]).toBe(T.recon_none)
     expect(r.view.open_items).toEqual(expect.objectContaining({ not_established: [], items: [], empty: T.open_none }))
     expect(r.view.summary).toContain(T.summary_not_assessment)
     expect(r.view.not_done).toContain('This record is not legal advice and is not a commercial clearance decision.')
@@ -83,7 +97,11 @@ describe('3 — missing service dates stay unknown; nothing about coverage is fa
     // CR-V2-MVP-6: only the "Documents" line differs (it says a document was added; it never establishes the item).
     const strip = (o: typeof without.view.open_items) => ({ ...o, items: o.items.map(({ documents: _d, ...rest }) => rest) })
     expect(strip(withDoc.view.open_items)).toEqual(strip(without.view.open_items))
-    expect(withDoc.view.summary).toEqual(without.view.summary)
+    // CR-V2-MVP-17: only the summary's document line differs; guidance and conditions lines are identical.
+    const docLine = (l: string) => l === T.recon_none || l.startsWith('Provisional document comparisons') || l.startsWith('No supporting document was added')
+    expect(withDoc.view.summary.filter((l) => !docLine(l))).toEqual(without.view.summary.filter((l) => !docLine(l)))
+    expect(without.view.summary).toContain(T.recon_none)
+    expect(withDoc.view.summary).not.toContain(T.recon_none)
     const rows = withDoc.view.documents.items[0].rows
     expect(rows).toContainEqual({ label: T.doc_field_label.service_period_start, value: T.doc_field_status.not_shown })
     expect(rows).toContainEqual({ label: T.doc_field_label.service_period_end, value: T.doc_field_status.not_shown })
@@ -111,7 +129,14 @@ describe('4 — correcting an unknown plan updates both the guidance and the unr
   test('an account-type requirement is listed as such, as not asked in this record', () => {
     const r = draft(s([tool('pika', 'Pro'), tool('kling', 'not_sure')]))
     expect(r.view.open_items.not_established).toEqual([
-      { key: 'tool_account_status:kling', label: 'Which Kling account type applies', told_us: T.open_told_us_none, status: 'Open', for_guidance: ['Kling (AI tool)'] },
+      {
+        key: 'tool_account_status:kling',
+        label: 'Which Kling account type applies',
+        told_us: T.open_told_us_none,
+        status: 'Open',
+        for_guidance: ['Kling (AI tool)'],
+        next: T.not_established_next_account('Kling', 'Member Account'),
+      },
     ])
   })
 
@@ -119,7 +144,8 @@ describe('4 — correcting an unknown plan updates both the guidance and the unr
     const r = draft(s([tool('kling', 'not_sure')], { M0: ['music', 'stock'], M1: ['artlist'], M3: ['getty'] }))
     expect(r.view.open_items.not_established.map((n) => n.label)).toEqual(['Which Kling account type applies'])
     expect(r.view.open_items.items).toHaveLength(4)
-    expect(summary(r)).toBe(T.summary_counts(4, 4, 5))
+    expect(summary(r)).toBe(T.summary_counts(4, 4))
+    expect(r.view.summary[2]).toBe(T.summary_conditions(5))
     expect(r.view.independent_review.lines).toEqual(expect.arrayContaining([T.review_not_established, T.review_open_items]))
   })
 })

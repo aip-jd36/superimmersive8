@@ -12,6 +12,7 @@
 
 import type { DraftRecordView as View } from '@/lib/creator-record/presentation/build-draft-record'
 import type { PublicUatView } from '@/lib/creator-record/public-uat/build-public-uat-draft'
+import { groupGuidanceCards } from '@/lib/creator-record/presentation/group-guidance'
 import { T } from '@/lib/creator-record/presentation/templates'
 
 const INK = '#1a1918'
@@ -28,9 +29,9 @@ function Section({ id, title, children }: { id: string; title: string; children:
 }
 
 /** A visible field label, so each line of a card is identifiable as plain page text. */
-function Field({ label, children, className = 'text-xs mt-2' }: { label: string; children: React.ReactNode; className?: string }) {
+function Field({ label, children, className = 'text-xs mt-2', id }: { label: string; children: React.ReactNode; className?: string; id?: string }) {
   return (
-    <p className={className}>
+    <p className={className} id={id}>
       <span className="font-semibold">{label}: </span>
       {children}
     </p>
@@ -133,24 +134,32 @@ export function DraftRecordView({ view, showTrace = false, showReferences = true
       <Section id="guidance" title={T.section_guidance}>
         <p className="text-sm mb-4" style={{ color: MUTED }}>{view.guidance.intro}</p>
         {view.guidance.empty && <p className="text-sm">{view.guidance.empty}</p>}
-        {view.guidance.cards.map((c) => (
-          <article key={c.claim_id} aria-labelledby={`card-${c.claim_id}`} data-guidance-claim={c.claim_id} className="mb-4 rounded-md border p-4" style={{ borderColor: LINE }}>
-            <h3 id={`card-${c.claim_id}`} className="text-sm font-semibold">Guidance: {c.subject}</h3>
-            <Field label="Relevance">{c.conclusion_label}</Field>
-            <Field label="Guidance" className="text-sm mt-2">{c.explanation}</Field>
-            {c.basis.map((b) => <Field key={b} label="Based on what you told us">{b}</Field>)}
-            {c.depends_on.length > 0 && (
-              <div className="text-xs mt-2">
-                <span className="font-semibold">Depends on:</span>
-                <ul className="list-disc pl-5" style={{ color: MUTED }}>
-                  {c.depends_on.map((d) => <li key={d}>{d}</li>)}
-                </ul>
-              </div>
-            )}
-            {c.caveats.map((cv) => <Field key={cv} label="Caveat">{cv}</Field>)}
-            <p className="text-xs mt-2" style={{ color: MUTED }}>{c.source}</p>
-            {showReferences && <p className="text-xs mt-1" style={{ color: MUTED }}>Reference: {c.claim_id}</p>}
-          </article>
+        {/* CR-V2-MVP-17: cards grouped by subject; text identical on every card of a group is shown once for the group. */}
+        {groupGuidanceCards(view.guidance.cards).map((g, gi) => (
+          <section key={g.subject} aria-labelledby={`guidance-group-${gi}`} data-guidance-group={gi} className="mb-4 rounded-md border p-4" style={{ borderColor: LINE }}>
+            <h3 id={`guidance-group-${gi}`} className="text-sm font-semibold">Guidance: {g.subject}</h3>
+            {/* Shown once, directly under the heading: identical on every card of this group, so it applies to all of them. */}
+            {g.shared_caveats.map((cv) => <Field key={cv} label="Caveat">{cv}</Field>)}
+            {g.shared_source && <p className="text-xs mt-2" style={{ color: MUTED }}>{g.shared_source}</p>}
+            {g.cards.map(({ card: c, own_caveats, show_own_source }) => (
+              <article key={c.claim_id} aria-labelledby={`guidance-group-${gi} card-${c.claim_id}`} data-guidance-claim={c.claim_id} className="mt-3 border-t pt-3 first-of-type:border-t-0 first-of-type:pt-0" style={{ borderColor: LINE }}>
+                <Field label="Relevance">{c.conclusion_label}</Field>
+                <Field label="Guidance" className="text-sm mt-2" id={`card-${c.claim_id}`}>{c.explanation}</Field>
+                {c.basis.map((b) => <Field key={b} label="Based on what you told us">{b}</Field>)}
+                {c.depends_on.length > 0 && (
+                  <div className="text-xs mt-2">
+                    <span className="font-semibold">Depends on:</span>
+                    <ul className="list-disc pl-5" style={{ color: MUTED }}>
+                      {c.depends_on.map((d) => <li key={d}>{d}</li>)}
+                    </ul>
+                  </div>
+                )}
+                {own_caveats.map((cv) => <Field key={cv} label="Caveat">{cv}</Field>)}
+                {show_own_source && <p className="text-xs mt-2" style={{ color: MUTED }}>{c.source}</p>}
+                {showReferences && <p className="text-xs mt-1" style={{ color: MUTED }}>Reference: {c.claim_id}</p>}
+              </article>
+            ))}
+          </section>
         ))}
       </Section>
 
@@ -168,6 +177,7 @@ export function DraftRecordView({ view, showTrace = false, showReferences = true
                   <dt style={{ color: MUTED }}>Status</dt><dd className="sm:col-span-2">{n.status}</dd>
                   <dt style={{ color: MUTED }}>Relates to</dt><dd className="sm:col-span-2">{n.for_guidance.join('; ')}</dd>
                 </dl>
+                {n.next && <p className="mt-2 text-xs" data-not-established-next>{n.next}</p>}
               </div>
             ))}
           </div>

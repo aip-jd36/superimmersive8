@@ -215,12 +215,15 @@ describe('lib/creator-record boundaries', () => {
       '@/lib/creator-record/evidence/document-observations',
       '@/lib/creator-record/pilot/pilot-registry',
       '@/lib/creator-record/presentation/build-draft-record',
+      // CR-V2-MVP-17: display grouping of guidance cards; a pure module with no imports (asserted below).
+      '@/lib/creator-record/presentation/group-guidance',
       '@/lib/creator-record/presentation/templates',
       '@/lib/creator-record/prototype/form',
       '@/components/creator-record/CreatorRecordQuestionnaire',
       '@/components/creator-record/DocumentReviewPanel',
       '@/components/creator-record/DraftRecordView',
     ]
+    expect(staticImports(readFileSync(path.join(APP_ROOT, 'lib/creator-record/presentation/group-guidance.ts'), 'utf8'))).toEqual([])
     for (const f of [
       'app/admin/creator-record-v2/CreatorRecordPrototypeClient.tsx',
       'components/creator-record/CreatorRecordQuestionnaire.tsx',

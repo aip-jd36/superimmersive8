@@ -77,7 +77,9 @@ test('the record is plain page text with labelled, distinguishable sections', ()
     expect(V).toContain(`<Section id="${id}"`)
   }
   expect(V).toMatch(/aria-labelledby=\{`record-\$\{id\}`\}/)
-  expect(V).toMatch(/Guidance: \{c.subject\}/)
+  // CR-V2-MVP-17: the subject heading is rendered once per group of cards for that subject.
+  expect(V).toMatch(/Guidance: \{g.subject\}/)
+  expect(V).toMatch(/aria-labelledby=\{`guidance-group-\$\{gi\} card-\$\{c.claim_id\}`\}/)
   expect(V).toMatch(/Open item: \{o.label\}/)
   for (const label of ['Relevance', 'Guidance', 'Based on what you told us', 'Caveat']) expect(V).toContain(`label="${label}"`)
   expect(V).not.toMatch(/<canvas|<img|<svg/i)

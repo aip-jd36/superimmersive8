@@ -25,6 +25,12 @@
 
 import type { CreatorRecordConclusion } from '../contract/compose'
 
+/** “A”, “A” and “B”, “A”, “B” and “C”. (A lone string is a one-item list, so the wording lock can sample it.) */
+const listQuoted = (xs: readonly string[] | string) => {
+  const q = (typeof xs === 'string' ? [xs] : xs).map((x) => `“${x}”`)
+  return q.length <= 1 ? q.join('') : `${q.slice(0, -1).join(', ')} and ${q[q.length - 1]}`
+}
+
 export const T = {
   record_title: 'Creator Record',
   status_draft: 'Draft — not issued',
@@ -81,14 +87,42 @@ export const T = {
    * item (information not established, and missing evidence). It never implies
    * completeness beyond "on what you told us".
    */
-  summary_counts: (guidance: number, unresolved: number, open: number) =>
+  summary_counts: (guidance: number, unresolved: number) =>
     `${guidance} ${guidance === 1 ? 'piece' : 'pieces'} of guidance included` +
     (guidance === 0
       ? '. This record therefore makes no statement about commercial use of the tools and materials you named.'
       : unresolved === 0
         ? '. None of it depends on information this record does not establish, on what you told us (which SI8 has not checked).'
-        : `. ${unresolved} of ${guidance} may be relevant only depending on information this record does not establish.`) +
-    ` ${open} open ${open === 1 ? 'item' : 'items'}.`,
+        : `. ${unresolved} of ${guidance} may be relevant only depending on information this record does not establish.`),
+  /**
+   * CR-V2-MVP-17 (PM-approved wording): guidance conditions, counted exactly as
+   * before (information not established + evidence dependencies), stated apart
+   * from document comparisons. Zero never implies clearance or sufficiency.
+   */
+  summary_conditions: (n: number) =>
+    n === 0
+      ? 'Based on what you told us, no further information is identified for the guidance shown here. This does not establish whether your project can be used commercially or whether your supporting evidence is sufficient.'
+      : `${n} ${n === 1 ? 'matter remains' : 'matters remain'} unresolved for the guidance shown here. See ‘Open items and missing evidence’ for details.`,
+  /**
+   * CR-V2-MVP-17 (PM-approved wording): provisional comparison outcomes, counted
+   * per seller or plan row (one document gives two rows); zero categories are
+   * omitted. "consistent" only as "appear(s) consistent"; "authenticity" only in
+   * the fixed negation (scanned by public-uat-presentation.test.ts).
+   */
+  summary_comparisons: (rows: number, c: { consistent: number; conflict: number; not_established: number; not_assessed: number }) =>
+    `Provisional document comparisons (${rows} seller and plan ${rows === 1 ? 'check' : 'checks'}): ` +
+    [
+      c.consistent > 0 ? `${c.consistent} ${c.consistent === 1 ? 'appears' : 'appear'} consistent` : null,
+      c.conflict > 0 ? `${c.conflict} ${c.conflict === 1 ? 'appears' : 'appear'} to conflict` : null,
+      c.not_established > 0 ? `${c.not_established} ${c.not_established === 1 ? 'does' : 'do'} not establish the comparison` : null,
+      c.not_assessed > 0 ? `${c.not_assessed} ${c.not_assessed === 1 ? 'was' : 'were'} not assessed` : null,
+    ]
+      .filter((x): x is string => x !== null)
+      .join(', ') +
+    '. These checks did not change your answers and do not establish document authenticity.',
+  /** CR-V2-MVP-17 (PM-approved wording): tools with no document, shown only when at least one document was added. */
+  summary_tools_without_documents: (k: number, total: number) =>
+    `No supporting document was added for ${k} of your ${total} tools. ${k === 1 ? 'That tool has' : 'Those tools have'} not been compared with document evidence.`,
   summary_not_assessment: 'It records your own statements. SI8 has not checked them.',
 
   declarations_intro: 'These are your own answers, recorded as you gave them. SI8 has not checked them.',
@@ -144,6 +178,12 @@ export const T = {
   not_established_account: (tool: string) => `Which ${tool} account type applies`,
   not_established_other: 'Information this guidance depends on that this record does not collect',
   not_established_told_plan_none: 'You were not sure, or did not say.',
+  /** CR-V2-MVP-17 (PM-approved wording): what remains open for an account-type condition, and the independent-review path. Never inferred from a document. */
+  not_established_next_account: (tool: string, value: string) =>
+    `The guidance depends on whether your ${tool} account meets the ‘${value}’ condition. This record has not established that condition. You can review the account information available to you and provide relevant supporting evidence for independent review. SI8’s Commercial Assurance Assessment is a separate, human-reviewed service.`,
+  /** CR-V2-MVP-17 (PM-approved): the plan answer is the creator's own, and can be edited. */
+  not_established_next_plan: (tool: string, plans: readonly string[] | string) =>
+    `The guidance refers to the ${tool} ${listQuoted(plans)} ${typeof plans === 'string' || plans.length === 1 ? 'plan' : 'plans'}. You can change your plan answer under “What you told us”.`,
   documents_needed_heading: 'Missing evidence',
   open_told_us_none: 'Not asked in this record.',
   open_documents_none: 'No document for this was provided. This prototype accepts billing documents for AI tools only.',
@@ -253,6 +293,7 @@ export const T = {
     seller_not_read: 'No seller could be read on the document.',
     seller_not_recognized: 'The seller shown is not a name SI8 recognises for a tool in its list, so it was not linked to the tool you named.',
     seller_ambiguous: 'The seller shown could refer to more than one tool, so it was not linked to the tool you named.',
+    // CR-V2-MVP-17: when the seller name and the declared tool are both known, `recon_seller_not_linked` is shown instead of `seller_not_recognized`.
     same_tool: 'The seller shown is a name SI8 recognises for the tool you named.',
     different_tool: 'The seller shown is a name SI8 recognises for a different tool from the one you named.',
     seller_not_established: 'The plan was not compared because the document was not linked to the tool you named.',
@@ -270,6 +311,13 @@ export const T = {
   recon_limit_conflict:
     'The automated reading may be incomplete or wrong. Your answer has not been changed. You can correct it yourself, add a different document, or leave it as it is; the difference stays in this record.',
   recon_none: 'You did not add any documents, so nothing was compared. You can continue without documents; this is recorded as a limitation.',
+  /**
+   * CR-V2-MVP-17 (PM-approved wording): an unrecognised seller, named. `seller` is
+   * text read from the document (untrusted): shown only as quoted text, cleaned
+   * and capped by `displayObservedText`. Matching and aliases are unchanged.
+   */
+  recon_seller_not_linked: (seller: string, tool: string) =>
+    `The document appears to name ‘${seller}’ as the seller. SI8 has not established a link between that name and ${tool}, the tool you identified. The plan shown in the document was therefore not compared with your declared plan. Your answers remain unchanged.`,
   not_done_documents: 'SI8 did not check whether any document you added is genuine, complete or current. The comparison with your answers is automated and provisional; SI8 did not review it.',
   method_documents: 'Document reading',
   method_documents_replay: (schema: string, replaySet: string) => `Fixture replay of recorded test data (${schema}; ${replaySet}); no AI model`,
