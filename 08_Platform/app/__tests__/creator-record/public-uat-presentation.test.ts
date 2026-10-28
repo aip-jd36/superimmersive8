@@ -39,16 +39,16 @@ const documentLines = (v: PublicUatView) => v.summary.filter((l) => l === T.reco
 describe('P1 — evidence-aware summary', () => {
   test.each<[string, Record<string, string[]>[], { tool_index: number; fixture_id: string }[], number | null, string[]]>([
     ['no document', [tool('pika', 'Pro')], [], 0, [T.recon_none]],
-    ['unlinked seller (Pika / Pro + A)', [tool('pika', 'Pro')], [ref('pdf-pika-pro-no-period')], 0, ['Provisional document comparisons (2 seller and plan checks): 2 do not establish the comparison. These checks did not change your answers and do not establish document authenticity.']],
-    ['apparent consistency (Pika / Pro + D)', [tool('pika', 'Pro')], [ref('shot-pika-multiple-payments')], 0, ['Provisional document comparisons (2 seller and plan checks): 2 appear consistent. These checks did not change your answers and do not establish document authenticity.']],
-    ['apparent conflict (Kling / Standard + E)', [tool('kling', 'Standard')], [ref('pdf-kling-pro-monthly')], 1, ['Provisional document comparisons (2 seller and plan checks): 1 appears consistent, 1 appears to conflict. These checks did not change your answers and do not establish document authenticity.']],
-    ['plan not sure (Pika / Not sure + A)', [tool('pika', 'not_sure')], [ref('pdf-pika-pro-no-period')], 1, ['Provisional document comparisons (2 seller and plan checks): 1 does not establish the comparison, 1 was not assessed. These checks did not change your answers and do not establish document authenticity.']],
-    ['unreadable document (Pika / Pro + I)', [tool('pika', 'Pro')], [ref('unreadable-dark-image')], 0, [T.summary_comparisons(2, { consistent: 0, conflict: 0, not_established: 2, not_assessed: 0 })]],
+    ['unlinked seller (Pika / Pro + A)', [tool('pika', 'Pro')], [ref('pdf-pika-pro-no-period')], 0, ['Provisional document comparisons (2 seller and plan checks): “Does not establish it” — 2. These comparisons did not change your answers. They are limited to the information shown in the documents and do not establish whether your project can be used commercially.']],
+    ['apparent consistency (Pika / Pro + D)', [tool('pika', 'Pro')], [ref('shot-pika-multiple-payments')], 0, ['Provisional document comparisons (2 seller and plan checks): “Appears consistent” — 2. These comparisons did not change your answers. They are limited to the information shown in the documents and do not establish whether your project can be used commercially.']],
+    ['apparent conflict (Kling / Standard + E)', [tool('kling', 'Standard')], [ref('pdf-kling-pro-monthly')], 1, ['Provisional document comparisons (2 seller and plan checks): “Appears consistent” — 1; “Appears to conflict” — 1. These comparisons did not change your answers. They are limited to the information shown in the documents and do not establish whether your project can be used commercially.']],
+    ['plan not sure (Pika / Not sure + A)', [tool('pika', 'not_sure')], [ref('pdf-pika-pro-no-period')], 1, ['Provisional document comparisons (2 seller and plan checks): “Does not establish it” — 1; “Not assessed” — 1. These comparisons did not change your answers. They are limited to the information shown in the documents and do not establish whether your project can be used commercially.']],
+    ['unreadable document (Pika / Pro + I)', [tool('pika', 'Pro')], [ref('unreadable-dark-image')], 0, [T.recon_summary(2, { consistent: 0, conflict: 0, not_established: 2, not_assessed: 0 })]],
     ['one of two tools without a document (R4)', [tool('pika', 'Pro'), tool('kling', 'Standard')], [ref('pdf-pika-pro-no-period')], 1, [
-      'Provisional document comparisons (2 seller and plan checks): 2 do not establish the comparison. These checks did not change your answers and do not establish document authenticity.',
+      'Provisional document comparisons (2 seller and plan checks): “Does not establish it” — 2. These comparisons did not change your answers. They are limited to the information shown in the documents and do not establish whether your project can be used commercially.',
       'No supporting document was added for 1 of your 2 tools. That tool has not been compared with document evidence.',
     ]],
-    ['no guidance (Runway / Pro + F): no conditions line', [tool('runway-gen3', 'Pro')], [ref('conflict-two-plan-names')], null, ['Provisional document comparisons (2 seller and plan checks): 2 do not establish the comparison. These checks did not change your answers and do not establish document authenticity.']],
+    ['no guidance (Runway / Pro + F): no conditions line', [tool('runway-gen3', 'Pro')], [ref('conflict-two-plan-names')], null, ['Provisional document comparisons (2 seller and plan checks): “Does not establish it” — 2. These comparisons did not change your answers. They are limited to the information shown in the documents and do not establish whether your project can be used commercially.']],
   ])('%s', (_n, tools, refs, n, docLines) => {
     const v = view(tools, refs)
     expect(documentLines(v)).toEqual(docLines)
@@ -168,24 +168,35 @@ describe('P4 — every new string passes the existing guards', () => {
     ['prove', /\bprov(e|es|ed|en|ing)\b/i], ['verify', /verif/i], ['authentic', /authentic/i], ['valid', /\bvalid(ated|ates|ity)?\b/i],
     ['clear', /\bclear(ed|ance|ing|s)?\b/i], ['approved', /\bapprov/i], ['certified', /certif/i], ['compliant', /complian/i], ['licensed/permitted/safe to', /licensed to|permitted to|\bsafe to\b/i],
   ]
-  /** The two PM-approved phrases are the only exceptions, and only verbatim. */
-  const APPROVED_EXCEPTIONS = ['do not establish document authenticity', /\b\d+ appears? consistent\b/g] as const
-  const strip = (t: string) => t.split(APPROVED_EXCEPTIONS[0]).join(' ').replace(APPROVED_EXCEPTIONS[1], ' ')
+  /** CR-V2-MVP-18: no exception beyond the existing Option C policy — "consistent" only as the exact label "Appears consistent". */
+  const strip = (t: string) => t.split('Appears consistent').join(' ')
   const all = [
-    T.summary_comparisons(6, { consistent: 1, conflict: 2, not_established: 2, not_assessed: 1 }),
-    T.summary_comparisons(2, { consistent: 2, conflict: 0, not_established: 0, not_assessed: 0 }),
+    T.recon_summary(6, { consistent: 1, conflict: 2, not_established: 2, not_assessed: 1 }),
+    T.recon_summary(2, { consistent: 2, conflict: 0, not_established: 0, not_assessed: 0 }),
     T.summary_tools_without_documents(1, 2), T.summary_tools_without_documents(2, 3),
     T.summary_conditions(0), T.summary_conditions(1), T.summary_conditions(3),
     T.recon_seller_not_linked('Pika Labs, Inc.', 'Pika'),
     T.not_established_next_account('Kling', 'Member Account'), T.not_established_next_plan('Pika', ['Pro', 'Standard']),
   ]
 
-  test('document wording guard, with only the two approved exceptions', () => {
+  test('document wording guard, with no exception beyond the exact reconciliation label', () => {
     const offenders = all.flatMap((t) => DOC_BANNED.filter(([, re]) => re.test(strip(t))).map(([n]) => `${n}: ${t}`))
     expect(offenders).toEqual([])
     // The exceptions are not a loophole: anything else with those words still fails.
     expect(DOC_BANNED.some(([, re]) => re.test(strip('The document is authentic.')))).toBe(true)
     expect(DOC_BANNED.some(([, re]) => re.test(strip('Your plan is consistent with the receipt.')))).toBe(true)
+    expect(DOC_BANNED.some(([, re]) => re.test(strip('2 appear consistent')))).toBe(true)
+  })
+
+  test('the summary comparison line is a reconciliation template, so the existing reconciliation guard covers it', () => {
+    expect(Object.keys(T)).toContain('recon_summary')
+    expect(Object.keys(T)).not.toContain('summary_comparisons')
+    const line = T.recon_summary(4, { consistent: 1, conflict: 1, not_established: 1, not_assessed: 1 })
+    expect(line.replace(/Appears consistent/g, '')).not.toMatch(/\bconsistent\b/i)
+    expect(line).not.toMatch(/authentic/i)
+    // Each count sits under the exact label shown in "Your answers beside your documents".
+    for (const label of Object.values(T.recon_result)) expect(line).toContain(`“${label}” — 1`)
+    expect(line).toMatch(/do not establish whether your project can be used commercially\.$/)
   })
 
   test('record wording guard (clearance, approval, applicability) and the dependency-status words', () => {

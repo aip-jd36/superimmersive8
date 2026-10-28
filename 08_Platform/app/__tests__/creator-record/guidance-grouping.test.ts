@@ -12,6 +12,9 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { groupGuidanceCards, type GroupableCard } from '@/lib/creator-record/presentation/group-guidance'
 import { buildPublicUatDraft } from '@/lib/creator-record/public-uat/build-public-uat-draft'
+import { PILOT_CAVEATS, PILOT_PUBLICATION_LEDGER } from '@/lib/creator-record/pilot/pilot-ledger'
+import { buildCreatorRecordDraft, pilotSources } from '@/lib/creator-record/prototype/build-draft'
+import { T } from '@/lib/creator-record/presentation/templates'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 
 type Card = GroupableCard & { id: string }
@@ -116,5 +119,74 @@ describe('G3 — the record view renders groups and adds no wording', () => {
     expect(new Set(literals)).toEqual(new Set(['Guidance:', 'Depends on:', 'Reference:']))
     const labels = Array.from(guidance.matchAll(/label="([^"]+)"/g)).map((m) => m[1])
     expect(new Set(labels)).toEqual(new Set(['Relevance', 'Guidance', 'Based on what you told us', 'Caveat']))
+  })
+})
+
+// ───────────────────────────────────────────── G4 caveat and source context (CR-V2-MVP-18)
+
+/**
+ * Lifting text to group level is safe only if it applies to every claim in the
+ * group. That holds when caveats and source lines are claim-intrinsic: fixed by
+ * the claim's own ledger entry and its own last-review date, never by the
+ * creator's answers, the claim's applicability status or its conclusion. Then a
+ * caveat present on every card of a group is, by construction, a caveat of every
+ * claim in it. These tests pin that contract; if it ever changes, they fail and
+ * the grouping must stop lifting text.
+ */
+describe('G4 — caveats and source lines are claim-intrinsic (independent of applicability and conclusion)', () => {
+  const ANS = { P1: ['UAT'], P3: ['own_channels'], F1: ['TW'], F2: ['online_worldwide'], L1: ['no'], M0: ['none'], H1: ['edited'] }
+  const tool = (T1: string, T3: string) => ({ T1: [T1], T3: [T3], T4: ['May 2026'] })
+  const states: { tools: Record<string, string[]>[]; answers: Record<string, string[]> }[] = [
+    { tools: [tool('pika', 'Pro')], answers: {} },
+    { tools: [tool('pika', 'not_sure')], answers: {} },
+    { tools: [tool('pika', 'Standard'), tool('kling', 'not_sure')], answers: {} },
+    { tools: [tool('kling', 'Pro')], answers: { M0: ['music', 'stock'], M1: ['artlist'], M3: ['getty'] } },
+  ]
+  const drafts = states.map((s) => {
+    const r = buildCreatorRecordDraft({ state: { answers: { ...ANS, ...s.answers }, tools: s.tools, acknowledgements: { A1: true, A2: true } }, sources: pilotSources(), topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: '2026-10-28', record: { record_id: 'G4', record_version: 1, captured_at: '2026-10-28T00:00:00Z' } })
+    if (!r.ok) throw new Error(JSON.stringify(r.issues))
+    return r
+  })
+
+  test('each card carries exactly its own ledger entry’s caveats and its own claim’s review date', () => {
+    for (const r of drafts) {
+      for (const c of r.view.guidance.cards) {
+        const entry = PILOT_PUBLICATION_LEDGER.find((e) => e.claim_id === c.claim_id && e.superseded_by === null)!
+        expect(c.caveats).toEqual(entry.required_caveats.map((id) => PILOT_CAVEATS[id]))
+        const claim = TOPIC_CLAIMS_FIXTURE.find((x) => x.claim_id === c.claim_id)!
+        expect(c.source).toBe(T.source_line(claim.last_verified as string))
+      }
+    }
+  })
+
+  test('the same claim has the same caveats and source whatever its applicability status or conclusion', () => {
+    const byClaim = new Map<string, { caveats: string[]; source: string; conclusions: Set<string> }>()
+    for (const r of drafts) {
+      for (const c of r.view.guidance.cards) {
+        const seen = byClaim.get(c.claim_id)
+        if (seen) {
+          expect([c.claim_id, c.caveats, c.source]).toEqual([c.claim_id, seen.caveats, seen.source])
+          seen.conclusions.add(c.conclusion)
+        } else byClaim.set(c.claim_id, { caveats: c.caveats, source: c.source, conclusions: new Set([c.conclusion]) })
+      }
+    }
+    // The comparison is meaningful: at least one claim appears under both conclusions.
+    expect(Array.from(byClaim.values()).some((v) => v.conclusions.size > 1)).toBe(true)
+  })
+
+  test('caveats are attached unconditionally from the ledger entry (no applicability-dependent caveat exists)', () => {
+    const compose = readFileSync(path.join(__dirname, '..', '..', 'lib', 'creator-record', 'contract', 'compose.ts'), 'utf8')
+    expect(compose).toMatch(/required_caveats: \[\.\.\.entry\.required_caveats\]/)
+    const ledger = readFileSync(path.join(__dirname, '..', '..', 'lib', 'creator-record', 'contract', 'publication-ledger.ts'), 'utf8')
+    expect(ledger).toMatch(/required_caveats: string\[\]/)
+  })
+
+  test('a group lifts a caveat only when every card in it carries that caveat (mixed groups keep it per card)', () => {
+    for (const r of drafts) {
+      for (const g of groupGuidanceCards(r.view.guidance.cards)) {
+        for (const cv of g.shared_caveats) expect(g.cards.every((m) => m.card.caveats.includes(cv))).toBe(true)
+        if (g.shared_source !== null) expect(g.cards.every((m) => m.card.source === g.shared_source)).toBe(true)
+      }
+    }
   })
 })

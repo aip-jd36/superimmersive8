@@ -25,6 +25,14 @@
 
 import type { CreatorRecordConclusion } from '../contract/compose'
 
+/** The fixed reconciliation result labels (CR-V2-MVP-6), shared by the comparison rows and the summary (CR-V2-MVP-18). */
+const RECON_RESULT_LABELS = {
+  appears_consistent: 'Appears consistent',
+  appears_to_conflict: 'Appears to conflict',
+  does_not_establish: 'Does not establish it',
+  not_assessed: 'Not assessed',
+} as const
+
 /** “A”, “A” and “B”, “A”, “B” and “C”. (A lone string is a one-item list, so the wording lock can sample it.) */
 const listQuoted = (xs: readonly string[] | string) => {
   const q = (typeof xs === 'string' ? [xs] : xs).map((x) => `“${x}”`)
@@ -104,22 +112,26 @@ export const T = {
       ? 'Based on what you told us, no further information is identified for the guidance shown here. This does not establish whether your project can be used commercially or whether your supporting evidence is sufficient.'
       : `${n} ${n === 1 ? 'matter remains' : 'matters remain'} unresolved for the guidance shown here. See ‘Open items and missing evidence’ for details.`,
   /**
-   * CR-V2-MVP-17 (PM-approved wording): provisional comparison outcomes, counted
-   * per seller or plan row (one document gives two rows); zero categories are
-   * omitted. "consistent" only as "appear(s) consistent"; "authenticity" only in
-   * the fixed negation (scanned by public-uat-presentation.test.ts).
+   * CR-V2-MVP-17/18: provisional comparison outcomes for the summary, counted per
+   * seller or plan row (one document gives two rows); zero categories omitted.
+   * Named `recon_` so the reconciliation wording guard covers it: each outcome is
+   * reported under its exact reconciliation label (the only permitted use of
+   * "consistent"), followed by the PM-approved limitation (CR-V2-MVP-18).
    */
-  summary_comparisons: (rows: number, c: { consistent: number; conflict: number; not_established: number; not_assessed: number }) =>
+  recon_summary: (rows: number, c: { consistent: number; conflict: number; not_established: number; not_assessed: number } = { consistent: 0, conflict: 0, not_established: 0, not_assessed: 0 }) =>
     `Provisional document comparisons (${rows} seller and plan ${rows === 1 ? 'check' : 'checks'}): ` +
-    [
-      c.consistent > 0 ? `${c.consistent} ${c.consistent === 1 ? 'appears' : 'appear'} consistent` : null,
-      c.conflict > 0 ? `${c.conflict} ${c.conflict === 1 ? 'appears' : 'appear'} to conflict` : null,
-      c.not_established > 0 ? `${c.not_established} ${c.not_established === 1 ? 'does' : 'do'} not establish the comparison` : null,
-      c.not_assessed > 0 ? `${c.not_assessed} ${c.not_assessed === 1 ? 'was' : 'were'} not assessed` : null,
-    ]
-      .filter((x): x is string => x !== null)
-      .join(', ') +
-    '. These checks did not change your answers and do not establish document authenticity.',
+    (
+      [
+        [RECON_RESULT_LABELS.appears_consistent, c.consistent],
+        [RECON_RESULT_LABELS.appears_to_conflict, c.conflict],
+        [RECON_RESULT_LABELS.does_not_establish, c.not_established],
+        [RECON_RESULT_LABELS.not_assessed, c.not_assessed],
+      ] as const
+    )
+      .filter(([, n]) => n > 0)
+      .map(([label, n]) => `“${label}” — ${n}`)
+      .join('; ') +
+    '. These comparisons did not change your answers. They are limited to the information shown in the documents and do not establish whether your project can be used commercially.',
   /** CR-V2-MVP-17 (PM-approved wording): tools with no document, shown only when at least one document was added. */
   summary_tools_without_documents: (k: number, total: number) =>
     `No supporting document was added for ${k} of your ${total} tools. ${k === 1 ? 'That tool has' : 'Those tools have'} not been compared with document evidence.`,
@@ -277,12 +289,7 @@ export const T = {
   recon_heading: (tool: number) => `Tool ${tool}`,
   recon_provider_label: 'Seller and the tool you named',
   recon_plan_label: 'Plan and your plan answer',
-  recon_result: {
-    appears_consistent: 'Appears consistent',
-    appears_to_conflict: 'Appears to conflict',
-    does_not_establish: 'Does not establish it',
-    not_assessed: 'Not assessed',
-  } as Record<string, string>,
+  recon_result: RECON_RESULT_LABELS as Record<string, string>,
   recon_reason: {
     no_document: 'You did not add a document for this tool. That is recorded as a limitation; you can continue without one.',
     document_not_read: 'The document for this tool was not read, so nothing was compared.',

@@ -499,7 +499,7 @@ function documentSummaryLines(documentCount: number, reconciliation: readonly Ev
   const count = (result: string) => rows.filter((f) => f.result === result).length
   const lines: string[] = []
   if (rows.length > 0) {
-    lines.push(T.summary_comparisons(rows.length, { consistent: count('appears_consistent'), conflict: count('appears_to_conflict'), not_established: count('does_not_establish'), not_assessed: count('not_assessed') }))
+    lines.push(T.recon_summary(rows.length, { consistent: count('appears_consistent'), conflict: count('appears_to_conflict'), not_established: count('does_not_establish'), not_assessed: count('not_assessed') }))
   }
   const withoutDocument = reconciliation.filter((r) => r.provider.reason === 'no_document').length
   if (withoutDocument > 0) lines.push(T.summary_tools_without_documents(withoutDocument, reconciliation.length))
