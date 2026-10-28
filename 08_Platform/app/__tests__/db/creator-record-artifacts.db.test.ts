@@ -58,14 +58,14 @@ maybe('creator_record_artifacts (PostgreSQL)', () => {
   async function insertPending(c: Client, submissionId: string, attempt = randomUUID()) {
     return c.query(
       `INSERT INTO public.creator_record_artifacts (submission_id, record_id, attempt_id, storage_path, sha256, byte_size, generator_version, status, uat)
-       VALUES ($1, $2, $3, $1::text || '/' || $3::text || '.pdf', $4, 100, 'legacy-creator-record-pdf-v1', 'pending', true) RETURNING *`,
+       VALUES ($1::uuid, $2, $3::uuid, $1::uuid::text || '/' || $3::uuid::text || '.pdf', $4, 100, 'legacy-creator-record-pdf-v1', 'pending', true) RETURNING *`,
       [submissionId, `CR-2026-${submissionId.slice(0, 8)}`, attempt, 'a'.repeat(64)],
     )
   }
 
   const takeOver = (c: Client, id: string, expected: string, next: string) =>
     c.query(
-      `UPDATE public.creator_record_artifacts SET attempt_id = $3, storage_path = submission_id::text || '/' || $3::text || '.pdf', sha256 = $4
+      `UPDATE public.creator_record_artifacts SET attempt_id = $3::uuid, storage_path = submission_id::text || '/' || $3::uuid::text || '.pdf', sha256 = $4
        WHERE id = $1 AND attempt_id = $2 AND status = 'pending'`,
       [id, expected, next, 'b'.repeat(64)],
     )
