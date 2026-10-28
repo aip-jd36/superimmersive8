@@ -11,6 +11,7 @@ on:
     paths:
       - '08_Platform/app/supabase/migrations/20261021000000_payment_fulfillments.sql'
       - '08_Platform/app/supabase/migrations/20261022000000_payment_zero_total_paid.sql'
+      - '08_Platform/app/supabase/migrations/20261028000000_creator_record_artifacts.sql'
       - '08_Platform/implementation/caa-3b/CAA_3B_FIX_1_*.sql'
       - '08_Platform/app/__tests__/db/**'
       - '08_Platform/implementation/caa-3b/CAA_3B_PRODUCTION_SCHEMA_PREFLIGHT.sql'
