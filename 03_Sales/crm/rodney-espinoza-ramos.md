@@ -29,6 +29,8 @@ Account record created 2026-10-26 (CRM ID **B194**, new — no prior CRM record,
 
 **STEC re-check (read-only, 2026-10-27, DB time 02:24 UTC) — CONFIRMED:** his 2026-10-27 reply (00:03 as displayed) was captured by webhook event `26253d80-…` (received 2026-10-26 16:50 UTC; a separate event `1b0d19b5-…` had captured the 2026-10-26 follow-up). Inbound message `041ac5d7-…` was bridged (`followup`, `succeeded`, attempt 1) into `lead_responses` **version 2** `85392b00-9c06-4e93-9f8c-381caec4b080` (parent `d93a287a-…`; latest; `message_count` 5; Lead Responded; no CSR notes; `conversation_raw` contains the reply verbatim). Version 1 `d93a287a-…` is now `is_latest_version = false`; these are the only two versions. **Do not submit a manual CSR entry.** The 2026-10-27 10:22 closing message was not yet in STEC (latest webhook from any campaign 2026-10-27 01:06 UTC) — outbound sync lag only.
 
+**STEC re-check (read-only, 2026-10-28, DB time 04:08 UTC) — CONFIRMED, final acknowledgment auto-ingested:** the 2026-10-27 10:22 closing message has since synced (outbound conversation message `352c54f5-…`, webhook `f142d023-…`). His 2026-10-27 22:00 reply "You are welcome Yu" was captured by webhook `997c9fc9-…` (received 2026-10-27 16:04 UTC) as inbound message `9b3cec2f-…` and bridged (bridge event `2cb81811-…`; `followup`, `succeeded`, attempt 1) into `lead_responses` **version 3** `2a2724fb-ad42-4885-b133-2b9e7e23ff01` (parent `85392b00-…`; **latest**; `message_count` 7; after Message #4; Lead Responded; no CSR notes; `conversation_raw` contains both the closing message and his acknowledgment). v2 `85392b00-…` is now `is_latest_version = false`; v1–v3 are the only versions. STEC's automatic `pipeline_stage` remains "Lead Responded" — that is STEC's own field, not this CRM's classification, and was not changed. **Do not submit a manual CSR entry.**
+
 **Dates/times:** Dripify display times as supplied by the user. Timezone not verified; no UTC conversion is recorded here.
 
 **`next_action_date` choice:** 2026-10-31 is an **internal review checkpoint only** — five days after the follow-up, matching the MEDIUM practice. It is not a date Rodney agreed to and does not schedule any outbound message. *[Superseded 2026-10-27: he answered and the exchange was closed — checkpoint cleared; see Disposition below.]*
@@ -48,6 +50,19 @@ A reported **allocation-of-responsibility** finding — not direct evidence of c
 - **CRC / Product A:** `CRC_INTRODUCED=false` · `CRC_LINK_SENT=false` · `CRC_USAGE_VERIFIED=false`. No CRC link; Product A not named or offered — no pilot invitation and no rejection.
 
 ## Interaction log (reverse-chronological)
+
+### 2026-10-27 — Rodney's final acknowledgment — inbound (22:00 as displayed)
+
+Inbound on LinkedIn / Dripify, replying to the 10:22 closing message. Logged verbatim (no punctuation added). Date inferred from the operator's 2026-10-28 Dripify view showing it under "Yesterday"; timezone not verified. Logged 2026-10-28; confirmed in STEC (v3 above).
+
+**Rodney (exact):**
+
+```
+You are welcome Yu
+```
+
+- **Classification:** polite acknowledgment of SI8's thanks. Not new rights-related pain, Product A or beta interest, purchase intent, or a request for more information; no question is outstanding and it does not reopen the conversation.
+- **Unchanged:** stage `nurturing`; discovery exchange completed; no next action, no urgency, no proactive follow-up. His earlier substantive report (studios he works with have legal teams supervising which AI tools are used under which licences — his account, not verified) stands as recorded below. `last_contacted` stays 2026-10-27 — it tracks SI8's outbound contact, and no SI8 message was sent after the 10:22 closing message.
 
 ### 2026-10-27 — closing message — SENT (10:22 as displayed in Dripify)
 
