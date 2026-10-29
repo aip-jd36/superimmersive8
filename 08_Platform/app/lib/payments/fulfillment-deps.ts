@@ -19,7 +19,8 @@ const parseJsonb = (val: unknown, fallback: any) => {
   return val
 }
 
-async function generateFromSubmission(sub: FulfillmentSubmission): Promise<void> {
+/** Exported for the CR-PDF-DECLARATIONS-1 wiring test only. */
+export async function generateFromSubmission(sub: FulfillmentSubmission): Promise<void> {
   await generateCreatorRecordPDF({
     submissionId: sub.id,
     filmmakerName: sub.filmmaker_name || 'Unknown',
@@ -29,6 +30,8 @@ async function generateFromSubmission(sub: FulfillmentSubmission): Promise<void>
     likenessConfirmation: parseJsonb(sub.likeness_confirmation, {}),
     ipConfirmation: parseJsonb(sub.ip_confirmation, {}),
     territory: sub.territory_preferences || 'Global',
+    custodianDeclaration: sub.custodian_declaration,
+    indemnificationConfirmed: sub.indemnification_confirmed,
   })
 }
 

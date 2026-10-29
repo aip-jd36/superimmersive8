@@ -69,7 +69,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: 'Stored document does not match its record; nothing was changed.', status: 'integrity_conflict' }, { status: 500 })
     }
 
-    // Check if already generated — admin can force-regenerate by passing ?force=true
+    // Check if already generated. ?force=true no longer regenerates an issued legacy PDF (CR-PDF-DECLARATIONS-1C, below).
     const forceRegenerate = new URL(request.url).searchParams.get('force') === 'true'
     const { data: existing } = await supabaseAdmin
       .from('rights_packages')
@@ -78,7 +78,16 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       .maybeSingle()
 
     if (existing?.document_url && !forceRegenerate) {
-      return NextResponse.json({ error: 'Creator Record PDF already exists. Use ?force=true to regenerate.', documentUrl: existing.document_url }, { status: 400 })
+      return NextResponse.json({ error: 'Creator Record PDF already exists. It is not regenerated automatically; operator review is required.', documentUrl: existing.document_url }, { status: 400 })
+    }
+
+    // CR-PDF-DECLARATIONS-1C: an already-issued legacy PDF is never regenerated automatically,
+    // whatever its declaration flags: regenerating would change a document the creator may already hold.
+    if (existing?.document_url) {
+      return NextResponse.json({
+        error: 'This Creator Record PDF has already been issued and is not regenerated automatically. Nothing was changed; operator review is required.',
+        status: 'regeneration_review_required',
+      }, { status: 409 })
     }
 
     // Parse JSONB fields — handle both string (legacy) and already-parsed (JSONB) cases
@@ -98,6 +107,8 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       likenessConfirmation,
       ipConfirmation,
       territory: submission.territory_preferences || submission.territory || 'Global',
+      custodianDeclaration: submission.custodian_declaration,
+      indemnificationConfirmed: submission.indemnification_confirmed,
     })
 
     if (!pdfUrl) {

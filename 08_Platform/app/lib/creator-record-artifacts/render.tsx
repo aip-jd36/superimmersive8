@@ -39,6 +39,9 @@ export function creatorRecordPdfData(sub: FulfillmentSubmission, recordId: strin
     likenessConfirmation: parseJsonb(sub.likeness_confirmation, {}),
     ipConfirmation: parseJsonb(sub.ip_confirmation, {}),
     territory: sub.territory_preferences || 'Global',
+    // CR-PDF-DECLARATIONS-1: passed as recorded; the renderer treats anything but strict true as not recorded.
+    custodianDeclaration: sub.custodian_declaration,
+    indemnificationConfirmed: sub.indemnification_confirmed,
   }
 }
 

@@ -89,7 +89,7 @@ describe('initial issuance', () => {
     const r = await issueCreatorRecordArtifact(SUB, deps())
     expect(r.outcome).toBe('issued')
     const row = (await table.find(SUB))!
-    expect(row).toEqual(expect.objectContaining({ status: 'issued', record_id: 'CR-2026-3F2A9C10', uat: true, generator_version: 'legacy-creator-record-pdf-v1' }))
+    expect(row).toEqual(expect.objectContaining({ status: 'issued', record_id: 'CR-2026-3F2A9C10', uat: true, generator_version: 'legacy-creator-record-pdf-v2' }))
     expect(row.storage_path).toBe(`${SUB}/${row.attempt_id}.pdf`)
     expect(row.sha256).toBe(sha256Hex(objects.objects.get(row.storage_path)!))
     expect(row.byte_size).toBe(objects.objects.get(row.storage_path)!.byteLength)

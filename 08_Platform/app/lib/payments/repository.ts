@@ -58,6 +58,9 @@ export interface FulfillmentSubmission {
   likeness_confirmation: unknown
   ip_confirmation: unknown
   territory_preferences: string | null
+  /** CR-PDF-DECLARATIONS-1: as recorded. Optional so an older caller degrades to "not recorded", never to a declaration. */
+  custodian_declaration?: boolean | null
+  indemnification_confirmed?: boolean | null
 }
 
 const firstRow = (data: unknown) => (Array.isArray(data) ? data[0] : data) as Record<string, any> | undefined
@@ -183,7 +186,7 @@ export async function listAttention(limit: number): Promise<Record<string, any>[
 export async function loadFulfillmentSubmission(submissionId: string): Promise<FulfillmentSubmission | null> {
   const { data, error } = await supabaseAdmin
     .from('submissions')
-    .select('id, user_id, tier, status, title, filmmaker_name, tools_used, authorship_statement, likeness_confirmation, ip_confirmation, territory_preferences')
+    .select('id, user_id, tier, status, title, filmmaker_name, tools_used, authorship_statement, likeness_confirmation, ip_confirmation, territory_preferences, custodian_declaration, indemnification_confirmed')
     .eq('id', submissionId)
     .maybeSingle()
   if (error) throw new PaymentLedgerError('load submission', error.code)

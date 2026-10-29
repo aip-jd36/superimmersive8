@@ -1,5 +1,9 @@
 import React from 'react'
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
+import {
+  DECLARATION_RECORDED_STATUS, DECLARATION_WORDING_LABEL, TOOL_RECEIPTS_NOTICE, accuracyWarrantyBlock, custodianDeclarationBlock,
+  type DeclarationBlock,
+} from './creator-record-declarations'
 
 const styles = StyleSheet.create({
   page: {
@@ -190,9 +194,27 @@ interface CreatorRecordData {
     no_trademarked_ip?: boolean
   }
   territory?: string
+  /** submissions.custodian_declaration as recorded; only strict `true` renders a declaration (CR-PDF-DECLARATIONS-1). */
+  custodianDeclaration?: boolean | null
+  /** submissions.indemnification_confirmed as recorded; only strict `true` renders a warranty (CR-PDF-DECLARATIONS-1). */
+  indemnificationConfirmed?: boolean | null
 }
 
+const DeclarationBody: React.FC<{ block: DeclarationBlock }> = ({ block }) =>
+  block.kind === 'quote' ? (
+    <View style={styles.attestBox}>
+      <Text style={styles.checkLabel}>{DECLARATION_RECORDED_STATUS}</Text>
+      <Text style={[styles.checkLabel, { marginTop: 4, color: '#6b7280' }]}>{DECLARATION_WORDING_LABEL}</Text>
+      <Text style={[styles.attestText, { marginTop: 4 }]}>{`“${block.text}”`}</Text>
+    </View>
+  ) : (
+    <Text style={styles.checkLabel}>{block.text}</Text>
+  )
+
 export const CreatorRecordPDF: React.FC<{ data: CreatorRecordData }> = ({ data }) => {
+  const custodianBlock = custodianDeclarationBlock(data.custodianDeclaration)
+  const accuracyBlock = accuracyWarrantyBlock(data.indemnificationConfirmed)
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
@@ -302,9 +324,7 @@ export const CreatorRecordPDF: React.FC<{ data: CreatorRecordData }> = ({ data }
             <Text style={styles.fieldValue}>No AI tools declared.</Text>
           )}
           <View style={styles.noticeBox}>
-            <Text style={styles.noticeText}>
-              Tool receipts are not verified by SI8 for Creator Record tier. Creator warrants they retain receipts and will produce them if legally challenged.
-            </Text>
+            <Text style={styles.noticeText}>{TOOL_RECEIPTS_NOTICE}</Text>
           </View>
         </View>
 
@@ -363,21 +383,13 @@ export const CreatorRecordPDF: React.FC<{ data: CreatorRecordData }> = ({ data }
         {/* Evidence Custodian */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>5. Evidence Custodian Declaration</Text>
-          <View style={styles.attestBox}>
-            <Text style={styles.attestText}>
-              Creator warrants that they retain all AI-generated prompt logs, tool receipts, and production records internally and will produce them upon request if this content is ever subject to legal challenge.
-            </Text>
-          </View>
+          <DeclarationBody block={custodianBlock} />
         </View>
 
-        {/* Indemnification */}
+        {/* Accuracy Warranty & Indemnification */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>6. Indemnification Warranty</Text>
-          <View style={styles.attestBox}>
-            <Text style={styles.attestText}>
-              Creator warrants the accuracy of all disclosures in this record and agrees to indemnify and hold harmless SuperImmersive 8 (PMF Strategy Inc. d/b/a SuperImmersive 8) from any third-party claims arising from inaccurate or incomplete disclosures.
-            </Text>
-          </View>
+          <Text style={styles.sectionTitle}>6. Accuracy Warranty & Indemnification</Text>
+          <DeclarationBody block={accuracyBlock} />
         </View>
 
         {/* Upgrade Notice */}

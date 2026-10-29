@@ -2,6 +2,11 @@
 const config = {
   preset: 'ts-jest',
   testEnvironment: 'node',
+  // tsconfig.json uses "jsx": "preserve" for Next.js; tests compile JSX themselves so a
+  // .tsx module (e.g. the Creator Record PDF renderer) can be imported (CR-PDF-DECLARATIONS-1).
+  transform: {
+    '^.+\\.tsx?$': ['ts-jest', { tsconfig: { jsx: 'react-jsx' } }],
+  },
   moduleNameMapper: {
     // Stub the Supabase admin client BEFORE the @/ alias so this takes
     // precedence over the catch-all alias below.

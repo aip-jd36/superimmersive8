@@ -34,8 +34,11 @@ export const CREATOR_RECORDS_BUCKET = 'creator-records'
 export const ARTIFACTS_TABLE = 'creator_record_artifacts'
 export const UAT_ALLOWLIST_TABLE = 'creator_record_artifact_uat'
 
-/** Identifies the renderer that produced the bytes; recorded on every artifact. */
-export const ARTIFACT_GENERATOR_VERSION = 'legacy-creator-record-pdf-v1'
+/**
+ * Identifies the renderer that produced the bytes; recorded on every artifact.
+ * v1: fixed declaration wording. v2 (CR-PDF-DECLARATIONS-1): declarations rendered from the recorded flags.
+ */
+export const ARTIFACT_GENERATOR_VERSION = 'legacy-creator-record-pdf-v2'
 
 /** Customer-facing record id, fixed at the first attempt: CR-{year}-{first 8 hex of the submission id}. */
 export function recordIdFor(submissionId: string, now: Date): string {

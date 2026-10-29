@@ -179,6 +179,12 @@ interface GenerateCreatorRecordParams {
   likenessConfirmation?: Record<string, boolean>
   ipConfirmation?: Record<string, boolean>
   territory?: string
+  /**
+   * CR-PDF-DECLARATIONS-1: submissions.custodian_declaration / indemnification_confirmed as recorded.
+   * Required keys, so every caller has to pass the recorded value; only strict true renders a declaration.
+   */
+  custodianDeclaration: boolean | null | undefined
+  indemnificationConfirmed: boolean | null | undefined
 }
 
 /**
@@ -207,6 +213,8 @@ export async function generateCreatorRecordPDF(
       likenessConfirmation: params.likenessConfirmation,
       ipConfirmation: params.ipConfirmation,
       territory: params.territory || 'Global',
+      custodianDeclaration: params.custodianDeclaration,
+      indemnificationConfirmed: params.indemnificationConfirmed,
     }
 
     // Generate PDF stream
