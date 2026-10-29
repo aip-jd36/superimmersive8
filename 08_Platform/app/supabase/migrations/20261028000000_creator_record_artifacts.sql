@@ -8,6 +8,9 @@
 -- 3. `creator_record_artifact_uat`: the server-side rollout allowlist. Until
 --    cutover, ONLY submissions listed here use the private path; every other
 --    Creator Record keeps the existing (legacy) path unchanged.
+-- 4. Explicit least-privilege grants on both tables (see "Privileges" below):
+--    anon and authenticated get nothing; service_role gets only what the code
+--    uses; nobody but the owner can TRUNCATE.
 --
 -- Nothing existing is altered: no change to `documents`, `rights_packages`,
 -- payment tables, policies or historical objects.
@@ -93,3 +96,22 @@ CREATE TABLE IF NOT EXISTS public.creator_record_artifact_uat (
 
 ALTER TABLE public.creator_record_artifact_uat ENABLE ROW LEVEL SECURITY;
 -- No policies: service role only. Rows are added by the operator in the SQL editor.
+
+-- Privileges (CR-ARTIFACT-1J): least privilege, explicit. Deny everyone first,
+-- including Supabase's default grants (ALL on new tables and EXECUTE on new
+-- functions to anon, authenticated and service_role), then grant the server
+-- role only what lib/creator-record-artifacts/store.ts uses:
+--   creator_record_artifacts     SELECT, INSERT, UPDATE  (find, status and delivery
+--                                reads; insert a pending row; takeover and
+--                                mark-issued compare-and-swap). Never DELETE,
+--                                TRUNCATE, REFERENCES or TRIGGER.
+--   creator_record_artifact_uat  SELECT                  (the rollout gate). Rows are
+--                                written only by the operator (the table owner).
+-- TRUNCATE fires no row trigger, so the immutability guard cannot cover it; only
+-- the table owner holds it. The guard function is a trigger function only: a
+-- trigger does not check EXECUTE when it fires, so no role needs it.
+REVOKE ALL ON TABLE public.creator_record_artifacts FROM PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON TABLE public.creator_record_artifact_uat FROM PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON FUNCTION public.creator_record_artifacts_guard() FROM PUBLIC, anon, authenticated, service_role;
+GRANT SELECT, INSERT, UPDATE ON TABLE public.creator_record_artifacts TO service_role;
+GRANT SELECT ON TABLE public.creator_record_artifact_uat TO service_role;

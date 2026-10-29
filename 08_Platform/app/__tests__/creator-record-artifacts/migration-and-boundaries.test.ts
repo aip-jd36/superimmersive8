@@ -42,6 +42,26 @@ describe('migration (additive, private)', () => {
     expect(code).toMatch(/IF OLD\.status = 'issued' THEN\s+RAISE EXCEPTION 'issued creator record artifacts are immutable'/)
   })
 
+  test('CR-ARTIFACT-1J: least privilege — revoke everything from every API role, then grant service_role only what the code uses', () => {
+    const grants = Array.from(code.matchAll(/^\s*(REVOKE|GRANT)\b[^;]*;/gim)).map((m) => m[0].trim().replace(/\s+/g, ' '))
+    expect(grants).toEqual([
+      'REVOKE ALL ON TABLE public.creator_record_artifacts FROM PUBLIC, anon, authenticated, service_role;',
+      'REVOKE ALL ON TABLE public.creator_record_artifact_uat FROM PUBLIC, anon, authenticated, service_role;',
+      'REVOKE ALL ON FUNCTION public.creator_record_artifacts_guard() FROM PUBLIC, anon, authenticated, service_role;',
+      'GRANT SELECT, INSERT, UPDATE ON TABLE public.creator_record_artifacts TO service_role;',
+      'GRANT SELECT ON TABLE public.creator_record_artifact_uat TO service_role;',
+    ])
+    // The revokes come after every CREATE they apply to, so default grants are removed, not pre-empted.
+    expect(code.indexOf('REVOKE ALL ON TABLE public.creator_record_artifact_uat')).toBeGreaterThan(code.indexOf('CREATE TABLE IF NOT EXISTS public.creator_record_artifact_uat'))
+    expect(code.indexOf('REVOKE ALL ON FUNCTION')).toBeGreaterThan(code.indexOf('CREATE OR REPLACE FUNCTION public.creator_record_artifacts_guard'))
+  })
+
+  test('the application never deletes, upserts or writes the allowlist (so the grant set above is sufficient)', () => {
+    const store = read('lib/creator-record-artifacts/store.ts')
+    expect(store).not.toMatch(/\.delete\(|\.upsert\(/)
+    expect(store).not.toMatch(/from\(UAT_ALLOWLIST_TABLE\)\s*\.(insert|update)/)
+  })
+
   test('it is the newest migration (applies after every existing one)', () => {
     const files = readdirSync(path.join(APP, 'supabase', 'migrations')).filter((f) => f.endsWith('.sql')).sort()
     expect(files[files.length - 1]).toBe('20261028000000_creator_record_artifacts.sql')
