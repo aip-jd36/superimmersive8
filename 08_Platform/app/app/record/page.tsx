@@ -20,7 +20,7 @@ const countWords = (text: string): number =>
   text.trim().split(/\s+/).filter(Boolean).length
 
 const SECTION_NAMES: Record<number, string> = {
-  1: 'Tier Selection',
+  1: 'Record Type',
   2: 'Production Details',
   3: 'Tool Disclosure',
   4: 'Human Authorship',
@@ -269,7 +269,7 @@ export default function SubmitPage() {
     // CR-CERTIFIED-PATH-1B: /record creates Creator Record submissions only, and never defaults a tier.
     // The server enforces the same rule (lib/submissions/build-intake-insert.ts).
     if (selectedTier !== 'creator_record') {
-      setTierError('Please select a verification tier to continue')
+      setTierError('Please select Creator Record to continue')
       setCurrentSection(1)
       return
     }
@@ -432,13 +432,13 @@ export default function SubmitPage() {
                   alert('Please fill out all required fields.')
                 })} className="space-y-8">
 
-                  {/* ── Section 1: Tier Selection ── */}
+                  {/* ── Section 1: Record Type ── */}
                   {currentSection === 1 && (
                     <div className="space-y-6">
-                      <h3 className="text-lg font-semibold">1. Choose Your Verification Tier</h3>
+                      <h3 className="text-lg font-semibold">1. Choose Your Record Type</h3>
 
                       <div className="space-y-3">
-                        <Label>Which verification do you need? *</Label>
+                        <Label>Self-attested documentation of your production *</Label>
 
                         <div
                           onClick={() => { setSelectedTier('creator_record'); setSubmissionMode('creator') }}
@@ -462,7 +462,7 @@ export default function SubmitPage() {
                         type="button"
                         onClick={() => {
                           if (!selectedTier) {
-                            setTierError('Please select a verification tier to continue')
+                            setTierError('Please select Creator Record to continue')
                           } else {
                             setTierError(null)
                             setCurrentSection(2)

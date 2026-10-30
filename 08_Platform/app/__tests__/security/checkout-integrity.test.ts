@@ -129,6 +129,33 @@ describe('tier, price and email come from the persisted submission', () => {
   })
 })
 
+describe('customer-visible product copy (CR-CHECKOUT-CLAIMS-1A)', () => {
+  // Affirmative clearance / verification / retired-product claims. The approved copy contains only
+  // explicit negations ("Not a commercial clearance assessment", "Does not certify commercial clearance").
+  const MISLEADING = /cleared for commercial use|commercial clearance verification|rights verified|chain of title|\bverified\b|commercial audit/i
+
+  it.each([
+    ['creator_record', 2900, 'Creator Record — Self-Attested Documentation',
+      'A self-attested record of information you provide about your AI-video production. Not a commercial clearance assessment.'],
+    ['si8_certified', 49900, 'SI8 Commercial Assurance Assessment',
+      'Human review of submitted project information and supporting evidence, with documented findings and limitations. Does not certify commercial clearance.'],
+  ])('%s: price %i, exact name and description, no clearance claim', async (tier, cents, name, description) => {
+    standard(row({ tier }))
+    const res = await POST(req({ submissionId: SUB_ID }))
+    expect(res.status).toBe(200)
+    const [params] = create.mock.calls[0]
+    expect(params.line_items).toEqual([{ price_data: { currency: 'usd', product_data: { name, description }, unit_amount: cents }, quantity: 1 }])
+    expect(params.metadata).toEqual({ submissionId: SUB_ID, tier, checkout_contract: 'caa-3b-v2' })
+    expect(`${name} ${description}`).not.toMatch(MISLEADING)
+  })
+
+  it('the route source no longer contains the retired shared Certified copy, and has no copy for the legacy tier', () => {
+    const src = require('fs').readFileSync(require('path').join(__dirname, '..', '..', 'app/api/checkout/create-session/route.ts'), 'utf8')
+    expect(src).not.toMatch(/CERTIFIED_COPY|Commercial Clearance Verification|CLEARED FOR COMMERCIAL USE|Rights Verified|Chain of Title/)
+    expect(src).not.toMatch(/^\s*certified:/m)
+  })
+})
+
 describe('legacy certified tier (CR-CERTIFIED-PATH-1B)', () => {
   const LEGACY = { error: 'This submission type is no longer available for checkout.', code: 'legacy_tier_not_offered' }
   const expectNoStripeNoPriceNoWrite = () => {

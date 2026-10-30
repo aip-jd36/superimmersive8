@@ -235,9 +235,9 @@ export default function AddToolModal({
                 <option value="Team">Team</option>
                 <option value="Enterprise">Enterprise</option>
                 <option value="Standard">Standard</option>
-                <option value="Free">Free (not eligible for commercial use)</option>
+                <option value="Free">Free</option>
               </select>
-              <p className="text-xs text-gray-500 mt-1">Commercial plan required for SI8 Certified approval</p>
+              <p className="text-xs text-gray-500 mt-1">Commercial-use terms vary by provider and plan.</p>
               {errors.planType && <p className="text-sm text-red-500 mt-1">{errors.planType}</p>}
             </div>
 
@@ -262,7 +262,7 @@ export default function AddToolModal({
                 description={
                   requireReceipt
                     ? 'Upload proof of paid commercial plan — PDF, JPG, or PNG (max 10MB). Required for SI8 Certified.'
-                    : 'Optional for Creator Record. Required if upgrading to SI8 Certified later.'
+                    : 'Optional for Creator Record — PDF, JPG, or PNG (max 10MB).'
                 }
                 accept="image/jpeg,image/png,application/pdf"
                 maxSize={10 * 1024 * 1024}

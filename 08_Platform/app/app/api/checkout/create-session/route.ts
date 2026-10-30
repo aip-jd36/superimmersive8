@@ -23,17 +23,20 @@ import { LEGACY_SUBMISSION_TIER } from '@/lib/submissions/build-intake-insert'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-const CERTIFIED_COPY = {
-  name: 'SI8 Certified — Commercial Clearance Verification',
-  description: 'Rights Verified verification service — 90-minute human review, CLEARED FOR COMMERCIAL USE PDF',
-}
+/**
+ * Customer-visible Stripe Checkout copy, per tier (CR-CHECKOUT-CLAIMS-1A). Only tiers that can be bought
+ * today are listed: a tier without copy fails closed ("Unsupported submission tier"), so the legacy
+ * `certified` tier has none and can never be shown, or sold, under the old clearance wording.
+ */
 const PRODUCT_COPY: Record<string, { name: string; description: string }> = {
   creator_record: {
     name: 'Creator Record — Self-Attested Documentation',
-    description: 'Structured Chain of Title record (self-attested, not for commercial use) — instant automated delivery',
+    description: 'A self-attested record of information you provide about your AI-video production. Not a commercial clearance assessment.',
   },
-  certified: CERTIFIED_COPY,
-  si8_certified: CERTIFIED_COPY,
+  si8_certified: {
+    name: 'SI8 Commercial Assurance Assessment',
+    description: 'Human review of submitted project information and supporting evidence, with documented findings and limitations. Does not certify commercial clearance.',
+  },
 }
 
 const NOT_FOUND = () => NextResponse.json({ error: 'Submission not found' }, { status: 404 })
