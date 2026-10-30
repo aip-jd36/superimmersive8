@@ -186,8 +186,8 @@ describe('private-artifact mapping (render.tsx) and versioning', () => {
     expect(t).not.toContain(DECLARATION_RECORDED_STATUS)
   })
 
-  test('new artifacts are recorded as generator v2', () => {
-    expect(ARTIFACT_GENERATOR_VERSION).toBe('legacy-creator-record-pdf-v2')
+  test('new artifacts are recorded with the current generator (v3 since CR-PDF-CLAIMS-1C)', () => {
+    expect(ARTIFACT_GENERATOR_VERSION).toBe('legacy-creator-record-pdf-v3')
   })
 })
 

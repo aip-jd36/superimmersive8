@@ -1,6 +1,7 @@
 import { Resend } from 'resend'
 import { escapeHtml } from '@/lib/crc-engine/results-email-template'
 import { sendAndClassify, type PaymentEmailOutcome } from '@/lib/payments/email-outcome'
+import { ASSESSMENT_NOTICE, ASSESSMENT_NOTICE_HEADING } from '@/lib/pdf/creator-record-claims'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
@@ -62,7 +63,7 @@ export async function sendSubmissionReceivedEmail(
       subject: `Submission received: ${filmTitle}`,
       html: `
         <h2>Hi ${creatorName},</h2>
-        <p>Thank you for submitting <strong>${filmTitle}</strong> for Rights Verified verification.</p>
+        <p>Thank you for submitting <strong>${filmTitle}</strong> for review by SI8.</p>
         <p>We'll review your submission within 5 business days and notify you when it's approved.</p>
         <p>You can track the status of your submission in your <a href="${process.env.NEXT_PUBLIC_SITE_URL}/dashboard">dashboard</a>.</p>
         <br>
@@ -87,17 +88,34 @@ export async function sendSubmissionReceivedEmail(
   }
 }
 
-// SI8 Certified approval email (sent by admin after human review)
+/**
+ * What an approval establishes (CR-PDF-CLAIMS-1C.1). Only the admin approve route sends this email:
+ *   - 'assessment_signed_off': an si8_certified submission whose Commercial Assurance Assessment has an
+ *     ACTIVE sign-off — the route refuses to approve that tier otherwise. Only this basis mentions a review.
+ *   - 'status_only': any other tier. Approval is an admin status change; no review, sign-off or verification
+ *     is established, so none is claimed and no risk rating is shown.
+ * The default is the weaker claim.
+ */
+export type ApprovalBasis = 'assessment_signed_off' | 'status_only'
+
 export async function sendSubmissionApprovedEmail(
   creatorName: string,
   filmTitle: string,
   dashboardUrl: string,
   creatorEmail: string,
-  riskRating?: string
+  riskRating?: string,
+  basis: ApprovalBasis = 'status_only'
 ) {
-  const riskLabel = riskRating
+  const signedOff = basis === 'assessment_signed_off'
+  const riskLabel = signedOff && riskRating
     ? riskRating.charAt(0).toUpperCase() + riskRating.slice(1)
     : null
+  const statusLine = signedOff
+    ? `Your submission <strong>${filmTitle}</strong> has been approved. SI8's human-reviewed Commercial Assurance Assessment of this submission has been signed off.`
+    : `The status of your submission <strong>${filmTitle}</strong> is now <strong>Approved</strong>. This status is not a review, verification or certification by SI8.`
+  const nextLine = signedOff
+    ? "Your Assessment Report is provided by the SI8 team. The Assessment is not legal advice and is not a guarantee of legal clearance or commercial use."
+    : 'Any document for this submission is shown in your dashboard. It is not legal advice and is not a guarantee of legal clearance or commercial use.'
   const riskColor: Record<string, string> = {
     low: '#166534', standard: '#1e40af', elevated: '#92400e', high: '#991b1b',
   }
@@ -109,10 +127,10 @@ export async function sendSubmissionApprovedEmail(
     await resend.emails.send({
       from: FROM_EMAIL,
       to: creatorEmail,
-      subject: `Approved: ${filmTitle} — Chain of Title ready`,
+      subject: `Approved: ${filmTitle}`,
       html: `
-        <h2>Congratulations, ${creatorName}!</h2>
-        <p>Your submission <strong>${filmTitle}</strong> has passed SI8's commercial audit and is now <strong>SI8 VERIFIED · COMMERCIAL AUDIT PASSED</strong>.</p>
+        <h2>Hi ${creatorName},</h2>
+        <p>${statusLine}</p>
         ${riskLabel ? `
         <p style="margin: 16px 0;">
           <strong>Your Risk Rating:</strong>
@@ -120,10 +138,7 @@ export async function sendSubmissionApprovedEmail(
         </p>
         ` : ''}
         <h3>What's Next?</h3>
-        <ol>
-          <li><strong>Download your Chain of Title PDF</strong> — Your SI8 Verified documentation is ready in your dashboard</li>
-          <li><strong>Optional: List in SI8 Catalog</strong> — Opt in to earn licensing revenue (you keep 80%)</li>
-        </ol>
+        <p>${nextLine}</p>
         <p><a href="${dashboardUrl}" style="background: #818cf8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">View Your Dashboard</a></p>
         <br>
         <p>Best,<br>The SI8 Team</p>
@@ -151,8 +166,8 @@ export async function sendCreatorRecordApprovedEmail(
         <h2>Hi ${creatorName},</h2>
         <p>Your Creator Record for <strong>${filmTitle}</strong> has been issued and your self-attested documentation PDF is ready to download.</p>
         <p><strong>Important:</strong> Your Creator Record is stamped <em>"SELF-ATTESTED — NOT FOR COMMERCIAL USE."</em> It is suitable for personal records and portfolio documentation only.</p>
-        <h3>Want to use this film commercially?</h3>
-        <p>Upgrade to <strong>SI8 Certified ($499)</strong> for a human-reviewed Chain of Title stamped "CLEARED FOR COMMERCIAL USE." Required for brand placements, agency deliverables, streaming submissions, and E&O insurance.</p>
+        <h3>${ASSESSMENT_NOTICE_HEADING}</h3>
+        <p>${ASSESSMENT_NOTICE}</p>
         <p><a href="${dashboardUrl}" style="background: #d97706; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Download Your Creator Record PDF</a></p>
         <br>
         <p>Best,<br>The SI8 Team</p>
@@ -191,7 +206,7 @@ export async function sendSubmissionRejectedEmail(
       subject: `Submission Update: ${filmTitle}`,
       html: `
         <h2>Hi ${creatorName},</h2>
-        <p>After reviewing your submission <strong>${filmTitle}</strong>, we're unable to approve it for Rights Verified at this time.</p>
+        <p>After reviewing your submission <strong>${filmTitle}</strong>, we're unable to approve it at this time.</p>
         <h3>Reason:</h3>
         <p>${reason}</p>
         <p>You can make corrections and resubmit. Please contact us at <a href="mailto:${ADMIN_EMAIL}">${ADMIN_EMAIL}</a> if you have questions.</p>
@@ -508,8 +523,8 @@ export async function sendCreatorRecordReadyPaymentEmail(p: {
         <h2>Hi ${name},</h2>
         <p>Your Creator Record for <strong>${title}</strong> has been issued and your self-attested documentation PDF is ready to download.</p>
         <p><strong>Important:</strong> Your Creator Record is stamped <em>"SELF-ATTESTED — NOT FOR COMMERCIAL USE."</em> It is suitable for personal records and portfolio documentation only.</p>
-        <h3>Want to use this film commercially?</h3>
-        <p>Upgrade to <strong>SI8 Certified ($499)</strong> for a human-reviewed Chain of Title stamped "CLEARED FOR COMMERCIAL USE." Required for brand placements, agency deliverables, streaming submissions, and E&O insurance.</p>
+        <h3>${ASSESSMENT_NOTICE_HEADING}</h3>
+        <p>${ASSESSMENT_NOTICE}</p>
         <p><a href="${p.dashboardUrl}" style="background: #d97706; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Download Your Creator Record PDF</a></p>
         <br>
         <p>Best,<br>The SI8 Team</p>
@@ -528,7 +543,7 @@ export async function sendCertifiedPaymentReceivedEmail(p: {
     subject: `Submission received: ${p.filmTitle}`,
     html: `
         <h2>Hi ${name},</h2>
-        <p>Thank you for submitting <strong>${title}</strong> for Rights Verified verification.</p>
+        <p>Thank you for submitting <strong>${title}</strong> for review by SI8.</p>
         <p>We'll review your submission within 5 business days and notify you when it's approved.</p>
         <p>You can track the status of your submission in your <a href="${p.dashboardUrl}">dashboard</a>.</p>
         <br>

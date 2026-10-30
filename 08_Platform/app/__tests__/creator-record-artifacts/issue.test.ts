@@ -24,7 +24,7 @@ class FakeTable implements ArtifactTable {
     this.rows.set(full.id, full)
     return { result: 'inserted' as const, row: { ...full } }
   }
-  async takeOver(id: string, expected: string, next: Pick<ArtifactRow, 'attempt_id' | 'storage_path' | 'sha256' | 'byte_size'>) {
+  async takeOver(id: string, expected: string, next: Pick<ArtifactRow, 'attempt_id' | 'storage_path' | 'sha256' | 'byte_size' | 'generator_version'>) {
     const r = this.rows.get(id)
     if (!r || r.status !== 'pending' || r.attempt_id !== expected) return false
     this.rows.set(id, { ...r, ...next })
@@ -89,7 +89,7 @@ describe('initial issuance', () => {
     const r = await issueCreatorRecordArtifact(SUB, deps())
     expect(r.outcome).toBe('issued')
     const row = (await table.find(SUB))!
-    expect(row).toEqual(expect.objectContaining({ status: 'issued', record_id: 'CR-2026-3F2A9C10', uat: true, generator_version: 'legacy-creator-record-pdf-v2' }))
+    expect(row).toEqual(expect.objectContaining({ status: 'issued', record_id: 'CR-2026-3F2A9C10', uat: true, generator_version: 'legacy-creator-record-pdf-v3' }))
     expect(row.storage_path).toBe(`${SUB}/${row.attempt_id}.pdf`)
     expect(row.sha256).toBe(sha256Hex(objects.objects.get(row.storage_path)!))
     expect(row.byte_size).toBe(objects.objects.get(row.storage_path)!.byteLength)
@@ -238,9 +238,39 @@ describe('immutability and integrity', () => {
     await issueCreatorRecordArtifact(SUB, deps())
     const issued = (await table.find(SUB))!
     for (let i = 0; i < 3; i++) expect((await issueCreatorRecordArtifact(SUB, deps())).outcome).toBe('already_issued')
-    expect(await table.takeOver(issued.id, issued.attempt_id, { attempt_id: 'x', storage_path: 'y', sha256: 'z', byte_size: 1 })).toBe(false)
+    expect(await table.takeOver(issued.id, issued.attempt_id, { attempt_id: 'x', storage_path: 'y', sha256: 'z', byte_size: 1, generator_version: 'legacy-creator-record-pdf-v3' })).toBe(false)
     expect(await table.markIssued(issued.id, issued.attempt_id, issued.sha256)).toBe(false)
     expect(renders()).toBe(1)
     expect(objects.puts).toHaveLength(1)
+  })
+})
+
+describe('generator provenance (CR-PDF-CLAIMS-1C.1)', () => {
+  const row = (over: Partial<ArtifactRow>): ArtifactRow => ({
+    id: 'art-old', submission_id: SUB, record_id: 'CR-2026-3F2A9C10', attempt_id: '00000000-0000-4000-8000-0000000000aa',
+    storage_path: `${SUB}/00000000-0000-4000-8000-0000000000aa.pdf`, sha256: 'e'.repeat(64), byte_size: 10,
+    generator_version: 'legacy-creator-record-pdf-v2', status: 'pending', uat: true, issued_at: null, ...over,
+  })
+
+  test('a pending row left by an older generator is re-rendered on takeover and records the current generator', async () => {
+    const { table, deps, renders } = setup()
+    table.rows.set('art-old', row({}))
+    expect((await issueCreatorRecordArtifact(SUB, deps())).outcome).toBe('issued')
+    expect(renders()).toBe(1)
+    expect((await table.find(SUB))!.generator_version).toBe('legacy-creator-record-pdf-v3')
+  })
+
+  test('an issued v1 artifact keeps its version, bytes and digest: nothing is re-rendered or rewritten', async () => {
+    const { table, objects, deps, renders } = setup()
+    const bytes = new TextEncoder().encode('%PDF historical v1')
+    const issued = row({ status: 'issued', issued_at: '2026-10-29T00:00:00Z', generator_version: 'legacy-creator-record-pdf-v1', sha256: sha256Hex(bytes), byte_size: bytes.byteLength })
+    table.rows.set('art-old', issued)
+    objects.objects.set(issued.storage_path, bytes)
+    const r = await issueCreatorRecordArtifact(SUB, deps())
+    expect(r.outcome).toBe('already_issued')
+    expect(await table.find(SUB)).toEqual(issued)
+    expect(objects.objects.get(issued.storage_path)).toBe(bytes)
+    expect(renders()).toBe(0)
+    expect(objects.puts).toHaveLength(0)
   })
 })

@@ -93,14 +93,16 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: 'Failed to update submission' }, { status: 500 })
     }
 
-    // Send approval email notification
+    // Send approval email notification. Only si8_certified reaches this point with an ACTIVE assessment
+    // sign-off established (gate above); every other tier is a status change only (CR-PDF-CLAIMS-1C.1).
     const dashboardUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`
     await sendSubmissionApprovedEmail(
       submission.filmmaker_name,
       submission.title,
       dashboardUrl,
       submission.user.email,
-      submission.risk_rating || undefined
+      submission.risk_rating || undefined,
+      submissionCheck?.tier === 'si8_certified' ? 'assessment_signed_off' : 'status_only'
     )
 
     console.log(`Submission ${params.id} approved and email sent to ${submission.user.email}`)

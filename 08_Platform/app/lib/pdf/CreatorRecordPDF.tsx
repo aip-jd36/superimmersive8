@@ -4,6 +4,9 @@ import {
   DECLARATION_RECORDED_STATUS, DECLARATION_WORDING_LABEL, TOOL_RECEIPTS_NOTICE, accuracyWarrantyBlock, custodianDeclarationBlock,
   type DeclarationBlock,
 } from './creator-record-declarations'
+import {
+  ASSESSMENT_NOTICE, ASSESSMENT_NOTICE_HEADING, ASSESSMENT_STAMP_NOTE, LICENSED_CONTENT_LABEL, SELF_ATTESTATION_KEY, SI8_SITE,
+} from './creator-record-claims'
 
 const styles = StyleSheet.create({
   page: {
@@ -227,7 +230,7 @@ export const CreatorRecordPDF: React.FC<{ data: CreatorRecordData }> = ({ data }
   const likenessLicenseNotes = (data.likenessConfirmation as any)?.license_notes
 
   const likenessItems = likenessHasLicense
-    ? [['Licensed content — creator holds rights documentation', true]] as [string, boolean][]
+    ? [[LICENSED_CONTENT_LABEL, true]] as [string, boolean][]
     : [
         ['No real faces or identifiable likenesses', data.likenessConfirmation?.no_real_faces],
         ['No real voices cloned or replicated', data.likenessConfirmation?.no_real_voices],
@@ -239,7 +242,7 @@ export const CreatorRecordPDF: React.FC<{ data: CreatorRecordData }> = ({ data }
   const ipLicenseNotes = (data.ipConfirmation as any)?.license_notes
 
   const ipItems = ipHasLicense
-    ? [['Licensed content — creator holds rights documentation', true]] as [string, boolean][]
+    ? [[LICENSED_CONTENT_LABEL, true]] as [string, boolean][]
     : [
         ['No copyrighted characters or franchises', data.ipConfirmation?.no_copyrighted_characters],
         ['No brand imitation or unauthorized logos', data.ipConfirmation?.no_brand_imitation],
@@ -263,7 +266,7 @@ export const CreatorRecordPDF: React.FC<{ data: CreatorRecordData }> = ({ data }
           <Text style={styles.stampTitle}>SELF-ATTESTED — NOT FOR COMMERCIAL USE</Text>
           <Text style={styles.stampSubtitle}>
             This document is self-attested by the creator. It has not been reviewed by SI8 staff.{'\n'}
-            Upgrade to SI8 Certified ($499) for commercial clearance and human review.
+            {ASSESSMENT_STAMP_NOTE}
           </Text>
         </View>
 
@@ -378,6 +381,7 @@ export const CreatorRecordPDF: React.FC<{ data: CreatorRecordData }> = ({ data }
               Notes: {ipLicenseNotes}
             </Text>
           ) : null}
+          <Text style={[styles.checkLabel, { marginTop: 6, fontSize: 8, color: '#6b7280' }]}>{SELF_ATTESTATION_KEY}</Text>
         </View>
 
         {/* Evidence Custodian */}
@@ -392,14 +396,14 @@ export const CreatorRecordPDF: React.FC<{ data: CreatorRecordData }> = ({ data }
           <DeclarationBody block={accuracyBlock} />
         </View>
 
-        {/* Upgrade Notice */}
+        {/* Commercial Assurance Assessment notice (CR-PDF-CLAIMS-1C) */}
         <View style={styles.noticeBox}>
           <Text style={[styles.noticeText, { fontWeight: 'bold', marginBottom: 3 }]}>
-            Want to use this film commercially?
+            {ASSESSMENT_NOTICE_HEADING}
           </Text>
           <Text style={styles.noticeText}>
-            Upgrade to SI8 Certified ($499) for a human-reviewed Chain of Title stamped "CLEARED FOR COMMERCIAL USE." Required for brand placements, agency deliverables, streaming submissions, and E&O insurance.{'\n'}
-            Visit: www.superimmersive8.com/submit
+            {ASSESSMENT_NOTICE}{'\n'}
+            {SI8_SITE}
           </Text>
         </View>
 
@@ -413,7 +417,7 @@ export const CreatorRecordPDF: React.FC<{ data: CreatorRecordData }> = ({ data }
           </Text>
           <Text style={{ marginTop: 4, fontSize: 7 }}>
             This document has NOT been reviewed by SI8 staff. It does not constitute legal advice, a legal guarantee, or commercial clearance.
-            NOT FOR COMMERCIAL USE without upgrading to SI8 Certified.
+            This document is not for commercial use.
           </Text>
         </View>
       </Page>

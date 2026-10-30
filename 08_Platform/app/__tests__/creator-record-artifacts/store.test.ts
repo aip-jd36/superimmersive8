@@ -107,7 +107,7 @@ describe('artifact table', () => {
 
   test('takeOver and markIssued are compare-and-swap on id + attempt + pending status', async () => {
     nextResult = { data: [{ id: 'x' }], error: null }
-    expect(await artifactTable.takeOver('x', 'old', { attempt_id: 'new', storage_path: 's/new.pdf', sha256: 'a'.repeat(64), byte_size: 2 })).toBe(true)
+    expect(await artifactTable.takeOver('x', 'old', { attempt_id: 'new', storage_path: 's/new.pdf', sha256: 'a'.repeat(64), byte_size: 2, generator_version: 'legacy-creator-record-pdf-v3' })).toBe(true)
     expect(calls.filter((c) => c.op === 'eq').map((c) => c.args)).toEqual([['id', 'x'], ['attempt_id', 'old'], ['status', 'pending']])
     calls.length = 0
     nextResult = { data: [], error: null }

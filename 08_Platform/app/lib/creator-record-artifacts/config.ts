@@ -37,8 +37,11 @@ export const UAT_ALLOWLIST_TABLE = 'creator_record_artifact_uat'
 /**
  * Identifies the renderer that produced the bytes; recorded on every artifact.
  * v1: fixed declaration wording. v2 (CR-PDF-DECLARATIONS-1): declarations rendered from the recorded flags.
+ * v3 (CR-PDF-CLAIMS-1C): customer-facing claims corrected (Assessment notice, status stamp, attestation wording).
+ * A row keeps the version that produced its bytes: issued rows are immutable, and a pending takeover
+ * re-renders and records the current version.
  */
-export const ARTIFACT_GENERATOR_VERSION = 'legacy-creator-record-pdf-v2'
+export const ARTIFACT_GENERATOR_VERSION = 'legacy-creator-record-pdf-v3'
 
 /** Customer-facing record id, fixed at the first attempt: CR-{year}-{first 8 hex of the submission id}. */
 export function recordIdFor(submissionId: string, now: Date): string {

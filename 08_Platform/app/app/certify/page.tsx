@@ -498,7 +498,7 @@ export default function CertifyPage() {
               <div>
                 <CardTitle>SI8 Certified — $499</CardTitle>
                 <CardDescription className="mt-1">
-                  90-minute human review · SI8 VERIFIED · COMMERCIAL AUDIT PASSED
+                  90-minute human review · Commercial Assurance Assessment
                 </CardDescription>
               </div>
               <span className="text-xs font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-800">
@@ -1006,7 +1006,7 @@ export default function CertifyPage() {
                             <div className="flex items-start gap-2">
                               <AlertTriangle className="w-4 h-4 text-yellow-700 flex-shrink-0 mt-0.5" />
                               <p className="text-xs text-yellow-800">
-                                <strong>Fair use is not a guarantee of clearance.</strong> SI8 will document your argument in the Chain of Title, but fair use is a fact-specific legal determination. We strongly recommend obtaining a legal opinion letter from a media attorney before commercial deployment.
+                                <strong>Fair use is not a guarantee of clearance.</strong> SI8 will record your argument in the Assessment, but fair use is a fact-specific legal determination. We strongly recommend obtaining a legal opinion letter from a media attorney before commercial deployment.
                               </p>
                             </div>
                           </div>
@@ -1190,7 +1190,7 @@ export default function CertifyPage() {
                       <div>
                         <Label>Client Name *</Label>
                         <Input value={clientName} onChange={(e) => setClientName(e.target.value)} placeholder="Brand or company name" />
-                        <p className="text-xs text-gray-500 mt-1">Documented in Chain of Title. Used to identify the end client for this submission.</p>
+                        <p className="text-xs text-gray-500 mt-1">Recorded with your submission. Used to identify the end client for this submission.</p>
                       </div>
                       <div>
                         <Label>Intended territory for this campaign (optional)</Label>
@@ -1220,7 +1220,7 @@ export default function CertifyPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">10. Video Link</h3>
                   <p className="text-sm text-gray-600">
-                    Provide a link so our reviewer can watch your submission. This URL is attached to your Chain of Title as the canonical reference for this version of the work.
+                    Provide a link so our reviewer can watch your submission. This URL is recorded as the reference for this version of the work.
                   </p>
                   <div>
                     <Label>Video Screening Link *</Label>
@@ -1262,9 +1262,8 @@ export default function CertifyPage() {
                     <div className="space-y-1 text-sm">
                       {[
                         '90-minute human review by SI8',
-                        'Chain of Title PDF: SI8 VERIFIED · COMMERCIAL AUDIT PASSED',
+                        'Assessment Report of SI8\'s findings (not legal advice or legal clearance)',
                         'Risk Rating output (Low / Standard / Elevated / High)',
-                        'Accepted by brand legal teams and E&O underwriters',
                         'Delivery within 5 business days',
                       ].map((item) => (
                         <div key={item} className="flex items-center gap-2">

@@ -113,7 +113,7 @@ function COTSidebar({
     },
     {
       num: 3,
-      name: 'Rights Verified Sign-off',
+      name: 'Human Review',
       populatedBy: null,
       value: 'Pending human review (5 business days)',
     },
@@ -121,7 +121,7 @@ function COTSidebar({
       num: 4,
       name: 'Commercial Use Authorization',
       populatedBy: null,
-      value: 'Issued on approval: CLEARED FOR COMMERCIAL USE',
+      value: "Not issued — SI8's review is not legal clearance",
     },
     {
       num: 5,
@@ -162,10 +162,10 @@ function COTSidebar({
     <div className="bg-white border border-gray-200 rounded-lg p-4 sticky top-4">
       <div className="flex items-center gap-2 mb-3">
         <FileText className="h-4 w-4 text-amber-600" />
-        <h3 className="text-sm font-semibold text-gray-900">Your Chain of Title</h3>
+        <h3 className="text-sm font-semibold text-gray-900">Your Submission Record</h3>
       </div>
       <p className="text-xs text-gray-500 mb-4">
-        This document is built from your answers. Fields fill in as you complete each section.
+        This record is built from your answers. Fields fill in as you complete each section.
       </p>
       <div className="space-y-2">
         {fields.map((field) => {
@@ -532,13 +532,13 @@ export default function SubmitPage() {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
-                    <CardTitle>Submit for Rights Verified</CardTitle>
+                    <CardTitle>Submit Your Film</CardTitle>
                     <CardDescription className="mt-1">
                       {selectedTier === 'creator_record'
                         ? 'Creator Record — $29 · Self-attested documentation, automated delivery'
                         : selectedTier === 'certified'
-                        ? 'SI8 Certified — $499 · 90-minute human review, cleared for commercial use'
-                        : 'Complete all sections to submit your AI video for verification'}
+                        ? 'SI8 Certified — $499 · 90-minute human review by SI8'
+                        : 'Complete all sections to submit your AI video'}
                     </CardDescription>
                   </div>
                   {selectedTier && (
@@ -602,9 +602,9 @@ export default function SubmitPage() {
                             <div>
                               <div className="font-semibold flex items-center gap-2">
                                 SI8 Certified — $499
-                                <span className="text-xs font-semibold bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full">COMMERCIAL USE</span>
+                                <span className="text-xs font-semibold bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full">HUMAN REVIEW</span>
                               </div>
-                              <div className="text-sm text-gray-600 mt-1">90-minute human review. Cleared for commercial use. Satisfies brand legal teams and E&O insurers.</div>
+                              <div className="text-sm text-gray-600 mt-1">90-minute human review by SI8. Not legal advice or legal clearance.</div>
                               <div className="text-xs text-gray-500 mt-1">Agencies, brands, production houses, streaming submissions</div>
                             </div>
                             <div className={`h-5 w-5 rounded-full border-2 flex-shrink-0 ${selectedTier === 'certified' ? 'border-amber-500 bg-amber-500' : 'border-gray-300'}`} />
@@ -663,7 +663,7 @@ export default function SubmitPage() {
                       <ChainOfTitleCallout
                         fieldNumber={6}
                         fieldName="Category Conflict Log"
-                        description="Your intended use and brand suitability answers populate this field. Buyers and legal teams use it to assess licensing eligibility."
+                        description="Your intended use and brand suitability answers are recorded in this field as you give them."
                       />
 
                       <div>
@@ -740,7 +740,7 @@ export default function SubmitPage() {
                       {/* Brand Safety — Excluded Categories */}
                       <div className="space-y-3 bg-red-50 p-4 rounded-lg border border-red-100">
                         <Label className="text-sm font-semibold text-red-800">Brand Categories — Do NOT Use With</Label>
-                        <p className="text-xs text-red-600">If you have concerns about your content being used with any of these categories, check them here. This is documented in your Chain of Title.</p>
+                        <p className="text-xs text-red-600">If you have concerns about your content being used with any of these categories, check them here. This is recorded with your submission.</p>
                         <div className="grid grid-cols-2 gap-2">
                           {EXCLUDED_CATEGORIES.map((cat) => (
                             <label key={cat} className="flex items-center gap-2 text-sm cursor-pointer">
@@ -771,7 +771,7 @@ export default function SubmitPage() {
                       <ChainOfTitleCallout
                         fieldNumber={1}
                         fieldName="Tool Provenance Log"
-                        description="Every tool you add here is documented with version, plan type, commercial license status, and production dates. This is the core of your Chain of Title."
+                        description="Every tool you add here is recorded with its version, plan type, the commercial-license status you report, and production dates."
                       />
 
                       <p className="text-sm text-gray-600">
@@ -838,8 +838,8 @@ export default function SubmitPage() {
 
                       <ChainOfTitleCallout
                         fieldNumber={3}
-                        fieldName="Rights Verified Sign-off"
-                        description="Your authorship statement is the primary evidence our reviewer uses to assess human creative direction. Quality and specificity directly affect your approval outcome."
+                        fieldName="Human Review Inputs"
+                        description="Your authorship statement is recorded as given. For SI8 Certified submissions, the reviewer uses it to assess human creative direction."
                       />
 
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800 space-y-1">
@@ -925,8 +925,8 @@ export default function SubmitPage() {
 
                       <ChainOfTitleCallout
                         fieldNumber={3}
-                        fieldName="Rights Verified Sign-off"
-                        description="Likeness confirmations are a required pass/fail threshold. Any real person face, voice, or identity without documented consent is a hard rejection."
+                        fieldName="Human Review Inputs"
+                        description="Your likeness confirmations are recorded as given. For SI8 Certified submissions, a real person's face, voice or identity without documented consent prevents approval."
                       />
 
                       <p className="text-sm text-gray-600">Confirm your work contains no unlicensed real person likenesses, or declare your licensed content below.</p>
@@ -1003,8 +1003,8 @@ export default function SubmitPage() {
 
                       <ChainOfTitleCallout
                         fieldNumber={3}
-                        fieldName="Rights Verified Sign-off"
-                        description="IP conflicts are a hard rejection category. Copyrighted characters, protected trade dress, or trademarked identifiers without authorization will block approval."
+                        fieldName="Human Review Inputs"
+                        description="Your IP and brand confirmations are recorded as given. For SI8 Certified submissions, copyrighted characters, protected trade dress or trademarked identifiers without authorization prevent approval."
                       />
 
                       <p className="text-sm text-gray-600">Confirm your work contains no unlicensed intellectual property, or declare your licensed content below.</p>
@@ -1077,8 +1077,8 @@ export default function SubmitPage() {
 
                       <ChainOfTitleCallout
                         fieldNumber={3}
-                        fieldName="Rights Verified Sign-off"
-                        description="Audio rights are one of the most common rejection causes. Every audio element must be original AI-generated with a commercial license, third-party licensed with documentation, or absent."
+                        fieldName="Human Review Inputs"
+                        description="Your audio disclosure is recorded as given. For SI8 Certified submissions, every audio element must be original AI-generated with a commercial license, third-party licensed with documentation, or absent."
                       />
 
                       <div>
@@ -1149,7 +1149,7 @@ export default function SubmitPage() {
                       <ChainOfTitleCallout
                         fieldNumber={7}
                         fieldName="Territory Log"
-                        description="Your territory selection is documented in the Chain of Title and governs the geographic scope of any licensing deals negotiated through the Showcase."
+                        description="Your territory selection is recorded with your submission as given."
                       />
 
                       <div>
@@ -1198,7 +1198,7 @@ export default function SubmitPage() {
                       <ChainOfTitleCallout
                         fieldNumber={9}
                         fieldName="Version History"
-                        description="The video URL is attached to your Chain of Title as the canonical reference for this version of the work. Keep it accessible (unlisted is fine)."
+                        description="The video URL is recorded as the reference for this version of the work. Keep it accessible (unlisted is fine)."
                       />
 
                       <div>
@@ -1242,7 +1242,7 @@ export default function SubmitPage() {
                         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                           <h4 className="font-semibold text-amber-900 mb-3 flex items-center gap-2">
                             <FileText className="h-4 w-4" />
-                            Your Chain of Title — 9-Field Preview
+                            Your Submission Record — Preview
                           </h4>
 
                           <div className="space-y-2 text-xs">
@@ -1274,7 +1274,7 @@ export default function SubmitPage() {
                             {/* Field 3 */}
                             <div className="bg-white border border-blue-100 rounded p-2.5">
                               <div className="font-semibold text-gray-700 mb-1 flex items-center gap-2">
-                                3. Rights Verified Sign-off
+                                3. Human Review
                                 <span className="flex items-center gap-1 text-blue-600 font-normal">
                                   <Clock className="h-3 w-3" /> Pending review
                                 </span>
@@ -1285,7 +1285,7 @@ export default function SubmitPage() {
                             {/* Field 4 */}
                             <div className="bg-white border border-green-100 rounded p-2.5">
                               <div className="font-semibold text-gray-700 mb-1">4. Commercial Use Authorization</div>
-                              <span className="text-green-700 font-medium">Will be stamped on approval: "CLEARED FOR COMMERCIAL USE"</span>
+                              <span className="text-gray-600">Not issued — SI8&apos;s review is not legal clearance</span>
                             </div>
 
                             {/* Field 5 */}
@@ -1353,7 +1353,7 @@ export default function SubmitPage() {
                             </li>
                             <li className="flex items-start gap-2">
                               <span className="font-bold text-green-700 flex-shrink-0">3.</span>
-                              Your Chain of Title PDF is delivered by email and available in your dashboard.
+                              The SI8 team contacts you with the outcome of the review.
                             </li>
                           </ol>
                           <div className="mt-3 pt-3 border-t border-green-200 text-sm font-semibold text-green-800">

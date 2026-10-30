@@ -45,7 +45,7 @@ export interface ArtifactTable {
   /** Insert a pending row; 'conflict' when another attempt already owns the submission. */
   insertPending(row: NewPendingArtifact): Promise<{ result: 'inserted'; row: ArtifactRow } | { result: 'conflict' }>
   /** Move a pending row to a new attempt, only if it is still pending on `expectedAttemptId`. */
-  takeOver(id: string, expectedAttemptId: string, next: Pick<ArtifactRow, 'attempt_id' | 'storage_path' | 'sha256' | 'byte_size'>): Promise<boolean>
+  takeOver(id: string, expectedAttemptId: string, next: Pick<ArtifactRow, 'attempt_id' | 'storage_path' | 'sha256' | 'byte_size' | 'generator_version'>): Promise<boolean>
   /** pending → issued, only for this exact attempt and digest. */
   markIssued(id: string, attemptId: string, sha256: string): Promise<boolean>
 }
@@ -115,7 +115,8 @@ async function resumePending(row: ArtifactRow, deps: IssueDeps): Promise<IssueRe
   // The pending attempt's object never landed: take over with a NEW attempt and path.
   const attemptId = deps.newAttemptId()
   const bytes = await deps.render(row.record_id)
-  const next = { attempt_id: attemptId, storage_path: storagePathFor(row.submission_id, attemptId), sha256: sha256Hex(bytes), byte_size: bytes.byteLength }
+  // The bytes are re-rendered by the current generator, so the row records that generator (CR-PDF-CLAIMS-1C.1).
+  const next = { attempt_id: attemptId, storage_path: storagePathFor(row.submission_id, attemptId), sha256: sha256Hex(bytes), byte_size: bytes.byteLength, generator_version: ARTIFACT_GENERATOR_VERSION }
   if (!(await deps.artifacts.takeOver(row.id, row.attempt_id, next))) return { outcome: 'contended' }
   deps.onEvent?.({ event: 'takeover', artifactId: row.id })
   return storeAndIssue({ ...row, ...next }, bytes, deps)
