@@ -496,7 +496,9 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                   <div className="text-gray-700">{
                     (submission as any).tier === 'si8_certified' ? 'SI8 Certified' :
                     (submission as any).tier === 'creator_record' ? 'Creator Record' :
-                    'SI8 Certified'
+                    // CR-CERTIFIED-PATH-1B: the legacy tier is never shown as a current SI8 Certified Assessment.
+                    (submission as any).tier === 'certified' ? 'Legacy Certified — no Assessment requirement enforced' :
+                    `Unknown tier: ${(submission as any).tier ?? '—'}`
                   }</div>
                 </div>
               </CardContent>

@@ -124,6 +124,15 @@ describe('runPaymentFulfillment', () => {
     expect(deps.generateCreatorRecordPdf).not.toHaveBeenCalled()
   })
 
+  // CR-CERTIFIED-PATH-1B: new legacy checkouts are blocked upstream, but a session created earlier still settles.
+  it('historical legacy certified session: fulfilled exactly as before (received email, no PDF, no approval)', async () => {
+    const { deps, calls } = setup({ tier: 'certified', status: 'pending', pdf: 'not_required' })
+    const r = await runPaymentFulfillment('cs_1', deps)
+    expect(r.status).toBe('completed')
+    expect(calls).toEqual(['email:sending', 'send:cert', 'email:accepted'])
+    expect(deps.generateCreatorRecordPdf).not.toHaveBeenCalled()
+  })
+
   it.each(['rejected', 'info_requested', 'approved'])('Certified %s: received email not sent', async (status) => {
     const { deps, calls } = setup({ tier: 'si8_certified', status, pdf: 'not_required' })
     await runPaymentFulfillment('cs_1', deps)

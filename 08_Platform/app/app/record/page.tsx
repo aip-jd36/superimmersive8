@@ -19,16 +19,6 @@ import { CheckCircle, Clock, FileText, Star } from 'lucide-react'
 const countWords = (text: string): number =>
   text.trim().split(/\s+/).filter(Boolean).length
 
-const getDeliveryDate = (): string => {
-  const date = new Date()
-  let daysAdded = 0
-  while (daysAdded < 5) {
-    date.setDate(date.getDate() + 1)
-    if (date.getDay() !== 0 && date.getDay() !== 6) daysAdded++
-  }
-  return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
-}
-
 const SECTION_NAMES: Record<number, string> = {
   1: 'Tier Selection',
   2: 'Production Details',
@@ -73,135 +63,6 @@ function ChainOfTitleCallout({
       <span className="text-amber-800">
         <span className="font-semibold">{fieldName}</span> — {description}
       </span>
-    </div>
-  )
-}
-
-// ─── Chain of Title Sidebar ───────────────────────────────────────────────────
-
-function COTSidebar({
-  currentSection,
-  tools,
-  territory,
-  suitableCategories,
-  excludedCategories,
-  primaryUse,
-}: {
-  currentSection: number
-  tools: Tool[]
-  territory: string
-  suitableCategories: string[]
-  excludedCategories: string[]
-  primaryUse: string
-}) {
-  const primaryTool = tools.find(t => t.isPrimary) || tools[0]
-
-  const fields = [
-    {
-      num: 1,
-      name: 'Tool Provenance Log',
-      populatedBy: 3,
-      value: tools.length > 0
-        ? `${tools.length} tool${tools.length !== 1 ? 's' : ''} documented${primaryTool ? ` — primary: ${primaryTool.toolName === 'Other' ? primaryTool.toolNameOther : primaryTool.toolName}` : ''}`
-        : null,
-    },
-    {
-      num: 2,
-      name: 'Model Disclosure',
-      populatedBy: 3,
-      value: tools.length > 0 ? 'Training data status: under review' : null,
-    },
-    {
-      num: 3,
-      name: 'Human Review',
-      populatedBy: null,
-      value: 'Pending human review (5 business days)',
-    },
-    {
-      num: 4,
-      name: 'Commercial Use Authorization',
-      populatedBy: null,
-      value: "Not issued — SI8's review is not legal clearance",
-    },
-    {
-      num: 5,
-      name: 'Modification Rights',
-      populatedBy: null,
-      value: 'Not authorized — creator retains control',
-    },
-    {
-      num: 6,
-      name: 'Category Conflict Log',
-      populatedBy: 2,
-      value:
-        suitableCategories.length > 0 || excludedCategories.length > 0
-          ? `${suitableCategories.length} suitable, ${excludedCategories.length} excluded`
-          : null,
-    },
-    {
-      num: 7,
-      name: 'Territory Log',
-      populatedBy: 8,
-      value: territory && territory !== 'Global' ? territory : territory === 'Global' ? 'Global (worldwide)' : null,
-    },
-    {
-      num: 8,
-      name: 'Regeneration Rights',
-      populatedBy: null,
-      value: 'Not authorized (standard)',
-    },
-    {
-      num: 9,
-      name: 'Version History',
-      populatedBy: null,
-      value: `V1.0 — ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
-    },
-  ]
-
-  return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 sticky top-4">
-      <div className="flex items-center gap-2 mb-3">
-        <FileText className="h-4 w-4 text-amber-600" />
-        <h3 className="text-sm font-semibold text-gray-900">Your Submission Record</h3>
-      </div>
-      <p className="text-xs text-gray-500 mb-4">
-        This record is built from your answers. Fields fill in as you complete each section.
-      </p>
-      <div className="space-y-2">
-        {fields.map((field) => {
-          const isActiveSection = field.populatedBy === currentSection
-          const isComplete = !!field.value && field.populatedBy !== null && currentSection > (field.populatedBy || 0)
-          const isAuto = field.populatedBy === null
-
-          return (
-            <div
-              key={field.num}
-              className={`p-2 rounded text-xs border transition-all ${
-                isActiveSection
-                  ? 'bg-amber-50 border-amber-300'
-                  : isComplete
-                  ? 'bg-green-50 border-green-200'
-                  : 'bg-gray-50 border-gray-100'
-              }`}
-            >
-              <div className={`font-semibold ${isActiveSection ? 'text-amber-800' : isComplete ? 'text-green-800' : 'text-gray-600'}`}>
-                {field.num}. {field.name}
-                {isActiveSection && <span className="ml-1 text-amber-600">← now</span>}
-              </div>
-              {field.value && (
-                <div className={`mt-0.5 ${isAuto ? 'text-gray-500 italic' : isComplete ? 'text-green-700' : 'text-gray-500 italic'}`}>
-                  {!isAuto && isComplete && '✓ '}{field.value}
-                </div>
-              )}
-              {!field.value && field.populatedBy && (
-                <div className="mt-0.5 text-gray-400 italic">
-                  Complete section {field.populatedBy}
-                </div>
-              )}
-            </div>
-          )
-        })}
-      </div>
     </div>
   )
 }
@@ -274,7 +135,7 @@ export default function SubmitPage() {
   const [editingTool, setEditingTool] = useState<Tool | null>(null)
   const [toolsError, setToolsError] = useState<string | null>(null)
   const [userId, setUserId] = useState<string>('')
-  const [selectedTier, setSelectedTier] = useState<'creator_record' | 'certified' | null>(null)
+  const [selectedTier, setSelectedTier] = useState<'creator_record' | null>(null)
   const [submissionMode, setSubmissionMode] = useState<'creator' | 'agency'>('creator')
   const [tierError, setTierError] = useState<string | null>(null)
   const [evidenceCustodian, setEvidenceCustodian] = useState(false)
@@ -405,6 +266,13 @@ export default function SubmitPage() {
       setIndemnificationError('You must accept the accuracy warranty to proceed')
       return
     }
+    // CR-CERTIFIED-PATH-1B: /record creates Creator Record submissions only, and never defaults a tier.
+    // The server enforces the same rule (lib/submissions/build-intake-insert.ts).
+    if (selectedTier !== 'creator_record') {
+      setTierError('Please select a verification tier to continue')
+      setCurrentSection(1)
+      return
+    }
 
     try {
       setIsSubmitting(true)
@@ -469,7 +337,7 @@ export default function SubmitPage() {
         modification_scope: null,
         territory_preferences: data.territory === 'Other' ? data.territory_other : data.territory,
         supporting_materials: JSON.stringify([]),
-        tier: selectedTier || 'certified',
+        tier: selectedTier,
         submission_mode: submissionMode,
         status: 'pending',
         payment_status: 'unpaid',
@@ -505,7 +373,7 @@ export default function SubmitPage() {
         body: JSON.stringify({
           submissionId: submission.id,
           creatorEmail: session.user.email,
-          tier: selectedTier || 'certified',
+          tier: selectedTier,
         }),
       })
 
@@ -519,15 +387,13 @@ export default function SubmitPage() {
     }
   }
 
-  const isCertified = selectedTier === 'certified'
-
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className={`mx-auto px-4 ${isCertified ? 'max-w-6xl' : 'max-w-3xl'}`}>
-        <div className={isCertified ? 'grid grid-cols-1 lg:grid-cols-3 gap-8' : ''}>
+      <div className="mx-auto px-4 max-w-3xl">
+        <div>
 
           {/* ── Form ── */}
-          <div className={isCertified ? 'lg:col-span-2' : ''}>
+          <div>
             <Card>
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -536,18 +402,12 @@ export default function SubmitPage() {
                     <CardDescription className="mt-1">
                       {selectedTier === 'creator_record'
                         ? 'Creator Record — $29 · Self-attested documentation, automated delivery'
-                        : selectedTier === 'certified'
-                        ? 'SI8 Certified — $499 · 90-minute human review by SI8'
                         : 'Complete all sections to submit your AI video'}
                     </CardDescription>
                   </div>
                   {selectedTier && (
-                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                      selectedTier === 'certified'
-                        ? 'bg-amber-100 text-amber-800'
-                        : 'bg-gray-100 text-gray-700'
-                    }`}>
-                      {selectedTier === 'certified' ? 'SI8 CERTIFIED' : 'CREATOR RECORD'}
+                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-gray-100 text-gray-700">
+                      CREATOR RECORD
                     </span>
                   )}
                 </div>
@@ -593,48 +453,7 @@ export default function SubmitPage() {
                             <div className={`h-5 w-5 rounded-full border-2 flex-shrink-0 ${selectedTier === 'creator_record' ? 'border-amber-500 bg-amber-500' : 'border-gray-300'}`} />
                           </div>
                         </div>
-
-                        <div
-                          onClick={() => setSelectedTier('certified')}
-                          className={`cursor-pointer rounded-lg border-2 p-4 transition-all ${selectedTier === 'certified' ? 'border-amber-400 bg-amber-50' : 'border-gray-200 hover:border-gray-300'}`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <div className="font-semibold flex items-center gap-2">
-                                SI8 Certified — $499
-                                <span className="text-xs font-semibold bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full">HUMAN REVIEW</span>
-                              </div>
-                              <div className="text-sm text-gray-600 mt-1">90-minute human review by SI8. Not legal advice or legal clearance.</div>
-                              <div className="text-xs text-gray-500 mt-1">Agencies, brands, production houses, streaming submissions</div>
-                            </div>
-                            <div className={`h-5 w-5 rounded-full border-2 flex-shrink-0 ${selectedTier === 'certified' ? 'border-amber-500 bg-amber-500' : 'border-gray-300'}`} />
-                          </div>
-                        </div>
                       </div>
-
-                      {selectedTier === 'certified' && (
-                        <div className="space-y-3">
-                          <Label>How are you submitting? *</Label>
-                          <div className="flex gap-3">
-                            <button
-                              type="button"
-                              onClick={() => setSubmissionMode('creator')}
-                              className={`flex-1 rounded-lg border-2 p-3 text-left text-sm transition-all ${submissionMode === 'creator' ? 'border-amber-400 bg-amber-50' : 'border-gray-200 hover:border-gray-300'}`}
-                            >
-                              <div className="font-medium">Individual Creator</div>
-                              <div className="text-xs text-gray-500 mt-0.5">I'm submitting my own work</div>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setSubmissionMode('agency')}
-                              className={`flex-1 rounded-lg border-2 p-3 text-left text-sm transition-all ${submissionMode === 'agency' ? 'border-amber-400 bg-amber-50' : 'border-gray-200 hover:border-gray-300'}`}
-                            >
-                              <div className="font-medium">Agency / Production House</div>
-                              <div className="text-xs text-gray-500 mt-0.5">Submitting on behalf of a client</div>
-                            </button>
-                          </div>
-                        </div>
-                      )}
 
                       {tierError && <p className="text-sm text-red-500">{tierError}</p>}
                       <p className="text-sm text-gray-500">Your profile information is automatically filled from your account settings.</p>
@@ -776,7 +595,6 @@ export default function SubmitPage() {
 
                       <p className="text-sm text-gray-600">
                         Add all AI tools used in production. Mark your <strong>primary generation tool</strong> — the one responsible for the majority of AI generation.
-                        {selectedTier === 'certified' && ' Receipt upload (proof of paid commercial plan) is required.'}
                         {selectedTier === 'creator_record' && ' Receipts are optional for Creator Record.'}
                       </p>
 
@@ -1132,59 +950,11 @@ export default function SubmitPage() {
                               alert('Please upload your audio license documentation before continuing.')
                               return
                             }
-                            setCurrentSection(submissionMode === 'agency' || selectedTier === 'creator_record' ? 9 : 8)
+                            setCurrentSection(9)
                           }}
                         >
                           Continue →
                         </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* ── Section 8: Territory ── */}
-                  {currentSection === 8 && submissionMode === 'creator' && selectedTier !== 'creator_record' && (
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold">8. Territory & Exclusivity Preferences</h3>
-
-                      <ChainOfTitleCallout
-                        fieldNumber={7}
-                        fieldName="Territory Log"
-                        description="Your territory selection is recorded with your submission as given."
-                      />
-
-                      <div>
-                        <Label htmlFor="territory">Territory *</Label>
-                        <select id="territory" {...register('territory')} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1">
-                          <option value="Global">Global (Worldwide)</option>
-                          <option value="North America">North America</option>
-                          <option value="Europe">Europe</option>
-                          <option value="Asia">Asia</option>
-                          <option value="Other">Other (specify below)</option>
-                        </select>
-                        {errors.territory && <p className="text-sm text-red-500 mt-1">{errors.territory.message}</p>}
-                      </div>
-
-                      {watch('territory') === 'Other' && (
-                        <div>
-                          <Label htmlFor="territory_other">Specify Territory *</Label>
-                          <Input id="territory_other" {...register('territory_other')} placeholder="e.g., South America, Middle East, Taiwan..." />
-                        </div>
-                      )}
-
-                      <div>
-                        <Label htmlFor="existing_restrictions">Existing Licensing Restrictions (optional)</Label>
-                        <textarea
-                          id="existing_restrictions"
-                          {...register('existing_restrictions')}
-                          className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                          placeholder="Do you have any existing licensing agreements that restrict territory or exclusivity?"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">Note any existing deals that may limit licensing scope.</p>
-                      </div>
-
-                      <div className="flex gap-4">
-                        <Button type="button" variant="outline" onClick={() => setCurrentSection(7)}>← Back</Button>
-                        <Button type="button" onClick={() => setCurrentSection(9)}>Continue →</Button>
                       </div>
                     </div>
                   )}
@@ -1226,7 +996,7 @@ export default function SubmitPage() {
                       */}
 
                       <div className="flex gap-4">
-                        <Button type="button" variant="outline" onClick={() => setCurrentSection(submissionMode === 'agency' || selectedTier === 'creator_record' ? 7 : 8)}>← Back</Button>
+                        <Button type="button" variant="outline" onClick={() => setCurrentSection(7)}>← Back</Button>
                         <Button type="button" onClick={() => setCurrentSection(10)}>Continue →</Button>
                       </div>
                     </div>
@@ -1236,131 +1006,6 @@ export default function SubmitPage() {
                   {currentSection === 10 && (
                     <div className="space-y-6">
                       <h3 className="text-lg font-semibold">10. Review & Submit</h3>
-
-                      {/* What you're getting */}
-                      {selectedTier === 'certified' && (
-                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                          <h4 className="font-semibold text-amber-900 mb-3 flex items-center gap-2">
-                            <FileText className="h-4 w-4" />
-                            Your Submission Record — Preview
-                          </h4>
-
-                          <div className="space-y-2 text-xs">
-                            {/* Field 1 */}
-                            <div className="bg-white border border-amber-100 rounded p-2.5">
-                              <div className="font-semibold text-gray-700 mb-1">1. Tool Provenance Log</div>
-                              {tools.length > 0 ? (
-                                <div className="space-y-1">
-                                  {tools.map((t, i) => {
-                                    const name = t.toolName === 'Other' ? t.toolNameOther : t.toolName
-                                    return (
-                                      <div key={i} className="flex items-center gap-2 text-gray-600">
-                                        {t.isPrimary && <Star className="h-3 w-3 text-amber-500 fill-amber-500 flex-shrink-0" />}
-                                        <span>{name} — {t.version} — {t.planType} plan</span>
-                                        {t.receipt && <span className="text-green-600">✓ Receipt on file</span>}
-                                      </div>
-                                    )
-                                  })}
-                                </div>
-                              ) : <span className="text-gray-400">No tools added</span>}
-                            </div>
-
-                            {/* Field 2 */}
-                            <div className="bg-white border border-amber-100 rounded p-2.5">
-                              <div className="font-semibold text-gray-700 mb-1">2. Model Disclosure</div>
-                              <span className="text-gray-500 italic">Training data transparency status — assessed by SI8 reviewer</span>
-                            </div>
-
-                            {/* Field 3 */}
-                            <div className="bg-white border border-blue-100 rounded p-2.5">
-                              <div className="font-semibold text-gray-700 mb-1 flex items-center gap-2">
-                                3. Human Review
-                                <span className="flex items-center gap-1 text-blue-600 font-normal">
-                                  <Clock className="h-3 w-3" /> Pending review
-                                </span>
-                              </div>
-                              <span className="text-gray-500 italic">Human review covers: authorship, likeness, IP, audio, brand safety — 90 minutes</span>
-                            </div>
-
-                            {/* Field 4 */}
-                            <div className="bg-white border border-green-100 rounded p-2.5">
-                              <div className="font-semibold text-gray-700 mb-1">4. Commercial Use Authorization</div>
-                              <span className="text-gray-600">Not issued — SI8&apos;s review is not legal clearance</span>
-                            </div>
-
-                            {/* Field 5 */}
-                            <div className="bg-white border border-amber-100 rounded p-2.5">
-                              <div className="font-semibold text-gray-700 mb-1">5. Modification Rights Status</div>
-                              <span className="text-gray-600">Not authorized — creator retains full creative control (standard)</span>
-                            </div>
-
-                            {/* Field 6 */}
-                            <div className="bg-white border border-amber-100 rounded p-2.5">
-                              <div className="font-semibold text-gray-700 mb-1">6. Category Conflict Log</div>
-                              {suitableCategories.length > 0 || excludedCategories.length > 0 ? (
-                                <div className="space-y-0.5 text-gray-600">
-                                  {suitableCategories.length > 0 && <div>Suitable: {suitableCategories.join(', ')}</div>}
-                                  {excludedCategories.length > 0 && <div className="text-red-600">Excluded: {excludedCategories.join(', ')}</div>}
-                                </div>
-                              ) : (
-                                <span className="text-gray-500 italic">Not specified — reviewer will assess brand safety during review</span>
-                              )}
-                            </div>
-
-                            {/* Field 7 */}
-                            <div className="bg-white border border-amber-100 rounded p-2.5">
-                              <div className="font-semibold text-gray-700 mb-1">7. Territory Log</div>
-                              <span className="text-gray-600">
-                                {watch('territory') === 'Other'
-                                  ? watch('territory_other') || 'Other (specify above)'
-                                  : watch('territory') || 'Global (default)'}
-                              </span>
-                            </div>
-
-                            {/* Field 8 */}
-                            <div className="bg-white border border-amber-100 rounded p-2.5">
-                              <div className="font-semibold text-gray-700 mb-1">8. Regeneration Rights Status</div>
-                              <span className="text-gray-600">Not authorized (standard)</span>
-                            </div>
-
-                            {/* Field 9 */}
-                            <div className="bg-white border border-amber-100 rounded p-2.5">
-                              <div className="font-semibold text-gray-700 mb-1">9. Version History</div>
-                              <span className="text-gray-600">
-                                V1.0 — Initial submission, {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                              </span>
-                              {watch('title') && <span className="ml-2 text-gray-500 italic">"{watch('title')}"</span>}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Delivery timeline */}
-                      {selectedTier === 'certified' && (
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                          <h4 className="font-semibold text-green-900 mb-2 flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4" />
-                            What Happens After Payment
-                          </h4>
-                          <ol className="text-sm text-green-800 space-y-1.5 list-none">
-                            <li className="flex items-start gap-2">
-                              <span className="font-bold text-green-700 flex-shrink-0">1.</span>
-                              You receive a confirmation email with your submission reference number.
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <span className="font-bold text-green-700 flex-shrink-0">2.</span>
-                              An SI8 reviewer begins your 90-minute expert review within 1 business day.
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <span className="font-bold text-green-700 flex-shrink-0">3.</span>
-                              The SI8 team contacts you with the outcome of the review.
-                            </li>
-                          </ol>
-                          <div className="mt-3 pt-3 border-t border-green-200 text-sm font-semibold text-green-800">
-                            Estimated delivery: {getDeliveryDate()}
-                          </div>
-                        </div>
-                      )}
 
                       {selectedTier === 'creator_record' && (
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -1419,7 +1064,7 @@ export default function SubmitPage() {
                         >
                           {isSubmitting
                             ? 'Creating submission...'
-                            : `Submit & Pay ${selectedTier === 'creator_record' ? '$29' : '$499'} →`}
+                            : 'Submit & Pay $29 →'}
                         </Button>
                       </div>
                     </div>
@@ -1429,20 +1074,6 @@ export default function SubmitPage() {
               </CardContent>
             </Card>
           </div>
-
-          {/* ── Sidebar (SI8 Certified only, desktop) ── */}
-          {isCertified && (
-            <div className="hidden lg:block">
-              <COTSidebar
-                currentSection={currentSection}
-                tools={tools}
-                territory={watch('territory') || 'Global'}
-                suitableCategories={suitableCategories}
-                excludedCategories={excludedCategories}
-                primaryUse={watch('primary_use') || ''}
-              />
-            </div>
-          )}
 
         </div>
       </div>
@@ -1454,7 +1085,7 @@ export default function SubmitPage() {
         onSave={handleSaveTool}
         editTool={editingTool}
         userId={userId}
-        requireReceipt={selectedTier === 'certified'}
+        requireReceipt={false}
         hasPrimaryTool={hasPrimaryTool}
         currentToolId={editingTool?.id}
       />

@@ -58,8 +58,17 @@ export const SUBMISSION_INTAKE_FIELDS = [
 /** Keys the forms send today that the server overrides rather than trusts. Discarded silently. */
 const SERVER_CONTROLLED_FIELDS = new Set(['user_id', 'status', 'payment_status'])
 
-/** Tier values the intake forms send. Price and review path depend on tier, so it is a closed set. */
+/** Every tier a stored submission may carry. Price and review path depend on tier, so it is a closed set. */
 export const SUBMISSION_TIERS = ['creator_record', 'certified', 'si8_certified'] as const
+
+/**
+ * Tiers a NEW submission may be created with (CR-CERTIFIED-PATH-1B). The legacy `certified` tier
+ * enforced no Assessment, so it is no longer created; historical `certified` rows stay readable and
+ * payable sessions already in flight still settle (payments are recorded by the database, not here).
+ * The tier must be sent explicitly: the database column default is never relied on.
+ */
+export const CREATABLE_SUBMISSION_TIERS = ['creator_record', 'si8_certified'] as const
+export const LEGACY_SUBMISSION_TIER = 'certified'
 export const SUBMISSION_MODES = ['creator', 'agency'] as const
 
 export const INITIAL_SUBMISSION_STATUS = 'pending'
@@ -96,7 +105,9 @@ export function buildIntakeInsert(submissionData: unknown, userId: string): Inta
   }
 
   if (typeof row.title !== 'string' || row.title.trim() === '') return { ok: false, reason: 'title is required' }
-  if ('tier' in row && !(SUBMISSION_TIERS as readonly unknown[]).includes(row.tier)) return { ok: false, reason: 'invalid tier' }
+  if (row.tier === undefined || row.tier === null || row.tier === '') return { ok: false, reason: 'tier is required' }
+  if (row.tier === LEGACY_SUBMISSION_TIER) return { ok: false, reason: 'tier no longer offered' }
+  if (!(CREATABLE_SUBMISSION_TIERS as readonly unknown[]).includes(row.tier)) return { ok: false, reason: 'invalid tier' }
   if ('submission_mode' in row && !(SUBMISSION_MODES as readonly unknown[]).includes(row.submission_mode)) {
     return { ok: false, reason: 'invalid submission_mode' }
   }

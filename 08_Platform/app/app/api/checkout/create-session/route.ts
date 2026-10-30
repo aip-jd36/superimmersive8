@@ -3,6 +3,7 @@ import { stripe } from '@/lib/stripe'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { getListPriceCents } from '@/lib/payments/repository'
+import { LEGACY_SUBMISSION_TIER } from '@/lib/submissions/build-intake-insert'
 
 /**
  * CAA-SECURITY-3B — create (or reuse) the Stripe Checkout session for a
@@ -38,6 +39,13 @@ const PRODUCT_COPY: Record<string, { name: string; description: string }> = {
 const NOT_FOUND = () => NextResponse.json({ error: 'Submission not found' }, { status: 404 })
 const RETRY = () => NextResponse.json({ error: 'Checkout is being prepared — please try again.' }, { status: 409 })
 const SERVER_ERROR = () => NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 })
+/**
+ * CR-CERTIFIED-PATH-1B: the legacy `certified` tier enforced no Assessment, so no new checkout is started
+ * for it — and no persisted session is reused or returned. Checked before any Stripe call. Payment
+ * recording is unaffected: a session created earlier still settles through the webhook and ledger.
+ */
+const LEGACY_TIER_NOT_OFFERED = () =>
+  NextResponse.json({ error: 'This submission type is no longer available for checkout.', code: 'legacy_tier_not_offered' }, { status: 409 })
 
 interface SubmissionRow {
   id: string
@@ -86,6 +94,7 @@ export async function POST(request: NextRequest) {
     if (loadError) return SERVER_ERROR()
     const row = found as SubmissionRow | null
     if (!row) return NOT_FOUND()
+    if (row.tier === LEGACY_SUBMISSION_TIER) return LEGACY_TIER_NOT_OFFERED()
 
     if (row.payment_status !== 'unpaid' || row.status !== 'pending') {
       return NextResponse.json({ error: 'This submission is not awaiting payment.' }, { status: 409 })

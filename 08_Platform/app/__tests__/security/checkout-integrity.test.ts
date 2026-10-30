@@ -103,7 +103,9 @@ describe('tier, price and email come from the persisted submission', () => {
     expect(getListPriceCents).toHaveBeenCalledWith('si8_certified')
   })
 
-  it.each([['creator_record', 2900], ['certified', 49900], ['si8_certified', 49900]])('%s → %i cents', async (tier, cents) => {
+  // The legacy `certified` tier no longer checks out (CR-CERTIFIED-PATH-1B, below); its price stays in the
+  // database price function so a session created earlier still settles.
+  it.each([['creator_record', 2900], ['si8_certified', 49900]])('%s → %i cents', async (tier, cents) => {
     standard(row({ tier }))
     await POST(req({ submissionId: SUB_ID }))
     expect(create.mock.calls[0][0].line_items[0].price_data.unit_amount).toBe(cents)
@@ -124,6 +126,57 @@ describe('tier, price and email come from the persisted submission', () => {
     const res = await POST(req({ submissionId: SUB_ID }))
     expect(res.status).toBe(409)
     expect(create).not.toHaveBeenCalled()
+  })
+})
+
+describe('legacy certified tier (CR-CERTIFIED-PATH-1B)', () => {
+  const LEGACY = { error: 'This submission type is no longer available for checkout.', code: 'legacy_tier_not_offered' }
+  const expectNoStripeNoPriceNoWrite = () => {
+    expect(create).not.toHaveBeenCalled()
+    expect(retrieve).not.toHaveBeenCalled()
+    expect(expire).not.toHaveBeenCalled()
+    expect(getListPriceCents).not.toHaveBeenCalled()
+    expect(queries.some(q => q.calls.some(([m]) => m === 'update'))).toBe(false)
+  }
+
+  it('an unpaid historical certified submission → 409, before any price lookup, Stripe call or write', async () => {
+    standard(row({ tier: 'certified' }))
+    const res = await POST(req({ submissionId: SUB_ID }))
+    expect(res.status).toBe(409)
+    expect(await res.json()).toEqual(LEGACY)
+    expect(queries).toHaveLength(1)
+    expectNoStripeNoPriceNoWrite()
+  })
+
+  it('a persisted open session is neither retrieved, reused, returned nor expired', async () => {
+    standard(row({ tier: 'certified', stripe_checkout_session_id: 'cs_open_legacy' }))
+    retrieve.mockResolvedValue({ id: 'cs_open_legacy', status: 'open', client_reference_id: SUB_ID, amount_subtotal: 49900, url: 'https://checkout.stripe.test/legacy' })
+    const res = await POST(req({ submissionId: SUB_ID }))
+    expect(res.status).toBe(409)
+    expect(JSON.stringify(await res.json())).not.toContain('checkout.stripe.test')
+    expectNoStripeNoPriceNoWrite()
+  })
+
+  it.each([[{ payment_status: 'paid' }], [{ status: 'approved' }]])('a settled historical certified submission %j gets the same stable 409', async (over) => {
+    standard(row({ tier: 'certified', ...over }))
+    const res = await POST(req({ submissionId: SUB_ID }))
+    expect(res.status).toBe(409)
+    expect(await res.json()).toEqual(LEGACY)
+    expectNoStripeNoPriceNoWrite()
+  })
+
+  it('a body tier cannot move a certified submission onto another product', async () => {
+    standard(row({ tier: 'certified' }))
+    const res = await POST(req({ submissionId: SUB_ID, tier: 'si8_certified' }))
+    expect(res.status).toBe(409)
+    expectNoStripeNoPriceNoWrite()
+  })
+
+  it('ownership is still checked first: a foreign certified submission is the ordinary 404', async () => {
+    resolver = () => ({ data: null })
+    const res = await POST(req({ submissionId: SUB_ID }))
+    expect(res.status).toBe(404)
+    expect(has(queries[0], 'eq', 'user_id', USER.id)).toBe(true)
   })
 })
 

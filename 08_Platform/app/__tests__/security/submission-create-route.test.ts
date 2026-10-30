@@ -194,6 +194,30 @@ describe('protected-field injection', () => {
     expect(insert).not.toHaveBeenCalled()
   })
 
+  // CR-CERTIFIED-PATH-1B: new submissions need an explicit, currently offered tier; the DB default is never used.
+  test('legacy certified tier → 400 "tier no longer offered", nothing inserted', async () => {
+    const res = await POST(req({ submissionData: { ...recordFormPayload, tier: 'certified' } }))
+    expect(res.status).toBe(400)
+    expect(await res.json()).toEqual({ error: 'Invalid submission', reason: 'tier no longer offered' })
+    expect(insert).not.toHaveBeenCalled()
+  })
+
+  test.each([['omitted'], ['null'], ['empty']])('%s tier → 400 "tier is required", nothing inserted', async (kind) => {
+    const { tier: _t, ...withoutTier } = recordFormPayload
+    const submissionData = kind === 'omitted' ? withoutTier : { ...withoutTier, tier: kind === 'null' ? null : '' }
+    const res = await POST(req({ submissionData }))
+    expect(res.status).toBe(400)
+    expect(await res.json()).toEqual({ error: 'Invalid submission', reason: 'tier is required' })
+    expect(insert).not.toHaveBeenCalled()
+  })
+
+  test.each([['Creator_Record'], [' creator_record'], ['si8-certified'], ['CERTIFIED']])('near-miss tier %p → 400 "invalid tier"', async (tier) => {
+    const res = await POST(req({ submissionData: { ...recordFormPayload, tier } }))
+    expect(res.status).toBe(400)
+    expect(await res.json()).toEqual({ error: 'Invalid submission', reason: 'invalid tier' })
+    expect(insert).not.toHaveBeenCalled()
+  })
+
   test('unknown submission_mode → 400', async () => {
     const res = await POST(req({ submissionData: { ...recordFormPayload, submission_mode: 'admin' } }))
     expect(res.status).toBe(400)
