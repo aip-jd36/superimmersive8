@@ -136,16 +136,20 @@ describe('customer-visible product copy (CR-CHECKOUT-CLAIMS-1A)', () => {
 
   it.each([
     ['creator_record', 2900, 'Creator Record — Self-Attested Documentation',
-      'A self-attested record of information you provide about your AI-video production. Not a commercial clearance assessment.'],
+      'A self-attested record of information you provide about your AI-video production. Not a commercial clearance assessment.', '/record'],
     ['si8_certified', 49900, 'SI8 Commercial Assurance Assessment',
-      'Human review of submitted project information and supporting evidence, with documented findings and limitations. Does not certify commercial clearance.'],
-  ])('%s: price %i, exact name and description, no clearance claim', async (tier, cents, name, description) => {
+      'Human review of submitted project information and supporting evidence, with documented findings and limitations. Does not certify commercial clearance.', '/certify'],
+  ])('%s: price %i, exact name and description, no clearance claim, cancel returns to its own form', async (tier, cents, name, description, cancelPath) => {
     standard(row({ tier }))
-    const res = await POST(req({ submissionId: SUB_ID }))
+    // CR-RELEASE-READINESS-1B: client-supplied return URLs are ignored; the stored tier decides.
+    const res = await POST(req({ submissionId: SUB_ID, cancel_url: 'https://evil.example/phish', cancelPath: '/evil', success_url: 'https://evil.example' }))
     expect(res.status).toBe(200)
     const [params] = create.mock.calls[0]
     expect(params.line_items).toEqual([{ price_data: { currency: 'usd', product_data: { name, description }, unit_amount: cents }, quantity: 1 }])
     expect(params.metadata).toEqual({ submissionId: SUB_ID, tier, checkout_contract: 'caa-3b-v2' })
+    expect(params.cancel_url).toBe(`https://app.test${cancelPath}?payment=cancelled`)
+    expect(params.success_url).toBe('https://app.test/dashboard?payment=success')
+    expect(params.client_reference_id).toBe(SUB_ID)
     expect(`${name} ${description}`).not.toMatch(MISLEADING)
   })
 

@@ -94,7 +94,7 @@ export default function AddToolModal({
     if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
       newErrors.endDate = 'End date must be after start date'
     }
-    if (requireReceipt && !receipt) newErrors.receipt = 'Receipt upload is required for SI8 Certified'
+    if (requireReceipt && !receipt) newErrors.receipt = 'Receipt upload is required for the Commercial Assurance Assessment'
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -261,7 +261,7 @@ export default function AddToolModal({
                 label={requireReceipt ? 'Plan Receipt *' : 'Plan Receipt (optional)'}
                 description={
                   requireReceipt
-                    ? 'Upload proof of paid commercial plan — PDF, JPG, or PNG (max 10MB). Required for SI8 Certified.'
+                    ? 'Upload proof of paid commercial plan — PDF, JPG, or PNG (max 10MB). Required for the Commercial Assurance Assessment.'
                     : 'Optional for Creator Record — PDF, JPG, or PNG (max 10MB).'
                 }
                 accept="image/jpeg,image/png,application/pdf"

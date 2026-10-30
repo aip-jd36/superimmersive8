@@ -401,7 +401,7 @@ export default function SubmitPage() {
                     <CardTitle>Submit Your Film</CardTitle>
                     <CardDescription className="mt-1">
                       {selectedTier === 'creator_record'
-                        ? 'Creator Record — $29 · Self-attested documentation, automated delivery'
+                        ? 'Creator Record — $29 · Self-attested documentation, generated after payment'
                         : 'Complete all sections to submit your AI video'}
                     </CardDescription>
                   </div>
@@ -447,7 +447,7 @@ export default function SubmitPage() {
                           <div className="flex items-center justify-between">
                             <div>
                               <div className="font-semibold">Creator Record — $29</div>
-                              <div className="text-sm text-gray-600 mt-1">Self-attested documentation. Automated, instant delivery. <strong>NOT for commercial use.</strong></div>
+                              <div className="text-sm text-gray-600 mt-1">Self-attested documentation of your AI-video production. Generated after payment. Not a commercial clearance assessment. <strong>NOT for commercial use.</strong></div>
                               <div className="text-xs text-gray-500 mt-1">Indie creators, social media, YouTube, portfolio, festivals</div>
                             </div>
                             <div className={`h-5 w-5 rounded-full border-2 flex-shrink-0 ${selectedTier === 'creator_record' ? 'border-amber-500 bg-amber-500' : 'border-gray-300'}`} />
@@ -1014,7 +1014,7 @@ export default function SubmitPage() {
                             <li><strong>Tier:</strong> Creator Record — $29 (self-attested)</li>
                             <li><strong>Film Title:</strong> {watch('title')}</li>
                             <li><strong>Tools Used:</strong> {tools.length} tool{tools.length !== 1 ? 's' : ''} added</li>
-                            <li><strong>Delivery:</strong> Automated — your PDF will be emailed immediately after payment</li>
+                            <li><strong>Delivery:</strong> After payment, we prepare your Creator Record PDF and email you a link to access it from your dashboard. Delivery may take additional time if processing is delayed.</li>
                           </ul>
                         </div>
                       )}

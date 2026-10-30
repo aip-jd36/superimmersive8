@@ -496,13 +496,13 @@ export default function CertifyPage() {
           <CardHeader>
             <div className="flex items-start justify-between">
               <div>
-                <CardTitle>SI8 Certified — $499</CardTitle>
+                <CardTitle>SI8 Commercial Assurance Assessment — $499</CardTitle>
                 <CardDescription className="mt-1">
-                  90-minute human review · Commercial Assurance Assessment
+                  Human review of submitted project information and supporting evidence
                 </CardDescription>
               </div>
               <span className="text-xs font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-800">
-                SI8 CERTIFIED
+                COMMERCIAL ASSURANCE
               </span>
             </div>
             {/* Progress bar */}
@@ -646,7 +646,7 @@ export default function CertifyPage() {
                   </p>
 
                   <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800">
-                    <strong>SI8 Certified requirement:</strong> Every tool must have a receipt showing you held a commercial plan during production. Tools without receipts will be flagged and may affect your risk rating.
+                    <strong>Commercial Assurance Assessment requirement:</strong> Every tool must have a receipt showing you held a commercial plan during production. Tools without receipts will be flagged and may affect your risk rating.
                   </div>
 
                   <Button type="button" onClick={handleAddTool} variant="outline" className="w-full border-2 border-dashed border-gray-300 hover:border-amber-400 hover:bg-amber-50">
@@ -1258,7 +1258,7 @@ export default function CertifyPage() {
 
                   {/* What's included */}
                   <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
-                    <p className="text-sm font-semibold text-gray-900">SI8 Certified — $499</p>
+                    <p className="text-sm font-semibold text-gray-900">SI8 Commercial Assurance Assessment — $499</p>
                     <div className="space-y-1 text-sm">
                       {[
                         '90-minute human review by SI8',

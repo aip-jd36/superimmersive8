@@ -162,7 +162,7 @@ export default async function DashboardPage() {
                 <Link href="/record">Creator Record — $29</Link>
               </Button>
               <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white" asChild>
-                <Link href="/certify">SI8 Certified — $499</Link>
+                <Link href="/certify">SI8 Commercial Assurance Assessment — $499</Link>
               </Button>
             </div>
           </div>
@@ -176,7 +176,7 @@ export default async function DashboardPage() {
                   <Link href="/record">Creator Record — $29</Link>
                 </Button>
                 <Button className="bg-amber-600 hover:bg-amber-700 text-white" asChild>
-                  <Link href="/certify">SI8 Certified — $499</Link>
+                  <Link href="/certify">SI8 Commercial Assurance Assessment — $499</Link>
                 </Button>
               </div>
             </div>

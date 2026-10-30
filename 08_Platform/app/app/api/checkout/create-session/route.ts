@@ -27,15 +27,19 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
  * Customer-visible Stripe Checkout copy, per tier (CR-CHECKOUT-CLAIMS-1A). Only tiers that can be bought
  * today are listed: a tier without copy fails closed ("Unsupported submission tier"), so the legacy
  * `certified` tier has none and can never be shown, or sold, under the old clearance wording.
+ * `cancelPath` (CR-RELEASE-READINESS-1B) is where a cancelled Checkout returns: it comes from this table,
+ * keyed by the stored, ownership-checked tier — never from the request.
  */
-const PRODUCT_COPY: Record<string, { name: string; description: string }> = {
+const PRODUCT_COPY: Record<string, { name: string; description: string; cancelPath: '/record' | '/certify' }> = {
   creator_record: {
     name: 'Creator Record — Self-Attested Documentation',
     description: 'A self-attested record of information you provide about your AI-video production. Not a commercial clearance assessment.',
+    cancelPath: '/record',
   },
   si8_certified: {
     name: 'SI8 Commercial Assurance Assessment',
     description: 'Human review of submitted project information and supporting evidence, with documented findings and limitations. Does not certify commercial clearance.',
+    cancelPath: '/certify',
   },
 }
 
@@ -137,7 +141,7 @@ export async function POST(request: NextRequest) {
       }],
       mode: 'payment' as const,
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?payment=success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/record?payment=cancelled`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}${copy.cancelPath}?payment=cancelled`,
       client_reference_id: row.id,
       ...(user.email ? { customer_email: user.email } : {}),
       // Informational only — never read for any decision.

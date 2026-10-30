@@ -7,8 +7,8 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space-grotesk' })
 
 export const metadata: Metadata = {
-  title: 'SI8 Creator Portal - Rights Verified',
-  description: 'Submit your AI video for Rights Verified verification and earn licensing revenue.',
+  title: 'SI8 Creator Portal',
+  description: 'Create and manage your Creator Record documentation and Commercial Assurance Assessment submissions.',
 }
 
 export default function RootLayout({
