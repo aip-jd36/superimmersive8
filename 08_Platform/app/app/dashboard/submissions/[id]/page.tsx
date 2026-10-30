@@ -118,7 +118,10 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
     ? (artifactRow as { record_id: string; issued_at: string })
     : null
   // CR-ARTIFACT-1C: if artifact state cannot be read, show no link at all rather than a possibly superseded legacy URL.
-  const pdfLink: string | null = artifactError ? null : issuedArtifact ? deliveryPathFor(params.id) : rightsPackage?.document_url ?? null
+  // CR-LEGACY-DOCUMENT-SECURITY-1C: a legacy Creator Record PDF is also served only through the authenticated
+  // delivery route — the raw storage URL is never rendered. The route serves Creator Records only.
+  const hasLegacyCreatorRecord = (submission as any).tier === 'creator_record' && !!rightsPackage?.document_url
+  const pdfLink: string | null = artifactError ? null : (issuedArtifact || hasLegacyCreatorRecord) ? deliveryPathFor(params.id) : null
   const pdfGeneratedAt: string | null = issuedArtifact ? issuedArtifact.issued_at : rightsPackage?.generated_at ?? null
   const pdfRecordId: string | null = issuedArtifact ? issuedArtifact.record_id : rightsPackage?.catalog_id ?? null
 

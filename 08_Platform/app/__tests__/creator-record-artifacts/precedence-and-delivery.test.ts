@@ -4,7 +4,7 @@
  */
 
 import { creatorRecordPdfComplete, issuancePath, issueCreatorRecordPdf, ArtifactIntegrityError, EligibilityUnknownError, type PrecedencePorts } from '@/lib/creator-record-artifacts/precedence'
-import { deliverCreatorRecordPdf, type DeliveryPorts } from '@/lib/creator-record-artifacts/deliver'
+import { deliverCreatorRecordPdf, resolveLegacyDocument, type DeliveryPorts, type LegacyReference } from '@/lib/creator-record-artifacts/deliver'
 import { sha256Hex, type ArtifactRow } from '@/lib/creator-record-artifacts/issue'
 
 const SUB = '3f2a9c10-1111-4222-8333-444455556666'
@@ -114,6 +114,14 @@ describe('CR-ARTIFACT-1C — issuance-preserving rollback (mode "off" ⇒ gate n
 // ───────────────────────────────────────────── delivery
 
 const BYTES = new TextEncoder().encode('%PDF-1.4 test')
+// CR-LEGACY-DOCUMENT-SECURITY-1C: a historical Creator Record PDF as the legacy generator stored it.
+const LEGACY_PATH = 'rights-packages/CR-2026-3F2A9C10_creator-record.pdf'
+const LEGACY_REF: LegacyReference = {
+  submission_id: '3f2a9c10-1111-4222-8333-444455556666',
+  document_path: LEGACY_PATH,
+  document_url: `https://example.supabase.co/storage/v1/object/public/documents/${LEGACY_PATH}`,
+}
+const LEGACY_BYTES = new TextEncoder().encode('%PDF-1.3 historical bytes')
 const ISSUED: ArtifactRow = {
   id: 'a1', submission_id: SUB, record_id: 'CR-2026-3F2A9C10', attempt_id: 'att', storage_path: `${SUB}/att.pdf`,
   sha256: sha256Hex(BYTES), byte_size: BYTES.byteLength, generator_version: 'legacy-creator-record-pdf-v1', status: 'issued', uat: true, issued_at: '2026-10-28T00:00:00Z',
@@ -127,7 +135,8 @@ function delivery(over: Partial<DeliveryPorts> = {}) {
     isAdmin: async () => false,
     findArtifact: async () => ISSUED,
     getObject: async () => BYTES,
-    legacyUrl: async () => null,
+    legacyReferences: async () => [],
+    getLegacyObject: async () => null,
     log: (e) => logs.push(e),
     ...over,
   }
@@ -171,18 +180,14 @@ describe('delivery contract', () => {
     expect(bad.headers.get('content-type')).toBe('application/json')
   })
 
-  test('legacy record (no artifact) → 302 to the existing legacy URL for its owner only', async () => {
-    const legacy = 'https://example.supabase.co/storage/v1/object/public/documents/rights-packages/x.pdf'
-    const r = await deliverCreatorRecordPdf(SUB, delivery({ findArtifact: async () => null, legacyUrl: async () => legacy }).p)
-    expect([r.status, r.headers.get('location')]).toEqual([302, legacy])
-    const other = await deliverCreatorRecordPdf(SUB, delivery({ currentUserId: async () => 'someone', findArtifact: async () => null, legacyUrl: async () => legacy }).p)
-    expect(other.status).toBe(404)
-  })
-
-  test('CR-ARTIFACT-1C: any lookup failure → 500 with no detail; never a downgrade to the legacy URL', async () => {
-    const legacy = 'https://example.supabase.co/storage/v1/object/public/documents/rights-packages/x.pdf'
-    const r = await deliverCreatorRecordPdf(SUB, delivery({ findArtifact: async () => { throw new Error('PGRST205') }, legacyUrl: async () => legacy }).p)
-    expect(r.status).toBe(500)
+  test('CR-ARTIFACT-1C: any lookup failure → 500 with no detail; never a downgrade to the legacy document', async () => {
+    let legacyRead = false
+    const r = await deliverCreatorRecordPdf(SUB, delivery({
+      findArtifact: async () => { throw new Error('PGRST205') },
+      legacyReferences: async () => ((legacyRead = true), [LEGACY_REF]),
+      getLegacyObject: async () => ((legacyRead = true), LEGACY_BYTES),
+    }).p)
+    expect([r.status, legacyRead]).toEqual([500, false])
     expect(r.headers.get('location')).toBeNull()
     expect(await r.text()).not.toMatch(/PGRST|http/)
   })
@@ -192,5 +197,108 @@ describe('delivery contract', () => {
     await deliverCreatorRecordPdf(SUB, p)
     expect(logs).toEqual([{ outcome: 'delivered', role: 'owner' }])
     expect(JSON.stringify(logs)).not.toMatch(/pdf|http|CR-|3f2a/i)
+  })
+})
+
+describe('legacy delivery (CR-LEGACY-DOCUMENT-SECURITY-1C)', () => {
+  /** Legacy-only submission (no artifact row); records every storage access. */
+  function legacy(over: Partial<DeliveryPorts> = {}) {
+    const reads = { refs: 0, legacy: [] as string[], private: 0 }
+    const d = delivery({
+      findArtifact: async () => null,
+      getObject: async () => ((reads.private++), BYTES),
+      legacyReferences: async () => ((reads.refs++), [LEGACY_REF]),
+      getLegacyObject: async (path) => ((reads.legacy.push(path)), LEGACY_BYTES),
+      ...over,
+    })
+    return { ...d, reads }
+  }
+
+  test.each([['owner', 'owner', false], ['admin', 'admin', true]])('%s → 200, original bytes streamed from the recorded path, private no-store, no redirect', async (_label, uid, admin) => {
+    const { p, reads, logs } = legacy({ currentUserId: async () => uid as string, isAdmin: async () => admin as boolean })
+    const r = await deliverCreatorRecordPdf(SUB, p)
+    expect(r.status).toBe(200)
+    expect(r.headers.get('location')).toBeNull()
+    expect(r.headers.get('content-type')).toBe('application/pdf')
+    expect(r.headers.get('cache-control')).toBe('private, no-store, max-age=0')
+    expect(r.headers.get('content-disposition')).toBe('attachment; filename="CR-2026-3F2A9C10.pdf"')
+    expect(new Uint8Array(await r.arrayBuffer())).toEqual(LEGACY_BYTES)
+    expect(reads).toEqual({ refs: 1, legacy: [LEGACY_PATH], private: 0 })
+    expect(logs).toEqual([{ outcome: 'legacy_delivered', role: admin ? 'admin' : 'owner' }])
+  })
+
+  test('anonymous → 401 and an unrelated user → 404, both before any reference or storage read', async () => {
+    const anon = legacy({ currentUserId: async () => null })
+    expect((await deliverCreatorRecordPdf(SUB, anon.p)).status).toBe(401)
+    const other = legacy({ currentUserId: async () => 'someone' })
+    const r = await deliverCreatorRecordPdf(SUB, other.p)
+    expect(r.status).toBe(404)
+    expect(await r.text()).not.toMatch(/http|documents|rights-packages/)
+    for (const x of [anon, other]) expect(x.reads).toEqual({ refs: 0, legacy: [], private: 0 })
+  })
+
+  test('no reference (or no document_url) → 404 as before, no storage read', async () => {
+    const cases: LegacyReference[][] = [[], [{ ...LEGACY_REF, document_url: null, document_path: null }]]
+    for (const refs of cases) {
+      const { p, reads } = legacy({ legacyReferences: async () => refs })
+      expect((await deliverCreatorRecordPdf(SUB, p)).status).toBe(404)
+      expect(reads.legacy).toEqual([])
+    }
+  })
+
+  const other8 = 'rights-packages/CR-2026-99999999_creator-record.pdf'
+  const INVALID: Array<[string, LegacyReference[]]> = [
+    ['ambiguous: two references', [LEGACY_REF, { ...LEGACY_REF }]],
+    ['a row belonging to another submission', [{ ...LEGACY_REF, submission_id: '99999999-1111-4222-8333-444455556666' }]],
+    ['a path naming another submission', [{ ...LEGACY_REF, document_path: other8, document_url: `https://x/documents/${other8}` }]],
+    ['path traversal', [{ ...LEGACY_REF, document_path: 'rights-packages/../../submission-files/x.pdf', document_url: 'https://x/documents/rights-packages/../../submission-files/x.pdf' }]],
+    ['outside the namespace', [{ ...LEGACY_REF, document_path: 'other/CR-2026-3F2A9C10_creator-record.pdf', document_url: 'https://x/documents/other/CR-2026-3F2A9C10_creator-record.pdf' }]],
+    ['a retired Chain of Title object', [{ ...LEGACY_REF, document_path: 'rights-packages/CR-2026-3F2A9C10_chain-of-title.pdf', document_url: 'https://x/documents/rights-packages/CR-2026-3F2A9C10_chain-of-title.pdf' }]],
+    ['malformed record id', [{ ...LEGACY_REF, document_path: 'rights-packages/CR-2026-3f2a9c10_creator-record.pdf', document_url: 'https://x/documents/rights-packages/CR-2026-3f2a9c10_creator-record.pdf' }]],
+    ['a URL without a path', [{ ...LEGACY_REF, document_path: null }]],
+    ['a path without a URL', [{ ...LEGACY_REF, document_url: null }]],
+    ['a URL that points at a different object', [{ ...LEGACY_REF, document_url: 'https://example.supabase.co/storage/v1/object/public/documents/rights-packages/CR-2026-3F2A9C10_other.pdf' }]],
+  ]
+  test.each(INVALID)('%s → 500 fail closed, no storage read, no URL in the response', async (_label, refs) => {
+    const { p, reads, logs } = legacy({ legacyReferences: async () => refs })
+    const r = await deliverCreatorRecordPdf(SUB, p)
+    expect(r.status).toBe(500)
+    expect(r.headers.get('location')).toBeNull()
+    expect(await r.text()).not.toMatch(/http|documents|rights-packages/)
+    expect(reads.legacy).toEqual([])
+    expect(logs).toEqual([{ outcome: 'legacy_reference_invalid', role: 'owner' }])
+  })
+
+  test('missing object → 500, storage error → 500, reference lookup error → 500; never a URL or redirect', async () => {
+    const cases: Partial<DeliveryPorts>[] = [
+      { getLegacyObject: async () => null },
+      { getLegacyObject: async () => { throw new Error('creator_record_artifact_legacy_download_failed:503') } },
+      { legacyReferences: async () => { throw new Error('creator_record_legacy_reference_lookup_failed') } },
+    ]
+    for (const over of cases) {
+      const r = await deliverCreatorRecordPdf(SUB, legacy(over).p)
+      expect(r.status).toBe(500)
+      expect(r.headers.get('location')).toBeNull()
+      expect(await r.text()).not.toMatch(/http|documents|rights-packages|503/)
+    }
+  })
+
+  test('a private artifact always takes precedence: issued is served from the private store, pending answers 409; legacy is never read', async () => {
+    const issued = legacy({ findArtifact: async () => ISSUED })
+    const r = await deliverCreatorRecordPdf(SUB, issued.p)
+    expect(new Uint8Array(await r.arrayBuffer())).toEqual(BYTES)
+    const pending = legacy({ findArtifact: async () => ({ ...ISSUED, status: 'pending', issued_at: null }) })
+    expect((await deliverCreatorRecordPdf(SUB, pending.p)).status).toBe(409)
+    for (const x of [issued, pending]) expect([x.reads.refs, x.reads.legacy]).toEqual([0, []])
+  })
+
+  test('delivery can only read: its ports have no issue, render, upload or write capability', () => {
+    expect(Object.keys(delivery().p).sort()).toEqual(
+      ['currentUserId', 'findArtifact', 'getLegacyObject', 'getObject', 'isAdmin', 'legacyReferences', 'log', 'submissionOwner'])
+  })
+
+  test('resolveLegacyDocument binds the object to the authorized submission from the database row', () => {
+    expect(resolveLegacyDocument(SUB, [LEGACY_REF])).toEqual({ kind: 'ok', path: LEGACY_PATH, recordId: 'CR-2026-3F2A9C10' })
+    expect(resolveLegacyDocument('99999999-1111-4222-8333-444455556666', [LEGACY_REF])).toEqual({ kind: 'invalid' })
   })
 })

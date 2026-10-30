@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileText, Loader2, Download } from 'lucide-react'
+import { deliveryPathFor } from '@/lib/creator-record-artifacts/config'
 
 type Props = {
   submissionId: string
@@ -78,7 +79,8 @@ export function GenerateRightsPackageButton({
         <CardContent>
           {existingRightsPackage.document_url ? (
             <Button asChild className="w-full">
-              <a href={existingRightsPackage.document_url} target="_blank" rel="noopener noreferrer">
+              {/* CR-LEGACY-DOCUMENT-SECURITY-1C: authenticated delivery only; never the raw storage URL. */}
+              <a href={deliveryPathFor(submissionId)} target="_blank" rel="noopener noreferrer">
                 <Download className="w-4 h-4 mr-2" />
                 Download Chain of Title
               </a>

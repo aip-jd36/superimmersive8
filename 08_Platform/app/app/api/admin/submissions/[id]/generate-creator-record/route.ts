@@ -7,6 +7,7 @@ import { issueCreatorRecordArtifact } from '@/lib/creator-record-artifacts/issue
 import { EligibilityUnknownError, issuancePath, type IssuancePath } from '@/lib/creator-record-artifacts/precedence'
 import { issueDepsFor } from '@/lib/creator-record-artifacts/production'
 import { artifactGateDecision, artifactStatus } from '@/lib/creator-record-artifacts/store'
+import { deliveryPathFor } from '@/lib/creator-record-artifacts/config'
 
 type RouteContext = { params: { id: string } }
 
@@ -43,6 +44,14 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     if ((submission as any).tier !== 'creator_record') {
       return NextResponse.json({ error: 'This endpoint is for Creator Record submissions only' }, { status: 400 })
     }
+    // CR-LEGACY-DOCUMENT-SECURITY-1C: the one issuance-eligibility rule — an approved (paid) Creator Record —
+    // now guards BOTH paths. It previously guarded only the artifact path, so the legacy path could issue a
+    // PDF for an unapproved submission. Checked before any eligibility lookup or generation.
+    // 1C.2: "paid" is checked explicitly — a Creator Record is issued after payment (PRD_RECORD_FORM), and an
+    // admin status change alone can set `approved`. A fully discounted ($0) payment is recorded as 'paid'.
+    if ((submission as any).status !== 'approved' || (submission as any).payment_status !== 'paid') {
+      return NextResponse.json({ error: 'Creator Record is not approved (paid) yet' }, { status: 409 })
+    }
 
     // CR-ARTIFACT-1: submissions on the private artifact path (an artifact row exists, or the rollout
     // gate is open and no legacy PDF exists) are resumed through the same issuance procedure as
@@ -57,9 +66,6 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: unknown ? 'Issuance eligibility could not be established; nothing was issued. Try again later.' : 'Issuance state could not be established; nothing was issued.', status: 'unavailable' }, { status: 503 })
     }
     if (path === 'artifact') {
-      if ((submission as any).status !== 'approved') {
-        return NextResponse.json({ error: 'Creator Record is not approved (paid) yet' }, { status: 409 })
-      }
       const result = await issueCreatorRecordArtifact(params.id, issueDepsFor(submission as FulfillmentSubmission))
       if (result.outcome === 'issued') return NextResponse.json({ success: true, status: 'issued', recordId: result.artifact.record_id })
       if (result.outcome === 'already_issued') {
@@ -78,7 +84,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       .maybeSingle()
 
     if (existing?.document_url && !forceRegenerate) {
-      return NextResponse.json({ error: 'Creator Record PDF already exists. It is not regenerated automatically; operator review is required.', documentUrl: existing.document_url }, { status: 400 })
+      return NextResponse.json({ error: 'Creator Record PDF already exists. It is not regenerated automatically; operator review is required.', downloadPath: deliveryPathFor(params.id) }, { status: 400 })
     }
 
     // CR-PDF-DECLARATIONS-1C: an already-issued legacy PDF is never regenerated automatically,
@@ -119,7 +125,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
 
     return NextResponse.json({
       success: true,
-      documentUrl: pdfUrl,
+      downloadPath: deliveryPathFor(params.id),
       message: 'Creator Record PDF generated successfully',
     })
   } catch (error: any) {

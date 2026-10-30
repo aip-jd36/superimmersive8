@@ -47,7 +47,7 @@ import { POST } from '@/app/api/admin/submissions/[id]/generate-creator-record/r
 const call = (force = false) => POST(new Request(`http://localhost/api/admin/submissions/s1/generate-creator-record${force ? '?force=true' : ''}`, { method: 'POST' }) as any, { params: { id: 's1' } })
 
 const submission = (c: unknown, i: unknown) => ({
-  id: 's1', tier: 'creator_record', status: 'approved', title: 'T', filmmaker_name: 'F', tools_used: '[]',
+  id: 's1', tier: 'creator_record', status: 'approved', payment_status: 'paid', title: 'T', filmmaker_name: 'F', tools_used: '[]',
   likeness_confirmation: '{}', ip_confirmation: '{}', territory_preferences: 'Global',
   custodian_declaration: c, indemnification_confirmed: i,
 })
@@ -97,7 +97,7 @@ describe('an existing issued legacy PDF', () => {
     expect(r.status).toBe(400)
     expect(await r.json()).toEqual({
       error: 'Creator Record PDF already exists. It is not regenerated automatically; operator review is required.',
-      documentUrl: 'https://legacy.example/old.pdf',
+      downloadPath: '/api/creator-record/s1/pdf',   // CR-LEGACY-DOCUMENT-SECURITY-1C: never the raw storage URL
     })
     expect(state.generated).toHaveLength(0)
   })
