@@ -49,16 +49,19 @@ beforeEach(() => {
 })
 
 describe('rollout eligibility (server-enforced, three states, fail closed)', () => {
-  test('the default mode is the internal allowlist — no customer is on the new path until cutover', () => {
-    expect(CREATOR_RECORD_ARTIFACT_ROLLOUT).toBe('allowlist')
+  // CR-MVP-STAGE-D: cutover — every new Creator Record issuance uses the private path.
+  test('the default mode is "all": every new issuance is private, decided without an allowlist lookup', async () => {
+    expect(CREATOR_RECORD_ARTIFACT_ROLLOUT).toBe('all')
+    expect(await artifactGateDecision('s')).toBe('allowlisted')
+    expect(calls).toHaveLength(0)
   })
 
-  test('explicitly allowlisted → "allowlisted"; definitively absent → "not_allowlisted"', async () => {
+  test('mode "allowlist": explicitly allowlisted → "allowlisted"; definitively absent → "not_allowlisted"', async () => {
     nextResult = { data: { submission_id: 's' }, error: null }
-    expect(await artifactGateDecision('s')).toBe('allowlisted')
+    expect(await artifactGateDecision('s', 'allowlist')).toBe('allowlisted')
     expect(calls[0].table).toBe('creator_record_artifact_uat')
     nextResult = { data: null, error: null }
-    expect(await artifactGateDecision('s')).toBe('not_allowlisted')
+    expect(await artifactGateDecision('s', 'allowlist')).toBe('not_allowlisted')
   })
 
   test.each([
@@ -68,10 +71,10 @@ describe('rollout eligibility (server-enforced, three states, fail closed)', () 
     ['statement timeout', '57014'],
     ['permission denied', '42501'],
     ['unknown error without a code', undefined],
-  ])('%s → "unknown" (never treated as not allowlisted)', async (_n, code) => {
+  ])('mode "allowlist": %s → "unknown" (never treated as not allowlisted)', async (_n, code) => {
     const spy = jest.spyOn(console, 'error').mockImplementation(() => {})
     nextResult = { data: null, error: { code } }
-    expect(await artifactGateDecision('3f2a9c10-1111-4222-8333-444455556666')).toBe('unknown')
+    expect(await artifactGateDecision('3f2a9c10-1111-4222-8333-444455556666', 'allowlist')).toBe('unknown')
     expect(JSON.stringify(spy.mock.calls)).not.toMatch(/3f2a/)
     spy.mockRestore()
   })

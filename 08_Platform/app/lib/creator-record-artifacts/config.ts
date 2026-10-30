@@ -28,7 +28,7 @@
 
 export type ArtifactRolloutMode = 'off' | 'allowlist' | 'all'
 
-export const CREATOR_RECORD_ARTIFACT_ROLLOUT: ArtifactRolloutMode = 'allowlist'
+export const CREATOR_RECORD_ARTIFACT_ROLLOUT: ArtifactRolloutMode = 'all'
 
 export const CREATOR_RECORDS_BUCKET = 'creator-records'
 export const ARTIFACTS_TABLE = 'creator_record_artifacts'
