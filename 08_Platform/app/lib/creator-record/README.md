@@ -108,3 +108,28 @@ Tests: `evidence-identity`, `evidence-examine`, `evidence-draft`, plus the bound
 ## public-uat/ — CR-V2-WORK-UAT-HARNESS-2
 
 Temporary, passwordless, synthetic-only harness at `/uat/creator-record-v2` + `POST /api/uat/creator-record-v2/draft` for cloud-browser UAT. **Closed unless armed** (`config.ts`: enabled flag + ≤ 14-day window, `null` = not armed). Reuses `buildCreatorRecordDraft` over `pilotSources()` unchanged; no upload (allowlisted fixture ids only, observations built server-side by `fixtures.ts` from the replay table); `toPublicUatView` adds the PUBLIC UAT designation and strips internal metadata without changing any interpretation. Runtime import closure excludes auth, Supabase, storage, email, payments, examination and any model (test-enforced). Operations, disable procedure and firewall recommendation: `08_Platform/implementation/CR_V2_PUBLIC_UAT_HARNESS.md`. Tests: `public-uat-harness`.
+
+## internal-draft/ — CR-OPTION-C-OC1
+
+Deterministic INTERNAL snapshot and draft PDF of a Creator Record v2, for PM and
+governance review only. **Not issued, not stored, and not reachable from any
+route, page, payment or issuance code** (test-enforced; nothing outside this
+folder imports it). Reuses `buildCreatorRecordDraft` and `formToObservations`
+unchanged; the prototype and the public UAT harness are untouched.
+
+| Path | Role |
+|---|---|
+| `canonical.ts` | Canonical JSON (sorted keys, verbatim strings; rejects `undefined`, non-finite numbers and non-plain objects) + SHA-256 |
+| `snapshot.ts` | `buildInternalDraftSnapshot` → `{ snapshot, canonical, sha256 }`. Records registry, ledger, question and mapping versions where they exist; `missing_versions` lists what is not versioned yet (never invented). Refuses issued `CR-YYYY-XXXXXXXX` ids |
+| `document-model.ts` | Pure model of what the PDF prints, only from the snapshot; refuses a snapshot whose digest, status, policy or conclusion labels do not hold |
+| `InternalDraftPDF.tsx` | @react-pdf renderer; "INTERNAL DRAFT — NOT ISSUED — NOT A CREATOR RECORD" as a fixed header and footer on every page. Generator `si8-internal-draft/creator-record-v2-pdf@0` |
+| `templates.ts` | Internal wording and identifiers |
+
+**C1 (PM decision, OC-1): neutral fallback only.** The prototype's reconciliation
+results, comparison counts and G-R2 cross-check are not carried into the snapshot,
+so the PDF cannot show them. The hash covers the canonical snapshot, not the PDF
+bytes (the PDF embeds a creation timestamp). Structure: summary, sections 1–7 of
+the draft view and the separate "Your answers beside your documents" section. This
+is not the PRD's 12-section structure, customer wording or a frozen contract.
+
+Tests: `internal-draft`.
