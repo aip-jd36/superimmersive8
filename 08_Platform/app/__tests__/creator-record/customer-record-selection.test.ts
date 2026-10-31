@@ -12,6 +12,7 @@ import type { GovernanceApproval } from '@/lib/creator-record/contract/types'
 import { loadQuestionRegistry } from '@/lib/creator-record/contract/question-registry'
 import type { CreatorRecordFactsBundle } from '@/lib/creator-record/integration/facts'
 import { selectionBasisFor, SelectionProvenanceError } from '@/lib/creator-record/integration/run-creator-record-guidance'
+import { selectReviewerClaims } from '@/lib/reviewer-lk/select-reviewer-claims'
 import { pilotSources, type CreatorRecordSources } from '@/lib/creator-record/prototype/build-draft'
 import { runDeclaredGuidance } from '@/lib/creator-record/prototype/declared-guidance'
 import { canonicalJson, sha256Hex } from '@/lib/creator-record/record-core/canonical'
@@ -266,5 +267,39 @@ describe('the prepared record carries it, deterministically and fail-closed', ()
     ['an unknown field', (r: any) => { getty(r).selection_basis.inferred = true }],
   ])('%s: refused', (_, mutate) => {
     expect(withGuidance(mutate)).toThrow(/^creator_record_v2_record_invariant: /)
+  })
+})
+
+// ───────────────────────────────────────────── CR-V2-2F: invariant against the real selector
+
+describe('selector/provenance invariant: checked against the real shared selector', () => {
+  test('on every state, each cited identity set is necessary and sufficient for the actual selection, and only selected claims carry provenance', () => {
+    let scopesChecked = 0
+    for (const state of Object.values(CASES)) {
+      const r = guidanceOf(state)
+      const f = r.guidance.facts
+      const fed = new Set(r.guidance.objectives.flatMap((o) => o.bi_input_claim_ids))
+      for (const item of r.guidance.composition.items) {
+        // Only claims the selector picked and guidance fed to BI are composed, and each carries its provenance.
+        expect(fed.has(item.claim_id)).toBe(true)
+        expect(item.selection_basis).toBeDefined()
+        const select = (tools: string[], providers: string[]) =>
+          selectReviewerClaims({ topic: item.provenance.objective.topic as never, topicClaims: TOPIC_CLAIMS_FIXTURE, activeToolIds: tools, assetProviderIds: providers, applicabilityFacts: f.applicabilityFacts }).claims.some((c) => c.claim_id === item.claim_id)
+        // The real selector, on the real identity sets, selects it.
+        expect(select(f.activeToolIds, f.assetProviderIds)).toBe(true)
+        for (const s of item.selection_basis!.scopes) {
+          const tools = s.scope === 'tool' ? s.matched_ids : f.activeToolIds
+          const providers = s.scope === 'asset_provider' ? s.matched_ids : f.assetProviderIds
+          // Sufficient: the cited ids alone keep it selected.
+          expect([item.claim_id, s.scope, 'sufficient', select(tools, providers)]).toEqual([item.claim_id, s.scope, 'sufficient', true])
+          // Necessary: without the cited ids the real selector drops it.
+          const withoutTools = s.scope === 'tool' ? f.activeToolIds.filter((id) => !s.matched_ids.includes(id)) : f.activeToolIds
+          const withoutProviders = s.scope === 'asset_provider' ? f.assetProviderIds.filter((id) => !s.matched_ids.includes(id)) : f.assetProviderIds
+          expect([item.claim_id, s.scope, 'necessary', select(withoutTools, withoutProviders)]).toEqual([item.claim_id, s.scope, 'necessary', false])
+          scopesChecked++
+        }
+      }
+    }
+    expect(scopesChecked).toBeGreaterThan(20)
   })
 })

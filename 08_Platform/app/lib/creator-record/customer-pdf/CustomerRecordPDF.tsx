@@ -72,6 +72,35 @@ function BlockView({ b }: { b: Block }) {
   }
 }
 
+const HEADING_KINDS: ReadonlySet<Block['kind']> = new Set(['heading', 'subheading', 'label'])
+/** A block short enough to keep on the same page as the heading above it. */
+const SHORT_BLOCK_CHARS = 400
+
+/**
+ * CR-V2-2F: a heading (or a run of headings) is laid out together with the block that follows it, so it is never
+ * stranded at the foot of a page (`minPresenceAhead` alone did not hold for long section headings). A long
+ * following block is not grouped, so it can still break across pages. Layout only: no block is added or changed.
+ */
+export function groupHeadings(blocks: readonly Block[]): Block[][] {
+  const groups: Block[][] = []
+  let run: Block[] = []
+  for (const b of blocks) {
+    if (HEADING_KINDS.has(b.kind)) {
+      run.push(b)
+      continue
+    }
+    const size = b.kind === 'row' ? b.label.length + b.value.length : b.text.length
+    if (run.length > 0 && size <= SHORT_BLOCK_CHARS) groups.push([...run, b])
+    else {
+      if (run.length > 0) groups.push(run)
+      groups.push([b])
+    }
+    run = []
+  }
+  if (run.length > 0) groups.push(run)
+  return groups
+}
+
 export function CustomerRecordPDF({ model }: { model: CustomerDocumentModel }) {
   const m = model.marking
   return (
@@ -87,9 +116,17 @@ export function CustomerRecordPDF({ model }: { model: CustomerDocumentModel }) {
         </Text>
         {model.sections.map((section) => (
           <View key={section.id} style={s.section}>
-            {section.blocks.map((b, i) => (
-              <BlockView key={i} b={b} />
-            ))}
+            {groupHeadings(section.blocks).map((group, i) =>
+              group.length === 1 ? (
+                <BlockView key={i} b={group[0]} />
+              ) : (
+                <View key={i} wrap={false}>
+                  {group.map((b, j) => (
+                    <BlockView key={j} b={b} />
+                  ))}
+                </View>
+              ),
+            )}
           </View>
         ))}
       </Page>
