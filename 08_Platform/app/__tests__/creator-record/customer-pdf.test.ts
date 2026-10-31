@@ -18,7 +18,7 @@ import { SOURCE_TEXT_CATEGORIES, SOURCE_TEXT_SOURCE_ID, sourceTextContent, sourc
 import { evaluateIssuanceEligibility } from '@/lib/creator-record/customer-record/eligibility'
 import { governanceSnapshotFrom } from '@/lib/creator-record/customer-record/governance-state'
 import * as TemplatesModule from '@/lib/creator-record/customer-pdf/templates'
-import { CUSTOMER_PDF_SECTIONS, CUSTOMER_PDF_TEMPLATE_ID, templateFingerprint, wordingLockViolations, type CustomerPdfTemplates, type PdfTemplateApproval } from '@/lib/creator-record/customer-pdf/templates'
+import { CUSTOMER_PDF_SECTIONS, CUSTOMER_PDF_TEMPLATE_ID, fill, templateFingerprint, wordingLockViolations, type CustomerPdfTemplates, type PdfTemplateApproval } from '@/lib/creator-record/customer-pdf/templates'
 import { buildCustomerDocument, CustomerPdfRefusal, documentModelCanonical, documentText, type Block, type CustomerDocumentInput } from '@/lib/creator-record/customer-pdf/document-model'
 import { APPLICABILITY_FACTS } from '@/lib/retrieval-engine/types'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
@@ -88,10 +88,12 @@ function placeholderTemplates(): CustomerPdfTemplates {
       contribution: { heading: `${PH}4. People, materials and your contribution`, intro: `${PH}As you told us. SI8 has not assessed these answers.`, empty: `${PH}Nothing recorded.` },
       guidance: {
         heading: `${PH}5. Commercial-use guidance`, intro: `${PH}Educational guidance selected from your own answers. SI8 has not checked them.`, empty: `${PH}No published guidance matches your answers yet.`,
-        subject_with_tool: '{topic} (tool {n})', conclusion: `${PH}How this reads`, on_what_you_told_us: `${PH}On what you told us`, depends_on: `${PH}This depends on information not established`, caveats: `${PH}Please note`,
+        item_heading: `${PH}Guidance {index}: {subject}`, subject_with_tool: '{topic} (tool {n})', conclusion: `${PH}How this reads`, on_what_you_told_us: `${PH}On what you told us`,
+        depends_on: `${PH}This depends on information not established`, unspecified_condition: `${PH}This record does not list the specific information this depends on.`, caveats: `${PH}Please note`,
       },
       open_items: {
-        heading: `${PH}6. Open items and limitations`, intro: `${PH}What this record does not establish.`, empty: `${PH}No open items.`, for_guidance: `${PH}For`,
+        heading: `${PH}6. Open items and limitations`, intro: `${PH}What this record does not establish.`, empty: `${PH}No open items.`, item_ref: `${PH}Guidance {index}`, for_guidance: `${PH}For`,
+        not_established_heading: `${PH}Information not established`, affects: `${PH}Affects guidance {items}`, unspecified_heading: `${PH}Guidance that depends on information not listed in this record`,
         what_you_told_us: `${PH}What you told us`, nothing_told: `${PH}Nothing recorded`, evidence_note: `${PH}Evidence that would help`, status: `${PH}Status`, sufficiency: `${PH}Evidence`,
         not_sure_heading: `${PH}Questions you answered "Not sure"`, documents_heading: `${PH}Documents`, documents_not_provided: `${PH}No documents were provided or examined.`,
         limitations_heading: `${PH}Limitations`, limitations: [`${PH}Guidance appears only where SI8 has published it for what you told us. Where a tool or topic has none, this record says nothing about it.`],
@@ -334,6 +336,86 @@ describe('template approval: exactly the approved, fingerprinted set, separate f
     const dep = clone(t)
     dep.dependency_codes.status.open = 'Met'
     expect(wordingLockViolations(dep)).toEqual(['dependency_codes.status.open'])
+  })
+})
+
+// ───────────────────────────────────────────── CR-V2-2C presentation hardening
+
+describe('guidance numbering and open conditions', () => {
+  const materials = () => ({ ...state('Pro'), answers: { ...ANS, M0: ['music', 'stock'], M1: ['artlist'], M2: ['no'], M3: ['getty'], M3D: ['yes'] } })
+  const twoToolsNotSure = () => ({ ...state('not_sure'), tools: [state('not_sure').tools[0], { T1: ['kling'], T3: ['Standard'], T4: ['May 2026'] }] })
+  const section = (m: ReturnType<typeof buildCustomerDocument>, id: string) => m.sections.find((s) => s.id === id)!.blocks
+  const rows = (blocks: Block[]) => blocks.filter((b): b is Extract<Block, { kind: 'row' }> => b.kind === 'row')
+
+  test('every guidance item is numbered in record order, and open conditions point to that number', () => {
+    const t = placeholderTemplates()
+    const rec = prepare({ state: materials() })
+    const m = buildCustomerDocument(docInput({ templates: t }, rec))
+    const headings = section(m, 'guidance').filter((b) => b.kind === 'subheading').map((b) => (b as { text: string }).text)
+    expect(headings.map((h) => /^\[Placeholder\] Guidance (\d+): /.exec(h)?.[1])).toEqual(rec.record.guidance.items.map((_, n) => String(n + 1)))
+    const forRows = rows(section(m, 'open_items')).filter((b) => b.label === t.sections.open_items.for_guidance).map((b) => b.value)
+    const expected = rec.record.guidance.items.flatMap((i, n) => i.dependency_rows.map(() => `${PH}Guidance ${n + 1}`))
+    expect(forRows).toEqual(expected)
+    expect(expected.length).toBe(4)
+  })
+
+  test('section 6 lists every open condition, nothing is dropped, and the count is the number of entries listed', () => {
+    const t = placeholderTemplates()
+    for (const st of [state('Pro'), twoToolsNotSure(), materials()]) {
+      const rec = prepare({ state: st })
+      const m = buildCustomerDocument(docInput({ templates: t }, rec))
+      const open = section(m, 'open_items')
+      const items = rec.record.guidance.items
+      const deps = items.reduce((n, i) => n + i.dependency_rows.length, 0)
+      const facts = new Set(items.flatMap((i) => i.applicability.material_unresolved.map((q) => `${q.fact}|${q.tool ?? ''}`)))
+      const unspecified = items.filter((i) => i.conclusion === 'relevant_applicability_unresolved' && i.applicability.material_unresolved.length === 0 && i.dependency_rows.length === 0)
+      const notSure = rec.record.declarations.answers.filter((a) => a.values.some((v) => v.kind === 'not_sure'))
+      for (const i of items) for (const d of i.dependency_rows) expect(open.some((b) => b.kind === 'subheading' && b.text === d.label)).toBe(true)
+      const factRows = rows(open).filter((b) => b.value.startsWith(`${PH}Affects guidance `))
+      expect(factRows).toHaveLength(facts.size)
+      for (const [n, i] of items.entries()) {
+        for (const q of i.applicability.material_unresolved) {
+          expect(factRows.some((r) => r.label === t.fact_labels[q.fact] && r.value.replace(`${PH}Affects guidance `, '').split(', ').includes(String(n + 1)))).toBe(true)
+        }
+      }
+      for (const i of unspecified) expect(open.some((b) => b.kind === 'bullet' && b.text === `${PH}Guidance ${items.indexOf(i) + 1}`)).toBe(true)
+      expect(section(m, 'guidance').filter((b) => b.kind === 'paragraph' && b.text === t.sections.guidance.unspecified_condition)).toHaveLength(unspecified.length)
+      const total = deps + facts.size + unspecified.length + notSure.length
+      const counts = t.sections.about.counts.open_items
+      expect(section(m, 'about')).toContainEqual({ kind: 'paragraph', text: fill(total === 1 ? counts.one : counts.other, { n: total }), from: 'template' })
+      expect(open.some((b) => b.kind === 'paragraph' && b.text === t.sections.open_items.empty)).toBe(total === 0)
+    }
+  })
+
+  test('the three fixture families exercise every kind of open condition', () => {
+    const kinds = new Set<string>()
+    for (const st of [twoToolsNotSure(), materials()]) {
+      const rec = prepare({ state: st })
+      for (const i of rec.record.guidance.items) {
+        if (i.dependency_rows.length > 0) kinds.add('dependency')
+        if (i.applicability.material_unresolved.length > 0) kinds.add('not_established')
+        if (i.conclusion === 'relevant_applicability_unresolved' && i.applicability.material_unresolved.length === 0 && i.dependency_rows.length === 0) kinds.add('unspecified')
+      }
+      if (rec.record.declarations.answers.some((a) => a.values.some((v) => v.kind === 'not_sure'))) kinds.add('not_sure')
+    }
+    expect(kinds).toEqual(new Set(['dependency', 'not_established', 'unspecified', 'not_sure']))
+  })
+
+  test('dependencies are never shown as resolved: only the approved open and not-assessed labels are used', () => {
+    const t = placeholderTemplates()
+    const rec = prepare({ state: materials() })
+    const m = buildCustomerDocument(docInput({ templates: t }, rec))
+    const statusValues = rows(section(m, 'open_items')).filter((b) => b.label === t.sections.open_items.status || b.label === t.sections.open_items.sufficiency).map((b) => b.value)
+    expect(new Set(statusValues)).toEqual(new Set([t.dependency_codes.status.open, t.dependency_codes.sufficiency.not_assessed]))
+    expect(documentText(m).join('\n')).not.toMatch(/\b(resolved|satisfied|confirmed|met)\b/i)
+  })
+
+  test('page numbering: the page style sets no line height (a page-level line height stops the page number being drawn)', () => {
+    const src = readFileSync(path.resolve(__dirname, '../../lib/creator-record/customer-pdf/CustomerRecordPDF.tsx'), 'utf8')
+    const pageStyle = /\n  page: \{([^}]*)\}/.exec(src)?.[1] ?? ''
+    expect(pageStyle).toMatch(/paddingTop/)
+    expect(pageStyle).not.toMatch(/lineHeight/)
+    expect(src).toMatch(/style=\{s\.pageNumber\} fixed render=/)
   })
 })
 

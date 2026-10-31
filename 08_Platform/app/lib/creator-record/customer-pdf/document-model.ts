@@ -186,8 +186,32 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
     return found
   }
 
+  // CR-V2-2C: every condition the record leaves open is listed in section 6, and the "open items" count is
+  // the number of entries listed there (a mechanical display count, never an assessment):
+  //   - each governed dependency row (status `open`, sufficiency `not_assessed`);
+  //   - each fact not established, grouped by fact and tool code, with the guidance items it affects;
+  //   - guidance whose conclusion is "applicability unresolved" but whose record lists no condition;
+  //   - each question answered "Not sure".
+  const items = r.guidance.items
+  const indexOf = new Map(items.map((i, n) => [i, n + 1]))
+  const ref = (i: RecordView['guidance']['items'][number]) => fill(S.open_items.item_ref, { index: indexOf.get(i)! })
+  const factLabel = (fact: string) => {
+    if (!Object.prototype.hasOwnProperty.call(t.fact_labels, fact)) throw new CustomerPdfRefusal('fact_unlabelled', fact)
+    return t.fact_labels[fact]
+  }
   const notSure = r.declarations.answers.filter((a) => a.values.some((v) => v.kind === 'not_sure'))
-  const dependencyRows = r.guidance.items.flatMap((i) => i.dependency_rows.map((d) => ({ item: i, row: d })))
+  const dependencyRows = items.flatMap((i) => i.dependency_rows.map((d) => ({ item: i, row: d })))
+  const notEstablished = new Map<string, { fact: string; indexes: number[] }>()
+  for (const i of items) {
+    for (const q of i.applicability.material_unresolved) {
+      const key = `${q.fact}\u0000${q.tool ?? ''}`
+      const entry = notEstablished.get(key) ?? { fact: q.fact, indexes: [] }
+      if (!entry.indexes.includes(indexOf.get(i)!)) entry.indexes.push(indexOf.get(i)!)
+      notEstablished.set(key, entry)
+    }
+  }
+  const unspecified = items.filter((i) => i.conclusion === 'relevant_applicability_unresolved' && i.applicability.material_unresolved.length === 0 && i.dependency_rows.length === 0)
+  const openCount = dependencyRows.length + notEstablished.size + unspecified.length + notSure.length
 
   // Guidance subject: the approved topic label, with the declared tool block when every basis entry names the same one.
   const subjectOf = (i: RecordView['guidance']['items'][number]): string => {
@@ -206,7 +230,7 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
         ...S.about.intro.map(tpl),
         tpl(count(S.about.counts.answers, r.declarations.answers.length)),
         tpl(count(S.about.counts.guidance, r.guidance.items.length)),
-        tpl(count(S.about.counts.open_items, dependencyRows.length + notSure.length)),
+        tpl(count(S.about.counts.open_items, openCount)),
       ],
     },
     { id: 'project', blocks: [heading(S.project.heading), tpl(S.project.intro), ...(inSection('project').length > 0 ? inSection('project').flatMap(answerBlocks) : [tpl(S.project.empty)])] },
@@ -232,7 +256,7 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
         ...(r.guidance.items.length === 0
           ? [tpl(S.guidance.empty)]
           : r.guidance.items.flatMap((i): Block[] => [
-              { kind: 'subheading', text: subjectOf(i), from: 'template' },
+              { kind: 'subheading', text: fill(S.guidance.item_heading, { index: indexOf.get(i)!, subject: subjectOf(i) }), from: 'template' },
               row(S.guidance.conclusion, t.conclusion_labels[i.conclusion], 'template'),
               { kind: 'paragraph', text: i.explanation, from: 'record' },
               ...(i.declared_applicability_basis.length > 0
@@ -249,12 +273,10 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
               ...(i.applicability.material_unresolved.length > 0
                 ? [
                     { kind: 'label', text: S.guidance.depends_on, from: 'template' } as Block,
-                    ...i.applicability.material_unresolved.map((q): Block => {
-                      if (!Object.prototype.hasOwnProperty.call(t.fact_labels, q.fact)) throw new CustomerPdfRefusal('fact_unlabelled', q.fact)
-                      return { kind: 'bullet', text: t.fact_labels[q.fact], from: 'template' }
-                    }),
+                    ...i.applicability.material_unresolved.map((q): Block => ({ kind: 'bullet', text: factLabel(q.fact), from: 'template' })),
                   ]
                 : []),
+              ...(unspecified.includes(i) ? [{ kind: 'paragraph', text: S.guidance.unspecified_condition, from: 'template' } as Block] : []),
               ...(i.caveats.length > 0 ? [{ kind: 'label', text: S.guidance.caveats, from: 'template' } as Block, ...i.caveats.map((c): Block => ({ kind: 'bullet', text: c.text, from: 'record' }))] : []),
             ])),
       ],
@@ -264,16 +286,23 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
       blocks: [
         heading(S.open_items.heading),
         tpl(S.open_items.intro),
-        ...(dependencyRows.length === 0 && notSure.length === 0 ? [tpl(S.open_items.empty)] : []),
+        ...(openCount === 0 ? [tpl(S.open_items.empty)] : []),
         ...dependencyRows.flatMap(({ item, row: d }): Block[] => [
           { kind: 'subheading', text: d.label, from: 'record' },
-          row(S.open_items.for_guidance, subjectOf(item), 'template'),
+          row(S.open_items.for_guidance, ref(item), 'template'),
           { kind: 'label', text: S.open_items.what_you_told_us, from: 'template' },
           ...(d.declarations.length > 0 ? d.declarations.map((x): Block => ({ kind: 'bullet', text: x.answer_verbatim, from: 'record' })) : [{ kind: 'bullet', text: S.open_items.nothing_told, from: 'template' } as Block]),
           ...(d.evidence_note !== null ? [row(S.open_items.evidence_note, d.evidence_note)] : []),
           row(S.open_items.status, t.dependency_codes.status[d.status], 'template'),
           row(S.open_items.sufficiency, t.dependency_codes.sufficiency[d.sufficiency], 'template'),
         ]),
+        ...(notEstablished.size > 0
+          ? [
+              { kind: 'subheading', text: S.open_items.not_established_heading, from: 'template' } as Block,
+              ...Array.from(notEstablished.values()).map((e): Block => ({ kind: 'row', label: factLabel(e.fact), label_from: 'template', value: fill(S.open_items.affects, { items: e.indexes.join(', ') }), value_from: 'template' })),
+            ]
+          : []),
+        ...(unspecified.length > 0 ? [{ kind: 'subheading', text: S.open_items.unspecified_heading, from: 'template' } as Block, ...unspecified.map((i): Block => ({ kind: 'bullet', text: ref(i), from: 'template' }))] : []),
         ...(notSure.length > 0 ? [{ kind: 'subheading', text: S.open_items.not_sure_heading, from: 'template' } as Block, ...notSure.map((a): Block => ({ kind: 'bullet', text: a.question, from: 'record' }))] : []),
         { kind: 'subheading', text: S.open_items.documents_heading, from: 'template' },
         tpl(S.open_items.documents_not_provided),

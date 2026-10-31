@@ -196,6 +196,8 @@ is approved, so it renders only in tests** (test-enforced).
 |---|---|
 | `templates.ts` | The PDF template contract: data only (strings, lists, `{slot}`s, closed code→label maps, question→section placement), fingerprinted as the SHA-256 of its canonical JSON. Its `PdfTemplateApproval` (id, version, fingerprint, record schema, lifecycle, authority, date) is separate from the questionnaire Source Text Approval: a template change never touches a prepared record. PRD §5.4 wording lock enforced on every template string |
 | `document-model.ts` | `buildCustomerDocument`: verifies the record first, reads it by exact keys, checks the templates against their approval, then maps it mechanically into blocks tagged `record` / `issuance` / `template`. Unknown conclusion, topic, fact, code, document state or unmapped question refuses (`CustomerPdfRefusal`); nothing is inferred |
-| `CustomerRecordPDF.tsx` | Mechanical @react-pdf layout of the model; 64-hex digests in monospace, never broken |
+| `CustomerRecordPDF.tsx` | Mechanical @react-pdf layout of the model; 64-hex digests in monospace, never broken. CR-V2-2C: no lineHeight on the page (it stops the fixed page number being drawn); each text style sets fontSize with its lineHeight; headings are kept with what follows |
+
+CR-V2-2C: guidance items are numbered and section 6 refers to them by number; section 6 lists every condition the record leaves open (dependency rows, facts not established grouped by fact, guidance with no listed condition, "Not sure" answers), and the open-items count is the number of entries listed there (a display count, not an assessment).
 
 OD-17 (verbatim governed statements) is not implemented. Tests: `customer-pdf`.

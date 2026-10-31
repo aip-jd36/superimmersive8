@@ -19,22 +19,27 @@ import { buildCustomerDocument, type Block, type CustomerDocumentInput, type Cus
 Font.registerHyphenationCallback((word) => [word])
 
 const s = StyleSheet.create({
-  page: { paddingTop: 64, paddingBottom: 56, paddingHorizontal: 48, fontSize: 9.5, fontFamily: 'Helvetica', color: '#1c1c1e', lineHeight: 1.35 },
+  // No lineHeight on the page: a page-level lineHeight stops @react-pdf drawing the fixed page-number text
+  // (CR-V2-2C, reproduced in isolation). Line height is set on each text style instead (on a wrapping View it
+  // is applied as fixed gaps). A numeric lineHeight multiplies the text's OWN fontSize (default 18, not the page's),
+  // so every style that sets lineHeight also sets fontSize.
+  page: { paddingTop: 64, paddingBottom: 56, paddingHorizontal: 48, fontSize: 9.5, fontFamily: 'Helvetica', color: '#1c1c1e' },
   header: { position: 'absolute', top: 22, left: 48, right: 48, flexDirection: 'row', justifyContent: 'space-between', borderBottomWidth: 0.75, borderBottomColor: '#233f66', paddingBottom: 5 },
-  stamp: { fontSize: 7.5, fontFamily: 'Helvetica-Bold', color: '#233f66', letterSpacing: 0.4, maxWidth: 380 },
+  stamp: { fontSize: 7.5, fontFamily: 'Helvetica-Bold', color: '#233f66', letterSpacing: 0.4, maxWidth: 380, lineHeight: 1.3 },
   headerId: { fontSize: 7.5, color: '#4a4a52' },
   footerText: { position: 'absolute', bottom: 22, left: 48, right: 140, fontSize: 7, color: '#83837e' },
+  pageNumber: { position: 'absolute', bottom: 22, left: 48, right: 48, textAlign: 'right', fontSize: 7, color: '#83837e' },
   section: { marginBottom: 12 },
   heading: { fontSize: 12.5, fontFamily: 'Helvetica-Bold', color: '#182c48', marginTop: 6, marginBottom: 5 },
   subheading: { fontSize: 10.5, fontFamily: 'Helvetica-Bold', marginTop: 7, marginBottom: 3 },
-  label: { fontFamily: 'Helvetica-Bold', marginTop: 4, marginBottom: 1 },
-  paragraph: { marginBottom: 4 },
+  label: { fontFamily: 'Helvetica-Bold', marginTop: 4, marginBottom: 1, fontSize: 9.5, lineHeight: 1.35 },
+  paragraph: { marginBottom: 4, fontSize: 9.5, lineHeight: 1.35 },
   bulletRow: { flexDirection: 'row', marginBottom: 2, paddingLeft: 6 },
   bulletMark: { width: 9 },
-  bulletText: { flex: 1 },
+  bulletText: { flex: 1, fontSize: 9.5, lineHeight: 1.35 },
   row: { flexDirection: 'row', marginBottom: 2 },
-  rowLabel: { width: 170, color: '#4a4a52', paddingRight: 8 },
-  rowValue: { flex: 1 },
+  rowLabel: { width: 170, color: '#4a4a52', paddingRight: 8, fontSize: 9.5, lineHeight: 1.35 },
+  rowValue: { flex: 1, fontSize: 9.5, lineHeight: 1.35 },
   // A 64-hex digest must print on one line, unbroken: never split or hyphenated.
   rowDigest: { flex: 1, fontFamily: 'Courier', fontSize: 7.5 },
 })
@@ -42,11 +47,12 @@ const s = StyleSheet.create({
 function BlockView({ b }: { b: Block }) {
   switch (b.kind) {
     case 'heading':
-      return <Text style={s.heading}>{b.text}</Text>
+      // A heading is never left alone at the foot of a page.
+      return <Text style={s.heading} minPresenceAhead={60}>{b.text}</Text>
     case 'subheading':
-      return <Text style={s.subheading}>{b.text}</Text>
+      return <Text style={s.subheading} minPresenceAhead={40}>{b.text}</Text>
     case 'label':
-      return <Text style={s.label}>{b.text}</Text>
+      return <Text style={s.label} minPresenceAhead={20}>{b.text}</Text>
     case 'paragraph':
       return <Text style={s.paragraph}>{b.text}</Text>
     case 'bullet':
@@ -71,9 +77,7 @@ export function CustomerRecordPDF({ model }: { model: CustomerDocumentModel }) {
   return (
     <Document title={model.meta.title} subject={model.meta.subject} creator={model.meta.creator} producer={model.meta.producer}>
       <Page size="A4" style={s.page}>
-        {/* OPEN LAYOUT DEFECT (CR-V2-2B): this page label is drawn for a short document but not in the full synthetic
-            document in local tests. It carries no record content; resolve before any customer rendering. */}
-        <Text style={{ position: 'absolute', bottom: 22, left: 48, right: 48, textAlign: 'right', fontSize: 7, color: '#83837e' }} fixed render={({ pageNumber, totalPages }) => m.page_label.replace('{page}', String(pageNumber)).replace('{pages}', String(totalPages))} />
+        <Text style={s.pageNumber} fixed render={({ pageNumber, totalPages }) => m.page_label.replace('{page}', String(pageNumber)).replace('{pages}', String(totalPages))} />
         <View style={s.header} fixed>
           <Text style={s.stamp}>{m.stamp}</Text>
           <Text style={s.headerId}>{m.record_id}</Text>
