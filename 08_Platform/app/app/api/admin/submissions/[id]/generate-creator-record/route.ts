@@ -8,6 +8,7 @@ import { EligibilityUnknownError, issuancePath, type IssuancePath } from '@/lib/
 import { issueDepsFor } from '@/lib/creator-record-artifacts/production'
 import { artifactGateDecision, artifactStatus } from '@/lib/creator-record-artifacts/store'
 import { deliveryPathFor } from '@/lib/creator-record-artifacts/config'
+import { selectCreatorRecordRenderer, type CreatorRecordRenderer } from '@/lib/creator-record-artifacts/renderers'
 
 type RouteContext = { params: { id: string } }
 
@@ -53,6 +54,15 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: 'Creator Record is not approved (paid) yet' }, { status: 409 })
     }
 
+    // CR-OPTION-C-OC2A: the renderer is selected from the stored submission only (nothing in the request can
+    // choose it), before any eligibility lookup. An unsupported product family issues nothing on either path.
+    let renderer: CreatorRecordRenderer
+    try {
+      renderer = selectCreatorRecordRenderer(submission as FulfillmentSubmission)
+    } catch {
+      return NextResponse.json({ error: 'This Creator Record cannot be issued by this build; nothing was issued.', status: 'unsupported_product_family' }, { status: 409 })
+    }
+
     // CR-ARTIFACT-1: submissions on the private artifact path (an artifact row exists, or the rollout
     // gate is open and no legacy PDF exists) are resumed through the same issuance procedure as
     // fulfilment. An issued artifact is immutable: `force` never replaces it. Legacy submissions
@@ -66,7 +76,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: unknown ? 'Issuance eligibility could not be established; nothing was issued. Try again later.' : 'Issuance state could not be established; nothing was issued.', status: 'unavailable' }, { status: 503 })
     }
     if (path === 'artifact') {
-      const result = await issueCreatorRecordArtifact(params.id, issueDepsFor(submission as FulfillmentSubmission))
+      const result = await issueCreatorRecordArtifact(params.id, issueDepsFor(submission as FulfillmentSubmission, renderer))
       if (result.outcome === 'issued') return NextResponse.json({ success: true, status: 'issued', recordId: result.artifact.record_id })
       if (result.outcome === 'already_issued') {
         return NextResponse.json({ error: 'This Creator Record has already been issued and cannot be replaced.', status: 'issued', recordId: result.artifact.record_id }, { status: 409 })
@@ -94,6 +104,10 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
         error: 'This Creator Record PDF has already been issued and is not regenerated automatically. Nothing was changed; operator review is required.',
         status: 'regeneration_review_required',
       }, { status: 409 })
+    }
+
+    if (!renderer.legacy_path_permitted) {
+      return NextResponse.json({ error: 'This Creator Record cannot be issued by this build; nothing was issued.', status: 'unsupported_product_family' }, { status: 409 })
     }
 
     // Parse JSONB fields — handle both string (legacy) and already-parsed (JSONB) cases

@@ -15,12 +15,16 @@
  *   - Fail closed: any storage or database error other than a definite
  *     "object not found" is thrown and retried later; a stored object whose
  *     digest differs from the record is never accepted or overwritten.
+ *   - CR-OPTION-C-OC2A: the renderer is selected per submission by the caller
+ *     (`./renderers`) and records its own generator version. A pending row is
+ *     resumed only by a renderer of the family that recorded it; otherwise
+ *     nothing is rendered, stored or issued (`ArtifactFamilyMismatchError`).
  *
  * Pure apart from the injected ports (unit-tested with fakes).
  */
 
 import { createHash } from 'node:crypto'
-import { ARTIFACT_GENERATOR_VERSION, recordIdFor, storagePathFor } from './config'
+import { recordIdFor, storagePathFor } from './config'
 
 export type ArtifactStatus = 'pending' | 'issued'
 
@@ -57,11 +61,21 @@ export interface ObjectStore {
   put(path: string, bytes: Uint8Array): Promise<'stored' | 'exists'>
 }
 
+/** The renderer selected for this submission (`./renderers`), bound to it. */
+export interface IssueRenderer {
+  family: string
+  /** Recorded on the row whenever this renderer renders (insert or pending takeover). */
+  generator_version: string
+  /** Whether a row recorded with `version` belongs to this renderer's family. */
+  ownsGeneratorVersion(version: string): boolean
+  /** Render the PDF bytes for a record id. */
+  render(recordId: string): Promise<Uint8Array>
+}
+
 export interface IssueDeps {
   artifacts: ArtifactTable
   objects: ObjectStore
-  /** Render the PDF bytes for a record id. */
-  render(recordId: string): Promise<Uint8Array>
+  renderer: IssueRenderer
   newAttemptId(): string
   now(): Date
   /** True when issued through the internal UAT allowlist (before cutover). */
@@ -86,6 +100,13 @@ export type IssueResult =
 
 export const sha256Hex = (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex')
 
+/** A pending row recorded by another product family than the one selected for its submission. Nothing was changed. */
+export class ArtifactFamilyMismatchError extends Error {
+  constructor(readonly artifactId: string) {
+    super('creator_record_artifact_family_mismatch')
+  }
+}
+
 export async function issueCreatorRecordArtifact(submissionId: string, deps: IssueDeps): Promise<IssueResult> {
   const existing = await deps.artifacts.find(submissionId)
   if (existing?.status === 'issued') return { outcome: 'already_issued', artifact: existing }
@@ -93,7 +114,7 @@ export async function issueCreatorRecordArtifact(submissionId: string, deps: Iss
 
   const recordId = recordIdFor(submissionId, deps.now())
   const attemptId = deps.newAttemptId()
-  const bytes = await deps.render(recordId)
+  const bytes = await deps.renderer.render(recordId)
   const inserted = await deps.artifacts.insertPending({
     submission_id: submissionId,
     record_id: recordId,
@@ -101,7 +122,7 @@ export async function issueCreatorRecordArtifact(submissionId: string, deps: Iss
     storage_path: storagePathFor(submissionId, attemptId),
     sha256: sha256Hex(bytes),
     byte_size: bytes.byteLength,
-    generator_version: ARTIFACT_GENERATOR_VERSION,
+    generator_version: deps.renderer.generator_version,
     uat: deps.uat,
   })
   if (inserted.result === 'conflict') return { outcome: 'contended' }
@@ -109,14 +130,16 @@ export async function issueCreatorRecordArtifact(submissionId: string, deps: Iss
 }
 
 async function resumePending(row: ArtifactRow, deps: IssueDeps): Promise<IssueResult> {
+  // Checked before any read, render or write: a row is never completed or taken over by another family's renderer.
+  if (!deps.renderer.ownsGeneratorVersion(row.generator_version)) throw new ArtifactFamilyMismatchError(row.id)
   const stored = await deps.objects.get(row.storage_path)
   if (stored) return verifyAndIssue(row, stored, deps)
 
   // The pending attempt's object never landed: take over with a NEW attempt and path.
   const attemptId = deps.newAttemptId()
-  const bytes = await deps.render(row.record_id)
-  // The bytes are re-rendered by the current generator, so the row records that generator (CR-PDF-CLAIMS-1C.1).
-  const next = { attempt_id: attemptId, storage_path: storagePathFor(row.submission_id, attemptId), sha256: sha256Hex(bytes), byte_size: bytes.byteLength, generator_version: ARTIFACT_GENERATOR_VERSION }
+  const bytes = await deps.renderer.render(row.record_id)
+  // The bytes are re-rendered by the family's current generator, so the row records that generator (CR-PDF-CLAIMS-1C.1).
+  const next = { attempt_id: attemptId, storage_path: storagePathFor(row.submission_id, attemptId), sha256: sha256Hex(bytes), byte_size: bytes.byteLength, generator_version: deps.renderer.generator_version }
   if (!(await deps.artifacts.takeOver(row.id, row.attempt_id, next))) return { outcome: 'contended' }
   deps.onEvent?.({ event: 'takeover', artifactId: row.id })
   return storeAndIssue({ ...row, ...next }, bytes, deps)

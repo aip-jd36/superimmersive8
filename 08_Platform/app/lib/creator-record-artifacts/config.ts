@@ -40,6 +40,8 @@ export const UAT_ALLOWLIST_TABLE = 'creator_record_artifact_uat'
  * v3 (CR-PDF-CLAIMS-1C): customer-facing claims corrected (Assessment notice, status stamp, attestation wording).
  * A row keeps the version that produced its bytes: issued rows are immutable, and a pending takeover
  * re-renders and records the current version.
+ * CR-OPTION-C-OC2A: this is the v1 family's current version. It is recorded only through the v1
+ * renderer in ./renderers, never read directly by the issuance code.
  */
 export const ARTIFACT_GENERATOR_VERSION = 'legacy-creator-record-pdf-v3'
 

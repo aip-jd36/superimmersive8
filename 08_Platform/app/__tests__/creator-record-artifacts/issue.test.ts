@@ -71,9 +71,15 @@ function setup() {
   const deps = (over: Partial<IssueDeps> = {}): IssueDeps => ({
     artifacts: table,
     objects,
-    render: async (recordId) => {
-      renders++
-      return new TextEncoder().encode(`%PDF ${recordId} render ${renders}`)
+    // CR-OPTION-C-OC2A: the renderer is supplied with its family and generator version (the v1 values).
+    renderer: {
+      family: 'creator_record_v1',
+      generator_version: 'legacy-creator-record-pdf-v3',
+      ownsGeneratorVersion: (version: string) => /^legacy-creator-record-pdf-v[1-9][0-9]*$/.test(version),
+      render: async (recordId: string) => {
+        renders++
+        return new TextEncoder().encode(`%PDF ${recordId} render ${renders}`)
+      },
     },
     newAttemptId: () => `00000000-0000-4000-8000-${String(++ids).padStart(12, '0')}`,
     now: () => new Date('2026-10-28T12:00:00Z'),
