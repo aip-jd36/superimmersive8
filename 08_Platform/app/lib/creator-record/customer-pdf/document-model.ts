@@ -98,7 +98,8 @@ const guidanceItem = obj({
   provenance: obj({
     claim: obj({ claim_id: str, last_verified: str }),
     objective: obj({ objective_id: str, version: int, topic: str, origin: str }),
-    bounded_interpretation: WITHHELD,
+    // CR-V2-2H: read (not interpreted) to say accurately why an item is qualified.
+    bounded_interpretation: obj({ goal_id: str, status: str, citation: oneOf(['supporting', 'unresolved_relevant'] as const) }),
     publication: obj({ entry_id: str, version: int, approver: str, decision_date: str, refresh_by: str }),
   }),
 })
@@ -211,8 +212,22 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
       notEstablished.set(key, entry)
     }
   }
-  const unspecified = items.filter((i) => i.conclusion === 'relevant_applicability_unresolved' && i.applicability.material_unresolved.length === 0 && i.dependency_rows.length === 0)
-  const openCount = dependencyRows.length + notEstablished.size + unspecified.length + notSure.length
+  // CR-V2-2H: why an unresolved item lists no condition of its own, from the record alone (nothing is re-interpreted).
+  // Bounded Interpretation's status is goal-level and is the ceiling for every item of that objective. When an item's own
+  // conditions are met, it is cited as supporting, and its objective's interpretation is unresolved, it is qualified only by
+  // that topic-level status: it is attributed to the other items of the same objective that do list open conditions. If no
+  // such item is in the record, the condition is genuinely not represented and the item stays "unspecified".
+  const hasListedCondition = (i: RecordView['guidance']['items'][number]) => i.applicability.material_unresolved.length > 0 || i.dependency_rows.length > 0
+  const qualifiedBy = new Map<RecordView['guidance']['items'][number], number[]>()
+  for (const i of items) {
+    const bi = i.provenance.bounded_interpretation
+    if (i.conclusion !== 'relevant_applicability_unresolved' || i.applicability.status !== 'met' || hasListedCondition(i)) continue
+    if (bi.citation !== 'supporting' || bi.status !== 'relevant_applicability_unresolved') continue
+    const by = items.filter((o) => o !== i && o.provenance.objective.objective_id === i.provenance.objective.objective_id && hasListedCondition(o)).map((o) => indexOf.get(o)!)
+    if (by.length > 0) qualifiedBy.set(i, by)
+  }
+  const unspecified = items.filter((i) => i.conclusion === 'relevant_applicability_unresolved' && !hasListedCondition(i) && !qualifiedBy.has(i))
+  const openCount = dependencyRows.length + notEstablished.size + qualifiedBy.size + unspecified.length + notSure.length
 
   // CR-V2-2E: the declarations a guidance item was selected on, exactly as the record cites them.
   const selectionObservations = (i: RecordView['guidance']['items'][number]) =>
@@ -271,6 +286,7 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
               { kind: 'subheading', text: fill(S.guidance.item_heading, { index: indexOf.get(i)!, subject: subjectOf(i) }), from: 'template' },
               row(S.guidance.conclusion, t.conclusion_labels[i.conclusion], 'template'),
               { kind: 'paragraph', text: i.explanation, from: 'record' },
+              { kind: 'paragraph', text: S.guidance.item_limitation, from: 'template' },
               ...(i.selection_basis.scopes.length > 0
                 ? [
                     { kind: 'label', text: S.guidance.selected_because, from: 'template' } as Block,
@@ -297,6 +313,7 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
                     ...i.applicability.material_unresolved.map((q): Block => ({ kind: 'bullet', text: factLabel(q.fact), from: 'template' })),
                   ]
                 : []),
+              ...(qualifiedBy.has(i) ? [{ kind: 'paragraph', text: fill(S.guidance.qualified_by_topic, { items: qualifiedBy.get(i)!.join(', ') }), from: 'template' } as Block] : []),
               ...(unspecified.includes(i) ? [{ kind: 'paragraph', text: S.guidance.unspecified_condition, from: 'template' } as Block] : []),
               ...(i.caveats.length > 0 ? [{ kind: 'label', text: S.guidance.caveats, from: 'template' } as Block, ...i.caveats.map((c): Block => ({ kind: 'bullet', text: c.text, from: 'record' }))] : []),
             ])),
@@ -321,6 +338,12 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
           ? [
               { kind: 'subheading', text: S.open_items.not_established_heading, from: 'template' } as Block,
               ...Array.from(notEstablished.values()).map((e): Block => ({ kind: 'row', label: factLabel(e.fact), label_from: 'template', value: fill(S.open_items.affects, { items: e.indexes.join(', ') }), value_from: 'template' })),
+            ]
+          : []),
+        ...(qualifiedBy.size > 0
+          ? [
+              { kind: 'subheading', text: S.open_items.topic_qualified_heading, from: 'template' } as Block,
+              ...Array.from(qualifiedBy.entries()).map(([i, by]): Block => ({ kind: 'row', label: ref(i), label_from: 'template', value: fill(S.open_items.qualified_by, { items: by.join(', ') }), value_from: 'template' })),
             ]
           : []),
         ...(unspecified.length > 0 ? [{ kind: 'subheading', text: S.open_items.unspecified_heading, from: 'template' } as Block, ...unspecified.map((i): Block => ({ kind: 'bullet', text: ref(i), from: 'template' }))] : []),
@@ -360,13 +383,16 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
           row(L.wording, st.source_id),
           row(L.wording_version, String(st.version)),
           row(L.wording_digest, st.content_sha256),
-          row(L.wording_authority, st.authority),
-          row(L.wording_decision_date, st.decision_date),
           row(L.templates, t.template_id, 'template'),
           row(L.templates_version, String(t.version), 'template'),
           row(L.templates_fingerprint, fingerprint, 'template'),
           ...(r.sources.publications.length > 0 ? [{ kind: 'subheading', text: P.publications_heading, from: 'template' } as Block] : []),
-          ...r.sources.publications.flatMap((p) => [row(L.publication, p.entry_id), row(L.publication_version, String(p.version)), row(L.publication_next_review, p.refresh_by)]),
+          // CR-V2-2H: each publication by the guidance item it supports; no internal ledger id is printed.
+          ...r.sources.publications.flatMap((p): Block[] => {
+            const item = items.find((i) => i.claim_id === p.claim_id)
+            if (!item) throw new CustomerPdfRefusal('record_unsupported', 'publication without its guidance item')
+            return [{ kind: 'label', text: ref(item), from: 'template' }, row(L.publication_version, String(p.version)), row(L.publication_next_review, p.refresh_by)]
+          }),
         ]
       })(),
     },

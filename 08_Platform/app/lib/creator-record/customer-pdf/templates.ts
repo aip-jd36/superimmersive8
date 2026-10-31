@@ -58,10 +58,19 @@ const templateSpec = obj({
     project: obj({ heading: str, intro: str, empty: str }),
     tools: obj({ heading: str, intro: str, tool_heading: str, empty: str }),
     contribution: obj({ heading: str, intro: str, empty: str }),
-    guidance: obj({ heading: str, intro: str, empty: str, item_heading: str, subject_with_tool: str, conclusion: str, selected_because: str, on_what_you_told_us: str, depends_on: str, unspecified_condition: str, caveats: str }),
+    guidance: obj({
+      heading: str, intro: str, empty: str, item_heading: str, subject_with_tool: str, conclusion: str,
+      // CR-V2-2H: printed after every guidance explanation (educational guidance, not a project-specific determination).
+      item_limitation: str,
+      selected_because: str, on_what_you_told_us: str, depends_on: str, unspecified_condition: str,
+      // CR-V2-2H: an item whose own conditions are met, qualified only by the topic-level interpretation; {items} = the open items it is qualified by.
+      qualified_by_topic: str,
+      caveats: str,
+    }),
     open_items: obj({
       heading: str, intro: str, empty: str, item_ref: str, for_guidance: str, what_you_told_us: str, nothing_told: str, evidence_note: str, status: str, sufficiency: str,
-      not_established_heading: str, affects: str, unspecified_heading: str, not_sure_heading: str, documents_heading: str, documents_not_provided: str, limitations_heading: str, limitations: arr(str),
+      not_established_heading: str, affects: str, unspecified_heading: str, topic_qualified_heading: str, qualified_by: str,
+      not_sure_heading: str, documents_heading: str, documents_not_provided: str, limitations_heading: str, limitations: arr(str),
     }),
     not_done: obj({ heading: str, lines: arr(str) }),
     provenance: obj({
@@ -69,9 +78,10 @@ const templateSpec = obj({
       labels: obj({
         record_id: str, issued_on: str, prepared_ref: str, record_version: str, prepared_on: str, captured_at: str, snapshot: str,
         record_schema: str, record_schema_version: str, builder: str, builder_version: str, registry_version: str, ledger_version: str,
-        wording: str, wording_version: str, wording_digest: str, wording_authority: str, wording_decision_date: str,
+        // CR-V2-2H: no approver name and no internal ledger identifier is printed (both stay in the verified record).
+        wording: str, wording_version: str, wording_digest: str,
         templates: str, templates_version: str, templates_fingerprint: str,
-        publication: str, publication_version: str, publication_next_review: str,
+        publication_version: str, publication_next_review: str,
       }),
     }),
   }),

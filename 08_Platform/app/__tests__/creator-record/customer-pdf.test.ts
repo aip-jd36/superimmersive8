@@ -90,10 +90,13 @@ function placeholderTemplates(): CustomerPdfTemplates {
         heading: `${PH}5. Commercial-use guidance`, intro: `${PH}Educational guidance selected from your own answers. SI8 has not checked them.`, empty: `${PH}No published guidance matches your answers yet.`,
         item_heading: `${PH}Guidance {index}: {subject}`, subject_with_tool: '{topic} (tool {n})', conclusion: `${PH}How this reads`, selected_because: `${PH}Selected because you told us`, on_what_you_told_us: `${PH}On what you told us`,
         depends_on: `${PH}This depends on information not established`, unspecified_condition: `${PH}This record does not list the specific information this depends on.`, caveats: `${PH}Please note`,
+        item_limitation: `${PH}This describes published terms. It does not confirm your plan, your account or that your use is covered.`,
+        qualified_by_topic: `${PH}Its own conditions match your answers; it is qualified by open points in guidance {items}.`,
       },
       open_items: {
         heading: `${PH}6. Open items and limitations`, intro: `${PH}What this record does not establish.`, empty: `${PH}No open items.`, item_ref: `${PH}Guidance {index}`, for_guidance: `${PH}For`,
         not_established_heading: `${PH}Information not established`, affects: `${PH}Affects guidance {items}`, unspecified_heading: `${PH}Guidance that depends on information not listed in this record`,
+        topic_qualified_heading: `${PH}Guidance qualified by other open points`, qualified_by: `${PH}Qualified by guidance {items}`,
         what_you_told_us: `${PH}What you told us`, nothing_told: `${PH}Nothing recorded`, evidence_note: `${PH}Evidence that would help`, status: `${PH}Status`, sufficiency: `${PH}Evidence`,
         not_sure_heading: `${PH}Questions you answered "Not sure"`, documents_heading: `${PH}Documents`, documents_not_provided: `${PH}No documents were provided or examined.`,
         limitations_heading: `${PH}Limitations`, limitations: [`${PH}Guidance appears only where SI8 has published it for what you told us. Where a tool or topic has none, this record says nothing about it.`],
@@ -104,9 +107,9 @@ function placeholderTemplates(): CustomerPdfTemplates {
         labels: {
           record_id: `${PH}Record id`, issued_on: `${PH}Issued on`, prepared_ref: `${PH}Preparation reference`, record_version: `${PH}Record version`, prepared_on: `${PH}Prepared on`, captured_at: `${PH}Answers captured at`, snapshot: `${PH}Snapshot SHA-256`,
           record_schema: `${PH}Record schema`, record_schema_version: `${PH}Record schema version`, builder: `${PH}Builder`, builder_version: `${PH}Builder version`, registry_version: `${PH}Question registry`, ledger_version: `${PH}Publication ledger`,
-          wording: `${PH}Questionnaire wording`, wording_version: `${PH}Wording version`, wording_digest: `${PH}Wording digest`, wording_authority: `${PH}Wording authority`, wording_decision_date: `${PH}Wording decision date`,
+          wording: `${PH}Questionnaire wording`, wording_version: `${PH}Wording version`, wording_digest: `${PH}Wording digest`,
           templates: `${PH}PDF templates`, templates_version: `${PH}Template version`, templates_fingerprint: `${PH}Template fingerprint`,
-          publication: `${PH}Guidance entry`, publication_version: `${PH}Entry version`, publication_next_review: `${PH}Next review by`,
+          publication_version: `${PH}Entry version`, publication_next_review: `${PH}Next review by`,
         },
       },
     },
@@ -347,6 +350,13 @@ describe('guidance numbering and open conditions', () => {
   const section = (m: ReturnType<typeof buildCustomerDocument>, id: string) => m.sections.find((s) => s.id === id)!.blocks
   const rows = (blocks: Block[]) => blocks.filter((b): b is Extract<Block, { kind: 'row' }> => b.kind === 'row')
 
+  const itemTexts = (m: ReturnType<typeof buildCustomerDocument>, n: number) => {
+    const g = section(m, 'guidance')
+    const start = g.findIndex((b) => b.kind === 'subheading' && b.text.startsWith(`${PH}Guidance ${n}: `))
+    const next = g.findIndex((b, i) => i > start && b.kind === 'subheading' && /^\[Placeholder\] Guidance \d+: /.test(b.text))
+    return g.slice(start, next < 0 ? undefined : next).map((b) => (b.kind === 'row' ? `${b.label} ${b.value}` : b.text))
+  }
+
   test('every guidance item is numbered in record order, and open conditions point to that number', () => {
     const t = placeholderTemplates()
     const rec = prepare({ state: materials() })
@@ -359,6 +369,21 @@ describe('guidance numbering and open conditions', () => {
     expect(expected.length).toBe(4)
   })
 
+  // CR-V2-2H: expected classification, computed independently from the record.
+  const classify = (items: CustomerRecordV2['guidance']['items']) => {
+    const listed = (i: CustomerRecordV2['guidance']['items'][number]) => i.applicability.material_unresolved.length > 0 || i.dependency_rows.length > 0
+    const qualified = new Map<number, number[]>()
+    const unspecified: number[] = []
+    items.forEach((i, n) => {
+      if (i.conclusion !== 'relevant_applicability_unresolved' || listed(i)) return
+      const bi = i.provenance.bounded_interpretation
+      const by = items.map((o, k) => [o, k + 1] as const).filter(([o]) => o !== i && o.provenance.objective.objective_id === i.provenance.objective.objective_id && listed(o)).map(([, k]) => k)
+      if (i.applicability.status === 'met' && bi.citation === 'supporting' && bi.status === 'relevant_applicability_unresolved' && by.length > 0) qualified.set(n + 1, by)
+      else unspecified.push(n + 1)
+    })
+    return { qualified, unspecified }
+  }
+
   test('section 6 lists every open condition, nothing is dropped, and the count is the number of entries listed', () => {
     const t = placeholderTemplates()
     for (const st of [state('Pro'), twoToolsNotSure(), materials()]) {
@@ -368,7 +393,7 @@ describe('guidance numbering and open conditions', () => {
       const items = rec.record.guidance.items
       const deps = items.reduce((n, i) => n + i.dependency_rows.length, 0)
       const facts = new Set(items.flatMap((i) => i.applicability.material_unresolved.map((q) => `${q.fact}|${q.tool ?? ''}`)))
-      const unspecified = items.filter((i) => i.conclusion === 'relevant_applicability_unresolved' && i.applicability.material_unresolved.length === 0 && i.dependency_rows.length === 0)
+      const { qualified, unspecified } = classify(items)
       const notSure = rec.record.declarations.answers.filter((a) => a.values.some((v) => v.kind === 'not_sure'))
       for (const i of items) for (const d of i.dependency_rows) expect(open.some((b) => b.kind === 'subheading' && b.text === d.label)).toBe(true)
       const factRows = rows(open).filter((b) => b.value.startsWith(`${PH}Affects guidance `))
@@ -378,27 +403,81 @@ describe('guidance numbering and open conditions', () => {
           expect(factRows.some((r) => r.label === t.fact_labels[q.fact] && r.value.replace(`${PH}Affects guidance `, '').split(', ').includes(String(n + 1)))).toBe(true)
         }
       }
-      for (const i of unspecified) expect(open.some((b) => b.kind === 'bullet' && b.text === `${PH}Guidance ${items.indexOf(i) + 1}`)).toBe(true)
+      for (const [n, by] of qualified) expect(rows(open)).toContainEqual({ kind: 'row', label: `${PH}Guidance ${n}`, label_from: 'template', value: fill(t.sections.open_items.qualified_by, { items: by.join(', ') }), value_from: 'template' })
+      for (const n of unspecified) expect(open.some((b) => b.kind === 'bullet' && b.text === `${PH}Guidance ${n}`)).toBe(true)
       expect(section(m, 'guidance').filter((b) => b.kind === 'paragraph' && b.text === t.sections.guidance.unspecified_condition)).toHaveLength(unspecified.length)
-      const total = deps + facts.size + unspecified.length + notSure.length
+      const total = deps + facts.size + qualified.size + unspecified.length + notSure.length
       const counts = t.sections.about.counts.open_items
       expect(section(m, 'about')).toContainEqual({ kind: 'paragraph', text: fill(total === 1 ? counts.one : counts.other, { n: total }), from: 'template' })
       expect(open.some((b) => b.kind === 'paragraph' && b.text === t.sections.open_items.empty)).toBe(total === 0)
     }
   })
 
-  test('the three fixture families exercise every kind of open condition', () => {
+  test('the fixture families exercise every kind of open condition', () => {
     const kinds = new Set<string>()
     for (const st of [twoToolsNotSure(), materials()]) {
       const rec = prepare({ state: st })
+      const { qualified } = classify(rec.record.guidance.items)
       for (const i of rec.record.guidance.items) {
         if (i.dependency_rows.length > 0) kinds.add('dependency')
         if (i.applicability.material_unresolved.length > 0) kinds.add('not_established')
-        if (i.conclusion === 'relevant_applicability_unresolved' && i.applicability.material_unresolved.length === 0 && i.dependency_rows.length === 0) kinds.add('unspecified')
       }
+      if (qualified.size > 0) kinds.add('topic_qualified')
       if (rec.record.declarations.answers.some((a) => a.values.some((v) => v.kind === 'not_sure'))) kinds.add('not_sure')
     }
-    expect(kinds).toEqual(new Set(['dependency', 'not_established', 'unspecified', 'not_sure']))
+    expect(kinds).toEqual(new Set(['dependency', 'not_established', 'topic_qualified', 'not_sure']))
+  })
+
+  test('R3: guidance whose own conditions are met is attributed to the other items of its topic, never to "not listed"', () => {
+    const t = placeholderTemplates()
+    const rec = prepare({ state: { ...state('Pro'), tools: [state('Pro').tools[0], { T1: ['kling'], T3: ['Standard'], T4: ['May 2026'] }] } })
+    const items = rec.record.guidance.items
+    const m = buildCustomerDocument(docInput({ templates: t }, rec))
+    const member = items.findIndex((i) => i.claim_id === 'CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1') + 1
+    for (const id of ['CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-PRO-001-v1', 'CLAIM-KLING-COMMERCIAL-USE-BASELINE-001-v1']) {
+      const n = items.findIndex((i) => i.claim_id === id) + 1
+      const item = items[n - 1]
+      // The conclusion is unchanged (still the topic-level ceiling); only its explanation is accurate.
+      expect(item.conclusion).toBe('relevant_applicability_unresolved')
+      expect(item.applicability.status).toBe('met')
+      expect(itemTexts(m, n)).toContain(fill(t.sections.guidance.qualified_by_topic, { items: String(member) }))
+      expect(itemTexts(m, n)).not.toContain(t.sections.guidance.unspecified_condition)
+    }
+  })
+
+  test('a condition genuinely not represented in the record is still said to be not listed', () => {
+    const t = placeholderTemplates()
+    // Remove the only item that lists a condition on the topic; the remaining unresolved items are then genuinely unexplained.
+    const base = prepare({ state: { ...state('Pro'), tools: [{ T1: ['kling'], T3: ['Standard'], T4: ['May 2026'] }] } })
+    const r = clone(base.record) as any
+    r.guidance.items = r.guidance.items.filter((i: any) => i.claim_id !== 'CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1')
+    r.sources.publications = r.sources.publications.filter((p: any) => p.claim_id !== 'CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1')
+    r.sources.authority_digests = r.sources.authority_digests.filter((d: any) => d.id !== 'CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1' && !(d.kind === 'publication_entry' && d.id.includes('KLING-COMMERCIAL-USE-MEMBER')))
+    const c = canonicalJson(r)
+    const m = buildCustomerDocument(docInput({ templates: t }, { ...base, record: r, canonical: c, sha256: sha256Hex(c) }))
+    expect(itemTexts(m, 1)).toContain(t.sections.guidance.unspecified_condition)
+    expect(itemTexts(m, 1).some((x) => x.startsWith(t.sections.guidance.qualified_by_topic.split('{')[0]))).toBe(false)
+  })
+
+  test('every guidance explanation is followed by the limitation line', () => {
+    const t = placeholderTemplates()
+    for (const st of [state('Pro'), twoToolsNotSure(), materials()]) {
+      const rec = prepare({ state: st })
+      const g = section(buildCustomerDocument(docInput({ templates: t }, rec)), 'guidance')
+      for (const item of rec.record.guidance.items) {
+        const at = g.findIndex((b) => b.kind === 'paragraph' && b.text === item.explanation)
+        expect(g[at + 1]).toEqual({ kind: 'paragraph', text: t.sections.guidance.item_limitation, from: 'template' })
+      }
+    }
+  })
+
+  test('no approver name or internal ledger identifier is printed; both stay in the verified record', () => {
+    const rec = prepare({ state: materials() })
+    const text = documentText(buildCustomerDocument(docInput({}, rec))).join('\n')
+    const hidden = [rec.record.sources.source_text.authority, ...rec.record.sources.publications.flatMap((p) => [p.entry_id, p.approver, p.claim_id]), ...rec.record.guidance.items.map((i) => i.claim_id)]
+    for (const h of hidden) expect([h, text.includes(h)]).toEqual([h, false])
+    expect(rec.record.sources.source_text.authority.length).toBeGreaterThan(0)
+    expect(rec.record.sources.publications.every((p) => p.entry_id && p.approver)).toBe(true)
   })
 
   test('dependencies are never shown as resolved: only the approved open and not-assessed labels are used', () => {
