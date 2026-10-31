@@ -58,7 +58,7 @@ const templateSpec = obj({
     project: obj({ heading: str, intro: str, empty: str }),
     tools: obj({ heading: str, intro: str, tool_heading: str, empty: str }),
     contribution: obj({ heading: str, intro: str, empty: str }),
-    guidance: obj({ heading: str, intro: str, empty: str, item_heading: str, subject_with_tool: str, conclusion: str, on_what_you_told_us: str, depends_on: str, unspecified_condition: str, caveats: str }),
+    guidance: obj({ heading: str, intro: str, empty: str, item_heading: str, subject_with_tool: str, conclusion: str, selected_because: str, on_what_you_told_us: str, depends_on: str, unspecified_condition: str, caveats: str }),
     open_items: obj({
       heading: str, intro: str, empty: str, item_ref: str, for_guidance: str, what_you_told_us: str, nothing_told: str, evidence_note: str, status: str, sufficiency: str,
       not_established_heading: str, affects: str, unspecified_heading: str, not_sure_heading: str, documents_heading: str, documents_not_provided: str, limitations_heading: str, limitations: arr(str),

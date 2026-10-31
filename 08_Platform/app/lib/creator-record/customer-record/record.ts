@@ -55,15 +55,16 @@ export const CUSTOMER_RECORD_SCHEMA = 'si8/creator-record-v2-record'
 /**
  * v2 (CR-V2-1A): content-addressed source text provenance; acknowledgements with their wording.
  * v3 (CR-V2-1C): builder provenance; content digest of every referenced governed entry.
+ * v4 (CR-V2-2E): selection provenance on each guidance item (`selection_basis`).
  */
-export const CUSTOMER_RECORD_SCHEMA_VERSION = 3
+export const CUSTOMER_RECORD_SCHEMA_VERSION = 4
 /**
  * The code that prepared the record. Technical provenance only: it grants no
  * commercial authority, and an issuance check can only refuse an unsupported
  * builder, never be satisfied by one. Raise the version with any change to how
  * a record is built or to the guidance pipeline it runs.
  */
-export const CUSTOMER_RECORD_BUILDER = { id: 'si8/creator-record-v2-record-builder', version: 1 } as const
+export const CUSTOMER_RECORD_BUILDER = { id: 'si8/creator-record-v2-record-builder', version: 2 } as const
 /** The content contract: what may appear in the record (no generated prose). Bump with any content change. */
 export const CUSTOMER_RECORD_CONTENT = { id: 'si8/creator-record-v2-record-content', version: 1, generated_text: 'none' } as const
 /** Issued Creator Record ids (CR-YYYY-8 hex): assigned at issuance, never part of a prepared record. */
@@ -105,6 +106,12 @@ export interface CustomerGuidanceItem {
   applicability: GuidanceItem['applicability']
   declared_applicability_basis: GuidanceItem['declared_applicability_basis']
   dependency_rows: GuidanceItem['dependency_rows']
+  /**
+   * CR-V2-2E: why this claim was selected: for each scope the governed claim declares, the matched canonical
+   * ids and exactly the declared observations that contributed them. Selection evidence only; empty `scopes`
+   * means the claim is not scope-restricted.
+   */
+  selection_basis: { scopes: { scope: 'tool' | 'asset_provider'; matched_ids: string[]; observation_ids: string[] }[] }
   provenance: GuidanceItem['provenance']
 }
 
@@ -183,6 +190,8 @@ const guidanceItem = obj({
   applicability: obj({ status: oneOf(['met', 'unresolved'] as const), material_unresolved: arr(jsonValue) }),
   declared_applicability_basis: arr(jsonValue),
   dependency_rows: arr(dependencyRow),
+  // CR-V2-2E: required. A guidance item whose selection evidence was not captured refuses.
+  selection_basis: obj({ scopes: arr(obj({ scope: oneOf(['tool', 'asset_provider'] as const), matched_ids: arr(str), observation_ids: arr(str) })) }),
   provenance: obj({
     claim: obj({ claim_id: str, last_verified: str }),
     objective: obj({ objective_id: str, version: int, topic: str, origin: oneOf(['creator_record_system_objective'] as const) }),
@@ -275,6 +284,7 @@ export function buildCustomerRecord(input: CustomerRecordInput): CustomerRecordR
 
   // 5. Guidance: projected exactly, then re-checked against the sources and BI.
   const claims = new Map(input.topicClaims.map((c) => [c.claim_id, c]))
+  const observationById = new Map(observations.map((o) => [o.observation_id, o]))
   const caveatText = text.caveats
   const items: CustomerGuidanceItem[] = guidance.composition.items.map((raw, i) => {
     let item: ReturnType<typeof guidanceItem>
@@ -304,6 +314,20 @@ export function buildCustomerRecord(input: CustomerRecordInput): CustomerRecordR
       if (!permitted) throw new CustomerRecordInvariantError(`conclusion stronger than permitted for ${item.claim_id}`)
     }
     if (entry.applicability_policy === 'met_only' && item.conclusion !== 'relevant_on_declared_facts') throw new CustomerRecordInvariantError(`ledger policy requires met for ${item.claim_id}`)
+    // CR-V2-2E: selection evidence must be grounded in this record's own declarations and match the governed scopes.
+    const scopedAs = new Set<string>([...(claim.tool_scope !== null ? ['tool'] : []), ...(claim.provider_scope !== null ? ['asset_provider'] : [])])
+    const sb = item.selection_basis.scopes
+    if (sb.length !== scopedAs.size || sb.some((x) => !scopedAs.has(x.scope)) || new Set(sb.map((x) => x.scope)).size !== sb.length) throw new CustomerRecordInvariantError(`selection basis does not match the governed scopes of ${item.claim_id}`)
+    for (const x of sb) {
+      if (x.matched_ids.length === 0 || x.observation_ids.length === 0) throw new CustomerRecordInvariantError(`empty selection basis for ${item.claim_id}`)
+      const governedScope = (x.scope === 'tool' ? claim.tool_scope : claim.provider_scope) ?? []
+      if (x.matched_ids.some((id) => !governedScope.includes(id))) throw new CustomerRecordInvariantError(`selection basis id outside the governed scope of ${item.claim_id}`)
+      const kind = x.scope === 'tool' ? 'tool_identity' : 'asset_provider_identity'
+      for (const id of x.observation_ids) {
+        const o = observationById.get(id)
+        if (!o || o.target.kind !== kind) throw new CustomerRecordInvariantError(`selection basis for ${item.claim_id} cites an observation that is not a ${kind} declaration in this record`)
+      }
+    }
     for (const row of item.dependency_rows) {
       if (!Object.prototype.hasOwnProperty.call(text.dependency_labels, row.dependency_id) || row.label !== text.dependency_labels[row.dependency_id]) throw new CustomerRecordInvariantError(`dependency label is not the approved wording for ${row.dependency_id}`)
     }
@@ -317,6 +341,7 @@ export function buildCustomerRecord(input: CustomerRecordInput): CustomerRecordR
       applicability: raw.applicability,
       declared_applicability_basis: raw.declared_applicability_basis,
       dependency_rows: raw.dependency_rows,
+      selection_basis: { scopes: item.selection_basis.scopes.map((x) => ({ scope: x.scope, matched_ids: [...x.matched_ids], observation_ids: [...x.observation_ids] })) },
       provenance: raw.provenance,
     }
   })

@@ -48,11 +48,13 @@ const INTEGRATION_RUNTIME_ALLOWED = [
   '@/lib/production-review/build-production-facts',
   // LK-EXCLUSION-ACTIVATION-READINESS-1: the shared governed-value contract (ADR-001 §L.9).
   '@/lib/retrieval-engine/governed-applicability-values',
+  // CR-V2-2E: the governed scope predicates (toolScopeMatches / providerScopeMatches), applied at the selection
+  // boundary to capture selection provenance. Pure; already in the runtime closure through select-reviewer-claims.
+  '@/lib/retrieval-engine/lookup-topic-claims',
   '@/lib/reviewer-lk/select-reviewer-claims',
 ]
 const INTEGRATION_TYPE_ONLY_ALLOWED = [
   '@/lib/bounded-interpretation/types',
-  '@/lib/retrieval-engine/lookup-topic-claims',
   '@/lib/retrieval-engine/types',
   '@/lib/reviewer-lk/types',
   '@/types/interview-engine',

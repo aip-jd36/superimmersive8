@@ -152,7 +152,7 @@ Tests: `internal-draft`, `internal-draft-projection`.
 ## customer-record/ — CR-V2-1
 
 Deterministic, fail-closed preparation of the Creator Record v2 **customer record**
-(`si8/creator-record-v2-record` v3, status `prepared_not_issued`). **Not approved
+(`si8/creator-record-v2-record` v4, status `prepared_not_issued`). **Not approved
 customer content, not issued, and not reachable from any route, payment or
 issuance code** (test-enforced). Pure: no database, payment, Storage, email, PDF,
 clock or randomness.
@@ -182,7 +182,9 @@ issuance eligibility (not implemented) are separate. Its reference is a preparat
 an issued `CR-` id. An explicitly approved empty ledger gives a declarations-only
 record (PRD OD-14 is a PM decision).
 
-Tests: `customer-record`, `customer-record-eligibility`, `record-core-golden` (record-core output pinned to the pre-extraction code).
+**CR-V2-2E selection provenance (schema v4, builder v2).** Each guidance item carries `selection_basis`: for every scope the governed claim declares (tool, asset provider), the matched canonical ids and exactly the declared observations that contributed them. It is captured at the selection boundary (`selectionBasisFor` in `integration/run-creator-record-guidance.ts`) by applying the governed scope predicates to the same id sets the selector used and tracing each id to the declarations that produced it in the same run; an id with no contributing declaration, or a scoped claim with no matched id, refuses. It is selection evidence only: never an applicability input, never attached to a dependency, never a change to a conclusion. Claim selection and composition are unchanged (pinned pre-change snapshot).
+
+Tests: `customer-record`, `customer-record-eligibility`, `customer-record-selection`, `record-core-golden` (record-core output pinned to the pre-extraction code).
 
 ## customer-pdf/ — CR-V2-2B
 

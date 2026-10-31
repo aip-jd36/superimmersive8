@@ -94,6 +94,7 @@ const guidanceItem = obj({
   applicability: obj({ status: oneOf(['met', 'unresolved'] as const), material_unresolved: arr(requirement) }),
   declared_applicability_basis: arr(basis),
   dependency_rows: arr(dependencyRow),
+  selection_basis: obj({ scopes: arr(obj({ scope: oneOf(['tool', 'asset_provider'] as const), matched_ids: arr(str), observation_ids: arr(str) })) }),
   provenance: obj({
     claim: obj({ claim_id: str, last_verified: str }),
     objective: obj({ objective_id: str, version: int, topic: str, origin: str }),
@@ -213,11 +214,22 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
   const unspecified = items.filter((i) => i.conclusion === 'relevant_applicability_unresolved' && i.applicability.material_unresolved.length === 0 && i.dependency_rows.length === 0)
   const openCount = dependencyRows.length + notEstablished.size + unspecified.length + notSure.length
 
-  // Guidance subject: the approved topic label, with the declared tool block when every basis entry names the same one.
+  // CR-V2-2E: the declarations a guidance item was selected on, exactly as the record cites them.
+  const selectionObservations = (i: RecordView['guidance']['items'][number]) =>
+    i.selection_basis.scopes.flatMap((sc) =>
+      sc.observation_ids.map((id) => {
+        const o = observations.get(id)
+        if (!o) throw new CustomerPdfRefusal('record_unsupported', `selection observation ${id}`)
+        return o
+      }),
+    )
+
+  // Guidance subject: the approved topic label, with the declared tool block when every cited declaration
+  // (applicability basis and selection basis) belongs to the same one.
   const subjectOf = (i: RecordView['guidance']['items'][number]): string => {
     const topic = i.provenance.objective.topic
     if (!Object.prototype.hasOwnProperty.call(t.topic_labels, topic)) throw new CustomerPdfRefusal('topic_unlabelled', topic)
-    const instances = Array.from(new Set(i.declared_applicability_basis.map((b) => b.instance)))
+    const instances = Array.from(new Set([...i.declared_applicability_basis.map((b) => b.instance), ...selectionObservations(i).map((o) => o.instance)]))
     const m = instances.length === 1 && instances[0] !== null ? /^tool-(\d+)$/.exec(instances[0]) : null
     return m ? fill(S.guidance.subject_with_tool, { topic: t.topic_labels[topic], n: Number(m[1]) }) : t.topic_labels[topic]
   }
@@ -259,6 +271,15 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
               { kind: 'subheading', text: fill(S.guidance.item_heading, { index: indexOf.get(i)!, subject: subjectOf(i) }), from: 'template' },
               row(S.guidance.conclusion, t.conclusion_labels[i.conclusion], 'template'),
               { kind: 'paragraph', text: i.explanation, from: 'record' },
+              ...(i.selection_basis.scopes.length > 0
+                ? [
+                    { kind: 'label', text: S.guidance.selected_because, from: 'template' } as Block,
+                    ...selectionObservations(i).map((o): Block => {
+                      const a = answerFor(o.question.q_id, o.instance)
+                      return { kind: 'row', label: a.question, label_from: 'record', value: o.answer_verbatim, value_from: 'record' }
+                    }),
+                  ]
+                : []),
               ...(i.declared_applicability_basis.length > 0
                 ? [
                     { kind: 'label', text: S.guidance.on_what_you_told_us, from: 'template' } as Block,

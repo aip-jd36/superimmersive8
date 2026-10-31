@@ -84,7 +84,7 @@ describe('approved and valid authorities', () => {
 
   test('the record carries builder provenance and a content digest for every governed entry it uses', () => {
     const { record } = prepare()
-    expect(record.schema_version).toBe(3)
+    expect(record.schema_version).toBe(CUSTOMER_RECORD_SCHEMA_VERSION)
     expect(record.builder).toEqual(CUSTOMER_RECORD_BUILDER)
     const refs = issuanceReferences(record)
     for (const k of DIGESTED_KINDS) expect(refs.some((x) => x.kind === k && /^[0-9a-f]{64}$/.test(x.content_sha256 ?? ''))).toBe(true)
@@ -253,7 +253,7 @@ describe('withdrawn, superseded, retired and pending authority in the current so
   })
 
   test('an unsupported builder or record schema blocks issuance; a supported one grants nothing else', () => {
-    const builders = [{ id: CUSTOMER_RECORD_BUILDER.id, version: 2 }]
+    const builders = [{ id: CUSTOMER_RECORD_BUILDER.id, version: CUSTOMER_RECORD_BUILDER.version + 1 }]
     expect(codes(evaluate(governance({ support: { ...CURRENT_ISSUANCE_SUPPORT, builders } }), rec))).toEqual(['builder:version_not_current'])
     expect(codes(evaluate(governance({ support: { ...CURRENT_ISSUANCE_SUPPORT, record_schemas: [] } }), rec))).toEqual(['record_schema:reference_missing'])
     // Supported builder and schema, but withdrawn wording: still ineligible.

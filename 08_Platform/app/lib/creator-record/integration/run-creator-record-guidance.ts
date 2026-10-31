@@ -20,10 +20,11 @@
 import { buildBoundedInterpretations } from '@/lib/bounded-interpretation/build-bounded-interpretation'
 import type { InterpretationStatus } from '@/lib/bounded-interpretation/types'
 import { reviewerClaimToBiResult } from '@/lib/hrr/bi-adapters'
+import { providerScopeMatches, toolScopeMatches } from '@/lib/retrieval-engine/lookup-topic-claims'
 import type { TopicClaim } from '@/lib/retrieval-engine/types'
 import { selectReviewerClaims } from '@/lib/reviewer-lk/select-reviewer-claims'
 import type { ReviewerLkClaim, ReviewerLkWithheld } from '@/lib/reviewer-lk/types'
-import { composeGuidance, type Composition, type ObjectiveEvaluation, type SelectedClaim } from '../contract/compose'
+import { composeGuidance, type Composition, type ObjectiveEvaluation, type ScopeSelectionBasis, type SelectedClaim, type SelectionBasis } from '../contract/compose'
 import type { DeclaredObservation } from '../contract/provenance'
 import { authorizePublication, type PublicationLedgerEntry, type PublicationRefusalReason } from '../contract/publication-ledger'
 import type { IsoDate } from '../contract/types'
@@ -63,6 +64,39 @@ export interface CreatorRecordGuidanceResult {
   governance_gaps: GovernanceGap[]
 }
 
+/** The selection evidence could not be established exactly. Nothing is guessed. */
+export class SelectionProvenanceError extends Error {
+  constructor(readonly claim_id: string, reason: string) {
+    super(`creator_record_selection_provenance: ${claim_id}: ${reason}`)
+  }
+}
+
+/**
+ * CR-V2-2E — why a scope-restricted claim was selected, captured at the
+ * selection boundary. The selector received exactly `facts.activeToolIds` and
+ * `facts.assetProviderIds` and kept the claim because the governed scope
+ * predicates (`toolScopeMatches`, `providerScopeMatches`) held. Here the same
+ * predicates are applied to each id of those same sets, and each matched id is
+ * traced to the declared observations that contributed it (`facts.provenance`,
+ * the record of how those sets were built in this run). Nothing is inferred
+ * from co-occurrence: an id that no observation contributed, or a scoped claim
+ * with no matched id, refuses.
+ */
+export function selectionBasisFor(claim: TopicClaim, facts: CreatorRecordFactsBundle): SelectionBasis {
+  const scopes: ScopeSelectionBasis[] = []
+  const capture = (scope: ScopeSelectionBasis['scope'], scoped: boolean, ids: readonly string[], matches: (id: string) => boolean, contributed: readonly { observation_id: string; id: string | null }[]) => {
+    if (!scoped) return
+    const matched_ids = ids.filter(matches).sort()
+    if (matched_ids.length === 0) throw new SelectionProvenanceError(claim.claim_id, `selected without a matched ${scope} id`)
+    for (const id of matched_ids) if (!contributed.some((c) => c.id === id)) throw new SelectionProvenanceError(claim.claim_id, `${scope} id ${id} has no contributing declaration`)
+    const observation_ids = Array.from(new Set(contributed.filter((c) => c.id !== null && matched_ids.includes(c.id)).map((c) => c.observation_id))).sort()
+    scopes.push({ scope, matched_ids, observation_ids })
+  }
+  capture('tool', claim.tool_scope !== null, facts.activeToolIds, (id) => toolScopeMatches(claim, [id]), facts.provenance.tools.map((t) => ({ observation_id: t.observation_id, id: t.tool_id })))
+  capture('asset_provider', claim.provider_scope !== null, facts.assetProviderIds, (id) => providerScopeMatches(claim, [id]), facts.provenance.providers.map((p) => ({ observation_id: p.observation_id, id: p.provider_id })))
+  return { scopes }
+}
+
 function toSelected(claim: ReviewerLkClaim, governed: TopicClaim, facts: CreatorRecordFactsBundle): SelectedClaim {
   const requirements = [...governed.applicability_requirements, ...(governed.applicability_any_of ?? []).flat()]
   // Only declarations that actually reached the evaluator, bound to the requirement's own tool.
@@ -74,6 +108,7 @@ function toSelected(claim: ReviewerLkClaim, governed: TopicClaim, facts: Creator
     applicability_status: claim.applicability_status as 'met' | 'unresolved',
     applicability_material_unresolved: [...claim.applicability_material_unresolved],
     declared_basis,
+    selection_basis: selectionBasisFor(governed, facts),
   }
 }
 

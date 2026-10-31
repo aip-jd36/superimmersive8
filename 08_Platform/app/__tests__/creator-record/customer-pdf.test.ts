@@ -88,7 +88,7 @@ function placeholderTemplates(): CustomerPdfTemplates {
       contribution: { heading: `${PH}4. People, materials and your contribution`, intro: `${PH}As you told us. SI8 has not assessed these answers.`, empty: `${PH}Nothing recorded.` },
       guidance: {
         heading: `${PH}5. Commercial-use guidance`, intro: `${PH}Educational guidance selected from your own answers. SI8 has not checked them.`, empty: `${PH}No published guidance matches your answers yet.`,
-        item_heading: `${PH}Guidance {index}: {subject}`, subject_with_tool: '{topic} (tool {n})', conclusion: `${PH}How this reads`, on_what_you_told_us: `${PH}On what you told us`,
+        item_heading: `${PH}Guidance {index}: {subject}`, subject_with_tool: '{topic} (tool {n})', conclusion: `${PH}How this reads`, selected_because: `${PH}Selected because you told us`, on_what_you_told_us: `${PH}On what you told us`,
         depends_on: `${PH}This depends on information not established`, unspecified_condition: `${PH}This record does not list the specific information this depends on.`, caveats: `${PH}Please note`,
       },
       open_items: {
@@ -416,6 +416,59 @@ describe('guidance numbering and open conditions', () => {
     expect(pageStyle).toMatch(/paddingTop/)
     expect(pageStyle).not.toMatch(/lineHeight/)
     expect(src).toMatch(/style=\{s\.pageNumber\} fixed render=/)
+  })
+})
+
+// ───────────────────────────────────────────── CR-V2-2E selection provenance in the PDF
+
+describe('selection basis in the customer PDF', () => {
+  const materials = () => ({ ...state('Pro'), answers: { ...ANS, M0: ['music', 'stock'], M1: ['artlist'], M2: ['no'], M3: ['getty'], M3D: ['yes'] } })
+  const itemBlocks = (m: ReturnType<typeof buildCustomerDocument>, n: number) => {
+    const g = m.sections.find((s) => s.id === 'guidance')!.blocks
+    const start = g.findIndex((b) => b.kind === 'subheading' && b.text.startsWith(`${PH}Guidance ${n}: `))
+    const next = g.findIndex((b, i) => i > start && b.kind === 'subheading' && /^\[Placeholder\] Guidance \d+: /.test(b.text))
+    return g.slice(start, next < 0 ? undefined : next)
+  }
+
+  test('each item shows the declarations it was selected on, verbatim, under its own label, separate from the applicability basis', () => {
+    const t = placeholderTemplates()
+    const rec = prepare({ state: materials() })
+    const m = buildCustomerDocument(docInput({ templates: t }, rec))
+    const obs = new Map(rec.record.declarations.observations.map((o) => [o.observation_id, o]))
+    rec.record.guidance.items.forEach((item, n) => {
+      const blocks = itemBlocks(m, n + 1)
+      const at = blocks.findIndex((b) => b.kind === 'label' && b.text === t.sections.guidance.selected_because)
+      const cited = item.selection_basis.scopes.flatMap((s) => s.observation_ids)
+      expect(at >= 0).toBe(cited.length > 0)
+      const rows = blocks.slice(at + 1, at + 1 + cited.length) as Extract<Block, { kind: 'row' }>[]
+      expect(rows.map((r) => [r.kind, r.value, r.value_from])).toEqual(cited.map((id) => ['row', obs.get(id)!.answer_verbatim, 'record']))
+    })
+    const gettyIndex = rec.record.guidance.items.findIndex((i) => i.claim_id === 'CLAIM-STOCK-GETTY-EDITORIAL-001-v1') + 1
+    const gettyRows = itemBlocks(m, gettyIndex).filter((b): b is Extract<Block, { kind: 'row' }> => b.kind === 'row' && b.label_from === 'record')
+    const m3 = rec.record.declarations.answers.find((a) => a.q_id === 'M3')!
+    expect(gettyRows).toContainEqual({ kind: 'row', label: m3.question, label_from: 'record', value: m3.answer_verbatim, value_from: 'record' })
+  })
+
+  test('the selection basis never appears as an answer to a dependency', () => {
+    const rec = prepare({ state: materials() })
+    const t = placeholderTemplates()
+    const open = buildCustomerDocument(docInput({ templates: t }, rec)).sections.find((s) => s.id === 'open_items')!.blocks
+    const toldUs = open.filter((b, i) => b.kind === 'bullet' && open[i - 1]?.kind === 'label' && (open[i - 1] as { text: string }).text === t.sections.open_items.what_you_told_us)
+    expect(toldUs.length).toBeGreaterThan(0)
+    for (const b of toldUs) expect(b).toEqual({ kind: 'bullet', text: t.sections.open_items.nothing_told, from: 'template' })
+  })
+
+  test('a single cited tool block numbers the heading; two blocks of the same tool do not pick one', () => {
+    const one = buildCustomerDocument(docInput({}, prepare({ state: state('Pro') })))
+    expect(one.sections.find((s) => s.id === 'guidance')!.blocks.filter((b) => b.kind === 'subheading').map((b) => (b as { text: string }).text)).toEqual([
+      `${PH}Guidance 1: ${PH}Commercial use of your AI tools (tool 1)`,
+      `${PH}Guidance 2: ${PH}Commercial use of your AI tools (tool 1)`,
+    ])
+    const twice = prepare({ state: { ...state('Pro'), tools: [state('Pro').tools[0], { T1: ['pika'], T3: ['Standard'], T4: ['May 2026'] }] } })
+    const m = buildCustomerDocument(docInput({}, twice))
+    const baseline = twice.record.guidance.items.findIndex((i) => i.claim_id === 'CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1') + 1
+    expect((itemBlocks(m, baseline)[0] as { text: string }).text).toBe(`${PH}Guidance ${baseline}: ${PH}Commercial use of your AI tools`)
+    expect(itemBlocks(m, baseline).filter((b) => b.kind === 'row' && b.label_from === 'record')).toHaveLength(2)
   })
 })
 

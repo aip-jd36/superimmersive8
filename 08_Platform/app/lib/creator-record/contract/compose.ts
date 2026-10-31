@@ -49,6 +49,24 @@ export interface CreatorRecordObjective {
   origin: 'creator_record_system_objective'
 }
 
+/**
+ * CR-V2-2E — why a scope-restricted claim was selected: for each scope the
+ * governed claim declares (tool, asset provider), the canonical ids that
+ * matched the project and EXACTLY the declared observations that contributed
+ * those ids. Captured at the selection boundary from the same inputs the
+ * selector used. Selection evidence only: it is never an applicability input,
+ * never attached to a dependency, and never changes a conclusion. An empty
+ * `scopes` list means the claim is not scope-restricted.
+ */
+export interface ScopeSelectionBasis {
+  scope: 'tool' | 'asset_provider'
+  matched_ids: string[]
+  observation_ids: string[]
+}
+export interface SelectionBasis {
+  scopes: ScopeSelectionBasis[]
+}
+
 /** One claim as the selector returned it and as it was fed to BI. */
 export interface SelectedClaim {
   claim: ClaimDescriptor
@@ -61,6 +79,8 @@ export interface SelectedClaim {
    * only declarations with a fixed tool are matched here.
    */
   declared_basis?: DeclaredBasis[]
+  /** CR-V2-2E: selection evidence (see `SelectionBasis`). Absent when the caller did not capture it. */
+  selection_basis?: SelectionBasis
 }
 
 export interface DeclaredBasis {
@@ -98,6 +118,8 @@ export interface GuidanceItem {
   /** Declared observations for this claim's non-jurisdiction applicability requirements, labelled "on what you told us". */
   declared_applicability_basis: DeclaredBasis[]
   dependency_rows: DependencyRow[]
+  /** CR-V2-2E: carried unchanged from the selected claim, when captured. Never read by composition. */
+  selection_basis?: SelectionBasis
   provenance: {
     claim: { claim_id: string; last_verified: IsoDate }
     objective: { objective_id: string; version: number; topic: string; origin: CreatorRecordObjective['origin'] }
@@ -217,6 +239,7 @@ export function composeGuidance(input: CompositionInput): Composition {
       applicability: { status: selected.applicability_status, material_unresolved: [...selected.applicability_material_unresolved] },
       declared_applicability_basis,
       dependency_rows: buildDependencyRows(selected.claim.unresolved_project_dependencies, active, input.dependencyLabel, entry.evidence_notes),
+      ...(selected.selection_basis ? { selection_basis: { scopes: selected.selection_basis.scopes.map((sc) => ({ scope: sc.scope, matched_ids: [...sc.matched_ids], observation_ids: [...sc.observation_ids] })) } } : {}),
       provenance: {
         claim: { claim_id: claimId, last_verified: selected.claim.last_verified as IsoDate },
         objective: { ...evaluation.objective },
