@@ -212,22 +212,25 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
       notEstablished.set(key, entry)
     }
   }
-  // CR-V2-2H: why an unresolved item lists no condition of its own, from the record alone (nothing is re-interpreted).
-  // Bounded Interpretation's status is goal-level and is the ceiling for every item of that objective. When an item's own
-  // conditions are met, it is cited as supporting, and its objective's interpretation is unresolved, it is qualified only by
-  // that topic-level status: it is attributed to the other items of the same objective that do list open conditions. If no
-  // such item is in the record, the condition is genuinely not represented and the item stays "unspecified".
-  const hasListedCondition = (i: RecordView['guidance']['items'][number]) => i.applicability.material_unresolved.length > 0 || i.dependency_rows.length > 0
-  const qualifiedBy = new Map<RecordView['guidance']['items'][number], number[]>()
-  for (const i of items) {
-    const bi = i.provenance.bounded_interpretation
-    if (i.conclusion !== 'relevant_applicability_unresolved' || i.applicability.status !== 'met' || hasListedCondition(i)) continue
-    if (bi.citation !== 'supporting' || bi.status !== 'relevant_applicability_unresolved') continue
-    const by = items.filter((o) => o !== i && o.provenance.objective.objective_id === i.provenance.objective.objective_id && hasListedCondition(o)).map((o) => indexOf.get(o)!)
-    if (by.length > 0) qualifiedBy.set(i, by)
-  }
-  const unspecified = items.filter((i) => i.conclusion === 'relevant_applicability_unresolved' && !hasListedCondition(i) && !qualifiedBy.has(i))
-  const openCount = dependencyRows.length + notEstablished.size + qualifiedBy.size + unspecified.length + notSure.length
+  // CR-V2-2H/2I: why an unresolved item is unresolved, from the record alone (nothing is re-interpreted).
+  // Bounded Interpretation's status is goal-level and is the ceiling for every item of that objective (ADR-002). An item
+  // whose own applicability is met, with no dependency, cited as supporting under an unresolved objective, is qualified
+  // only by that topic-level status. The record does not establish which inputs produced it (an input can be omitted from
+  // the record after interpretation, and an unresolved applicability need not list a fact), so no other item is named:
+  // the explanation is generic and topic-level. "Not listed" is said only where the item's own condition is genuinely
+  // not represented: applicability unresolved with no material fact, or (defensively) no reason the record can show.
+  type ItemView = RecordView['guidance']['items'][number]
+  const topicLevel = (i: ItemView) =>
+    i.conclusion === 'relevant_applicability_unresolved' &&
+    i.applicability.status === 'met' &&
+    i.dependency_rows.length === 0 &&
+    i.provenance.bounded_interpretation.citation === 'supporting' &&
+    i.provenance.bounded_interpretation.status === 'relevant_applicability_unresolved'
+  const ownUnlisted = (i: ItemView) => i.applicability.status === 'unresolved' && i.applicability.material_unresolved.length === 0
+  const shownReason = (i: ItemView) => i.applicability.material_unresolved.length > 0 || i.dependency_rows.length > 0 || topicLevel(i)
+  const topicQualified = items.filter(topicLevel)
+  const unspecified = items.filter((i) => i.conclusion === 'relevant_applicability_unresolved' && (ownUnlisted(i) || !shownReason(i)))
+  const openCount = dependencyRows.length + notEstablished.size + topicQualified.length + unspecified.length + notSure.length
 
   // CR-V2-2E: the declarations a guidance item was selected on, exactly as the record cites them.
   const selectionObservations = (i: RecordView['guidance']['items'][number]) =>
@@ -313,7 +316,7 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
                     ...i.applicability.material_unresolved.map((q): Block => ({ kind: 'bullet', text: factLabel(q.fact), from: 'template' })),
                   ]
                 : []),
-              ...(qualifiedBy.has(i) ? [{ kind: 'paragraph', text: fill(S.guidance.qualified_by_topic, { items: qualifiedBy.get(i)!.join(', ') }), from: 'template' } as Block] : []),
+              ...(topicQualified.includes(i) ? [{ kind: 'paragraph', text: S.guidance.topic_level, from: 'template' } as Block] : []),
               ...(unspecified.includes(i) ? [{ kind: 'paragraph', text: S.guidance.unspecified_condition, from: 'template' } as Block] : []),
               ...(i.caveats.length > 0 ? [{ kind: 'label', text: S.guidance.caveats, from: 'template' } as Block, ...i.caveats.map((c): Block => ({ kind: 'bullet', text: c.text, from: 'record' }))] : []),
             ])),
@@ -340,11 +343,8 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
               ...Array.from(notEstablished.values()).map((e): Block => ({ kind: 'row', label: factLabel(e.fact), label_from: 'template', value: fill(S.open_items.affects, { items: e.indexes.join(', ') }), value_from: 'template' })),
             ]
           : []),
-        ...(qualifiedBy.size > 0
-          ? [
-              { kind: 'subheading', text: S.open_items.topic_qualified_heading, from: 'template' } as Block,
-              ...Array.from(qualifiedBy.entries()).map(([i, by]): Block => ({ kind: 'row', label: ref(i), label_from: 'template', value: fill(S.open_items.qualified_by, { items: by.join(', ') }), value_from: 'template' })),
-            ]
+        ...(topicQualified.length > 0
+          ? [{ kind: 'subheading', text: S.open_items.topic_qualified_heading, from: 'template' } as Block, ...topicQualified.map((i): Block => ({ kind: 'bullet', text: ref(i), from: 'template' }))]
           : []),
         ...(unspecified.length > 0 ? [{ kind: 'subheading', text: S.open_items.unspecified_heading, from: 'template' } as Block, ...unspecified.map((i): Block => ({ kind: 'bullet', text: ref(i), from: 'template' }))] : []),
         ...(notSure.length > 0 ? [{ kind: 'subheading', text: S.open_items.not_sure_heading, from: 'template' } as Block, ...notSure.map((a): Block => ({ kind: 'bullet', text: a.question, from: 'record' }))] : []),

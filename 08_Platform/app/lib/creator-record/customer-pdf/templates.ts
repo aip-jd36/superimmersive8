@@ -63,13 +63,14 @@ const templateSpec = obj({
       // CR-V2-2H: printed after every guidance explanation (educational guidance, not a project-specific determination).
       item_limitation: str,
       selected_because: str, on_what_you_told_us: str, depends_on: str, unspecified_condition: str,
-      // CR-V2-2H: an item whose own conditions are met, qualified only by the topic-level interpretation; {items} = the open items it is qualified by.
-      qualified_by_topic: str,
+      // CR-V2-2I: an item whose own conditions are met, qualified only by the topic-level interpretation. Names no other item:
+      // the record does not establish which inputs produced the topic-level status.
+      topic_level: str,
       caveats: str,
     }),
     open_items: obj({
       heading: str, intro: str, empty: str, item_ref: str, for_guidance: str, what_you_told_us: str, nothing_told: str, evidence_note: str, status: str, sufficiency: str,
-      not_established_heading: str, affects: str, unspecified_heading: str, topic_qualified_heading: str, qualified_by: str,
+      not_established_heading: str, affects: str, unspecified_heading: str, topic_qualified_heading: str,
       not_sure_heading: str, documents_heading: str, documents_not_provided: str, limitations_heading: str, limitations: arr(str),
     }),
     not_done: obj({ heading: str, lines: arr(str) }),
