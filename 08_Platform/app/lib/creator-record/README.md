@@ -123,7 +123,9 @@ unchanged; the prototype and the public UAT harness are untouched.
 | `snapshot.ts` | `buildInternalDraftSnapshot` → `{ snapshot, canonical, sha256 }`. Records registry, ledger, question and mapping versions where they exist; `missing_versions` lists what is not versioned yet (never invented). Refuses issued `CR-YYYY-XXXXXXXX` ids |
 | `document-model.ts` | Pure model of what the PDF prints, only from the snapshot; refuses a snapshot whose digest, status, policy or conclusion labels do not hold |
 | `InternalDraftPDF.tsx` | @react-pdf renderer; "INTERNAL DRAFT — NOT ISSUED — NOT A CREATOR RECORD" as a fixed header and footer on every page. Generator `si8-internal-draft/creator-record-v2-pdf@0` |
-| `templates.ts` | Internal wording and identifiers |
+| `projection.ts` | OC-1B: structured, fail-closed projection of the prototype's view and documents to the fields the draft may use (exact keys and types; unknown, missing or ill-typed fields stop it). Never reads the prototype summary, reconciliation, reconciliation trace or a document's cross-check |
+| `template-contract.ts` | OC-1B: fingerprint (SHA-256 of what `D` prints, functions probed with 0/1/2) and the check that it is the one pinned for the current template version |
+| `templates.ts` | Internal wording (`D`, including the prototype strings it pins) and identifiers; template id, version and the append-only fingerprint pins |
 
 **C1 (PM decision, OC-1): neutral fallback only.** The prototype's reconciliation
 results, comparison counts and G-R2 cross-check are not carried into the snapshot,
@@ -132,4 +134,11 @@ bytes (the PDF embeds a creation timestamp). Structure: summary, sections 1–7 
 the draft view and the separate "Your answers beside your documents" section. This
 is not the PRD's 12-section structure, customer wording or a frozen contract.
 
-Tests: `internal-draft`.
+**OC-1B.** Nothing is filtered by matching wording: the summary is built from
+structured counts and `D`. The snapshot records `templates: { id, version,
+fingerprint }`; a template change (including a change to a prototype string `D`
+pins) stops snapshot building until the version is raised and its fingerprint
+pinned. The prototype's own templates have no version and are listed in
+`missing_versions` as `prototype_presentation_templates`.
+
+Tests: `internal-draft`, `internal-draft-projection`.

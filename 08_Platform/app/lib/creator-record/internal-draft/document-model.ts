@@ -7,13 +7,15 @@
  * stronger than Bounded Interpretation).
  *
  * Fail closed: the model is refused unless the snapshot's digest matches, it is
- * an internal unissued draft with the neutral comparison policy, and every
+ * an internal unissued draft with the neutral comparison policy, built with the
+ * running template contract (OC-1B), and every
  * guidance conclusion label is the fixed label of its conclusion.
  */
 
 import { T } from '../presentation/templates'
 import type { DraftRow } from '../presentation/build-draft-record'
 import { snapshotDigestMatches, type InternalDraftSnapshot } from './snapshot'
+import { internalDraftTemplateContract } from './template-contract'
 import { COMPARISON_POLICY, D, INTERNAL_DRAFT_GENERATOR_ID, ISSUED_RECORD_ID } from './templates'
 
 export type Block =
@@ -49,6 +51,9 @@ export function buildInternalDraftDocument(snapshot: InternalDraftSnapshot, sha2
   if (snapshot.status !== 'internal_unissued_draft' || snapshot.generator_id !== INTERNAL_DRAFT_GENERATOR_ID) throw new InternalDraftRenderError('not an internal draft snapshot')
   if (snapshot.comparison_policy !== COMPARISON_POLICY) throw new InternalDraftRenderError('comparison policy is not neutral fallback')
   if (ISSUED_RECORD_ID.test(snapshot.record.draft_id)) throw new InternalDraftRenderError('an issued Creator Record id cannot appear on a draft')
+  const templates = internalDraftTemplateContract()
+  const t = snapshot.templates
+  if (!t || t.id !== templates.id || t.version !== templates.version || t.fingerprint !== templates.fingerprint) throw new InternalDraftRenderError('snapshot was built with different draft templates')
   for (const c of snapshot.guidance.cards) {
     if (c.conclusion_label !== T.conclusion_label[c.conclusion]) throw new InternalDraftRenderError(`non-standard conclusion label for ${c.claim_id}`)
   }

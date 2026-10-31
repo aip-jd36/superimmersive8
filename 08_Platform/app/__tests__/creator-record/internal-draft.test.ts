@@ -166,7 +166,7 @@ describe('versions and governance', () => {
     expect(snapshot.sources.approval).toBe('pilot_unapproved')
     expect(snapshot.sources.registry_version).toContain('(internal, unapproved)')
     expect(snapshot.sources.ledger_version).toContain('(internal, unapproved)')
-    expect(snapshot.missing_versions).toEqual(['presentation_templates'])
+    expect(snapshot.missing_versions).toEqual(['prototype_presentation_templates'])
     expect(snapshot.generator_id).toBe(INTERNAL_DRAFT_GENERATOR_ID)
   })
 
@@ -373,8 +373,9 @@ describe('isolation from Production issuance, payment and the app', () => {
   test('it imports only the reused prototype modules, react, @react-pdf/renderer and node:crypto', () => {
     const external = new Set(walk(DRAFT_ROOT).flatMap(importsOf).filter((i) => !i.startsWith('./')))
     expect(Array.from(external).sort()).toEqual([
-      '../contract/compose', '../contract/provenance', '../presentation/build-draft-record', '../presentation/templates',
-      '../prototype/build-draft', '../prototype/form', '@react-pdf/renderer', 'node:crypto', 'react',
+      '../contract/compose', '../contract/provenance', '../evidence/document-observations', '../integration/run-creator-record-guidance',
+      '../presentation/build-draft-record', '../presentation/templates', '../prototype/build-draft', '../prototype/form',
+      '@react-pdf/renderer', 'node:crypto', 'react',
     ])
   })
 
