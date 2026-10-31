@@ -4,6 +4,10 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { getListPriceCents } from '@/lib/payments/repository'
 import { LEGACY_SUBMISSION_TIER } from '@/lib/submissions/build-intake-insert'
+import { checkV2Checkout, type PurchaseError } from '@/lib/creator-record/customer-flow/purchase'
+import { productionPurchaseDeps } from '@/lib/creator-record-flow/production'
+import { V2_CHECKOUT_COPY } from '@/lib/creator-record-flow/wording'
+import { purchaseMessage } from '@/lib/creator-record-flow/http'
 
 /**
  * CAA-SECURITY-3B — create (or reuse) the Stripe Checkout session for a
@@ -19,6 +23,12 @@ import { LEGACY_SUBMISSION_TIER } from '@/lib/submissions/build-intake-insert'
  *   - Concurrency: the Stripe idempotency key is derived from the persisted
  *     state, so racing requests receive the same session; the binding write
  *     is conditional on that same persisted state.
+ *   - CR-V2-MVP-M3: a Creator Record v2 submission (persisted marker
+ *     `creator_record_product = 'v2'`) is checked out only when its bound,
+ *     reviewed version still verifies, is the creator's latest version and is
+ *     eligible now, and v2 issuance, new submissions and the creator's invite
+ *     are all open — checked BEFORE any Stripe call, including session reuse.
+ *     Any other marker value fails closed. V1 is unchanged.
  */
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -30,7 +40,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
  * `cancelPath` (CR-RELEASE-READINESS-1B) is where a cancelled Checkout returns: it comes from this table,
  * keyed by the stored, ownership-checked tier — never from the request.
  */
-const PRODUCT_COPY: Record<string, { name: string; description: string; cancelPath: '/record' | '/certify' }> = {
+const PRODUCT_COPY: Record<string, { name: string; description: string; cancelPath: '/record' | '/certify' | '/creator-record' }> = {
   creator_record: {
     name: 'Creator Record — Self-Attested Documentation',
     description: 'A self-attested record of information you provide about your AI-video production. Not a commercial clearance assessment.',
@@ -42,6 +52,11 @@ const PRODUCT_COPY: Record<string, { name: string; description: string; cancelPa
     cancelPath: '/certify',
   },
 }
+
+/** CR-V2-MVP-M3: v2 checkout copy (DRAFT wording, lib/creator-record-flow/wording.ts), keyed by the persisted marker only. */
+const V2_COPY = { ...V2_CHECKOUT_COPY, cancelPath: '/creator-record' as const }
+
+const V2_REFUSED = (e: PurchaseError) => NextResponse.json({ error: purchaseMessage(e.code), code: e.code }, { status: e.status })
 
 const NOT_FOUND = () => NextResponse.json({ error: 'Submission not found' }, { status: 404 })
 const RETRY = () => NextResponse.json({ error: 'Checkout is being prepared — please try again.' }, { status: 409 })
@@ -61,12 +76,13 @@ interface SubmissionRow {
   status: string | null
   payment_status: string | null
   stripe_checkout_session_id: string | null
+  creator_record_product: string | null
 }
 
 async function loadOwnedSubmission(submissionId: string, userId: string) {
   return supabaseAdmin
     .from('submissions')
-    .select('id, user_id, tier, status, payment_status, stripe_checkout_session_id')
+    .select('id, user_id, tier, status, payment_status, stripe_checkout_session_id, creator_record_product')
     .eq('id', submissionId)
     .eq('user_id', userId)
     .maybeSingle()
@@ -107,8 +123,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'This submission is not awaiting payment.' }, { status: 409 })
     }
 
+    // CR-V2-MVP-M3: v2 preconditions, before any price lookup or Stripe call.
+    let isV2 = false
+    if (row.creator_record_product !== null && row.creator_record_product !== undefined) {
+      if (row.creator_record_product !== 'v2') return NextResponse.json({ error: 'Unsupported submission tier' }, { status: 400 })
+      const v2 = await checkV2Checkout(productionPurchaseDeps(), user.id, row)
+      if (!v2.ok) return V2_REFUSED(v2)
+      isV2 = true
+    }
+
     const unitAmount = await getListPriceCents(row.tier)
-    const copy = row.tier ? PRODUCT_COPY[row.tier] : undefined
+    const copy = isV2 ? V2_COPY : row.tier ? PRODUCT_COPY[row.tier] : undefined
     if (unitAmount === null || !copy) {
       return NextResponse.json({ error: 'Unsupported submission tier' }, { status: 400 })
     }
@@ -145,7 +170,7 @@ export async function POST(request: NextRequest) {
       client_reference_id: row.id,
       ...(user.email ? { customer_email: user.email } : {}),
       // Informational only — never read for any decision.
-      metadata: { submissionId: row.id, tier: row.tier as string, checkout_contract: 'caa-3b-v2' },
+      metadata: { submissionId: row.id, tier: row.tier as string, checkout_contract: 'caa-3b-v2', ...(isV2 ? { creator_record_product: 'v2' } : {}) },
     }
 
     const baseKey = `si8-checkout-v2:${row.id}:${previousSessionId ?? 'initial'}`

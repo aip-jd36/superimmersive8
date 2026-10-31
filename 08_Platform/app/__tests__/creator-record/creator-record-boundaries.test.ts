@@ -190,6 +190,9 @@ describe('lib/creator-record boundaries', () => {
       'app/admin/creator-record-v2/page.tsx',
       'app/api/admin/creator-record-v2/draft/route.ts',
       'app/api/admin/creator-record-v2/examine/route.ts',
+      // CR-V2-MVP-M3: checkout runs the v2 preconditions; the purchase route binds a reviewed version.
+      'app/api/checkout/create-session/route.ts',
+      'app/api/creator-record-v2/prepared/[id]/purchase/route.ts',
       'app/api/creator-record-v2/prepared/[id]/review/route.ts',
       'app/api/creator-record-v2/prepared/[id]/route.ts',
       'app/api/creator-record-v2/prepared/route.ts',
@@ -233,7 +236,10 @@ describe('lib/creator-record boundaries', () => {
       '@/components/creator-record/CreatorRecordQuestionnaire',
       '@/components/creator-record/DocumentReviewPanel',
       '@/components/creator-record/DraftRecordView',
+      // CR-V2-MVP-M3: draft customer wording (string constants only, no imports; asserted below).
+      '@/lib/creator-record-flow/wording',
     ]
+    expect(staticImports(readFileSync(path.join(APP_ROOT, 'lib/creator-record-flow/wording.ts'), 'utf8'))).toEqual([])
     expect(staticImports(readFileSync(path.join(APP_ROOT, 'lib/creator-record/presentation/group-guidance.ts'), 'utf8'))).toEqual([])
     for (const f of [
       'app/admin/creator-record-v2/CreatorRecordPrototypeClient.tsx',

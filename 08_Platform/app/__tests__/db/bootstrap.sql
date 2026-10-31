@@ -38,8 +38,9 @@ CREATE TABLE public.submissions (
   amount_paid                integer,
   tools_used                 jsonb,
   authorship_statement       text,
-  likeness_confirmation      boolean,
-  ip_confirmation            boolean,
+  likeness_confirmation      jsonb,   -- jsonb as in 001_initial_schema.sql (CR-V2-MVP-M3)
+  ip_confirmation            jsonb,
+  audio_disclosure           jsonb,
   territory_preferences      jsonb,
   created_at                 timestamptz DEFAULT now(),
   updated_at                 timestamptz DEFAULT now()

@@ -65,14 +65,16 @@ describe('the stop at the renderer-selection boundary', () => {
     expect(selectCreatorRecordRenderer(v1()).family).toBe(CREATOR_RECORD_V1_FAMILY)
   })
 
-  test('a v2 submission is refused as stopped; with the stop lifted it is still refused (no v2 renderer is registered)', () => {
+  // CR-V2-MVP-M3: the v2 renderer is now registered, but is reachable only with the stop lifted.
+  test('a v2 submission is refused as stopped; with the stop lifted only the v2 renderer (never v1, never legacy) is selected', () => {
     expect(() => selectCreatorRecordRenderer(v2())).toThrow(CreatorRecordIssuanceStoppedError)
     expect(() => selectCreatorRecordRenderer(v2())).toThrow(UnsupportedProductFamilyError)
     expect(() => rendererForFamily(CREATOR_RECORD_V2_FAMILY, 'stopped')).toThrow(CreatorRecordIssuanceStoppedError)
-    let lifted: unknown
-    try { rendererForFamily(CREATOR_RECORD_V2_FAMILY, 'enabled') } catch (e) { lifted = e }
-    expect(lifted).toBeInstanceOf(UnsupportedProductFamilyError)
-    expect(lifted).not.toBeInstanceOf(CreatorRecordIssuanceStoppedError)
+    const lifted = rendererForFamily(CREATOR_RECORD_V2_FAMILY, 'enabled')
+    expect(lifted.family).toBe(CREATOR_RECORD_V2_FAMILY)
+    expect(lifted.legacy_path_permitted).toBe(false)
+    expect(lifted.generator_version).toBe('creator-record-v2-pdf-v1')
+    expect(() => rendererForFamily(null, 'enabled')).toThrow(UnsupportedProductFamilyError)
     expect(rendererForFamily(CREATOR_RECORD_V1_FAMILY, 'stopped').family).toBe(CREATOR_RECORD_V1_FAMILY)
   })
 

@@ -5,7 +5,9 @@
  * new submissions open, the creator is invited, and the approved sources pass
  * `checkApprovedSources`. Otherwise it explains that Creator Record is not
  * available. No pilot or unapproved source is ever read here; uploads and
- * document examination are not offered. Payment is not part of this milestone.
+ * document examination are not offered.
+ * CR-V2-MVP-M3: payment is offered after review only while v2 issuance is enabled
+ * (default: stopped); the purchase and checkout routes re-check every condition.
  */
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
@@ -14,6 +16,7 @@ import { checkApprovedSources } from '@/lib/creator-record/customer-record/sourc
 import { CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
 import { productionFlowDeps } from '@/lib/creator-record-flow/production'
 import { sessionUserId } from '@/lib/creator-record-flow/http'
+import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/config'
 import { CreatorRecordV2Client } from './CreatorRecordV2Client'
 
 export const dynamic = 'force-dynamic'
@@ -51,6 +54,7 @@ export default async function CreatorRecordPage() {
         presentation={inputs.sources.presentation}
         acknowledgements={inputs.source_text.acknowledgements}
         maxTools={inputs.sources.max_tools}
+        paymentOpen={CREATOR_RECORD_V2_ISSUANCE === 'enabled'}
       />
     </main>
   )

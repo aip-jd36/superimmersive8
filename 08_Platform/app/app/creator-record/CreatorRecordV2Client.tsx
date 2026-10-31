@@ -6,11 +6,16 @@
  * The server prepares and stores every version; this client only sends the
  * answers (and, for a correction, the draft they correct) and shows what the
  * server recorded. Confirming freezes that version. No uploads are offered.
+ *
+ * CR-V2-MVP-M3: once confirmed, "Continue to payment" asks the server to create (or
+ * return) the submission for that version, then opens the existing checkout. The
+ * server re-checks every condition at both steps; `paymentOpen` only hides the button.
  */
 import { useState } from 'react'
 import { CreatorRecordQuestionnaire, type QuestionnaireProps } from '@/components/creator-record/CreatorRecordQuestionnaire'
 import type { CreatorRecordFormState, FormIssue } from '@/lib/creator-record/prototype/form'
 import type { PreparedView } from '@/lib/creator-record/customer-flow/service'
+import { V2_REVIEW_PAGE } from '@/lib/creator-record-flow/wording'
 
 const SECTION_TITLES: Record<string, string> = {
   project: 'About the video',
@@ -33,6 +38,8 @@ interface Props {
   presentation: QuestionnaireProps['presentation']
   acknowledgements: QuestionnaireProps['acknowledgements']
   maxTools: number
+  /** CR-V2-MVP-M3: whether v2 issuance is enabled (display only; the server decides). */
+  paymentOpen: boolean
 }
 
 export function CreatorRecordV2Client(props: Props) {
@@ -87,6 +94,35 @@ export function CreatorRecordV2Client(props: Props) {
     }
   }
 
+  async function pay() {
+    if (!view) return
+    setBusy(true)
+    setError(null)
+    try {
+      const res = await fetch(`/api/creator-record-v2/prepared/${view.id}/purchase`, { method: 'POST' })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok || typeof json.submission_id !== 'string') {
+        setError(typeof json.error === 'string' ? json.error : FAILED)
+        return
+      }
+      const checkout = await fetch('/api/checkout/create-session', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ submissionId: json.submission_id }),
+      })
+      const session = await checkout.json().catch(() => ({}))
+      if (checkout.ok && typeof session.url === 'string') {
+        window.location.assign(session.url)
+        return
+      }
+      setError(typeof session.error === 'string' ? session.error : FAILED)
+    } catch {
+      setError(FAILED)
+    } finally {
+      setBusy(false)
+    }
+  }
+
   function correct() {
     if (!view) return
     setLastState(view.form_state)
@@ -107,8 +143,7 @@ export function CreatorRecordV2Client(props: Props) {
         </p>
         {reviewed && (
           <div role="status" className="mb-6 rounded-lg border p-4" style={{ borderColor: '#16a34a', backgroundColor: '#F0FDF4' }}>
-            <p className="text-sm font-semibold" style={{ color: '#166534' }}>You confirmed these declarations.</p>
-            <p className="text-xs mt-1" style={{ color: '#166534' }}>This version is now fixed. Payment is not open yet. You will be able to complete your Creator Record when it is.</p>
+            <p className="text-sm font-semibold" style={{ color: '#166534' }}>{props.paymentOpen ? V2_REVIEW_PAGE.confirmed : V2_REVIEW_PAGE.payment_closed}</p>
           </div>
         )}
         {error && <p className="mb-4 text-sm font-medium" style={{ color: '#b42318' }} role="alert">{error}</p>}
@@ -147,6 +182,11 @@ export function CreatorRecordV2Client(props: Props) {
           {!reviewed && (
             <button type="button" className={primaryClass} style={{ backgroundColor: INK }} onClick={confirm} disabled={busy}>
               {busy ? 'Confirming…' : 'Confirm these declarations'}
+            </button>
+          )}
+          {reviewed && props.paymentOpen && (
+            <button type="button" className={primaryClass} style={{ backgroundColor: INK }} onClick={pay} disabled={busy}>
+              {busy ? V2_REVIEW_PAGE.paying : V2_REVIEW_PAGE.pay}
             </button>
           )}
         </div>

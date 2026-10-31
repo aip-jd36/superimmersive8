@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatDate } from '@/lib/utils'
 import { deliveryPathFor } from '@/lib/creator-record-artifacts/config'
+import { v2DashboardState, v2DashboardView } from '@/lib/creator-record-flow/dashboard'
+import { V2_DASHBOARD } from '@/lib/creator-record-flow/wording'
 import {
   ArrowLeft, CheckCircle, Clock, XCircle, FileText,
   Download, ExternalLink, AlertCircle
@@ -124,6 +126,51 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
   const pdfLink: string | null = artifactError ? null : (issuedArtifact || hasLegacyCreatorRecord) ? deliveryPathFor(params.id) : null
   const pdfGeneratedAt: string | null = issuedArtifact ? issuedArtifact.issued_at : rightsPackage?.generated_at ?? null
   const pdfRecordId: string | null = issuedArtifact ? issuedArtifact.record_id : rightsPackage?.catalog_id ?? null
+
+  // CR-V2-MVP-M3: a Creator Record v2 submission has its own minimal view (DRAFT wording). Its V1 intake
+  // columns hold neutral placeholders; the record itself is the PDF. "Ready" requires an issued artifact.
+  if ((submission as any).creator_record_product === 'v2') {
+    const artifact = artifactError ? 'unknown' : !artifactRow ? 'none' : issuedArtifact ? 'issued' : 'pending'
+    const v2 = v2DashboardView(v2DashboardState({ payment_status: submission.payment_status ?? null, artifact }))
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 mb-6">
+          <ArrowLeft className="w-4 h-4" />
+          Back to Dashboard
+        </Link>
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">{V2_DASHBOARD.heading}</h1>
+            <p className="text-sm text-gray-500 mt-1">Started {formatDate(submission.created_at)}</p>
+          </div>
+          <span className="px-3 py-1.5 rounded-full text-sm font-semibold bg-gray-100 text-gray-800">{v2.badge}</span>
+        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              {V2_DASHBOARD.heading}
+            </CardTitle>
+            <CardDescription>
+              {v2.message}
+              {v2.download && issuedArtifact ? ` Issued ${formatDate(issuedArtifact.issued_at)} · Record ID: ${issuedArtifact.record_id}` : ''}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-gray-600">{V2_DASHBOARD.nature}</p>
+            {v2.download && (
+              <Button asChild className="w-full sm:w-auto">
+                <a href={deliveryPathFor(params.id)} target="_blank" rel="noopener noreferrer">
+                  <Download className="w-4 h-4 mr-2" />
+                  {V2_DASHBOARD.download}
+                </a>
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   /* CATALOG DISABLED: opt_ins fetch removed
   const { data: optIn } = await supabaseAdmin

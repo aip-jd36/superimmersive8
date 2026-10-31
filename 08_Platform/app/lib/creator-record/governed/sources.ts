@@ -17,6 +17,7 @@ import type { PublicationLedgerEntry } from '../contract/publication-ledger'
 import type { RegistryInput } from '../contract/question-registry'
 import type { CreatorRecordSources } from '../prototype/build-draft'
 import type { SourceTextApproval } from '../customer-record/source-text'
+import type { PdfTemplateApproval } from '../customer-pdf/templates'
 
 /** Approved Question Registry and Observation Map entries. None approved yet. */
 export const CREATOR_RECORD_REGISTRY_INPUT: RegistryInput = Object.freeze({ questions: [], observation_map: [] }) as RegistryInput
@@ -47,3 +48,12 @@ export const CREATOR_RECORD_MAX_TOOLS = 3
 
 /** The Source Text Approval covering the wording above. None issued yet. */
 export const CREATOR_RECORD_SOURCE_TEXT_APPROVAL: SourceTextApproval | null = null
+
+// CR-V2-MVP-M3: the customer PDF template set and its approval (`../customer-pdf/templates`). Rendering
+// refuses without both, so no Creator Record v2 PDF can be issued until they are approved (M0).
+
+/** The approved customer PDF template set (data only). None approved yet. */
+export const CREATOR_RECORD_PDF_TEMPLATES: unknown = null
+
+/** The approval covering `CREATOR_RECORD_PDF_TEMPLATES`. None issued yet. */
+export const CREATOR_RECORD_PDF_TEMPLATE_APPROVAL: PdfTemplateApproval | null = null

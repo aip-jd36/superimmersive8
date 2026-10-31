@@ -210,7 +210,7 @@ OD-17 (verbatim governed statements) is not implemented. Tests: `customer-pdf`.
 
 ## customer-flow/ — CR-V2-MVP-M2
 
-The invited creator's prepare → review flow. **No payment, checkout binding or issuance** (M3); test-enforced.
+The invited creator's prepare → review flow (M2), and from M3 the purchase and issuance rules below.
 
 | Path | Role |
 |---|---|
@@ -219,4 +219,23 @@ The invited creator's prepare → review flow. **No payment, checkout binding or
 
 Outside this module: routes `app/api/creator-record-v2/prepared` (POST), `.../[id]` (GET), `.../[id]/review` (POST); page `app/creator-record`; production ports `lib/creator-record-flow/`. Storage: migration `20261101000000_creator_record_v2_prepared.sql` (additive; RLS on, service role only; content immutable; prepared → reviewed only; a reviewed version binds to a submission once; reviewed rows cannot be deleted; pilot invite list `creator_record_v2_pilot_access`).
 
-Issuance stop: `CREATOR_RECORD_V2_ISSUANCE = 'stopped'` (`lib/creator-record-artifacts/config.ts`), enforced in `rendererForFamily` — the boundary every issuance path passes (webhook fulfilment, sweep, reconcile, admin retry). A v2 submission is refused there before anything is rendered or stored; no v2 renderer is registered and nothing persists the v2 marker yet.
+Issuance stop: `CREATOR_RECORD_V2_ISSUANCE = 'stopped'` (`lib/creator-record-artifacts/config.ts`), enforced in `rendererForFamily` — the boundary every issuance path passes (webhook fulfilment, sweep, reconcile, admin retry). A v2 submission is refused there before anything is rendered or stored.
+
+### CR-V2-MVP-M3 — checkout binding and v2 fulfilment (local; nothing deployed or applied)
+
+| Path | Role |
+|---|---|
+| `customer-flow/purchase.ts` | PURE. `startPurchase`: the reviewed latest version becomes a submission through the DB bind function (atomic, idempotent, digest-checked). `checkV2Checkout`: run by the existing checkout route for a v2 submission before any Stripe call. `renderV2ForIssuance`: the v2 renderer's body — re-checks the persisted v2 identity, the bound version (owner, reviewed, SHA-256 + identity columns) and current governance eligibility, then renders exactly the stored record. Throws `V2IssuanceRefusal`; nothing is rendered or stored. |
+| `customer-flow/approved-inputs.ts` | Adds `approvedGovernanceSnapshot` (eligibility state from the approved sources only) and `approvedPdfTemplates` (both null until M0). |
+| `governed/sources.ts` | Adds the empty `CREATOR_RECORD_PDF_TEMPLATES` / `CREATOR_RECORD_PDF_TEMPLATE_APPROVAL` slots. |
+
+Contracts:
+- **Binding** (migration `20261102000000_creator_record_v2_submission_binding.sql`): `submissions.creator_record_product` (`'v2'` or NULL, creator_record only, immutable, settable only by `create_creator_record_v2_submission`). The prepared-record guard is replaced with a stricter one: per-draft serialization, contiguous versions, only the latest version can be reviewed or bound, binding only through the function. A v2 submission is an ordinary `creator_record` to the payment ledger (unchanged; same price).
+- **Checkout**: purchase route `POST /api/creator-record-v2/prepared/[id]/purchase` → existing `POST /api/checkout/create-session`. Both refuse unless v2 issuance is `enabled`, new submissions are `open`, the creator is invited and the bound record is reviewed, latest, intact and eligible. Checked before any Stripe call, including reuse of an open session. V1 checkout is unchanged.
+- **Fulfilment**: the v2 renderer is registered in `lib/creator-record-artifacts/renderers.ts` but reachable only when `CREATOR_RECORD_V2_ISSUANCE = 'enabled'` (default `stopped`), for every path (webhook, sweep, reconcile, admin retry). It records `creator-record-v2-pdf-v1`, never permits the legacy generator and never resumes a v1 row (nor v1 a v2 row). Private artifact storage and delivery are reused unchanged. A refused issuance leaves the PDF step pending (retried, then the reconciliation queue); the v2 ready email is sent only after the PDF step completed. A correction after payment does not stop issuance of the paid version.
+- **Customer wording**: `lib/creator-record-flow/wording.ts`, DRAFT pending M0, wording-locked by test.
+
+DEPLOY ORDER: M2 then M3 migrations BEFORE any code that selects `creator_record_product` (checkout and fulfilment select it for every Creator Record, V1 included).
+
+Tests: `customer-purchase`, `creator-record-flow/*`, `run-payment-fulfillment` (v2 cases), real PostgreSQL `db/creator-record-v2-binding.db.test.ts`.
+

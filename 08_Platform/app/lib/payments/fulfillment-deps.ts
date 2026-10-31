@@ -9,7 +9,7 @@ import type { FulfillmentDeps } from './run-payment-fulfillment'
 import { generateCreatorRecordPDF } from '@/lib/pdf/generateChainOfTitle'
 import { creatorRecordComplete, issueCreatorRecord } from '@/lib/creator-record-artifacts/production'
 import {
-  sendCreatorRecordReadyPaymentEmail, sendCertifiedPaymentReceivedEmail,
+  sendCreatorRecordReadyPaymentEmail, sendCreatorRecordV2ReadyPaymentEmail, sendCertifiedPaymentReceivedEmail,
   notifyAdminPaymentFulfillment, sendPaymentLedgerAdminAlert,
 } from '@/lib/emails'
 
@@ -48,6 +48,7 @@ export function productionFulfillmentDeps(): FulfillmentDeps {
     generateCreatorRecordPdf: (sub) => issueCreatorRecord(sub, () => generateFromSubmission(sub)),
     loadUserContact,
     sendCreatorRecordEmail: sendCreatorRecordReadyPaymentEmail,
+    sendCreatorRecordV2Email: sendCreatorRecordV2ReadyPaymentEmail,
     sendCertifiedReceivedEmail: sendCertifiedPaymentReceivedEmail,
     notifyAdmin: notifyAdminPaymentFulfillment,
     alert: sendPaymentLedgerAdminAlert,

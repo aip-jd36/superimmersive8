@@ -441,16 +441,24 @@ describe('independence', () => {
     const importers = files.filter((f) => importsOf(f).some((i) => i.includes('customer-record'))).map(rel).sort()
     // CR-V2-2B: the customer PDF document model (itself unreachable from the app).
     // CR-V2-MVP-M2: the invited prepare/review flow, and a type-only import of the Source Text Approval shape by the governed sources.
+    // CR-V2-MVP-M3: the governance snapshot (approved inputs) and the purchase / issuance rules.
     expect(importers).toEqual([
       'app/creator-record/page.tsx',
+      'lib/creator-record/customer-flow/approved-inputs.ts',
+      'lib/creator-record/customer-flow/purchase.ts',
       'lib/creator-record/customer-flow/service.ts',
       'lib/creator-record/customer-pdf/document-model.ts',
       'lib/creator-record/governed/sources.ts',
     ])
-    // Still no payment, checkout, webhook, admin or artifact-issuance code reaches the v2 record or its flow (M3).
+    // CR-V2-MVP-M3: payment, checkout, webhook, admin and artifact-issuance code reach the v2 flow ONLY through these
+    // exact files (checkout preconditions, the registered v2 renderer). Exact list, including dynamic imports.
     const issuance = files.map(rel).filter((f) => /^lib\/(payments|creator-record-artifacts)\/|^app\/api\/(webhooks|checkout|admin)\//.test(f))
     expect(issuance.length).toBeGreaterThan(0)
-    expect(issuance.filter((f) => importsOf(path.join(APP_ROOT, f)).some((i) => /customer-record|customer-flow|customer-pdf|creator-record-flow/.test(i)))).toEqual([])
+    const reach = (f: string) => Array.from(new Set(readFileSync(path.join(APP_ROOT, f), 'utf8').match(/@\/lib\/(creator-record\/customer-[a-z-]+\/[a-z-]+|creator-record-flow\/[a-z-]+)/g) ?? [])).sort()
+    expect(issuance.filter((f) => reach(f).length > 0).map((f) => [f, reach(f)])).toEqual([
+      ['app/api/checkout/create-session/route.ts', ['@/lib/creator-record-flow/http', '@/lib/creator-record-flow/production', '@/lib/creator-record-flow/wording', '@/lib/creator-record/customer-flow/purchase']],
+      ['lib/creator-record-artifacts/renderers.ts', ['@/lib/creator-record-flow/production']],
+    ])
   })
 })
 

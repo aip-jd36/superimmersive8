@@ -12,6 +12,7 @@ type Row = { fulfillment: string; pdf: string; email: string; token: string | nu
 function setup(opts: {
   tier?: string; status?: string; pdf?: string; email?: string; claimReason?: string
   pdfExists?: boolean; pdfGenerates?: boolean; emailOutcome?: PaymentEmailOutcome; noSubmission?: boolean; noEmail?: boolean
+  product?: string | null
 } = {}) {
   const row: Row = { fulfillment: 'pending', pdf: opts.pdf ?? 'pending', email: opts.email ?? 'pending', token: null }
   let pdfExists = !!opts.pdfExists
@@ -19,6 +20,7 @@ function setup(opts: {
     id: 'sub-1', user_id: 'user-1', tier: opts.tier ?? 'creator_record', status: opts.status ?? 'approved',
     title: 'Film', filmmaker_name: 'F', tools_used: '[]', authorship_statement: null,
     likeness_confirmation: '{}', ip_confirmation: '{}', territory_preferences: 'Global',
+    creator_record_product: opts.product ?? null,
   }
   const calls: string[] = []
   const deps: FulfillmentDeps = {
@@ -46,6 +48,7 @@ function setup(opts: {
     generateCreatorRecordPdf: jest.fn(async () => { calls.push('generate'); if (opts.pdfGenerates !== false) pdfExists = true }),
     loadUserContact: jest.fn(async () => ({ name: 'Creator', email: opts.noEmail ? null : 'c@example.com' })),
     sendCreatorRecordEmail: jest.fn(async () => { calls.push('send:cr'); return opts.emailOutcome ?? ({ status: 'accepted', providerId: 're_1' } as PaymentEmailOutcome) }),
+    sendCreatorRecordV2Email: jest.fn(async () => { calls.push('send:cr-v2'); return opts.emailOutcome ?? ({ status: 'accepted', providerId: 're_3' } as PaymentEmailOutcome) }),
     sendCertifiedReceivedEmail: jest.fn(async () => { calls.push('send:cert'); return opts.emailOutcome ?? ({ status: 'accepted', providerId: 're_2' } as PaymentEmailOutcome) }),
     notifyAdmin: jest.fn(async () => undefined),
     alert: jest.fn(async () => undefined),
@@ -185,3 +188,54 @@ describe('runPaymentFulfillment', () => {
     expect(deps.finish).not.toHaveBeenCalled()
   })
 })
+
+// CR-V2-MVP-M3: the v2 ready email — only after the v2 PDF was issued, never the v1 email.
+describe('runPaymentFulfillment — Creator Record v2', () => {
+  it('issues the PDF, then sends the v2 ready email (not the v1 one), then completes', async () => {
+    const { deps, calls } = setup({ product: 'v2' })
+    const r = await runPaymentFulfillment('cs_v2', deps)
+    expect(r.status).toBe('completed')
+    expect(calls).toEqual(['generate', 'pdf:completed', 'email:sending', 'send:cr-v2', 'email:accepted'])
+    expect(deps.sendCreatorRecordEmail).not.toHaveBeenCalled()
+  })
+
+  it('a failed (e.g. stopped or ineligible) issuance sends no email and does not complete', async () => {
+    const { deps, row, calls } = setup({ product: 'v2', pdfGenerates: false })
+    const r = await runPaymentFulfillment('cs_v2', deps)
+    expect(r.status).toBe('failed')
+    expect(row.pdf).toBe('pending')
+    expect(calls).toEqual(['generate'])
+  })
+
+  it('a thrown issuance refusal is recorded and sends no email', async () => {
+    const { deps, row, calls } = setup({ product: 'v2' })
+    ;(deps.generateCreatorRecordPdf as jest.Mock).mockImplementationOnce(async () => { throw new Error('creator_record_v2_issuance_refused:governance_indeterminate') })
+    const r = await runPaymentFulfillment('cs_v2', deps)
+    expect(r.status).toBe('failed')
+    expect(r.reason).toMatch(/governance_indeterminate/)
+    expect(row.pdf).toBe('pending')
+    expect(calls).toEqual([])
+  })
+
+  it('a v2 submission whose PDF step was not required gets no ready email', async () => {
+    const { deps, calls } = setup({ product: 'v2', pdf: 'not_required' })
+    await runPaymentFulfillment('cs_v2', deps)
+    expect(calls).toEqual(['email:not_required'])
+    expect(deps.sendCreatorRecordV2Email).not.toHaveBeenCalled()
+  })
+
+  it('a retry after a rejected email resends the v2 email once the PDF is complete', async () => {
+    const { deps, calls } = setup({ product: 'v2', pdf: 'completed', email: 'failed' })
+    const r = await runPaymentFulfillment('cs_v2', deps)
+    expect(r.status).toBe('completed')
+    expect(calls).toEqual(['email:sending', 'send:cr-v2', 'email:accepted'])
+  })
+
+  it('v1 Creator Records still get the v1 email', async () => {
+    const { deps, calls } = setup({ product: null })
+    await runPaymentFulfillment('cs_v1', deps)
+    expect(calls).toContain('send:cr')
+    expect(deps.sendCreatorRecordV2Email).not.toHaveBeenCalled()
+  })
+})
+

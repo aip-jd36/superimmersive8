@@ -22,9 +22,14 @@
  * Only the v1 renderer is registered. Adding a family is a reviewed code change.
  *
  * CR-V2-MVP-M2: a submission marked as Creator Record v2 resolves to the v2 family, which is refused
- * here while v2 issuance is stopped (`CREATOR_RECORD_V2_ISSUANCE`, the default) and, until a v2 renderer
- * is registered, also when it is not. Nothing persists the v2 marker yet (checkout binding, M3), so every
- * stored submission still resolves to v1.
+ * here while v2 issuance is stopped (`CREATOR_RECORD_V2_ISSUANCE`, the default).
+ *
+ * CR-V2-MVP-M3: the marker is persisted (`submissions.creator_record_product`, set only by the database
+ * bind function) and the v2 renderer is registered. It is reachable only when issuance is 'enabled'. It
+ * never permits the legacy generator, records its own generator version, and resumes only rows of that
+ * version (a v1 row is never completed by it, nor a v2 row by the v1 renderer). Its body re-verifies the
+ * bound record and governance eligibility before rendering (the customer-flow purchase module, via
+ * `@/lib/creator-record-flow/production`; this module never imports the creator-record module directly).
  */
 
 import type { FulfillmentSubmission } from '@/lib/payments/repository'
@@ -56,7 +61,22 @@ const V1_RENDERER: CreatorRecordRenderer = Object.freeze({
   render: async (sub: FulfillmentSubmission, recordId: string, issuedAt: Date) => (await import('./render')).renderCreatorRecordPdf(sub, recordId, issuedAt),
 })
 
-const REGISTRY: ReadonlyMap<string, CreatorRecordRenderer> = new Map([[V1_RENDERER.family, V1_RENDERER]])
+/** CR-V2-MVP-M3: recorded on every v2 artifact row. */
+export const CREATOR_RECORD_V2_GENERATOR_VERSION = 'creator-record-v2-pdf-v1'
+const V2_GENERATOR_VERSION = /^creator-record-v2-pdf-v[1-9][0-9]*$/
+
+const V2_RENDERER: CreatorRecordRenderer = Object.freeze({
+  family: CREATOR_RECORD_V2_FAMILY,
+  generator_version: CREATOR_RECORD_V2_GENERATOR_VERSION,
+  ownsGeneratorVersion: (version: string) => V2_GENERATOR_VERSION.test(version),
+  legacy_path_permitted: false,
+  // Loaded on first render only. Throws (nothing rendered or stored) unless the bound record verifies and is eligible.
+  render: async (sub: FulfillmentSubmission, recordId: string, issuedAt: Date) =>
+    (await import('@/lib/creator-record-flow/production')).renderCreatorRecordV2Pdf(
+      { id: sub.id, user_id: sub.user_id, tier: sub.tier, creator_record_product: sub.creator_record_product ?? null }, recordId, issuedAt),
+})
+
+const REGISTRY: ReadonlyMap<string, CreatorRecordRenderer> = new Map([[V1_RENDERER.family, V1_RENDERER], [V2_RENDERER.family, V2_RENDERER]])
 
 export class UnsupportedProductFamilyError extends Error {
   constructor() {
@@ -76,7 +96,7 @@ export class CreatorRecordIssuanceStoppedError extends UnsupportedProductFamilyE
 export function productFamilyFor(sub: Pick<FulfillmentSubmission, 'tier' | 'creator_record_product'>): string | null {
   if (sub.tier !== 'creator_record') return null
   const product = sub.creator_record_product
-  // No product marker is persisted yet (M3): every stored Creator Record is v1. A marker other than 'v2' is unknown.
+  // No marker (every existing and V1 submission) is v1. A marker other than 'v2' is unknown and fails closed.
   if (product === undefined || product === null) return CREATOR_RECORD_V1_FAMILY
   return product === 'v2' ? CREATOR_RECORD_V2_FAMILY : null
 }

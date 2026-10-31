@@ -31,6 +31,8 @@ export interface FulfillmentDeps {
   generateCreatorRecordPdf(submission: FulfillmentSubmission): Promise<void>
   loadUserContact(userId: string): Promise<{ name: string | null; email: string | null } | null>
   sendCreatorRecordEmail(p: { creatorName: string; filmTitle: string; dashboardUrl: string; to: string }): Promise<PaymentEmailOutcome>
+  /** CR-V2-MVP-M3: the Creator Record v2 ready email. Sent only after the v2 PDF step completed. */
+  sendCreatorRecordV2Email(p: { creatorName: string; filmTitle: string; dashboardUrl: string; to: string }): Promise<PaymentEmailOutcome>
   sendCertifiedReceivedEmail(p: { creatorName: string; filmTitle: string; dashboardUrl: string; to: string }): Promise<PaymentEmailOutcome>
   notifyAdmin(p: { tier: string; filmTitle: string; creatorName: string; creatorEmail: string }): Promise<void>
   alert(subject: string, fields: Record<string, string | number | null | undefined>): Promise<void>
@@ -104,8 +106,10 @@ export async function runPaymentFulfillment(sessionId: string, deps: Fulfillment
     const emailStatus = claim.emailStatus
     if (pdfStatus !== 'pending' && (emailStatus === 'pending' || emailStatus === 'failed')) {
       const isCreatorRecord = sub?.tier === 'creator_record'
+      // CR-V2-MVP-M3: a v2 ready email is sent only after its PDF was actually issued (never on 'not_required').
+      const isV2 = isCreatorRecord && sub?.creator_record_product === 'v2'
       const eligible = !!sub && (
-        isCreatorRecord ? sub.status === 'approved'
+        isCreatorRecord ? sub.status === 'approved' && (!isV2 || pdfStatus === 'completed')
           : CERTIFIED_TIERS.has(sub.tier ?? '') && AWAITING_REVIEW.has(sub.status ?? '')
       )
       const contact = eligible && sub ? await deps.loadUserContact(sub.user_id) : null
@@ -124,9 +128,11 @@ export async function runPaymentFulfillment(sessionId: string, deps: Fulfillment
           to: contact.email,
         }
         await mark('email', 'sending')
-        const outcome = isCreatorRecord
-          ? await deps.sendCreatorRecordEmail(params)
-          : await deps.sendCertifiedReceivedEmail(params)
+        const outcome = isV2
+          ? await deps.sendCreatorRecordV2Email(params)
+          : isCreatorRecord
+            ? await deps.sendCreatorRecordEmail(params)
+            : await deps.sendCertifiedReceivedEmail(params)
         if (outcome.status === 'accepted') {
           await mark('email', 'accepted', outcome.providerId)
           await deps.notifyAdmin({ tier: sub.tier ?? '', filmTitle: params.filmTitle, creatorName: params.creatorName, creatorEmail: contact.email })

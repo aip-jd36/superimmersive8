@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { formatDate, formatCurrency } from '@/lib/utils'
+import { v2ListBadge } from '@/lib/creator-record-flow/dashboard'
 
 type Submission = {
   id: string
@@ -11,6 +12,8 @@ type Submission = {
   title: string
   status: string
   payment_status: string
+  /** CR-V2-MVP-M3: 'v2' for a Creator Record v2 submission. */
+  creator_record_product?: string | null
   created_at: string
   [key: string]: any
 }
@@ -195,7 +198,11 @@ export default async function DashboardPage() {
                   {submissions.map((submission) => (
                     <tr key={submission.id} className="border-b hover:bg-gray-50">
                       <td className="py-3 px-4 font-medium">{submission.title}</td>
-                      <td className="py-3 px-4">{getStatusBadge(submission.status)}</td>
+                      <td className="py-3 px-4">
+                        {submission.creator_record_product === 'v2'
+                          ? <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{v2ListBadge(submission.payment_status)}</span>
+                          : getStatusBadge(submission.status)}
+                      </td>
                       <td className="py-3 px-4 text-gray-600">
                         {formatDate(submission.created_at)}
                       </td>

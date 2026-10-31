@@ -193,7 +193,7 @@ describe('private-artifact mapping (render.tsx) and versioning', () => {
 
 describe('every issuance path loads and passes the flags (source checks)', () => {
   test('fulfilment loads both columns', () => {
-    expect(read('lib/payments/repository.ts')).toMatch(/\.select\('[^']*custodian_declaration, indemnification_confirmed'\)/)
+    expect(read('lib/payments/repository.ts')).toMatch(/\.select\('[^']*custodian_declaration, indemnification_confirmed(, creator_record_product)?'\)/)
   })
   test('legacy generator forwards both flags to the renderer', () => {
     const g = read('lib/pdf/generateChainOfTitle.tsx')

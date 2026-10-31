@@ -62,8 +62,8 @@ export interface FulfillmentSubmission {
   custodian_declaration?: boolean | null
   indemnification_confirmed?: boolean | null
   /**
-   * CR-V2-MVP-M2: product marker read at the renderer-selection boundary ('v2' = Creator Record v2).
-   * Not persisted or loaded yet (checkout binding, M3): absent means v1. Never set from a request.
+   * CR-V2-MVP-M2/M3: product marker read at the renderer-selection boundary ('v2' = Creator Record v2).
+   * Persisted by the database bind function only (M3 migration); null = v1. Never set from a request.
    */
   creator_record_product?: string | null
 }
@@ -191,7 +191,7 @@ export async function listAttention(limit: number): Promise<Record<string, any>[
 export async function loadFulfillmentSubmission(submissionId: string): Promise<FulfillmentSubmission | null> {
   const { data, error } = await supabaseAdmin
     .from('submissions')
-    .select('id, user_id, tier, status, title, filmmaker_name, tools_used, authorship_statement, likeness_confirmation, ip_confirmation, territory_preferences, custodian_declaration, indemnification_confirmed')
+    .select('id, user_id, tier, status, title, filmmaker_name, tools_used, authorship_statement, likeness_confirmation, ip_confirmation, territory_preferences, custodian_declaration, indemnification_confirmed, creator_record_product')
     .eq('id', submissionId)
     .maybeSingle()
   if (error) throw new PaymentLedgerError('load submission', error.code)

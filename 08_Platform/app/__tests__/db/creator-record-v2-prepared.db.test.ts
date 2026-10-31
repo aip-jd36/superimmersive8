@@ -53,8 +53,8 @@ maybe('creator_record_v2_prepared (PostgreSQL)', () => {
     const id = randomUUID()
     const r = await c.query(
       `INSERT INTO public.creator_record_v2_prepared (id, user_id, draft_id, version, record_ref, record_schema, record_schema_version, canonical, sha256, form_state, status)
-       VALUES ($1, $2, $3, $4, 'PREP-' || $1::text, 'si8/creator-record-v2-record', 4, '{"x":1}', $5, '{"answers":{}}'::jsonb, 'prepared') RETURNING *`,
-      [id, userId, draftId, version, 'c'.repeat(64)],
+       VALUES ($1, $2, $3, $4, $6, 'si8/creator-record-v2-record', 4, '{"x":1}', $5, '{"answers":{}}'::jsonb, 'prepared') RETURNING *`,
+      [id, userId, draftId, version, 'c'.repeat(64), `PREP-${id}`],
     )
     return r.rows[0]
   }
@@ -108,8 +108,8 @@ maybe('creator_record_v2_prepared (PostgreSQL)', () => {
     const id = randomUUID()
     expect(await errCode(svc.query(
       `INSERT INTO public.creator_record_v2_prepared (id, user_id, draft_id, version, record_ref, record_schema, record_schema_version, canonical, sha256, form_state, status, reviewed_at)
-       VALUES ($1, $2, $3, 1, 'PREP-' || $1::text, 'si8/creator-record-v2-record', 4, '{}', $4, '{}'::jsonb, 'reviewed', now())`,
-      [id, owner, randomUUID(), 'e'.repeat(64)],
+       VALUES ($1, $2, $3, 1, $5, 'si8/creator-record-v2-record', 4, '{}', $4, '{}'::jsonb, 'reviewed', now())`,
+      [id, owner, randomUUID(), 'e'.repeat(64), `PREP-${id}`],
     ))).toBe('P0001')
   })
 
