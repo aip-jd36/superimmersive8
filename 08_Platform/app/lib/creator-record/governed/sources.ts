@@ -15,6 +15,8 @@
 
 import type { PublicationLedgerEntry } from '../contract/publication-ledger'
 import type { RegistryInput } from '../contract/question-registry'
+import type { CreatorRecordSources } from '../prototype/build-draft'
+import type { SourceTextApproval } from '../customer-record/source-text'
 
 /** Approved Question Registry and Observation Map entries. None approved yet. */
 export const CREATOR_RECORD_REGISTRY_INPUT: RegistryInput = Object.freeze({ questions: [], observation_map: [] }) as RegistryInput
@@ -24,3 +26,24 @@ export const CREATOR_RECORD_PUBLICATION_LEDGER: readonly PublicationLedgerEntry[
 
 /** Approved Creator Record dependency display labels. None approved yet. */
 export const CREATOR_RECORD_DEPENDENCY_LABELS: Readonly<Record<string, string>> = Object.freeze({})
+
+// CR-V2-MVP-M2: the remaining approved inputs a customer record needs. Every one is empty or null until
+// the M0 approvals exist, so the customer flow refuses (fails closed) before preparing anything.
+
+/** Approved question wording and option labels, per approved question. None approved yet. */
+export const CREATOR_RECORD_PRESENTATION: CreatorRecordSources['presentation'] = Object.freeze({})
+
+/** Approved acknowledgement wording, by acknowledgement id. None approved yet. */
+export const CREATOR_RECORD_ACKNOWLEDGEMENTS: Readonly<Record<string, string>> = Object.freeze({})
+
+/** Approved caveat wording, by caveat id. None approved yet. */
+export const CREATOR_RECORD_CAVEATS: Readonly<Record<string, string>> = Object.freeze({})
+
+/** Customer-facing versions of the approved registry and ledger. None approved yet (refused as unavailable). */
+export const CREATOR_RECORD_VERSIONS: Readonly<{ registry: string; ledger: string }> = Object.freeze({ registry: 'none approved', ledger: 'none approved' })
+
+/** Maximum number of tool blocks in the approved questionnaire. */
+export const CREATOR_RECORD_MAX_TOOLS = 3
+
+/** The Source Text Approval covering the wording above. None issued yet. */
+export const CREATOR_RECORD_SOURCE_TEXT_APPROVAL: SourceTextApproval | null = null

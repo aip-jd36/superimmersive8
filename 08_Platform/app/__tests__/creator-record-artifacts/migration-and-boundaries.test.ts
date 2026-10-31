@@ -62,9 +62,10 @@ describe('migration (additive, private)', () => {
     expect(store).not.toMatch(/from\(UAT_ALLOWLIST_TABLE\)\s*\.(insert|update)/)
   })
 
-  test('it is the newest migration (applies after every existing one)', () => {
+  test('it applies after every migration that predates it; only reviewed later migrations follow', () => {
     const files = readdirSync(path.join(APP, 'supabase', 'migrations')).filter((f) => f.endsWith('.sql')).sort()
-    expect(files[files.length - 1]).toBe('20261028000000_creator_record_artifacts.sql')
+    // CR-V2-MVP-M2 adds the (independent, additive) prepared-record migration after it.
+    expect(files.slice(files.indexOf('20261028000000_creator_record_artifacts.sql') + 1)).toEqual(['20261101000000_creator_record_v2_prepared.sql'])
   })
 })
 

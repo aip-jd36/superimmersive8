@@ -207,3 +207,16 @@ CR-V2-2H (presentation only; no selection, interpretation, conclusion or schema 
 CR-V2-MVP-M1: the provenance section prints no date for guidance. The ledger `refresh_by` is a future re-check date, not a review date, and no authoritative "last reviewed" date is defined yet (PM direction 9). `refresh_by`, `decision_date` and `claim_last_verified` stay in the verified record and keep their eligibility role.
 
 OD-17 (verbatim governed statements) is not implemented. Tests: `customer-pdf`.
+
+## customer-flow/ — CR-V2-MVP-M2
+
+The invited creator's prepare → review flow. **No payment, checkout binding or issuance** (M3); test-enforced.
+
+| Path | Role |
+|---|---|
+| `customer-flow/service.ts` | PURE (ports injected). `preparePrepared` builds a record from the approved sources with the existing fail-closed builder and stores it as a NEW immutable version of a draft; `getPrepared` is owner-only and re-verifies the canonical record against its digest and the row's identity columns; `reviewPrepared` freezes the draft's latest version. The creator is the session user; record ids, versions, digests and statuses are never read from a request. |
+| `customer-flow/approved-inputs.ts` | The approved inputs, read only from `governed/sources.ts` (never the pilot). All empty or null until M0, so nothing is prepared. `CREATOR_RECORD_V2_SUBMISSIONS = 'stopped'` by default. |
+
+Outside this module: routes `app/api/creator-record-v2/prepared` (POST), `.../[id]` (GET), `.../[id]/review` (POST); page `app/creator-record`; production ports `lib/creator-record-flow/`. Storage: migration `20261101000000_creator_record_v2_prepared.sql` (additive; RLS on, service role only; content immutable; prepared → reviewed only; a reviewed version binds to a submission once; reviewed rows cannot be deleted; pilot invite list `creator_record_v2_pilot_access`).
+
+Issuance stop: `CREATOR_RECORD_V2_ISSUANCE = 'stopped'` (`lib/creator-record-artifacts/config.ts`), enforced in `rendererForFamily` — the boundary every issuance path passes (webhook fulfilment, sweep, reconcile, admin retry). A v2 submission is refused there before anything is rendered or stored; no v2 renderer is registered and nothing persists the v2 marker yet.

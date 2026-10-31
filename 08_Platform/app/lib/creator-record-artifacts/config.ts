@@ -30,6 +30,16 @@ export type ArtifactRolloutMode = 'off' | 'allowlist' | 'all'
 
 export const CREATOR_RECORD_ARTIFACT_ROLLOUT: ArtifactRolloutMode = 'all'
 
+/**
+ * CR-V2-MVP-M2 — the Creator Record v2 issuance stop, enforced at the renderer-selection boundary
+ * (./renderers), which every issuance path passes through: payment fulfilment (webhook), the recovery
+ * sweep, admin reconciliation and the admin generation retry. 'stopped' refuses every v2 submission
+ * before anything is rendered, stored or issued. It is the default; only a reviewed code change opens it.
+ * It does not affect v1.
+ */
+export type V2IssuanceMode = 'stopped' | 'enabled'
+export const CREATOR_RECORD_V2_ISSUANCE: V2IssuanceMode = 'stopped'
+
 export const CREATOR_RECORDS_BUCKET = 'creator-records'
 export const ARTIFACTS_TABLE = 'creator_record_artifacts'
 export const UAT_ALLOWLIST_TABLE = 'creator_record_artifact_uat'

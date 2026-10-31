@@ -8,7 +8,7 @@ import { EligibilityUnknownError, issuancePath, type IssuancePath } from '@/lib/
 import { issueDepsFor } from '@/lib/creator-record-artifacts/production'
 import { artifactGateDecision, artifactStatus } from '@/lib/creator-record-artifacts/store'
 import { deliveryPathFor } from '@/lib/creator-record-artifacts/config'
-import { selectCreatorRecordRenderer, type CreatorRecordRenderer } from '@/lib/creator-record-artifacts/renderers'
+import { selectCreatorRecordRenderer, type CreatorRecordRenderer, CreatorRecordIssuanceStoppedError } from '@/lib/creator-record-artifacts/renderers'
 
 type RouteContext = { params: { id: string } }
 
@@ -59,7 +59,11 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     let renderer: CreatorRecordRenderer
     try {
       renderer = selectCreatorRecordRenderer(submission as FulfillmentSubmission)
-    } catch {
+    } catch (err) {
+      // CR-V2-MVP-M2: the v2 issuance stop is reported distinctly; nothing is issued either way.
+      if (err instanceof CreatorRecordIssuanceStoppedError) {
+        return NextResponse.json({ error: 'Creator Record v2 issuance is stopped; nothing was issued.', status: 'issuance_stopped' }, { status: 409 })
+      }
       return NextResponse.json({ error: 'This Creator Record cannot be issued by this build; nothing was issued.', status: 'unsupported_product_family' }, { status: 409 })
     }
 

@@ -61,6 +61,11 @@ export interface FulfillmentSubmission {
   /** CR-PDF-DECLARATIONS-1: as recorded. Optional so an older caller degrades to "not recorded", never to a declaration. */
   custodian_declaration?: boolean | null
   indemnification_confirmed?: boolean | null
+  /**
+   * CR-V2-MVP-M2: product marker read at the renderer-selection boundary ('v2' = Creator Record v2).
+   * Not persisted or loaded yet (checkout binding, M3): absent means v1. Never set from a request.
+   */
+  creator_record_product?: string | null
 }
 
 const firstRow = (data: unknown) => (Array.isArray(data) ? data[0] : data) as Record<string, any> | undefined

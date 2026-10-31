@@ -435,10 +435,22 @@ describe('independence', () => {
     expect(runtime.some((l) => /pilot|build-draft/.test(l))).toBe(false)
   })
 
-  test('nothing in the app imports it yet (no route, payment or issuance integration)', () => {
+  test('only the prepare flow imports it; no payment or issuance integration', () => {
     const files = [...walk(path.join(APP_ROOT, 'app')), ...walk(path.join(APP_ROOT, 'components')), ...walk(path.join(APP_ROOT, 'lib'))].filter((f) => !f.startsWith(ROOT))
-    // CR-V2-2B: the customer PDF document model (itself unreachable from the app) is the only importer.
-    expect(files.filter((f) => importsOf(f).some((i) => i.includes('customer-record'))).map((f) => path.relative(APP_ROOT, f).split(path.sep).join('/'))).toEqual(['lib/creator-record/customer-pdf/document-model.ts'])
+    const rel = (f: string) => path.relative(APP_ROOT, f).split(path.sep).join('/')
+    const importers = files.filter((f) => importsOf(f).some((i) => i.includes('customer-record'))).map(rel).sort()
+    // CR-V2-2B: the customer PDF document model (itself unreachable from the app).
+    // CR-V2-MVP-M2: the invited prepare/review flow, and a type-only import of the Source Text Approval shape by the governed sources.
+    expect(importers).toEqual([
+      'app/creator-record/page.tsx',
+      'lib/creator-record/customer-flow/service.ts',
+      'lib/creator-record/customer-pdf/document-model.ts',
+      'lib/creator-record/governed/sources.ts',
+    ])
+    // Still no payment, checkout, webhook, admin or artifact-issuance code reaches the v2 record or its flow (M3).
+    const issuance = files.map(rel).filter((f) => /^lib\/(payments|creator-record-artifacts)\/|^app\/api\/(webhooks|checkout|admin)\//.test(f))
+    expect(issuance.length).toBeGreaterThan(0)
+    expect(issuance.filter((f) => importsOf(path.join(APP_ROOT, f)).some((i) => /customer-record|customer-flow|customer-pdf|creator-record-flow/.test(i)))).toEqual([])
   })
 })
 

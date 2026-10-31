@@ -173,11 +173,13 @@ describe('lib/creator-record boundaries', () => {
     expect(importers).toEqual([])
   })
 
+  // CR-V2-MVP-M2: plus the invited customer flow (page, client, three prepared-record routes and their production ports).
   test('CR-V2-VERTICAL-SLICE-1: only the internal admin prototype imports lib/creator-record (exact allowlist)', () => {
     const appFiles = [
       ...walk(path.join(APP_ROOT, 'app')),
       ...walk(path.join(APP_ROOT, 'components')),
-      ...walk(path.join(APP_ROOT, 'lib')).filter((f) => !f.startsWith(MODULE_ROOT)),
+      // CR-V2-MVP-M2: `MODULE_ROOT + sep`, so sibling directories such as lib/creator-record-flow are checked too.
+      ...walk(path.join(APP_ROOT, 'lib')).filter((f) => !f.startsWith(MODULE_ROOT + path.sep)),
     ]
     const importers = appFiles
       .filter((f) => /from\s+['"][^'"]*creator-record\//.test(readFileSync(f, 'utf8')))
@@ -188,12 +190,19 @@ describe('lib/creator-record boundaries', () => {
       'app/admin/creator-record-v2/page.tsx',
       'app/api/admin/creator-record-v2/draft/route.ts',
       'app/api/admin/creator-record-v2/examine/route.ts',
+      'app/api/creator-record-v2/prepared/[id]/review/route.ts',
+      'app/api/creator-record-v2/prepared/[id]/route.ts',
+      'app/api/creator-record-v2/prepared/route.ts',
       'app/api/uat/creator-record-v2/draft/route.ts',
+      'app/creator-record/CreatorRecordV2Client.tsx',
+      'app/creator-record/page.tsx',
       'app/uat/creator-record-v2/PublicUatClient.tsx',
       'app/uat/creator-record-v2/page.tsx',
       'components/creator-record/CreatorRecordQuestionnaire.tsx',
       'components/creator-record/DocumentReviewPanel.tsx',
       'components/creator-record/DraftRecordView.tsx',
+      'lib/creator-record-flow/http.ts',
+      'lib/creator-record-flow/production.ts',
     ])
   })
 
@@ -228,6 +237,7 @@ describe('lib/creator-record boundaries', () => {
     expect(staticImports(readFileSync(path.join(APP_ROOT, 'lib/creator-record/presentation/group-guidance.ts'), 'utf8'))).toEqual([])
     for (const f of [
       'app/admin/creator-record-v2/CreatorRecordPrototypeClient.tsx',
+      'app/creator-record/CreatorRecordV2Client.tsx',
       'components/creator-record/CreatorRecordQuestionnaire.tsx',
       'components/creator-record/DocumentReviewPanel.tsx',
       'components/creator-record/DraftRecordView.tsx',

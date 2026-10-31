@@ -20,12 +20,18 @@
  *     recorded by another family is refused (see `./issue`).
  *
  * Only the v1 renderer is registered. Adding a family is a reviewed code change.
+ *
+ * CR-V2-MVP-M2: a submission marked as Creator Record v2 resolves to the v2 family, which is refused
+ * here while v2 issuance is stopped (`CREATOR_RECORD_V2_ISSUANCE`, the default) and, until a v2 renderer
+ * is registered, also when it is not. Nothing persists the v2 marker yet (checkout binding, M3), so every
+ * stored submission still resolves to v1.
  */
 
 import type { FulfillmentSubmission } from '@/lib/payments/repository'
-import { ARTIFACT_GENERATOR_VERSION } from './config'
+import { ARTIFACT_GENERATOR_VERSION, CREATOR_RECORD_V2_ISSUANCE, type V2IssuanceMode } from './config'
 
 export const CREATOR_RECORD_V1_FAMILY = 'creator_record_v1'
+export const CREATOR_RECORD_V2_FAMILY = 'creator_record_v2'
 
 export interface CreatorRecordRenderer {
   readonly family: string
@@ -58,20 +64,32 @@ export class UnsupportedProductFamilyError extends Error {
   }
 }
 
+/** CR-V2-MVP-M2: v2 issuance is stopped. A kind of unsupported family, so every existing fail-closed path applies. */
+export class CreatorRecordIssuanceStoppedError extends UnsupportedProductFamilyError {
+  constructor() {
+    super()
+    this.message = 'creator_record_v2_issuance_stopped'
+  }
+}
+
 /** The submission's product family, from stored state only. Null when it is not a Creator Record. */
-export function productFamilyFor(sub: Pick<FulfillmentSubmission, 'tier'>): string | null {
-  // No product-version column exists yet: every stored Creator Record is v1.
-  return sub.tier === 'creator_record' ? CREATOR_RECORD_V1_FAMILY : null
+export function productFamilyFor(sub: Pick<FulfillmentSubmission, 'tier' | 'creator_record_product'>): string | null {
+  if (sub.tier !== 'creator_record') return null
+  const product = sub.creator_record_product
+  // No product marker is persisted yet (M3): every stored Creator Record is v1. A marker other than 'v2' is unknown.
+  if (product === undefined || product === null) return CREATOR_RECORD_V1_FAMILY
+  return product === 'v2' ? CREATOR_RECORD_V2_FAMILY : null
 }
 
 /** The registered renderer for a family. Throws `UnsupportedProductFamilyError` otherwise; never a default. */
-export function rendererForFamily(family: string | null): CreatorRecordRenderer {
+export function rendererForFamily(family: string | null, v2Issuance: V2IssuanceMode = CREATOR_RECORD_V2_ISSUANCE): CreatorRecordRenderer {
+  if (family === CREATOR_RECORD_V2_FAMILY && v2Issuance !== 'enabled') throw new CreatorRecordIssuanceStoppedError()
   const renderer = family === null ? undefined : REGISTRY.get(family)
   if (!renderer) throw new UnsupportedProductFamilyError()
   return renderer
 }
 
 /** The renderer for a stored submission. Throws `UnsupportedProductFamilyError` when there is none. */
-export function selectCreatorRecordRenderer(sub: Pick<FulfillmentSubmission, 'tier'>): CreatorRecordRenderer {
+export function selectCreatorRecordRenderer(sub: Pick<FulfillmentSubmission, 'tier' | 'creator_record_product'>): CreatorRecordRenderer {
   return rendererForFamily(productFamilyFor(sub))
 }
