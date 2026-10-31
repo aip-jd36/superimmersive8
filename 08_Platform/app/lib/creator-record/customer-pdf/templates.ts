@@ -82,7 +82,7 @@ const templateSpec = obj({
         // CR-V2-2H: no approver name and no internal ledger identifier is printed (both stay in the verified record).
         wording: str, wording_version: str, wording_digest: str,
         templates: str, templates_version: str, templates_fingerprint: str,
-        publication_version: str, publication_next_review: str,
+        publication_version: str,
       }),
     }),
   }),

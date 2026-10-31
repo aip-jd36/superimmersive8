@@ -109,7 +109,7 @@ function placeholderTemplates(): CustomerPdfTemplates {
           record_schema: `${PH}Record schema`, record_schema_version: `${PH}Record schema version`, builder: `${PH}Builder`, builder_version: `${PH}Builder version`, registry_version: `${PH}Question registry`, ledger_version: `${PH}Publication ledger`,
           wording: `${PH}Questionnaire wording`, wording_version: `${PH}Wording version`, wording_digest: `${PH}Wording digest`,
           templates: `${PH}PDF templates`, templates_version: `${PH}Template version`, templates_fingerprint: `${PH}Template fingerprint`,
-          publication_version: `${PH}Entry version`, publication_next_review: `${PH}Next review by`,
+          publication_version: `${PH}Entry version`,
         },
       },
     },
@@ -521,6 +521,19 @@ describe('guidance numbering and open conditions', () => {
     for (const h of hidden) expect([h, text.includes(h)]).toEqual([h, false])
     expect(rec.record.sources.source_text.authority.length).toBeGreaterThan(0)
     expect(rec.record.sources.publications.every((p) => p.entry_id && p.approver)).toBe(true)
+  })
+
+  // CR-V2-MVP-M1 (PM direction 9): no future re-check date is shown as a review date, and no unverified
+  // "last reviewed" date is printed until one is defined as authoritative. The dates stay in the verified record.
+  test('the customer PDF prints no review, re-check or decision date for guidance', () => {
+    for (const st of [state('Pro'), materials()]) {
+      const rec = prepare({ state: st })
+      const text = documentText(buildCustomerDocument(docInput({}, rec))).join('\n')
+      const dates = new Set(rec.record.sources.publications.flatMap((p) => [p.refresh_by, p.decision_date, p.claim_last_verified]))
+      expect(dates.size).toBeGreaterThan(0)
+      for (const d of Array.from(dates)) expect([d, text.includes(d)]).toEqual([d, false])
+    }
+    expect(Object.keys(placeholderTemplates().sections.provenance.labels)).not.toContain('publication_next_review')
   })
 
   test('dependencies are never shown as resolved: only the approved open and not-assessed labels are used', () => {

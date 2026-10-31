@@ -388,10 +388,12 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
           row(L.templates_fingerprint, fingerprint, 'template'),
           ...(r.sources.publications.length > 0 ? [{ kind: 'subheading', text: P.publications_heading, from: 'template' } as Block] : []),
           // CR-V2-2H: each publication by the guidance item it supports; no internal ledger id is printed.
+          // CR-V2-MVP-M1: no date is printed. `refresh_by` is a future re-check date, not a historical review
+          // date, and no authoritative "last reviewed" date is defined yet (PM direction 9); it stays in the record.
           ...r.sources.publications.flatMap((p): Block[] => {
             const item = items.find((i) => i.claim_id === p.claim_id)
             if (!item) throw new CustomerPdfRefusal('record_unsupported', 'publication without its guidance item')
-            return [{ kind: 'label', text: ref(item), from: 'template' }, row(L.publication_version, String(p.version)), row(L.publication_next_review, p.refresh_by)]
+            return [{ kind: 'label', text: ref(item), from: 'template' }, row(L.publication_version, String(p.version))]
           }),
         ]
       })(),
