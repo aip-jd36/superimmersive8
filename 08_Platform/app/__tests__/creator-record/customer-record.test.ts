@@ -22,9 +22,11 @@ import { buildInternalDraftSnapshot } from '@/lib/creator-record/internal-draft/
 import { canonicalJson, sha256Hex } from '@/lib/creator-record/record-core/canonical'
 import {
   buildCustomerRecord, customerRecordDigestMatches, CustomerRecordInvariantError, verifyCustomerRecord,
-  CUSTOMER_RECORD_SCHEMA, type CustomerRecordInput, type CustomerRecordResult, type CustomerRecordV2,
+  CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION, type CustomerRecordInput, type CustomerRecordResult, type CustomerRecordV2,
 } from '@/lib/creator-record/customer-record/record'
-import type { SourceRefusalCode, SourceTextApproval } from '@/lib/creator-record/customer-record/sources'
+import type { SourceRefusalCode, SourceTextInput } from '@/lib/creator-record/customer-record/sources'
+import { SOURCE_TEXT_CATEGORIES, SOURCE_TEXT_SOURCE_ID, sourceTextContent, sourceTextDigest, type SourceTextApproval } from '@/lib/creator-record/customer-record/source-text'
+import { loadQuestionRegistry } from '@/lib/creator-record/contract/question-registry'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 
 const RECORD = { record_id: 'PREP-CRV21TEST', record_version: 1, captured_at: '2026-10-31T00:00:00Z' }
@@ -33,7 +35,6 @@ const ANS = { P1: ['CR-V2-1 synthetic video'], P3: ['own_channels'], F1: ['TW'],
 const clone = <V,>(v: V): V => JSON.parse(JSON.stringify(v)) as V
 
 const SYNTHETIC: GovernanceApproval = { status: 'approved', approver: 'SYNTHETIC TEST APPROVER (fixture only)', decision_date: '2026-10-30', review_ref: 'SYNTHETIC-REVIEW-1' }
-const TEXT_APPROVAL: SourceTextApproval = { version: 'SYNTHETIC-TEXT-1', approval: SYNTHETIC }
 
 /** Synthetic "approved governed" sources: the pilot content, relabelled. Test fixture only. */
 function approvedSources(): CreatorRecordSources {
@@ -52,9 +53,24 @@ function approvedSources(): CreatorRecordSources {
 }
 
 const state = (plan = 'Pro', tool = 'pika'): CreatorRecordFormState => ({ answers: { ...ANS }, tools: [{ T1: [tool], T3: [plan], T4: ['May 2026'] }], acknowledgements: { A1: true, A2: true } })
-const input = (over: Partial<CustomerRecordInput> = {}): CustomerRecordInput => ({
-  state: state(), sources: approvedSources(), source_text_approval: TEXT_APPROVAL, topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: AS_OF, record: RECORD, ...over,
-})
+/** Synthetic acknowledgement wording (test fixture only). */
+const ACKS = (s: CreatorRecordSources): Record<string, string> => Object.fromEntries(s.acknowledgement_ids.map((id) => [id, `Synthetic acknowledgement ${id} (test fixture only).`]))
+/** A synthetic Source Text Approval for exactly the given wording. Test fixture only. */
+function approvalFor(s: CreatorRecordSources, acks: Record<string, string> = ACKS(s), over: Partial<SourceTextApproval> = {}): SourceTextApproval {
+  const loaded = loadQuestionRegistry(s.registry_input)
+  if (!loaded.ok) throw new Error('registry')
+  return {
+    source_id: SOURCE_TEXT_SOURCE_ID, version: 1, content_sha256: sourceTextDigest(sourceTextContent(s, loaded.registry, acks)),
+    categories: [...SOURCE_TEXT_CATEGORIES], record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION },
+    lifecycle: 'approved', authority: 'SYNTHETIC TEST AUTHORITY (fixture only)', decision_date: '2026-10-30', review_ref: 'SYNTHETIC-TEXT-REVIEW-1', ...over,
+  }
+}
+const textFor = (s: CreatorRecordSources): SourceTextInput | null => (loadQuestionRegistry(s.registry_input).ok ? { approval: approvalFor(s), acknowledgements: ACKS(s) } : null)
+/** By default the synthetic approval follows the sources given; tests of stale approvals pass `source_text` explicitly. */
+const input = (over: Partial<CustomerRecordInput> = {}): CustomerRecordInput => {
+  const sources = over.sources ?? approvedSources()
+  return { state: state(), sources, source_text: textFor(sources), topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: AS_OF, record: RECORD, ...over }
+}
 function built(r: CustomerRecordResult): { record: CustomerRecordV2; canonical: string; sha256: string } {
   if (!r.ok) throw new Error(JSON.stringify(r))
   return r
@@ -76,8 +92,8 @@ async function toolDoc(fixtureId: string): Promise<ToolDocument> {
 
 describe('only approved governed sources are accepted', () => {
   test('the real governed sources (nothing approved yet) are refused, with every reason', () => {
-    const r = buildCustomerRecord(input({ sources: governedSources(), source_text_approval: null }))
-    expect(refusalCodes(r)).toEqual(['ledger_version_missing', 'no_approved_questions', 'registry_version_missing', 'source_text_not_approved'])
+    const r = buildCustomerRecord(input({ sources: governedSources(), source_text: null }))
+    expect(refusalCodes(r)).toEqual(['ledger_version_missing', 'no_approved_questions', 'registry_version_missing', 'source_text_missing'])
   })
 
   test('pilot sources are refused', () => {
@@ -105,19 +121,6 @@ describe('only approved governed sources are accepted', () => {
   test('the ledger needs an approved version', () => {
     const s = approvedSources()
     expect(refusalCodes(buildCustomerRecord(input({ sources: { ...s, versions: { ...s.versions, ledger: 'none approved' } } })))).toEqual(['ledger_version_missing'])
-  })
-
-  test.each([
-    ['missing', null],
-    ['pending', { version: 'T-1', approval: { ...SYNTHETIC, status: 'pending' } }],
-    ['without an approver', { version: 'T-1', approval: { ...SYNTHETIC, approver: null } }],
-    ['without a version', { version: '', approval: SYNTHETIC }],
-  ] as [string, SourceTextApproval | null][])('source text approval %s is refused', (_, approval) => {
-    expect(refusalCodes(buildCustomerRecord(input({ source_text_approval: approval })))).toEqual(['source_text_not_approved'])
-  })
-
-  test('a pilot-marked source text approval is refused', () => {
-    expect(refusalCodes(buildCustomerRecord(input({ source_text_approval: { version: 'T-1', approval: { ...SYNTHETIC, approver: 'PILOT-UAT — not a governance approval' } } })))).toEqual(['pilot_marker'])
   })
 
   test('approved questions need approved wording; wording needs an approved question; options need labels', () => {
@@ -185,7 +188,10 @@ describe('the record', () => {
     expect(record.content).toEqual({ id: 'si8/creator-record-v2-record-content', version: 1, generated_text: 'none' })
     expect(record.sources).toEqual(expect.objectContaining({
       kind: 'governed', registry_version: 'SYNTHETIC-REGISTRY-1', ledger_version: 'SYNTHETIC-LEDGER-1', guidance_as_of: AS_OF,
-      source_text: { version: 'SYNTHETIC-TEXT-1', approver: SYNTHETIC.approver, decision_date: '2026-10-30', review_ref: 'SYNTHETIC-REVIEW-1' },
+      source_text: {
+        source_id: SOURCE_TEXT_SOURCE_ID, version: 1, content_sha256: approvalFor(approvedSources()).content_sha256, categories: [...SOURCE_TEXT_CATEGORIES].sort(),
+        record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION }, authority: 'SYNTHETIC TEST AUTHORITY (fixture only)', decision_date: '2026-10-30', review_ref: 'SYNTHETIC-TEXT-REVIEW-1',
+      },
     }))
     expect(record.sources.questions.map((q) => q.q_id)).toEqual(Array.from(new Set(record.declarations.answers.map((a) => a.q_id))))
     expect(record.sources.questions.every((q) => q.approver === SYNTHETIC.approver)).toBe(true)
@@ -243,7 +249,7 @@ describe('the record', () => {
       const submitted = a.tool_index === null ? (ANS as Record<string, string[]>)[a.q_id] : (state().tools[a.tool_index] as Record<string, string[]>)[a.q_id]
       expect(a.values.map((v) => v.value)).toEqual(submitted)
     }
-    expect(record.declarations.acknowledgements).toEqual(['A1', 'A2'])
+    expect(record.declarations.acknowledgements).toEqual(s.acknowledgement_ids.map((id) => ({ id, text: ACKS(s)[id] })).sort((a, b) => a.id.localeCompare(b.id)))
   })
 
   test('form problems are reported, nothing is built', () => {
@@ -413,7 +419,7 @@ describe('independence', () => {
     const targets = new Set(walk(ROOT).flatMap((f) => importsOf(f).map((i) => (i.startsWith('.') ? path.relative(path.join(APP_ROOT, 'lib', 'creator-record'), path.resolve(path.dirname(f), i)).split(path.sep).join('/') : i))))
     expect(Array.from(targets).sort()).toEqual([
       'contract/compose', 'contract/provenance', 'contract/publication-ledger', 'contract/question-registry', 'contract/types',
-      'customer-record/sources', 'prototype/build-draft', 'prototype/declared-guidance', 'prototype/form', 'prototype/parse-form-state',
+      'customer-record/source-text', 'customer-record/sources', 'prototype/build-draft', 'prototype/declared-guidance', 'prototype/form', 'prototype/parse-form-state',
       'record-core/canonical', 'record-core/projection',
     ])
     // prototype/build-draft (which holds the pilot data) is reached for types only.
@@ -430,5 +436,116 @@ describe('independence', () => {
   test('nothing in the app imports it yet (no route, payment or issuance integration)', () => {
     const files = [...walk(path.join(APP_ROOT, 'app')), ...walk(path.join(APP_ROOT, 'components')), ...walk(path.join(APP_ROOT, 'lib'))].filter((f) => !f.startsWith(ROOT))
     expect(files.filter((f) => importsOf(f).some((i) => i.includes('customer-record'))).map((f) => path.relative(APP_ROOT, f))).toEqual([])
+  })
+})
+
+// ───────────────────────────────────────────── CR-V2-1A: the Source Text Approval contract
+
+describe('Source Text Approval: approval is bound to exact, immutable wording', () => {
+  const base = approvedSources()
+  const stale = (): SourceTextInput => ({ approval: approvalFor(base), acknowledgements: ACKS(base) })
+  const withText = (sources: CreatorRecordSources, source_text: SourceTextInput | null) => buildCustomerRecord(input({ sources, source_text }))
+
+  test.each([
+    ['question wording', (s: any) => { s.presentation.P1 = { ...s.presentation.P1, text: `${s.presentation.P1.text} (edited)` } }],
+    ['question help', (s: any) => { s.presentation.P1 = { ...s.presentation.P1, help: 'New help text.' } }],
+    ['an option label', (s: any) => { s.presentation.P3 = { ...s.presentation.P3, option_labels: { ...s.presentation.P3.option_labels, own_channels: 'Own channels (edited)' } } }],
+    ['a dependency label', (s: any) => { const k = Object.keys(s.dependency_labels)[0]; s.dependency_labels = { ...s.dependency_labels, [k]: 'Edited label' } }],
+    ['a caveat', (s: any) => { const k = Object.keys(s.caveats)[0]; s.caveats = { ...s.caveats, [k]: 'Edited caveat.' } }],
+    ['an added caveat', (s: any) => { s.caveats = { ...s.caveats, 'new-caveat': 'A caveat nobody approved.' } }],
+  ])('changing %s without a new approval is refused', (_, mutate) => {
+    const s = clone(base)
+    mutate(s)
+    expect(refusalCodes(withText(s, stale()))).toEqual(['source_text_digest_mismatch'])
+  })
+
+  test('changing acknowledgement wording without a new approval is refused', () => {
+    const acks = { ...ACKS(base), [base.acknowledgement_ids[0]]: 'I agree to something else.' }
+    expect(refusalCodes(withText(base, { approval: approvalFor(base), acknowledgements: acks }))).toEqual(['source_text_digest_mismatch'])
+  })
+
+  test('the same or a new version over different content does not match; a new approval of the new content does', () => {
+    const s = clone(base) as any
+    s.presentation.P1 = { ...s.presentation.P1, text: 'What is the title of this project?' }
+    expect(refusalCodes(withText(s, stale()))).toEqual(['source_text_digest_mismatch'])
+    expect(refusalCodes(withText(s, { approval: { ...approvalFor(base), version: 2 }, acknowledgements: ACKS(base) }))).toEqual(['source_text_digest_mismatch'])
+    const { record } = built(withText(s, { approval: approvalFor(s, ACKS(s), { version: 2 }), acknowledgements: ACKS(s) }))
+    expect(record.sources.source_text.version).toBe(2)
+    expect(record.declarations.answers.find((a) => a.q_id === 'P1')!.question).toBe('What is the title of this project?')
+  })
+
+  test.each([
+    [{ version: 0 }, 'source_text_identity_invalid'],
+    [{ version: 1.5 }, 'source_text_identity_invalid'],
+    [{ source_id: 'si8/something-else' }, 'source_text_identity_invalid'],
+    [{ lifecycle: 'pending' }, 'source_text_not_approved'],
+    [{ lifecycle: 'withdrawn' }, 'source_text_withdrawn'],
+    [{ lifecycle: 'superseded' }, 'source_text_superseded'],
+    [{ authority: '' }, 'source_text_not_approved'],
+    [{ decision_date: '30/10/2026' }, 'source_text_not_approved'],
+    [{ authority: 'PILOT-UAT — not a governance approval' }, 'pilot_marker'],
+    [{ record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: 1 } }, 'source_text_schema_mismatch'],
+    [{ record_schema: { id: 'si8-internal-draft/creator-record-v2-snapshot', version: CUSTOMER_RECORD_SCHEMA_VERSION } }, 'source_text_schema_mismatch'],
+    [{ categories: SOURCE_TEXT_CATEGORIES.filter((c) => c !== 'caveat_wording') }, 'source_text_categories_invalid'],
+  ] as [Partial<SourceTextApproval>, SourceRefusalCode][])('approval %j is refused (%s)', (over, code) => {
+    expect(refusalCodes(withText(base, { approval: approvalFor(base, ACKS(base), over), acknowledgements: ACKS(base) }))).toEqual([code])
+  })
+
+  test('a missing approval is refused', () => {
+    expect(refusalCodes(withText(base, { approval: null, acknowledgements: ACKS(base) }))).toEqual(['source_text_missing'])
+  })
+
+  test('every acknowledgement needs approved wording, and no wording may be orphaned', () => {
+    expect(base.acknowledgement_ids.length).toBeGreaterThan(0)
+    const [first] = base.acknowledgement_ids
+    const missing = Object.fromEntries(Object.entries(ACKS(base)).filter(([k]) => k !== first))
+    expect(refusalCodes(withText(base, { approval: approvalFor(base, missing), acknowledgements: missing }))).toEqual(['acknowledgement_text_missing'])
+    const blank = { ...ACKS(base), [first]: '   ' }
+    expect(refusalCodes(withText(base, { approval: approvalFor(base, blank), acknowledgements: blank }))).toEqual(['acknowledgement_text_missing'])
+    const orphan = { ...ACKS(base), A9: 'An acknowledgement the questionnaire does not show.' }
+    expect(refusalCodes(withText(base, { approval: approvalFor(base, orphan), acknowledgements: orphan }))).toEqual(['acknowledgement_text_orphan'])
+  })
+
+  test('an accepted acknowledgement the questionnaire does not define is refused', () => {
+    const r = buildCustomerRecord(input({ state: { ...state(), acknowledgements: { A1: true, A2: true, A7: true } } }))
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect([r.stage, r.stage === 'input' ? r.issues : null]).toEqual(['input', ['state.acknowledgements.A7']])
+  })
+
+  test('the record carries each acknowledgement with its exact approved wording, and the digest of the approved wording', () => {
+    const { record } = built(buildCustomerRecord(input()))
+    for (const a of record.declarations.acknowledgements) expect(a.text).toBe(ACKS(base)[a.id])
+    expect(record.declarations.acknowledgements.map((a) => a.id).sort()).toEqual([...base.acknowledgement_ids].sort())
+    expect(record.sources.source_text.content_sha256).toBe(approvalFor(base).content_sha256)
+  })
+
+  test('wording approval cannot carry explanations or conclusions: there is no such category, and extra content cannot match', () => {
+    const loaded = loadQuestionRegistry(base.registry_input)
+    if (!loaded.ok) throw new Error('registry')
+    const content = sourceTextContent(base, loaded.registry, ACKS(base))
+    const widened = { ...content, explanations: { 'CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1': 'Cleared for commercial use.' }, conclusion_labels: { relevant_applicability_unresolved: 'Cleared' } }
+    const approval = approvalFor(base, ACKS(base), { content_sha256: sourceTextDigest(widened as typeof content), categories: [...SOURCE_TEXT_CATEGORIES, 'guidance_explanations', 'conclusion_labels'] })
+    expect(refusalCodes(withText(base, { approval, acknowledgements: ACKS(base) }))).toEqual(['source_text_categories_invalid', 'source_text_digest_mismatch'])
+  })
+
+  test('approved wording that asserts a stronger conclusion changes no conclusion, explanation or eligibility', () => {
+    const control = built(buildCustomerRecord(input({ state: state('not_sure') }))).record
+    expect(control.guidance.items.some((i) => i.conclusion === 'relevant_applicability_unresolved')).toBe(true)
+    const s = clone(base)
+    s.caveats = Object.fromEntries(Object.keys(s.caveats).map((k) => [k, 'Your use is cleared and fully licensed for commercial use.']))
+    s.dependency_labels = Object.fromEntries(Object.keys(s.dependency_labels).map((k) => [k, 'Confirmed: no further evidence needed']))
+    const { record } = built(buildCustomerRecord(input({ sources: s, state: state('not_sure') })))
+    const strip = (r: CustomerRecordV2) => r.guidance.items.map((i) => [i.claim_id, i.conclusion, i.explanation, i.applicability, i.provenance])
+    expect(strip(record)).toEqual(strip(control))
+    expect(record.sources.publications).toEqual(control.sources.publications)
+  })
+
+  test('historical integrity is verified from the record and digest alone, whatever the approval state is now', () => {
+    const { canonical, sha256, record } = built(buildCustomerRecord(input()))
+    // The same wording can no longer prepare a record once its approval is withdrawn ...
+    expect(refusalCodes(withText(base, { approval: approvalFor(base, ACKS(base), { lifecycle: 'withdrawn' }), acknowledgements: ACKS(base) }))).toEqual(['source_text_withdrawn'])
+    // ... but the record prepared earlier still verifies: verification takes no approval input.
+    expect(verifyCustomerRecord.length).toBe(2)
+    expect(verifyCustomerRecord(canonical, sha256)).toEqual({ ok: true, record })
   })
 })

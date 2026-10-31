@@ -152,14 +152,15 @@ Tests: `internal-draft`, `internal-draft-projection`.
 ## customer-record/ — CR-V2-1
 
 Deterministic, fail-closed preparation of the Creator Record v2 **customer record**
-(`si8/creator-record-v2-record` v1, status `prepared_not_issued`). **Not approved
+(`si8/creator-record-v2-record` v2, status `prepared_not_issued`). **Not approved
 customer content, not issued, and not reachable from any route, payment or
 issuance code** (test-enforced). Pure: no database, payment, Storage, email, PDF,
 clock or randomness.
 
 | Path | Role |
 |---|---|
-| `sources.ts` | `checkApprovedSources`: approved governed sources only. Refuses pilot or prototype material, missing or unapproved registry/ledger versions (never invented), a registry approving no question, missing or orphan question wording and option labels, a missing `SourceTextApproval` (for the texts with no approval of their own), and incomplete, duplicated, stale, lapsed or unknown ledger entries or caveats without text. Every reason is reported |
+| `sources.ts` | `checkApprovedSources`: approved governed sources only. Refuses pilot or prototype material, missing or unapproved registry/ledger versions (never invented), a registry approving no question, missing or orphan question wording and option labels, wording that is not exactly what an approved Source Text Approval names, and incomplete, duplicated, stale, lapsed or unknown ledger entries or caveats without text. Every reason is reported |
+| `source-text.ts` | CR-V2-1A Source Text Approval contract. The wording with no approval of its own (question wording and help, option labels, acknowledgement wording, dependency labels, caveats) is one content set, identified by the SHA-256 of its canonical form. An approval names source id, version, that digest, the exact categories, the record schema, lifecycle (`pending`/`approved`/`withdrawn`/`superseded`), a named authority and a date. Only `approved` prepares a record. Wording only: it has no category for explanations or conclusions, and cannot change eligibility, applicability, provenance or a conclusion |
 | `record.ts` | `buildCustomerRecord` → `{ record, canonical, sha256 }`; `verifyCustomerRecord`; `customerRecordDigestMatches` |
 
 Reuses `prototype/declared-guidance.ts` (`runDeclaredGuidance`: the existing form
@@ -170,8 +171,12 @@ the composition as produced, read through an exact-key projection and re-checked
 (never stronger than Bounded Interpretation and applicability permit; explanation
 and caveats are the approved ledger and source text, verbatim). The record holds no
 SI8-generated prose (`content.generated_text: 'none'`): answers, approved source
-text, identifiers and codes only. Its reference is a preparation reference, never
+text, identifiers and codes only. Wording comes from the approved content set, whose
+digest the record carries; acknowledgements are stored with their exact approved
+wording. Preparation-time approval, historical integrity (`verifyCustomerRecord`,
+from the record and digest alone, whatever the approval's state today) and current
+issuance eligibility (not implemented) are separate. Its reference is a preparation reference, never
 an issued `CR-` id. An explicitly approved empty ledger gives a declarations-only
 record (PRD OD-14 is a PM decision).
 
-Tests: `customer-record`.
+Tests: `customer-record`, `record-core-golden` (record-core output pinned to the pre-extraction code).

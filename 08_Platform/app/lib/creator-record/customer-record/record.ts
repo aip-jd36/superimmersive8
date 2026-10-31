@@ -24,7 +24,13 @@
  *     ledger and source text, verbatim. Any mismatch throws.
  *   - Text: the record contains no SI8-generated prose. Every string is the
  *     creator's own answer, approved source text, an identifier or a fixed code.
- *     Presentation wording is a later (renderer) milestone.
+ *     Wording is taken from the approved content set (`./source-text`), whose
+ *     digest the record carries; acknowledgements are stored with their exact
+ *     approved wording. Presentation wording is a later (renderer) milestone.
+ *   - Integrity: `verifyCustomerRecord` checks a stored record from the record
+ *     and its digest alone. It does not consult any approval: a record prepared
+ *     under an approval that is later withdrawn still verifies. Whether such a
+ *     record may still be ISSUED is a separate, not yet implemented decision.
  *   - Identity: a preparation reference, never an issued Creator Record id;
  *     the issued id is assigned at issuance and is not part of this hash.
  */
@@ -39,10 +45,11 @@ import { toolInstance, type FormIssue } from '../prototype/form'
 import { parseFormState } from '../prototype/parse-form-state'
 import { canonicalJson, sha256Hex, CanonicalizationError } from '../record-core/canonical'
 import { arr, int, nullable, obj, oneOf, ProjectionRefusal, str, type P } from '../record-core/projection'
-import { checkApprovedSources, type SourceRefusal, type SourceTextApproval, type TopicClaims } from './sources'
+import { checkApprovedSources, type SourceRefusal, type SourceTextInput, type TopicClaims } from './sources'
 
 export const CUSTOMER_RECORD_SCHEMA = 'si8/creator-record-v2-record'
-export const CUSTOMER_RECORD_SCHEMA_VERSION = 1
+/** v2 (CR-V2-1A): content-addressed source text provenance; acknowledgements with their wording. */
+export const CUSTOMER_RECORD_SCHEMA_VERSION = 2
 /** The content contract: what may appear in the record (no generated prose). Bump with any content change. */
 export const CUSTOMER_RECORD_CONTENT = { id: 'si8/creator-record-v2-record-content', version: 1, generated_text: 'none' } as const
 /** Issued Creator Record ids (CR-YYYY-8 hex): assigned at issuance, never part of a prepared record. */
@@ -53,7 +60,8 @@ export interface CustomerRecordInput {
   /** The questionnaire state, exactly as submitted; parsed strictly here. Documents are not accepted. */
   state: unknown
   sources: CreatorRecordSources
-  source_text_approval: SourceTextApproval | null
+  /** The approved wording: its Source Text Approval and the acknowledgement wording it covers. */
+  source_text: SourceTextInput | null
   topicClaims: TopicClaims
   /** Guidance date (YYYY-MM-DD), supplied by the caller. */
   as_of: string
@@ -96,12 +104,23 @@ export interface CustomerRecordV2 {
     kind: 'governed'
     registry_version: string
     ledger_version: string
-    source_text: { version: string; approver: string; decision_date: string; review_ref: string | null }
+    /** The approved wording set: identity, approval and the digest of exactly the texts used. */
+    source_text: {
+      source_id: string
+      version: number
+      content_sha256: string
+      categories: string[]
+      record_schema: { id: string; version: number }
+      authority: string
+      decision_date: string
+      review_ref: string | null
+    }
     guidance_as_of: string
     questions: { q_id: string; version: number; approver: string; decision_date: string; review_ref: string | null }[]
     publications: { entry_id: string; version: number; claim_id: string; claim_last_verified: string; approver: string; decision_date: string; refresh_by: string }[]
   }
-  declarations: { answers: DeclaredAnswer[]; observations: DeclaredObservation[]; acknowledgements: string[] }
+  /** Acknowledgements the creator accepted, with the exact approved wording shown. */
+  declarations: { answers: DeclaredAnswer[]; observations: DeclaredObservation[]; acknowledgements: { id: string; text: string }[] }
   documents: { status: 'not_provided'; tools: { tool_index: number; status: 'not_provided' }[] }
   comparison: { policy: 'disabled' }
   guidance: { items: CustomerGuidanceItem[] }
@@ -175,9 +194,14 @@ export function buildCustomerRecord(input: CustomerRecordInput): CustomerRecordR
   const state = parsed.state
 
   // 2. Approved governed sources only.
-  const check = checkApprovedSources(input.sources, input.source_text_approval, input.topicClaims, input.as_of)
+  const check = checkApprovedSources(input.sources, input.source_text, input.topicClaims, input.as_of, { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION })
   if (!check.ok) return { ok: false, stage: 'sources', refusals: check.refusals }
   const { approved } = check
+  const text = approved.source_text_content
+
+  // Only acknowledgements the questionnaire defines (and whose wording is approved) can be recorded.
+  const unknownAck = Object.keys(state.acknowledgements).filter((id) => !input.sources.acknowledgement_ids.includes(id))
+  if (unknownAck.length > 0) return { ok: false, stage: 'input', issues: unknownAck.map((id) => `state.acknowledgements.${id}`) }
 
   // 3. Existing validation, declaration mapping and guidance, on declarations alone.
   const declared = runDeclaredGuidance({ state, sources: input.sources, topicClaims: input.topicClaims, as_of: input.as_of, record: input.record })
@@ -186,7 +210,7 @@ export function buildCustomerRecord(input: CustomerRecordInput): CustomerRecordR
 
   if (guidance.governance_gaps.some((g) => g.kind === 'ledger_entry_without_governed_claim')) throw new CustomerRecordInvariantError('ledger entry without a governed claim')
 
-  // 4. Declarations, from the recorded observations (registry order, then tool block).
+  // 4. Declarations, from the recorded observations (registry order, then tool block), worded from the approved content.
   const presentation = input.sources.presentation
   const order = Array.from(approved.registry.questions.keys())
   const groups = new Map<string, DeclaredObservation[]>()
@@ -210,25 +234,28 @@ export function buildCustomerRecord(input: CustomerRecordInput): CustomerRecordR
       const verbatims = new Set(obs.map((o) => o.answer_verbatim))
       if (submitted.length === 0 || verbatims.size !== 1) throw new CustomerRecordInvariantError(`observations for ${q_id} do not match the submitted answer`)
       const p = presentation[q_id]
+      const approvedText = text.questions[q_id]
+      if (!approvedText || approvedText.q_version !== q_version) throw new CustomerRecordInvariantError(`no approved wording for ${q_id} v${q_version}`)
+      const labels = approvedText.option_labels
       const values = submitted.map((v) => {
         if (q.options !== 'free_text') {
-          if (!Object.prototype.hasOwnProperty.call(p.option_labels, v)) throw new CustomerRecordInvariantError(`no approved label for ${q_id}.${v}`)
-          return { value: v, kind: 'option' as const, label: p.option_labels[v] }
+          if (!Object.prototype.hasOwnProperty.call(labels, v)) throw new CustomerRecordInvariantError(`no approved label for ${q_id}.${v}`)
+          return { value: v, kind: 'option' as const, label: labels[v] }
         }
-        if (p.allow_not_sure && v === 'not_sure') return { value: v, kind: 'not_sure' as const, label: Object.prototype.hasOwnProperty.call(p.option_labels, v) ? p.option_labels[v] : null }
+        if (p.allow_not_sure && v === 'not_sure') return { value: v, kind: 'not_sure' as const, label: Object.prototype.hasOwnProperty.call(labels, v) ? labels[v] : null }
         return { value: v, kind: 'free_text' as const, label: null }
       })
       if (q.options !== 'free_text') {
         const recorded = new Set(obs.map((o) => o.normalized_value))
         if (recorded.size !== submitted.length || submitted.some((v) => !recorded.has(v))) throw new CustomerRecordInvariantError(`observations for ${q_id} do not match the submitted options`)
       }
-      return { q_id, q_version, tool_index, question: p.text, answer_verbatim: obs[0].answer_verbatim, values }
+      return { q_id, q_version, tool_index, question: approvedText.text, answer_verbatim: obs[0].answer_verbatim, values }
     })
     .sort((a, b) => order.indexOf(a.q_id) - order.indexOf(b.q_id) || (a.tool_index ?? -1) - (b.tool_index ?? -1))
 
   // 5. Guidance: projected exactly, then re-checked against the sources and BI.
   const claims = new Map(input.topicClaims.map((c) => [c.claim_id, c]))
-  const caveatText = input.sources.caveats
+  const caveatText = text.caveats
   const items: CustomerGuidanceItem[] = guidance.composition.items.map((raw, i) => {
     let item: ReturnType<typeof guidanceItem>
     try {
@@ -257,6 +284,10 @@ export function buildCustomerRecord(input: CustomerRecordInput): CustomerRecordR
       if (!permitted) throw new CustomerRecordInvariantError(`conclusion stronger than permitted for ${item.claim_id}`)
     }
     if (entry.applicability_policy === 'met_only' && item.conclusion !== 'relevant_on_declared_facts') throw new CustomerRecordInvariantError(`ledger policy requires met for ${item.claim_id}`)
+    for (const row of item.dependency_rows) {
+      if (!Object.prototype.hasOwnProperty.call(text.dependency_labels, row.dependency_id) || row.label !== text.dependency_labels[row.dependency_id]) throw new CustomerRecordInvariantError(`dependency label is not the approved wording for ${row.dependency_id}`)
+    }
+    for (const id of item.required_caveats) if (!Object.prototype.hasOwnProperty.call(caveatText, id)) throw new CustomerRecordInvariantError(`no approved wording for caveat ${id}`)
 
     return {
       claim_id: item.claim_id,
@@ -302,7 +333,10 @@ export function buildCustomerRecord(input: CustomerRecordInput): CustomerRecordR
       declarations: {
         answers,
         observations: [...observations].sort((a, b) => (a.observation_id < b.observation_id ? -1 : a.observation_id > b.observation_id ? 1 : 0)),
-        acknowledgements: Object.keys(state.acknowledgements).filter((k) => state.acknowledgements[k] === true).sort(),
+        acknowledgements: input.sources.acknowledgement_ids
+          .filter((id) => state.acknowledgements[id] === true)
+          .map((id) => ({ id, text: text.acknowledgements[id] }))
+          .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)),
       },
       documents: { status: 'not_provided', tools: state.tools.slice(0, input.sources.max_tools).map((_, i) => ({ tool_index: i, status: 'not_provided' })) },
       comparison: { policy: 'disabled' },

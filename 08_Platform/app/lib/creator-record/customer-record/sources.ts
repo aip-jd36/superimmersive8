@@ -8,9 +8,10 @@
  *   - a registry that does not load, or approves no question;
  *   - question wording that is missing, or present for a question that is not
  *     approved, or an option without approved wording;
- *   - no approval for the source texts that have no approval of their own
- *     (question wording, option labels, acknowledgements, dependency labels,
- *     caveats): `SourceTextApproval`;
+ *   - source texts (question wording, option labels, acknowledgement wording,
+ *     dependency labels, caveats) that are not exactly the content an
+ *     `approved` Source Text Approval names for this record schema
+ *     (`./source-text`, CR-V2-1A);
  *   - a current, eligible ledger entry that is incomplete, duplicated, stale,
  *     lapsed, for an unknown claim, or that names a caveat with no text.
  *
@@ -24,13 +25,14 @@ import type { PublicationLedgerEntry } from '../contract/publication-ledger'
 import { loadQuestionRegistry, type QuestionRegistry } from '../contract/question-registry'
 import { isApproved, isIsoDate, type GovernanceApproval } from '../contract/types'
 import type { BuildDraftInput, CreatorRecordSources } from '../prototype/build-draft'
+import { checkSourceText, SOURCE_TEXT_REFUSAL_CODES, type AcknowledgementText, type SourceTextApproval, type SourceTextContent } from './source-text'
 
 export type TopicClaims = BuildDraftInput['topicClaims']
 
-/** Approval of the source texts that carry no approval of their own. */
-export interface SourceTextApproval {
-  version: string
-  approval: GovernanceApproval
+/** The approved wording supplied with a record: its approval, and the acknowledgement wording it covers. */
+export interface SourceTextInput {
+  approval: SourceTextApproval | null
+  acknowledgements: AcknowledgementText
 }
 
 export const SOURCE_REFUSAL_CODES = [
@@ -43,7 +45,7 @@ export const SOURCE_REFUSAL_CODES = [
   'question_presentation_missing',
   'presentation_without_approved_question',
   'option_label_missing',
-  'source_text_not_approved',
+  ...SOURCE_TEXT_REFUSAL_CODES,
   'max_tools_invalid',
   'ledger_entry_incomplete',
   'ledger_entry_duplicate',
@@ -63,7 +65,18 @@ export interface ApprovedSources {
   registry: QuestionRegistry
   registry_version: string
   ledger_version: string
-  source_text: { version: string; approver: string; decision_date: string; review_ref: string | null }
+  source_text: {
+    source_id: string
+    version: number
+    content_sha256: string
+    categories: string[]
+    record_schema: { id: string; version: number }
+    authority: string
+    decision_date: string
+    review_ref: string | null
+  }
+  /** The approved wording itself, exactly as approved. */
+  source_text_content: SourceTextContent
 }
 
 export type SourceCheck = { ok: true; approved: ApprovedSources } | { ok: false; refusals: SourceRefusal[] }
@@ -76,7 +89,7 @@ const marked = (s: string | null | undefined) => typeof s === 'string' && UNAPPR
 const approvalMarked = (a: GovernanceApproval | null | undefined) => !!a && (marked(a.approver) || marked(a.review_ref))
 const has = (o: Readonly<Record<string, unknown>>, k: string) => Object.prototype.hasOwnProperty.call(o, k)
 
-export function checkApprovedSources(sources: CreatorRecordSources, sourceText: SourceTextApproval | null, topicClaims: TopicClaims, asOf: string): SourceCheck {
+export function checkApprovedSources(sources: CreatorRecordSources, sourceText: SourceTextInput | null, topicClaims: TopicClaims, asOf: string, recordSchema: { id: string; version: number }): SourceCheck {
   const refusals: SourceRefusal[] = []
   const refuse = (code: SourceRefusalCode, ref: string | null = null) => refusals.push({ code, ref })
 
@@ -89,10 +102,6 @@ export function checkApprovedSources(sources: CreatorRecordSources, sourceText: 
   else if (marked(registryVersion)) refuse('pilot_marker', 'versions.registry')
   if (typeof ledgerVersion !== 'string' || VERSION_UNAVAILABLE.test(ledgerVersion)) refuse('ledger_version_missing')
   else if (marked(ledgerVersion)) refuse('pilot_marker', 'versions.ledger')
-
-  // ── Source texts without an approval of their own ──
-  if (!sourceText || typeof sourceText.version !== 'string' || VERSION_UNAVAILABLE.test(sourceText.version) || !isApproved(sourceText.approval)) refuse('source_text_not_approved')
-  else if (marked(sourceText.version) || approvalMarked(sourceText.approval)) refuse('pilot_marker', 'source_text')
 
   if (!Number.isInteger(sources.max_tools) || sources.max_tools < 1) refuse('max_tools_invalid')
 
@@ -120,6 +129,13 @@ export function checkApprovedSources(sources: CreatorRecordSources, sourceText: 
     for (const id of Object.keys(sources.presentation)) if (!approvedIds.has(id)) refuse('presentation_without_approved_question', id)
   }
 
+  // ── Wording: exactly the content an approved Source Text Approval names (CR-V2-1A) ──
+  let text: ReturnType<typeof checkSourceText> | null = null
+  if (registry) {
+    text = checkSourceText(sources, registry, sourceText?.acknowledgements ?? null, sourceText?.approval ?? null, recordSchema)
+    if (!text.ok) for (const r of text.refusals) refuse(r.code, r.ref)
+  }
+
   // ── Publication ledger ──
   const claims = new Map(topicClaims.map((c) => [c.claim_id, c]))
   const current = sources.ledger.filter((e) => e.superseded_by === null)
@@ -137,15 +153,19 @@ export function checkApprovedSources(sources: CreatorRecordSources, sourceText: 
     for (const id of e.required_caveats) if (!has(sources.caveats, id) || String(sources.caveats[id]).trim() === '') refuse('caveat_text_missing', `${e.entry_id}.${id}`)
   }
 
-  if (refusals.length > 0 || !registry || !sourceText) return { ok: false, refusals }
-  const a = sourceText.approval
+  if (refusals.length > 0 || !registry || !text || !text.ok) return { ok: false, refusals }
+  const a = text.approval
   return {
     ok: true,
     approved: {
       registry,
       registry_version: registryVersion,
       ledger_version: ledgerVersion,
-      source_text: { version: sourceText.version, approver: a.approver as string, decision_date: a.decision_date as string, review_ref: a.review_ref },
+      source_text: {
+        source_id: a.source_id, version: a.version, content_sha256: text.digest, categories: [...a.categories].sort(),
+        record_schema: { id: a.record_schema.id, version: a.record_schema.version }, authority: a.authority, decision_date: a.decision_date, review_ref: a.review_ref,
+      },
+      source_text_content: text.content,
     },
   }
 }
