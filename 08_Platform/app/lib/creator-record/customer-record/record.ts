@@ -45,11 +45,25 @@ import { toolInstance, type FormIssue } from '../prototype/form'
 import { parseFormState } from '../prototype/parse-form-state'
 import { canonicalJson, sha256Hex, CanonicalizationError } from '../record-core/canonical'
 import { arr, int, nullable, obj, oneOf, ProjectionRefusal, str, type P } from '../record-core/projection'
+import {
+  claimContentDigest, claimRef, observationMapContentDigest, observationMapRef, publicationContentDigest, publicationRef,
+  questionContentDigest, questionRef, type DigestedKind,
+} from './authority-content'
 import { checkApprovedSources, type SourceRefusal, type SourceTextInput, type TopicClaims } from './sources'
 
 export const CUSTOMER_RECORD_SCHEMA = 'si8/creator-record-v2-record'
-/** v2 (CR-V2-1A): content-addressed source text provenance; acknowledgements with their wording. */
-export const CUSTOMER_RECORD_SCHEMA_VERSION = 2
+/**
+ * v2 (CR-V2-1A): content-addressed source text provenance; acknowledgements with their wording.
+ * v3 (CR-V2-1C): builder provenance; content digest of every referenced governed entry.
+ */
+export const CUSTOMER_RECORD_SCHEMA_VERSION = 3
+/**
+ * The code that prepared the record. Technical provenance only: it grants no
+ * commercial authority, and an issuance check can only refuse an unsupported
+ * builder, never be satisfied by one. Raise the version with any change to how
+ * a record is built or to the guidance pipeline it runs.
+ */
+export const CUSTOMER_RECORD_BUILDER = { id: 'si8/creator-record-v2-record-builder', version: 1 } as const
 /** The content contract: what may appear in the record (no generated prose). Bump with any content change. */
 export const CUSTOMER_RECORD_CONTENT = { id: 'si8/creator-record-v2-record-content', version: 1, generated_text: 'none' } as const
 /** Issued Creator Record ids (CR-YYYY-8 hex): assigned at issuance, never part of a prepared record. */
@@ -99,6 +113,7 @@ export interface CustomerRecordV2 {
   schema_version: typeof CUSTOMER_RECORD_SCHEMA_VERSION
   status: 'prepared_not_issued'
   content: typeof CUSTOMER_RECORD_CONTENT
+  builder: { id: string; version: number }
   record: { record_ref: string; record_version: number; prepared_on: string; captured_at: string }
   sources: {
     kind: 'governed'
@@ -118,6 +133,11 @@ export interface CustomerRecordV2 {
     guidance_as_of: string
     questions: { q_id: string; version: number; approver: string; decision_date: string; review_ref: string | null }[]
     publications: { entry_id: string; version: number; claim_id: string; claim_last_verified: string; approver: string; decision_date: string; refresh_by: string }[]
+    /**
+     * CR-V2-1C: the content digest of every governed entry the record relied on, by kind,
+     * id and version. Version labels alone are not proof of content (`./authority-content`).
+     */
+    authority_digests: { kind: DigestedKind; id: string; version: string; content_sha256: string }[]
   }
   /** Acknowledgements the creator accepted, with the exact approved wording shown. */
   declarations: { answers: DeclaredAnswer[]; observations: DeclaredObservation[]; acknowledgements: { id: string; text: string }[] }
@@ -314,12 +334,39 @@ export function buildCustomerRecord(input: CustomerRecordInput): CustomerRecordR
     return { entry_id: p.entry_id, version: p.version, claim_id: it.claim_id, claim_last_verified: it.provenance.claim.last_verified, approver: p.approver, decision_date: p.decision_date, refresh_by: p.refresh_by }
   })
 
+  // CR-V2-1C: content digests of exactly the governed entries the record relies on.
+  const digests = new Map<string, CustomerRecordV2['sources']['authority_digests'][number]>()
+  const addDigest = (kind: DigestedKind, ref: { id: string; version: string }, content_sha256: string) => {
+    const key = `${kind}\u0000${ref.id}\u0000${ref.version}`
+    const prior = digests.get(key)
+    if (prior && prior.content_sha256 !== content_sha256) throw new CustomerRecordInvariantError(`two contents for ${kind} ${ref.id} v${ref.version}`)
+    digests.set(key, { kind, ...ref, content_sha256 })
+  }
+  for (const q of questions) addDigest('question', questionRef({ q_id: q.q_id, version: q.version }), questionContentDigest(approved.registry.questions.get(q.q_id)!))
+  for (const o of observations) {
+    if (!o.map_entry) continue
+    const m = o.map_entry
+    const entry = approved.registry.observation_map.find((x) => x.o_id === m.o_id && x.version === m.o_version)
+    if (!entry) throw new CustomerRecordInvariantError(`observation map entry ${m.o_id} v${m.o_version} not in the registry`)
+    addDigest('observation_map_entry', observationMapRef(entry), observationMapContentDigest(entry))
+  }
+  for (const it of items) {
+    const p = it.provenance.publication
+    const entry = input.sources.ledger.find((e) => e.entry_id === p.entry_id && e.version === p.version)
+    if (!entry) throw new CustomerRecordInvariantError(`ledger entry ${p.entry_id} v${p.version} not in the ledger`)
+    addDigest('publication_entry', publicationRef(entry), publicationContentDigest(entry))
+    const claim = claims.get(it.claim_id)!
+    addDigest('governed_claim', claimRef(claim), claimContentDigest(claim))
+  }
+  const authority_digests = Array.from(digests.values()).sort((a, b) => (a.kind + a.id + a.version < b.kind + b.id + b.version ? -1 : a.kind + a.id + a.version > b.kind + b.id + b.version ? 1 : 0))
+
   const record: CustomerRecordV2 = JSON.parse(
     JSON.stringify({
       schema: CUSTOMER_RECORD_SCHEMA,
       schema_version: CUSTOMER_RECORD_SCHEMA_VERSION,
       status: 'prepared_not_issued',
       content: CUSTOMER_RECORD_CONTENT,
+      builder: CUSTOMER_RECORD_BUILDER,
       record: { record_ref: input.record.record_id, record_version: input.record.record_version, prepared_on: input.as_of, captured_at: input.record.captured_at },
       sources: {
         kind: 'governed',
@@ -329,6 +376,7 @@ export function buildCustomerRecord(input: CustomerRecordInput): CustomerRecordR
         guidance_as_of: input.as_of,
         questions,
         publications,
+        authority_digests,
       },
       declarations: {
         answers,

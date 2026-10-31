@@ -152,7 +152,7 @@ Tests: `internal-draft`, `internal-draft-projection`.
 ## customer-record/ — CR-V2-1
 
 Deterministic, fail-closed preparation of the Creator Record v2 **customer record**
-(`si8/creator-record-v2-record` v2, status `prepared_not_issued`). **Not approved
+(`si8/creator-record-v2-record` v3, status `prepared_not_issued`). **Not approved
 customer content, not issued, and not reachable from any route, payment or
 issuance code** (test-enforced). Pure: no database, payment, Storage, email, PDF,
 clock or randomness.
@@ -161,7 +161,10 @@ clock or randomness.
 |---|---|
 | `sources.ts` | `checkApprovedSources`: approved governed sources only. Refuses pilot or prototype material, missing or unapproved registry/ledger versions (never invented), a registry approving no question, missing or orphan question wording and option labels, wording that is not exactly what an approved Source Text Approval names, and incomplete, duplicated, stale, lapsed or unknown ledger entries or caveats without text. Every reason is reported |
 | `source-text.ts` | CR-V2-1A Source Text Approval contract. The wording with no approval of its own (question wording and help, option labels, acknowledgement wording, dependency labels, caveats) is one content set, identified by the SHA-256 of its canonical form. An approval names source id, version, that digest, the exact categories, the record schema, lifecycle (`pending`/`approved`/`withdrawn`/`superseded`), a named authority and a date. Only `approved` prepares a record. Wording only: it has no category for explanations or conclusions, and cannot change eligibility, applicability, provenance or a conclusion |
-| `record.ts` | `buildCustomerRecord` → `{ record, canonical, sha256 }`; `verifyCustomerRecord`; `customerRecordDigestMatches` |
+| `record.ts` | `buildCustomerRecord` → `{ record, canonical, sha256 }`; `verifyCustomerRecord`; `customerRecordDigestMatches`. CR-V2-1C: records `builder` provenance and `sources.authority_digests` |
+| `authority-content.ts` | CR-V2-1C: the content digest of each referenced question, observation-map entry, ledger entry and governed claim (lifecycle and validity fields excluded). Version labels are never taken as proof of content |
+| `eligibility.ts` | CR-V2-1C: `issuanceReferences(record)` and the generic, pure `evaluateIssuanceEligibility(canonical, sha256, snapshot)` → `eligible` / `ineligible` / `invalid_record` / `indeterminate` (`conflict`, `malformed_state`, `unavailable`). Integrity first; withdrawn, superseded, retired or pending authority blocks; no transitions, no substitution, no conclusion read |
+| `governance-state.ts` | CR-V2-1C: pure adapters from the current sources (registry, ledger, claims, wording approvals, supported schemas and builders) to the generic snapshot. Pilot material is never approved; unreadable sources stay unavailable |
 
 Reuses `prototype/declared-guidance.ts` (`runDeclaredGuidance`: the existing form
 validation, declaration mapping and guidance pipeline, now shared with the draft;
@@ -179,4 +182,4 @@ issuance eligibility (not implemented) are separate. Its reference is a preparat
 an issued `CR-` id. An explicitly approved empty ledger gives a declarations-only
 record (PRD OD-14 is a PM decision).
 
-Tests: `customer-record`, `record-core-golden` (record-core output pinned to the pre-extraction code).
+Tests: `customer-record`, `customer-record-eligibility`, `record-core-golden` (record-core output pinned to the pre-extraction code).

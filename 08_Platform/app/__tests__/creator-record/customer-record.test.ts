@@ -419,6 +419,8 @@ describe('independence', () => {
     const targets = new Set(walk(ROOT).flatMap((f) => importsOf(f).map((i) => (i.startsWith('.') ? path.relative(path.join(APP_ROOT, 'lib', 'creator-record'), path.resolve(path.dirname(f), i)).split(path.sep).join('/') : i))))
     expect(Array.from(targets).sort()).toEqual([
       'contract/compose', 'contract/provenance', 'contract/publication-ledger', 'contract/question-registry', 'contract/types',
+      // CR-V2-1C: the authority digests and the eligibility check are part of the module.
+      'customer-record/authority-content', 'customer-record/eligibility', 'customer-record/record',
       'customer-record/source-text', 'customer-record/sources', 'prototype/build-draft', 'prototype/declared-guidance', 'prototype/form', 'prototype/parse-form-state',
       'record-core/canonical', 'record-core/projection',
     ])

@@ -1,0 +1,125 @@
+/**
+ * CR-V2-1C — pure adapters from the current governance sources to the generic
+ * `GovernanceSnapshot` the eligibility check reads (`./eligibility`).
+ *
+ * The only place that knows each source format. Mapping rules (fail closed):
+ *   - only `governed` sources can be approved: pilot sources, and any entry
+ *     carrying a pilot or prototype marker, map to `pending`;
+ *   - question / observation-map entries: approval `approved` (with approver and
+ *     date) → approved; `pending` → pending; `retired` → retired;
+ *   - publication-ledger entries: `superseded_by` → superseded; eligibility `No`
+ *     → withdrawn; `Pending`, or an incomplete approval → pending; validity is
+ *     `refresh_by`; two current entries for one claim are a governance conflict;
+ *   - governed claims: versioned by `last_verified`; `superseded_by` → superseded;
+ *     never verified → pending;
+ *   - Source Text Approvals: their own lifecycle; an incomplete one → pending;
+ *   - record schemas and builders: the supported list, as approved identities.
+ * A source the caller could not read is passed as `UNAVAILABLE` and stays
+ * unavailable; one that does not load is malformed. Nothing is defaulted to
+ * approved.
+ */
+
+import { loadQuestionRegistry } from '../contract/question-registry'
+import { isApproved, isIsoDate, type GovernanceApproval } from '../contract/types'
+import type { CreatorRecordSources } from '../prototype/build-draft'
+import {
+  claimContentDigest, claimRef, observationMapContentDigest, observationMapRef, publicationContentDigest, publicationRef,
+  questionContentDigest, questionRef, type AuthorityKind,
+} from './authority-content'
+import type { AuthorityLifecycle, AuthorityState, GovernanceSnapshot, Lookup } from './eligibility'
+import { CUSTOMER_RECORD_BUILDER, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION } from './record'
+import { SOURCE_TEXT_CATEGORIES, type SourceTextApproval } from './source-text'
+import type { TopicClaims } from './sources'
+
+export const UNAVAILABLE = Object.freeze({ unavailable: true as const })
+export type Available<T> = T | typeof UNAVAILABLE
+
+export interface Identity {
+  id: string
+  version: number
+}
+
+/** The record schemas and builders this build can issue. Technical identities only. */
+export const CURRENT_ISSUANCE_SUPPORT: { record_schemas: readonly Identity[]; builders: readonly Identity[] } = Object.freeze({
+  record_schemas: [{ id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION }],
+  builders: [{ id: CUSTOMER_RECORD_BUILDER.id, version: CUSTOMER_RECORD_BUILDER.version }],
+})
+
+export interface CurrentGovernance {
+  issuance_date: string
+  sources: Available<CreatorRecordSources>
+  topicClaims: Available<TopicClaims>
+  source_text_approvals: Available<readonly SourceTextApproval[]>
+  support?: typeof CURRENT_ISSUANCE_SUPPORT
+}
+
+const UNAPPROVED_MARKER = /pilot|prototype|unapproved|not a governance approval|not a creator record publication approval/i
+const marked = (...xs: (string | null | undefined)[]) => xs.some((x) => typeof x === 'string' && UNAPPROVED_MARKER.test(x))
+const isUnavailable = (v: unknown): v is typeof UNAVAILABLE => v === UNAVAILABLE
+const ok = (entries: AuthorityState[]): Lookup => ({ status: 'ok', entries })
+const state = (kind: AuthorityKind, ref: { id: string; version: string }, lifecycle: AuthorityLifecycle, content_sha256: string | null, valid_until: string | null = null, conflict = false): AuthorityState => ({ kind, ...ref, lifecycle, content_sha256, valid_until, conflict })
+
+function approvalLifecycle(a: GovernanceApproval, governed: boolean): AuthorityLifecycle {
+  if (!governed || marked(a.approver, a.review_ref)) return 'pending'
+  if (a.status === 'retired') return 'retired'
+  return isApproved(a) ? 'approved' : 'pending'
+}
+
+export function governanceSnapshotFrom(g: CurrentGovernance): GovernanceSnapshot {
+  const support = g.support ?? CURRENT_ISSUANCE_SUPPORT
+  const authorities: GovernanceSnapshot['authorities'] = {
+    record_schema: ok(support.record_schemas.map((s) => state('record_schema', { id: s.id, version: String(s.version) }, 'approved', null))),
+    builder: ok(support.builders.map((b) => state('builder', { id: b.id, version: String(b.version) }, 'approved', null))),
+  }
+
+  // ── Question Registry and Observation Map ──
+  if (isUnavailable(g.sources)) {
+    authorities.question = authorities.observation_map_entry = authorities.publication_entry = { status: 'unavailable' }
+  } else {
+    const sources = g.sources
+    const governed = sources.kind === 'governed'
+    const loaded = loadQuestionRegistry(sources.registry_input)
+    if (!loaded.ok) {
+      authorities.question = authorities.observation_map_entry = { status: 'malformed' }
+    } else {
+      authorities.question = ok(Array.from(loaded.registry.questions.values()).map((q) => state('question', questionRef(q), approvalLifecycle(q.approval, governed), questionContentDigest(q))))
+      authorities.observation_map_entry = ok(loaded.registry.observation_map.map((o) => state('observation_map_entry', observationMapRef(o), approvalLifecycle(o.approval, governed), observationMapContentDigest(o))))
+    }
+
+    // ── Publication ledger ──
+    const currentPerClaim = new Map<string, number>()
+    for (const e of sources.ledger) if (e.superseded_by === null) currentPerClaim.set(e.claim_id, (currentPerClaim.get(e.claim_id) ?? 0) + 1)
+    authorities.publication_entry = ok(
+      sources.ledger.map((e) => {
+        const complete = typeof e.approver === 'string' && e.approver.trim() !== '' && isIsoDate(e.decision_date) && isIsoDate(e.refresh_by)
+        const lifecycle: AuthorityLifecycle =
+          e.superseded_by !== null ? 'superseded'
+            : !governed || marked(e.entry_id, e.approver) ? 'pending'
+              : e.creator_record_eligible === 'No' ? 'withdrawn'
+                : e.creator_record_eligible !== 'Yes' || !complete ? 'pending'
+                  : 'approved'
+        const conflict = e.superseded_by === null && (currentPerClaim.get(e.claim_id) ?? 0) > 1
+        return state('publication_entry', publicationRef(e), lifecycle, publicationContentDigest(e), isIsoDate(e.refresh_by) ? e.refresh_by : null, conflict)
+      }),
+    )
+  }
+
+  // ── Governed claims ──
+  authorities.governed_claim = isUnavailable(g.topicClaims)
+    ? { status: 'unavailable' }
+    : ok(g.topicClaims.map((c) => state('governed_claim', claimRef(c), c.superseded_by !== null ? 'superseded' : isIsoDate(c.last_verified) ? 'approved' : 'pending', claimContentDigest(c))))
+
+  // ── Source Text Approvals ──
+  if (isUnavailable(g.source_text_approvals)) authorities.source_text = { status: 'unavailable' }
+  else {
+    authorities.source_text = ok(
+      g.source_text_approvals.map((a) => {
+        const categoriesExact = Array.isArray(a.categories) && [...a.categories].sort().join('|') === [...SOURCE_TEXT_CATEGORIES].sort().join('|')
+        const complete = typeof a.authority === 'string' && a.authority.trim() !== '' && isIsoDate(a.decision_date) && categoriesExact && !marked(a.authority, a.review_ref)
+        const lifecycle: AuthorityLifecycle = a.lifecycle === 'approved' && !complete ? 'pending' : a.lifecycle
+        return state('source_text', { id: a.source_id, version: String(a.version) }, lifecycle, a.content_sha256)
+      }),
+    )
+  }
+  return { issuance_date: g.issuance_date, authorities }
+}
