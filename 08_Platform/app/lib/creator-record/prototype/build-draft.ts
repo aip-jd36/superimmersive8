@@ -22,17 +22,18 @@
  */
 
 import type { PublicationLedgerEntry } from '../contract/publication-ledger'
-import { loadQuestionRegistry, type QuestionRegistry, type RegistryInput } from '../contract/question-registry'
+import type { QuestionRegistry, RegistryInput } from '../contract/question-registry'
 import type { RecordContext } from '../contract/provenance'
 import { CREATOR_RECORD_DEPENDENCY_LABELS, CREATOR_RECORD_PUBLICATION_LEDGER, CREATOR_RECORD_REGISTRY_INPUT } from '../governed/sources'
-import { runCreatorRecordGuidance, type CreatorRecordGuidanceResult } from '../integration/run-creator-record-guidance'
+import type { CreatorRecordGuidanceResult } from '../integration/run-creator-record-guidance'
 import { buildDraftRecord, type DraftRecordView } from '../presentation/build-draft-record'
 import { PILOT_CAVEATS, PILOT_DEPENDENCY_LABELS, PILOT_LEDGER_VERSION, PILOT_PUBLICATION_LEDGER } from '../pilot/pilot-ledger'
 import { PILOT_ACKNOWLEDGEMENTS, PILOT_MAX_TOOLS, PILOT_QUESTION_META, PILOT_REGISTRY_INPUT, PILOT_REGISTRY_VERSION, type PilotQuestionMeta } from '../pilot/pilot-registry'
 import type { TopicClaim } from '@/lib/retrieval-engine/types'
 import { reconcileToolEvidence, toDocumentObservations, type EvidenceReconciliation, type ToolDocument } from '../evidence/document-observations'
 import { resolveSellerIdentity } from '../integration/seller-identity'
-import { formToObservations, shownToolQuestionIds, toolInstance, validateForm, visibleQuestions, type CreatorRecordFormState, type FormConfig, type FormIssue } from './form'
+import { shownToolQuestionIds, toolInstance, visibleQuestions, type CreatorRecordFormState, type FormIssue } from './form'
+import { loadFormConfig, runDeclaredGuidance } from './declared-guidance'
 
 export interface CreatorRecordSources {
   kind: 'governed' | 'pilot'
@@ -76,11 +77,8 @@ export function pilotSources(): CreatorRecordSources {
   }
 }
 
-export function loadFormConfig(sources: CreatorRecordSources): FormConfig {
-  const r = loadQuestionRegistry(sources.registry_input)
-  if (!r.ok) throw new Error(`Creator Record registry rejected: ${r.errors.join('; ')}`)
-  return { registry: r.registry, presentation: sources.presentation, acknowledgement_ids: sources.acknowledgement_ids, max_tools: sources.max_tools }
-}
+// CR-V2-1: moved to the pilot-free ./declared-guidance, unchanged; re-exported for existing callers.
+export { loadFormConfig }
 
 export interface BuildDraftInput {
   state: CreatorRecordFormState
@@ -100,21 +98,11 @@ export type BuildDraftResult =
   | { ok: false; issues: FormIssue[] }
 
 export function buildCreatorRecordDraft(input: BuildDraftInput): BuildDraftResult {
-  const config = loadFormConfig(input.sources)
   const documents = input.documents ?? []
-  const issues = validateForm(config, input.state)
-  if (issues.length > 0) return { ok: false, issues }
-
-  const { observations, discarded } = formToObservations(config, input.state, input.record)
+  const declared = runDeclaredGuidance(input)
+  if (!declared.ok) return { ok: false, issues: declared.issues }
+  const { config, observations, discarded, guidance } = declared
   const labels = input.sources.dependency_labels
-  // Only customer declarations reach the guidance pipeline. Documents are not an input.
-  const guidance = runCreatorRecordGuidance({
-    observations,
-    topicClaims: input.topicClaims,
-    ledger: input.sources.ledger,
-    dependencyLabel: (id) => (Object.prototype.hasOwnProperty.call(labels, id) ? labels[id] : undefined),
-    as_of: input.as_of,
-  })
 
   // Provisional evidence reconciliation, one per tool block. After guidance; never an input to it.
   const prov = guidance.facts.provenance

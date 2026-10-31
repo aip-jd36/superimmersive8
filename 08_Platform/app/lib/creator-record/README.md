@@ -119,7 +119,6 @@ unchanged; the prototype and the public UAT harness are untouched.
 
 | Path | Role |
 |---|---|
-| `canonical.ts` | Canonical JSON (sorted keys, verbatim strings; rejects `undefined`, non-finite numbers and non-plain objects) + SHA-256 |
 | `snapshot.ts` | `buildInternalDraftSnapshot` → `{ snapshot, canonical, sha256 }`. Records registry, ledger, question and mapping versions where they exist; `missing_versions` lists what is not versioned yet (never invented). Refuses issued `CR-YYYY-XXXXXXXX` ids |
 | `document-model.ts` | Pure model of what the PDF prints, only from the snapshot; refuses a snapshot whose digest, status, policy or conclusion labels do not hold |
 | `InternalDraftPDF.tsx` | @react-pdf renderer; "INTERNAL DRAFT — NOT ISSUED — NOT A CREATOR RECORD" as a fixed header and footer on every page. Generator `si8-internal-draft/creator-record-v2-pdf@0` |
@@ -142,3 +141,37 @@ pinned. The prototype's own templates have no version and are listed in
 `missing_versions` as `prototype_presentation_templates`.
 
 Tests: `internal-draft`, `internal-draft-projection`.
+
+## record-core/ — shared (CR-V2-1)
+
+| Path | Role |
+|---|---|
+| `canonical.ts` | Canonical JSON (sorted keys, verbatim strings; rejects `undefined`, non-finite numbers and non-plain objects) + SHA-256. Moved from `internal-draft/`, unchanged |
+| `projection.ts` | The OC-1B exact-key projection combinators (`obj`, `str`, `oneOf`, `WITHHELD`…), throwing `ProjectionRefusal`; each caller maps it to its own error |
+
+## customer-record/ — CR-V2-1
+
+Deterministic, fail-closed preparation of the Creator Record v2 **customer record**
+(`si8/creator-record-v2-record` v1, status `prepared_not_issued`). **Not approved
+customer content, not issued, and not reachable from any route, payment or
+issuance code** (test-enforced). Pure: no database, payment, Storage, email, PDF,
+clock or randomness.
+
+| Path | Role |
+|---|---|
+| `sources.ts` | `checkApprovedSources`: approved governed sources only. Refuses pilot or prototype material, missing or unapproved registry/ledger versions (never invented), a registry approving no question, missing or orphan question wording and option labels, a missing `SourceTextApproval` (for the texts with no approval of their own), and incomplete, duplicated, stale, lapsed or unknown ledger entries or caveats without text. Every reason is reported |
+| `record.ts` | `buildCustomerRecord` → `{ record, canonical, sha256 }`; `verifyCustomerRecord`; `customerRecordDigestMatches` |
+
+Reuses `prototype/declared-guidance.ts` (`runDeclaredGuidance`: the existing form
+validation, declaration mapping and guidance pipeline, now shared with the draft;
+loads no pilot data) and the `record-core/` modules. Documents are not accepted:
+every declared tool is `not_provided`, and comparisons are `disabled`. Guidance is
+the composition as produced, read through an exact-key projection and re-checked
+(never stronger than Bounded Interpretation and applicability permit; explanation
+and caveats are the approved ledger and source text, verbatim). The record holds no
+SI8-generated prose (`content.generated_text: 'none'`): answers, approved source
+text, identifiers and codes only. Its reference is a preparation reference, never
+an issued `CR-` id. An explicitly approved empty ledger gives a declarations-only
+record (PRD OD-14 is a PM decision).
+
+Tests: `customer-record`.

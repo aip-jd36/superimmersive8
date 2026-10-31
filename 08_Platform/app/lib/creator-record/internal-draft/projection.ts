@@ -10,7 +10,7 @@
  * than identity and how it was read. It reads only the fields listed below, by
  * name and type.
  *
- * Fail closed, generically: every object is projected against an exact key list.
+ * Fail closed, generically (combinators in `../record-core/projection`): every object is projected against an exact key list.
  * An unknown key (for example a new comparison field), a missing key or a value
  * of the wrong type stops the projection; nothing unrecognised is carried and no
  * neutral wording is invented for it. `WITHHELD` keys must be present (so the
@@ -21,58 +21,11 @@ import { CREATOR_RECORD_CONCLUSIONS } from '../contract/compose'
 import { OBSERVATION_SOURCE_KINDS, type DocumentObservation } from '../contract/provenance'
 import { DOCUMENT_OUTCOMES, EXTRACTION_MODES, type ToolDocument } from '../evidence/document-observations'
 import type { DraftDeclarationGroup, DraftDocument, DraftGuidanceCard, DraftNotEstablished, DraftRecordView, DraftRow } from '../presentation/build-draft-record'
+import { arr, bool, hex64, int, nullable, obj, oneOf, opt, ProjectionRefusal, str, WITHHELD, type P } from '../record-core/projection'
 
 export class InternalDraftProjectionError extends Error {
   constructor(path: string, reason: string) {
     super(`internal_draft_projection_refused: ${path}: ${reason}`)
-  }
-}
-
-// ── Generic projection combinators ──
-
-type P<V> = (value: unknown, path: string) => V
-const WITHHELD = Symbol('withheld')
-type Optional<V> = { optional: P<V> }
-type Field = P<unknown> | typeof WITHHELD | Optional<unknown>
-type Projected<S extends Record<string, Field>> = {
-  [K in keyof S as S[K] extends typeof WITHHELD ? never : S[K] extends Optional<unknown> ? never : K]: S[K] extends P<infer V> ? V : never
-} & {
-  [K in keyof S as S[K] extends Optional<unknown> ? K : never]?: S[K] extends Optional<infer V> ? V : never
-}
-
-const fail = (path: string, reason: string): never => {
-  throw new InternalDraftProjectionError(path, reason)
-}
-const isPlainObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v) && Object.getPrototypeOf(v) === Object.prototype
-
-const str: P<string> = (v, path) => (typeof v === 'string' ? v : fail(path, 'expected a string'))
-const int: P<number> = (v, path) => (typeof v === 'number' && Number.isInteger(v) && v >= 0 ? v : fail(path, 'expected a non-negative integer'))
-const bool: P<boolean> = (v, path) => (typeof v === 'boolean' ? v : fail(path, 'expected a boolean'))
-const hex64: P<string> = (v, path) => (typeof v === 'string' && /^[0-9a-f]{64}$/.test(v) ? v : fail(path, 'expected a SHA-256 hex digest'))
-const nullable = <V>(p: P<V>): P<V | null> => (v, path) => (v === null ? null : p(v, path))
-const arr = <V>(p: P<V>): P<V[]> => (v, path) => (Array.isArray(v) ? v.map((x, i) => p(x, `${path}[${i}]`)) : fail(path, 'expected an array'))
-const oneOf = <V extends string>(values: readonly V[]): P<V> => (v, path) => ((values as readonly unknown[]).includes(v) ? (v as V) : fail(path, 'unsupported value'))
-const opt = <V>(p: P<V>): Optional<V> => ({ optional: p })
-
-function obj<S extends Record<string, Field>>(spec: S): P<Projected<S>> {
-  return (v, path) => {
-    if (!isPlainObject(v)) return fail(path, 'expected an object')
-    for (const key of Object.keys(v)) if (!(key in spec)) fail(`${path}.${key}`, 'unsupported field')
-    const out: Record<string, unknown> = {}
-    for (const [key, field] of Object.entries(spec)) {
-      const at = `${path}.${key}`
-      if (field === WITHHELD) {
-        if (!(key in v)) fail(at, 'missing field')
-        continue
-      }
-      if (typeof field === 'object') {
-        if (key in v && v[key] !== undefined) out[key] = field.optional(v[key], at)
-        continue
-      }
-      if (!(key in v)) fail(at, 'missing field')
-      out[key] = field(v[key], at)
-    }
-    return out as Projected<S>
   }
 }
 
@@ -154,10 +107,17 @@ export interface PermittedDraft {
  * and when the documents and the view's document list do not correspond one to one.
  */
 export function projectPermittedDraft(view: DraftRecordView, documents: readonly ToolDocument[]): PermittedDraft {
-  const v = permittedView(view, 'view')
-  const docs = arr(toolDocument)(documents, 'documents')
+  let v: PermittedView
+  let docs: PermittedDocument[]
+  try {
+    v = permittedView(view, 'view')
+    docs = arr(toolDocument)(documents, 'documents')
+  } catch (err) {
+    if (err instanceof ProjectionRefusal) throw new InternalDraftProjectionError(err.path, err.reason)
+    throw err
+  }
   const ids = docs.map((d) => d.document.document_id)
-  if (new Set(ids).size !== ids.length) fail('documents', 'duplicate document id')
-  if (v.documents.items.length !== docs.length || v.documents.items.some((d, i) => d.document_id !== ids[i])) fail('view.documents.items', 'does not correspond to the documents added')
+  if (new Set(ids).size !== ids.length) throw new InternalDraftProjectionError('documents', 'duplicate document id')
+  if (v.documents.items.length !== docs.length || v.documents.items.some((d, i) => d.document_id !== ids[i])) throw new InternalDraftProjectionError('view.documents.items', 'does not correspond to the documents added')
   return { view: v, documents: docs }
 }

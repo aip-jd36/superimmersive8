@@ -1,0 +1,434 @@
+/**
+ * CR-V2-1 — the Creator Record v2 customer record builder.
+ *
+ * "Approved" sources in this file are SYNTHETIC TEST FIXTURES: the pilot
+ * registry and ledger relabelled with a synthetic approver. No real governance
+ * approval exists; the real governed sources are empty and must be refused.
+ */
+
+import { readdirSync, readFileSync, statSync } from 'node:fs'
+import path from 'node:path'
+import { createHash } from 'node:crypto'
+import type { GovernanceApproval } from '@/lib/creator-record/contract/types'
+import type { ToolDocument } from '@/lib/creator-record/evidence/document-observations'
+import { examineUpload } from '@/lib/creator-record/evidence/examine-upload'
+import { buildReplayTable, type ReplayFixture } from '@/lib/creator-record/evidence/replay'
+import { REPLAY_FIXTURES } from '@/lib/creator-record/evidence/replay-fixtures.data'
+import { buildCreatorRecordDraft, governedSources, pilotSources, type CreatorRecordSources } from '@/lib/creator-record/prototype/build-draft'
+import type { CreatorRecordFormState } from '@/lib/creator-record/prototype/form'
+import { T } from '@/lib/creator-record/presentation/templates'
+import { D } from '@/lib/creator-record/internal-draft/templates'
+import { buildInternalDraftSnapshot } from '@/lib/creator-record/internal-draft/snapshot'
+import { canonicalJson, sha256Hex } from '@/lib/creator-record/record-core/canonical'
+import {
+  buildCustomerRecord, customerRecordDigestMatches, CustomerRecordInvariantError, verifyCustomerRecord,
+  CUSTOMER_RECORD_SCHEMA, type CustomerRecordInput, type CustomerRecordResult, type CustomerRecordV2,
+} from '@/lib/creator-record/customer-record/record'
+import type { SourceRefusalCode, SourceTextApproval } from '@/lib/creator-record/customer-record/sources'
+import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
+
+const RECORD = { record_id: 'PREP-CRV21TEST', record_version: 1, captured_at: '2026-10-31T00:00:00Z' }
+const AS_OF = '2026-10-31'
+const ANS = { P1: ['CR-V2-1 synthetic video'], P3: ['own_channels'], F1: ['TW'], F2: ['online_worldwide'], L1: ['no'], M0: ['none'], H1: ['edited'] }
+const clone = <V,>(v: V): V => JSON.parse(JSON.stringify(v)) as V
+
+const SYNTHETIC: GovernanceApproval = { status: 'approved', approver: 'SYNTHETIC TEST APPROVER (fixture only)', decision_date: '2026-10-30', review_ref: 'SYNTHETIC-REVIEW-1' }
+const TEXT_APPROVAL: SourceTextApproval = { version: 'SYNTHETIC-TEXT-1', approval: SYNTHETIC }
+
+/** Synthetic "approved governed" sources: the pilot content, relabelled. Test fixture only. */
+function approvedSources(): CreatorRecordSources {
+  const p = pilotSources()
+  return {
+    ...p,
+    kind: 'governed',
+    registry_input: {
+      ...p.registry_input,
+      questions: p.registry_input.questions.map((q) => ({ ...q, approval: q.approval.status === 'approved' ? SYNTHETIC : q.approval })),
+      observation_map: p.registry_input.observation_map.map((o) => ({ ...o, approval: o.approval.status === 'approved' ? SYNTHETIC : o.approval })),
+    },
+    ledger: p.ledger.map((e) => ({ ...e, entry_id: e.entry_id.replace(/^PILOT-UAT-/, 'SYN-'), approver: SYNTHETIC.approver })),
+    versions: { registry: 'SYNTHETIC-REGISTRY-1', ledger: 'SYNTHETIC-LEDGER-1' },
+  }
+}
+
+const state = (plan = 'Pro', tool = 'pika'): CreatorRecordFormState => ({ answers: { ...ANS }, tools: [{ T1: [tool], T3: [plan], T4: ['May 2026'] }], acknowledgements: { A1: true, A2: true } })
+const input = (over: Partial<CustomerRecordInput> = {}): CustomerRecordInput => ({
+  state: state(), sources: approvedSources(), source_text_approval: TEXT_APPROVAL, topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: AS_OF, record: RECORD, ...over,
+})
+function built(r: CustomerRecordResult): { record: CustomerRecordV2; canonical: string; sha256: string } {
+  if (!r.ok) throw new Error(JSON.stringify(r))
+  return r
+}
+const refusalCodes = (r: CustomerRecordResult): SourceRefusalCode[] => {
+  if (r.ok || r.stage !== 'sources') throw new Error(`expected a sources refusal, got ${JSON.stringify(r).slice(0, 300)}`)
+  return Array.from(new Set(r.refusals.map((x) => x.code))).sort()
+}
+
+const PNG = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]
+async function toolDoc(fixtureId: string): Promise<ToolDocument> {
+  const bytes = new Uint8Array([...PNG, ...Buffer.from(`synthetic:${fixtureId}`)])
+  const fixture = REPLAY_FIXTURES.find((f) => f.fixture_id === fixtureId)!
+  const table = buildReplayTable([{ ...fixture, sha256: createHash('sha256').update(bytes).digest('hex') } as ReplayFixture])
+  return { tool_index: 0, document: await examineUpload(bytes, `${fixtureId}.png`, { mode: 'fixture_replay', replayTable: table }) }
+}
+
+// ───────────────────────────────────────────── governance
+
+describe('only approved governed sources are accepted', () => {
+  test('the real governed sources (nothing approved yet) are refused, with every reason', () => {
+    const r = buildCustomerRecord(input({ sources: governedSources(), source_text_approval: null }))
+    expect(refusalCodes(r)).toEqual(['ledger_version_missing', 'no_approved_questions', 'registry_version_missing', 'source_text_not_approved'])
+  })
+
+  test('pilot sources are refused', () => {
+    const codes = refusalCodes(buildCustomerRecord(input({ sources: pilotSources() })))
+    expect(codes).toContain('not_governed_sources')
+    expect(codes).toContain('pilot_marker')
+  })
+
+  test('pilot content relabelled "governed" but still carrying pilot approvals is refused', () => {
+    const p = pilotSources()
+    const codes = refusalCodes(buildCustomerRecord(input({ sources: { ...p, kind: 'governed', versions: { registry: 'R-1', ledger: 'L-1' } } })))
+    expect(codes).toEqual(['pilot_marker'])
+  })
+
+  test.each([
+    ['', 'registry_version_missing'],
+    ['none approved', 'registry_version_missing'],
+    ['R-1 (internal, unapproved)', 'registry_version_missing'],
+    ['PILOT-UAT-REGISTRY-1', 'pilot_marker'],
+  ])('registry version %j is refused (%s); no version is invented', (version, code) => {
+    const s = approvedSources()
+    expect(refusalCodes(buildCustomerRecord(input({ sources: { ...s, versions: { ...s.versions, registry: version } } })))).toEqual([code])
+  })
+
+  test('the ledger needs an approved version', () => {
+    const s = approvedSources()
+    expect(refusalCodes(buildCustomerRecord(input({ sources: { ...s, versions: { ...s.versions, ledger: 'none approved' } } })))).toEqual(['ledger_version_missing'])
+  })
+
+  test.each([
+    ['missing', null],
+    ['pending', { version: 'T-1', approval: { ...SYNTHETIC, status: 'pending' } }],
+    ['without an approver', { version: 'T-1', approval: { ...SYNTHETIC, approver: null } }],
+    ['without a version', { version: '', approval: SYNTHETIC }],
+  ] as [string, SourceTextApproval | null][])('source text approval %s is refused', (_, approval) => {
+    expect(refusalCodes(buildCustomerRecord(input({ source_text_approval: approval })))).toEqual(['source_text_not_approved'])
+  })
+
+  test('a pilot-marked source text approval is refused', () => {
+    expect(refusalCodes(buildCustomerRecord(input({ source_text_approval: { version: 'T-1', approval: { ...SYNTHETIC, approver: 'PILOT-UAT — not a governance approval' } } })))).toEqual(['pilot_marker'])
+  })
+
+  test('approved questions need approved wording; wording needs an approved question; options need labels', () => {
+    const s = approvedSources()
+    const first = s.registry_input.questions.find((q) => q.approval.status === 'approved' && q.options !== 'free_text')!
+    const option = (first.options as string[])[0]
+    const presentation = clone(s.presentation) as Record<string, any>
+    delete presentation.P1
+    presentation[first.q_id].option_labels = { ...presentation[first.q_id].option_labels }
+    delete presentation[first.q_id].option_labels[option]
+    presentation.ZZ9 = { ...presentation[first.q_id], q_id: 'ZZ9' }
+    const r = buildCustomerRecord(input({ sources: { ...s, presentation } }))
+    expect(refusalCodes(r)).toEqual(['option_label_missing', 'presentation_without_approved_question', 'question_presentation_missing'])
+    if (!r.ok && r.stage === 'sources') {
+      expect(r.refusals).toEqual(expect.arrayContaining([{ code: 'question_presentation_missing', ref: 'P1' }, { code: 'option_label_missing', ref: `${first.q_id}.${option}` }, { code: 'presentation_without_approved_question', ref: 'ZZ9' }]))
+    }
+  })
+
+  test('a registry that approves no question is refused', () => {
+    const s = approvedSources()
+    const registry_input = { ...s.registry_input, questions: s.registry_input.questions.map((q) => ({ ...q, approval: { ...q.approval, status: 'pending' as const } })) }
+    const codes = refusalCodes(buildCustomerRecord(input({ sources: { ...s, registry_input, presentation: {} } })))
+    expect(codes).toEqual(['no_approved_questions'])
+  })
+
+  test('incomplete, duplicated, stale, lapsed or unknown ledger entries, and caveats without text, are refused', () => {
+    const s = approvedSources()
+    const yes = s.ledger.filter((e) => e.creator_record_eligible === 'Yes')
+    expect(yes.length).toBeGreaterThanOrEqual(4)
+    const [a, b, c, d] = yes
+    const ledger = [
+      ...s.ledger.filter((e) => ![a, b, c, d].includes(e)),
+      { ...a, explanation: '' },
+      { ...b, claim_last_verified: '2001-01-01' },
+      { ...c, claim_id: 'CLAIM-DOES-NOT-EXIST-001-v1' },
+      { ...d, required_caveats: [...d.required_caveats, 'caveat-without-text'] },
+      { ...d, entry_id: 'SYN-DUPLICATE' },
+    ]
+    const codes = refusalCodes(buildCustomerRecord(input({ sources: { ...s, ledger } })))
+    expect(codes).toEqual(['caveat_text_missing', 'ledger_claim_reverified', 'ledger_claim_unknown', 'ledger_entry_duplicate', 'ledger_entry_incomplete'])
+  })
+
+  test('a lapsed refresh date is refused', () => {
+    const s = approvedSources()
+    const ledger = s.ledger.map((e, i) => (i === 0 ? { ...e, refresh_by: '2026-10-30' } : e))
+    expect(s.ledger[0].creator_record_eligible).toBe('Yes')
+    expect(refusalCodes(buildCustomerRecord(input({ sources: { ...s, ledger } })))).toEqual(['ledger_refresh_lapsed'])
+  })
+
+  test('an explicitly approved, empty ledger gives a declarations-only record (no guidance)', () => {
+    const { record } = built(buildCustomerRecord(input({ sources: { ...approvedSources(), ledger: [] } })))
+    expect(record.guidance.items).toEqual([])
+    expect(record.declarations.answers.length).toBeGreaterThan(0)
+    expect(record.sources.publications).toEqual([])
+  })
+})
+
+// ───────────────────────────────────────────── the record
+
+describe('the record', () => {
+  test('is built from approved sources and carries their provenance, apart from each other', () => {
+    const { record } = built(buildCustomerRecord(input()))
+    expect(record.schema).toBe(CUSTOMER_RECORD_SCHEMA)
+    expect(record.status).toBe('prepared_not_issued')
+    expect(record.content).toEqual({ id: 'si8/creator-record-v2-record-content', version: 1, generated_text: 'none' })
+    expect(record.sources).toEqual(expect.objectContaining({
+      kind: 'governed', registry_version: 'SYNTHETIC-REGISTRY-1', ledger_version: 'SYNTHETIC-LEDGER-1', guidance_as_of: AS_OF,
+      source_text: { version: 'SYNTHETIC-TEXT-1', approver: SYNTHETIC.approver, decision_date: '2026-10-30', review_ref: 'SYNTHETIC-REVIEW-1' },
+    }))
+    expect(record.sources.questions.map((q) => q.q_id)).toEqual(Array.from(new Set(record.declarations.answers.map((a) => a.q_id))))
+    expect(record.sources.questions.every((q) => q.approver === SYNTHETIC.approver)).toBe(true)
+    expect(record.guidance.items.length).toBeGreaterThan(0)
+    expect(record.sources.publications.map((p) => p.claim_id)).toEqual(record.guidance.items.map((i) => i.claim_id))
+  })
+
+  test('is deterministic, and its digest is the SHA-256 of its canonical form', () => {
+    const a = built(buildCustomerRecord(input()))
+    const b = built(buildCustomerRecord(input()))
+    expect(b.canonical).toBe(a.canonical)
+    expect(b.sha256).toBe(a.sha256)
+    expect(a.sha256).toBe(sha256Hex(a.canonical))
+    expect(a.canonical).toBe(canonicalJson(a.record))
+  })
+
+  test('does not depend on the key order of the submitted state', () => {
+    const s = state()
+    const reordered = { acknowledgements: { A2: true, A1: true }, tools: [{ T4: ['May 2026'], T3: ['Pro'], T1: ['pika'] }], answers: Object.fromEntries(Object.entries(s.answers).reverse()) }
+    expect(built(buildCustomerRecord(input({ state: reordered }))).sha256).toBe(built(buildCustomerRecord(input())).sha256)
+  })
+
+  test('the reference, version, capture time, guidance date and every answer are part of the hash', () => {
+    const base = built(buildCustomerRecord(input())).sha256
+    const variants = [
+      input({ record: { ...RECORD, record_id: 'PREP-OTHER' } }),
+      input({ record: { ...RECORD, record_version: 2 } }),
+      input({ record: { ...RECORD, captured_at: '2026-10-31T00:00:01Z' } }),
+      input({ as_of: '2026-11-01' }),
+      input({ state: { ...state(), answers: { ...ANS, P1: ['A different title'] } } }),
+    ]
+    const hashes = variants.map((v) => built(buildCustomerRecord(v)).sha256)
+    expect(new Set([base, ...hashes]).size).toBe(hashes.length + 1)
+  })
+
+  test('declarations are exactly the recorded observations, with approved wording, verbatim answers and approved labels', () => {
+    const s = approvedSources()
+    const { record } = built(buildCustomerRecord(input()))
+    const byKey = new Map<string, { verbatim: Set<string>; codes: Set<string | null> }>()
+    for (const o of record.declarations.observations) {
+      const k = `${o.question.q_id}|${o.instance ?? ''}`
+      const g = byKey.get(k) ?? { verbatim: new Set<string>(), codes: new Set<string | null>() }
+      g.verbatim.add(o.answer_verbatim)
+      g.codes.add(o.normalized_value)
+      byKey.set(k, g)
+    }
+    expect(record.declarations.answers.length).toBe(byKey.size)
+    for (const a of record.declarations.answers) {
+      const k = `${a.q_id}|${a.tool_index === null ? '' : `tool-${a.tool_index + 1}`}`
+      const g = byKey.get(k)!
+      expect(g.verbatim).toEqual(new Set([a.answer_verbatim]))
+      if (a.values.every((v) => v.kind === 'option')) expect(g.codes).toEqual(new Set(a.values.map((v) => v.value)))
+      expect(a.question).toBe(s.presentation[a.q_id].text)
+      for (const v of a.values) if (v.kind === 'option') expect(v.label).toBe(s.presentation[a.q_id].option_labels[v.value])
+      const submitted = a.tool_index === null ? (ANS as Record<string, string[]>)[a.q_id] : (state().tools[a.tool_index] as Record<string, string[]>)[a.q_id]
+      expect(a.values.map((v) => v.value)).toEqual(submitted)
+    }
+    expect(record.declarations.acknowledgements).toEqual(['A1', 'A2'])
+  })
+
+  test('form problems are reported, nothing is built', () => {
+    const r = buildCustomerRecord(input({ state: { ...state(), answers: { ...ANS, P1: [] } } }))
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect(r.stage).toBe('form')
+  })
+
+  test.each([
+    ['not an object', 'state', null],
+    ['answers not lists', 'state', { answers: { P1: 'x' }, tools: [], acknowledgements: {} }],
+    ['an unknown key', 'state', { ...state(), extra: true }],
+    ['an issued record id', 'record.record_id_is_issued_id', undefined],
+    ['a bad capture time', 'record.captured_at', undefined],
+    ['a bad guidance date', 'as_of', undefined],
+  ])('malformed input (%s) is refused before any source is read', (label, issue, badState) => {
+    const over: Partial<CustomerRecordInput> =
+      issue === 'record.record_id_is_issued_id' ? { record: { ...RECORD, record_id: 'CR-2026-3F2A9C10' } }
+        : issue === 'record.captured_at' ? { record: { ...RECORD, captured_at: '31/10/2026' } }
+          : issue === 'as_of' ? { as_of: '2026-10-31T00:00:00Z' }
+            : { state: badState }
+    const r = buildCustomerRecord(input({ ...over, sources: governedSources() }))
+    expect(r.ok).toBe(false)
+    if (!r.ok) {
+      expect([label, r.stage]).toEqual([label, 'input'])
+      if (r.stage === 'input') expect(r.issues).toContain(issue)
+    }
+  })
+})
+
+// ───────────────────────────────────────────── documents and comparisons (Option C)
+
+describe('documents are not provided and comparisons are disabled', () => {
+  test('documents are not accepted as input', () => {
+    const r = buildCustomerRecord(input({ state: { ...state(), documents: [] } }))
+    expect(r.ok).toBe(false)
+    if (!r.ok && r.stage === 'input') expect(r.issues).toContain('state.documents_not_accepted')
+  })
+
+  test('every declared tool is recorded as not provided; the comparison policy is disabled', () => {
+    const two = { ...state(), tools: [state().tools[0], { T1: ['kling'], T3: ['Standard'], T4: ['May 2026'] }] }
+    const { record, canonical } = built(buildCustomerRecord(input({ state: two })))
+    expect(record.documents).toEqual({ status: 'not_provided', tools: [{ tool_index: 0, status: 'not_provided' }, { tool_index: 1, status: 'not_provided' }] })
+    expect(record.comparison).toEqual({ policy: 'disabled' })
+    expect(canonical).not.toMatch(/appears_consistent|appears_to_conflict|reconciliation|cross_check|document_observations/)
+  })
+
+  test.each([['shot-pika-multiple-payments'], ['pdf-kling-pro-monthly']])('guidance is the same as the prototype gives with a document (%s): documents cannot influence it', async (fixture) => {
+    const { record } = built(buildCustomerRecord(input()))
+    const draft = buildCreatorRecordDraft({ state: state(), sources: approvedSources(), topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: AS_OF, record: RECORD, documents: [await toolDoc(fixture)] })
+    if (!draft.ok) throw new Error('draft failed')
+    expect(record.guidance.items.map((i) => [i.claim_id, i.conclusion, i.explanation])).toEqual(draft.guidance.composition.items.map((i) => [i.claim_id, i.conclusion, i.explanation]))
+    // The draft did read the document (display only); the guidance above is still identical.
+    expect(draft.view.trace.document_observations.length).toBeGreaterThan(0)
+  })
+})
+
+// ───────────────────────────────────────────── grounding and interpretation
+
+describe('no generated prose, and never a stronger conclusion than permitted', () => {
+  test('every text field is the creator\'s answer or approved source text, verbatim; no template sentence appears', () => {
+    const s = approvedSources()
+    const { record, canonical } = built(buildCustomerRecord(input({ state: { ...state(), tools: [state().tools[0], { T1: ['kling'], T3: ['Standard'], T4: ['May 2026'] }] } })))
+    const ledgerText = new Set(s.ledger.flatMap((e) => [e.explanation, ...Object.values(e.evidence_notes)]))
+    for (const it of record.guidance.items) {
+      expect(ledgerText.has(it.explanation)).toBe(true)
+      for (const c of it.caveats) expect(c.text).toBe(s.caveats[c.caveat_id])
+      for (const row of it.dependency_rows) {
+        expect(row.label).toBe(s.dependency_labels[row.dependency_id])
+        if (row.evidence_note !== null) expect(ledgerText.has(row.evidence_note)).toBe(true)
+      }
+    }
+    const templates = [...JSON.stringify(T).match(/"([^"\\]|\\.){16,}"/g) ?? [], ...JSON.stringify(D).match(/"([^"\\]|\\.){16,}"/g) ?? []].map((q) => JSON.parse(q) as string)
+      // Template sentences only: codes and keys are not prose.
+      .filter((t) => t.includes(' '))
+    expect(templates.length).toBeGreaterThan(50)
+    const own = new Set([...Object.values(s.presentation).flatMap((p) => [p.text, ...Object.values(p.option_labels)]), ...ledgerText, ...Object.values(s.caveats), ...Object.values(s.dependency_labels)])
+    for (const t of templates) if (!own.has(t)) expect([t, canonical.includes(t)]).toEqual([t, false])
+  })
+
+  // Tamper with the guidance pipeline's output; the record must refuse it.
+  function withGuidance(mutate: (r: any) => void): () => CustomerRecordResult {
+    let build!: typeof buildCustomerRecord
+    jest.isolateModules(() => {
+      const actual = jest.requireActual('@/lib/creator-record/integration/run-creator-record-guidance')
+      jest.doMock('@/lib/creator-record/integration/run-creator-record-guidance', () => ({
+        ...actual,
+        runCreatorRecordGuidance: (i: unknown) => {
+          const r = actual.runCreatorRecordGuidance(i)
+          mutate(r)
+          return r
+        },
+      }))
+      build = require('@/lib/creator-record/customer-record/record').buildCustomerRecord
+    })
+    return () => build(input({ state: state('Standard') }))
+  }
+
+  test('control: the untampered pipeline builds, with both conclusion strengths available in these cases', () => {
+    const conclusions = new Set<string>()
+    for (const s of [state('Pro'), state('Standard'), state('not_sure')]) for (const i of built(buildCustomerRecord(input({ state: s }))).record.guidance.items) conclusions.add(i.conclusion)
+    expect(conclusions).toEqual(new Set(['relevant_on_declared_facts', 'relevant_applicability_unresolved']))
+    expect(() => withGuidance(() => undefined)()).not.toThrow()
+  })
+
+  test.each([
+    ['a conclusion stronger than BI and applicability permit', (r: any) => { for (const i of r.composition.items) { i.conclusion = 'relevant_on_declared_facts'; i.applicability.status = 'unresolved' } }],
+    ['a conclusion BI does not permit at all', (r: any) => { for (const i of r.composition.items) i.provenance.bounded_interpretation.status = 'outside_current_coverage' }],
+    ['an unsupported conclusion value', (r: any) => { r.composition.items[0].conclusion = 'cleared_for_commercial_use' }],
+    ['an explanation that is not the approved ledger text', (r: any) => { r.composition.items[0].explanation = 'This video is safe for commercial use.' }],
+    ['caveats that are not the approved ledger caveats', (r: any) => { r.composition.items[0].required_caveats = [] }],
+    ['an unknown field on a guidance item', (r: any) => { r.composition.items[0].commercial_clearance = true }],
+    ['a dependency row without an approved label', (r: any) => { r.composition.items[0].dependency_rows.push({ dependency_id: 'x', label: null, declarations: [], evidence_note: null, evidence_requirement: 'not_defined_by_governance', treated_as: 'evidence_required', sufficiency: 'not_assessed', status: 'open' }) }],
+    ['guidance for an unknown claim', (r: any) => { r.composition.items[0].claim_id = 'CLAIM-UNKNOWN-001-v1' }],
+    ['mismatched publication provenance', (r: any) => { r.composition.items[0].provenance.publication.version = 99 }],
+    ['a ledger entry without a governed claim', (r: any) => { r.governance_gaps.push({ kind: 'ledger_entry_without_governed_claim', entry_id: 'x', claim_id: 'y' }) }],
+  ])('%s: refused, nothing is built', (_, mutate) => {
+    const build = withGuidance((r) => {
+      expect(r.composition.items.length).toBeGreaterThan(0)
+      mutate(r)
+    })
+    // Matched by message: jest.isolateModules loads a second copy of the error class.
+    expect(build).toThrow(/^creator_record_v2_record_invariant: /)
+  })
+})
+
+// ───────────────────────────────────────────── verification
+
+describe('verification', () => {
+  test('a stored record verifies only with its exact canonical text and digest', () => {
+    const { record, canonical, sha256 } = built(buildCustomerRecord(input()))
+    expect(verifyCustomerRecord(canonical, sha256)).toEqual({ ok: true, record })
+    expect(customerRecordDigestMatches(record, sha256)).toBe(true)
+
+    const tampered = canonical.replace('CR-V2-1 synthetic video', 'CR-V2-1 synthetic videO')
+    expect(verifyCustomerRecord(tampered, sha256)).toEqual({ ok: false, reason: 'digest_mismatch' })
+    const spaced = JSON.stringify(JSON.parse(canonical), null, 1)
+    expect(verifyCustomerRecord(spaced, sha256Hex(spaced))).toEqual({ ok: false, reason: 'not_canonical' })
+    expect(verifyCustomerRecord(canonical, sha256.toUpperCase())).toEqual({ ok: false, reason: 'digest_malformed' })
+    expect(verifyCustomerRecord('not json', sha256Hex('not json'))).toEqual({ ok: false, reason: 'not_json' })
+    const changed = clone(record)
+    changed.guidance.items = []
+    expect(customerRecordDigestMatches(changed, sha256)).toBe(false)
+  })
+
+  test('an internal draft snapshot is not a customer record', () => {
+    const draft = buildInternalDraftSnapshot({ state: state(), sources: pilotSources(), topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: AS_OF, record: { ...RECORD, record_id: 'PROTOTYPE-X' } })
+    if (!draft.ok) throw new Error('draft failed')
+    expect(verifyCustomerRecord(draft.canonical, draft.sha256)).toEqual({ ok: false, reason: 'wrong_schema' })
+  })
+})
+
+// ───────────────────────────────────────────── independence
+
+describe('independence', () => {
+  const APP_ROOT = path.resolve(__dirname, '..', '..')
+  const ROOT = path.join(APP_ROOT, 'lib', 'creator-record', 'customer-record')
+  const walk = (dir: string): string[] =>
+    readdirSync(dir).flatMap((n) => {
+      if (n === 'node_modules' || n === '.next') return []
+      const p = path.join(dir, n)
+      return statSync(p).isDirectory() ? walk(p) : /\.(ts|tsx)$/.test(n) ? [p] : []
+    })
+  const importsOf = (f: string) => Array.from(readFileSync(f, 'utf8').matchAll(/^\s*import\s[^;]*?from\s+['"]([^'"]+)['"]/gm)).map((m) => m[1])
+
+  test('imports only the reused contract, form, guidance and record-core modules: no database, payment, Storage, email, PDF, pilot, evidence or draft', () => {
+    const targets = new Set(walk(ROOT).flatMap((f) => importsOf(f).map((i) => (i.startsWith('.') ? path.relative(path.join(APP_ROOT, 'lib', 'creator-record'), path.resolve(path.dirname(f), i)).split(path.sep).join('/') : i))))
+    expect(Array.from(targets).sort()).toEqual([
+      'contract/compose', 'contract/provenance', 'contract/publication-ledger', 'contract/question-registry', 'contract/types',
+      'customer-record/sources', 'prototype/build-draft', 'prototype/declared-guidance', 'prototype/form', 'prototype/parse-form-state',
+      'record-core/canonical', 'record-core/projection',
+    ])
+    // prototype/build-draft (which holds the pilot data) is reached for types only.
+    for (const f of walk(ROOT)) expect(readFileSync(f, 'utf8')).not.toMatch(/^import\s(?!type\s)[^\n]*from\s+['"]\.\.\/prototype\/build-draft['"]/m)
+  })
+
+  test('the shared declaration/guidance module loads no pilot data', () => {
+    const src = readFileSync(path.join(APP_ROOT, 'lib', 'creator-record', 'prototype', 'declared-guidance.ts'), 'utf8')
+    const runtime = src.split('\n').filter((l) => /^import\s(?!type\s)/.test(l))
+    expect(runtime.length).toBeGreaterThan(0)
+    expect(runtime.some((l) => /pilot|build-draft/.test(l))).toBe(false)
+  })
+
+  test('nothing in the app imports it yet (no route, payment or issuance integration)', () => {
+    const files = [...walk(path.join(APP_ROOT, 'app')), ...walk(path.join(APP_ROOT, 'components')), ...walk(path.join(APP_ROOT, 'lib'))].filter((f) => !f.startsWith(ROOT))
+    expect(files.filter((f) => importsOf(f).some((i) => i.includes('customer-record'))).map((f) => path.relative(APP_ROOT, f))).toEqual([])
+  })
+})

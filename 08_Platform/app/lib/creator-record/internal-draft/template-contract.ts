@@ -8,7 +8,7 @@
  * JSON, hashed with SHA-256.
  */
 
-import { canonicalJson, sha256Hex } from './canonical'
+import { canonicalJson, sha256Hex } from '../record-core/canonical'
 import { D, INTERNAL_DRAFT_TEMPLATE_FINGERPRINTS, INTERNAL_DRAFT_TEMPLATE_ID, INTERNAL_DRAFT_TEMPLATE_VERSION } from './templates'
 
 export class InternalDraftTemplateContractError extends Error {

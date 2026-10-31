@@ -33,7 +33,7 @@ import type { CreatorRecordFormState } from '@/lib/creator-record/prototype/form
 import { parseFormState } from '@/lib/creator-record/prototype/parse-form-state'
 import { NEGATION_ALLOWLIST, T } from '@/lib/creator-record/presentation/templates'
 import { PILOT_PUBLICATION_LEDGER } from '@/lib/creator-record/pilot/pilot-ledger'
-import { CanonicalizationError, canonicalJson, sha256Hex } from '@/lib/creator-record/internal-draft/canonical'
+import { CanonicalizationError, canonicalJson, sha256Hex } from '@/lib/creator-record/record-core/canonical'
 import { buildInternalDraftDocument, documentText, InternalDraftRenderError } from '@/lib/creator-record/internal-draft/document-model'
 import { InternalDraftPDF } from '@/lib/creator-record/internal-draft/InternalDraftPDF'
 import { buildInternalDraftSnapshot, InternalDraftSnapshotError, snapshotDigestMatches, type InternalDraftSnapshot } from '@/lib/creator-record/internal-draft/snapshot'
@@ -375,7 +375,9 @@ describe('isolation from Production issuance, payment and the app', () => {
     expect(Array.from(external).sort()).toEqual([
       '../contract/compose', '../contract/provenance', '../evidence/document-observations', '../integration/run-creator-record-guidance',
       '../presentation/build-draft-record', '../presentation/templates', '../prototype/build-draft', '../prototype/form',
-      '@react-pdf/renderer', 'node:crypto', 'react',
+      // CR-V2-1: canonical JSON and the projection combinators are shared with the customer record.
+      '../record-core/canonical', '../record-core/projection',
+      '@react-pdf/renderer', 'react',
     ])
   })
 

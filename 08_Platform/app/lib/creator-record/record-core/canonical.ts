@@ -1,5 +1,6 @@
 /**
- * CR-OPTION-C-OC1 — canonical JSON and its SHA-256, for the internal draft snapshot.
+ * CR-OPTION-C-OC1 — canonical JSON and its SHA-256. Shared (CR-V2-1) by the internal
+ * draft snapshot and the Creator Record v2 customer record.
  *
  * Canonical form: object keys sorted by UTF-16 code unit (Array.prototype.sort),
  * no whitespace, strings and numbers as JSON.stringify writes them, arrays in

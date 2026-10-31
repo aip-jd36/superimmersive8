@@ -30,7 +30,7 @@ import type { DraftDeclarationGroup, DraftNotEstablished, DraftOpenItem, DraftRe
 import { T } from '../presentation/templates'
 import { buildCreatorRecordDraft, loadFormConfig, type BuildDraftInput } from '../prototype/build-draft'
 import { formToObservations, type FormIssue } from '../prototype/form'
-import { canonicalJson, sha256Hex } from './canonical'
+import { canonicalJson, sha256Hex } from '../record-core/canonical'
 import { projectPermittedDraft } from './projection'
 import { internalDraftTemplateContract, type InternalDraftTemplateContract } from './template-contract'
 import {

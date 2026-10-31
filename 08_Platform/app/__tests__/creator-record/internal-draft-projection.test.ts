@@ -21,7 +21,7 @@ import { REPLAY_FIXTURES } from '@/lib/creator-record/evidence/replay-fixtures.d
 import { buildCreatorRecordDraft, pilotSources } from '@/lib/creator-record/prototype/build-draft'
 import type { CreatorRecordFormState } from '@/lib/creator-record/prototype/form'
 import { T } from '@/lib/creator-record/presentation/templates'
-import { canonicalJson, sha256Hex } from '@/lib/creator-record/internal-draft/canonical'
+import { canonicalJson, sha256Hex } from '@/lib/creator-record/record-core/canonical'
 import { buildInternalDraftDocument, documentText, InternalDraftRenderError } from '@/lib/creator-record/internal-draft/document-model'
 import { InternalDraftProjectionError } from '@/lib/creator-record/internal-draft/projection'
 import { buildInternalDraftSnapshot, snapshotFromDraft, type InternalDraftSnapshot } from '@/lib/creator-record/internal-draft/snapshot'
