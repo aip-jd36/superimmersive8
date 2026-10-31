@@ -183,3 +183,19 @@ an issued `CR-` id. An explicitly approved empty ledger gives a declarations-onl
 record (PRD OD-14 is a PM decision).
 
 Tests: `customer-record`, `customer-record-eligibility`, `record-core-golden` (record-core output pinned to the pre-extraction code).
+
+## customer-pdf/ — CR-V2-2B
+
+The customer PDF of a Creator Record v2, in eight sections (about; project and use;
+tools and plans; people, materials and contribution; guidance; open items and
+limitations; what SI8 did not do; declarations and provenance). **Not reachable from
+any route, page, payment or issuance code, and no template set ships with it: none
+is approved, so it renders only in tests** (test-enforced).
+
+| Path | Role |
+|---|---|
+| `templates.ts` | The PDF template contract: data only (strings, lists, `{slot}`s, closed code→label maps, question→section placement), fingerprinted as the SHA-256 of its canonical JSON. Its `PdfTemplateApproval` (id, version, fingerprint, record schema, lifecycle, authority, date) is separate from the questionnaire Source Text Approval: a template change never touches a prepared record. PRD §5.4 wording lock enforced on every template string |
+| `document-model.ts` | `buildCustomerDocument`: verifies the record first, reads it by exact keys, checks the templates against their approval, then maps it mechanically into blocks tagged `record` / `issuance` / `template`. Unknown conclusion, topic, fact, code, document state or unmapped question refuses (`CustomerPdfRefusal`); nothing is inferred |
+| `CustomerRecordPDF.tsx` | Mechanical @react-pdf layout of the model; 64-hex digests in monospace, never broken |
+
+OD-17 (verbatim governed statements) is not implemented. Tests: `customer-pdf`.

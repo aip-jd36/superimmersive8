@@ -437,7 +437,8 @@ describe('independence', () => {
 
   test('nothing in the app imports it yet (no route, payment or issuance integration)', () => {
     const files = [...walk(path.join(APP_ROOT, 'app')), ...walk(path.join(APP_ROOT, 'components')), ...walk(path.join(APP_ROOT, 'lib'))].filter((f) => !f.startsWith(ROOT))
-    expect(files.filter((f) => importsOf(f).some((i) => i.includes('customer-record'))).map((f) => path.relative(APP_ROOT, f))).toEqual([])
+    // CR-V2-2B: the customer PDF document model (itself unreachable from the app) is the only importer.
+    expect(files.filter((f) => importsOf(f).some((i) => i.includes('customer-record'))).map((f) => path.relative(APP_ROOT, f).split(path.sep).join('/'))).toEqual(['lib/creator-record/customer-pdf/document-model.ts'])
   })
 })
 
