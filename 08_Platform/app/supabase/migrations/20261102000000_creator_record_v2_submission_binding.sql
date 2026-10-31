@@ -28,6 +28,13 @@
 -- column every Creator Record fulfilment would fail closed, V1 included).
 -- Before applying, confirm the production `submissions` NOT NULL columns still
 -- match 001_initial_schema.sql (the function below fills them with neutral values).
+--
+-- ROLLBACK (CR-V2-MVP-M4B): the rollback guard at the end of this file stops any
+-- code, of any age, from issuing a V1 PDF for a v2 submission. Roll v2 back by
+-- setting CREATOR_RECORD_V2_SUBMISSIONS / CREATOR_RECORD_V2_ISSUANCE to 'stopped'.
+-- Deploying older code is then safe for V1; a v2 submission stays paid-but-not-issued
+-- (fails closed, visible) until M3+ code is redeployed and reconciliation retries it.
+-- Never drop this migration's objects while any v2 submission exists.
 
 -- ── Marker column ─────────────────────────────────────────────────────────────
 
@@ -219,3 +226,62 @@ $$;
 REVOKE ALL ON FUNCTION public.submissions_creator_record_product_guard() FROM PUBLIC, anon, authenticated, service_role;
 REVOKE ALL ON FUNCTION public.create_creator_record_v2_submission(uuid, uuid, text, text) FROM PUBLIC, anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.create_creator_record_v2_submission(uuid, uuid, text, text) TO service_role;
+
+-- ── Rollback guard (CR-V2-MVP-M4B) ────────────────────────────────────────────
+--
+-- Code older than M3 does not know the v2 marker and would treat a v2 submission
+-- as a V1 Creator Record: the payment ledger approves it, and fulfilment (webhook,
+-- sweep or admin retry) would issue a V1 PDF from the neutral placeholder columns
+-- above. These two triggers make that impossible in the database, whatever code
+-- is deployed, so a code rollback after v2 submissions exist cannot silently
+-- issue a V1 PDF for one:
+--   * creator_record_artifacts: a v2 submission's artifact must carry a v2
+--     generator version; a V1 submission's artifact must not.
+--   * rights_packages (the legacy, pre-artifact PDF path): never for a v2
+--     submission.
+-- The refused write raises P0001, so the fulfilment attempt fails closed and stays
+-- visible as failed (no PDF row, no "ready" email: email is sent only after the PDF).
+-- For V1 rows both triggers are a single indexed lookup and change nothing.
+-- They live in this migration so the marker column never exists without them.
+-- Requires 20261028000000_creator_record_artifacts.sql (already in Production).
+
+CREATE OR REPLACE FUNCTION public.creator_record_artifacts_product_guard()
+RETURNS trigger LANGUAGE plpgsql AS $$
+DECLARE
+  v_product text;
+  v_v2_generator boolean := NEW.generator_version ~ '^creator-record-v2-pdf-v[1-9][0-9]*$';
+BEGIN
+  SELECT s.creator_record_product INTO v_product FROM public.submissions s WHERE s.id = NEW.submission_id;
+  IF v_product = 'v2' AND NOT v_v2_generator THEN
+    RAISE EXCEPTION 'a creator record v2 submission can only be issued by the v2 generator' USING ERRCODE = 'P0001';
+  END IF;
+  IF v_product IS DISTINCT FROM 'v2' AND v_v2_generator THEN
+    RAISE EXCEPTION 'the v2 generator can only issue a creator record v2 submission' USING ERRCODE = 'P0001';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS creator_record_artifacts_product_guard ON public.creator_record_artifacts;
+CREATE TRIGGER creator_record_artifacts_product_guard
+  BEFORE INSERT OR UPDATE ON public.creator_record_artifacts
+  FOR EACH ROW EXECUTE FUNCTION public.creator_record_artifacts_product_guard();
+
+CREATE OR REPLACE FUNCTION public.rights_packages_creator_record_v2_guard()
+RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM public.submissions s WHERE s.id = NEW.submission_id AND s.creator_record_product IS NOT NULL) THEN
+    RAISE EXCEPTION 'a creator record v2 submission never uses the legacy rights package path' USING ERRCODE = 'P0001';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS rights_packages_creator_record_v2_guard ON public.rights_packages;
+CREATE TRIGGER rights_packages_creator_record_v2_guard
+  BEFORE INSERT OR UPDATE ON public.rights_packages
+  FOR EACH ROW EXECUTE FUNCTION public.rights_packages_creator_record_v2_guard();
+
+-- Trigger functions only: a trigger does not check EXECUTE when it fires, so no role needs it.
+REVOKE ALL ON FUNCTION public.creator_record_artifacts_product_guard() FROM PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON FUNCTION public.rights_packages_creator_record_v2_guard() FROM PUBLIC, anon, authenticated, service_role;

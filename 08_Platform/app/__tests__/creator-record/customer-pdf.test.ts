@@ -624,7 +624,8 @@ describe('rendering boundary', () => {
   test('only the v2 issuance path reaches it (exact list): no route, page or payment code imports it', () => {
     const files = [...walk(path.join(APP_ROOT, 'app')), ...walk(path.join(APP_ROOT, 'components')), ...walk(path.join(APP_ROOT, 'lib'))].filter((f) => !f.startsWith(ROOT))
     const rel = (f: string) => path.relative(APP_ROOT, f).split(path.sep).join('/')
-    const TYPE_ONLY = ['lib/creator-record/customer-flow/approved-inputs.ts', 'lib/creator-record/customer-flow/purchase.ts', 'lib/creator-record/governed/sources.ts']
+    // CR-V2-MVP-M4B: the publication authority bundle shape (type-only).
+    const TYPE_ONLY = ['lib/creator-record/customer-flow/approved-inputs.ts', 'lib/creator-record/customer-flow/purchase.ts', 'lib/creator-record/governed/publication-authority.ts', 'lib/creator-record/governed/sources.ts']
     expect(files.filter((f) => importsOf(f).some((i) => i.includes('customer-pdf'))).map(rel).sort()).toEqual(TYPE_ONLY)
     for (const f of TYPE_ONLY) expect(readFileSync(path.join(APP_ROOT, f), 'utf8')).not.toMatch(/^\s*import\s+(?!type\b)[^\n]*customer-pdf/m)
     // The renderer (react-pdf) is loaded lazily, by the production v2 issuance port only.

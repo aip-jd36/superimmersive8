@@ -6,6 +6,8 @@
  * contiguous version ordering, no review or binding of a superseded version, the bind function
  * (ownership, review state, digest, idempotency, concurrency), least privilege, and that a bound v2
  * submission settles through the UNCHANGED payment ledger like any Creator Record.
+ * CR-V2-MVP-M4B: the rollback guard — no code of any age can write a V1 artifact or a legacy rights
+ * package for a v2 submission, and V1 issuance is unchanged.
  *
  * Disposable local `si8_test_*` database only. Skipped without DATABASE_URL_TEST (required in CI).
  */
@@ -20,10 +22,11 @@ const DIR = join(__dirname, '..', '..', 'supabase', 'migrations')
 const MIGRATIONS = [
   '20261021000000_payment_fulfillments.sql',
   '20261022000000_payment_zero_total_paid.sql',
+  '20261028000000_creator_record_artifacts.sql',
   '20261101000000_creator_record_v2_prepared.sql',
   '20261102000000_creator_record_v2_submission_binding.sql',
 ].map((f) => join(DIR, f))
-const M3 = MIGRATIONS[3]
+const M3 = MIGRATIONS[4]
 const BOOTSTRAP = join(__dirname, 'bootstrap.sql')
 
 function assertDisposable(url: string) {
@@ -92,6 +95,9 @@ maybe('creator record v2 submission binding (PostgreSQL)', () => {
     await admin.query('DROP SCHEMA IF EXISTS public CASCADE')
     await admin.query('CREATE SCHEMA public')
     await admin.query(readFileSync(BOOTSTRAP, 'utf8'))
+    // Supabase's storage schema does not exist in a plain Postgres: a minimal stand-in for the artifact migration's bucket insert.
+    await admin.query('DROP SCHEMA IF EXISTS storage CASCADE')
+    await admin.query('CREATE SCHEMA storage; CREATE TABLE storage.buckets (id text PRIMARY KEY, name text NOT NULL, public boolean, file_size_limit bigint, allowed_mime_types text[])')
     for (const m of MIGRATIONS) await admin.query(readFileSync(m, 'utf8')) // verbatim, deploy order
     svc = await connect('service_role')
   })
@@ -305,6 +311,66 @@ maybe('creator record v2 submission binding (PostgreSQL)', () => {
       // Duplicate delivery is idempotent.
       expect((await record(session, sub as string)).out_reason).toBe('accepted')
       expect(Number((await admin.query('SELECT count(*) FROM public.payment_fulfillments WHERE submission_id = $1', [sub])).rows[0].count)).toBe(1)
+    })
+  })
+
+  describe('rollback guard (CR-V2-MVP-M4B)', () => {
+    const V1_GEN = 'legacy-creator-record-pdf-v3' // the generator every pre-M3 build issues with
+    const V2_GEN = 'creator-record-v2-pdf-v1'
+    async function artifact(c: Client, submissionId: string, generator: string) {
+      const attempt = randomUUID()
+      return c.query(
+        `INSERT INTO public.creator_record_artifacts (submission_id, record_id, attempt_id, storage_path, sha256, byte_size, generator_version, status, uat)
+         VALUES ($1, $2, $3, $6, $4, 100, $5, 'pending', false) RETURNING id, attempt_id`,
+        [submissionId, `CR-${randomUUID()}`, attempt, SHA('a'), generator, `${submissionId}/${attempt}.pdf`],
+      )
+    }
+    async function v2Submission() {
+      const u = await user()
+      const row = await reviewedRow(u)
+      return (await bind(svc, row.id, u, row.sha256)).out_submission_id as string
+    }
+    async function v1Submission() {
+      const u = await user()
+      return (await svc.query(`INSERT INTO public.submissions (user_id, tier) VALUES ($1, 'creator_record') RETURNING id`, [u])).rows[0].id as string
+    }
+
+    test('a v2 submission cannot get a V1 artifact (insert or takeover), from any role', async () => {
+      const sub = await v2Submission()
+      expect(await errCode(artifact(svc, sub, V1_GEN))).toBe('P0001')
+      expect(await errCode(artifact(admin, sub, V1_GEN))).toBe('P0001')
+      expect(await errCode(artifact(svc, sub, 'anything-else'))).toBe('P0001')
+      const ok = (await artifact(svc, sub, V2_GEN)).rows[0]
+      // A pending v2 artifact cannot be taken over by a V1 attempt.
+      expect(await errCode(svc.query(`UPDATE public.creator_record_artifacts SET generator_version = $2 WHERE id = $1`, [ok.id, V1_GEN]))).toBe('P0001')
+      await svc.query(`UPDATE public.creator_record_artifacts SET status = 'issued', issued_at = now() WHERE id = $1`, [ok.id])
+      expect((await admin.query('SELECT generator_version, status FROM public.creator_record_artifacts WHERE submission_id = $1', [sub])).rows).toEqual([{ generator_version: V2_GEN, status: 'issued' }])
+    })
+
+    test('a v2 submission can never use the legacy rights package path (insert or upsert)', async () => {
+      const sub = await v2Submission()
+      expect(await errCode(admin.query(`INSERT INTO public.rights_packages (submission_id, document_url) VALUES ($1, 'x')`, [sub]))).toBe('P0001')
+      expect(await errCode(svc.query(
+        `INSERT INTO public.rights_packages (submission_id, document_url) VALUES ($1, 'x') ON CONFLICT (submission_id) DO UPDATE SET document_url = excluded.document_url`, [sub],
+      ))).toBe('P0001')
+      expect(Number((await admin.query('SELECT count(*) FROM public.rights_packages WHERE submission_id = $1', [sub])).rows[0].count)).toBe(0)
+    })
+
+    test('V1 issuance is unchanged; the v2 generator cannot issue a V1 submission', async () => {
+      const sub = await v1Submission()
+      expect(await errCode(artifact(svc, sub, V2_GEN))).toBe('P0001')
+      const a = (await artifact(svc, sub, V1_GEN)).rows[0]
+      await svc.query(`UPDATE public.creator_record_artifacts SET status = 'issued', issued_at = now() WHERE id = $1`, [a.id])
+      const legacy = await v1Submission()
+      await svc.query(`INSERT INTO public.rights_packages (submission_id, document_url) VALUES ($1, 'x') ON CONFLICT (submission_id) DO UPDATE SET document_url = excluded.document_url`, [legacy])
+      await svc.query(`INSERT INTO public.rights_packages (submission_id, document_url) VALUES ($1, 'y') ON CONFLICT (submission_id) DO UPDATE SET document_url = excluded.document_url`, [legacy])
+      expect((await admin.query('SELECT document_url FROM public.rights_packages WHERE submission_id = $1', [legacy])).rows).toEqual([{ document_url: 'y' }])
+    })
+
+    test('the guard functions are trigger-only (no role can execute them)', async () => {
+      for (const fn of ['public.creator_record_artifacts_product_guard()', 'public.rights_packages_creator_record_v2_guard()'])
+        for (const role of ['anon', 'authenticated', 'service_role'])
+          expect([fn, role, (await admin.query(`SELECT has_function_privilege($1::name, $2, 'EXECUTE') AS x`, [role, fn])).rows[0].x]).toEqual([fn, role, false])
     })
   })
 })

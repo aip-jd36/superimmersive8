@@ -88,7 +88,7 @@ export function productionFlowDeps(): FlowDeps {
     submissions: CREATOR_RECORD_V2_SUBMISSIONS,
     hasPilotAccess,
     store: preparedStore,
-    inputs: approvedCustomerRecordInputs,
+    inputs: () => approvedCustomerRecordInputs(),
     topicClaims: TOPIC_CLAIMS_FIXTURE,
     now: () => new Date(),
     newId: () => randomUUID(),
@@ -117,7 +117,7 @@ export function productionV2IssuanceDeps(): V2IssuanceDeps {
   return {
     boundTo: preparedBoundTo,
     governance: (date) => approvedGovernanceSnapshot(date, TOPIC_CLAIMS_FIXTURE),
-    templates: approvedPdfTemplates,
+    templates: () => approvedPdfTemplates(),
     // Loaded on first render only.
     renderPdf: async (input) => (await (await import('@/lib/creator-record/customer-pdf/CustomerRecordPDF')).renderCustomerRecordPdf(input)).bytes,
   }

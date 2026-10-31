@@ -239,3 +239,20 @@ DEPLOY ORDER: M2 then M3 migrations BEFORE any code that selects `creator_record
 
 Tests: `customer-purchase`, `creator-record-flow/*`, `run-payment-fulfillment` (v2 cases), real PostgreSQL `db/creator-record-v2-binding.db.test.ts`.
 
+
+### CR-V2-MVP-M4B — synthetic authority isolation and rollback safety (local; nothing deployed or applied)
+
+| Path | Role |
+|---|---|
+| `governed/publication-authority.ts` | PURE. `resolvePublicationAuthority(env)` → `governance` (default; Production needs no variable) or `synthetic_isolated_test`, or a refusal. `selectAuthorityBundle` returns the one bundle the build may publish from, or null. |
+| `governed/sources.ts` | Adds `CREATOR_RECORD_GOVERNANCE_AUTHORITY` (`authority_class: 'governance'`), the existing approved slots as one bundle. |
+| `governed/synthetic-test-authority.ts` | `CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY` (`authority_class: 'synthetic_test'`). Empty (null); filled by the staging setup only. |
+| `customer-flow/approved-inputs.ts` | Every approved input (prepare, checkout governance, issuance governance, PDF templates) now comes from the selected bundle. No bundle → empty inputs and `unavailable` governance: nothing prepared, sold or issued. |
+
+Contracts:
+- **Synthetic authority**: selected only if `SI8_CR_PUBLICATION_AUTHORITY=synthetic-isolated-test` AND `VERCEL_ENV` ≠ `production` (absent/`preview`/`development` only) AND the Supabase project in `NEXT_PUBLIC_SUPABASE_URL` is not Production and equals `SI8_CR_SYNTHETIC_SUPABASE_REF` AND `STRIPE_SECRET_KEY` is a test key. Any other value of the mode variable, or any failed check, fails closed. Each mode accepts only its own structural `authority_class`, so a synthetic bundle is never Production authority (on any branch or deploy route) and renaming an approver changes nothing; governance mode also refuses approval text that reads as synthetic. Source Text Approval and eligibility apply unchanged to the selected bundle; both stops apply in both modes.
+- **Rollback guard** (appended to `20261102000000_creator_record_v2_submission_binding.sql`, so the marker column never exists without it): `creator_record_artifacts` refuses a non-v2 generator for a v2 submission (and the v2 generator for a V1 one); `rights_packages` refuses any v2 submission. Any code, of any age, therefore fails closed instead of issuing a V1 PDF for a v2 submission.
+
+DEPLOY SEQUENCE: (1) apply M2 then M3 migrations; (2) deploy M3+ code (stops `stopped`); (3) open stops only by reviewed code change. ROLLBACK: set the stops to `stopped` (preferred). Deploying older code is safe for V1; a paid v2 submission then stays visibly paid-but-not-issued (the guard refuses the V1 write; no ready email) until M3+ code is redeployed and reconciliation retries it. Never drop the M3 objects while a v2 submission exists.
+
+Tests: `publication-authority`, `v2-rollback-guard-static`, real PostgreSQL 15 + 17 `db/creator-record-v2-binding.db.test.ts` (rollback guard).

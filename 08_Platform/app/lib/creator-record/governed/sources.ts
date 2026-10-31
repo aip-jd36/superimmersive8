@@ -18,6 +18,7 @@ import type { RegistryInput } from '../contract/question-registry'
 import type { CreatorRecordSources } from '../prototype/build-draft'
 import type { SourceTextApproval } from '../customer-record/source-text'
 import type { PdfTemplateApproval } from '../customer-pdf/templates'
+import type { PublicationAuthorityBundle } from './publication-authority'
 
 /** Approved Question Registry and Observation Map entries. None approved yet. */
 export const CREATOR_RECORD_REGISTRY_INPUT: RegistryInput = Object.freeze({ questions: [], observation_map: [] }) as RegistryInput
@@ -57,3 +58,23 @@ export const CREATOR_RECORD_PDF_TEMPLATES: unknown = null
 
 /** The approval covering `CREATOR_RECORD_PDF_TEMPLATES`. None issued yet. */
 export const CREATOR_RECORD_PDF_TEMPLATE_APPROVAL: PdfTemplateApproval | null = null
+
+// CR-V2-MVP-M4B: the governance bundle — the only bundle Production can publish from
+// (`./publication-authority`). Synthetic test approvals never go here: they live in
+// `./synthetic-test-authority`, which governance mode never reads.
+
+/** Every approved input above, as the Production publication authority. */
+export const CREATOR_RECORD_GOVERNANCE_AUTHORITY: PublicationAuthorityBundle = Object.freeze({
+  authority_class: 'governance',
+  registry_input: CREATOR_RECORD_REGISTRY_INPUT,
+  publication_ledger: CREATOR_RECORD_PUBLICATION_LEDGER,
+  dependency_labels: CREATOR_RECORD_DEPENDENCY_LABELS,
+  presentation: CREATOR_RECORD_PRESENTATION,
+  acknowledgements: CREATOR_RECORD_ACKNOWLEDGEMENTS,
+  caveats: CREATOR_RECORD_CAVEATS,
+  versions: CREATOR_RECORD_VERSIONS,
+  max_tools: CREATOR_RECORD_MAX_TOOLS,
+  source_text_approval: CREATOR_RECORD_SOURCE_TEXT_APPROVAL,
+  pdf_templates: CREATOR_RECORD_PDF_TEMPLATES,
+  pdf_template_approval: CREATOR_RECORD_PDF_TEMPLATE_APPROVAL,
+})

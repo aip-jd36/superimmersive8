@@ -442,14 +442,18 @@ describe('independence', () => {
     // CR-V2-2B: the customer PDF document model (itself unreachable from the app).
     // CR-V2-MVP-M2: the invited prepare/review flow, and a type-only import of the Source Text Approval shape by the governed sources.
     // CR-V2-MVP-M3: the governance snapshot (approved inputs) and the purchase / issuance rules.
+    // CR-V2-MVP-M4B: a type-only import of the Source Text Approval shape by the publication authority bundle.
     expect(importers).toEqual([
       'app/creator-record/page.tsx',
       'lib/creator-record/customer-flow/approved-inputs.ts',
       'lib/creator-record/customer-flow/purchase.ts',
       'lib/creator-record/customer-flow/service.ts',
       'lib/creator-record/customer-pdf/document-model.ts',
+      'lib/creator-record/governed/publication-authority.ts',
       'lib/creator-record/governed/sources.ts',
     ])
+    for (const f of ['lib/creator-record/governed/publication-authority.ts', 'lib/creator-record/governed/synthetic-test-authority.ts'])
+      expect(readFileSync(path.join(APP_ROOT, f), 'utf8')).not.toMatch(/^\s*import\s+(?!type\s)/m)
     // CR-V2-MVP-M3: payment, checkout, webhook, admin and artifact-issuance code reach the v2 flow ONLY through these
     // exact files (checkout preconditions, the registered v2 renderer). Exact list, including dynamic imports.
     const issuance = files.map(rel).filter((f) => /^lib\/(payments|creator-record-artifacts)\/|^app\/api\/(webhooks|checkout|admin)\//.test(f))
