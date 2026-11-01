@@ -3,7 +3,7 @@ import { stripe } from '@/lib/stripe'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { getListPriceCents } from '@/lib/payments/repository'
-import { LEGACY_SUBMISSION_TIER } from '@/lib/submissions/build-intake-insert'
+import { CREATOR_RECORD_V1_NEW_SALES, isV1CreatorRecord, LEGACY_SUBMISSION_TIER } from '@/lib/submissions/build-intake-insert'
 import { checkV2Checkout, type PurchaseError } from '@/lib/creator-record/customer-flow/purchase'
 import { productionPurchaseDeps } from '@/lib/creator-record-flow/production'
 import { V2_CHECKOUT_COPY } from '@/lib/creator-record-flow/wording'
@@ -28,7 +28,8 @@ import { purchaseMessage } from '@/lib/creator-record-flow/http'
  *     reviewed version still verifies, is the creator's latest version and is
  *     eligible now, and v2 issuance, new submissions and the creator's invite
  *     are all open — checked BEFORE any Stripe call, including session reuse.
- *     Any other marker value fails closed. V1 is unchanged.
+ *     Any other marker value fails closed.
+ *   - CR-V2-CUTOVER-1: a v1 Creator Record (no marker) is refused while v1 sales are retired.
  */
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -68,6 +69,14 @@ const SERVER_ERROR = () => NextResponse.json({ error: 'Failed to create checkout
  */
 const LEGACY_TIER_NOT_OFFERED = () =>
   NextResponse.json({ error: 'This submission type is no longer available for checkout.', code: 'legacy_tier_not_offered' }, { status: 409 })
+
+/**
+ * CR-V2-CUTOVER-1: Creator Record v1 is retired from new sales. No v1 session is started, reused or
+ * returned — checked before any Stripe call, like the legacy tier above. A v1 session created before the
+ * cutover still settles through the webhook and ledger, and is fulfilled unchanged.
+ */
+const V1_CREATOR_RECORD_NOT_OFFERED = () =>
+  NextResponse.json({ error: 'This Creator Record is no longer available for checkout.', code: 'v1_creator_record_retired' }, { status: 409 })
 
 interface SubmissionRow {
   id: string
@@ -118,6 +127,7 @@ export async function POST(request: NextRequest) {
     const row = found as SubmissionRow | null
     if (!row) return NOT_FOUND()
     if (row.tier === LEGACY_SUBMISSION_TIER) return LEGACY_TIER_NOT_OFFERED()
+    if (CREATOR_RECORD_V1_NEW_SALES !== 'open' && isV1CreatorRecord(row)) return V1_CREATOR_RECORD_NOT_OFFERED()
 
     if (row.payment_status !== 'unpaid' || row.status !== 'pending') {
       return NextResponse.json({ error: 'This submission is not awaiting payment.' }, { status: 409 })

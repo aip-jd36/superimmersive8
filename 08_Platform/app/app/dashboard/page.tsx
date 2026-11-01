@@ -5,6 +5,10 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { formatDate, formatCurrency } from '@/lib/utils'
 import { v2ListBadge } from '@/lib/creator-record-flow/dashboard'
+import { CREATOR_RECORD_V1_NEW_SALES } from '@/lib/submissions/build-intake-insert'
+
+// CR-V2-CUTOVER-1: new Creator Records start at the v2 entry point; /record (v1) only while v1 sales are open.
+const CREATOR_RECORD_ENTRY = CREATOR_RECORD_V1_NEW_SALES === 'open' ? { href: '/record', label: 'Creator Record — $29' } : { href: '/creator-record', label: 'Creator Record' }
 
 type Submission = {
   id: string
@@ -162,7 +166,7 @@ export default async function DashboardPage() {
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" asChild>
-                <Link href="/record">Creator Record — $29</Link>
+                <Link href={CREATOR_RECORD_ENTRY.href}>{CREATOR_RECORD_ENTRY.label}</Link>
               </Button>
               <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white" asChild>
                 <Link href="/certify">SI8 Commercial Assurance Assessment — $499</Link>
@@ -176,7 +180,7 @@ export default async function DashboardPage() {
               <p className="text-gray-500 mb-6">You haven't submitted any videos yet.</p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button variant="outline" asChild>
-                  <Link href="/record">Creator Record — $29</Link>
+                  <Link href={CREATOR_RECORD_ENTRY.href}>{CREATOR_RECORD_ENTRY.label}</Link>
                 </Button>
                 <Button className="bg-amber-600 hover:bg-amber-700 text-white" asChild>
                   <Link href="/certify">SI8 Commercial Assurance Assessment — $499</Link>

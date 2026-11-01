@@ -46,7 +46,8 @@ describe('server-side creation rule', () => {
   })
 
   test.each([
-    [{ title: 'T', tier: 'creator_record' }, true, undefined],
+    // CR-V2-CUTOVER-1: creator_record (v1 via this route) is retired from new sales.
+    [{ title: 'T', tier: 'creator_record' }, false, 'tier no longer offered'],
     [{ title: 'T', tier: 'si8_certified' }, true, undefined],
     [{ title: 'T', tier: 'certified' }, false, 'tier no longer offered'],
     [{ title: 'T' }, false, 'tier is required'],

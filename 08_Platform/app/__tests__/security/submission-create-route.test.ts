@@ -21,7 +21,7 @@ jest.mock('@/lib/supabase/server', () => ({ createClient: () => ({ auth: { getUs
 jest.mock('@/lib/supabase/admin', () => ({ supabaseAdmin: { from: (t: string) => from(t) } }))
 
 import { POST } from '@/app/api/submissions/create/route'
-import { SUBMISSION_INTAKE_FIELDS } from '@/lib/submissions/build-intake-insert'
+import { buildIntakeInsert, SUBMISSION_INTAKE_FIELDS } from '@/lib/submissions/build-intake-insert'
 
 const SESSION_USER = 'user-session-1'
 
@@ -115,14 +115,14 @@ beforeEach(() => {
 describe('authentication', () => {
   test('no session → 401, nothing inserted', async () => {
     getUser.mockResolvedValue({ data: { user: null }, error: null })
-    const res = await POST(req({ submissionData: recordFormPayload, userId: SESSION_USER }))
+    const res = await POST(req({ submissionData: certFormPayload, userId: SESSION_USER }))
     expect(res.status).toBe(401)
     expect(insert).not.toHaveBeenCalled()
   })
 
   test('auth error → 401, nothing inserted', async () => {
     getUser.mockResolvedValue({ data: { user: null }, error: { message: 'jwt expired' } })
-    const res = await POST(req({ submissionData: recordFormPayload }))
+    const res = await POST(req({ submissionData: certFormPayload }))
     expect(res.status).toBe(401)
     expect(insert).not.toHaveBeenCalled()
   })
@@ -130,7 +130,7 @@ describe('authentication', () => {
 
 describe('identity spoofing', () => {
   test('body user_id and userId are ignored; user_id is the session user', async () => {
-    const res = await POST(req({ submissionData: { ...recordFormPayload, user_id: 'victim-2' }, userId: 'victim-2' }))
+    const res = await POST(req({ submissionData: { ...certFormPayload, user_id: 'victim-2' }, userId: 'victim-2' }))
     expect(res.status).toBe(200)
     expect(inserted().user_id).toBe(SESSION_USER)
   })
@@ -138,7 +138,7 @@ describe('identity spoofing', () => {
 
 describe('protected-field injection', () => {
   test('status and payment_status are always server-set', async () => {
-    await POST(req({ submissionData: { ...recordFormPayload, status: 'approved', payment_status: 'paid' } }))
+    await POST(req({ submissionData: { ...certFormPayload, status: 'approved', payment_status: 'paid' } }))
     expect(inserted().status).toBe('pending')
     expect(inserted().payment_status).toBe('unpaid')
   })
@@ -172,7 +172,7 @@ describe('protected-field injection', () => {
       not_a_column: 'x',
     }
     const warn = jest.spyOn(console, 'warn').mockImplementation(() => {})
-    const res = await POST(req({ submissionData: { ...recordFormPayload, ...injected } }))
+    const res = await POST(req({ submissionData: { ...certFormPayload, ...injected } }))
     expect(res.status).toBe(200)
     for (const k of Object.keys(injected)) expect(inserted()).not.toHaveProperty(k)
     // Names are logged, values never are.
@@ -189,21 +189,21 @@ describe('protected-field injection', () => {
   })
 
   test.each([['premium'], ['approved'], [499]])('unknown tier %p → 400, nothing inserted', async (tier) => {
-    const res = await POST(req({ submissionData: { ...recordFormPayload, tier } }))
+    const res = await POST(req({ submissionData: { ...certFormPayload, tier } }))
     expect(res.status).toBe(400)
     expect(insert).not.toHaveBeenCalled()
   })
 
   // CR-CERTIFIED-PATH-1B: new submissions need an explicit, currently offered tier; the DB default is never used.
   test('legacy certified tier → 400 "tier no longer offered", nothing inserted', async () => {
-    const res = await POST(req({ submissionData: { ...recordFormPayload, tier: 'certified' } }))
+    const res = await POST(req({ submissionData: { ...certFormPayload, tier: 'certified' } }))
     expect(res.status).toBe(400)
     expect(await res.json()).toEqual({ error: 'Invalid submission', reason: 'tier no longer offered' })
     expect(insert).not.toHaveBeenCalled()
   })
 
   test.each([['omitted'], ['null'], ['empty']])('%s tier → 400 "tier is required", nothing inserted', async (kind) => {
-    const { tier: _t, ...withoutTier } = recordFormPayload
+    const { tier: _t, ...withoutTier } = certFormPayload
     const submissionData = kind === 'omitted' ? withoutTier : { ...withoutTier, tier: kind === 'null' ? null : '' }
     const res = await POST(req({ submissionData }))
     expect(res.status).toBe(400)
@@ -212,14 +212,14 @@ describe('protected-field injection', () => {
   })
 
   test.each([['Creator_Record'], [' creator_record'], ['si8-certified'], ['CERTIFIED']])('near-miss tier %p → 400 "invalid tier"', async (tier) => {
-    const res = await POST(req({ submissionData: { ...recordFormPayload, tier } }))
+    const res = await POST(req({ submissionData: { ...certFormPayload, tier } }))
     expect(res.status).toBe(400)
     expect(await res.json()).toEqual({ error: 'Invalid submission', reason: 'invalid tier' })
     expect(insert).not.toHaveBeenCalled()
   })
 
   test('unknown submission_mode → 400', async () => {
-    const res = await POST(req({ submissionData: { ...recordFormPayload, submission_mode: 'admin' } }))
+    const res = await POST(req({ submissionData: { ...certFormPayload, submission_mode: 'admin' } }))
     expect(res.status).toBe(400)
     expect(insert).not.toHaveBeenCalled()
   })
@@ -232,9 +232,9 @@ describe('malformed payloads', () => {
     ['submissionData is an array', { submissionData: [] }, false],
     ['submissionData is a string', { submissionData: 'x' }, false],
     ['body is null', null, false],
-    ['missing title', { submissionData: { ...recordFormPayload, title: undefined } }, false],
-    ['blank title', { submissionData: { ...recordFormPayload, title: '   ' } }, false],
-    ['object-valued field', { submissionData: { ...recordFormPayload, tools_used: [{ tool_name: 'x' }] } }, false],
+    ['missing title', { submissionData: { ...certFormPayload, title: undefined } }, false],
+    ['blank title', { submissionData: { ...certFormPayload, title: '   ' } }, false],
+    ['object-valued field', { submissionData: { ...certFormPayload, tools_used: [{ tool_name: 'x' }] } }, false],
   ])('%s → 400, nothing inserted', async (_label, body, badJson) => {
     const res = await POST(req(body, { badJson: badJson as boolean }))
     expect(res.status).toBe(400)
@@ -246,7 +246,7 @@ describe('error handling', () => {
   test('DB error → 400 with a fixed message; no code, details or hint returned', async () => {
     single.mockResolvedValue({ data: null, error: { code: '23514', message: 'violates check constraint "submissions_tier_check"', details: 'Failing row contains (secret)', hint: 'h' } })
     const err = jest.spyOn(console, 'error').mockImplementation(() => {})
-    const res = await POST(req({ submissionData: recordFormPayload }))
+    const res = await POST(req({ submissionData: certFormPayload }))
     const json = await res.json()
     expect(res.status).toBe(400)
     expect(json).toEqual({ error: 'Failed to create submission' })
@@ -256,16 +256,40 @@ describe('error handling', () => {
   test('unexpected throw → 500 with a fixed message', async () => {
     single.mockRejectedValue(new Error('connection reset at 10.0.0.5'))
     const err = jest.spyOn(console, 'error').mockImplementation(() => {})
-    const res = await POST(req({ submissionData: recordFormPayload }))
+    const res = await POST(req({ submissionData: certFormPayload }))
     expect(res.status).toBe(500)
     expect(await res.json()).toEqual({ error: 'Internal server error' })
     err.mockRestore()
   })
 })
 
+// CR-V2-CUTOVER-1: Creator Record v1 (the RecordForm payload) is retired from new sales.
+describe('Creator Record v1 cutover', () => {
+  test('the RecordForm (v1) payload → 400 "tier no longer offered", nothing inserted', async () => {
+    const res = await POST(req({ submissionData: recordFormPayload }))
+    expect(res.status).toBe(400)
+    expect(await res.json()).toEqual({ error: 'Invalid submission', reason: 'tier no longer offered' })
+    expect(insert).not.toHaveBeenCalled()
+  })
+
+  test('a v2 marker in the body is not an intake field, so it cannot make a v1 row look like v2', async () => {
+    const res = await POST(req({ submissionData: { ...recordFormPayload, creator_record_product: 'v2' } }))
+    expect(res.status).toBe(400)
+    expect(insert).not.toHaveBeenCalled()
+  })
+
+  test('the rollback configuration (v1 sales open) still accepts the RecordForm payload unchanged', () => {
+    const r = buildIntakeInsert(recordFormPayload, SESSION_USER, 'open')
+    expect(r.ok).toBe(true)
+    if (r.ok) {
+      const { user_id: _u, status: _s, payment_status: _p, ...intake } = recordFormPayload
+      for (const [k, v] of Object.entries(intake)) expect(r.row[k]).toEqual(v)
+    }
+  })
+})
+
 describe('legitimate intake', () => {
   test.each([
-    ['RecordForm', recordFormPayload],
     ['CertForm', certFormPayload],
   ])('%s payload inserts every intake field unchanged and returns the id', async (_label, payload) => {
     const res = await POST(req({ submissionData: payload, userId: SESSION_USER, catalogData: null }))

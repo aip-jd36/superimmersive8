@@ -69,6 +69,28 @@ export const SUBMISSION_TIERS = ['creator_record', 'certified', 'si8_certified']
  */
 export const CREATABLE_SUBMISSION_TIERS = ['creator_record', 'si8_certified'] as const
 export const LEGACY_SUBMISSION_TIER = 'certified'
+
+/**
+ * CR-V2-CUTOVER-1 — Creator Record v1 is retired from NEW sales; Creator Record v2 is the only Creator
+ * Record a new customer can buy (once its own stops are opened by a separate, reviewed change).
+ *
+ * A v1 Creator Record is a `creator_record` submission WITHOUT the v2 marker (`creator_record_product`
+ * NULL). Only this route can create one (the v2 row is created by the database bind function, never
+ * here), and the checkout route refuses to start or reuse a session for one. Everything that serves
+ * EXISTING v1 records is kept unchanged: payment recording (database), fulfilment, retries, the sweep,
+ * admin reconciliation and retry, private storage, delivery and historical PDF downloads.
+ *
+ * 'retired' is the launch configuration. 'open' exists only as the reviewed one-line rollback lever while
+ * v2 launches; it is deleted together with the v1 intake form once v2 is established. It is a code
+ * constant (no environment value or request can change it), like the v2 stops.
+ */
+export type V1CreatorRecordSales = 'open' | 'retired'
+export const CREATOR_RECORD_V1_NEW_SALES: V1CreatorRecordSales = 'retired'
+
+/** A v1 Creator Record: the creator_record tier with no product marker. Any marker (v2 or unknown) is not v1. */
+export function isV1CreatorRecord(row: { tier?: unknown; creator_record_product?: unknown }): boolean {
+  return row.tier === 'creator_record' && (row.creator_record_product === null || row.creator_record_product === undefined)
+}
 export const SUBMISSION_MODES = ['creator', 'agency'] as const
 
 export const INITIAL_SUBMISSION_STATUS = 'pending'
@@ -88,7 +110,7 @@ function isPrimitive(v: unknown): boolean {
   return v === null || typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'
 }
 
-export function buildIntakeInsert(submissionData: unknown, userId: string): IntakeInsertResult {
+export function buildIntakeInsert(submissionData: unknown, userId: string, v1Sales: V1CreatorRecordSales = CREATOR_RECORD_V1_NEW_SALES): IntakeInsertResult {
   if (!isPlainObject(submissionData)) return { ok: false, reason: 'submissionData must be an object' }
 
   const row: Record<string, unknown> = {}
@@ -108,6 +130,8 @@ export function buildIntakeInsert(submissionData: unknown, userId: string): Inta
   if (row.tier === undefined || row.tier === null || row.tier === '') return { ok: false, reason: 'tier is required' }
   if (row.tier === LEGACY_SUBMISSION_TIER) return { ok: false, reason: 'tier no longer offered' }
   if (!(CREATABLE_SUBMISSION_TIERS as readonly unknown[]).includes(row.tier)) return { ok: false, reason: 'invalid tier' }
+  // CR-V2-CUTOVER-1: this route can only ever create a v1 Creator Record (the marker is not an intake field).
+  if (row.tier === 'creator_record' && v1Sales !== 'open') return { ok: false, reason: 'tier no longer offered' }
   if ('submission_mode' in row && !(SUBMISSION_MODES as readonly unknown[]).includes(row.submission_mode)) {
     return { ok: false, reason: 'invalid submission_mode' }
   }

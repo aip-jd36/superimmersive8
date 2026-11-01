@@ -260,3 +260,46 @@ Tests: `publication-authority`, `v2-rollback-guard-static`, real PostgreSQL 15 +
 ### CR-V2-MVP-M4C — isolated staging preparation (local; nothing provisioned, deployed, migrated or paid)
 
 Runbook: `08_Platform/implementation/CR_V2_STAGING_REHEARSAL_CHECKLIST.md`. Staging-only tooling, refusing Production by construction: `scripts/staging/apply-staging-migrations.sh` (full history onto a fresh non-Production project; runs the `supabase/staging/before_20260909000000_*` placeholder that a fresh history needs), `supabase/staging/seed_pilot_access.sql` (one invited test creator), `scripts/staging/cr-v2-staging-preflight.ts` (no-network env check). The stops stay `stopped` here; the two-line staging flip is documented in the runbook and cannot merge green.
+
+### CR-V2-CUTOVER-1 — single-product cutover (local; nothing deployed, migrated or sold)
+
+Creator Record v2 is the only Creator Record a new customer can buy. v1 (a `creator_record` submission with no `creator_record_product` marker) is retired from NEW sales by one code constant, `CREATOR_RECORD_V1_NEW_SALES = 'retired'` (`lib/submissions/build-intake-insert.ts`), modelled on the CR-CERTIFIED-PATH-1B retirement of the legacy `certified` tier. It is not a product registry. `'open'` exists only as the reviewed one-line rollback lever during the v2 launch, and is deleted together with the v1 form once v2 is established.
+
+| Retired: new v1 sales | Retained: existing v1 records and shared infrastructure |
+|---|---|
+| `/api/submissions/create` refuses `tier: 'creator_record'` with "tier no longer offered". This route only ever creates v1; v2 rows come from the database bind function. | Payment recording (database ledger), the Stripe webhook, `runPaymentFulfillment`, the recovery sweep, admin reconcile and admin retry. None of them reads the cutover setting. |
+| `/api/checkout/create-session` refuses a v1 row with 409 `v1_creator_record_retired`, before any price lookup, Stripe call or write. This includes not reusing or returning a persisted open session. | The v1 renderer, `legacy-creator-record-pdf-v3`, still issues for a paid v1 submission. |
+| `/record` (and `/submit`) redirects to `/creator-record`. The v1 form is kept unchanged behind `app/record/layout.tsx`, for rollback only. | Historical PDFs: `/api/creator-record/[id]/pdf` still serves private artifacts and the legacy `documents` bucket. |
+| The dashboard buttons and nav, and sign-up `next=/record`, go to `/creator-record`, and the "$29" v1 label is no longer shown. | Auth, private storage (`creator-records`) and delivery emails. The database still prices `creator_record` at 2900, so a session opened before the cutover settles. |
+
+v2 is unchanged and stays fail-closed:
+- both stops stay `stopped`;
+- the publication authority stays empty in Production;
+- the v2 renderer never permits the legacy path or a v1 version;
+- an unknown marker is never treated as v1: checkout returns 400, and fulfilment raises `UnsupportedProductFamilyError`.
+
+**Window.** Once this code is deployed and before v2 is opened, no Creator Record can be bought. v1 is refused and v2 is stopped. Ship it in the same release as the reviewed change that opens v2, or accept the pause.
+
+**MIGRATION-FIRST ROLLOUT**
+1. Read-only Production checks:
+   - the `submissions` column types and CHECKs, including `authorship_statement`;
+   - `rights_packages.submission_id`;
+   - the pending v1 work:
+     - unpaid v1 with a persisted session: `select id, stripe_checkout_session_id from submissions where tier = 'creator_record' and payment_status = 'unpaid' and stripe_checkout_session_id is not null`;
+     - paid but not fully fulfilled: `select stripe_checkout_session_id, submission_id, fulfillment_status, pdf_status, email_status from payment_fulfillments where tier = 'creator_record' and outcome = 'accepted' and (pdf_status = 'pending' or email_status not in ('not_required', 'accepted', 'reconciled'))`;
+     - pending artifacts: `select submission_id, generator_version from creator_record_artifacts where status = 'pending'`.
+2. Apply `20261101000000` (M2), then `20261102000000` (M3, including the M4B guards). Both are additive: new tables, a nullable column and new triggers and functions, with no change to any function the deployed code calls. The currently deployed code therefore keeps working: it never sets the marker and only writes v1 rows, which the guards allow.
+3. Deploy this code. It needs the M3 column, because checkout and fulfilment select `creator_record_product`.
+4. Optional: expire the open v1 sessions from step 1 in Stripe. Otherwise a customer who already holds the URL can still pay within the session's lifetime (up to 24 h). That payment is recorded and fulfilled as v1, unchanged.
+5. Re-run the step 1 queries. Any pending v1 completes through the sweep, admin reconcile or admin retry, all on the v1 renderer.
+6. Opening v2 is a separate, reviewed change (approved governance plus the two stops). It is not part of this cutover.
+
+**ROLLBACK**
+- **Stop all Creator Record sales and issuance:** the state is already that while v2's stops are `stopped`. Once v2 is open, set both stops back to `stopped`.
+- **Re-open v1:** set `CREATOR_RECORD_V1_NEW_SALES = 'open'` as a reviewed one-line change, or deploy the pre-cutover code. That is safe for v1, but never deploy anything older than CR-ARTIFACT-1 or than M3 once v2 rows exist. With M3 applied, older code fails closed for v2: the guards refuse a v1 PDF or a `rights_packages` row for a v2 submission, so it stays visibly paid but not issued.
+- **Never drop** the M3 objects while a v2 submission exists. **Never delete** objects in the `documents` or `creator-records` buckets: historical downloads depend on them.
+
+Tests:
+- `security/creator-record-v1-cutover`;
+- the cutover blocks in `security/checkout-integrity`, `security/submission-create-route` and `security/legacy-certified-containment`;
+- `creator-record-flow/v2-checkout-route`.

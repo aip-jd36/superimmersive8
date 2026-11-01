@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { CREATOR_RECORD_V1_NEW_SALES } from '@/lib/submissions/build-intake-insert'
 import { Button } from '@/components/ui/button'
 
 export default async function DashboardLayout({
@@ -53,7 +54,7 @@ export default async function DashboardLayout({
                   Dashboard
                 </Link>
                 <Link
-                  href="/record"
+                  href={CREATOR_RECORD_V1_NEW_SALES === 'open' ? '/record' : '/creator-record'}
                   className="px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-secondary"
                   style={{ color: '#52504A' }}
                 >

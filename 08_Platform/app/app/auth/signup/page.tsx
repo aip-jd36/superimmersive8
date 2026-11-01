@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 import { Turnstile } from '@marsidev/react-turnstile'
+import { CREATOR_RECORD_V1_NEW_SALES } from '@/lib/submissions/build-intake-insert'
 
 const signupSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -131,7 +132,9 @@ export default function SignupPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
-    setNextPath(params.get('next') || '')
+    const next = params.get('next') || ''
+    // CR-V2-CUTOVER-1: the retired v1 form is never a sign-up destination (or shown as a product).
+    setNextPath(next === '/record' && CREATOR_RECORD_V1_NEW_SALES !== 'open' ? '/creator-record' : next)
   }, [])
 
   const {

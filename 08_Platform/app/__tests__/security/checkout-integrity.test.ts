@@ -42,7 +42,8 @@ const req = (body: unknown) => ({ json: async () => body }) as any
 const has = (q: Q, m: string, ...a: unknown[]) => q.calls.some(([x, ...y]) => x === m && JSON.stringify(y) === JSON.stringify(a))
 
 function row(over: Record<string, unknown> = {}) {
-  return { id: SUB_ID, user_id: USER.id, tier: 'creator_record', status: 'pending', payment_status: 'unpaid', stripe_checkout_session_id: null, ...over }
+  // CR-V2-CUTOVER-1: the shared checkout mechanics are pinned on a tier still sold (si8_certified); v1 Creator Record is refused (below).
+  return { id: SUB_ID, user_id: USER.id, tier: 'si8_certified', status: 'pending', payment_status: 'unpaid', stripe_checkout_session_id: null, ...over }
 }
 
 /** Default: owned row found, bind succeeds. */
@@ -105,7 +106,7 @@ describe('tier, price and email come from the persisted submission', () => {
 
   // The legacy `certified` tier no longer checks out (CR-CERTIFIED-PATH-1B, below); its price stays in the
   // database price function so a session created earlier still settles.
-  it.each([['creator_record', 2900], ['si8_certified', 49900]])('%s → %i cents', async (tier, cents) => {
+  it.each([['si8_certified', 49900]])('%s → %i cents', async (tier, cents) => {
     standard(row({ tier }))
     await POST(req({ submissionId: SUB_ID }))
     expect(create.mock.calls[0][0].line_items[0].price_data.unit_amount).toBe(cents)
@@ -135,8 +136,6 @@ describe('customer-visible product copy (CR-CHECKOUT-CLAIMS-1A)', () => {
   const MISLEADING = /cleared for commercial use|commercial clearance verification|rights verified|chain of title|\bverified\b|commercial audit/i
 
   it.each([
-    ['creator_record', 2900, 'Creator Record — Self-Attested Documentation',
-      'A self-attested record of information you provide about your AI-video production. Not a commercial clearance assessment.', '/record'],
     ['si8_certified', 49900, 'SI8 Commercial Assurance Assessment',
       'Human review of submitted project information and supporting evidence, with documented findings and limitations. Does not certify commercial clearance.', '/certify'],
   ])('%s: price %i, exact name and description, no clearance claim, cancel returns to its own form', async (tier, cents, name, description, cancelPath) => {
@@ -226,7 +225,7 @@ describe('session identity, reuse and concurrency', () => {
 
   it('an open, matching persisted session is reused (no new session)', async () => {
     standard(row({ stripe_checkout_session_id: 'cs_old' }))
-    retrieve.mockResolvedValue({ id: 'cs_old', status: 'open', client_reference_id: SUB_ID, amount_subtotal: 2900, url: 'https://checkout.stripe.test/old' })
+    retrieve.mockResolvedValue({ id: 'cs_old', status: 'open', client_reference_id: SUB_ID, amount_subtotal: 49900, url: 'https://checkout.stripe.test/old' })
     const res = await POST(req({ submissionId: SUB_ID }))
     expect(await res.json()).toEqual({ url: 'https://checkout.stripe.test/old' })
     expect(create).not.toHaveBeenCalled()
@@ -234,7 +233,7 @@ describe('session identity, reuse and concurrency', () => {
 
   it('an open session with a stale amount is expired and replaced', async () => {
     standard(row({ stripe_checkout_session_id: 'cs_old' }))
-    retrieve.mockResolvedValue({ id: 'cs_old', status: 'open', client_reference_id: SUB_ID, amount_subtotal: 49900, url: 'u' })
+    retrieve.mockResolvedValue({ id: 'cs_old', status: 'open', client_reference_id: SUB_ID, amount_subtotal: 2900, url: 'u' })
     const res = await POST(req({ submissionId: SUB_ID }))
     expect(res.status).toBe(200)
     expect(expire).toHaveBeenCalledWith('cs_old')
@@ -293,13 +292,55 @@ describe('session identity, reuse and concurrency', () => {
   })
 })
 
-describe('current /record and /certify payloads remain compatible', () => {
-  it('/record body ({submissionId, creatorEmail, tier}) checks out at $29', async () => {
-    standard(row({ tier: 'creator_record' }))
+describe('Creator Record v1 is retired from new sales (CR-V2-CUTOVER-1)', () => {
+  const RETIRED = { error: 'This Creator Record is no longer available for checkout.', code: 'v1_creator_record_retired' }
+  const expectNoStripeNoPriceNoWrite = () => {
+    expect(create).not.toHaveBeenCalled()
+    expect(retrieve).not.toHaveBeenCalled()
+    expect(expire).not.toHaveBeenCalled()
+    expect(getListPriceCents).not.toHaveBeenCalled()
+    expect(queries.some(q => q.calls.some(([m]) => m === 'update'))).toBe(false)
+  }
+
+  it.each([[{}], [{ creator_record_product: null }]])('an unpaid v1 submission %j → 409, before any price lookup, Stripe call or write', async (over) => {
+    standard(row({ tier: 'creator_record', ...over }))
     const res = await POST(req({ submissionId: SUB_ID, creatorEmail: 'owner@example.com', tier: 'creator_record' }))
-    expect(res.status).toBe(200)
-    expect(create.mock.calls[0][0].line_items[0].price_data.unit_amount).toBe(2900)
+    expect(res.status).toBe(409)
+    expect(await res.json()).toEqual(RETIRED)
+    expectNoStripeNoPriceNoWrite()
   })
+
+  it('a persisted open v1 session is neither retrieved, reused, returned nor expired', async () => {
+    standard(row({ tier: 'creator_record', stripe_checkout_session_id: 'cs_open_v1' }))
+    retrieve.mockResolvedValue({ id: 'cs_open_v1', status: 'open', client_reference_id: SUB_ID, amount_subtotal: 2900, url: 'https://checkout.stripe.test/v1' })
+    const res = await POST(req({ submissionId: SUB_ID }))
+    expect(res.status).toBe(409)
+    expect(JSON.stringify(await res.json())).not.toContain('checkout.stripe.test')
+    expectNoStripeNoPriceNoWrite()
+  })
+
+  it('a body marker cannot turn a v1 submission into v2 (the stored marker decides)', async () => {
+    standard(row({ tier: 'creator_record' }))
+    const res = await POST(req({ submissionId: SUB_ID, creator_record_product: 'v2', tier: 'creator_record' }))
+    expect(res.status).toBe(409)
+    expectNoStripeNoPriceNoWrite()
+  })
+
+  it('an unknown stored marker still fails closed (400), never as v1 and never priced', async () => {
+    standard(row({ tier: 'creator_record', creator_record_product: 'v3' }))
+    const res = await POST(req({ submissionId: SUB_ID }))
+    expect(res.status).toBe(400)
+    expect(create).not.toHaveBeenCalled()
+    expect(getListPriceCents).not.toHaveBeenCalled()
+  })
+
+  it('ownership is still checked first: a foreign v1 submission is the ordinary 404', async () => {
+    resolver = () => ({ data: null })
+    expect((await POST(req({ submissionId: SUB_ID }))).status).toBe(404)
+  })
+})
+
+describe('current /certify payload remains compatible', () => {
 
   it('/certify body checks out at $499', async () => {
     standard(row({ tier: 'si8_certified' }))

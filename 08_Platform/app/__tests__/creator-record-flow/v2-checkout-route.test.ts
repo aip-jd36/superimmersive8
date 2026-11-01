@@ -4,7 +4,7 @@
  * Same harness as __tests__/security/checkout-integrity.test.ts. Proves: the v2 preconditions
  * (checkV2Checkout) run for a v2-marked submission BEFORE any price lookup or Stripe call —
  * including reuse of an already-open session; a refusal returns its fixed code; v2 uses its own
- * copy and cancel path; an unknown marker fails closed; V1 never reaches the v2 check.
+ * copy and cancel path; an unknown marker fails closed; V1 never reaches the v2 check (and is retired).
  */
 
 const getUser = jest.fn()
@@ -103,20 +103,19 @@ test('a paid v2 submission is refused by the existing payment-state rule first',
   expect(create).not.toHaveBeenCalled()
 })
 
-test('an unknown marker fails closed; V1 (no marker) never reaches the v2 check', async () => {
+test('an unknown marker fails closed; V1 (no marker) never reaches the v2 check and is retired (CR-V2-CUTOVER-1)', async () => {
   standard(row({ creator_record_product: 'v3' }))
   expect((await POST(req({ submissionId: SUB_ID }))).status).toBe(400)
   expect(create).not.toHaveBeenCalled()
 
   for (const marker of [null, undefined]) {
     jest.clearAllMocks()
-    create.mockResolvedValue({ id: 'cs_new', status: 'open', url: 'https://checkout.stripe.test/new' })
     standard(row({ creator_record_product: marker }))
     const res = await POST(req({ submissionId: SUB_ID }))
-    expect(res.status).toBe(200)
+    expect(res.status).toBe(409)
+    expect(await res.json()).toMatchObject({ code: 'v1_creator_record_retired' })
     expect(checkV2Checkout).not.toHaveBeenCalled()
-    const [params] = create.mock.calls[0]
-    expect(params.cancel_url).toBe('https://app.test/record?payment=cancelled')
-    expect(params.metadata).toEqual({ submissionId: SUB_ID, tier: 'creator_record', checkout_contract: 'caa-3b-v2' })
+    expect(getListPriceCents).not.toHaveBeenCalled()
+    expect(create).not.toHaveBeenCalled()
   }
 })
