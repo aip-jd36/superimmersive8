@@ -50,29 +50,35 @@ import {
   questionContentDigest, questionRef, type DigestedKind,
 } from './authority-content'
 import { checkApprovedSources, type SourceRefusal, type SourceTextInput, type TopicClaims } from './sources'
+import {
+  EVIDENCE_CATEGORIES, EVIDENCE_EXAMINATION_NOT_EXAMINED, EVIDENCE_MAX_BYTES, EVIDENCE_MAX_FILE_NAME_CHARS, EVIDENCE_MAX_PER_RECORD, EVIDENCE_MAX_PER_TOOL, EVIDENCE_MEDIA_TYPES,
+  type EvidenceCategory, type EvidenceMediaType,
+} from '../evidence-intake/vocabulary'
 
 export const CUSTOMER_RECORD_SCHEMA = 'si8/creator-record-v2-record'
 /**
  * v2 (CR-V2-1A): content-addressed source text provenance; acknowledgements with their wording.
  * v3 (CR-V2-1C): builder provenance; content digest of every referenced governed entry.
  * v4 (CR-V2-2E): selection provenance on each guidance item (`selection_basis`).
+ * v5 (CR-V2-DOC-1): `documents` is an inventory of the creator's own stored documents, each fixed by its
+ *     SHA-256 (never examined in this version; no document reaches guidance).
  */
-export const CUSTOMER_RECORD_SCHEMA_VERSION = 4
+export const CUSTOMER_RECORD_SCHEMA_VERSION = 5
 /**
  * The code that prepared the record. Technical provenance only: it grants no
  * commercial authority, and an issuance check can only refuse an unsupported
  * builder, never be satisfied by one. Raise the version with any change to how
  * a record is built or to the guidance pipeline it runs.
  */
-export const CUSTOMER_RECORD_BUILDER = { id: 'si8/creator-record-v2-record-builder', version: 2 } as const
+export const CUSTOMER_RECORD_BUILDER = { id: 'si8/creator-record-v2-record-builder', version: 3 } as const
 /** The content contract: what may appear in the record (no generated prose). Bump with any content change. */
-export const CUSTOMER_RECORD_CONTENT = { id: 'si8/creator-record-v2-record-content', version: 1, generated_text: 'none' } as const
+export const CUSTOMER_RECORD_CONTENT = { id: 'si8/creator-record-v2-record-content', version: 2, generated_text: 'none' } as const
 /** Issued Creator Record ids (CR-YYYY-8 hex): assigned at issuance, never part of a prepared record. */
 const ISSUED_RECORD_ID = /^CR-\d{4}-[0-9A-F]{8}$/i
 const ISO_DATETIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/
 
 export interface CustomerRecordInput {
-  /** The questionnaire state, exactly as submitted; parsed strictly here. Documents are not accepted. */
+  /** The questionnaire state, exactly as submitted; parsed strictly here. Documents are not part of the state (see `documents`). */
   state: unknown
   sources: CreatorRecordSources
   /** The approved wording: its Source Text Approval and the acknowledgement wording it covers. */
@@ -82,6 +88,22 @@ export interface CustomerRecordInput {
   as_of: string
   /** Preparation reference, record version and capture time (ISO, UTC). */
   record: RecordContext
+  /**
+   * CR-V2-DOC-1: the creator's own stored documents this version references, already resolved by the caller
+   * against the evidence store (owner, stored, SHA-256). Inventory only: never an input to guidance.
+   */
+  documents?: readonly CustomerRecordDocument[]
+}
+
+/** One inventoried document, fixed by its SHA-256. The category is the creator's description, not a fact. */
+export interface CustomerRecordDocument {
+  document_id: string
+  sha256: string
+  media_type: EvidenceMediaType
+  byte_size: number
+  file_name: string
+  category: EvidenceCategory
+  tool_index: number | null
 }
 
 export interface DeclaredAnswer {
@@ -148,7 +170,7 @@ export interface CustomerRecordV2 {
   }
   /** Acknowledgements the creator accepted, with the exact approved wording shown. */
   declarations: { answers: DeclaredAnswer[]; observations: DeclaredObservation[]; acknowledgements: { id: string; text: string }[] }
-  documents: { status: 'not_provided'; tools: { tool_index: number; status: 'not_provided' }[] }
+  documents: { policy: 'inventory_only'; items: (CustomerRecordDocument & { examination: typeof EVIDENCE_EXAMINATION_NOT_EXAMINED })[] }
   comparison: { policy: 'disabled' }
   guidance: { items: CustomerGuidanceItem[] }
 }
@@ -211,16 +233,54 @@ function inputIssues(input: CustomerRecordInput): string[] {
   if (!isIsoDate(input.as_of)) issues.push('as_of')
   const s = input.state
   if (s && typeof s === 'object' && !Array.isArray(s) && Object.prototype.hasOwnProperty.call(s, 'documents')) issues.push('state.documents_not_accepted')
+  issues.push(...documentIssues(input.documents))
+  return issues
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+/** CR-V2-DOC-1: the document inventory, checked strictly (shape, limits, uniqueness). Tool range is checked against the parsed state. */
+function documentIssues(docs: CustomerRecordInput['documents']): string[] {
+  if (docs === undefined) return []
+  if (!Array.isArray(docs) || docs.length > EVIDENCE_MAX_PER_RECORD) return ['documents']
+  const issues: string[] = []
+  const ids = new Set<string>()
+  const perTool = new Map<number, number>()
+  docs.forEach((d, i) => {
+    const keys = d && typeof d === 'object' ? Object.keys(d).sort().join(',') : ''
+    const ok =
+      keys === 'byte_size,category,document_id,file_name,media_type,sha256,tool_index' &&
+      UUID.test(d.document_id) && !ids.has(d.document_id) &&
+      /^[0-9a-f]{64}$/.test(d.sha256) &&
+      (EVIDENCE_MEDIA_TYPES as readonly string[]).includes(d.media_type) &&
+      Number.isInteger(d.byte_size) && d.byte_size > 0 && d.byte_size <= EVIDENCE_MAX_BYTES &&
+      typeof d.file_name === 'string' && d.file_name.trim() !== '' && Array.from(d.file_name).length <= EVIDENCE_MAX_FILE_NAME_CHARS &&
+      (EVIDENCE_CATEGORIES as readonly string[]).includes(d.category) &&
+      (d.tool_index === null || (Number.isInteger(d.tool_index) && d.tool_index >= 0))
+    if (!ok) {
+      issues.push(`documents[${i}]`)
+      return
+    }
+    ids.add(d.document_id)
+    if (d.tool_index !== null) {
+      const n = (perTool.get(d.tool_index) ?? 0) + 1
+      perTool.set(d.tool_index, n)
+      if (n > EVIDENCE_MAX_PER_TOOL) issues.push(`documents[${i}].tool_index`)
+    }
+  })
   return issues
 }
 
 export function buildCustomerRecord(input: CustomerRecordInput): CustomerRecordResult {
-  // 1. Input shape, strictly. Documents are not an input.
+  // 1. Input shape, strictly. Documents are never part of the state; the inventory comes separately and never reaches guidance.
   const shapeIssues = inputIssues(input)
   const parsed = parseFormState(input.state)
   if (!parsed.ok) shapeIssues.push('state')
   if (shapeIssues.length > 0 || !parsed.ok) return { ok: false, stage: 'input', issues: shapeIssues }
   const state = parsed.state
+  const documents = input.documents ?? []
+  const toolLimit = Math.min(state.tools.length, input.sources.max_tools)
+  const outOfRange = documents.map((d, i) => (d.tool_index !== null && d.tool_index >= toolLimit ? `documents[${i}].tool_index` : null)).filter((x): x is string => x !== null)
+  if (outOfRange.length > 0) return { ok: false, stage: 'input', issues: outOfRange }
 
   // 2. Approved governed sources only.
   const check = checkApprovedSources(input.sources, input.source_text, input.topicClaims, input.as_of, { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION })
@@ -411,7 +471,14 @@ export function buildCustomerRecord(input: CustomerRecordInput): CustomerRecordR
           .map((id) => ({ id, text: text.acknowledgements[id] }))
           .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)),
       },
-      documents: { status: 'not_provided', tools: state.tools.slice(0, input.sources.max_tools).map((_, i) => ({ tool_index: i, status: 'not_provided' })) },
+      // CR-V2-DOC-1: inventory only, in the creator's order; nothing is examined and nothing reaches guidance.
+      documents: {
+        policy: 'inventory_only',
+        items: documents.map((d) => ({
+          document_id: d.document_id, sha256: d.sha256, media_type: d.media_type, byte_size: d.byte_size, file_name: d.file_name,
+          category: d.category, tool_index: d.tool_index, examination: EVIDENCE_EXAMINATION_NOT_EXAMINED,
+        })),
+      },
       comparison: { policy: 'disabled' },
       guidance: { items },
     }),

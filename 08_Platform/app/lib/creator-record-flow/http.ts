@@ -22,6 +22,7 @@ export const unauthorized = () => NextResponse.json({ error: 'Unauthorized' }, {
 
 const MESSAGES: Record<string, string> = {
   invalid_request: 'The request could not be read.',
+  invalid_documents: 'One or more documents could not be used. Check your documents and try again.',
   invalid_answers: 'Some answers need attention.',
   not_invited: 'Creator Record is currently available by invitation only.',
   not_found: 'Not found.',
@@ -50,6 +51,7 @@ const PURCHASE_MESSAGES: Record<PurchaseError['code'], string> = {
   integrity_failure: MESSAGES.integrity_failure,
   submissions_stopped: MESSAGES.submissions_stopped,
   issuance_stopped: 'Creator Record payments are not open yet.',
+  evidence_unavailable: 'A document in this record is no longer available. Nothing was charged.',
   unavailable: 'Creator Record is not available right now.',
 }
 

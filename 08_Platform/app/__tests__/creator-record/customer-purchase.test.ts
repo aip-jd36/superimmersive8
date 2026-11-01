@@ -308,6 +308,9 @@ function placeholderTemplates(): CustomerPdfTemplates {
     topic_labels: { commercial_use: t('Commercial use'), third_party_source_rights: t('Third-party material') },
     fact_labels: Object.fromEntries(APPLICABILITY_FACTS.map((f) => [f, `${PH}${f.replace(/_/g, ' ')}`])),
     not_sure_label: t('Not sure'),
+    documents: { intro: t('Documents you added, listed as received.'), item_label: t('Document {n}'), type: t('Type'), category: t('Your description'), tool: t('Tool'), tool_value: t('Tool {n}'), size: t('Size'), size_value: t('{bytes} bytes'), fingerprint: t('SHA-256 fingerprint'), fingerprint_note: t('A fingerprint identifies the exact file received. It does not show that the document is genuine, who created it, or when.'), examination: t('Examination'), not_examined: t('Not examined by SI8') },
+    document_type_labels: { 'application/pdf': t('PDF'), 'image/png': t('PNG image'), 'image/jpeg': t('JPEG image') },
+    document_category_labels: { billing_receipt: t('Receipt or invoice'), licence: t('Licence'), provider_terms: t('Provider terms'), release_or_consent: t('Release or consent'), permission: t('Permission'), project_file: t('Project file'), other: t('Other') },
     dependency_codes: { status: { open: t('Open') }, sufficiency: { not_assessed: t('Not assessed') } },
   }
 }

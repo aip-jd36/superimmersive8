@@ -30,6 +30,8 @@ import { evaluateIssuanceEligibility, type GovernanceSnapshot, type IssuanceElig
 import type { CustomerDocumentInput } from '../customer-pdf/document-model'
 import type { PdfTemplateApproval } from '../customer-pdf/templates'
 import { verifiedRecord, type PreparedRow, type SubmissionsMode } from './service'
+import type { CustomerRecordV2 } from '../customer-record/record'
+import type { EvidenceIntegrity } from '../evidence-intake/service'
 
 export type V2IssuanceMode = 'stopped' | 'enabled'
 
@@ -48,12 +50,28 @@ export interface PurchaseDeps {
   governance(issuanceDate: string): GovernanceSnapshot
   now(): Date
   log?(event: string, detail: Record<string, unknown>): void
+  /**
+   * CR-V2-DOC-1B: every document the version references is still held intact (`verifyEvidenceIntact`).
+   * Absent → a version that references any document cannot be bought (fail closed).
+   */
+  evidenceIntact?(userId: string, items: readonly EvidenceItem[]): Promise<EvidenceIntegrity>
+}
+
+/** The inventory fields the evidence check needs, read from the verified record. */
+export type EvidenceItem = { document_id: string; sha256: string; byte_size: number }
+
+/** True only when the record references no document, or every one is held intact. Fail closed. */
+async function evidenceHeld(check: ((userId: string, items: readonly EvidenceItem[]) => Promise<EvidenceIntegrity>) | undefined, userId: string, record: CustomerRecordV2): Promise<EvidenceIntegrity> {
+  const items = record.documents.items.map((d) => ({ document_id: d.document_id, sha256: d.sha256, byte_size: d.byte_size }))
+  if (items.length === 0) return { ok: true }
+  if (!check) return { ok: false, reason: 'unavailable' }
+  return check(userId, items)
 }
 
 export type PurchaseError =
   | { ok: false; status: 403; code: 'not_invited' }
   | { ok: false; status: 404; code: 'not_found' }
-  | { ok: false; status: 409; code: 'not_reviewed' | 'superseded' | 'ineligible' }
+  | { ok: false; status: 409; code: 'not_reviewed' | 'superseded' | 'ineligible' | 'evidence_unavailable' }
   | { ok: false; status: 500; code: 'integrity_failure' }
   | { ok: false; status: 503; code: 'submissions_stopped' | 'issuance_stopped' | 'unavailable' }
 
@@ -82,13 +100,20 @@ function eligibilityError(e: IssuanceEligibility): PurchaseError | null {
 /** Checks shared by both steps: owner, integrity, reviewed, latest, eligible now. */
 async function purchasable(deps: PurchaseDeps, userId: string, row: PreparedRow | null): Promise<PurchaseError | null> {
   if (!row || row.user_id !== userId) return err({ status: 404, code: 'not_found' })
-  if (!verifiedRecord(row)) {
+  const record = verifiedRecord(row)
+  if (!record) {
     deps.log?.('creator_record_v2_integrity_failure', { prepared_id: row.id })
     return err({ status: 500, code: 'integrity_failure' })
   }
   if (row.status !== 'reviewed') return err({ status: 409, code: 'not_reviewed' })
   const latest = await deps.latestVersion(row.draft_id)
   if (!latest || latest.id !== row.id) return err({ status: 409, code: 'superseded' })
+  // CR-V2-DOC-1B: never sell a record whose referenced documents SI8 no longer holds intact.
+  const held = await evidenceHeld(deps.evidenceIntact?.bind(deps), userId, record)
+  if (!held.ok) {
+    deps.log?.('creator_record_v2_evidence_unavailable', { prepared_id: row.id, reason: held.reason })
+    return err({ status: 409, code: 'evidence_unavailable' })
+  }
   const eligibility = evaluateIssuanceEligibility(row.canonical, row.sha256, deps.governance(today(deps.now())))
   const refused = eligibilityError(eligibility)
   if (refused) deps.log?.('creator_record_v2_purchase_refused', { prepared_id: row.id, decision: eligibility.decision })
@@ -153,6 +178,8 @@ export const V2_ISSUANCE_REFUSALS = [
   'record_integrity',
   'governance_ineligible',
   'governance_indeterminate',
+  // CR-V2-DOC-1B: a referenced document is no longer held intact (or could not be checked).
+  'evidence_unavailable',
 ] as const
 export type V2IssuanceRefusalCode = (typeof V2_ISSUANCE_REFUSALS)[number]
 
@@ -169,6 +196,8 @@ export interface V2IssuanceDeps {
   templates(): { templates: unknown; approval: PdfTemplateApproval | null }
   /** Renders exactly the given record (the customer PDF builder re-verifies it and the templates). */
   renderPdf(input: CustomerDocumentInput): Promise<Uint8Array>
+  /** CR-V2-DOC-1B: as for checkout. Absent → a record that references any document is not issued. */
+  evidenceIntact?(userId: string, items: readonly EvidenceItem[]): Promise<EvidenceIntegrity>
 }
 
 export async function renderV2ForIssuance(deps: V2IssuanceDeps, sub: CheckoutSubmission, recordId: string, issuedAt: Date): Promise<Uint8Array> {
@@ -177,7 +206,10 @@ export async function renderV2ForIssuance(deps: V2IssuanceDeps, sub: CheckoutSub
   if (!row) throw new V2IssuanceRefusal('record_unbound')
   if (row.submission_id !== sub.id || row.user_id !== sub.user_id) throw new V2IssuanceRefusal('binding_mismatch')
   if (row.status !== 'reviewed') throw new V2IssuanceRefusal('record_not_reviewed')
-  if (!verifiedRecord(row)) throw new V2IssuanceRefusal('record_integrity')
+  const record = verifiedRecord(row)
+  if (!record) throw new V2IssuanceRefusal('record_integrity')
+  // CR-V2-DOC-1B: the PDF lists each referenced document; issue only while SI8 still holds every one intact.
+  if (!(await evidenceHeld(deps.evidenceIntact?.bind(deps), row.user_id, record)).ok) throw new V2IssuanceRefusal('evidence_unavailable')
   const issuedOn = today(issuedAt)
   const eligibility = evaluateIssuanceEligibility(row.canonical, row.sha256, deps.governance(issuedOn))
   if (eligibility.decision === 'invalid_record') throw new V2IssuanceRefusal('record_integrity')

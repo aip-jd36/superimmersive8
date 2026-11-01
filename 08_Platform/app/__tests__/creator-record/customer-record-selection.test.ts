@@ -210,7 +210,7 @@ describe('the prepared record carries it, deterministically and fail-closed', ()
   test('schema v4: every guidance item has its selection basis, grounded in the record; hashing is deterministic; verification and eligibility hold', () => {
     const a = prepare(CASES.materials_getty_artlist)
     const b = prepare(CASES.materials_getty_artlist)
-    expect(a.record.schema_version).toBe(4)
+    expect(a.record.schema_version).toBe(5) // CR-V2-DOC-1: v5 adds the document inventory; selection basis unchanged
     expect(b.canonical).toBe(a.canonical)
     expect(a.sha256).toBe(sha256Hex(a.canonical))
     const obs = new Map(a.record.declarations.observations.map((o) => [o.observation_id, o]))

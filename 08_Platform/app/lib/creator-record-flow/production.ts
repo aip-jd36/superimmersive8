@@ -14,9 +14,16 @@ import type { FlowDeps, NewPreparedRow, PreparedRow, PreparedStore } from '@/lib
 import { approvedCustomerRecordInputs, approvedGovernanceSnapshot, approvedPdfTemplates, CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flow/approved-inputs'
 import { renderV2ForIssuance, type BindReason, type CheckoutSubmission, type PurchaseDeps, type V2IssuanceDeps } from '@/lib/creator-record/customer-flow/purchase'
 import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/config'
+import { hasPilotAccess, PILOT_ACCESS_TABLE } from './pilot-access'
+import { evidenceObjects, evidenceStore } from './evidence-production'
+import { verifyEvidenceIntact } from '@/lib/creator-record/evidence-intake/service'
+
+/** CR-V2-DOC-1B: referenced documents still held intact (row stored, same fingerprint, bytes present and re-hashed). */
+const evidenceIntact = (userId: string, items: readonly { document_id: string; sha256: string; byte_size: number }[]) => verifyEvidenceIntact({ store: evidenceStore, objects: evidenceObjects }, userId, items)
+
+export { hasPilotAccess, PILOT_ACCESS_TABLE }
 
 export const PREPARED_TABLE = 'creator_record_v2_prepared'
-export const PILOT_ACCESS_TABLE = 'creator_record_v2_pilot_access'
 
 const COLUMNS = 'id, user_id, draft_id, version, record_ref, record_schema, record_schema_version, canonical, sha256, form_state, status, created_at, reviewed_at, submission_id'
 
@@ -77,11 +84,6 @@ export async function bindPreparedToSubmission(p: { preparedId: string; userId: 
   return { submissionId: row.out_submission_id ?? null, reason: row.out_reason as BindReason }
 }
 
-export async function hasPilotAccess(userId: string): Promise<boolean> {
-  const { data, error } = await supabaseAdmin.from(PILOT_ACCESS_TABLE).select('user_id').eq('user_id', userId).maybeSingle()
-  if (error) throw new PreparedStoreError('pilot_access', error.code)
-  return !!data
-}
 
 export function productionFlowDeps(): FlowDeps {
   return {
@@ -93,6 +95,8 @@ export function productionFlowDeps(): FlowDeps {
     now: () => new Date(),
     newId: () => randomUUID(),
     log: (event, detail) => console.warn(event, detail),
+    // CR-V2-DOC-1: read only to resolve a version's document references.
+    evidence: evidenceStore,
   }
 }
 
@@ -109,6 +113,7 @@ export function productionPurchaseDeps(): PurchaseDeps {
     governance: (date) => approvedGovernanceSnapshot(date, TOPIC_CLAIMS_FIXTURE),
     now: () => new Date(),
     log: (event, detail) => console.warn(event, detail),
+    evidenceIntact,
   }
 }
 
@@ -120,6 +125,7 @@ export function productionV2IssuanceDeps(): V2IssuanceDeps {
     templates: () => approvedPdfTemplates(),
     // Loaded on first render only.
     renderPdf: async (input) => (await (await import('@/lib/creator-record/customer-pdf/CustomerRecordPDF')).renderCustomerRecordPdf(input)).bytes,
+    evidenceIntact,
   }
 }
 

@@ -17,7 +17,8 @@
  *   - nothing is interpreted: codes are mapped to approved labels, answers and
  *     approved texts are printed verbatim, counts are counted, order is the
  *     record's own. An unknown conclusion, topic, fact or code refuses;
- *   - documents are printed as not provided; any other document state refuses.
+ *   - CR-V2-DOC-1: documents are printed as an inventory (fingerprint, type, size, the creator's own
+ *     description) and always as not examined; any other document state refuses.
  *
  * Errors: `CustomerPdfRefusal` with a code, never a partial model.
  */
@@ -26,6 +27,7 @@ import { CREATOR_RECORD_CONCLUSIONS } from '../contract/compose'
 import { isIsoDate } from '../contract/types'
 import { verifyCustomerRecord, type CustomerRecordV2 } from '../customer-record/record'
 import { arr, int, nullable, obj, oneOf, opt, ProjectionRefusal, str, WITHHELD } from '../record-core/projection'
+import { EVIDENCE_CATEGORIES, EVIDENCE_MEDIA_TYPES } from '../evidence-intake/vocabulary'
 import { canonicalJson } from '../record-core/canonical'
 import { checkTemplates, fill, type CustomerPdfSectionId, type CustomerPdfTemplates, type PdfTemplateApproval, type TemplateRefusalCode } from './templates'
 
@@ -121,7 +123,13 @@ const recordSpec = obj({
     authority_digests: WITHHELD,
   }),
   declarations: obj({ answers: arr(answer), observations: arr(observation), acknowledgements: arr(obj({ id: str, text: str })) }),
-  documents: obj({ status: oneOf(['not_provided'] as const), tools: arr(obj({ tool_index: int, status: oneOf(['not_provided'] as const) })) }),
+  documents: obj({
+    policy: oneOf(['inventory_only'] as const),
+    items: arr(obj({
+      document_id: str, sha256: str, media_type: oneOf(EVIDENCE_MEDIA_TYPES), byte_size: int, file_name: str,
+      category: oneOf(EVIDENCE_CATEGORIES), tool_index: nullable(int), examination: oneOf(['not_examined'] as const),
+    })),
+  }),
   comparison: obj({ policy: oneOf(['disabled'] as const) }),
   guidance: obj({ items: arr(guidanceItem) }),
 })
@@ -349,7 +357,21 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
         ...(unspecified.length > 0 ? [{ kind: 'subheading', text: S.open_items.unspecified_heading, from: 'template' } as Block, ...unspecified.map((i): Block => ({ kind: 'bullet', text: ref(i), from: 'template' }))] : []),
         ...(notSure.length > 0 ? [{ kind: 'subheading', text: S.open_items.not_sure_heading, from: 'template' } as Block, ...notSure.map((a): Block => ({ kind: 'bullet', text: a.question, from: 'record' }))] : []),
         { kind: 'subheading', text: S.open_items.documents_heading, from: 'template' },
-        tpl(S.open_items.documents_not_provided),
+        ...(r.documents.items.length === 0
+          ? [tpl(S.open_items.documents_not_provided)]
+          : [
+              tpl(t.documents.intro),
+              ...r.documents.items.flatMap((d, i): Block[] => [
+                { kind: 'row', label: fill(t.documents.item_label, { n: i + 1 }), label_from: 'template', value: d.file_name, value_from: 'record' },
+                { kind: 'row', label: t.documents.type, label_from: 'template', value: t.document_type_labels[d.media_type], value_from: 'template' },
+                { kind: 'row', label: t.documents.category, label_from: 'template', value: t.document_category_labels[d.category], value_from: 'template' },
+                ...(d.tool_index === null ? [] : [{ kind: 'row', label: t.documents.tool, label_from: 'template', value: fill(t.documents.tool_value, { n: d.tool_index + 1 }), value_from: 'template' } as Block]),
+                { kind: 'row', label: t.documents.size, label_from: 'template', value: fill(t.documents.size_value, { bytes: d.byte_size }), value_from: 'template' },
+                { kind: 'row', label: t.documents.fingerprint, label_from: 'template', value: d.sha256, value_from: 'record' },
+                { kind: 'row', label: t.documents.examination, label_from: 'template', value: t.documents.not_examined, value_from: 'template' },
+              ]),
+              tpl(t.documents.fingerprint_note),
+            ]),
         { kind: 'subheading', text: S.open_items.limitations_heading, from: 'template' },
         ...S.open_items.limitations.map((l): Block => ({ kind: 'bullet', text: l, from: 'template' })),
       ],

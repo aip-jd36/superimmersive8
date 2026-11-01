@@ -29,6 +29,8 @@ import type { CreatorRecordFormState } from '../prototype/form'
 import type { CreatorRecordSources } from '../prototype/build-draft'
 import { buildCustomerRecord, verifyCustomerRecord, CUSTOMER_RECORD_SCHEMA, type CustomerRecordV2 } from '../customer-record/record'
 import type { SourceTextInput, TopicClaims } from '../customer-record/sources'
+import { parseEvidenceReferences } from '../evidence-intake/contract'
+import { resolveEvidenceReferences, type EvidenceStore } from '../evidence-intake/service'
 
 export type PreparedStatus = 'prepared' | 'reviewed'
 
@@ -76,6 +78,11 @@ export interface FlowDeps {
   now(): Date
   newId(): string
   log?(event: string, detail: Record<string, unknown>): void
+  /**
+   * CR-V2-DOC-1: the creator's stored documents, read only to resolve a version's references. Absent → a
+   * version that references any document is refused (fail closed).
+   */
+  evidence?: Pick<EvidenceStore, 'get'>
 }
 
 export interface PreparedView {
@@ -93,11 +100,13 @@ export interface PreparedView {
     answers: { q_id: string; tool_index: number | null; question: string; answer: string }[]
     acknowledgements: { id: string; text: string }[]
   }
+  /** CR-V2-DOC-1: the documents this version references, exactly as recorded (inventory only, not examined). */
+  documents: { document_id: string; file_name: string; media_type: string; byte_size: number; sha256: string; category: string; tool_index: number | null }[]
   guidance_items: number
 }
 
 export type FlowError =
-  | { ok: false; status: 400; code: 'invalid_request' }
+  | { ok: false; status: 400; code: 'invalid_request' | 'invalid_documents' }
   | { ok: false; status: 400; code: 'invalid_answers'; issues: FormIssue[] }
   | { ok: false; status: 403; code: 'not_invited' }
   | { ok: false; status: 404; code: 'not_found' }
@@ -132,6 +141,7 @@ function viewOf(row: PreparedRow, record: CustomerRecordV2): PreparedView {
       answers: record.declarations.answers.map((a) => ({ q_id: a.q_id, tool_index: a.tool_index, question: a.question, answer: a.answer_verbatim })),
       acknowledgements: record.declarations.acknowledgements.map((a) => ({ id: a.id, text: a.text })),
     },
+    documents: record.documents.items.map((d) => ({ document_id: d.document_id, file_name: d.file_name, media_type: d.media_type, byte_size: d.byte_size, sha256: d.sha256, category: d.category, tool_index: d.tool_index })),
     guidance_items: record.guidance.items.length,
   }
 }
@@ -159,21 +169,36 @@ async function ownedVerified(deps: FlowDeps, userId: string, id: unknown): Promi
   return { row, record }
 }
 
-/** Prepare a new version from submitted answers. `body` is the untrusted request body: `{ state, draft_id? }`. */
+/**
+ * Prepare a new version from submitted answers. `body` is the untrusted request body:
+ * `{ state, draft_id?, documents? }`, where `documents` references the creator's OWN stored documents
+ * (CR-V2-DOC-1). Each reference is resolved here against the evidence store and recorded with its SHA-256;
+ * the database re-checks the same at insert. A foreign, missing, pending or deleted document refuses.
+ */
 export async function preparePrepared(deps: FlowDeps, userId: string, body: unknown): Promise<FlowResult> {
   const gated = await gate(deps, userId)
   if (gated) return gated
 
   if (!body || typeof body !== 'object' || Array.isArray(body)) return err({ status: 400, code: 'invalid_request' })
   const b = body as Record<string, unknown>
-  if (Object.keys(b).some((k) => k !== 'state' && k !== 'draft_id')) return err({ status: 400, code: 'invalid_request' })
+  if (Object.keys(b).some((k) => k !== 'state' && k !== 'draft_id' && k !== 'documents')) return err({ status: 400, code: 'invalid_request' })
   const draftParam = b.draft_id
   if (draftParam !== undefined && draftParam !== null && (typeof draftParam !== 'string' || !UUID.test(draftParam))) return err({ status: 400, code: 'invalid_request' })
 
-  // Documents are not part of Creator Record v2.
+  // The prototype's display-only examined documents are never accepted in the state.
   if (b.state && typeof b.state === 'object' && !Array.isArray(b.state) && Object.prototype.hasOwnProperty.call(b.state, 'documents')) return err({ status: 400, code: 'invalid_request' })
   const parsed = parseFormState(b.state)
   if (!parsed.ok || parsed.documents.length > 0) return err({ status: 400, code: 'invalid_request' })
+
+  // CR-V2-DOC-1: references to the creator's own stored documents.
+  const refs = parseEvidenceReferences(b.documents, parsed.state.tools.length)
+  if (!refs) return err({ status: 400, code: 'invalid_documents' })
+  let documents: Awaited<ReturnType<typeof resolveEvidenceReferences>> = { ok: true, documents: [] }
+  if (refs.length > 0) {
+    if (!deps.evidence) return err({ status: 400, code: 'invalid_documents' })
+    documents = await resolveEvidenceReferences(deps.evidence, userId, refs)
+    if (!documents.ok) return err({ status: 400, code: 'invalid_documents' })
+  }
 
   let draftId: string
   let version: number
@@ -197,6 +222,7 @@ export async function preparePrepared(deps: FlowDeps, userId: string, body: unkn
     topicClaims: deps.topicClaims,
     as_of: now.toISOString().slice(0, 10),
     record: { record_id: `PREP-${id}`, record_version: version, captured_at: now.toISOString() },
+    documents: documents.documents,
   })
   if (!built.ok) {
     if (built.stage === 'form') return err({ status: 400, code: 'invalid_answers', issues: built.issues })
@@ -204,6 +230,7 @@ export async function preparePrepared(deps: FlowDeps, userId: string, body: unkn
       deps.log?.('creator_record_v2_sources_unavailable', { codes: Array.from(new Set(built.refusals.map((r) => r.code))).sort() })
       return err({ status: 503, code: 'unavailable' })
     }
+    if (built.issues.some((i) => i.startsWith('documents'))) return err({ status: 400, code: 'invalid_documents' })
     return err({ status: 400, code: 'invalid_request' })
   }
 

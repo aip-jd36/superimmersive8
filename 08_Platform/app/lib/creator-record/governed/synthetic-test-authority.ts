@@ -191,7 +191,7 @@ const LEDGER: readonly PublicationLedgerEntry[] = [
 ]
 
 /** Must equal CUSTOMER_RECORD_SCHEMA / _VERSION (test-checked). */
-const RECORD_SCHEMA = { id: 'si8/creator-record-v2-record', version: 4 }
+const RECORD_SCHEMA = { id: 'si8/creator-record-v2-record', version: 5 }
 
 /** Placeholder PDF templates (data only). Every string is marked TEST; the wording lock applies unchanged. */
 const PDF_TEMPLATES = {
@@ -217,12 +217,15 @@ const PDF_TEMPLATES = {
   topic_labels: { commercial_use: t('Topic: commercial use'), third_party_source_rights: t('Topic: third-party material') },
   fact_labels: { tool_plan_tier: t('Fact: plan'), tool_account_status: t('Fact: account'), jurisdiction: t('Fact: jurisdiction') },
   not_sure_label: t('Not sure'),
+  documents: { intro: t('Documents you added, listed as received.'), item_label: t('Document {n}'), type: t('Type'), category: t('Your description'), tool: t('Tool'), tool_value: t('Tool {n}'), size: t('Size'), size_value: t('{bytes} bytes'), fingerprint: t('SHA-256 fingerprint'), fingerprint_note: t('A fingerprint identifies the exact file received. It does not show that the document is genuine, who created it, or when.'), examination: t('Examination'), not_examined: t('Not examined by SI8') },
+  document_type_labels: { 'application/pdf': t('PDF'), 'image/png': t('PNG image'), 'image/jpeg': t('JPEG image') },
+  document_category_labels: { billing_receipt: t('Receipt or invoice'), licence: t('Licence'), provider_terms: t('Provider terms'), release_or_consent: t('Release or consent'), permission: t('Permission'), project_file: t('Project file'), other: t('Other') },
   dependency_codes: { status: { open: t('Open') }, sufficiency: { not_assessed: t('Not assessed') } },
 }
 
 /** Pinned digests (recomputed by the test; a mismatch means the wording changed and must be re-pinned). */
 export const SYNTHETIC_SOURCE_TEXT_SHA256 = 'e589b6d8b9172463994a2f6335f622e08f11a53e0e3822e3c9acfce4003c221e'
-export const SYNTHETIC_PDF_TEMPLATES_FINGERPRINT = '35a85b7fd355d6e8dbccd8a3f1a21ec24f93b248f2222a908f6c02fca295a5b7'
+export const SYNTHETIC_PDF_TEMPLATES_FINGERPRINT = '0a2ce73b68d1223f61a8bcd28a297b65f0beec9a08d7f77229d0fd8f2aa6acfd'
 
 const SOURCE_TEXT_APPROVAL: SourceTextApproval = {
   source_id: 'si8/creator-record-v2-source-text',

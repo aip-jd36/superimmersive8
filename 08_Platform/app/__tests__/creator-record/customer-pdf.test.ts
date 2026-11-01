@@ -118,6 +118,9 @@ function placeholderTemplates(): CustomerPdfTemplates {
     topic_labels: { commercial_use: `${PH}Commercial use of your AI tools`, third_party_source_rights: `${PH}Third-party source material` },
     fact_labels: Object.fromEntries(APPLICABILITY_FACTS.map((f) => [f, `${PH}${f.replace(/_/g, ' ')}`])),
     not_sure_label: `${PH}Not sure`,
+    documents: { intro: `${PH}Documents you added, listed as received.`, item_label: `${PH}Document {n}`, type: `${PH}Type`, category: `${PH}Your description`, tool: `${PH}Tool`, tool_value: `${PH}Tool {n}`, size: `${PH}Size`, size_value: `${PH}{bytes} bytes`, fingerprint: `${PH}SHA-256 fingerprint`, fingerprint_note: `${PH}A fingerprint identifies the exact file received. It does not show that the document is genuine, who created it, or when.`, examination: `${PH}Examination`, not_examined: `${PH}Not examined by SI8` },
+    document_type_labels: { 'application/pdf': `${PH}PDF`, 'image/png': `${PH}PNG image`, 'image/jpeg': `${PH}JPEG image` },
+    document_category_labels: { billing_receipt: `${PH}Receipt or invoice`, licence: `${PH}Licence`, provider_terms: `${PH}Provider terms`, release_or_consent: `${PH}Release or consent`, permission: `${PH}Permission`, project_file: `${PH}Project file`, other: `${PH}Other` },
     dependency_codes: { status: { open: `${PH}Open` }, sufficiency: { not_assessed: `${PH}Not assessed` } },
   }
 }
@@ -636,7 +639,7 @@ describe('rendering boundary', () => {
   test('it reads only the verified record and the template contract: no database, Storage, payment, governance or v1 PDF code', () => {
     const targets = new Set(walk(ROOT).flatMap(importsOf))
     expect(Array.from(targets).sort()).toEqual([
-      '../contract/compose', '../contract/types', '../customer-record/record', '../integration/objectives', '../record-core/canonical', '../record-core/projection',
+      '../contract/compose', '../contract/types', '../customer-record/record', '../evidence-intake/vocabulary', '../integration/objectives', '../record-core/canonical', '../record-core/projection',
       './document-model', './templates', '@react-pdf/renderer', 'react',
     ])
   })

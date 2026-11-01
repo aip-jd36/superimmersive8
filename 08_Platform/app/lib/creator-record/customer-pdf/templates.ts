@@ -23,6 +23,7 @@ import { isIsoDate } from '../contract/types'
 import { CREATOR_RECORD_OBJECTIVE_TOPICS } from '../integration/objectives'
 import { canonicalJson, sha256Hex } from '../record-core/canonical'
 import { arr, fail, int, isPlainObject, obj, oneOf, ProjectionRefusal, str, type P } from '../record-core/projection'
+import { EVIDENCE_CATEGORIES, EVIDENCE_MEDIA_TYPES } from '../evidence-intake/vocabulary'
 
 export const CUSTOMER_PDF_TEMPLATE_ID = 'si8/creator-record-v2-pdf-templates'
 export const CUSTOMER_PDF_SECTIONS = ['about', 'project', 'tools', 'contribution', 'guidance', 'open_items', 'not_done', 'provenance'] as const
@@ -86,6 +87,17 @@ const templateSpec = obj({
       }),
     }),
   }),
+  /**
+   * CR-V2-DOC-1: the document inventory printed under Open items. `item_label` fills `{n}`, `size_value`
+   * `{bytes}` and `tool_value` `{n}`. `fingerprint_note` states that a fingerprint identifies bytes only;
+   * `not_examined` states that SI8 did not examine the document.
+   */
+  documents: obj({
+    intro: str, item_label: str, type: str, category: str, tool: str, tool_value: str, size: str, size_value: str,
+    fingerprint: str, fingerprint_note: str, examination: str, not_examined: str,
+  }),
+  document_type_labels: exactLabels(EVIDENCE_MEDIA_TYPES),
+  document_category_labels: exactLabels(EVIDENCE_CATEGORIES),
   question_sections: mapOf(oneOf(QUESTION_SECTIONS)),
   conclusion_labels: exactLabels(CREATOR_RECORD_CONCLUSIONS),
   topic_labels: exactLabels(CREATOR_RECORD_OBJECTIVE_TOPICS),

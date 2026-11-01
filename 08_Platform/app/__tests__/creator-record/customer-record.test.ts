@@ -185,7 +185,7 @@ describe('the record', () => {
     const { record } = built(buildCustomerRecord(input()))
     expect(record.schema).toBe(CUSTOMER_RECORD_SCHEMA)
     expect(record.status).toBe('prepared_not_issued')
-    expect(record.content).toEqual({ id: 'si8/creator-record-v2-record-content', version: 1, generated_text: 'none' })
+    expect(record.content).toEqual({ id: 'si8/creator-record-v2-record-content', version: 2, generated_text: 'none' })
     expect(record.sources).toEqual(expect.objectContaining({
       kind: 'governed', registry_version: 'SYNTHETIC-REGISTRY-1', ledger_version: 'SYNTHETIC-LEDGER-1', guidance_as_of: AS_OF,
       source_text: {
@@ -289,10 +289,10 @@ describe('documents are not provided and comparisons are disabled', () => {
     if (!r.ok && r.stage === 'input') expect(r.issues).toContain('state.documents_not_accepted')
   })
 
-  test('every declared tool is recorded as not provided; the comparison policy is disabled', () => {
+  test('with no document referenced, the inventory is empty; the comparison policy is disabled', () => {
     const two = { ...state(), tools: [state().tools[0], { T1: ['kling'], T3: ['Standard'], T4: ['May 2026'] }] }
     const { record, canonical } = built(buildCustomerRecord(input({ state: two })))
-    expect(record.documents).toEqual({ status: 'not_provided', tools: [{ tool_index: 0, status: 'not_provided' }, { tool_index: 1, status: 'not_provided' }] })
+    expect(record.documents).toEqual({ policy: 'inventory_only', items: [] })
     expect(record.comparison).toEqual({ policy: 'disabled' })
     expect(canonical).not.toMatch(/appears_consistent|appears_to_conflict|reconciliation|cross_check|document_observations/)
   })
@@ -423,7 +423,9 @@ describe('independence', () => {
       'customer-record/authority-content', 'customer-record/eligibility', 'customer-record/record',
       'customer-record/source-text', 'customer-record/sources', 'prototype/build-draft', 'prototype/declared-guidance', 'prototype/form', 'prototype/parse-form-state',
       'record-core/canonical', 'record-core/projection',
-    ])
+      // CR-V2-DOC-1: the pure document vocabulary (no I/O, no examination).
+      'evidence-intake/vocabulary',
+    ].sort())
     // prototype/build-draft (which holds the pilot data) is reached for types only.
     for (const f of walk(ROOT)) expect(readFileSync(f, 'utf8')).not.toMatch(/^import\s(?!type\s)[^\n]*from\s+['"]\.\.\/prototype\/build-draft['"]/m)
   })
