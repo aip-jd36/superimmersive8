@@ -8,6 +8,21 @@
 
 ---
 
+## Update — 2026-11-01: Creator Record V2 is a $29 product (CR-V2-MVP-SCOPE-1)
+
+**Decision (PM, approved product scope):** Creator Record V2 is a **$29 AI-assisted Commercial Readiness Record**. The authoritative scope is `08_Platform/prds/PRD_CREATOR_RECORD_v2_MVP_SCOPE.md`.
+
+**What it supersedes:** the 2026-08-05 update below treated the $29 Creator Record as a dormant legacy fallback outside the product narrative. That update described **V1** (RecordForm). For Creator Record V2 it is superseded. V1 itself remains retired from new sales (CR-V2-CUTOVER-1, 2026-11-01).
+
+**What does not change:**
+- CRC stays free (`PRD_CRC_v1.0.md`, frozen and not amended).
+- Motions 2 and 3 are untouched.
+- How CRC and Creator Record V2 relate in the funnel is an open positioning question.
+
+**Not approved by this update:** price activation in Production, checkout wording and launch timing. The 2026-08-05 update is preserved below as written.
+
+---
+
 ## Update — 2026-08-05: Legacy Self-Serve Narrative Retired (Superseded by CRC)
 
 **Decision:** Motion 1 (Legacy Self-Serve, $29 Creator Record) is no longer part of SI8's forward-looking product narrative. Going forward the story is: **free AI-assisted Commercial Readiness Check (CRC) → paid, human-reviewed Assessment** (Agency/Enterprise motions, unchanged below).

@@ -71,6 +71,9 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 ### Revenue Model (Year 1 Target: $80-120K)
 
 **Two-tier pricing (updated June 2026):**
+
+> **Superseded for Creator Record V2 (2026-11-01, CR-V2-MVP-SCOPE-1):** Creator Record V2 is a **$29 AI-assisted Commercial Readiness Record**: declarations, optional uploads with AI-assisted examination, governed educational guidance and a private PDF. It is not a free intake funnel. Authoritative scope: `08_Platform/prds/PRD_CREATOR_RECORD_v2_MVP_SCOPE.md`. The Creator Record line below describes the historical V1 positioning and is kept as history; V1 is retired from new sales (CR-V2-CUTOVER-1).
+
 - **Creator Record** — Free (intake funnel; $29 one-time per submission if abuse requires) · Self-attested, automated, PDF stamp "SELF-ATTESTED — NOT FOR COMMERCIAL USE" · Output language: "Submitted and ready for certification" — never issues commercial safety opinion · NOT a standalone product or disclosure SaaS · NO subscription pricing (research does not support recurring disclosure demand)
 - **SI8 Certified** — $499 · 90-minute human review, PDF stamp "SI8 CERTIFIED · COMMERCIAL AUDIT PASSED" · Only validated commercial product
 
@@ -84,7 +87,7 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 | **Layer 1 Production (optional)** | $20-30K | If needed to supplement revenue |
 
 **Unit economics:**
-- Creator Record: Free (intake funnel — not a revenue line; $29 one-time fallback if abuse requires payment gate)
+- Creator Record: Free (intake funnel — not a revenue line; $29 one-time fallback if abuse requires payment gate). *Historical V1 positioning, superseded for Creator Record V2 ($29 product) by CR-V2-MVP-SCOPE-1, 2026-11-01.*
 - SI8 Certified: $499 revenue, ~$17 cost (Stripe + platform overhead) = 97% gross margin
 - Showcase licensing: 20% commission (creator keeps 80%), ~85% margin after platform fees
 - Producer curation: 50% to filmmaker, 50% to SI8 (after absorbing verification cost internally)
@@ -715,7 +718,7 @@ Traditional lawyers are conservative and don't trust automation — BUT they're 
 | **Migration Policy** | `MIGRATION.md` | ACTIVE | Strategic OS effective date, migration principles, document status definitions, forward-migration-only rule |
 | **Decision Quality Standards** | `06_Operations/DECISION-QUALITY-STANDARDS.md` | ACTIVE | Five-classification framework (Principle/Fact/Hypothesis/Decision/Open Question), hygiene rules, promotion protocol, recommendation format |
 | **Decision Quality Audit v0.1** | `06_Operations/DECISION-QUALITY-AUDIT-v0.1.md` | ACTIVE | First audit of classification drift across key docs — pending JD review |
-| **Product Strategy 2026-06-28** | `01_Business/plans/PRODUCT-STRATEGY-2026-06-28.md` | ACTIVE | Major simplification: SI8 Certified is the only validated product; Creator Record = free intake funnel; Workflow → Design Partner Program; Numbers Protocol partnership framing; Sophia Yan meeting goals |
+| **Product Strategy 2026-06-28** | `01_Business/plans/PRODUCT-STRATEGY-2026-06-28.md` | ACTIVE | Major simplification: SI8 Certified is the only validated product; Creator Record = free intake funnel (superseded for Creator Record V2 by CR-V2-MVP-SCOPE-1, 2026-11-01: a $29 product); Workflow → Design Partner Program; Numbers Protocol partnership framing; Sophia Yan meeting goals |
 | **Business Plan v4** (current) | `01_Business/plans/BUSINESS_PLAN_v4.md` | ACTIVE | Source of truth for strategy (CaaS + Creator Platform) |
 | **Peer Review Summary (CaaS)** | `01_Business/plans/PEER_REVIEW_SUMMARY_CAAS.md` | ACTIVE | ChatGPT (Opus) + Gemini feedback synthesis on v4 pivot |
 | **Revenue Model v4** | `01_Business/financials/REVENUE_MODEL_v4.md` | ACTIVE | Three-gear economics, unit economics, projections |
@@ -795,7 +798,8 @@ Traditional lawyers are conservative and don't trust automation — BUT they're 
 | **PRD: Admin Panel** | `08_Platform/prds/PRD_ADMIN_PANEL.md` | ACTIVE | Review queue, PDF generation, catalog management |
 | **PRD: Public Catalog** | `08_Platform/prds/PRD_PUBLIC_CATALOG.md` | ACTIVE | Marketplace, licensing requests, Rights Verified badges |
 | **PRD: CaaS Website** | `08_Platform/prds/PRD_CAAS_WEBSITE.md` | ACTIVE | Homepage redesign for v4 model (How It Works, Pricing) |
-| **PRD: RecordForm** | `08_Platform/prds/PRD_RECORD_FORM.md` | ACTIVE | $29 Creator Record — self-attested, 9 sections, automated flow (Mar 2026) |
+| PRD: RecordForm | `08_Platform/prds/PRD_RECORD_FORM.md` | SUPERSEDED | $29 Creator Record V1 — self-attested, 9 sections, automated flow (Mar 2026). Retired from new sales 2026-11-01 (CR-V2-CUTOVER-1); existing V1 records are still fulfilled and downloadable |
+| **Creator Record V2 — Approved MVP Scope** | `08_Platform/prds/PRD_CREATOR_RECORD_v2_MVP_SCOPE.md` | ACTIVE | **Controlling Creator Record V2 product direction (PM decision CR-V2-MVP-SCOPE-1, 2026-11-01):** a $29 AI-assisted Commercial Readiness Record with declarations, optional uploads, AI-assisted document examination, governed Living Knowledge guidance and a private PDF. Approves scope only, not wording, claims, templates, legal terms or Production activation. Lists implemented vs. missing capabilities (§5), outstanding approvals (§6) and superseded assumptions (§7). PRD v0.3 (`PRD_CREATOR_RECORD_v2_DRAFT.md`, unfrozen; branch `work/cr-option-c-oc0`) is historical design input only. |
 | **PRD: CertForm** | `08_Platform/prds/PRD_CERT_FORM.md` | ACTIVE | $499 SI8 Certified — 11 sections, human review, Risk Rating, reviewer checklist (Mar 2026) |
 | **PRD: Reviewer Workbook UI** | `08_Platform/prds/PRD_REVIEWER_WORKBOOK_UI.md` | ACTIVE | Admin tool replacing markdown workbook — 6-section guided assessment interface implementing Workbook Schema v0.1; route `/admin/submissions/[id]/review`; `.typ` report generation; `workbook_data` JSONB schema. Jul 2026. |
 | **PRD: Living Notebook** | `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` | ACTIVE — v1.0 architecture frozen | Spec for the four-document Living Notebook (Platform Rights Matrix / SI8 Positions / Edge Cases / Pending Questions) — markdown-first, git-native, companion to (not replacement for) the Reviewer Manual. Includes "Default State: Uncertainty" governance principle and Freeze Notice. Jul 30, 2026, revised Aug 1-2, 2026; Aug 5-6, 2026: added CRC-Eligible Governance (claim-level publication approval, `CRC-Eligible`/`CRC Publication Scope`/`CRC Decision Date`/`CRC Approver` fields on Platform Rights Matrix rows) and the Status convention (row-level Status vs. per-field sub-claim confidence, stated explicitly not implied). |

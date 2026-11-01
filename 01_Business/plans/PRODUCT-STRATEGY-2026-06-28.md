@@ -48,6 +48,8 @@ The value proposition is **independent commercial judgment**, not technical sign
 
 ## 2. Creator Record becomes the entry point
 
+> **Superseded in part (2026-11-01, PM decision CR-V2-MVP-SCOPE-1):** Creator Record V2 is a **$29 AI-assisted Commercial Readiness Record**, not a free intake funnel. See `08_Platform/prds/PRD_CREATOR_RECORD_v2_MVP_SCOPE.md`. The June 2026 reasoning below is preserved as written. Its boundaries still hold: no commercial-safety opinion, and never competing with SI8 Certified.
+
 The Creator Record is no longer viewed as a separate business.
 
 Its primary purpose is:
