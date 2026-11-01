@@ -451,6 +451,7 @@ describe('independence', () => {
       'lib/creator-record/customer-pdf/document-model.ts',
       'lib/creator-record/governed/publication-authority.ts',
       'lib/creator-record/governed/sources.ts',
+      'lib/creator-record/governed/synthetic-test-authority.ts', // CR-V2-MVP-M4C: type-only (the synthetic test bundle)
     ])
     for (const f of ['lib/creator-record/governed/publication-authority.ts', 'lib/creator-record/governed/synthetic-test-authority.ts'])
       expect(readFileSync(path.join(APP_ROOT, f), 'utf8')).not.toMatch(/^\s*import\s+(?!type\s)/m)

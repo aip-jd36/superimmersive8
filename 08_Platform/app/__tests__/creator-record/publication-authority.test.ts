@@ -242,11 +242,13 @@ describe('selectAuthorityBundle: each mode accepts only its own structural class
     expect(authorityFor({ SI8_CR_PUBLICATION_AUTHORITY: 'yes' })).toBeNull()
   })
 
-  test('the shipped bundles: governance is classed governance; the synthetic slot is empty', () => {
+  test('the shipped bundles: governance is classed governance; the synthetic slot (M4C) is classed synthetic_test', () => {
     expect(CREATOR_RECORD_GOVERNANCE_AUTHORITY.authority_class).toBe('governance')
-    expect(CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY).toBeNull()
+    expect(CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY?.authority_class).toBe('synthetic_test')
     expect(currentPublicationAuthority(PRODUCTION)).toBe(CREATOR_RECORD_GOVERNANCE_AUTHORITY)
-    expect(currentPublicationAuthority(ISOLATED)).toBeNull() // nothing to test with yet → fail closed
+    expect(currentPublicationAuthority(ISOLATED)).toBe(CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY)
+    // The shipped synthetic bundle never reaches governance mode, in any slot.
+    expect(authorityFor(PRODUCTION, CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY, CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY as PublicationAuthorityBundle)).toBeNull()
   })
 })
 

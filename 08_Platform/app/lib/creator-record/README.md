@@ -246,7 +246,7 @@ Tests: `customer-purchase`, `creator-record-flow/*`, `run-payment-fulfillment` (
 |---|---|
 | `governed/publication-authority.ts` | PURE. `resolvePublicationAuthority(env)` → `governance` (default; Production needs no variable) or `synthetic_isolated_test`, or a refusal. `selectAuthorityBundle` returns the one bundle the build may publish from, or null. |
 | `governed/sources.ts` | Adds `CREATOR_RECORD_GOVERNANCE_AUTHORITY` (`authority_class: 'governance'`), the existing approved slots as one bundle. |
-| `governed/synthetic-test-authority.ts` | `CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY` (`authority_class: 'synthetic_test'`). Empty (null); filled by the staging setup only. |
+| `governed/synthetic-test-authority.ts` | `CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY` (`authority_class: 'synthetic_test'`). M4C: populated with a reduced, `[TEST ONLY]`-worded questionnaire, SYN-* ledger entries and placeholder PDF templates, digests pinned (`synthetic-test-authority.test.ts`). Inert in Production by construction. |
 | `customer-flow/approved-inputs.ts` | Every approved input (prepare, checkout governance, issuance governance, PDF templates) now comes from the selected bundle. No bundle → empty inputs and `unavailable` governance: nothing prepared, sold or issued. |
 
 Contracts:
@@ -256,3 +256,7 @@ Contracts:
 DEPLOY SEQUENCE: (1) apply M2 then M3 migrations; (2) deploy M3+ code (stops `stopped`); (3) open stops only by reviewed code change. ROLLBACK: set the stops to `stopped` (preferred). Deploying older code is safe for V1; a paid v2 submission then stays visibly paid-but-not-issued (the guard refuses the V1 write; no ready email) until M3+ code is redeployed and reconciliation retries it. Never drop the M3 objects while a v2 submission exists.
 
 Tests: `publication-authority`, `v2-rollback-guard-static`, real PostgreSQL 15 + 17 `db/creator-record-v2-binding.db.test.ts` (rollback guard).
+
+### CR-V2-MVP-M4C — isolated staging preparation (local; nothing provisioned, deployed, migrated or paid)
+
+Runbook: `08_Platform/implementation/CR_V2_STAGING_REHEARSAL_CHECKLIST.md`. Staging-only tooling, refusing Production by construction: `scripts/staging/apply-staging-migrations.sh` (full history onto a fresh non-Production project; runs the `supabase/staging/before_20260909000000_*` placeholder that a fresh history needs), `supabase/staging/seed_pilot_access.sql` (one invited test creator), `scripts/staging/cr-v2-staging-preflight.ts` (no-network env check). The stops stay `stopped` here; the two-line staging flip is documented in the runbook and cannot merge green.
