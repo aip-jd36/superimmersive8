@@ -13,34 +13,57 @@
  *   - Only fixture replay exists. `executor.mode` has one value, `fixture_replay`, and `origin` one value,
  *     `fixture_replay_recorded`: replay returns SI8's recorded ground truth for its own synthetic test
  *     documents and says nothing about extraction quality. A live model is not representable here.
- *   - `authority_class` has one value, `synthetic_test`. It is derived by the core from trusted fixture
- *     metadata after the integrity check, never from the request. A non-synthetic document is refused
- *     before examination, so no envelope can describe one.
- *   - Identity: `examination_key` is a DETERMINISTIC REPLAY KEY (same envelope version, document bytes,
- *     profile and executor → same key and same envelope). Nothing is persisted, so no durable
+ *   - CONTENT, NOT AUTHORITY (CR-V2-DOC-2B-IDENTITY-1). `content_class: 'known_synthetic_fixture'` says only
+ *     that the document's bytes are byte-identical to one of SI8's committed synthetic fixtures. The fixture
+ *     generator and its parameters are public, so anyone can produce those bytes: recognising them proves
+ *     nothing about who uploaded them or why. `workflow_authorization` is therefore always
+ *     `not_established`. No envelope can say that a document, its uploader or its use is an authorised
+ *     synthetic-test record, a customer record or anything else; that authority would have to come from a
+ *     separately approved source, which does not exist yet. Content that is not a known fixture is refused
+ *     before examination, so no envelope describes any other content.
+ *   - Identity: `examination_key` is a DETERMINISTIC REPLAY KEY over every input that can change the
+ *     envelope: the envelope version (core assembly), the document id and bytes, the profile identity
+ *     (adapter and mapping version, engine schema and prompt versions) and the executor identity (mode,
+ *     replay set and the SHA-256 of the exact recorded output used). Nothing is persisted, so no durable
  *     exactly-once execution is claimed (`identity: 'deterministic_replay_key'`).
- *   - A preflight refusal (request, profile, document, ownership, integrity, authority, executor) is a
+ *   - A preflight refusal (request, profile, executor, document, ownership, integrity, content) is a
  *     `PreflightRefusal`, never an envelope: an envelope exists only when an examination actually ran.
  *     Its `outcome` is then `examined`, or `could_not_examine` with the engine's own fixed reason.
+ *
+ * Versions: v1 (DOC-2B, d412d3ad) → v2 (IDENTITY-1): `executor.recording_sha256` added; the v1 authority
+ * field replaced by `content_class` + `workflow_authorization`. No v1 envelope was ever persisted or consumed
+ * (no persistence, no importer), so v1 is not accepted and no migration exists.
  */
 
 import type { EvidenceMediaType } from '../evidence-intake/vocabulary'
 
-export const EXAMINATION_ENVELOPE = { id: 'si8/creator-record-v2-examination', version: 1 } as const
+export const EXAMINATION_ENVELOPE = { id: 'si8/creator-record-v2-examination', version: 2 } as const
 
-export const AUTHORITY_CLASSES = ['synthetic_test'] as const
-export type AuthorityClass = (typeof AUTHORITY_CLASSES)[number]
+/** What the document's bytes are recognised as. Content only — never authority. */
+export const CONTENT_CLASSES = ['known_synthetic_fixture'] as const
+export type ContentClass = (typeof CONTENT_CLASSES)[number]
+
+/** Whether any workflow authority (synthetic-test, customer, submission) is established. In DOC-2B: never. */
+export const WORKFLOW_AUTHORIZATIONS = ['not_established'] as const
+export type WorkflowAuthorization = (typeof WORKFLOW_AUTHORIZATIONS)[number]
 
 export const EXECUTOR_MODES = ['fixture_replay'] as const
 export type ExecutorMode = (typeof EXECUTOR_MODES)[number]
 
 export interface ExecutorIdentity {
   mode: ExecutorMode
-  /** The recorded replay set (fixture spec version). */
+  /** The recorded replay set (fixture spec version). A label: it does not fix the data on its own. */
   replay_set: string
+  /** SHA-256 of the canonical JSON of the exact recorded output replayed for this document. Computed by the core. */
+  recording_sha256: string
 }
 
-/** A profile's identity: what it is, its version, and the engine contract versions it runs. */
+/**
+ * A profile's identity. `version` is the ADAPTER AND MAPPING version: it must be raised, as an explicit
+ * change, whenever the profile's readings can differ for the same recorded output (engine behaviour, mapping
+ * or limitations). The pinned output fingerprint (`./profile.ts`) is corpus-limited regression protection
+ * only; it does not replace the rule.
+ */
 export interface ProfileRef {
   id: string
   version: number
@@ -107,7 +130,8 @@ export interface ExaminationEnvelope {
   examination_key: string
   identity: 'deterministic_replay_key'
   document: { document_id: string; sha256: string; media_type: EvidenceMediaType; byte_size: number }
-  authority_class: AuthorityClass
+  content_class: ContentClass
+  workflow_authorization: WorkflowAuthorization
   profile: ProfileRef
   executor: ExecutorIdentity
   outcome: ExaminationOutcome
@@ -125,7 +149,7 @@ export interface ExaminationEnvelope {
 }
 
 /** Preflight refusals: no examination ran, so no envelope exists. */
-export const PREFLIGHT_STAGES = ['request', 'profile', 'executor', 'document', 'ownership', 'integrity', 'authority'] as const
+export const PREFLIGHT_STAGES = ['request', 'profile', 'executor', 'document', 'ownership', 'integrity', 'content'] as const
 export type PreflightStage = (typeof PREFLIGHT_STAGES)[number]
 
 export const PREFLIGHT_REFUSAL_CODES = [
@@ -138,8 +162,9 @@ export const PREFLIGHT_REFUSAL_CODES = [
   'object_unavailable',
   'integrity_mismatch',
   'media_type_not_supported',
-  'real_documents_not_permitted',
+  'not_a_known_synthetic_fixture',
   'no_replay_recording',
+  'invalid_replay_recording',
 ] as const
 export type PreflightRefusalCode = (typeof PREFLIGHT_REFUSAL_CODES)[number]
 
@@ -174,17 +199,17 @@ function parseObservation(v: unknown, sha: string, keyPrefix: string): Examinati
 
 export function parseExaminationEnvelope(raw: unknown): ExaminationEnvelope | null {
   const r = raw
-  if (!isObj(r) || !exact(r, ['envelope', 'examination_key', 'identity', 'document', 'authority_class', 'profile', 'executor', 'outcome', 'observations', 'limitations', 'provenance'])) return null
+  if (!isObj(r) || !exact(r, ['envelope', 'examination_key', 'identity', 'document', 'content_class', 'workflow_authorization', 'profile', 'executor', 'outcome', 'observations', 'limitations', 'provenance'])) return null
   if (!isObj(r.envelope) || !exact(r.envelope, ['id', 'version']) || r.envelope.id !== EXAMINATION_ENVELOPE.id || r.envelope.version !== EXAMINATION_ENVELOPE.version) return null
   if (typeof r.examination_key !== 'string' || !HEX64.test(r.examination_key) || r.identity !== 'deterministic_replay_key') return null
   const d = r.document
   if (!isObj(d) || !exact(d, ['document_id', 'sha256', 'media_type', 'byte_size']) || !isStr(d.document_id) || typeof d.sha256 !== 'string' || !HEX64.test(d.sha256)) return null
   if (!oneOf(MEDIA, d.media_type) || typeof d.byte_size !== 'number' || !Number.isInteger(d.byte_size) || d.byte_size < 1) return null
-  if (!oneOf(AUTHORITY_CLASSES, r.authority_class)) return null
+  if (!oneOf(CONTENT_CLASSES, r.content_class) || !oneOf(WORKFLOW_AUTHORIZATIONS, r.workflow_authorization)) return null
   const p = r.profile
-  if (!isObj(p) || !exact(p, ['id', 'version', 'schema', 'prompt']) || !isStr(p.id) || typeof p.version !== 'number' || !Number.isInteger(p.version) || !isStr(p.schema) || !isStr(p.prompt)) return null
+  if (!isObj(p) || !exact(p, ['id', 'version', 'schema', 'prompt']) || !isStr(p.id) || typeof p.version !== 'number' || !Number.isInteger(p.version) || p.version < 1 || !isStr(p.schema) || !isStr(p.prompt)) return null
   const e = r.executor
-  if (!isObj(e) || !exact(e, ['mode', 'replay_set']) || !oneOf(EXECUTOR_MODES, e.mode) || !isStr(e.replay_set)) return null
+  if (!isObj(e) || !exact(e, ['mode', 'replay_set', 'recording_sha256']) || !oneOf(EXECUTOR_MODES, e.mode) || !isStr(e.replay_set) || typeof e.recording_sha256 !== 'string' || !HEX64.test(e.recording_sha256)) return null
   const o = r.outcome
   if (!isObj(o) || !exact(o, ['status', 'reason'])) return null
   if (!((o.status === 'examined' && o.reason === null) || (o.status === 'could_not_examine' && oneOf(EXAMINATION_FAILURE_REASONS, o.reason)))) return null

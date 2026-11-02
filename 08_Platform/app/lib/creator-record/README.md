@@ -150,16 +150,33 @@ publication path reads it. No persistence, migration or storage adapter.
 
 | Path | Role |
 |---|---|
-| `envelope.ts` | `si8/creator-record-v2-examination` v1 and its strict parser. Document fingerprint, profile and executor identity, `authority_class` (`synthetic_test` only), observations (`printed_text` / `examiner_classification`, always `not_verified`, origin `fixture_replay_recorded`), closed limitation codes, provenance (`model_calls: 0`, `prompt_sent: false`). `PreflightRefusal` is separate: a refused request never yields an envelope |
-| `profile.ts` | The generic profile interface (`readRecorded`: a recorded output through the profile's own engine; no way to reach a model) and the registry, keyed by exact `id@version` |
-| `receipt-profile.ts` | Adapter over `receipt-examination/` **unchanged** (same recorded-response shape as `evidence/examine-upload.ts` replay); mechanical mapping to observations and limitations |
-| `examine-document.ts` | The pure core, all ports injected: request (exact keys) → profile → executor (replay only) → document stored → owner → bytes re-hashed (SHA-256, size, sniffed type) → media type → synthetic authority from the trusted registry by the re-computed hash → recording → engine → envelope |
-| `replay-executor.ts` | Replay executor and synthetic registry from the committed replay table (the same table DOC-1 intake uses) |
+| `envelope.ts` | `si8/creator-record-v2-examination` **v2** and its strict parser. Document fingerprint, profile and executor identity (including `recording_sha256`), `content_class: 'known_synthetic_fixture'` and `workflow_authorization: 'not_established'`, observations (`printed_text` / `examiner_classification`, always `not_verified`, origin `fixture_replay_recorded`), closed limitation codes, provenance (`model_calls: 0`, `prompt_sent: false`). `PreflightRefusal` is separate: a refused request never yields an envelope |
+| `profile.ts` | The generic profile interface (`readRecorded`: a recorded output through the profile's own engine; no way to reach a model), the registry keyed by exact `id@version`, and the VERSIONING CONTRACT (`profileOutputCanonical`) |
+| `receipt-profile.ts` | Adapter over `receipt-examination/` **unchanged** (same recorded-response shape as `evidence/examine-upload.ts` replay); mechanical mapping to observations and limitations; `RECEIPT_PROFILE_OUTPUT_FINGERPRINTS` (append-only pins per version) |
+| `examine-document.ts` | The pure core, all ports injected: request (exact keys) → profile → executor (replay only, exact identity) → document stored → owner → bytes re-hashed (SHA-256, size, sniffed type) → media type → known-fixture CONTENT check by the re-computed hash → recording (canonical JSON; its SHA-256 computed here) → engine → envelope |
+| `replay-executor.ts` | Replay executor and known-fixture registry from the committed replay table (the same table DOC-1 intake uses) |
 
-`examination_key` is a deterministic replay key (envelope version, document id and bytes, profile,
-executor). Nothing is persisted, so no exactly-once execution is claimed. Observations are never facts,
-declarations or findings, and never reach retrieval, applicability or Bounded Interpretation (admissibility
-is DOC-2E). Tests: `examination-foundation` (all 45 fixtures equal the existing replay path once normalized).
+**Content is not authority (CR-V2-DOC-2B-IDENTITY-1).** Recognising a document's bytes as one of SI8's
+committed synthetic fixtures says only what the bytes are. The fixture generator and its parameters are in a
+public repository, so anyone can reproduce those bytes: recognition establishes nothing about who uploaded a
+document or whether its use is an authorised synthetic test, a customer record or a submission. Every
+envelope therefore carries `workflow_authorization: 'not_established'`, and no field can say otherwise.
+Workflow authority needs a separately approved source (open: DOC-2C-B). DOC-1 intake's own
+`isSyntheticTestDocument` check (unchanged here) is likewise a content check.
+
+**Identity.** `examination_key` is a deterministic replay key over every input that can change the
+envelope: envelope version (core assembly), document id and bytes, profile identity (adapter/mapping
+version, engine schema and prompt versions) and executor identity (mode, replay-set label and
+`recording_sha256`, the SHA-256 of the canonical JSON of the exact recorded output replayed, computed by the
+core and never taken from the executor). Different replay data under the same label therefore gives a
+different key; the profile consumes exactly the hashed value (re-materialised from the hashed text,
+deep-frozen). A profile's `version` must be raised, as an explicit reviewed change, whenever its readings can
+change in any case. The pinned output fingerprint over a fixed corpus (all committed fixtures plus fixed
+failure cases) is corpus-limited regression protection only: a mismatch proves a change on the corpus, a
+match proves nothing about other inputs. Nothing is
+persisted, so no exactly-once execution is claimed. Observations are never facts, declarations or findings,
+and never reach retrieval, applicability or Bounded Interpretation (admissibility is DOC-2E). Tests:
+`examination-foundation` (all 45 fixtures equal the existing replay path once normalized).
 
 ## record-core/ — shared (CR-V2-1)
 

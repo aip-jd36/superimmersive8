@@ -22,6 +22,18 @@ import type { ExaminationProfile, ProfileObservation, ProfileReading } from './p
 export const RECEIPT_PROFILE_ID = 'receipt'
 export const RECEIPT_PROFILE_VERSION = 1
 
+/**
+ * Pinned output fingerprints, per profile version (append-only; see the versioning contract in
+ * `./profile.ts`). SHA-256 of `canonicalJson(profileOutputCanonical(RECEIPT_PROFILE, corpus))` over the
+ * corpus defined in `__tests__/creator-record/examination-foundation.test.ts` (`fingerprintCorpus`). A
+ * mismatch means the profile's readings changed on that corpus: raise RECEIPT_PROFILE_VERSION and add a pin.
+ * A match is NOT proof of unchanged behaviour outside the corpus; any material change to the engine, mapping
+ * or limitations requires raising RECEIPT_PROFILE_VERSION regardless.
+ */
+export const RECEIPT_PROFILE_OUTPUT_FINGERPRINTS: Readonly<Record<number, string>> = {
+  1: 'e78843f39c42592f9d8be11eaacb698b0ae8fb80e068f381827005200c251228',
+}
+
 /** The recorded output in place of a model response: the same shape `examine-upload.ts` replays. */
 const recordedCaller = (recordedOutput: unknown): ReceiptModelCaller => async () => ({
   id: 'fixture-replay',
