@@ -1,0 +1,63 @@
+{
+  "consent_version_not_null": true,
+  "documents_api_grants": {
+    "anon": [
+      false,
+      false,
+      false,
+      false
+    ],
+    "authenticated": [
+      false,
+      false,
+      false,
+      false
+    ],
+    "service_role": [
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "documents_constraints": {
+    "creator_record_v2_documents_byte_size_check": "CHECK (((byte_size > 0) AND (byte_size <= 4194304)))",
+    "creator_record_v2_documents_check": "CHECK ((storage_path = (((user_id)::text || '/'::text) || (id)::text)))",
+    "creator_record_v2_documents_check1": "CHECK (((state = 'pending'::text) = (stored_at IS NULL)))",
+    "creator_record_v2_documents_check2": "CHECK (((state = 'deleted'::text) = (deleted_at IS NOT NULL)))",
+    "creator_record_v2_documents_check3": "CHECK (((object_removed_at IS NULL) OR (state = 'deleted'::text)))",
+    "creator_record_v2_documents_consent_version_check": "CHECK ((length(TRIM(BOTH FROM consent_version)) > 0))",
+    "creator_record_v2_documents_file_name_check": "CHECK (((length(file_name) >= 1) AND (length(file_name) <= 120)))",
+    "creator_record_v2_documents_media_type_check": "CHECK ((media_type = ANY (ARRAY['application/pdf'::text, 'image/png'::text, 'image/jpeg'::text])))",
+    "creator_record_v2_documents_pkey": "PRIMARY KEY (id)",
+    "creator_record_v2_documents_sha256_check": "CHECK ((sha256 ~ '^[0-9a-f]{64}$'::text))",
+    "creator_record_v2_documents_state_check": "CHECK ((state = ANY (ARRAY['pending'::text, 'stored'::text, 'deleted'::text])))",
+    "creator_record_v2_documents_storage_path_key": "UNIQUE (storage_path)",
+    "creator_record_v2_documents_user_id_fkey": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT"
+  },
+  "documents_triggers": [
+    "creator_record_v2_documents_guard"
+  ],
+  "functions": {
+    "creator_record_v2_append_only_guard": {
+      "config": null,
+      "definer": false,
+      "md5": "509db484094209260f0378431fe917f8",
+      "owner": "postgres"
+    },
+    "creator_record_v2_documents_guard": {
+      "config": null,
+      "definer": false,
+      "md5": "c7137201b1f6bcf2e7f7f871a0b9ccb3",
+      "owner": "postgres"
+    },
+    "creator_record_v2_prepared_documents_link": {
+      "config": [
+        "search_path=public, pg_temp"
+      ],
+      "definer": true,
+      "md5": "cf2fee7f2acf902eaef69dd0cc2dee9c",
+      "owner": "postgres"
+    }
+  }
+}

@@ -39,7 +39,7 @@ function rowFor(env: ExaminationEnvelope, text: string, id: string, supersedes: 
     profile_version: env.profile.version, schema_version: env.profile.schema, prompt_version: env.profile.prompt, executor_mode: env.executor.mode,
     replay_set: env.executor.replay_set, recording_sha256: env.executor.recording_sha256, replay_fixture_id: env.provenance.replay_fixture_id,
     outcome_status: env.outcome.status, outcome_reason: env.outcome.reason, envelope_canonical: text, envelope_sha256: sha256Hex(text),
-    supersedes_id: supersedes, access_log_id: 1, created_at: '2026-11-02T00:00:00.000Z', ...over,
+    supersedes_id: supersedes, access_log_id: 1, uat_grant_id: null, created_at: '2026-11-02T00:00:00.000Z', ...over,
   }
 }
 
@@ -196,6 +196,8 @@ describe('classifyDatabaseError', () => {
     ['examination_key_conflict', 'key_conflict'],
     ['examination_profile_regression', 'profile_regression'],
     ['an examination read is logged only for the owner of a stored document', 'examination_read_refused'],
+    ['examination_uat_target_mismatch', 'uat_target_mismatch'],
+    ['examination_uat_budget_exhausted', 'uat_budget_exhausted'],
   ])('P0001 "%s" → %s', (message, refusal) => expect(classifyDatabaseError({ code: 'P0001', message })).toBe(refusal))
 
   test('anything else is not a refusal (treated as unavailable)', () => {
@@ -244,6 +246,51 @@ describe('readExaminationHistory — strict read-back', () => {
     const { rows, doc } = await chain([1])
     const h = await readExaminationHistory({ listRuns: async () => tamper(rows) }, OWNER, doc.id)
     expect([h.kind, h.kind === 'unavailable' && h.reason]).toEqual(['unavailable', 'run_integrity'])
+  })
+
+  describe('CR-V2-PROD-UAT-B authority stamp (boundary, grant, project ref)', () => {
+    const GRANT = '33333333-3333-4333-8333-333333333333'
+    const uat = (r: PersistedRunRow): PersistedRunRow => ({ ...r, execution_boundary: 'operator_synthetic_uat', environment_project_ref: 'lehqgcgnenwdmuzudbrs', uat_grant_id: GRANT })
+
+    test('an operator-UAT run verifies on its own and against the exact expected grant and project', async () => {
+      const { rows, doc } = await chain([1])
+      const ok = await readExaminationHistory({ listRuns: async () => [uat(rows[0])] }, OWNER, doc.id, { boundary: 'operator_synthetic_uat', uat_grant_id: GRANT, project_ref: 'lehqgcgnenwdmuzudbrs' })
+      expect(ok.kind).toBe('verified')
+      expect((await readExaminationHistory({ listRuns: async () => [uat(rows[0])] }, OWNER, doc.id)).kind).toBe('verified')
+      expect((await readExaminationHistory({ listRuns: async () => rows }, OWNER, doc.id, { boundary: 'isolated_synthetic_test', uat_grant_id: null })).kind).toBe('verified')
+    })
+
+    test.each<[string, (r: PersistedRunRow) => PersistedRunRow, string]>([
+      ['an unknown boundary', (r) => ({ ...r, execution_boundary: 'production' }), 'execution_boundary'],
+      ['a malformed project ref', (r) => ({ ...r, environment_project_ref: 'Not-A-Ref' }), 'environment_project_ref'],
+      ['an isolated run carrying a grant', (r) => ({ ...r, uat_grant_id: GRANT }), 'uat_grant_id'],
+      ['an isolated run stamped with the Production project', (r) => ({ ...r, environment_project_ref: 'lehqgcgnenwdmuzudbrs' }), 'environment_project_ref'],
+      ['an operator-UAT run with no grant', (r) => ({ ...uat(r), uat_grant_id: null }), 'uat_grant_id'],
+      ['an operator-UAT run with a malformed grant id', (r) => ({ ...uat(r), uat_grant_id: 'grant-1' }), 'uat_grant_id'],
+    ])('rejects %s', async (_n, tamper, check) => {
+      const { rows, doc } = await chain([1])
+      const { verifyRunRow } = await import('@/lib/creator-record/examination/persistence')
+      expect(verifyRunRow(tamper(rows[0]), OWNER, doc.id)).toBe(check)
+      const h = await readExaminationHistory({ listRuns: async () => [tamper(rows[0])] }, OWNER, doc.id)
+      expect([h.kind, h.kind === 'unavailable' && h.reason]).toEqual(['unavailable', 'run_integrity'])
+    })
+
+    test.each<[string, Parameters<typeof readExaminationHistory>[3], string]>([
+      ['a different expected boundary', { boundary: 'isolated_synthetic_test' }, 'expected_boundary'],
+      ['a different expected grant', { boundary: 'operator_synthetic_uat', uat_grant_id: '44444444-4444-4444-8444-444444444444' }, 'expected_uat_grant_id'],
+      ['a different expected project', { boundary: 'operator_synthetic_uat', project_ref: 'abcdefghijklmnopqrst' }, 'expected_project_ref'],
+    ])('rejects an operator-UAT run against %s', async (_n, expectation, check) => {
+      const { rows, doc } = await chain([1])
+      const { verifyRunRow } = await import('@/lib/creator-record/examination/persistence')
+      expect(verifyRunRow(uat(rows[0]), OWNER, doc.id, expectation)).toBe(check)
+      expect((await readExaminationHistory({ listRuns: async () => [uat(rows[0])] }, OWNER, doc.id, expectation)).kind).toBe('unavailable')
+    })
+
+    test('the adapter’s Production ref mirrors the governed constant', async () => {
+      const { PRODUCTION_PROJECT_REF } = await import('@/lib/creator-record/examination/persistence')
+      const { PRODUCTION_SUPABASE_PROJECT_REF } = await import('@/lib/creator-record/governed/publication-authority')
+      expect(PRODUCTION_PROJECT_REF).toBe(PRODUCTION_SUPABASE_PROJECT_REF)
+    })
   })
 
   test.each<[string, (rows: PersistedRunRow[]) => PersistedRunRow[]]>([

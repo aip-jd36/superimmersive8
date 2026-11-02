@@ -54,7 +54,8 @@ export interface EvidenceRow {
   byte_size: number
   file_name: string
   storage_path: string
-  consent_version: string
+  /** CR-V2-PROD-UAT-B: null only for an operator-seeded synthetic document (no customer consent exists for it). */
+  consent_version: string | null
   state: EvidenceState
   created_at: string
   stored_at: string | null
@@ -62,7 +63,7 @@ export interface EvidenceRow {
   object_removed_at: string | null
 }
 
-export type NewEvidenceRow = Pick<EvidenceRow, 'id' | 'user_id' | 'sha256' | 'media_type' | 'byte_size' | 'file_name' | 'storage_path' | 'consent_version'>
+export type NewEvidenceRow = Pick<EvidenceRow, 'id' | 'user_id' | 'sha256' | 'media_type' | 'byte_size' | 'file_name' | 'storage_path'> & { consent_version: string }
 
 export interface EvidenceStore {
   /**

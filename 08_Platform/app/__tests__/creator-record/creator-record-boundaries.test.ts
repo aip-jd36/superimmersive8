@@ -210,7 +210,8 @@ describe('lib/creator-record boundaries', () => {
       'components/creator-record/DraftRecordView.tsx',
       'lib/creator-record-flow/evidence-http.ts', // CR-V2-DOC-1: evidence route helpers
       'lib/creator-record-flow/evidence-production.ts', // CR-V2-DOC-1: evidence intake ports
-      'lib/creator-record-flow/examination-production.ts', // CR-V2-DOC-2C-C-B: examination persistence ports (no importer; no route)
+      'lib/creator-record-flow/examination-production.ts', // CR-V2-DOC-2C-C-B: examination persistence ports (no route; only the operator CLI)
+      'lib/creator-record-flow/examination-uat.ts', // CR-V2-PROD-UAT-B: operator synthetic UAT logic (only the operator CLI; no route)
       'lib/creator-record-flow/http.ts',
       'lib/creator-record-flow/production.ts',
     ])

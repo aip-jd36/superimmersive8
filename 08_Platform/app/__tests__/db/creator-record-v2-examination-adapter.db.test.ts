@@ -2,7 +2,9 @@
  * CR-V2-DOC-2C-C-B — the examination persistence adapter end to end on real PostgreSQL 15: the committed DOC-2B
  * core and `examineAndRecord` / `readExaminationHistory`, through a test-only pg-backed port that MIRRORS the
  * operations of lib/creator-record-flow/examination-production.ts (same tables, columns, insert values and write
- * function), against migration 20261104000000 applied verbatim.
+ * function), against migrations 20261104000000 and 20261105000000 (CR-V2-PROD-UAT-B: the reader selects
+ * uat_grant_id) applied verbatim. Everything here is the isolated-marker path; the operator-UAT grant path is proved
+ * by creator-record-v2-operator-uat.db.test.ts.
  *
  * NOT covered here: supabase-js, PostgREST and Supabase Storage. Object bytes come from an in-memory map, so this
  * suite does not verify the real Supabase storage integration (the production port is only unit-tested against a
@@ -47,6 +49,7 @@ const MIGRATIONS = [
   '20261102000000_creator_record_v2_submission_binding.sql',
   '20261103000000_creator_record_v2_evidence.sql',
   '20261104000000_creator_record_v2_examination_runs.sql',
+  '20261105000000_creator_record_v2_operator_synthetic_uat.sql',
 ].map((f) => join(DIR, f))
 const BOOTSTRAP = join(__dirname, 'bootstrap.sql')
 

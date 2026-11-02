@@ -12,16 +12,18 @@
  *   4. the envelope's exact canonical text and the access-event id go to the database's one write function, which
  *      re-checks everything and is authoritative: 'created' or 'existing' (idempotent), or a fixed refusal.
  *
- * Authority: this module never creates, reads or changes the environment marker and passes no authority of its
- * own. Fixture recognition stays content only (workflow_authorization 'not_established'); whether examination is
- * permitted at all is decided by the database (its environment marker), never here.
+ * Authority: this module never creates, reads or changes the environment marker or a UAT grant and passes no
+ * authority of its own. Fixture recognition stays content only (workflow_authorization 'not_established'); whether
+ * examination is permitted at all is decided by the database (the isolated-test marker or an operator synthetic UAT
+ * grant, 20261105000000), never here.
  *
  * Audit: the access event is EVENT CORRELATION — the server logged an examination read before persisting — not
  * proof that bytes were read. A failure after the event leaves the event without a run (over-reports, never
  * under-reports); a retry writes a new event and converges on the same deterministic key.
  *
- * readExaminationHistory(ports, userId, documentId): every stored run is re-verified (digest, strict v2 parser,
- * canonical form, recomputed key, every column against the envelope, owner, linear supersession). Any failure makes
+ * readExaminationHistory(ports, userId, documentId, expectation?): every stored run is re-verified (authority stamp:
+ * known boundary, grant and project ref consistent and as expected; digest, strict v2 parser, canonical form,
+ * recomputed key, every column against the envelope, owner, linear supersession). Any failure makes
  * the whole history 'unavailable' (fail closed). The chain is returned in supersession order; NO "current" run is
  * chosen (latest attempt vs latest successful is an open decision).
  *
@@ -50,6 +52,9 @@ export const DATABASE_REFUSALS = [
   'key_conflict',
   'profile_regression',
   'examination_read_refused',
+  // CR-V2-PROD-UAT-B (20261105000000): operator synthetic UAT grant refusals.
+  'uat_target_mismatch',
+  'uat_budget_exhausted',
 ] as const
 export type DatabaseRefusal = (typeof DATABASE_REFUSALS)[number]
 
@@ -64,6 +69,8 @@ const RAISED_MESSAGES: Readonly<Record<string, DatabaseRefusal>> = {
   examination_key_conflict: 'key_conflict',
   examination_profile_regression: 'profile_regression',
   'an examination read is logged only for the owner of a stored document': 'examination_read_refused',
+  examination_uat_target_mismatch: 'uat_target_mismatch',
+  examination_uat_budget_exhausted: 'uat_budget_exhausted',
 }
 
 /** A database error as both pg and PostgREST report it. Only P0001 with a known message is a refusal. */
@@ -105,10 +112,25 @@ export interface PersistedRunRow {
   envelope_sha256: string
   supersedes_id: string | null
   access_log_id: number
+  /** CR-V2-PROD-UAT-B: the operator synthetic UAT grant a run was made under; null on the isolated path. */
+  uat_grant_id: string | null
   created_at: string
 }
 
-export const PERSISTED_RUN_COLUMNS = 'id, examination_key, document_id, user_id, document_sha256, envelope_version, content_class, workflow_authorization, execution_boundary, environment_project_ref, profile_id, profile_version, schema_version, prompt_version, executor_mode, replay_set, recording_sha256, replay_fixture_id, outcome_status, outcome_reason, envelope_canonical, envelope_sha256, supersedes_id, access_log_id, created_at'
+export const PERSISTED_RUN_COLUMNS = 'id, examination_key, document_id, user_id, document_sha256, envelope_version, content_class, workflow_authorization, execution_boundary, environment_project_ref, profile_id, profile_version, schema_version, prompt_version, executor_mode, replay_set, recording_sha256, replay_fixture_id, outcome_status, outcome_reason, envelope_canonical, envelope_sha256, supersedes_id, access_log_id, uat_grant_id, created_at'
+
+/** The two execution boundaries the database can stamp (20261104000000 + 20261105000000). */
+export const EXECUTION_BOUNDARIES = ['isolated_synthetic_test', 'operator_synthetic_uat'] as const
+export type ExecutionBoundary = (typeof EXECUTION_BOUNDARIES)[number]
+/** The Production project ref, which the isolated boundary may never carry (mirrors the database CHECK). */
+export const PRODUCTION_PROJECT_REF = 'lehqgcgnenwdmuzudbrs'
+
+/** What the reader expects of every run (optional): its boundary, and for operator UAT its grant and project. */
+export interface RunExpectation {
+  boundary: ExecutionBoundary
+  uat_grant_id?: string | null
+  project_ref?: string
+}
 
 export interface ExaminationStoragePorts {
   getDocument(documentId: string): Promise<ExaminationDocumentRecord | null>
@@ -213,8 +235,28 @@ export type ExaminationHistory =
   | { kind: 'verified'; runs: VerifiedRun[] }
   | { kind: 'unavailable'; reason: 'storage_unavailable' | 'run_integrity' | 'chain_integrity'; run_id?: string }
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+
+/** The run's authority stamp: a known boundary, consistent with its grant and project ref, and as expected. */
+function verifyAuthorityStamp(row: PersistedRunRow, expectation?: RunExpectation): string | null {
+  if (!(EXECUTION_BOUNDARIES as readonly string[]).includes(row.execution_boundary)) return 'execution_boundary'
+  if (typeof row.environment_project_ref !== 'string' || !/^[a-z0-9]{20}$/.test(row.environment_project_ref)) return 'environment_project_ref'
+  if (row.execution_boundary === 'isolated_synthetic_test') {
+    if (row.uat_grant_id !== null) return 'uat_grant_id'
+    if (row.environment_project_ref === PRODUCTION_PROJECT_REF) return 'environment_project_ref'
+  } else if (typeof row.uat_grant_id !== 'string' || !UUID.test(row.uat_grant_id)) return 'uat_grant_id'
+  if (expectation) {
+    if (row.execution_boundary !== expectation.boundary) return 'expected_boundary'
+    if (expectation.uat_grant_id !== undefined && row.uat_grant_id !== expectation.uat_grant_id) return 'expected_uat_grant_id'
+    if (expectation.project_ref !== undefined && row.environment_project_ref !== expectation.project_ref) return 'expected_project_ref'
+  }
+  return null
+}
+
 /** Every check a stored row must pass; null when it passes, otherwise the failing check. */
-export function verifyRunRow(row: PersistedRunRow, ownerUserId: string, documentId: string): string | null {
+export function verifyRunRow(row: PersistedRunRow, ownerUserId: string, documentId: string, expectation?: RunExpectation): string | null {
+  const stamp = verifyAuthorityStamp(row, expectation)
+  if (stamp) return stamp
   const t = row.envelope_canonical
   if (typeof t !== 'string' || sha256Hex(t) !== row.envelope_sha256) return 'envelope_digest'
   let raw: unknown
@@ -251,7 +293,7 @@ export function verifyRunRow(row: PersistedRunRow, ownerUserId: string, document
   return null
 }
 
-export async function readExaminationHistory(storage: Pick<ExaminationStoragePorts, 'listRuns'>, ownerUserId: string, documentId: string): Promise<ExaminationHistory> {
+export async function readExaminationHistory(storage: Pick<ExaminationStoragePorts, 'listRuns'>, ownerUserId: string, documentId: string, expectation?: RunExpectation): Promise<ExaminationHistory> {
   let rows: PersistedRunRow[]
   try {
     rows = await storage.listRuns(ownerUserId, documentId)
@@ -260,7 +302,7 @@ export async function readExaminationHistory(storage: Pick<ExaminationStoragePor
   }
   const verified = new Map<string, VerifiedRun>()
   for (const row of rows) {
-    if (verifyRunRow(row, ownerUserId, documentId) !== null) return { kind: 'unavailable', reason: 'run_integrity', run_id: row.id }
+    if (verifyRunRow(row, ownerUserId, documentId, expectation) !== null) return { kind: 'unavailable', reason: 'run_integrity', run_id: row.id }
     verified.set(row.id, { run_id: row.id, supersedes_id: row.supersedes_id, created_at: row.created_at, envelope: JSON.parse(row.envelope_canonical) as ExaminationEnvelope })
   }
   // Linear supersession per profile id: one root, every link inside the set, no fork, no cycle.
