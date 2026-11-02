@@ -512,11 +512,14 @@ describe('CR-V2-DOC-2B examination foundation', () => {
     })
   })
 
-  test('nothing outside lib/creator-record/examination imports it (no route, record, guidance, payment or publication path)', () => {
+  test('only the one approved production port imports it, and nothing imports that port (no route, record, guidance, payment or publication path)', () => {
     const roots = ['lib', 'app', 'components'].map((r) => path.join(process.cwd(), r))
     const walk = (d: string): string[] => readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? (e.name === 'node_modules' ? [] : walk(path.join(d, e.name))) : /\.(ts|tsx)$/.test(e.name) ? [path.join(d, e.name)] : []))
     const own = path.join(process.cwd(), 'lib', 'creator-record', 'examination') + path.sep
-    const importers = roots.flatMap((r) => { try { return walk(r) } catch { return [] } }).filter((f) => !f.startsWith(own) && /creator-record\/examination/.test(readFileSync(f, 'utf8')))
-    expect(importers).toEqual([])
+    const files = roots.flatMap((r) => { try { return walk(r) } catch { return [] } })
+    const rel = (f: string) => path.relative(process.cwd(), f).split(path.sep).join('/')
+    // CR-V2-DOC-2C-C-B: exactly one approved internal production-side module.
+    expect(files.filter((f) => !f.startsWith(own) && /creator-record\/examination/.test(readFileSync(f, 'utf8'))).map(rel)).toEqual(['lib/creator-record-flow/examination-production.ts'])
+    expect(files.filter((f) => /(from\s+|import\s*\(\s*)['"][^'"]*creator-record-flow\/examination-production['"]/.test(readFileSync(f, 'utf8'))).map(rel)).toEqual([])
   })
 })
