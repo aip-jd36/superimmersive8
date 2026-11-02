@@ -65,7 +65,7 @@ describe('migration (additive, private)', () => {
   test('it applies after every migration that predates it; only reviewed later migrations follow', () => {
     const files = readdirSync(path.join(APP, 'supabase', 'migrations')).filter((f) => f.endsWith('.sql')).sort()
     // CR-V2-MVP-M2 adds the (independent, additive) prepared-record migration after it; CR-V2-MVP-M3 the binding migration.
-    expect(files.slice(files.indexOf('20261028000000_creator_record_artifacts.sql') + 1)).toEqual(['20261101000000_creator_record_v2_prepared.sql', '20261102000000_creator_record_v2_submission_binding.sql', '20261103000000_creator_record_v2_evidence.sql'])
+    expect(files.slice(files.indexOf('20261028000000_creator_record_artifacts.sql') + 1)).toEqual(['20261101000000_creator_record_v2_prepared.sql', '20261102000000_creator_record_v2_submission_binding.sql', '20261103000000_creator_record_v2_evidence.sql', '20261104000000_creator_record_v2_examination_runs.sql'])
   })
 })
 

@@ -9,5 +9,8 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   testMatch: ['<rootDir>/__tests__/db/**/*.db.test.ts'],
+  // CR-V2-DOC-2C-B: the @/ alias, as in jest.config.js, so a DB suite can build real envelopes with the
+  // committed (pure) examination code. No other mapping; no Supabase stub (DB suites never import it).
+  moduleNameMapper: { '^@/(.*)$': '<rootDir>/$1' },
   testTimeout: 30000,
 }
