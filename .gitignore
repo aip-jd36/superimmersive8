@@ -31,3 +31,7 @@ tools/ga4_token.json
 # Python cache
 __pycache__/
 *.pyc
+
+# Supabase CLI machine-local state (CR-V2-DOC-2C-OPS-2): the link to a project (project-ref, pooler-url) and
+# cached service versions. Never commit it: a tracked link makes every clone target that project by default.
+08_Platform/supabase/.temp/
