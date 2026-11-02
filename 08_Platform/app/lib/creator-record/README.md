@@ -142,6 +142,25 @@ pinned. The prototype's own templates have no version and are listed in
 
 Tests: `internal-draft`, `internal-draft-projection`.
 
+## examination/ — CR-V2-DOC-2B (local; replay only, nothing wired)
+
+A generic, closed examination envelope over one stored document, with the receipt engine as the first
+profile. **No importer outside this folder** (test-enforced): no route, record, guidance, payment, PDF or
+publication path reads it. No persistence, migration or storage adapter.
+
+| Path | Role |
+|---|---|
+| `envelope.ts` | `si8/creator-record-v2-examination` v1 and its strict parser. Document fingerprint, profile and executor identity, `authority_class` (`synthetic_test` only), observations (`printed_text` / `examiner_classification`, always `not_verified`, origin `fixture_replay_recorded`), closed limitation codes, provenance (`model_calls: 0`, `prompt_sent: false`). `PreflightRefusal` is separate: a refused request never yields an envelope |
+| `profile.ts` | The generic profile interface (`readRecorded`: a recorded output through the profile's own engine; no way to reach a model) and the registry, keyed by exact `id@version` |
+| `receipt-profile.ts` | Adapter over `receipt-examination/` **unchanged** (same recorded-response shape as `evidence/examine-upload.ts` replay); mechanical mapping to observations and limitations |
+| `examine-document.ts` | The pure core, all ports injected: request (exact keys) → profile → executor (replay only) → document stored → owner → bytes re-hashed (SHA-256, size, sniffed type) → media type → synthetic authority from the trusted registry by the re-computed hash → recording → engine → envelope |
+| `replay-executor.ts` | Replay executor and synthetic registry from the committed replay table (the same table DOC-1 intake uses) |
+
+`examination_key` is a deterministic replay key (envelope version, document id and bytes, profile,
+executor). Nothing is persisted, so no exactly-once execution is claimed. Observations are never facts,
+declarations or findings, and never reach retrieval, applicability or Bounded Interpretation (admissibility
+is DOC-2E). Tests: `examination-foundation` (all 45 fixtures equal the existing replay path once normalized).
+
 ## record-core/ — shared (CR-V2-1)
 
 | Path | Role |
