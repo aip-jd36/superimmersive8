@@ -32,6 +32,7 @@ import type { PdfTemplateApproval } from '../customer-pdf/templates'
 import { verifiedRecord, type PreparedRow, type SubmissionsMode } from './service'
 import type { CustomerRecordV2 } from '../customer-record/record'
 import type { EvidenceIntegrity } from '../evidence-intake/service'
+import type { ExaminationRunReference, RunReferenceIntegrity } from '../examination/projection'
 
 export type V2IssuanceMode = 'stopped' | 'enabled'
 
@@ -55,6 +56,12 @@ export interface PurchaseDeps {
    * Absent → a version that references any document cannot be bought (fail closed).
    */
   evidenceIntact?(userId: string, items: readonly EvidenceItem[]): Promise<EvidenceIntegrity>
+  /**
+   * CR-V2-EXAM-INTEGRATION-X0: every examination run the version references still passes every stored-run check
+   * and has the envelope digest the record captured (`verifyReferencedRuns`). Absent → a version that references
+   * any examination cannot be bought (fail closed). Never consulted for a record without examinations.
+   */
+  examinationsIntact?(userId: string, refs: readonly ExaminationRunReference[]): Promise<RunReferenceIntegrity>
 }
 
 /** The inventory fields the evidence check needs, read from the verified record. */
@@ -66,6 +73,18 @@ async function evidenceHeld(check: ((userId: string, items: readonly EvidenceIte
   if (items.length === 0) return { ok: true }
   if (!check) return { ok: false, reason: 'unavailable' }
   return check(userId, items)
+}
+
+/** CR-V2-EXAM-INTEGRATION-X0: true when the record references no examination run, or every one still verifies. Fail closed. */
+async function examinationsHeld(check: ((userId: string, refs: readonly ExaminationRunReference[]) => Promise<RunReferenceIntegrity>) | undefined, userId: string, record: CustomerRecordV2): Promise<RunReferenceIntegrity> {
+  const refs = record.documents.items.flatMap((d) => (typeof d.examination === 'object' && d.examination !== null ? [{ run_id: d.examination.run_id, document_id: d.document_id, envelope_sha256: d.examination.envelope_sha256 }] : []))
+  if (refs.length === 0) return { ok: true }
+  if (!check) return { ok: false, reason: 'unavailable' }
+  try {
+    return await check(userId, refs)
+  } catch {
+    return { ok: false, reason: 'unavailable' }
+  }
 }
 
 export type PurchaseError =
@@ -112,6 +131,12 @@ async function purchasable(deps: PurchaseDeps, userId: string, row: PreparedRow 
   const held = await evidenceHeld(deps.evidenceIntact?.bind(deps), userId, record)
   if (!held.ok) {
     deps.log?.('creator_record_v2_evidence_unavailable', { prepared_id: row.id, reason: held.reason })
+    return err({ status: 409, code: 'evidence_unavailable' })
+  }
+  // CR-V2-EXAM-INTEGRATION-X0: never sell a record whose referenced examination runs no longer verify.
+  const runs = await examinationsHeld(deps.examinationsIntact?.bind(deps), userId, record)
+  if (!runs.ok) {
+    deps.log?.('creator_record_v2_examination_unavailable', { prepared_id: row.id, reason: runs.reason })
     return err({ status: 409, code: 'evidence_unavailable' })
   }
   const eligibility = evaluateIssuanceEligibility(row.canonical, row.sha256, deps.governance(today(deps.now())))
@@ -198,6 +223,8 @@ export interface V2IssuanceDeps {
   renderPdf(input: CustomerDocumentInput): Promise<Uint8Array>
   /** CR-V2-DOC-1B: as for checkout. Absent → a record that references any document is not issued. */
   evidenceIntact?(userId: string, items: readonly EvidenceItem[]): Promise<EvidenceIntegrity>
+  /** CR-V2-EXAM-INTEGRATION-X0: as for checkout. Absent → a record that references any examination is not issued. */
+  examinationsIntact?(userId: string, refs: readonly ExaminationRunReference[]): Promise<RunReferenceIntegrity>
 }
 
 export async function renderV2ForIssuance(deps: V2IssuanceDeps, sub: CheckoutSubmission, recordId: string, issuedAt: Date): Promise<Uint8Array> {
@@ -210,6 +237,8 @@ export async function renderV2ForIssuance(deps: V2IssuanceDeps, sub: CheckoutSub
   if (!record) throw new V2IssuanceRefusal('record_integrity')
   // CR-V2-DOC-1B: the PDF lists each referenced document; issue only while SI8 still holds every one intact.
   if (!(await evidenceHeld(deps.evidenceIntact?.bind(deps), row.user_id, record)).ok) throw new V2IssuanceRefusal('evidence_unavailable')
+  // CR-V2-EXAM-INTEGRATION-X0: and every referenced examination run still verifies.
+  if (!(await examinationsHeld(deps.examinationsIntact?.bind(deps), row.user_id, record)).ok) throw new V2IssuanceRefusal('evidence_unavailable')
   const issuedOn = today(issuedAt)
   const eligibility = evaluateIssuanceEligibility(row.canonical, row.sha256, deps.governance(issuedOn))
   if (eligibility.decision === 'invalid_record') throw new V2IssuanceRefusal('record_integrity')

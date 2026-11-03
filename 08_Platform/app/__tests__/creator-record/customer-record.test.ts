@@ -425,6 +425,10 @@ describe('independence', () => {
       'record-core/canonical', 'record-core/projection',
       // CR-V2-DOC-1: the pure document vocabulary (no I/O, no examination).
       'evidence-intake/vocabulary',
+      // CR-V2-EXAM-INTEGRATION-X0: the bounded examination projection (pure: re-verifies a persisted run's envelope),
+      // the existing pure reconciliation and its persisted-examination adapter, and the record's own examination part.
+      // No database, Storage, engine, model or SDK is reachable through any of them (see the X0 boundary tests).
+      'customer-record/examination-section', 'evidence/document-observations', 'evidence/persisted-comparison', 'examination/projection',
     ].sort())
     // prototype/build-draft (which holds the pilot data) is reached for types only.
     for (const f of walk(ROOT)) expect(readFileSync(f, 'utf8')).not.toMatch(/^import\s(?!type\s)[^\n]*from\s+['"]\.\.\/prototype\/build-draft['"]/m)

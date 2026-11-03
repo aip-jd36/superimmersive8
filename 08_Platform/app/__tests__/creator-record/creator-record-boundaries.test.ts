@@ -338,7 +338,12 @@ describe('lib/creator-record boundaries', () => {
       ),
     )
     for (const t of Array.from(relativeTargets)) {
-      expect(['contract/provenance', 'receipt-examination/examine', 'receipt-examination/plan-tokens', 'receipt-examination/prompt', 'receipt-examination/schema'].includes(t) || t.startsWith('evidence/')).toBe(true)
+      expect([
+        'contract/provenance', 'receipt-examination/examine', 'receipt-examination/plan-tokens', 'receipt-examination/prompt', 'receipt-examination/schema',
+        // CR-V2-EXAM-INTEGRATION-X0 (evidence/persisted-comparison only): the exact receipt-reading inversion, the envelope
+        // type and the existing seller-identity resolution. All pure; none loads the examination engine or any SDK.
+        'examination/receipt-reading', 'examination/envelope', 'integration/seller-identity',
+      ].includes(t) || t.startsWith('evidence/')).toBe(true)
     }
     for (const f of files) expect(staticImports(readFileSync(f, 'utf8')).some((i) => i.includes('examine.anthropic'))).toBe(false)
     const live = readFileSync(path.join(MODULE_ROOT, 'evidence', 'live-caller.ts'), 'utf8')

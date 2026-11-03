@@ -9,7 +9,9 @@
  *   - An observation is what a document APPEARS to show, as reported by an examination. It is never a
  *     project fact, a declaration, a governed proposition or a human-verified finding:
  *     `verification` is always `not_verified`. Nothing here reaches retrieval, applicability, Bounded
- *     Interpretation, composition, a record or a PDF (no importer outside this folder; test-enforced).
+ *     Interpretation or composition (test-enforced). CR-V2-EXAM-INTEGRATION-X0: an envelope may reach a record
+ *     (and later a PDF) ONLY verbatim inside the bounded projection (`./projection.ts`), made from a persisted,
+ *     integrity-checked run and never an input to guidance; the importers outside this folder are pinned by test.
  *   - Only fixture replay exists. `executor.mode` has one value, `fixture_replay`, and `origin` one value,
  *     `fixture_replay_recorded`: replay returns SI8's recorded ground truth for its own synthetic test
  *     documents and says nothing about extraction quality. A live model is not representable here.

@@ -519,6 +519,26 @@ describe('CR-V2-DOC-2B examination foundation', () => {
     const files = roots.flatMap((r) => { try { return walk(r) } catch { return [] } })
     const rel = (f: string) => path.relative(process.cwd(), f).split(path.sep).join('/')
     // CR-V2-DOC-2C-C-B: the approved internal production-side module; CR-V2-PROD-UAT-B: the operator-UAT module.
+    // CR-V2-EXAM-INTEGRATION-X0: the record may hold an examination ONLY through the bounded projection, and the
+    // persisted comparison may read only the exact receipt-reading inversion (and the envelope type). Relative imports
+    // count too, and each importer is pinned to exactly the examination modules it may use.
+    const examinationImports = (f: string) =>
+      Array.from(readFileSync(f, 'utf8').matchAll(/(?:from\s+|import\s*\(\s*)['"]([^'"]+)['"]/g))
+        .map((m) => m[1])
+        .map((i) => (i.startsWith('.') ? path.relative(path.join(process.cwd(), 'lib', 'creator-record'), path.resolve(path.dirname(f), i)).split(path.sep).join('/') : i.replace(/^@\/lib\/creator-record\//, '')))
+        .filter((i) => i.startsWith('examination/'))
+        .sort()
+    const importers = files.filter((f) => !f.startsWith(own) && examinationImports(f).length > 0).map((f) => [rel(f), examinationImports(f)])
+    expect(importers).toEqual([
+      ['lib/creator-record/customer-flow/purchase.ts', ['examination/projection']],
+      ['lib/creator-record/customer-record/examination-section.ts', ['examination/projection']],
+      ['lib/creator-record/customer-record/record.ts', ['examination/projection']],
+      ['lib/creator-record/evidence/persisted-comparison.ts', ['examination/envelope', 'examination/receipt-reading']],
+      ['lib/creator-record-flow/examination-production.ts', ['examination/examine-document', 'examination/persistence', 'examination/replay-executor']],
+      ['lib/creator-record-flow/examination-uat.ts', ['examination/persistence', 'examination/receipt-profile']],
+    ])
+    for (const f of ['lib/creator-record/customer-flow/purchase.ts', 'lib/creator-record/customer-record/record.ts'])
+      expect(readFileSync(path.join(process.cwd(), f), 'utf8')).not.toMatch(/^import\s+(?!type\s)[^\n]*examination\//m)
     expect(files.filter((f) => !f.startsWith(own) && /creator-record\/examination/.test(readFileSync(f, 'utf8'))).map(rel)).toEqual(['lib/creator-record-flow/examination-production.ts', 'lib/creator-record-flow/examination-uat.ts'])
     // CR-V2-PROD-UAT-B: only the route-free operator CLI imports the production port.
     expect(files.filter((f) => /(from\s+|import\s*\(\s*)['"][^'"]*creator-record-flow\/examination-production['"]/.test(readFileSync(f, 'utf8'))).map(rel)).toEqual(['scripts/creator-record-v2-uat/examination-uat.ts'])

@@ -17,6 +17,12 @@
  *     `not_provided` (Option C: documents cannot create declarations).
  *   - Comparisons: disabled. Nothing is reconciled and nothing can influence
  *     guidance (guidance runs on declarations alone).
+ *   - CR-V2-EXAM-INTEGRATION-X0: an EXAMINATION-BEARING record (schema v6) is built only when the caller supplies
+ *     projections of persisted, integrity-checked examination runs (`./examination-section`). It adds, SEPARATELY
+ *     from the declarations: each document's projection (verbatim, `not_verified`), comparisons derived here from
+ *     this version's declarations, and this version's closed-code creator responses. Guidance still runs on
+ *     declarations alone and is identical with or without them. Without examinations the record is the v5 record,
+ *     byte for byte. v6 is not an issuable schema (`./governance-state`), and no route supplies examinations.
  *   - Guidance: exactly the composition the existing pipeline produced, read
  *     through an exact-key projection, then re-checked here: the conclusion
  *     can never be stronger than Bounded Interpretation and the selector's
@@ -54,6 +60,11 @@ import {
   EVIDENCE_CATEGORIES, EVIDENCE_EXAMINATION_NOT_EXAMINED, EVIDENCE_MAX_BYTES, EVIDENCE_MAX_FILE_NAME_CHARS, EVIDENCE_MAX_PER_RECORD, EVIDENCE_MAX_PER_TOOL, EVIDENCE_MEDIA_TYPES,
   type EvidenceCategory, type EvidenceMediaType,
 } from '../evidence-intake/vocabulary'
+import type { ExaminationProjection } from '../examination/projection'
+import {
+  attachExaminations, deriveComparisons, examinationSectionsValid, PERSISTED_COMPARISON_METHOD, recordResponses,
+  type CreatorResponse, type CreatorResponseInput, type CustomerComparison, type CustomerRecordExaminationInput,
+} from './examination-section'
 
 export const CUSTOMER_RECORD_SCHEMA = 'si8/creator-record-v2-record'
 /**
@@ -65,6 +76,11 @@ export const CUSTOMER_RECORD_SCHEMA = 'si8/creator-record-v2-record'
  */
 export const CUSTOMER_RECORD_SCHEMA_VERSION = 5
 /**
+ * v6 (CR-V2-EXAM-INTEGRATION-X0): the EXAMINATION-BEARING record: v5 plus per-document examination projections,
+ * derived comparisons and version-specific creator responses. Used only when examinations are supplied.
+ */
+export const CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION = 6
+/**
  * The code that prepared the record. Technical provenance only: it grants no
  * commercial authority, and an issuance check can only refuse an unsupported
  * builder, never be satisfied by one. Raise the version with any change to how
@@ -73,6 +89,9 @@ export const CUSTOMER_RECORD_SCHEMA_VERSION = 5
 export const CUSTOMER_RECORD_BUILDER = { id: 'si8/creator-record-v2-record-builder', version: 3 } as const
 /** The content contract: what may appear in the record (no generated prose). Bump with any content change. */
 export const CUSTOMER_RECORD_CONTENT = { id: 'si8/creator-record-v2-record-content', version: 2, generated_text: 'none' } as const
+/** CR-V2-EXAM-INTEGRATION-X0: the builder and content identities of a v6 (examination-bearing) record. */
+export const CUSTOMER_RECORD_EXAMINATION_BUILDER = { id: 'si8/creator-record-v2-record-builder', version: 4 } as const
+export const CUSTOMER_RECORD_EXAMINATION_CONTENT = { id: 'si8/creator-record-v2-record-content', version: 3, generated_text: 'none' } as const
 /** Issued Creator Record ids (CR-YYYY-8 hex): assigned at issuance, never part of a prepared record. */
 const ISSUED_RECORD_ID = /^CR-\d{4}-[0-9A-F]{8}$/i
 const ISO_DATETIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/
@@ -93,6 +112,14 @@ export interface CustomerRecordInput {
    * against the evidence store (owner, stored, SHA-256). Inventory only: never an input to guidance.
    */
   documents?: readonly CustomerRecordDocument[]
+  /**
+   * CR-V2-EXAM-INTEGRATION-X0: for inventoried documents, the projection of one persisted run each, made by the
+   * caller with `projectVerifiedRun` (integrity, owner and document checked). Observations only: never an input
+   * to guidance. Supplying any makes the record examination-bearing (v6).
+   */
+  examinations?: readonly CustomerRecordExaminationInput[]
+  /** CR-V2-EXAM-INTEGRATION-X0: this version's creator responses (closed codes). Never carried from another version. */
+  responses?: readonly CreatorResponseInput[]
 }
 
 /** One inventoried document, fixed by its SHA-256. The category is the creator's description, not a fact. */
@@ -139,9 +166,9 @@ export interface CustomerGuidanceItem {
 
 export interface CustomerRecordV2 {
   schema: typeof CUSTOMER_RECORD_SCHEMA
-  schema_version: typeof CUSTOMER_RECORD_SCHEMA_VERSION
+  schema_version: typeof CUSTOMER_RECORD_SCHEMA_VERSION | typeof CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION
   status: 'prepared_not_issued'
-  content: typeof CUSTOMER_RECORD_CONTENT
+  content: typeof CUSTOMER_RECORD_CONTENT | typeof CUSTOMER_RECORD_EXAMINATION_CONTENT
   builder: { id: string; version: number }
   record: { record_ref: string; record_version: number; prepared_on: string; captured_at: string }
   sources: {
@@ -170,9 +197,13 @@ export interface CustomerRecordV2 {
   }
   /** Acknowledgements the creator accepted, with the exact approved wording shown. */
   declarations: { answers: DeclaredAnswer[]; observations: DeclaredObservation[]; acknowledgements: { id: string; text: string }[] }
-  documents: { policy: 'inventory_only'; items: (CustomerRecordDocument & { examination: typeof EVIDENCE_EXAMINATION_NOT_EXAMINED })[] }
-  comparison: { policy: 'disabled' }
+  /** v5: `inventory_only`, every item `not_examined`. v6: `inventory_with_examination`, each item `not_examined` or a projection. */
+  documents: { policy: 'inventory_only' | 'inventory_with_examination'; items: (CustomerRecordDocument & { examination: typeof EVIDENCE_EXAMINATION_NOT_EXAMINED | ExaminationProjection })[] }
+  /** v5: disabled. v6: derived from this version's declarations (never supplied, never carried). */
+  comparison: { policy: 'disabled' } | { policy: 'derived_per_version'; method: typeof PERSISTED_COMPARISON_METHOD; items: CustomerComparison[] }
   guidance: { items: CustomerGuidanceItem[] }
+  /** v6 only: this version's closed-code creator responses. */
+  creator_responses?: { policy: 'closed_codes_this_version_only'; items: CreatorResponse[] }
 }
 
 export type CustomerRecordResult =
@@ -234,6 +265,8 @@ function inputIssues(input: CustomerRecordInput): string[] {
   const s = input.state
   if (s && typeof s === 'object' && !Array.isArray(s) && Object.prototype.hasOwnProperty.call(s, 'documents')) issues.push('state.documents_not_accepted')
   issues.push(...documentIssues(input.documents))
+  if (input.examinations !== undefined && !Array.isArray(input.examinations)) issues.push('examinations')
+  if (input.responses !== undefined && !Array.isArray(input.responses)) issues.push('responses')
   return issues
 }
 
@@ -281,9 +314,16 @@ export function buildCustomerRecord(input: CustomerRecordInput): CustomerRecordR
   const toolLimit = Math.min(state.tools.length, input.sources.max_tools)
   const outOfRange = documents.map((d, i) => (d.tool_index !== null && d.tool_index >= toolLimit ? `documents[${i}].tool_index` : null)).filter((x): x is string => x !== null)
   if (outOfRange.length > 0) return { ok: false, stage: 'input', issues: outOfRange }
+  // CR-V2-EXAM-INTEGRATION-X0: an examination-bearing record only when examinations (or responses) are supplied.
+  const examinationInputs = input.examinations ?? []
+  const responseInputs = input.responses ?? []
+  const examinationBearing = examinationInputs.length > 0 || responseInputs.length > 0
+  const schemaVersion = examinationBearing ? CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION : CUSTOMER_RECORD_SCHEMA_VERSION
+  const attached = attachExaminations(documents, examinationInputs)
+  if (!attached.ok) return { ok: false, stage: 'input', issues: attached.issues }
 
-  // 2. Approved governed sources only.
-  const check = checkApprovedSources(input.sources, input.source_text, input.topicClaims, input.as_of, { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION })
+  // 2. Approved governed sources only (approved for the schema this record will have).
+  const check = checkApprovedSources(input.sources, input.source_text, input.topicClaims, input.as_of, { id: CUSTOMER_RECORD_SCHEMA, version: schemaVersion })
   if (!check.ok) return { ok: false, stage: 'sources', refusals: check.refusals }
   const { approved } = check
   const text = approved.source_text_content
@@ -443,15 +483,26 @@ export function buildCustomerRecord(input: CustomerRecordInput): CustomerRecordR
     const claim = claims.get(it.claim_id)!
     addDigest('governed_claim', claimRef(claim), claimContentDigest(claim))
   }
+  // 7. CR-V2-EXAM-INTEGRATION-X0: comparisons derived from THIS version's declarations; this version's responses.
+  // After guidance, never an input to it.
+  const prov = guidance.facts.provenance
+  const declaredFor = (i: number) => {
+    const ids = Array.from(new Set(prov.tools.filter((x) => x.instance === toolInstance(i)).map((x) => x.tool_id)))
+    return { tool_id: ids.length === 1 ? ids[0] : null, plan: (state.tools[i]?.T3 ?? [])[0] ?? null }
+  }
+  const comparisons = examinationBearing ? deriveComparisons(documents, attached.byDocument, declaredFor) : []
+  const responded = recordResponses(responseInputs, attached.byDocument, comparisons, input.record.record_version)
+  if (!responded.ok) return { ok: false, stage: 'input', issues: responded.issues }
+
   const authority_digests = Array.from(digests.values()).sort((a, b) => (a.kind + a.id + a.version < b.kind + b.id + b.version ? -1 : a.kind + a.id + a.version > b.kind + b.id + b.version ? 1 : 0))
 
   const record: CustomerRecordV2 = JSON.parse(
     JSON.stringify({
       schema: CUSTOMER_RECORD_SCHEMA,
-      schema_version: CUSTOMER_RECORD_SCHEMA_VERSION,
+      schema_version: schemaVersion,
       status: 'prepared_not_issued',
-      content: CUSTOMER_RECORD_CONTENT,
-      builder: CUSTOMER_RECORD_BUILDER,
+      content: examinationBearing ? CUSTOMER_RECORD_EXAMINATION_CONTENT : CUSTOMER_RECORD_CONTENT,
+      builder: examinationBearing ? CUSTOMER_RECORD_EXAMINATION_BUILDER : CUSTOMER_RECORD_BUILDER,
       record: { record_ref: input.record.record_id, record_version: input.record.record_version, prepared_on: input.as_of, captured_at: input.record.captured_at },
       sources: {
         kind: 'governed',
@@ -473,14 +524,15 @@ export function buildCustomerRecord(input: CustomerRecordInput): CustomerRecordR
       },
       // CR-V2-DOC-1: inventory only, in the creator's order; nothing is examined and nothing reaches guidance.
       documents: {
-        policy: 'inventory_only',
+        policy: examinationBearing ? 'inventory_with_examination' : 'inventory_only',
         items: documents.map((d) => ({
           document_id: d.document_id, sha256: d.sha256, media_type: d.media_type, byte_size: d.byte_size, file_name: d.file_name,
-          category: d.category, tool_index: d.tool_index, examination: EVIDENCE_EXAMINATION_NOT_EXAMINED,
+          category: d.category, tool_index: d.tool_index, examination: attached.byDocument.get(d.document_id) ?? EVIDENCE_EXAMINATION_NOT_EXAMINED,
         })),
       },
-      comparison: { policy: 'disabled' },
+      comparison: examinationBearing ? { policy: 'derived_per_version', method: PERSISTED_COMPARISON_METHOD, items: comparisons } : { policy: 'disabled' },
       guidance: { items },
+      ...(examinationBearing ? { creator_responses: { policy: 'closed_codes_this_version_only', items: responded.responses } } : {}),
     }),
   )
   const canonical = canonicalJson(record)
@@ -512,6 +564,9 @@ export function verifyCustomerRecord(canonical: string, sha256: string): { ok: t
     return { ok: false, reason: 'not_canonical' }
   }
   const r = parsed as Partial<CustomerRecordV2>
-  if (r.schema !== CUSTOMER_RECORD_SCHEMA || r.schema_version !== CUSTOMER_RECORD_SCHEMA_VERSION || r.status !== 'prepared_not_issued') return { ok: false, reason: 'wrong_schema' }
-  return { ok: true, record: r as CustomerRecordV2 }
+  if (r.schema !== CUSTOMER_RECORD_SCHEMA || r.status !== 'prepared_not_issued') return { ok: false, reason: 'wrong_schema' }
+  if (r.schema_version === CUSTOMER_RECORD_SCHEMA_VERSION) return { ok: true, record: r as CustomerRecordV2 }
+  // CR-V2-EXAM-INTEGRATION-X0: a v6 record's examination parts must re-verify strictly.
+  if (r.schema_version === CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION && r.record && examinationSectionsValid(r as unknown as Parameters<typeof examinationSectionsValid>[0])) return { ok: true, record: r as CustomerRecordV2 }
+  return { ok: false, reason: 'wrong_schema' }
 }
