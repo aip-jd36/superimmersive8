@@ -1,4 +1,4 @@
-# CR-V2-PROD-UAT-D1: Production Migration Execution Pack (20261104000000 → 20261105000000)
+# CR-V2-PROD-UAT-D1: Production Migration Execution Pack (20261104000000 → 20261105000000; 20261106000000 prepared)
 
 **Status: APPLIED TO PRODUCTION, 2026-11-03 (operator-reported).** 01 → 04 committed and verified, with all checks passing and no drift. See `08_Platform/implementation/CR_V2_PROD_UAT_D_MIGRATION_RECORD.md`. Do not run 01 or 03 again: their pre-checks refuse anyway. The verification queries (02, 04) remain safe to run at any time.
 
@@ -152,3 +152,84 @@ These can't weaken the migrations' security: an extra trigger, policy, privilege
   - The new checks and index scan the DOC-1 tables, which are empty in Production (C1: zero documents and zero access events).
   - Exclusive locks on DOC-1 tables, and a write-blocking lock on `public.users`, are held until `COMMIT`. That is milliseconds when there is no contention, and at most `lock_timeout` when there is.
 - **Line endings.** Production's DOC-1 function bodies are stored with CRLF line endings, because they were pasted from Windows. The fingerprint checks accept exactly the LF or the CRLF form of the committed body.
+
+## 20261106000000 (CR-V2-EXAM-INTEGRATION-X1): 05 and 06, after E4
+
+**Not authorized to run.** Applying 20261106 to Production needs its own PM decision. These two files are prepared and tested only.
+
+| File | What it does |
+|---|---|
+| `05_apply_20261106.sql` | One transaction, the same bounded timeouts as 01 and 03. Pre-check, then the migration verbatim, then the post-check, then `NOTIFY pgrst`, then `COMMIT`. Success is exactly one row: `x1p_result = '20261106000000 COMMITTED'`. |
+| `06_verify_20261106.sql` | Read-only: `state` (`absent`, `applied` or `partial`), 18 checks and drift. It is the authority on whether 05 committed. Its checks are invariants, so they keep passing after customer-path grants exist. |
+
+**Why the pre-check doesn't require 02 and 04 to pass in full.** Production already holds the E4 operator-UAT history: one revoked operator grant, its seeded document, two examination reads and one run. 02 and 04 were written for a pre-UAT database, so on E4 they fail exactly these data counts:
+
+- 02: `access_log_all_downloads`, `runs_rows_0`;
+- 04: `access_log_no_grant_rows`, `documents_all_owner_upload`, `grants_rows_0`.
+
+The pre-check allows exactly those failures and nothing else. Any security, shape or other deviation still refuses. This set was established on a Production-shaped database (`__tests__/db/creator-record-v2-production-apply-20261106.db.test.ts`), not assumed.
+
+**The named allowance is not enough on its own.** Those checks only test "count is zero", so they fail identically for one row or many. 05 therefore also pins the **exact E4 history** (`expected.json` → `e4_20261106`), taken from the committed E4 record `08_Platform/implementation/CR_V2_PROD_UAT_E4_EXAMINATION_RECORD.md` and its `e1_state` reconciliation:
+
+- **the one run:** id `5a2f9a72-…`, its examination key, that document, identity and grant, `operator_synthetic_uat` on the Production ref, the Kling fixture, outcome `examined`, no supersession;
+- **the one document:** id `daa1f62d-…`, that identity and fixture SHA-256, seeded under that grant, no consent value, `stored`;
+- **the one examination access event:** for that document, identity and grant, and it is that run's event. It is also the only event that carries any grant;
+- **the one grant:** id `27d8c027-…`, that identity, fixture, bound document and Production ref; the recorded created and expiry times; 4 reads and 1 run; revoked.
+
+Anything more, less or different refuses before any change, naming the first differing category (runs, then documents, then examination events, then grants). The post-check repeats the fingerprint, with the one expected schema difference: the grant then reads `operator_seed`.
+
+**Deliberately not checked, because the E4 record does not establish them:**
+
+- the access event's id;
+- `file_download` rows (`e1_state` counts examination events only);
+- the revocation time, and the stored `revoked_by` / `revoke_reason` text (operator-entered, never read back);
+- the run's envelope digest and created time;
+- the grant's `established_by` / `reason` / `change_ref`.
+
+**This makes 05 specific to Production's exact current state.** Any other database, including staging, would need its own decision.
+
+**The 05 pre-check refuses, before any change, unless all of these hold:**
+
+- the database looks like Production (the same Cloud World check as 01 and 03);
+- 06 is `absent` (so a second run is named as such);
+- 02 and 04 are `applied`, failing only the E4 data counts above;
+- the history is exactly E4 (the fingerprint above);
+- no grant of any kind is active;
+- no isolated-test marker exists.
+
+The migration's own precondition (the exact 20261105 run authority constraint) follows.
+
+**The 05 post-check refuses, so nothing commits, unless all of these hold:**
+
+- 06 is `applied` and every check passes;
+- 02 still fails only the E4 data counts;
+- 04 fails only the E4 data counts plus `shape_runs_constraints`. That is the run authority constraint 20261106 replaces by design, so expect it in 04's output from then on;
+- every E4 row still matches the fingerprint, and the grant reads `operator_seed`.
+
+**What 06 checks:**
+
+- the exact definitions of every grant column (including `grant_kind`), every grant constraint (including the kind CHECK), the grant indexes, and the run columns and constraints;
+- the five replaced function bodies, accepting the LF form (as embedded in 05) or the CRLF form, one per function;
+- the status function's result type;
+- two data invariants: a run's boundary agrees with its grant's kind, and a customer-path grant binds only its identity's own upload of the granted bytes;
+- every protected table's privileges, RLS, policies, triggers and owners, and every protected function's mode, owner and EXECUTE grants (all unchanged by 20261106).
+
+**Operator sequence (only after approval):**
+
+1. Run 02, 04 and 06. Expect 06 `absent`, and only the E4 failures in 02 and 04.
+2. Confirm no grant is active.
+3. Run 05.
+4. Run 06 and expect `applied`, `all_pass: true` and no drift.
+5. Run 02 and 04 and expect the failure sets above.
+
+On any error or unclear response: run `ROLLBACK;` on its own, then run 06. Its `state` decides what happened.
+
+**Rollback limits:**
+
+- **Allowed** only while no `customer_path_uat` grant has ever existed. In ONE transaction, run `supabase/operator/creator-record-v2-uat/rollback_20261106.sql`, then `20261105000000` verbatim. This restores the exact pre-05 state with every E4 row intact (tested). It needs its own approval.
+- **Refused** once a customer-path grant exists. Revoke it instead; history is never dropped.
+- **Never** re-apply 20261105 on its own after 20261106. It is refused (the status function's return type differs), so it fails closed, but don't rely on that.
+
+**Application compatibility.** The X1 code on `main` (`5d893573`) does not depend on 20261106: nothing deployed reads `grant_kind` or the status function. The X2 creator examination route is stopped by the submissions constant. Even when open, without 20261106 and a customer-path grant the database refuses every read. So the order of deploy and apply doesn't matter for live behaviour.
+
+**Tested on PostgreSQL 15.19 and 17.4.** The expectations captured from the committed migration are identical on both.

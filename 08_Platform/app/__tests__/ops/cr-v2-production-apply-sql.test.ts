@@ -20,15 +20,17 @@ const { FILES } = require(join(DIR, 'build.js')) as { FILES: Record<string, stri
 const APPLY = [
   { file: '01_apply_20261104.sql', migration: '20261104000000_creator_record_v2_examination_runs.sql', verify: '02_verify_20261104.sql', tag: 'D1A' },
   { file: '03_apply_20261105.sql', migration: '20261105000000_creator_record_v2_operator_synthetic_uat.sql', verify: '04_verify_20261105.sql', tag: 'D1B' },
+  // CR-V2-EXAM-INTEGRATION-X1: prepared, not authorized to run.
+  { file: '05_apply_20261106.sql', migration: '20261106000000_creator_record_v2_customer_path_uat.sql', verify: '06_verify_20261106.sql', tag: 'X1P' },
 ]
-const VERIFY = ['02_verify_20261104.sql', '04_verify_20261105.sql']
+const VERIFY = ['02_verify_20261104.sql', '04_verify_20261105.sql', '06_verify_20261106.sql']
 
 /** SQL with comments and string literals blanked, so keywords are matched only in code. */
 const code = (sql: string) => sql.replace(/--[^\n]*/g, ' ').replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/'(?:[^']|'')*'/g, "''")
 /** Top-level statements: dollar-quoted bodies are blanked first so semicolons inside them do not split. */
 const statements = (sql: string) => code(sql).replace(/\$([a-z0-9_]*)\$[\s\S]*?\$\1\$/gi, '$$$$').split(';').map((s) => s.trim()).filter(Boolean)
 
-test('build.js reproduces all four pack files exactly (they never drift from the migrations, expected.json and the reviewed rules)', () => {
+test('build.js reproduces every pack file exactly (they never drift from the migrations, expected.json and the reviewed rules)', () => {
   expect(Object.keys(FILES).sort()).toEqual([...APPLY.map((a) => a.file), ...VERIFY].sort())
   for (const name of Object.keys(FILES)) expect(read(join(DIR, name))).toBe(FILES[name])
 })

@@ -193,6 +193,8 @@ describe('lib/creator-record boundaries', () => {
       // CR-V2-MVP-M3: checkout runs the v2 preconditions; the purchase route binds a reviewed version.
       'app/api/checkout/create-session/route.ts',
       // CR-V2-DOC-1: evidence intake routes (stopped by default, invite-only, synthetic-only code lock).
+      // CR-V2-EXAM-INTEGRATION-X2: creator examination of an own document (stopped by default, invite-only; the database decides authority).
+      'app/api/creator-record-v2/evidence/[id]/examination/route.ts',
       'app/api/creator-record-v2/evidence/[id]/file/route.ts',
       'app/api/creator-record-v2/evidence/[id]/route.ts',
       'app/api/creator-record-v2/evidence/route.ts',
@@ -210,7 +212,8 @@ describe('lib/creator-record boundaries', () => {
       'components/creator-record/DraftRecordView.tsx',
       'lib/creator-record-flow/evidence-http.ts', // CR-V2-DOC-1: evidence route helpers
       'lib/creator-record-flow/evidence-production.ts', // CR-V2-DOC-1: evidence intake ports
-      'lib/creator-record-flow/examination-production.ts', // CR-V2-DOC-2C-C-B: examination persistence ports (no route; only the operator CLI)
+      'lib/creator-record-flow/examination-customer.ts', // CR-V2-EXAM-INTEGRATION-X2: creator examination wiring (one route)
+      'lib/creator-record-flow/examination-production.ts', // CR-V2-DOC-2C-C-B: examination persistence ports (operator CLI; X2: the creator examination wiring)
       'lib/creator-record-flow/examination-uat.ts', // CR-V2-PROD-UAT-B: operator synthetic UAT logic (only the operator CLI; no route)
       'lib/creator-record-flow/http.ts',
       'lib/creator-record-flow/production.ts',

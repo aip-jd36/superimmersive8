@@ -1,12 +1,14 @@
 #!/usr/bin/env node
-// CR-V2-PROD-UAT-D1 / D1C — generates the four operator files of the Production migration execution pack:
+// CR-V2-PROD-UAT-D1 / D1C — generates the operator files of the Production migration execution pack:
 //   02_verify_20261104.sql, 04_verify_20261105.sql   read-only verification, from expected.json and the fixed rules below
 //   01_apply_20261104.sql,  03_apply_20261105.sql    one transaction each, embedding the committed migration verbatim and
 //                                                    the verification query verbatim as pre- and post-checks
+//   06_verify_20261106.sql, 05_apply_20261106.sql    CR-V2-EXAM-INTEGRATION-X1: the same for 20261106000000, on a
+//                                                    database that already holds the E4 operator-UAT history
 //   node supabase/operator/creator-record-v2-uat/production-apply/build.js           # (re)write the four files
 //   node supabase/operator/creator-record-v2-uat/production-apply/build.js --check   # exit 1 if any differs
 // __tests__/ops/cr-v2-production-apply-sql.test.ts requires the files on disk to equal this output exactly.
-// No connection, no network, no dependency. This is a fixed expectation list for these two migrations, not a schema diff.
+// No connection, no network, no dependency. This is a fixed expectation list for these migrations, not a schema diff.
 const fs = require('fs')
 const path = require('path')
 
@@ -135,9 +137,10 @@ const rowCount = (table, where, expect, guard) => `CASE WHEN ${guard ?? `to_regc
 const hasColumn = (table, col) => `EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid = 'public.${table}'::regclass AND attname = '${col}' AND attnum > 0 AND NOT attisdropped)`
 
 /** Drift: names under the prefix, or on protected tables, that neither migration expects. Reported, never a failure. */
-function drift(tables) {
+function drift(tables, extraKnown = {}) {
   const per = (kind, sql) => `'${kind}', (SELECT coalesce(json_agg(x.n ORDER BY x.n COLLATE "C"), '[]'::json) FROM (${sql}) x(n))`
-  const known = (kind) => tables.map((t) => `(c.relname = '${t}' AND NOT (x.nm = ANY (${arr(EXPECTED.known[`${t}.${kind}`])})))`).join('\n            OR ')
+  const names = (t, kind) => (extraKnown[`${t}.${kind}`] ? [...EXPECTED.known[`${t}.${kind}`], ...extraKnown[`${t}.${kind}`]].sort(C) : EXPECTED.known[`${t}.${kind}`])
+  const known = (kind) => tables.map((t) => `(c.relname = '${t}' AND NOT (x.nm = ANY (${arr(names(t, kind))})))`).join('\n            OR ')
   return `json_build_object(
     ${per('tables', `SELECT relname::text FROM pg_class WHERE relnamespace = 'public'::regnamespace AND relkind IN ('r', 'v', 'm', 'p', 'f') AND relname LIKE 'creator\\_record\\_v2\\_%' AND NOT (relname = ANY (${arr(KNOWN_TABLES)}))`)},
     ${per('functions', `SELECT DISTINCT proname::text FROM pg_proc WHERE pronamespace = 'public'::regnamespace AND proname LIKE '%creator\\_record\\_v2%' AND NOT (proname = ANY (${arr([...new Set(KNOWN_FUNCTIONS)].sort(C))}))`)},
@@ -149,7 +152,7 @@ function drift(tables) {
         WHERE c.oid = ANY (${oids(tables)}) AND (${known('indexes')})`)})`
 }
 
-function verify({ migration, column, header, stateParts, rows, driftTables }) {
+function verify({ migration, column, header, stateParts, rows, driftTables, extraKnown }) {
   return `${header}
 SELECT json_build_object(
   'migration', '${migration}',
@@ -159,7 +162,7 @@ ${stateParts.map((p) => `                   (${p})`).join(',\n')}) o(x) WHERE o.
   'all_pass', bool_and(coalesce(t.ok, false)),
   'failed', coalesce(json_agg(t.name ORDER BY t.name) FILTER (WHERE NOT coalesce(t.ok, false)), '[]'::json),
   'checks', count(*),
-  'drift', ${drift(driftTables)}
+  'drift', ${drift(driftTables, extraKnown)}
 ) AS ${column}
 FROM (VALUES
 ${rows.join(',\n')}
@@ -281,6 +284,94 @@ const VERIFY_04 = verify({
   ],
 })
 
+// ── 20261106000000 (CR-V2-EXAM-INTEGRATION-X1): the customer_path_uat grant kind ─────────────────────────────────────────
+/** The five functions 20261106000000 replaces, by body (md5 of prosrc, captured from the committed migration). */
+const M06_BODIES = EXPECTED.functions_20261106
+const M06_KNOWN = { [`${GRANTS}.columns`]: ['grant_kind'], [`${GRANTS}.constraints`]: ['creator_record_v2_examination_uat_grants_kind_check'] }
+const S06_KIND = `(SELECT a.attrelid FROM pg_attribute a WHERE a.attrelid = to_regclass('public.${GRANTS}') AND a.attname = 'grant_kind' AND a.attnum > 0 AND NOT a.attisdropped)`
+const VERIFY_06 = verify({
+  migration: '20261106000000', column: 'verify_20261106', driftTables: P04, extraKnown: M06_KNOWN,
+  header: COMMON_HEADER('06', '20261106000000', 'CR-V2-EXAM-INTEGRATION-X1', '05')
+    + '\n-- Run 02 and 04 as well. On a database holding the E4 operator-UAT history they report that history as failed DATA checks'
+    + '\n-- (02: runs_rows_0, access_log_all_downloads; 04: grants_rows_0, documents_all_owner_upload, access_log_no_grant_rows) and,'
+    + '\n-- after 20261106000000, 04 also reports shape_runs_constraints (the run authority constraint this migration replaces). Any'
+    + '\n-- other failure is a STOP. The checks below are invariants: they hold in every later state, not only at apply time.',
+  stateParts: [S06_KIND,
+    `(SELECT oid FROM pg_constraint WHERE conrelid = to_regclass('public.${GRANTS}') AND conname = 'creator_record_v2_examination_uat_grants_kind_check')`,
+    `(SELECT oid FROM pg_constraint WHERE conrelid = to_regclass('public.${RUNS}') AND conname = 'creator_record_v2_examination_runs_authority_check' AND pg_get_constraintdef(oid) LIKE '%customer_path_synthetic_uat%')`],
+  rows: [
+    '  -- Migration-owned shapes (exact definitions of the named items)',
+    row('shape_grants_columns', shape('grants06_columns', GRANTS, 'columns')),
+    row('shape_grants_constraints', shape('grants06_constraints', GRANTS, 'constraints')),
+    row('shape_grants_indexes', shape('grants_indexes', GRANTS, 'indexes')),
+    row('shape_runs_columns', shape('runs05_columns', RUNS, 'columns')),
+    row('shape_runs_constraints', shape('runs06_constraints', RUNS, 'constraints')),
+    // Each body as committed: LF (as embedded in 05_apply) or CRLF (applied from a Windows checkout); one per function.
+    row('function_bodies', `(SELECT count(DISTINCT p.proname) FROM pg_proc p WHERE p.pronamespace = 'public'::regnamespace AND (p.proname::text, md5(p.prosrc)) IN (
+       ${Object.entries(M06_BODIES).flatMap(([n, ms]) => ms.map((m) => `(${lit(n)}, ${lit(m)})`)).join(', ')})) = ${Object.keys(M06_BODIES).length}`),
+    row('status_function_result', `coalesce(pg_get_function_result(to_regprocedure('public.creator_record_v2_examination_uat_status(text)')), '') = ${lit(EXPECTED.status_result_20261106)}`),
+    '  -- Data invariants: a run boundary agrees with its grant kind; a customer-path grant binds only its identity\'s own upload',
+    row('runs_boundary_matches_grant_kind', rowCount(RUNS, `uat_grant_id IS NOT NULL AND (execution_boundary = 'customer_path_synthetic_uat') <> (uat_grant_id IN (SELECT id FROM public.${GRANTS} WHERE grant_kind = 'customer_path_uat'))`, '0', `${S06_KIND} IS NULL`)),
+    row('customer_path_binds_owner_upload', rowCount(GRANTS, `grant_kind = 'customer_path_uat' AND bound_document_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM public.${DOC} d WHERE d.id = bound_document_id AND d.origin = 'owner_upload' AND d.seed_grant_id IS NULL AND d.user_id = test_user_id AND d.sha256 = document_sha256)`, '0', `${S06_KIND} IS NULL`)),
+    '  -- Security: every protected table and function, exact (unchanged by 20261106000000)',
+    row('table_privileges', tablePrivileges(P04)),
+    row('rls_on', rlsOn(P04)),
+    row('no_policies', noPolicies(P04)),
+    row('triggers', `${actualTriggers(P04)}
+    = ${arr(triggerList(TRIGGERS_05))}`),
+    row('table_owner', tableOwners([GRANTS])),
+    row('function_modes', functionModes([...FN.DOC1, ...M04_KEPT, ...M05_ALL])),
+    row('function_owner', functionOwners(M05_ALL)),
+    row('function_execute', functionExecute([...FN.DOC1, ...M04_KEPT, ...M05_ALL])),
+    row('doc1_function_bodies', doc1Bodies),
+  ],
+})
+/** The 02 / 04 checks the E4 operator-UAT history fails by design (data counts written for a pre-UAT database), and nothing else. */
+const E4_DATA_02 = ['access_log_all_downloads', 'runs_rows_0']
+const E4_DATA_04 = ['access_log_no_grant_rows', 'documents_all_owner_upload', 'grants_rows_0']
+/**
+ * The EXACT E4 history (expected.json e4_20261106, sourced from the committed E4 record and its e1_state reconciliation):
+ * one run, one document, one examination access event and one grant, each with its recorded identity and relationships.
+ * Anything more, less or different refuses. Checked runs → documents → examination events → grants, so the first
+ * difference is named. `afterMigration` adds the one expected schema difference: the grant then reads operator_seed.
+ */
+const E4 = EXPECTED.e4_20261106
+function e4Fingerprint(tag, afterMigration) {
+  const L = (s) => lit(String(s))
+  return `  -- The exact E4 history (08_Platform/implementation/CR_V2_PROD_UAT_E4_EXAMINATION_RECORD.md; expected.json e4_20261106).
+  IF (SELECT count(*) FROM public.${RUNS}) <> 1 OR NOT EXISTS (SELECT 1 FROM public.${RUNS} r
+       WHERE r.id = ${L(E4.run_id)} AND r.examination_key = ${L(E4.examination_key)} AND r.document_id = ${L(E4.document_id)}
+         AND r.user_id = ${L(E4.test_user_id)} AND r.uat_grant_id = ${L(E4.grant_id)} AND r.execution_boundary = 'operator_synthetic_uat'
+         AND r.environment_project_ref = ${L(E4.project_ref)} AND r.document_sha256 = ${L(E4.fixture_sha256)} AND r.replay_fixture_id = ${L(E4.fixture_id)}
+         AND r.outcome_status = 'examined' AND r.outcome_reason IS NULL AND r.supersedes_id IS NULL) THEN
+    RAISE EXCEPTION '${tag}: the examination runs are not exactly the E4 run';
+  END IF;
+  IF (SELECT count(*) FROM public.${DOC}) <> 1 OR NOT EXISTS (SELECT 1 FROM public.${DOC} d
+       WHERE d.id = ${L(E4.document_id)} AND d.user_id = ${L(E4.test_user_id)} AND d.sha256 = ${L(E4.fixture_sha256)}
+         AND d.origin = 'operator_synthetic_seed' AND d.seed_grant_id = ${L(E4.grant_id)} AND d.consent_version IS NULL AND d.state = 'stored') THEN
+    RAISE EXCEPTION '${tag}: the documents are not exactly the E4 seeded document';
+  END IF;
+  IF (SELECT count(*) FROM public.${LOG} WHERE purpose = 'examination') <> 1
+     OR (SELECT count(*) FROM public.${LOG} WHERE uat_grant_id IS NOT NULL) <> 1
+     OR NOT EXISTS (SELECT 1 FROM public.${LOG} l JOIN public.${RUNS} r ON r.access_log_id = l.id
+       WHERE l.purpose = 'examination' AND l.actor_role = 'owner' AND l.document_id = ${L(E4.document_id)}
+         AND l.actor_user_id = ${L(E4.test_user_id)} AND l.uat_grant_id = ${L(E4.grant_id)} AND r.id = ${L(E4.run_id)}) THEN
+    RAISE EXCEPTION '${tag}: the examination access events are not exactly the E4 event';
+  END IF;
+  IF (SELECT count(*) FROM public.${GRANTS}) <> 1 OR NOT EXISTS (SELECT 1 FROM public.${GRANTS} g
+       WHERE g.id = ${L(E4.grant_id)} AND g.test_user_id = ${L(E4.test_user_id)} AND g.document_sha256 = ${L(E4.fixture_sha256)}
+         AND g.bound_document_id = ${L(E4.document_id)} AND g.supabase_project_ref = ${L(E4.project_ref)}
+         AND g.created_at = ${L(E4.grant_created_at)}::timestamptz AND g.expires_at = ${L(E4.grant_expires_at)}::timestamptz
+         AND g.max_read_events = ${E4.grant_max_read_events} AND g.max_new_runs = ${E4.grant_max_new_runs}
+         AND g.revoked_at IS NOT NULL AND g.revoked_by IS NOT NULL AND g.revoke_reason IS NOT NULL${afterMigration ? `
+         AND g.grant_kind = 'operator_seed'` : ''}) THEN
+    RAISE EXCEPTION '${tag}: the UAT grants are not exactly the revoked E4 grant';
+  END IF;`
+}
+const onlyAllowed = (tag, label, allowed) => `  IF v->>'state' IS DISTINCT FROM 'applied' OR EXISTS (SELECT 1 FROM json_array_elements_text(v->'failed') f(name) WHERE NOT (f.name = ANY (${arr(allowed)}))) THEN
+    RAISE EXCEPTION '${tag}: ${label} is not applied, or fails a check other than the E4 history: %', v;
+  END IF;`
+
 // ── Apply files ─────────────────────────────────────────────────────────────────────────────────────────────────────
 /** Bounded waits for every apply transaction (see README: lock release, aborted sessions, idle and transaction timeouts). */
 const OPEN = `BEGIN;
@@ -310,7 +401,7 @@ const verifyInto = (sql, column) => `  SELECT x.${column} INTO v FROM (
 ${body(sql)}
   ) x;`
 
-function apply({ tag, migration, title, pre, verifySql, verifyFile, verifyColumn }) {
+function apply({ tag, migration, title, pre, post, verifySql, verifyFile, verifyColumn }) {
   return `-- CR-V2-PROD-UAT-D1 · ${tag} · APPLY ${migration} (${title}) — ONE transaction. Database operator only, in the SQL
 -- Editor of the verified Production project. GENERATED by build.js from the committed migration and ${verifyFile}: do not edit.
 --
@@ -347,7 +438,7 @@ BEGIN
 ${verifyInto(verifySql, verifyColumn)}
   IF v->>'state' IS DISTINCT FROM 'applied' OR (v->>'all_pass')::boolean IS NOT TRUE THEN
     RAISE EXCEPTION '${tag} post-check failed; nothing is committed: %', v;
-  END IF;
+  END IF;${post ? `\n${post}` : ''}
 END
 $d1_post$;
 
@@ -363,6 +454,7 @@ const DOC1_PRECHECKS = ['doc1_function_bodies', 'doc1_function_execute', 'doc1_f
 const FILES = {
   '02_verify_20261104.sql': VERIFY_02,
   '04_verify_20261105.sql': VERIFY_04,
+  '06_verify_20261106.sql': VERIFY_06,
   '01_apply_20261104.sql': apply({
     tag: 'D1A', migration: '20261104000000', title: 'creator_record_v2_examination_runs',
     verifySql: VERIFY_02, verifyFile: '02_verify_20261104.sql', verifyColumn: 'verify_20261104',
@@ -394,9 +486,39 @@ ${verifyInto(VERIFY_04, 'verify_20261105')}
   END IF;
   -- (The migration's own preconditions follow: historical consent consistency and the exact DOC-2C-B run constraints.)`,
   }),
+  '05_apply_20261106.sql': apply({
+    tag: 'X1P', migration: '20261106000000', title: 'creator_record_v2_customer_path_uat',
+    verifySql: VERIFY_06, verifyFile: '06_verify_20261106.sql', verifyColumn: 'verify_20261106',
+    pre: `  -- 20261106000000 wholly absent (checked first: a second run is named as such).
+${verifyInto(VERIFY_06, 'verify_20261106')}
+  IF v->>'state' IS DISTINCT FROM 'absent' THEN
+    RAISE EXCEPTION 'X1P refused: 20261106000000 is not absent (state %); run 06_verify_20261106.sql and stop', v->>'state';
+  END IF;
+  -- 20261104000000 and 20261105000000 applied, failing nothing but the E4 operator-UAT history (data counts).
+${verifyInto(VERIFY_02, 'verify_20261104')}
+${onlyAllowed('X1P refused', '20261104000000', E4_DATA_02)}
+${verifyInto(VERIFY_04, 'verify_20261105')}
+${onlyAllowed('X1P refused', '20261105000000', E4_DATA_04)}
+${e4Fingerprint('X1P refused', false)}
+  -- No examination authority in force while the schema changes: no active grant of any kind, no isolated-test marker.
+  IF EXISTS (SELECT 1 FROM public.${GRANTS} WHERE revoked_at IS NULL AND expires_at > now()) THEN
+    RAISE EXCEPTION 'X1P refused: an examination UAT grant is active; revoke it first';
+  END IF;
+  IF EXISTS (SELECT 1 FROM public.${MARK}) THEN
+    RAISE EXCEPTION 'X1P refused: the isolated-test environment marker exists; this is not the Production state';
+  END IF;
+  -- (The migration's own precondition follows: the exact 20261105000000 run authority constraint.)`,
+    post: `  -- 02 and 04 still fail nothing but the E4 history (04 also: the run authority constraint 20261106000000 replaced).
+${verifyInto(VERIFY_02, 'verify_20261104')}
+${onlyAllowed('X1P post-check failed; nothing is committed', '20261104000000', E4_DATA_02)}
+${verifyInto(VERIFY_04, 'verify_20261105')}
+${onlyAllowed('X1P post-check failed; nothing is committed', '20261105000000', [...E4_DATA_04, 'shape_runs_constraints'].sort(C))}
+  -- Every E4 row is still exactly as before; the grant now reads operator_seed (the one expected schema difference).
+${e4Fingerprint('X1P post-check failed; nothing is committed', true)}`,
+  }),
 }
 
-module.exports = { FILES, TABLE_PRIVS, TRIGGERS_04, TRIGGERS_05, FN }
+module.exports = { FILES, TABLE_PRIVS, TRIGGERS_04, TRIGGERS_05, FN, E4_DATA_02, E4_DATA_04 }
 if (require.main === module) {
   const check = process.argv.includes('--check')
   let stale = 0
