@@ -10,6 +10,9 @@
  * (default: stopped); the purchase and checkout routes re-check every condition.
  * CR-V2-EXAM-INTEGRATION-X3: documents and examination are offered only when the approved inputs also approve the
  * examination-bearing record (schema v6). Otherwise the page is exactly the v5 journey (Production today).
+ * CR-V2-UAT-PROD-MIN-1: while the submissions stop is in force, the one identity of an open synthetic UAT window
+ * (`synthetic-uat.ts`, inert by default) is admitted, still only with a pilot invitation, and is served the synthetic
+ * test inputs under a visible synthetic-test notice. Payment is never offered to it.
  */
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
@@ -42,15 +45,16 @@ export default async function CreatorRecordPage() {
   if (!userId) redirect('/auth/login')
 
   const deps = productionFlowDeps()
-  if (deps.submissions !== 'open') return <Unavailable message="Creator Record is not taking new submissions right now." />
+  const syntheticUat = deps.submissions !== 'open' && deps.syntheticUat !== undefined && deps.syntheticUat.admits(userId, deps.now())
+  if (deps.submissions !== 'open' && !syntheticUat) return <Unavailable message="Creator Record is not taking new submissions right now." />
   if (!(await deps.hasPilotAccess(userId))) return <Unavailable message="Creator Record is currently available by invitation only." />
 
-  const inputs = deps.inputs()
+  const inputs = syntheticUat ? deps.syntheticUat!.inputs() : deps.inputs()
   const today = deps.now().toISOString().slice(0, 10)
   const check = checkApprovedSources(inputs.sources, inputs.source_text, TOPIC_CLAIMS_FIXTURE, today, { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION })
   if (!check.ok || !inputs.source_text) return <Unavailable message="Creator Record is not available yet." />
   // CR-V2-EXAM-INTEGRATION-X3: offered only with an approval for the examination-bearing record.
-  const examinationOffered = checkApprovedSources(inputs.sources, inputs.source_text, TOPIC_CLAIMS_FIXTURE, today, { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION }).ok
+  const examinationOffered = checkApprovedSources(inputs.sources, inputs.source_text_examination ?? inputs.source_text, TOPIC_CLAIMS_FIXTURE, today, { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION }).ok
 
   return (
     <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
@@ -59,7 +63,8 @@ export default async function CreatorRecordPage() {
         presentation={inputs.sources.presentation}
         acknowledgements={inputs.source_text.acknowledgements}
         maxTools={inputs.sources.max_tools}
-        paymentOpen={CREATOR_RECORD_V2_ISSUANCE === 'enabled'}
+        paymentOpen={!syntheticUat && CREATOR_RECORD_V2_ISSUANCE === 'enabled'}
+        syntheticUat={syntheticUat}
         {...(examinationOffered ? { examination: { consentVersion: EVIDENCE_CONSENT_DRAFT_VERSION } } : {})}
       />
     </main>

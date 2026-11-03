@@ -13,6 +13,7 @@ import { examinationProjectionFor, type CustomerExaminationDeps, type CustomerEx
 import type { FlowDeps } from '@/lib/creator-record/customer-flow/service'
 import { productionExaminationDeps } from '@/lib/creator-record-flow/examination-production'
 import { hasPilotAccess } from './pilot-access'
+import { productionSyntheticUat } from '@/lib/creator-record/customer-flow/synthetic-uat'
 import { NO_STORE } from './http'
 
 export function productionCustomerExaminationDeps(): CustomerExaminationDeps {
@@ -21,6 +22,9 @@ export function productionCustomerExaminationDeps(): CustomerExaminationDeps {
     hasPilotAccess,
     adapter: productionExaminationDeps(),
     log: (event, detail) => console.warn(`[creator-record-v2/examination] ${event}`, detail),
+    // CR-V2-UAT-PROD-MIN-1: inert unless the committed UAT window names this identity and is open.
+    syntheticUat: productionSyntheticUat,
+    now: () => new Date(),
   }
 }
 

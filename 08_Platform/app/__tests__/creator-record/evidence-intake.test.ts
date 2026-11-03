@@ -506,3 +506,31 @@ describe('CR-V2-DOC-1B: no storage policy can reach the evidence bucket', () => 
     expect(sql).toContain(`AND d.state <> 'deleted') >= ${EVIDENCE_MAX_LIVE_PER_CREATOR} THEN`)
   })
 })
+
+describe('CR-V2-UAT-PROD-MIN-1: the identity-scoped synthetic UAT exception (submissions stopped)', () => {
+  test('inside the window only the synthetic fixture is accepted; after expiry no upload, listing or deletion, while the owner-download contract is unchanged', async () => {
+    const synthetic = pdf('1 0 obj << /Title (SYNTHETIC UAT) >> endobj')
+    let now = new Date('2026-11-05T10:00:00.000Z')
+    const window = { start: Date.parse('2026-11-05T09:00:00.000Z'), end: Date.parse('2026-11-05T15:00:00.000Z') }
+    const d = deps({
+      submissions: 'stopped',
+      now: () => now,
+      isSyntheticTestDocument: (s: string) => s === sha(synthetic),
+      syntheticUat: { admits: (u: string, t: Date) => u === USER && t.getTime() >= window.start && t.getTime() < window.end },
+    })
+    // Inside the window: the UAT identity, synthetic fixture only; anyone else stays stopped.
+    expect(await upload(d, pdf())).toMatchObject({ status: 403, code: 'synthetic_documents_only' })
+    const r = await upload(d, synthetic)
+    if (!r.ok) throw new Error('upload')
+    expect(await upload(d, synthetic, OTHER)).toMatchObject({ status: 503, code: 'submissions_stopped' })
+    // After expiry: every write and the listing are closed again.
+    now = new Date('2026-11-05T15:00:00.000Z')
+    expect(await upload(d, synthetic)).toMatchObject({ status: 503, code: 'submissions_stopped' })
+    expect(await listEvidence(d, USER)).toMatchObject({ status: 503, code: 'submissions_stopped' })
+    expect(await deleteEvidence(d, USER, r.document.id)).toMatchObject({ status: 503, code: 'submissions_stopped' })
+    // The existing owner-download contract (not a UAT operation) is unchanged: the owner (logged), never another user.
+    expect(await readEvidenceFile(d, { userId: USER, isAdmin: false }, r.document.id)).toMatchObject({ ok: true, bytes: synthetic })
+    expect(await readEvidenceFile(d, { userId: OTHER, isAdmin: false }, r.document.id)).toMatchObject({ status: 404, code: 'not_found' })
+    expect(d.store.access).toEqual([{ document_id: r.document.id, actor: USER, role: 'owner' }])
+  })
+})

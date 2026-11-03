@@ -22,7 +22,7 @@ import type { PreparedView } from '@/lib/creator-record/customer-flow/service'
 import { V2_REVIEW_PAGE } from '@/lib/creator-record-flow/wording'
 import { EvidencePanel } from '@/components/creator-record/EvidencePanel'
 import { ExaminationReview } from '@/components/creator-record/ExaminationReview'
-import { EXAM_TEXT, attachmentsOf, preparedBody, type Attachment, type ResponseInput } from '@/lib/creator-record-flow/examination-ui'
+import { EXAM_TEXT, SYNTHETIC_UAT_NOTICE, attachmentsOf, preparedBody, type Attachment, type ResponseInput } from '@/lib/creator-record-flow/examination-ui'
 
 const SECTION_TITLES: Record<string, string> = {
   project: 'About the video',
@@ -49,6 +49,8 @@ interface Props {
   paymentOpen: boolean
   /** CR-V2-EXAM-INTEGRATION-X3: offered only when the page says so (display only; the server decides). */
   examination?: { consentVersion: string }
+  /** CR-V2-UAT-PROD-MIN-1: this session is the identity-scoped synthetic UAT (display only; the server decides). */
+  syntheticUat?: boolean
 }
 
 export function CreatorRecordV2Client(props: Props) {
@@ -163,12 +165,20 @@ export function CreatorRecordV2Client(props: Props) {
     window.scrollTo({ top: 0 })
   }
 
+  const uatNotice = props.syntheticUat ? (
+    <div role="note" className="mb-6 rounded-lg border-2 p-4" style={{ borderColor: '#b42318', backgroundColor: '#FEF3F2' }} data-synthetic-uat>
+      <p className="text-sm font-semibold" style={{ color: '#b42318' }}>{SYNTHETIC_UAT_NOTICE.title}</p>
+      <p className="text-sm" style={{ color: '#7a271a' }}>{SYNTHETIC_UAT_NOTICE.body}</p>
+    </div>
+  ) : null
+
   if (mode === 'review' && view) {
     const reviewed = view.status === 'reviewed'
     const single = view.declarations.answers.filter((a) => a.tool_index === null)
     const tools = Array.from(new Set(view.declarations.answers.filter((a) => a.tool_index !== null).map((a) => a.tool_index as number))).sort((a, b) => a - b)
     return (
       <div>
+        {uatNotice}
         <h1 className="font-display text-2xl font-bold mb-2" style={{ color: INK }}>Check your declarations</h1>
         <p className="text-sm mb-6" style={{ color: MUTED }}>
           This is exactly what SI8 recorded from your answers (version {view.version}). SI8 has not checked them. If anything is wrong, correct your answers. The corrected version is then the one you review.
@@ -232,6 +242,7 @@ export function CreatorRecordV2Client(props: Props) {
 
   return (
     <div>
+      {uatNotice}
       <h1 className="font-display text-2xl font-bold mb-2" style={{ color: INK }}>Creator Record</h1>
       <p className="text-sm mb-8" style={{ color: MUTED }}>
         Tell us about your video and how you made it. You will check your declarations before anything is completed. SI8 does not check your answers.

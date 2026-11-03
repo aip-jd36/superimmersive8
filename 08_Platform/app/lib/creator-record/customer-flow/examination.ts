@@ -42,6 +42,12 @@ export interface CustomerExaminationDeps {
   /** The persistence adapter's ports (production: replay-only core). */
   adapter: ExaminationAdapterDeps
   log?(event: string, detail: Record<string, unknown>): void
+  /**
+   * CR-V2-UAT-PROD-MIN-1: the identity-scoped synthetic UAT exception to the submissions stop (pilot invitation still
+   * required). Examination authority itself stays with the database grant.
+   */
+  syntheticUat?: { admits(userId: string, now: Date): boolean }
+  now?(): Date
 }
 
 export type CustomerExaminationErrorCode =
@@ -70,7 +76,8 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const err = (status: CustomerExaminationError['status'], code: CustomerExaminationErrorCode): CustomerExaminationError => ({ ok: false, status, code })
 
 async function gate(deps: CustomerExaminationDeps, userId: string): Promise<CustomerExaminationError | null> {
-  if (deps.submissions !== 'open') return err(503, 'submissions_stopped')
+  const uat = deps.syntheticUat !== undefined && deps.syntheticUat.admits(userId, deps.now ? deps.now() : new Date())
+  if (deps.submissions !== 'open' && !uat) return err(503, 'submissions_stopped')
   if (!(await deps.hasPilotAccess(userId))) return err(403, 'not_invited')
   return null
 }

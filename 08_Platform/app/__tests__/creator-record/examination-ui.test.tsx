@@ -158,7 +158,9 @@ describe('client and page boundaries', () => {
   })
 
   test('examination is offered only with an approval for the v6 record; the page gates are unchanged', () => {
-    expect(page).toContain("if (deps.submissions !== 'open') return <Unavailable")
+    // CR-V2-UAT-PROD-MIN-1: the stop admits only the identity of an open synthetic UAT window (pilot still required).
+    expect(page).toContain("if (deps.submissions !== 'open' && !syntheticUat) return <Unavailable")
+    expect(page.indexOf('deps.hasPilotAccess(userId)')).toBeGreaterThan(page.indexOf('&& !syntheticUat) return <Unavailable'))
     expect(page).toContain('CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION }).ok')
     expect(page).toContain('...(examinationOffered ? { examination: { consentVersion: EVIDENCE_CONSENT_DRAFT_VERSION } } : {})')
   })

@@ -48,6 +48,12 @@ export const EXAM_TEXT = {
   payment_blocked: 'This version includes examination findings, so it cannot be paid for or issued. Prepare a version without them to continue.',
 } as const
 
+/** CR-V2-UAT-PROD-MIN-1: shown on every page of the identity-scoped synthetic UAT (draft; display only). */
+export const SYNTHETIC_UAT_NOTICE = {
+  title: 'SYNTHETIC TEST — SI8 internal UAT only',
+  body: 'This session uses synthetic test content and DRAFT, unapproved wording and consent. Nothing here is a Creator Record, a customer agreement, a verification or commercial clearance. Payment and issuance are not available.',
+} as const
+
 export const COMPARISON_LABELS: Record<string, string> = {
   appears_consistent: 'Appears consistent',
   appears_to_conflict: 'Appears to conflict',

@@ -31,6 +31,10 @@ import type { PdfTemplateApproval } from '../customer-pdf/templates'
 import type { PublicationAuthorityBundle } from './publication-authority'
 
 /** The synthetic authority's name. Reads as synthetic everywhere (governance mode refuses such text too). */
+// NOTE (CR-V2-UAT-PROD-MIN-1): the name below says "staging rehearsal only" for historical reasons (it was written for the
+// M4C staging rehearsal). It is deliberately NOT renamed: it is part of the pinned identity and digests. It is reused,
+// unchanged, solely for the isolated identity-scoped synthetic Production UAT (`../customer-flow/synthetic-uat`). In every
+// context it means the same thing: synthetic, no SI8 decision, not approved customer content, never issuable.
 export const SYNTHETIC_TEST_AUTHORITY_NAME = 'SYNTHETIC TEST AUTHORITY (staging rehearsal only; no SI8 decision)'
 const DECISION_DATE = '2026-11-01'
 
@@ -238,6 +242,17 @@ const SOURCE_TEXT_APPROVAL: SourceTextApproval = {
   decision_date: DECISION_DATE,
   review_ref: 'SYN-M4C-TEXT-1',
 }
+
+/**
+ * CR-V2-UAT-PROD-MIN-1: the same synthetic wording, approved by the SAME synthetic test authority for the
+ * examination-bearing record (schema v6). Served only to the one identity of an open synthetic UAT window
+ * (`../customer-flow/synthetic-uat`); never part of any governance bundle.
+ */
+export const SYNTHETIC_TEST_V6_SOURCE_TEXT_APPROVAL: SourceTextApproval = Object.freeze({
+  ...SOURCE_TEXT_APPROVAL,
+  record_schema: { id: RECORD_SCHEMA.id, version: 6 },
+  review_ref: 'SYN-UAT-PROD-MIN-TEXT-V6-1',
+})
 
 const PDF_TEMPLATE_APPROVAL: PdfTemplateApproval = {
   template_id: 'si8/creator-record-v2-pdf-templates',

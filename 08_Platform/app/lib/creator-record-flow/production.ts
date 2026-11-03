@@ -17,6 +17,7 @@ import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/confi
 import { hasPilotAccess, PILOT_ACCESS_TABLE } from './pilot-access'
 import { evidenceObjects, evidenceStore } from './evidence-production'
 import { productionExaminationProjections } from '@/lib/creator-record-flow/examination-customer'
+import { productionSyntheticUat } from '@/lib/creator-record/customer-flow/synthetic-uat'
 import { verifyEvidenceIntact } from '@/lib/creator-record/evidence-intake/service'
 
 /** CR-V2-DOC-1B: referenced documents still held intact (row stored, same fingerprint, bytes present and re-hashed). */
@@ -100,6 +101,8 @@ export function productionFlowDeps(): FlowDeps {
     evidence: evidenceStore,
     // CR-V2-EXAM-INTEGRATION-X3: the persisted, re-verified projection of an owned document's run (only when asked).
     examinations: productionExaminationProjections,
+    // CR-V2-UAT-PROD-MIN-1: inert unless the committed UAT window names this identity and is open.
+    syntheticUat: productionSyntheticUat,
   }
 }
 

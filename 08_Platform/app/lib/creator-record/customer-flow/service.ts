@@ -30,6 +30,11 @@
  *     exists in it. A response is therefore given by preparing a new version. Earlier responses are never copied: the
  *     server only LISTS those whose target is unchanged (`carry_forward_candidates`) for explicit re-affirmation.
  *   - Without `include_examinations` (or with no examined document) the record is the v5 record, byte for byte.
+ *
+ * CR-V2-UAT-PROD-MIN-1 (identity-scoped synthetic UAT, `./synthetic-uat`): while the submissions stop is in force,
+ * `deps.syntheticUat` may admit ONE named identity inside ONE fixed window, still requiring the pilot invitation; that
+ * request alone is served the synthetic test inputs. A version built from synthetic sources is readable only by a
+ * request admitted to synthetic inputs, so expiry or a removed invitation also closes retrieval and review.
  */
 
 import type { FormIssue } from '../prototype/form'
@@ -41,6 +46,7 @@ import type { SourceTextInput, TopicClaims } from '../customer-record/sources'
 import { parseEvidenceReferences } from '../evidence-intake/contract'
 import { carryForwardCandidates, CREATOR_RESPONSE_CODES, type CreatorResponseInput, type CustomerRecordExaminationInput } from '../customer-record/examination-section'
 import type { DocumentProjection } from './examination'
+import { isSyntheticRecordAuthority, type SyntheticUatPorts } from './synthetic-uat'
 import { resolveEvidenceReferences, type EvidenceStore } from '../evidence-intake/service'
 
 export type PreparedStatus = 'prepared' | 'reviewed'
@@ -76,6 +82,8 @@ export interface PreparedStore {
 export interface ApprovedInputs {
   sources: CreatorRecordSources
   source_text: SourceTextInput | null
+  /** CR-V2-UAT-PROD-MIN-1: the wording approval for an examination-bearing (v6) version, when the inputs have one. */
+  source_text_examination?: SourceTextInput | null
 }
 
 export type SubmissionsMode = 'open' | 'stopped'
@@ -99,6 +107,8 @@ export interface FlowDeps {
    * Absent → a version asking to include examinations is refused (fail closed).
    */
   examinations?: { projectionFor(userId: string, documentId: string): Promise<DocumentProjection> }
+  /** CR-V2-UAT-PROD-MIN-1: the identity-scoped synthetic UAT exception. Absent or inert = none. */
+  syntheticUat?: SyntheticUatPorts
 }
 
 export interface PreparedView {
@@ -159,10 +169,27 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 type WithoutOk<T> = T extends unknown ? Omit<T, 'ok'> : never
 const err = (e: WithoutOk<FlowError>): FlowError => ({ ok: false, ...e }) as FlowError
 
-async function gate(deps: FlowDeps, userId: string): Promise<FlowError | null> {
-  if (deps.submissions !== 'open') return err({ status: 503, code: 'submissions_stopped' })
+/** Who may use the customer flow now, and with which approved inputs. The pilot invitation is always required. */
+interface Admission { uat: boolean; inputs: () => ApprovedInputs }
+async function admit(deps: FlowDeps, userId: string): Promise<Admission | FlowError> {
+  const uat = deps.submissions !== 'open' && deps.syntheticUat !== undefined && deps.syntheticUat.admits(userId, deps.now())
+  if (deps.submissions !== 'open' && !uat) return err({ status: 503, code: 'submissions_stopped' })
   if (!(await deps.hasPilotAccess(userId))) return err({ status: 403, code: 'not_invited' })
-  return null
+  return { uat, inputs: uat ? deps.syntheticUat!.inputs : deps.inputs }
+}
+const refused = (a: Admission | FlowError): a is FlowError => 'ok' in a
+
+/**
+ * CR-V2-UAT-PROD-MIN-1: a version built from synthetic sources is readable only by a request admitted to synthetic
+ * inputs (an open UAT window for this identity, or an environment whose own inputs are synthetic). Otherwise it is
+ * closed: the stop's answer when no admission exists, not_found when admitted only to non-synthetic inputs.
+ */
+async function syntheticClosed(deps: FlowDeps, userId: string, record: CustomerRecordV2): Promise<FlowError | null> {
+  if (!isSyntheticRecordAuthority(record.sources.source_text.authority)) return null
+  const a = await admit(deps, userId)
+  if (refused(a)) return a
+  const own = a.inputs().source_text?.approval?.authority
+  return isSyntheticRecordAuthority(own) ? null : err({ status: 404, code: 'not_found' })
 }
 
 function viewOf(row: PreparedRow, record: CustomerRecordV2): PreparedView {
@@ -239,8 +266,8 @@ async function ownedVerified(deps: FlowDeps, userId: string, id: unknown): Promi
  * the database re-checks the same at insert. A foreign, missing, pending or deleted document refuses.
  */
 export async function preparePrepared(deps: FlowDeps, userId: string, body: unknown): Promise<FlowResult> {
-  const gated = await gate(deps, userId)
-  if (gated) return gated
+  const admission = await admit(deps, userId)
+  if (refused(admission)) return admission
 
   if (!body || typeof body !== 'object' || Array.isArray(body)) return err({ status: 400, code: 'invalid_request' })
   const b = body as Record<string, unknown>
@@ -304,11 +331,14 @@ export async function preparePrepared(deps: FlowDeps, userId: string, body: unkn
 
   const id = deps.newId()
   const now = deps.now()
-  const inputs = deps.inputs()
+  const inputs = admission.inputs()
+  // CR-V2-UAT-PROD-MIN-1: an examination-bearing version uses the inputs' v6 approval when they have one.
+  const examinationBearing = examinations.length > 0 || responses.length > 0
+  const sourceText = examinationBearing && inputs.source_text_examination ? inputs.source_text_examination : inputs.source_text
   const built = buildCustomerRecord({
     state: parsed.state,
     sources: inputs.sources,
-    source_text: inputs.source_text,
+    source_text: sourceText,
     topicClaims: deps.topicClaims,
     as_of: now.toISOString().slice(0, 10),
     record: { record_id: `PREP-${id}`, record_version: version, captured_at: now.toISOString() },
@@ -356,15 +386,19 @@ export async function preparePrepared(deps: FlowDeps, userId: string, body: unkn
 export async function getPrepared(deps: FlowDeps, userId: string, id: unknown): Promise<FlowResult> {
   const r = await ownedVerified(deps, userId, id)
   if ('ok' in r) return r
+  const closed = await syntheticClosed(deps, userId, r.record)
+  if (closed) return closed
   return { ok: true, view: viewOf(r.row, r.record) }
 }
 
 /** Freeze the draft's latest version as reviewed. Idempotent for an already reviewed version. */
 export async function reviewPrepared(deps: FlowDeps, userId: string, id: unknown): Promise<FlowResult> {
-  const gated = await gate(deps, userId)
-  if (gated) return gated
+  const admission = await admit(deps, userId)
+  if (refused(admission)) return admission
   const r = await ownedVerified(deps, userId, id)
   if ('ok' in r) return r
+  const closed = await syntheticClosed(deps, userId, r.record)
+  if (closed) return closed
   if (r.row.status === 'reviewed') return { ok: true, view: viewOf(r.row, r.record) }
 
   const latest = await deps.store.latestVersion(r.row.draft_id)

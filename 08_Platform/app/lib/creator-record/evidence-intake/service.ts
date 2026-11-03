@@ -110,6 +110,11 @@ export interface EvidenceDeps {
   newId(): string
   now(): Date
   log?(event: string, detail: Record<string, unknown>): void
+  /**
+   * CR-V2-UAT-PROD-MIN-1: the identity-scoped synthetic UAT exception to the submissions stop (one named identity, one
+   * fixed window; the pilot invitation is still required). Absent or inert = none. The synthetic-only lock is unchanged.
+   */
+  syntheticUat?: { admits(userId: string, now: Date): boolean }
 }
 
 export interface EvidenceView {
@@ -137,7 +142,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const viewOf = (r: EvidenceRow): EvidenceView => ({ id: r.id, file_name: r.file_name, media_type: r.media_type, byte_size: r.byte_size, sha256: r.sha256, created_at: r.created_at })
 
 async function gate(deps: EvidenceDeps, userId: string): Promise<EvidenceError | null> {
-  if (deps.submissions !== 'open') return err({ status: 503, code: 'submissions_stopped' })
+  if (deps.submissions !== 'open' && !(deps.syntheticUat && deps.syntheticUat.admits(userId, deps.now()))) return err({ status: 503, code: 'submissions_stopped' })
   if (!(await deps.hasPilotAccess(userId))) return err({ status: 403, code: 'not_invited' })
   return null
 }
