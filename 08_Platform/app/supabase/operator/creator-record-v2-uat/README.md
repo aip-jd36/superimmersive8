@@ -1,6 +1,9 @@
 # CR-V2-PROD-UAT-B: Operator Synthetic Examination UAT Runbook
 
 **Status: reviewed tooling only. Running any step against staging or Production needs its own explicit approval.**
+**Production progress:**
+- **Steps 1–2 (preflight, migrations): done on 2026-11-03** (operator-reported). See `08_Platform/implementation/CR_V2_PROD_UAT_D_MIGRATION_RECORD.md`.
+- **Steps 3 onward** (test identity, grant, seed, examine): **not started**, and each still needs its own approval.
 
 ## Scope
 

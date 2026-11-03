@@ -1,5 +1,7 @@
 # CR-V2-PROD-UAT-B: Read-Only Preflight Before Migrations 20261104000000 + 20261105000000
 
+**Production is past this pack.** Both migrations were applied on 2026-11-03 (operator-reported; `08_Platform/implementation/CR_V2_PROD_UAT_D_MIGRATION_RECORD.md`). There, U1 now returns every value `true`, and the "before the migrations" expectations below no longer apply.
+
 Four **read-only** queries for the SQL Editor of the target project. Each one is a single `SELECT` that writes nothing; `__tests__/ops/cr-v2-uat-preflight-sql.test.ts` enforces this. Each query was also executed inside a `READ ONLY` transaction on PostgreSQL 15, against the schema the repository's migrations produce (`__tests__/db/creator-record-v2-operator-uat.db.test.ts`).
 
 None of them returns personal data, ids, file names, paths or consent text: only booleans, counts and catalog definitions.

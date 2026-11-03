@@ -1,6 +1,6 @@
 # CR-V2-PROD-UAT-D1: Production Migration Execution Pack (20261104000000 → 20261105000000)
 
-**Status: prepared and tested locally only. Running any file here against Production needs its own explicit approval.**
+**Status: APPLIED TO PRODUCTION, 2026-11-03 (operator-reported).** 01 → 04 committed and verified, with all checks passing and no drift. See `08_Platform/implementation/CR_V2_PROD_UAT_D_MIGRATION_RECORD.md`. Do not run 01 or 03 again: their pre-checks refuse anyway. The verification queries (02, 04) remain safe to run at any time.
 
 This pack applies the two committed migrations to Production, each in one bounded transaction, and proves the result. It creates **no** grant, marker, user, document or run, and it changes no Production stop.
 
@@ -139,7 +139,7 @@ These can't weaken the migrations' security: an extra trigger, policy, privilege
 | **After the first grant is created** | **Irreversible by design.** Grants, documents, access events and runs are never deleted (no retention policy exists). Rolling back 20261105 is refused. The only lever is revocation (`revoke_grant.sql`): with no active grant and no marker, every examination read and run is refused. Any further change is forward-only and needs its own decision. |
 | **Never** | Re-apply `20261104000000` after `20261105000000`: it would restore the grant-unaware functions (fail-closed, but it breaks the grant path). Run `supabase db push` against Production: no migration here is recorded in the CLI history, so it would try to re-run the whole history. |
 
-**Production code is unaffected either way.** The deployed `fc7bc89b` has no route or job that calls any object these migrations create. DOC-1 intake, downloads and owner deletion keep their exact behaviour (tested), so applying them, or not, changes no live behaviour.
+**Production code is unaffected either way.** The application deployed when the migrations were applied (`08f5190d`) has no route or job that calls any object these migrations create. DOC-1 intake, downloads and owner deletion keep their exact behaviour (tested), so applying them, or not, changes no live behaviour.
 
 ## PostgreSQL 17.6 and managed Supabase
 
