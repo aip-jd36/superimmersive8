@@ -10,12 +10,19 @@
  * CR-V2-MVP-M3: once confirmed, "Continue to payment" asks the server to create (or
  * return) the submission for that version, then opens the existing checkout. The
  * server re-checks every condition at both steps; `paymentOpen` only hides the button.
+ *
+ * CR-V2-EXAM-INTEGRATION-X3: only when the page offers examination (`examination`), the creator can add synthetic test
+ * documents, examine them, include the findings in a version, and respond to them. Every step goes through the server;
+ * a response is recorded by preparing a new version. Without `examination` this client is exactly the v5 journey.
  */
 import { useState } from 'react'
 import { CreatorRecordQuestionnaire, type QuestionnaireProps } from '@/components/creator-record/CreatorRecordQuestionnaire'
 import type { CreatorRecordFormState, FormIssue } from '@/lib/creator-record/prototype/form'
 import type { PreparedView } from '@/lib/creator-record/customer-flow/service'
 import { V2_REVIEW_PAGE } from '@/lib/creator-record-flow/wording'
+import { EvidencePanel } from '@/components/creator-record/EvidencePanel'
+import { ExaminationReview } from '@/components/creator-record/ExaminationReview'
+import { EXAM_TEXT, attachmentsOf, preparedBody, type Attachment, type ResponseInput } from '@/lib/creator-record-flow/examination-ui'
 
 const SECTION_TITLES: Record<string, string> = {
   project: 'About the video',
@@ -40,6 +47,8 @@ interface Props {
   maxTools: number
   /** CR-V2-MVP-M3: whether v2 issuance is enabled (display only; the server decides). */
   paymentOpen: boolean
+  /** CR-V2-EXAM-INTEGRATION-X3: offered only when the page says so (display only; the server decides). */
+  examination?: { consentVersion: string }
 }
 
 export function CreatorRecordV2Client(props: Props) {
@@ -50,6 +59,36 @@ export function CreatorRecordV2Client(props: Props) {
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [formKey, setFormKey] = useState(0)
+  const [attachments, setAttachments] = useState<Attachment[]>([])
+  const [includeExaminations, setIncludeExaminations] = useState(false)
+
+  async function post(body: Record<string, unknown>): Promise<boolean> {
+    const res = await fetch('/api/creator-record-v2/prepared', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+    const json = await res.json().catch(() => ({}))
+    if (res.ok && json.prepared) {
+      setView(json.prepared as PreparedView)
+      setMode('review')
+      window.scrollTo({ top: 0 })
+      return true
+    }
+    setIssues(Array.isArray(json.issues) ? json.issues : [])
+    setError(typeof json.error === 'string' ? json.error : FAILED)
+    return false
+  }
+
+  /** CR-V2-EXAM-INTEGRATION-X3: responses are recorded on a NEW version with exactly this version's inputs. */
+  async function respond(responses: ResponseInput[]) {
+    if (!view) return
+    setBusy(true)
+    setError(null)
+    try {
+      await post(preparedBody({ state: view.form_state, draftId: view.draft_id, attachments: attachmentsOf(view), includeExaminations: true, responses }))
+    } catch {
+      setError(FAILED)
+    } finally {
+      setBusy(false)
+    }
+  }
 
   async function submit(state: CreatorRecordFormState) {
     setBusy(true)
@@ -57,20 +96,9 @@ export function CreatorRecordV2Client(props: Props) {
     setIssues([])
     setLastState(state)
     try {
-      const res = await fetch('/api/creator-record-v2/prepared', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ state, ...(view ? { draft_id: view.draft_id } : {}) }),
-      })
-      const json = await res.json().catch(() => ({}))
-      if (res.ok && json.prepared) {
-        setView(json.prepared as PreparedView)
-        setMode('review')
-        window.scrollTo({ top: 0 })
-      } else {
-        setIssues(Array.isArray(json.issues) ? json.issues : [])
-        setError(typeof json.error === 'string' ? json.error : FAILED)
-      }
+      await post(props.examination
+        ? preparedBody({ state, draftId: view?.draft_id ?? null, attachments, includeExaminations })
+        : { state, ...(view ? { draft_id: view.draft_id } : {}) })
     } catch {
       setError(FAILED)
     } finally {
@@ -126,6 +154,10 @@ export function CreatorRecordV2Client(props: Props) {
   function correct() {
     if (!view) return
     setLastState(view.form_state)
+    if (props.examination) {
+      setAttachments(attachmentsOf(view))
+      setIncludeExaminations(view.examination !== undefined)
+    }
     setMode('form')
     setFormKey((k) => k + 1)
     window.scrollTo({ top: 0 })
@@ -171,6 +203,7 @@ export function CreatorRecordV2Client(props: Props) {
             </div>
           ))}
         </section>
+        {view.examination && <ExaminationReview key={view.id} view={view} busy={busy} onRespond={(r) => void respond(r)} />}
         <section className="mb-6 rounded-lg border bg-white p-6" style={{ borderColor: LINE }} aria-labelledby="decl-acks">
           <h2 id="decl-acks" className="font-display text-lg font-semibold mb-3" style={{ color: INK }}>What you acknowledged</h2>
           <ul className="list-disc pl-5 space-y-2">
@@ -184,7 +217,10 @@ export function CreatorRecordV2Client(props: Props) {
               {busy ? 'Confirming…' : 'Confirm these declarations'}
             </button>
           )}
-          {reviewed && props.paymentOpen && (
+          {reviewed && props.paymentOpen && view.examination && (
+            <p className="text-sm" style={{ color: MUTED }} role="status">{EXAM_TEXT.payment_blocked}</p>
+          )}
+          {reviewed && props.paymentOpen && !view.examination && (
             <button type="button" className={primaryClass} style={{ backgroundColor: INK }} onClick={pay} disabled={busy}>
               {busy ? V2_REVIEW_PAGE.paying : V2_REVIEW_PAGE.pay}
             </button>
@@ -213,6 +249,16 @@ export function CreatorRecordV2Client(props: Props) {
         issues={issues}
         onSubmit={(state) => submit(state)}
       />
+      {props.examination && (
+        <EvidencePanel
+          consentVersion={props.examination.consentVersion}
+          maxTools={props.maxTools}
+          attachments={attachments}
+          onAttachmentsChange={setAttachments}
+          includeExaminations={includeExaminations}
+          onIncludeExaminationsChange={setIncludeExaminations}
+        />
+      )}
     </div>
   )
 }

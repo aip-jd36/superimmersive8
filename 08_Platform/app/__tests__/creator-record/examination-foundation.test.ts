@@ -532,7 +532,8 @@ describe('CR-V2-DOC-2B examination foundation', () => {
     // CR-V2-EXAM-INTEGRATION-X2: the creator examination service uses the unchanged adapter and read-back, and the
     // receipt profile identity only (no engine import).
     expect(importers).toEqual([
-      ['lib/creator-record/customer-flow/examination.ts', ['examination/persistence', 'examination/receipt-reading']],
+      // CR-V2-EXAM-INTEGRATION-X3: and the bounded projection, for a prepared record to carry.
+      ['lib/creator-record/customer-flow/examination.ts', ['examination/persistence', 'examination/projection', 'examination/receipt-reading']],
       ['lib/creator-record/customer-flow/purchase.ts', ['examination/projection']],
       ['lib/creator-record/customer-record/examination-section.ts', ['examination/projection']],
       ['lib/creator-record/customer-record/record.ts', ['examination/projection']],
@@ -546,7 +547,7 @@ describe('CR-V2-DOC-2B examination foundation', () => {
     // CR-V2-PROD-UAT-B: the operator CLI imports the production port; CR-V2-EXAM-INTEGRATION-X2: so does the creator
     // examination wiring (its one route is stopped by default, invite-only, and the database decides authority).
     expect(files.filter((f) => /(from\s+|import\s*\(\s*)['"][^'"]*creator-record-flow\/examination-production['"]/.test(readFileSync(f, 'utf8'))).map(rel).sort()).toEqual(['lib/creator-record-flow/examination-customer.ts', 'scripts/creator-record-v2-uat/examination-uat.ts'])
-    // ... and the only file importing that wiring is the creator examination route.
-    expect(files.filter((f) => /creator-record-flow\/examination-customer['"]/.test(readFileSync(f, 'utf8'))).map(rel)).toEqual(['app/api/creator-record-v2/evidence/[id]/examination/route.ts'])
+    // ... and only the creator examination route and (X3) the prepare flow's production ports import that wiring.
+    expect(files.filter((f) => /creator-record-flow\/examination-customer['"]/.test(readFileSync(f, 'utf8'))).map(rel).sort()).toEqual(['app/api/creator-record-v2/evidence/[id]/examination/route.ts', 'lib/creator-record-flow/production.ts'])
   })
 })

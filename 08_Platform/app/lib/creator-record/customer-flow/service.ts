@@ -21,6 +21,15 @@
  *     must itself be reviewed.
  *   - Every read re-verifies the stored canonical record against its digest and
  *     the row's own identity columns; a mismatch fails closed.
+ *
+ * CR-V2-EXAM-INTEGRATION-X3 (examination in a record):
+ *   - `include_examinations: true` asks the SERVER to attach, for each referenced document, the bounded projection of
+ *     the creator's one persisted, re-verified run (X0; `deps.examinations`). The browser never supplies a projection,
+ *     a comparison or an envelope. Comparisons are derived by the builder from THIS version's declarations.
+ *   - `responses` (closed codes) are recorded for THIS version only and must target an observation or comparison that
+ *     exists in it. A response is therefore given by preparing a new version. Earlier responses are never copied: the
+ *     server only LISTS those whose target is unchanged (`carry_forward_candidates`) for explicit re-affirmation.
+ *   - Without `include_examinations` (or with no examined document) the record is the v5 record, byte for byte.
  */
 
 import type { FormIssue } from '../prototype/form'
@@ -30,6 +39,8 @@ import type { CreatorRecordSources } from '../prototype/build-draft'
 import { buildCustomerRecord, verifyCustomerRecord, CUSTOMER_RECORD_SCHEMA, type CustomerRecordV2 } from '../customer-record/record'
 import type { SourceTextInput, TopicClaims } from '../customer-record/sources'
 import { parseEvidenceReferences } from '../evidence-intake/contract'
+import { carryForwardCandidates, CREATOR_RESPONSE_CODES, type CreatorResponseInput, type CustomerRecordExaminationInput } from '../customer-record/examination-section'
+import type { DocumentProjection } from './examination'
 import { resolveEvidenceReferences, type EvidenceStore } from '../evidence-intake/service'
 
 export type PreparedStatus = 'prepared' | 'reviewed'
@@ -83,6 +94,11 @@ export interface FlowDeps {
    * version that references any document is refused (fail closed).
    */
   evidence?: Pick<EvidenceStore, 'get'>
+  /**
+   * CR-V2-EXAM-INTEGRATION-X3: the bounded projection of the creator's persisted run for a document they own.
+   * Absent → a version asking to include examinations is refused (fail closed).
+   */
+  examinations?: { projectionFor(userId: string, documentId: string): Promise<DocumentProjection> }
 }
 
 export interface PreparedView {
@@ -103,14 +119,36 @@ export interface PreparedView {
   /** CR-V2-DOC-1: the documents this version references, exactly as recorded (inventory only, not examined). */
   documents: { document_id: string; file_name: string; media_type: string; byte_size: number; sha256: string; category: string; tool_index: number | null }[]
   guidance_items: number
+  /**
+   * CR-V2-EXAM-INTEGRATION-X3: present only on an examination-bearing version (record schema v6), exactly as recorded:
+   * each examined document's unverified observations and limitations, the comparisons derived from THIS version's
+   * declarations, and THIS version's creator responses. Never a verification, finding or clearance.
+   */
+  examination?: ExaminationView
+  /** Earlier responses whose target is unchanged in this version: listed for explicit re-affirmation, never applied. */
+  carry_forward_candidates?: CreatorResponseInput[]
+}
+
+export interface ExaminationView {
+  documents: {
+    document_id: string
+    run_id: string
+    verification: 'not_verified'
+    outcome: { status: string; reason: string | null }
+    observations: { observation_id: string; field: string; qualifier: string | null; basis: string; status: string; value: string | null; excerpt: string | null; verification: 'not_verified' }[]
+    limitations: string[]
+  }[]
+  comparisons: { tool_index: number; document_id: string; run_id: string; declared: { tool_id: string | null; plan: string | null }; provider: { result: string; reason: string }; plan: { result: string; reason: string } }[]
+  responses: { target: CreatorResponseInput['target']; code: CreatorResponseInput['code']; given_in_version: number }[]
+  response_codes: readonly string[]
 }
 
 export type FlowError =
-  | { ok: false; status: 400; code: 'invalid_request' | 'invalid_documents' }
+  | { ok: false; status: 400; code: 'invalid_request' | 'invalid_documents' | 'invalid_responses' }
   | { ok: false; status: 400; code: 'invalid_answers'; issues: FormIssue[] }
   | { ok: false; status: 403; code: 'not_invited' }
   | { ok: false; status: 404; code: 'not_found' }
-  | { ok: false; status: 409; code: 'superseded' | 'conflict' }
+  | { ok: false; status: 409; code: 'superseded' | 'conflict' | 'examination_unavailable' }
   | { ok: false; status: 500; code: 'integrity_failure' }
   | { ok: false; status: 503; code: 'submissions_stopped' | 'unavailable' }
 
@@ -143,6 +181,31 @@ function viewOf(row: PreparedRow, record: CustomerRecordV2): PreparedView {
     },
     documents: record.documents.items.map((d) => ({ document_id: d.document_id, file_name: d.file_name, media_type: d.media_type, byte_size: d.byte_size, sha256: d.sha256, category: d.category, tool_index: d.tool_index })),
     guidance_items: record.guidance.items.length,
+    ...(record.schema_version === 6 ? { examination: examinationViewOf(record) } : {}),
+  }
+}
+
+/** CR-V2-EXAM-INTEGRATION-X3: the examination-bearing parts of a verified v6 record, as recorded (no interpretation). */
+function examinationViewOf(record: CustomerRecordV2): ExaminationView {
+  const documents: ExaminationView['documents'] = []
+  for (const d of record.documents.items) {
+    if (typeof d.examination !== 'object' || d.examination === null) continue
+    const e = d.examination.envelope
+    documents.push({
+      document_id: d.document_id,
+      run_id: d.examination.run_id,
+      verification: d.examination.verification,
+      outcome: { status: e.outcome.status, reason: e.outcome.reason },
+      observations: e.observations.map((o) => ({ observation_id: o.observation_id, field: o.field, qualifier: o.qualifier, basis: o.basis, status: o.status, value: o.value, excerpt: o.excerpt, verification: o.verification })),
+      limitations: [...e.limitations],
+    })
+  }
+  const comparisons = record.comparison.policy === 'derived_per_version' ? record.comparison.items : []
+  return {
+    documents,
+    comparisons: comparisons.map((c) => ({ tool_index: c.tool_index, document_id: c.document_id, run_id: c.run_id, declared: { ...c.declared }, provider: { result: c.provider.result, reason: c.provider.reason }, plan: { result: c.plan.result, reason: c.plan.reason } })),
+    responses: (record.creator_responses?.items ?? []).map((r) => ({ target: r.target, code: r.code, given_in_version: r.given_in_version })),
+    response_codes: CREATOR_RESPONSE_CODES,
   }
 }
 
@@ -181,7 +244,13 @@ export async function preparePrepared(deps: FlowDeps, userId: string, body: unkn
 
   if (!body || typeof body !== 'object' || Array.isArray(body)) return err({ status: 400, code: 'invalid_request' })
   const b = body as Record<string, unknown>
-  if (Object.keys(b).some((k) => k !== 'state' && k !== 'draft_id' && k !== 'documents')) return err({ status: 400, code: 'invalid_request' })
+  // CR-V2-EXAM-INTEGRATION-X3: `include_examinations` and `responses` are the only additions. A projection, a
+  // comparison or an examination envelope is never accepted from the request.
+  if (Object.keys(b).some((k) => k !== 'state' && k !== 'draft_id' && k !== 'documents' && k !== 'include_examinations' && k !== 'responses')) return err({ status: 400, code: 'invalid_request' })
+  if (b.include_examinations !== undefined && b.include_examinations !== true) return err({ status: 400, code: 'invalid_request' })
+  const includeExaminations = b.include_examinations === true
+  if (b.responses !== undefined && (!includeExaminations || !Array.isArray(b.responses))) return err({ status: 400, code: 'invalid_responses' })
+  const responses = (b.responses ?? []) as CreatorResponseInput[]
   const draftParam = b.draft_id
   if (draftParam !== undefined && draftParam !== null && (typeof draftParam !== 'string' || !UUID.test(draftParam))) return err({ status: 400, code: 'invalid_request' })
 
@@ -200,13 +269,34 @@ export async function preparePrepared(deps: FlowDeps, userId: string, body: unkn
     if (!documents.ok) return err({ status: 400, code: 'invalid_documents' })
   }
 
+  // CR-V2-EXAM-INTEGRATION-X3: the server attaches each referenced document's persisted, re-verified projection.
+  const examinations: CustomerRecordExaminationInput[] = []
+  if (includeExaminations) {
+    if (!deps.examinations) return err({ status: 409, code: 'examination_unavailable' })
+    for (const d of documents.documents) {
+      let p: DocumentProjection
+      try {
+        p = await deps.examinations.projectionFor(userId, d.document_id)
+      } catch {
+        p = { kind: 'unavailable', reason: 'storage_unavailable' }
+      }
+      if (p.kind === 'unavailable') {
+        deps.log?.('creator_record_v2_examination_projection_unavailable', { reason: p.reason })
+        return err({ status: 409, code: 'examination_unavailable' })
+      }
+      if (p.kind === 'projection') examinations.push({ document_id: d.document_id, projection: p.projection })
+    }
+  }
+
   let draftId: string
   let version: number
+  let previous: PreparedRow | null = null
   if (typeof draftParam === 'string') {
     const latest = await deps.store.latestVersion(draftParam)
     if (!latest || latest.user_id !== userId) return err({ status: 404, code: 'not_found' })
     draftId = draftParam
     version = latest.version + 1
+    previous = latest
   } else {
     draftId = deps.newId()
     version = 1
@@ -223,6 +313,8 @@ export async function preparePrepared(deps: FlowDeps, userId: string, body: unkn
     as_of: now.toISOString().slice(0, 10),
     record: { record_id: `PREP-${id}`, record_version: version, captured_at: now.toISOString() },
     documents: documents.documents,
+    ...(examinations.length > 0 ? { examinations } : {}),
+    ...(responses.length > 0 ? { responses } : {}),
   })
   if (!built.ok) {
     if (built.stage === 'form') return err({ status: 400, code: 'invalid_answers', issues: built.issues })
@@ -231,6 +323,8 @@ export async function preparePrepared(deps: FlowDeps, userId: string, body: unkn
       return err({ status: 503, code: 'unavailable' })
     }
     if (built.issues.some((i) => i.startsWith('documents'))) return err({ status: 400, code: 'invalid_documents' })
+    if (built.issues.some((i) => i.startsWith('responses'))) return err({ status: 400, code: 'invalid_responses' })
+    if (built.issues.some((i) => i.startsWith('examinations'))) return err({ status: 409, code: 'examination_unavailable' })
     return err({ status: 400, code: 'invalid_request' })
   }
 
@@ -252,7 +346,10 @@ export async function preparePrepared(deps: FlowDeps, userId: string, body: unkn
   })
   const record = verifiedRecord(row)
   if (!record) return err({ status: 500, code: 'integrity_failure' })
-  return { ok: true, view: viewOf(row, record) }
+  // CR-V2-EXAM-INTEGRATION-X3: earlier responses whose target is unchanged, LISTED for re-affirmation; never applied.
+  const prior = previous ? verifiedRecord(previous) : null
+  const candidates = prior && prior.schema_version === 6 && record.schema_version === 6 ? carryForwardCandidates(prior, record) : []
+  return { ok: true, view: { ...viewOf(row, record), ...(candidates.length > 0 ? { carry_forward_candidates: candidates } : {}) } }
 }
 
 /** The owner's view of one prepared version. */

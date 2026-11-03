@@ -218,8 +218,11 @@ describe('route: no client authority, stopped in Production, replay only', () =>
       expect([f, /uat_grants|examination_environment|uat_status|grant_kind|binding_nonce/.test(read(f).replace(/\/\*[\s\S]*?\*\//g, ''))]).toEqual([f, false])
   })
 
-  test('the prepared-record routes and service are unchanged by X2 (no examination import)', () => {
-    for (const f of ['app/api/creator-record-v2/prepared/route.ts', 'app/api/creator-record-v2/prepared/[id]/route.ts', 'lib/creator-record/customer-flow/service.ts'])
+  test('the prepared-record routes stay unchanged; the prepare service reaches examination code only by type (X3: projections come through its injected port)', () => {
+    for (const f of ['app/api/creator-record-v2/prepared/route.ts', 'app/api/creator-record-v2/prepared/[id]/route.ts'])
       expect([f, /examination/.test(read(f))]).toEqual([f, false])
+    const service = read('lib/creator-record/customer-flow/service.ts')
+    expect(service).not.toMatch(/^import\s+(?!type\s)[^\n]*from '\.\/examination'/m)
+    expect(service).not.toMatch(/from '\.\.\/examination\//)
   })
 })

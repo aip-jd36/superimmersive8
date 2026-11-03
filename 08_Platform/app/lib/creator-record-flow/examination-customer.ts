@@ -9,7 +9,8 @@
  */
 import { NextResponse } from 'next/server'
 import { CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flow/approved-inputs'
-import type { CustomerExaminationDeps, CustomerExaminationError } from '@/lib/creator-record/customer-flow/examination'
+import { examinationProjectionFor, type CustomerExaminationDeps, type CustomerExaminationError } from '@/lib/creator-record/customer-flow/examination'
+import type { FlowDeps } from '@/lib/creator-record/customer-flow/service'
 import { productionExaminationDeps } from '@/lib/creator-record-flow/examination-production'
 import { hasPilotAccess } from './pilot-access'
 import { NO_STORE } from './http'
@@ -21,6 +22,14 @@ export function productionCustomerExaminationDeps(): CustomerExaminationDeps {
     adapter: productionExaminationDeps(),
     log: (event, detail) => console.warn(`[creator-record-v2/examination] ${event}`, detail),
   }
+}
+
+/**
+ * CR-V2-EXAM-INTEGRATION-X3: the prepare flow's projection port. The creator's one persisted run for a document they
+ * own, re-verified and projected (X0); never a grant, the marker or the status function.
+ */
+export const productionExaminationProjections: NonNullable<FlowDeps['examinations']> = {
+  projectionFor: (userId, documentId) => examinationProjectionFor(productionExaminationDeps().storage, userId, documentId),
 }
 
 const MESSAGES: Record<CustomerExaminationError['code'] | 'invalid_request', string> = {

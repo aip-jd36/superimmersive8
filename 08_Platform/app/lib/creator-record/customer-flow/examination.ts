@@ -31,6 +31,7 @@ import {
   type VerifiedRun,
 } from '../examination/persistence'
 import { RECEIPT_READING_PROFILE } from '../examination/receipt-reading'
+import { projectVerifiedRun, type ExaminationProjection } from '../examination/projection'
 
 export type SubmissionsMode = 'open' | 'stopped'
 
@@ -155,4 +156,31 @@ export async function customerExaminationHistory(
     return err(503, 'unavailable')
   }
   return { ok: true, runs: h.runs.map((r) => ({ run_id: r.run_id, supersedes_id: r.supersedes_id, created_at: r.created_at, envelope: r.envelope })) }
+}
+
+// ── CR-V2-EXAM-INTEGRATION-X3: the projection a prepared record may carry ───────────────────────────
+
+export type DocumentProjection =
+  | { kind: 'none' }
+  | { kind: 'projection'; projection: ExaminationProjection }
+  | { kind: 'unavailable'; reason: 'storage_unavailable' | 'boundary_not_customer_visible' | 'multiple_runs' | 'run_integrity' }
+
+/**
+ * The bounded projection (X0) of the creator's ONE persisted run for a document they own, re-checked byte for byte
+ * (`projectVerifiedRun`: authority stamp, digest, strict parse, canonical form, key, owner, document). No run: `none`.
+ * Fail closed on anything else: a run outside the customer-visible boundaries (an operator-seeded run), more than one
+ * run (which one a record should carry is not decided), or any integrity failure. Never reads a grant.
+ */
+export async function examinationProjectionFor(storage: Pick<ExaminationAdapterDeps['storage'], 'listRuns'>, userId: string, documentId: string): Promise<DocumentProjection> {
+  let rows: PersistedRunRow[]
+  try {
+    rows = await storage.listRuns(userId, documentId)
+  } catch {
+    return { kind: 'unavailable', reason: 'storage_unavailable' }
+  }
+  if (rows.some((row) => !(CUSTOMER_VISIBLE_BOUNDARIES as readonly string[]).includes(row.execution_boundary))) return { kind: 'unavailable', reason: 'boundary_not_customer_visible' }
+  if (rows.length === 0) return { kind: 'none' }
+  if (rows.length > 1) return { kind: 'unavailable', reason: 'multiple_runs' }
+  const p = projectVerifiedRun(rows[0], userId, documentId)
+  return p.ok ? { kind: 'projection', projection: p.projection } : { kind: 'unavailable', reason: 'run_integrity' }
 }

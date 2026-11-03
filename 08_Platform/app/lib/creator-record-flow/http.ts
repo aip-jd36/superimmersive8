@@ -23,6 +23,9 @@ export const unauthorized = () => NextResponse.json({ error: 'Unauthorized' }, {
 const MESSAGES: Record<string, string> = {
   invalid_request: 'The request could not be read.',
   invalid_documents: 'One or more documents could not be used. Check your documents and try again.',
+  // CR-V2-EXAM-INTEGRATION-X3
+  invalid_responses: 'One or more responses could not be recorded. Nothing was changed.',
+  examination_unavailable: 'Examination findings could not be included right now. Nothing was changed.',
   invalid_answers: 'Some answers need attention.',
   not_invited: 'Creator Record is currently available by invitation only.',
   not_found: 'Not found.',

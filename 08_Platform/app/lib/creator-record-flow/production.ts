@@ -16,6 +16,7 @@ import { renderV2ForIssuance, type BindReason, type CheckoutSubmission, type Pur
 import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/config'
 import { hasPilotAccess, PILOT_ACCESS_TABLE } from './pilot-access'
 import { evidenceObjects, evidenceStore } from './evidence-production'
+import { productionExaminationProjections } from '@/lib/creator-record-flow/examination-customer'
 import { verifyEvidenceIntact } from '@/lib/creator-record/evidence-intake/service'
 
 /** CR-V2-DOC-1B: referenced documents still held intact (row stored, same fingerprint, bytes present and re-hashed). */
@@ -97,6 +98,8 @@ export function productionFlowDeps(): FlowDeps {
     log: (event, detail) => console.warn(event, detail),
     // CR-V2-DOC-1: read only to resolve a version's document references.
     evidence: evidenceStore,
+    // CR-V2-EXAM-INTEGRATION-X3: the persisted, re-verified projection of an owned document's run (only when asked).
+    examinations: productionExaminationProjections,
   }
 }
 

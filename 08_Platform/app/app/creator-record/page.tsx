@@ -8,12 +8,15 @@
  * document examination are not offered.
  * CR-V2-MVP-M3: payment is offered after review only while v2 issuance is enabled
  * (default: stopped); the purchase and checkout routes re-check every condition.
+ * CR-V2-EXAM-INTEGRATION-X3: documents and examination are offered only when the approved inputs also approve the
+ * examination-bearing record (schema v6). Otherwise the page is exactly the v5 journey (Production today).
  */
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { checkApprovedSources } from '@/lib/creator-record/customer-record/sources'
-import { CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
+import { CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION, CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
+import { EVIDENCE_CONSENT_DRAFT_VERSION } from '@/lib/creator-record/evidence-intake/contract'
 import { productionFlowDeps } from '@/lib/creator-record-flow/production'
 import { sessionUserId } from '@/lib/creator-record-flow/http'
 import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/config'
@@ -46,6 +49,8 @@ export default async function CreatorRecordPage() {
   const today = deps.now().toISOString().slice(0, 10)
   const check = checkApprovedSources(inputs.sources, inputs.source_text, TOPIC_CLAIMS_FIXTURE, today, { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION })
   if (!check.ok || !inputs.source_text) return <Unavailable message="Creator Record is not available yet." />
+  // CR-V2-EXAM-INTEGRATION-X3: offered only with an approval for the examination-bearing record.
+  const examinationOffered = checkApprovedSources(inputs.sources, inputs.source_text, TOPIC_CLAIMS_FIXTURE, today, { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION }).ok
 
   return (
     <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
@@ -55,6 +60,7 @@ export default async function CreatorRecordPage() {
         acknowledgements={inputs.source_text.acknowledgements}
         maxTools={inputs.sources.max_tools}
         paymentOpen={CREATOR_RECORD_V2_ISSUANCE === 'enabled'}
+        {...(examinationOffered ? { examination: { consentVersion: EVIDENCE_CONSENT_DRAFT_VERSION } } : {})}
       />
     </main>
   )

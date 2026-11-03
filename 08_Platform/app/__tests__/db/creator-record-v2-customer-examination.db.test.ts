@@ -24,7 +24,7 @@ import { canonicalJson, sha256Hex } from '@/lib/creator-record/record-core/canon
 import type { ExaminationDocumentRecord } from '@/lib/creator-record/examination/examine-document'
 import { defaultProfileRegistry, knownFixtureRegistry, replayExecutor } from '@/lib/creator-record/examination/replay-executor'
 import { classifyDatabaseError, ExaminationPortError, PERSISTED_RUN_COLUMNS, type ExaminationStoragePorts, type PersistedRunRow } from '@/lib/creator-record/examination/persistence'
-import { customerExaminationHistory, requestCustomerExamination, type CustomerExaminationDeps } from '@/lib/creator-record/customer-flow/examination'
+import { customerExaminationHistory, examinationProjectionFor, requestCustomerExamination, type CustomerExaminationDeps } from '@/lib/creator-record/customer-flow/examination'
 
 const URL = process.env.DATABASE_URL_TEST
 const DIR = join(__dirname, '..', '..', 'supabase', 'migrations')
@@ -192,10 +192,41 @@ maybe('creator record v2 customer examination (PostgreSQL)', () => {
       expect(await requestCustomerExamination(deps(), owner, doc)).toMatchObject({ ok: true, result: 'existing', run_id: (r as { run_id: string }).run_id })
       const h = await customerExaminationHistory(deps(), owner, doc)
       expect(h.ok && h.runs.map((x) => [x.run_id, x.envelope.document.document_id, x.envelope.observations.every((o) => o.verification === 'not_verified')])).toEqual([[(r as { run_id: string }).run_id, doc, true]])
+      // CR-V2-EXAM-INTEGRATION-X3: the prepare flow's projection of that persisted run, from the real tables.
+      const projected = await examinationProjectionFor(pgStorage(), owner, doc)
+      expect(projected.kind === 'projection' && [projected.projection.run_id, projected.projection.verification, projected.projection.execution_boundary, projected.projection.envelope.document.document_id])
+        .toEqual([(r as { run_id: string }).run_id, 'not_verified', 'customer_path_synthetic_uat', doc])
       // Another creator can neither examine nor read it.
       const other = await user()
+      expect(await examinationProjectionFor(pgStorage(), other, doc)).toEqual({ kind: 'none' })
       expect(await requestCustomerExamination(deps(), other, doc)).toEqual({ ok: false, status: 404, code: 'not_found' })
       expect(await customerExaminationHistory(deps(), other, doc)).toEqual({ ok: false, status: 404, code: 'not_found' })
+    })
+
+    test('RUN IDENTITY: a temporary failure, its retry and a repeated request converge on ONE run (no conflicting second run)', async () => {
+      const owner = await user()
+      const grantId = await grant(owner, 'customer_path_uat')
+      const doc = await upload(owner)
+      // 1. Temporary failure after the audit event (the write path is unavailable once): nothing persisted.
+      const base = deps()
+      const flaky: CustomerExaminationDeps = { ...base, adapter: { ...base.adapter, storage: { ...base.adapter.storage, async recordExamination() { throw new ExaminationPortError('record', null) } } } }
+      expect(await requestCustomerExamination(flaky, owner, doc)).toEqual({ ok: false, status: 503, code: 'unavailable' })
+      expect(await count('SELECT count(*) n FROM public.creator_record_v2_examination_runs WHERE document_id = $1', [doc])).toBe(0)
+      // 2. Retry: created. 3. Repeated request: the same run, 'existing'.
+      const first = await requestCustomerExamination(deps(), owner, doc)
+      expect(first).toMatchObject({ ok: true, result: 'created' })
+      const again = await requestCustomerExamination(deps(), owner, doc)
+      expect(again).toEqual({ ok: true, result: 'existing', run_id: (first as { run_id: string }).run_id })
+      expect(await count('SELECT count(*) n FROM public.creator_record_v2_examination_runs WHERE document_id = $1', [doc])).toBe(1)
+      // Each attempt is audited (3 reads of the grant's 4); the run budget (1) was never exceeded.
+      expect(await count('SELECT count(*) n FROM public.creator_record_v2_evidence_access_log WHERE uat_grant_id = $1', [grantId])).toBe(3)
+      // 4. The prepare flow can still carry it: exactly one run, the same one.
+      const p = await examinationProjectionFor(pgStorage(), owner, doc)
+      expect(p.kind === 'projection' && p.projection.run_id).toBe((first as { run_id: string }).run_id)
+      // 5. The read budget then ends further attempts; still one run, nothing stranded.
+      expect(await requestCustomerExamination(deps(), owner, doc)).toEqual({ ok: true, result: 'existing', run_id: (first as { run_id: string }).run_id })
+      expect(await requestCustomerExamination(deps(), owner, doc)).toEqual({ ok: false, status: 409, code: 'examination_not_permitted' })
+      expect(await count('SELECT count(*) n FROM public.creator_record_v2_examination_runs WHERE document_id = $1', [doc])).toBe(1)
     })
 
     test('MISMATCH fails closed: another invited creator’s own upload, the identity’s other bytes, and anything after revocation', async () => {
@@ -228,6 +259,8 @@ maybe('creator record v2 customer examination (PostgreSQL)', () => {
       // Even if that identity were invited, the creator history refuses to show it.
       await admin.query(`INSERT INTO public.creator_record_v2_pilot_access (user_id, added_by, reason) VALUES ($1, 'db test operator', 'X2 test')`, [operatorIdentity])
       expect(await customerExaminationHistory(deps(), operatorIdentity, seeded)).toEqual({ ok: false, status: 503, code: 'unavailable' })
+      // ... and the prepare flow refuses to carry it (X3).
+      expect(await examinationProjectionFor(pgStorage(), operatorIdentity, seeded)).toEqual({ kind: 'unavailable', reason: 'boundary_not_customer_visible' })
     })
   })
 })

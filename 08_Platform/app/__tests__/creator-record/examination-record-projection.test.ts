@@ -422,15 +422,19 @@ describe('no new reachable behaviour', () => {
     })
   const rel = (f: string) => path.relative(APP_ROOT, f).split(path.sep).join('/')
 
-  test('the prepare route\'s flow refuses any examination or response field', async () => {
+  test('the prepare route\'s flow never accepts a projection or comparison; responses only with server-attached examinations (X3)', async () => {
     const deps: FlowDeps = {
       submissions: 'open', hasPilotAccess: async () => true,
       store: { insert: async () => { throw new Error('must not store') }, get: async () => null, latestVersion: async () => null, markReviewed: async () => null },
       inputs: () => ({ sources: SOURCES, source_text: { approval: TEXT_V6, acknowledgements: ACKS } }), topicClaims: TOPIC_CLAIMS_FIXTURE, now: () => NOW, newId: () => DOC_ID,
     }
-    for (const extra of [{ examinations: [] }, { responses: [] }, { comparison: [] }]) {
+    // A projection or a comparison supplied by the browser is never read.
+    for (const extra of [{ examinations: [] }, { comparison: [] }, { include_examinations: 'yes' }, { include_examinations: false }])
       expect(await preparePrepared(deps, OWNER, { state: state(), ...extra })).toEqual({ ok: false, status: 400, code: 'invalid_request' })
-    }
+    // CR-V2-EXAM-INTEGRATION-X3: responses only alongside server-attached examinations.
+    expect(await preparePrepared(deps, OWNER, { state: state(), responses: [] })).toEqual({ ok: false, status: 400, code: 'invalid_responses' })
+    // Asking for examinations without the server's projection port: refused, nothing stored.
+    expect(await preparePrepared(deps, OWNER, { state: state(), include_examinations: true })).toEqual({ ok: false, status: 409, code: 'examination_unavailable' })
   })
 
   test('no app, component or production-port file reaches the examination record path; no production run check is wired', () => {

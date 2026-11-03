@@ -210,11 +210,13 @@ describe('lib/creator-record boundaries', () => {
       'components/creator-record/CreatorRecordQuestionnaire.tsx',
       'components/creator-record/DocumentReviewPanel.tsx',
       'components/creator-record/DraftRecordView.tsx',
+      'components/creator-record/ExaminationReview.tsx', // CR-V2-EXAM-INTEGRATION-X3: the prepared view's type only
       'lib/creator-record-flow/evidence-http.ts', // CR-V2-DOC-1: evidence route helpers
       'lib/creator-record-flow/evidence-production.ts', // CR-V2-DOC-1: evidence intake ports
       'lib/creator-record-flow/examination-customer.ts', // CR-V2-EXAM-INTEGRATION-X2: creator examination wiring (one route)
       'lib/creator-record-flow/examination-production.ts', // CR-V2-DOC-2C-C-B: examination persistence ports (operator CLI; X2: the creator examination wiring)
       'lib/creator-record-flow/examination-uat.ts', // CR-V2-PROD-UAT-B: operator synthetic UAT logic (only the operator CLI; no route)
+      'lib/creator-record-flow/examination-ui.ts', // CR-V2-EXAM-INTEGRATION-X3: browser helpers (vocabulary at runtime; types otherwise)
       'lib/creator-record-flow/http.ts',
       'lib/creator-record-flow/production.ts',
     ])
@@ -249,7 +251,15 @@ describe('lib/creator-record boundaries', () => {
       '@/components/creator-record/DraftRecordView',
       // CR-V2-MVP-M3: draft customer wording (string constants only, no imports; asserted below).
       '@/lib/creator-record-flow/wording',
+      // CR-V2-EXAM-INTEGRATION-X3: the examination experience. examination-ui's only runtime import is the evidence
+      // vocabulary, a module with no imports (both asserted below); the record service and form are types only.
+      '@/components/creator-record/EvidencePanel',
+      '@/components/creator-record/ExaminationReview',
+      '@/lib/creator-record-flow/examination-ui',
+      '@/lib/creator-record/evidence-intake/vocabulary',
     ]
+    expect(staticImports(readFileSync(path.join(APP_ROOT, 'lib/creator-record/evidence-intake/vocabulary.ts'), 'utf8'))).toEqual([])
+    expect(runtimeImports(readFileSync(path.join(APP_ROOT, 'lib/creator-record-flow/examination-ui.ts'), 'utf8'))).toEqual(['@/lib/creator-record/evidence-intake/vocabulary'])
     expect(staticImports(readFileSync(path.join(APP_ROOT, 'lib/creator-record-flow/wording.ts'), 'utf8'))).toEqual([])
     expect(staticImports(readFileSync(path.join(APP_ROOT, 'lib/creator-record/presentation/group-guidance.ts'), 'utf8'))).toEqual([])
     for (const f of [
@@ -258,6 +268,9 @@ describe('lib/creator-record boundaries', () => {
       'components/creator-record/CreatorRecordQuestionnaire.tsx',
       'components/creator-record/DocumentReviewPanel.tsx',
       'components/creator-record/DraftRecordView.tsx',
+      'components/creator-record/EvidencePanel.tsx',
+      'components/creator-record/ExaminationReview.tsx',
+      'lib/creator-record-flow/examination-ui.ts',
     ]) {
       const src = readFileSync(path.join(APP_ROOT, f), 'utf8')
       const runtime = runtimeImports(src).filter((i) => i.includes('creator-record'))
