@@ -119,7 +119,15 @@ export interface UatGrantStatus {
   max_read_events: number
   new_runs_used: number
   max_new_runs: number
+  /**
+   * CR-V2-EXAM-INTEGRATION-X1 (20261106000000). Absent before that migration (every grant was then operator-seeded).
+   * This operator script acts only on operator_seed grants; a customer_path_uat grant is never seeded or examined here.
+   */
+  grant_kind?: 'operator_seed' | 'customer_path_uat'
 }
+
+/** True for an operator-seeded grant (the only kind this script seeds or examines). */
+export const isOperatorSeedGrant = (grant: UatGrantStatus) => (grant.grant_kind ?? 'operator_seed') === 'operator_seed'
 
 export type GrantResolution = { ok: true; grant: UatGrantStatus } | { ok: false; reason: 'no_grant_for_code' | 'ambiguous' | 'project_mismatch' | 'status_unavailable' }
 
@@ -184,6 +192,7 @@ export async function seedSyntheticDocument(
   opts: { newId: () => string; now: () => Date; fixtures?: readonly ReplayFixture[] },
 ): Promise<SeedOutcome> {
   const refuse = (reason: string): SeedOutcome => ({ stage: 'refused_before_write', reason })
+  if (!isOperatorSeedGrant(grant)) return refuse('not_an_operator_seed_grant')
   if (!grant.active) return refuse('grant_not_active')
   if (grant.bound_document_id !== null) return refuse('grant_already_bound')
   const v = validateEvidenceBytes(bytes)
@@ -240,10 +249,11 @@ export async function seedSyntheticDocument(
 
 // ── Examination (once, replay only) and strict read-back ─────────────────────────────────────────────
 
-export type UatExamination = ExamineAndRecordResult | { kind: 'not_attempted'; reason: 'grant_not_active' | 'grant_not_bound' }
+export type UatExamination = ExamineAndRecordResult | { kind: 'not_attempted'; reason: 'not_an_operator_seed_grant' | 'grant_not_active' | 'grant_not_bound' }
 
 /** One examination of the grant's document through the existing adapter. Never retried here. */
 export async function examineGrantDocument(deps: ExaminationAdapterDeps, grant: UatGrantStatus): Promise<UatExamination> {
+  if (!isOperatorSeedGrant(grant)) return { kind: 'not_attempted', reason: 'not_an_operator_seed_grant' }
   if (!grant.active) return { kind: 'not_attempted', reason: 'grant_not_active' }
   if (grant.bound_document_id === null) return { kind: 'not_attempted', reason: 'grant_not_bound' }
   return examineAndRecord(deps, {

@@ -10,6 +10,7 @@ import path from 'node:path'
 import {
   embeddedSupabaseUrls,
   examineGrantDocument,
+  isOperatorSeedGrant,
   newBindingNonce,
   readGrantHistory,
   resolveGrant,
@@ -137,6 +138,8 @@ describe('seeding exactly one synthetic document (no automatic cleanup)', () => 
 
   test.each<[string, Partial<UatGrantStatus>, Uint8Array, string]>([
     ['an inactive grant', { active: false }, PDF, 'grant_not_active'],
+    // CR-V2-EXAM-INTEGRATION-X1: a customer_path_uat grant is never seeded (the database refuses it as well).
+    ['a customer_path_uat grant', { grant_kind: 'customer_path_uat' }, PDF, 'not_an_operator_seed_grant'],
     ['an already-bound grant', { bound_document_id: randomUUID() }, PDF, 'grant_already_bound'],
     ['bytes DOC-1 validation refuses', {}, new Uint8Array(Buffer.from('not a pdf')), 'bytes_invalid:unsupported_format'],
     ['another fixture than the granted one', { document_sha256: 'a'.repeat(64) }, PDF, 'not_the_granted_fixture'],
@@ -198,6 +201,11 @@ describe('examination (once, replay only) and strict read-back', () => {
     const { deps, seen } = fakeDeps()
     expect(await examineGrantDocument(deps, grantStatus({ active: false, bound_document_id: randomUUID() }))).toEqual({ kind: 'not_attempted', reason: 'grant_not_active' })
     expect(await examineGrantDocument(deps, grantStatus())).toEqual({ kind: 'not_attempted', reason: 'grant_not_bound' })
+    // CR-V2-EXAM-INTEGRATION-X1: the operator script never examines a customer-path upload, even when bound.
+    expect(await examineGrantDocument(deps, grantStatus({ grant_kind: 'customer_path_uat', bound_document_id: randomUUID() }))).toEqual({ kind: 'not_attempted', reason: 'not_an_operator_seed_grant' })
+    // A grant read before 20261106000000 (no grant_kind) and one marked operator_seed are both operator-seeded.
+    expect(isOperatorSeedGrant(grantStatus())).toBe(true)
+    expect(isOperatorSeedGrant(grantStatus({ grant_kind: 'operator_seed' }))).toBe(true)
     expect(seen).toEqual([])
     const doc = randomUUID()
     const r = await examineGrantDocument(deps, grantStatus({ bound_document_id: doc }))

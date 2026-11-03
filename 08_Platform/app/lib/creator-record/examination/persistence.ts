@@ -119,8 +119,12 @@ export interface PersistedRunRow {
 
 export const PERSISTED_RUN_COLUMNS = 'id, examination_key, document_id, user_id, document_sha256, envelope_version, content_class, workflow_authorization, execution_boundary, environment_project_ref, profile_id, profile_version, schema_version, prompt_version, executor_mode, replay_set, recording_sha256, replay_fixture_id, outcome_status, outcome_reason, envelope_canonical, envelope_sha256, supersedes_id, access_log_id, uat_grant_id, created_at'
 
-/** The two execution boundaries the database can stamp (20261104000000 + 20261105000000). */
-export const EXECUTION_BOUNDARIES = ['isolated_synthetic_test', 'operator_synthetic_uat'] as const
+/**
+ * The execution boundaries the database can stamp (20261104000000 + 20261105000000; CR-V2-EXAM-INTEGRATION-X1 /
+ * 20261106000000 adds `customer_path_synthetic_uat`: a run of an approved test identity's own upload under a
+ * customer_path_uat grant). Every boundary but the isolated one carries its grant.
+ */
+export const EXECUTION_BOUNDARIES = ['isolated_synthetic_test', 'operator_synthetic_uat', 'customer_path_synthetic_uat'] as const
 export type ExecutionBoundary = (typeof EXECUTION_BOUNDARIES)[number]
 /** The Production project ref, which the isolated boundary may never carry (mirrors the database CHECK). */
 export const PRODUCTION_PROJECT_REF = 'lehqgcgnenwdmuzudbrs'
