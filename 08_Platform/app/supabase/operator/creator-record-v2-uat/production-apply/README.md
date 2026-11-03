@@ -214,10 +214,29 @@ The migration's own precondition (the exact 20261105 run authority constraint) f
 - two data invariants: a run's boundary agrees with its grant's kind, and a customer-path grant binds only its identity's own upload of the granted bytes;
 - every protected table's privileges, RLS, policies, triggers and owners, and every protected function's mode, owner and EXECUTE grants (all unchanged by 20261106).
 
+**Read-only preflight (`07_preflight_20261106.sql`, CR-V2-UAT-PROD-3).** 02, 04 and 06 cannot tell the E4 history from a larger history: their data checks only test "count is zero". `07` is the standalone, read-only form of the checks 05 makes itself: server version, Production identity, the exact E4 fingerprint, no active grant, no marker, and the exact 20261105 run authority constraint. It also returns diagnostic counts.
+
+- It is hand-maintained. `__tests__/ops/cr-v2-preflight-20261106-sync.test.ts` requires each of its conditions to be the exact positive form of 05's, so a changed value in either file fails the build.
+- `__tests__/db/creator-record-v2-production-apply-20261106.db.test.ts` runs 04, 02, 06 and 07 inside `BEGIN READ ONLY` on the exact E4 state and on deviations.
+
+**Preflight order and expected results.** Run each query on its own, in the SQL Editor of the verified Production project:
+
+| Step | File | Expected |
+|---|---|---|
+| P1 | `04_verify_20261105.sql` | `state` `applied`, `checks` 28, `failed` exactly `["access_log_no_grant_rows","documents_all_owner_upload","grants_rows_0"]`, all drift lists empty |
+| P2 | `02_verify_20261104.sql` | `state` `applied`, `checks` 31, `failed` exactly `["access_log_all_downloads","runs_rows_0"]`, all drift lists empty |
+| P3 | `06_verify_20261106.sql` | `state` `absent` (its other fields are not evaluated in this state) |
+| P4 | `07_preflight_20261106.sql` | every boolean `true`; `counts` exactly grants 1, documents 1, examination_events 1, events_with_grant 1, runs 1, marker_rows 0 |
+
+**GO only if all four match exactly**, immediately before running 05. Then:
+
+- an extra failed name, `partial`, any `false`, any other count, or non-empty drift is **NO-GO**: report it;
+- never edit 05, 07 or `expected.json` to make a result pass.
+
 **Operator sequence (only after approval):**
 
-1. Run 02, 04 and 06. Expect 06 `absent`, and only the E4 failures in 02 and 04.
-2. Confirm no grant is active.
+1. Run the preflight P1–P4 above (04, 02, 06, then 07). Every result must match exactly.
+2. Confirm no grant is active (P4 `no_active_grant: true`).
 3. Run 05.
 4. Run 06 and expect `applied`, `all_pass: true` and no drift.
 5. Run 02 and 04 and expect the failure sets above.

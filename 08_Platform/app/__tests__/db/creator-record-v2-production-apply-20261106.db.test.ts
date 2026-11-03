@@ -401,6 +401,58 @@ maybe('creator record v2 production apply / verify for 20261106000000 (PostgreSQ
     })
   })
 
+  describe('07 — the read-only Production preflight (with 04, 02 and 06, in the operator order)', () => {
+    const P4 = file('07_preflight_20261106.sql')
+    /** Run one preflight file inside a READ ONLY transaction (a write would be refused by PostgreSQL itself). */
+    const ro = async (sql: string) => { await admin.query('BEGIN READ ONLY'); try { return await run(admin, sql) } finally { await admin.query('ROLLBACK') } }
+    const p4 = async () => ((await ro(P4)) as Record<string, Record<string, unknown>>).preflight_20261106
+    const EXPECTED_P4 = {
+      server_version_ok: true, looks_like_production: true,
+      counts: { grants: 1, documents: 1, examination_events: 1, events_with_grant: 1, runs: 1, marker_rows: 0 },
+      e4_run_exact: true, e4_document_exact: true, e4_event_exact: true, e4_grant_exact_and_revoked: true,
+      no_active_grant: true, no_marker: true, run_authority_constraint_is_20261105: true, grant_kind_absent: true,
+    }
+
+    test('on Production with exactly E4: P1 / P2 fail only the E4 data counts, P3 absent, P4 exactly as expected — all READ ONLY', async () => {
+      await productionWithE4()
+      const before = await catalog()
+      const v04 = ((await ro(file('04_verify_20261105.sql'))) as Record<string, Verify>).verify_20261105
+      const v02 = ((await ro(file('02_verify_20261104.sql'))) as Record<string, Verify>).verify_20261104
+      const v06 = ((await ro(file('06_verify_20261106.sql'))) as Record<string, Verify>).verify_20261106
+      expect(v04).toMatchObject({ state: 'applied', checks: 28, failed: E4_04, drift: NO_DRIFT })
+      expect(v02).toMatchObject({ state: 'applied', checks: 31, failed: E4_02, drift: NO_DRIFT })
+      expect(v06.state).toBe('absent')
+      expect(await p4()).toEqual(EXPECTED_P4)
+      expect(await catalog()).toBe(before)
+      // ... and 05 agrees: it commits on exactly this state.
+      expect(await run(admin, APPLY_06)).toEqual({ x1p_result: '20261106000000 COMMITTED' })
+    })
+
+    test('P4 detects an unexpected active grant (which P1 / P2 alone do not)', async () => {
+      await productionWithE4()
+      await admin.query(`INSERT INTO ${GRANTS} (test_user_id, document_sha256, supabase_project_ref, binding_nonce_sha256, established_by, reason, change_ref, expires_at, max_read_events)
+                         VALUES ($1, $2, $3, $4, 'x', 'y', 'z', now() + interval '1 hour', 1)`, [await freshUser(), F.sha256, PROD_REF, sha(randomUUID())])
+      expect(((await ro(file('04_verify_20261105.sql'))) as Record<string, Verify>).verify_20261105.failed).toEqual(E4_04)
+      expect(await p4()).toEqual({ ...EXPECTED_P4, counts: { ...EXPECTED_P4.counts, grants: 2 }, e4_grant_exact_and_revoked: false, no_active_grant: false })
+    })
+
+    test('P4 detects an unexpected isolated-test marker', async () => {
+      await productionWithE4()
+      await admin.query(`INSERT INTO public.creator_record_v2_examination_environment (environment_kind, supabase_project_ref, established_by, reason) VALUES ('isolated_synthetic_test', 'localpg15examination', 'x', 'y')`)
+      expect(await p4()).toEqual({ ...EXPECTED_P4, counts: { ...EXPECTED_P4.counts, marker_rows: 1 }, no_marker: false })
+    })
+
+    test('P4 detects a changed E4 fingerprint value (grant created_at off by one second)', async () => {
+      await productionWithE4()
+      await admin.query('BEGIN')
+      await admin.query(`ALTER TABLE ${GRANTS} DISABLE TRIGGER USER`)
+      await admin.query(`UPDATE ${GRANTS} SET created_at = created_at + interval '1 second'`)
+      await admin.query(`ALTER TABLE ${GRANTS} ENABLE TRIGGER USER`)
+      await admin.query('COMMIT')
+      expect(await p4()).toEqual({ ...EXPECTED_P4, e4_grant_exact_and_revoked: false })
+    })
+  })
+
   test('ROLLBACK (documented limits): with only operator_seed history, rollback_20261106 + 20261105 in one transaction restores the pre-05 state with E4 intact', async () => {
     await productionWithE4()
     const before = await e4Rows()
