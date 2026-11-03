@@ -3,7 +3,11 @@
 **Status: reviewed tooling only. Running any step against staging or Production needs its own explicit approval.**
 **Production progress:**
 - **Steps 1–2 (preflight, migrations): done on 2026-11-03** (operator-reported). See `08_Platform/implementation/CR_V2_PROD_UAT_D_MIGRATION_RECORD.md`.
-- **Steps 3 onward** (test identity, grant, seed, examine): **not started**, and each still needs its own approval.
+- **Steps 3–10 (test identity, grant, status, seed, one examination, history, revocation, evidence): done on 2026-11-03.** Operator-reported PASS; E4 is verified and closed (PM GO). See `08_Platform/implementation/CR_V2_PROD_UAT_E4_EXAMINATION_RECORD.md`.
+  - The only grant is revoked, and `rollback_20261105.sql` is now permanently unusable.
+  - Step 10's read-only database reconciliation matched every expected value.
+  - Step 10's optional Storage-log comparison was **not performed**.
+- **Any further grant needs a new approval and a new code.**
 
 ## Scope
 
