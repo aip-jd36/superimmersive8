@@ -760,7 +760,8 @@ maybe('creator record v2 operator synthetic UAT (PostgreSQL)', () => {
         const nonce = newNonce()
         const base = { target: 'production', ref: PROD_REF, email, fixture: F.fixture_id, hash: sha(nonce) }
         expect((await fail(admin.query(createSql(base)))).message).toBe('REFUSED: this database does not look like Production')
-        await admin.query(`INSERT INTO public.assessments VALUES ('ASSESS-005-2026-07-12', 'v0.1', false)`)
+        // Production's real shape (verified 2026-11-03): Cloud World is marked is_system_test = true by 20260719000000.
+        await admin.query(`INSERT INTO public.assessments VALUES ('ASSESS-005-2026-07-12', 'SI8 Reviewer Manual v0.1', true)`)
         expect((await fail(admin.query(createSql({ ...base, target: 'staging', ref: TEST_REF })))).message).toBe('REFUSED: this database does not look like the staging database')
         expect((await fail(admin.query(createSql({ ...base, ref: TEST_REF })))).message).toBe('REFUSED: a production grant must name the Production project ref')
         expect((await fail(admin.query(createSql({ ...base, fixture: 'no-such-fixture' })))).message).toBe('REFUSED: no-such-fixture is not a committed synthetic fixture')
@@ -779,6 +780,42 @@ maybe('creator record v2 operator synthetic UAT (PostgreSQL)', () => {
         expect(await count('SELECT count(*) n FROM public.creator_record_v2_documents WHERE id = $1', [docId])).toBe(1)
         expect(await count(`SELECT count(*) n FROM ${GRANTS} WHERE id = $1`, [rows[0].grant_id])).toBe(1)
         await admin.query('DROP TABLE public.assessments')
+      })
+
+      test('create_grant.sql identity safeguard (CR-V2-PROD-UAT-D1): the verified Production record is accepted whatever its is_system_test value; the staging placeholder is refused as Production and accepted only as staging', async () => {
+        await admin.query(`CREATE TABLE IF NOT EXISTS public.assessments (assessment_number text PRIMARY KEY, methodology_version text, is_system_test boolean)`)
+        const shape = async (methodology: string, systemTest: boolean) => {
+          await admin.query(`DELETE FROM public.assessments`)
+          await admin.query(`INSERT INTO public.assessments VALUES ('ASSESS-005-2026-07-12', $1, $2)`, [methodology, systemTest])
+        }
+        const attempt = async (target: 'production' | 'staging') => {
+          await revokeAll()
+          const email = `uat-${randomUUID()}@example.test`
+          await user(email)
+          const nonce = newNonce()
+          const r = await fail(admin.query(createSql({ target, ref: target === 'production' ? PROD_REF : TEST_REF, email, fixture: F.fixture_id, hash: sha(nonce) })))
+          return r.code === 'no error' ? ((await status(svc, nonce))[0]?.active === true ? 'created' : 'no active grant') : r.message
+        }
+        try {
+          // The real Production row: SI8's own system-test assessment (the regression: this was refused before D1).
+          await shape('SI8 Reviewer Manual v0.1', true)
+          expect(await attempt('production')).toBe('created')
+          expect(await attempt('staging')).toBe('REFUSED: this database does not look like the staging database')
+          // The same record without the flag (its shape before 20260719000000) is still Production.
+          await shape('SI8 Reviewer Manual v0.1', false)
+          expect(await attempt('production')).toBe('created')
+          // The staging placeholder (supabase/staging/before_20260909000000_*): never Production, only staging.
+          await shape('STAGING-PLACEHOLDER', true)
+          expect(await attempt('production')).toBe('REFUSED: this database does not look like Production')
+          expect(await attempt('staging')).toBe('created')
+          // No ASSESS-005 at all: neither.
+          await admin.query(`DELETE FROM public.assessments`)
+          expect(await attempt('production')).toBe('REFUSED: this database does not look like Production')
+          expect(await attempt('staging')).toBe('REFUSED: this database does not look like the staging database')
+        } finally {
+          await revokeAll()
+          await admin.query('DROP TABLE IF EXISTS public.assessments')
+        }
       })
 
       test('rollback_20261105.sql: refused once any grant exists; on a grant-free database it restores the exact DOC-2C-B schema', async () => {

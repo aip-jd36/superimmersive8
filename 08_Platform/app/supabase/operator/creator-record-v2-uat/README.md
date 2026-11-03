@@ -21,7 +21,7 @@
 ## Order of operations
 
 1. **Preflight.** Run `supabase/verification/cr-v2-uat-preflight`, U1–U4, and stop on any mismatch.
-2. **Migrations.** Apply `20261104000000`, then `20261105000000`, in the transactional wrapper.
+2. **Migrations.** Apply `20261104000000`, then `20261105000000`, in the transactional wrapper: `production-apply/` (01 → 02 → 03 → 04; see its README for the exact sequence, failure handling and rollback limits).
    - Then reload the PostgREST schema cache with `NOTIFY pgrst, 'reload schema';`. Without the reload, the API may keep serving the old function signatures and columns until it next reloads on its own.
    - Afterwards U1 must return every value `true`.
 3. **Test identity.** Create one dedicated user: auto-confirmed, an obviously synthetic address, a random password that is thrown away. Do **not** invite it to the pilot.

@@ -1,0 +1,513 @@
+{
+  "_comment": "CR-V2-PROD-UAT-D1C: definitions of the columns, constraints and indexes that 20261104000000 and 20261105000000 own, as (count, md5 of the definitions in byte order). Captured from the committed migrations applied to PostgreSQL 15.19 and 17.4 (identical). known = every name expected on the seven protected tables after either migration; anything else there is reported as drift, never a failure.",
+  "groups": {
+    "marker_columns": {
+      "names": [
+        "environment_kind",
+        "established_at",
+        "established_by",
+        "reason",
+        "singleton",
+        "supabase_project_ref"
+      ],
+      "n": 6,
+      "md5": "856ff5e9f3a8818f0033e9a95f0a4436"
+    },
+    "marker_constraints": {
+      "names": [
+        "creator_record_v2_examination_enviro_supabase_project_ref_check",
+        "creator_record_v2_examination_environmen_environment_kind_check",
+        "creator_record_v2_examination_environment_established_by_check",
+        "creator_record_v2_examination_environment_pkey",
+        "creator_record_v2_examination_environment_reason_check",
+        "creator_record_v2_examination_environment_singleton_check"
+      ],
+      "n": 6,
+      "md5": "46b6d745570a32f0d9e898375d753555"
+    },
+    "marker_indexes": {
+      "names": [
+        "creator_record_v2_examination_environment_pkey"
+      ],
+      "n": 1,
+      "md5": "0e6ecc091de602bd0050692345920d17"
+    },
+    "fixtures_columns": {
+      "names": [
+        "fixture_id",
+        "fixture_set",
+        "recording_sha256",
+        "sha256"
+      ],
+      "n": 4,
+      "md5": "e051fe173bc0a37f5dca8da45ffb675d"
+    },
+    "fixtures_constraints": {
+      "names": [
+        "creator_record_v2_synthetic_fixtures_fixture_id_check",
+        "creator_record_v2_synthetic_fixtures_fixture_set_check",
+        "creator_record_v2_synthetic_fixtures_fixture_set_fixture_id_key",
+        "creator_record_v2_synthetic_fixtures_pkey",
+        "creator_record_v2_synthetic_fixtures_recording_sha256_check",
+        "creator_record_v2_synthetic_fixtures_sha256_check"
+      ],
+      "n": 6,
+      "md5": "092585de0262dda5f7c60974c3e0511c"
+    },
+    "fixtures_indexes": {
+      "names": [
+        "creator_record_v2_synthetic_fixtures_fixture_set_fixture_id_key",
+        "creator_record_v2_synthetic_fixtures_pkey"
+      ],
+      "n": 2,
+      "md5": "2c0f7ca6a635e9ef5748477e18c02c7d"
+    },
+    "runs_columns": {
+      "names": [
+        "access_log_id",
+        "content_class",
+        "created_at",
+        "document_id",
+        "document_sha256",
+        "envelope_canonical",
+        "envelope_sha256",
+        "envelope_version",
+        "environment_project_ref",
+        "examination_key",
+        "execution_boundary",
+        "executor_mode",
+        "id",
+        "outcome_reason",
+        "outcome_status",
+        "profile_id",
+        "profile_version",
+        "prompt_version",
+        "recording_sha256",
+        "replay_fixture_id",
+        "replay_set",
+        "schema_version",
+        "supersedes_id",
+        "user_id",
+        "workflow_authorization"
+      ],
+      "n": 25,
+      "md5": "0ceed3c0140ad38e61e27f30977c2e7e"
+    },
+    "runs_constraints": {
+      "names": [
+        "creator_record_v2_examination_runs_access_log_id_fkey",
+        "creator_record_v2_examination_runs_access_log_id_key",
+        "creator_record_v2_examination_runs_check",
+        "creator_record_v2_examination_runs_check1",
+        "creator_record_v2_examination_runs_content_class_check",
+        "creator_record_v2_examination_runs_document_id_fkey",
+        "creator_record_v2_examination_runs_document_sha256_check",
+        "creator_record_v2_examination_runs_envelope_canonical_check",
+        "creator_record_v2_examination_runs_envelope_sha256_check",
+        "creator_record_v2_examination_runs_envelope_sha256_key",
+        "creator_record_v2_examination_runs_envelope_version_check",
+        "creator_record_v2_examination_runs_examination_key_check",
+        "creator_record_v2_examination_runs_examination_key_key",
+        "creator_record_v2_examination_runs_executor_mode_check",
+        "creator_record_v2_examination_runs_outcome_reason_check",
+        "creator_record_v2_examination_runs_outcome_status_check",
+        "creator_record_v2_examination_runs_pkey",
+        "creator_record_v2_examination_runs_profile_id_check",
+        "creator_record_v2_examination_runs_profile_version_check",
+        "creator_record_v2_examination_runs_prompt_version_check",
+        "creator_record_v2_examination_runs_recording_sha256_check",
+        "creator_record_v2_examination_runs_replay_fixture_id_check",
+        "creator_record_v2_examination_runs_replay_set_check",
+        "creator_record_v2_examination_runs_schema_version_check",
+        "creator_record_v2_examination_runs_supersedes_id_fkey",
+        "creator_record_v2_examination_runs_supersedes_id_key",
+        "creator_record_v2_examination_runs_user_id_fkey",
+        "creator_record_v2_examination_runs_workflow_authorization_check"
+      ],
+      "n": 28,
+      "md5": "3b4fcf8d8392d9002465d63409ac1c03"
+    },
+    "runs_replaced_constraints_s04": {
+      "names": [
+        "creator_record_v2_examination_run_environment_project_ref_check",
+        "creator_record_v2_examination_runs_execution_boundary_check"
+      ],
+      "n": 2,
+      "md5": "8b9b8622ac7134b1fb3e5ca718a3ffae"
+    },
+    "runs_indexes": {
+      "names": [
+        "creator_record_v2_examination_runs_access_log_id_key",
+        "creator_record_v2_examination_runs_envelope_sha256_key",
+        "creator_record_v2_examination_runs_examination_key_key",
+        "creator_record_v2_examination_runs_owner_idx",
+        "creator_record_v2_examination_runs_pkey",
+        "creator_record_v2_examination_runs_root_idx",
+        "creator_record_v2_examination_runs_supersedes_id_key"
+      ],
+      "n": 7,
+      "md5": "1149fb124b3ea3ee4a4e7bfd3b5cf628"
+    },
+    "access_log_purpose": {
+      "names": [
+        "purpose"
+      ],
+      "n": 1,
+      "md5": "8c6bd2a71301a96d1b3e92a505be31df"
+    },
+    "access_log_purpose_check": {
+      "names": [
+        "creator_record_v2_evidence_access_log_purpose_check"
+      ],
+      "n": 1,
+      "md5": "a50e874577291427d7ee41c14e9bad5e"
+    },
+    "grants_columns": {
+      "names": [
+        "binding_nonce_sha256",
+        "bound_document_id",
+        "change_ref",
+        "created_at",
+        "document_sha256",
+        "established_by",
+        "expires_at",
+        "id",
+        "max_new_runs",
+        "max_read_events",
+        "reason",
+        "revoke_reason",
+        "revoked_at",
+        "revoked_by",
+        "supabase_project_ref",
+        "test_user_id"
+      ],
+      "n": 16,
+      "md5": "43264b9e63b51644ed5fa910f8a4ddb7"
+    },
+    "grants_constraints": {
+      "names": [
+        "creator_record_v2_examination_uat_gr_binding_nonce_sha256_check",
+        "creator_record_v2_examination_uat_gr_supabase_project_ref_check",
+        "creator_record_v2_examination_uat_gran_binding_nonce_sha256_key",
+        "creator_record_v2_examination_uat_grants_change_ref_check",
+        "creator_record_v2_examination_uat_grants_check",
+        "creator_record_v2_examination_uat_grants_check1",
+        "creator_record_v2_examination_uat_grants_document_sha256_fkey",
+        "creator_record_v2_examination_uat_grants_established_by_check",
+        "creator_record_v2_examination_uat_grants_max_new_runs_check",
+        "creator_record_v2_examination_uat_grants_max_read_events_check",
+        "creator_record_v2_examination_uat_grants_pkey",
+        "creator_record_v2_examination_uat_grants_reason_check",
+        "creator_record_v2_examination_uat_grants_revoke_reason_check",
+        "creator_record_v2_examination_uat_grants_revoked_by_check",
+        "creator_record_v2_examination_uat_grants_test_user_id_fkey"
+      ],
+      "n": 15,
+      "md5": "f0e258c0d23874135f843c21663c63b1"
+    },
+    "grants_indexes": {
+      "names": [
+        "creator_record_v2_examination_uat_gran_binding_nonce_sha256_key",
+        "creator_record_v2_examination_uat_grants_open_idx",
+        "creator_record_v2_examination_uat_grants_pkey"
+      ],
+      "n": 3,
+      "md5": "b1bf2e7c3b4e75021ec9760ccc8283d2"
+    },
+    "documents_columns": {
+      "names": [
+        "consent_version",
+        "origin",
+        "seed_grant_id"
+      ],
+      "n": 3,
+      "md5": "eb4489f7b0db336933f64774424580de"
+    },
+    "documents_constraints": {
+      "names": [
+        "creator_record_v2_documents_provenance_check",
+        "creator_record_v2_documents_seed_grant_id_fkey"
+      ],
+      "n": 2,
+      "md5": "612ef31b0837d7cf8189cb7db3dadb8a"
+    },
+    "documents_indexes": {
+      "names": [
+        "creator_record_v2_documents_seed_grant_idx"
+      ],
+      "n": 1,
+      "md5": "b1e2373e1ee5b14cbcd06681ca1bd6bc"
+    },
+    "access_log_columns": {
+      "names": [
+        "uat_grant_id"
+      ],
+      "n": 1,
+      "md5": "26b6e1a6ebf37f30bc8bf1d73ed292d8"
+    },
+    "access_log_constraints": {
+      "names": [
+        "creator_record_v2_evidence_access_log_uat_grant_check",
+        "creator_record_v2_evidence_access_log_uat_grant_id_fkey"
+      ],
+      "n": 2,
+      "md5": "7776921f5e21219cc9749b5edd03f509"
+    },
+    "access_log_indexes": {
+      "names": [
+        "creator_record_v2_evidence_access_log_uat_grant_idx"
+      ],
+      "n": 1,
+      "md5": "b44d695506b60a93be09f9c534eb892d"
+    },
+    "runs05_columns": {
+      "names": [
+        "uat_grant_id"
+      ],
+      "n": 1,
+      "md5": "26b6e1a6ebf37f30bc8bf1d73ed292d8"
+    },
+    "runs05_constraints": {
+      "names": [
+        "creator_record_v2_examination_runs_authority_check",
+        "creator_record_v2_examination_runs_uat_grant_id_fkey"
+      ],
+      "n": 2,
+      "md5": "3569342c64c796499bf5e7b4eaefe98b"
+    },
+    "runs05_indexes": {
+      "names": [
+        "creator_record_v2_examination_runs_uat_grant_idx"
+      ],
+      "n": 1,
+      "md5": "aab4d39a355d92b3f699a9755d9e967f"
+    }
+  },
+  "known": {
+    "creator_record_v2_documents.columns": [
+      "byte_size",
+      "consent_version",
+      "created_at",
+      "deleted_at",
+      "file_name",
+      "id",
+      "media_type",
+      "object_removed_at",
+      "origin",
+      "seed_grant_id",
+      "sha256",
+      "state",
+      "storage_path",
+      "stored_at",
+      "user_id"
+    ],
+    "creator_record_v2_documents.constraints": [
+      "creator_record_v2_documents_byte_size_check",
+      "creator_record_v2_documents_check",
+      "creator_record_v2_documents_check1",
+      "creator_record_v2_documents_check2",
+      "creator_record_v2_documents_check3",
+      "creator_record_v2_documents_consent_version_check",
+      "creator_record_v2_documents_file_name_check",
+      "creator_record_v2_documents_media_type_check",
+      "creator_record_v2_documents_pkey",
+      "creator_record_v2_documents_provenance_check",
+      "creator_record_v2_documents_seed_grant_id_fkey",
+      "creator_record_v2_documents_sha256_check",
+      "creator_record_v2_documents_state_check",
+      "creator_record_v2_documents_storage_path_key",
+      "creator_record_v2_documents_user_id_fkey"
+    ],
+    "creator_record_v2_documents.indexes": [
+      "creator_record_v2_documents_live_sha_idx",
+      "creator_record_v2_documents_owner_idx",
+      "creator_record_v2_documents_pkey",
+      "creator_record_v2_documents_seed_grant_idx",
+      "creator_record_v2_documents_storage_path_key"
+    ],
+    "creator_record_v2_evidence_access_log.columns": [
+      "accessed_at",
+      "actor_role",
+      "actor_user_id",
+      "document_id",
+      "id",
+      "purpose",
+      "uat_grant_id"
+    ],
+    "creator_record_v2_evidence_access_log.constraints": [
+      "creator_record_v2_evidence_access_log_actor_role_check",
+      "creator_record_v2_evidence_access_log_document_id_fkey",
+      "creator_record_v2_evidence_access_log_pkey",
+      "creator_record_v2_evidence_access_log_purpose_check",
+      "creator_record_v2_evidence_access_log_uat_grant_check",
+      "creator_record_v2_evidence_access_log_uat_grant_id_fkey"
+    ],
+    "creator_record_v2_evidence_access_log.indexes": [
+      "creator_record_v2_evidence_access_log_pkey",
+      "creator_record_v2_evidence_access_log_uat_grant_idx"
+    ],
+    "creator_record_v2_prepared_documents.columns": [
+      "document_id",
+      "prepared_id",
+      "sha256"
+    ],
+    "creator_record_v2_prepared_documents.constraints": [
+      "creator_record_v2_prepared_documents_document_id_fkey",
+      "creator_record_v2_prepared_documents_pkey",
+      "creator_record_v2_prepared_documents_prepared_id_fkey"
+    ],
+    "creator_record_v2_prepared_documents.indexes": [
+      "creator_record_v2_prepared_documents_document_idx",
+      "creator_record_v2_prepared_documents_pkey"
+    ],
+    "creator_record_v2_examination_environment.columns": [
+      "environment_kind",
+      "established_at",
+      "established_by",
+      "reason",
+      "singleton",
+      "supabase_project_ref"
+    ],
+    "creator_record_v2_examination_environment.constraints": [
+      "creator_record_v2_examination_enviro_supabase_project_ref_check",
+      "creator_record_v2_examination_environmen_environment_kind_check",
+      "creator_record_v2_examination_environment_established_by_check",
+      "creator_record_v2_examination_environment_pkey",
+      "creator_record_v2_examination_environment_reason_check",
+      "creator_record_v2_examination_environment_singleton_check"
+    ],
+    "creator_record_v2_examination_environment.indexes": [
+      "creator_record_v2_examination_environment_pkey"
+    ],
+    "creator_record_v2_synthetic_fixtures.columns": [
+      "fixture_id",
+      "fixture_set",
+      "recording_sha256",
+      "sha256"
+    ],
+    "creator_record_v2_synthetic_fixtures.constraints": [
+      "creator_record_v2_synthetic_fixtures_fixture_id_check",
+      "creator_record_v2_synthetic_fixtures_fixture_set_check",
+      "creator_record_v2_synthetic_fixtures_fixture_set_fixture_id_key",
+      "creator_record_v2_synthetic_fixtures_pkey",
+      "creator_record_v2_synthetic_fixtures_recording_sha256_check",
+      "creator_record_v2_synthetic_fixtures_sha256_check"
+    ],
+    "creator_record_v2_synthetic_fixtures.indexes": [
+      "creator_record_v2_synthetic_fixtures_fixture_set_fixture_id_key",
+      "creator_record_v2_synthetic_fixtures_pkey"
+    ],
+    "creator_record_v2_examination_runs.columns": [
+      "access_log_id",
+      "content_class",
+      "created_at",
+      "document_id",
+      "document_sha256",
+      "envelope_canonical",
+      "envelope_sha256",
+      "envelope_version",
+      "environment_project_ref",
+      "examination_key",
+      "execution_boundary",
+      "executor_mode",
+      "id",
+      "outcome_reason",
+      "outcome_status",
+      "profile_id",
+      "profile_version",
+      "prompt_version",
+      "recording_sha256",
+      "replay_fixture_id",
+      "replay_set",
+      "schema_version",
+      "supersedes_id",
+      "uat_grant_id",
+      "user_id",
+      "workflow_authorization"
+    ],
+    "creator_record_v2_examination_runs.constraints": [
+      "creator_record_v2_examination_run_environment_project_ref_check",
+      "creator_record_v2_examination_runs_access_log_id_fkey",
+      "creator_record_v2_examination_runs_access_log_id_key",
+      "creator_record_v2_examination_runs_authority_check",
+      "creator_record_v2_examination_runs_check",
+      "creator_record_v2_examination_runs_check1",
+      "creator_record_v2_examination_runs_content_class_check",
+      "creator_record_v2_examination_runs_document_id_fkey",
+      "creator_record_v2_examination_runs_document_sha256_check",
+      "creator_record_v2_examination_runs_envelope_canonical_check",
+      "creator_record_v2_examination_runs_envelope_sha256_check",
+      "creator_record_v2_examination_runs_envelope_sha256_key",
+      "creator_record_v2_examination_runs_envelope_version_check",
+      "creator_record_v2_examination_runs_examination_key_check",
+      "creator_record_v2_examination_runs_examination_key_key",
+      "creator_record_v2_examination_runs_execution_boundary_check",
+      "creator_record_v2_examination_runs_executor_mode_check",
+      "creator_record_v2_examination_runs_outcome_reason_check",
+      "creator_record_v2_examination_runs_outcome_status_check",
+      "creator_record_v2_examination_runs_pkey",
+      "creator_record_v2_examination_runs_profile_id_check",
+      "creator_record_v2_examination_runs_profile_version_check",
+      "creator_record_v2_examination_runs_prompt_version_check",
+      "creator_record_v2_examination_runs_recording_sha256_check",
+      "creator_record_v2_examination_runs_replay_fixture_id_check",
+      "creator_record_v2_examination_runs_replay_set_check",
+      "creator_record_v2_examination_runs_schema_version_check",
+      "creator_record_v2_examination_runs_supersedes_id_fkey",
+      "creator_record_v2_examination_runs_supersedes_id_key",
+      "creator_record_v2_examination_runs_uat_grant_id_fkey",
+      "creator_record_v2_examination_runs_user_id_fkey",
+      "creator_record_v2_examination_runs_workflow_authorization_check"
+    ],
+    "creator_record_v2_examination_runs.indexes": [
+      "creator_record_v2_examination_runs_access_log_id_key",
+      "creator_record_v2_examination_runs_envelope_sha256_key",
+      "creator_record_v2_examination_runs_examination_key_key",
+      "creator_record_v2_examination_runs_owner_idx",
+      "creator_record_v2_examination_runs_pkey",
+      "creator_record_v2_examination_runs_root_idx",
+      "creator_record_v2_examination_runs_supersedes_id_key",
+      "creator_record_v2_examination_runs_uat_grant_idx"
+    ],
+    "creator_record_v2_examination_uat_grants.columns": [
+      "binding_nonce_sha256",
+      "bound_document_id",
+      "change_ref",
+      "created_at",
+      "document_sha256",
+      "established_by",
+      "expires_at",
+      "id",
+      "max_new_runs",
+      "max_read_events",
+      "reason",
+      "revoke_reason",
+      "revoked_at",
+      "revoked_by",
+      "supabase_project_ref",
+      "test_user_id"
+    ],
+    "creator_record_v2_examination_uat_grants.constraints": [
+      "creator_record_v2_examination_uat_gr_binding_nonce_sha256_check",
+      "creator_record_v2_examination_uat_gr_supabase_project_ref_check",
+      "creator_record_v2_examination_uat_gran_binding_nonce_sha256_key",
+      "creator_record_v2_examination_uat_grants_change_ref_check",
+      "creator_record_v2_examination_uat_grants_check",
+      "creator_record_v2_examination_uat_grants_check1",
+      "creator_record_v2_examination_uat_grants_document_sha256_fkey",
+      "creator_record_v2_examination_uat_grants_established_by_check",
+      "creator_record_v2_examination_uat_grants_max_new_runs_check",
+      "creator_record_v2_examination_uat_grants_max_read_events_check",
+      "creator_record_v2_examination_uat_grants_pkey",
+      "creator_record_v2_examination_uat_grants_reason_check",
+      "creator_record_v2_examination_uat_grants_revoke_reason_check",
+      "creator_record_v2_examination_uat_grants_revoked_by_check",
+      "creator_record_v2_examination_uat_grants_test_user_id_fkey"
+    ],
+    "creator_record_v2_examination_uat_grants.indexes": [
+      "creator_record_v2_examination_uat_gran_binding_nonce_sha256_key",
+      "creator_record_v2_examination_uat_grants_open_idx",
+      "creator_record_v2_examination_uat_grants_pkey"
+    ]
+  }
+}

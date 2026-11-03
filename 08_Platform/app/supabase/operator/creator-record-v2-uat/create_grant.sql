@@ -45,6 +45,9 @@ BEGIN
 
   -- Target safeguard: Production holds the real Cloud World assessment ASSESS-005-2026-07-12; staging holds the
   -- placeholder that supabase/staging/before_20260909000000_assessment_publications.sql inserts. Supporting evidence only.
+  -- The two are told apart by methodology_version alone. is_system_test is NOT a discriminator: 20260719000000 marks the
+  -- real Production record is_system_test = true (Cloud World is SI8's own system-test assessment), and the staging
+  -- placeholder is true as well (verified in Production by CR-V2-PROD-UAT-C1C, 2026-11-03).
   IF to_regclass('public.assessments') IS NULL THEN
     RAISE EXCEPTION 'REFUSED: no assessments table; cannot apply the target safeguard';
   END IF;
@@ -53,7 +56,7 @@ BEGIN
       RAISE EXCEPTION 'REFUSED: a production grant must name the Production project ref';
     END IF;
     IF NOT EXISTS (SELECT 1 FROM public.assessments WHERE assessment_number = 'ASSESS-005-2026-07-12'
-                     AND methodology_version IS DISTINCT FROM 'STAGING-PLACEHOLDER' AND is_system_test IS NOT TRUE) THEN
+                     AND methodology_version IS DISTINCT FROM 'STAGING-PLACEHOLDER') THEN
       RAISE EXCEPTION 'REFUSED: this database does not look like Production';
     END IF;
   ELSE
