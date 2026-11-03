@@ -121,9 +121,9 @@ maybe('creator record v2 operator synthetic UAT (PostgreSQL)', () => {
   const extra: Client[] = []
   async function connect(role?: 'service_role' | 'anon' | 'authenticated'): Promise<Client> {
     const c = new Client({ connectionString: URL })
+    extra.push(c) // registered for afterAll before anything can fail, so a failed connect or SET ROLE never leaks an open client
     await c.connect()
     if (role) await c.query(`SET ROLE ${role}`)
-    extra.push(c)
     return c
   }
   async function schema(files: string[]) {
@@ -199,6 +199,9 @@ maybe('creator record v2 operator synthetic UAT (PostgreSQL)', () => {
     assertDisposable(URL as string)
     admin = new Client({ connectionString: URL })
     await admin.connect()
+    // The shared bootstrap creates the Supabase API roles (cluster-wide, IF NOT EXISTS). Run it before SET ROLE, so the
+    // suite never depends on another suite having run first (CI starts from a fresh database; D1F).
+    await schema([])
     svc = await connect('service_role')
   })
   afterAll(async () => {
