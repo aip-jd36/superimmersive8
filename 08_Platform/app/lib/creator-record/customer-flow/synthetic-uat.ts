@@ -42,7 +42,15 @@ export interface SyntheticUatConfig {
 }
 
 /** The temporary UAT window. `null` = inert. Set ONLY in a reviewed, temporary UAT commit; revert afterwards. */
-export const CREATOR_RECORD_V2_SYNTHETIC_UAT: SyntheticUatConfig | null = null
+// TEMPORARY — CR-V2-UAT-PROD-8 (PM-approved window). One synthetic SI8 test identity (pilot invitation
+// CR-V2-UAT-PROD-7). Window: 2026-11-06 03:00–15:00 UTC (11:00–23:00 Taipei), exactly 12 hours, the existing cap.
+// It opens and closes by itself on the server clock. Revert to `null` after the UAT.
+export const CREATOR_RECORD_V2_SYNTHETIC_UAT: SyntheticUatConfig | null = {
+  user_id: '3adfe2e0-3a48-45cb-a2e9-2f6d2b3683a6',
+  starts_at: '2026-11-06T03:00:00.000Z',
+  expires_at: '2026-11-06T15:00:00.000Z',
+  change_ref: 'CR-V2-UAT-PROD-8',
+}
 
 /** No window can be longer than this, whatever the configuration says. */
 export const SYNTHETIC_UAT_MAX_WINDOW_MS = 12 * 60 * 60 * 1000
