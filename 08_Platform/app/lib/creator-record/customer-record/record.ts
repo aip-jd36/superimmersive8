@@ -145,6 +145,15 @@ export interface DeclaredAnswer {
   values: { value: string; kind: 'option' | 'free_text' | 'not_sure'; label: string | null }[]
 }
 
+/**
+ * CR-V2-DECL-1A: whether a recorded answer value is the creator's uncertainty. Read-side only: the stored value and the
+ * record's digest are untouched. A free-text "Not sure" choice has kind `not_sure`; a closed `not_sure` option has kind
+ * `option`. Text the creator typed is never uncertainty, whatever it says.
+ */
+export function isUncertainValue(v: DeclaredAnswer['values'][number]): boolean {
+  return v.kind === 'not_sure' || (v.kind === 'option' && v.value === 'not_sure')
+}
+
 export interface CustomerGuidanceItem {
   claim_id: string
   conclusion: GuidanceItem['conclusion']

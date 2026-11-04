@@ -13,7 +13,9 @@
  *     `approved` Source Text Approval names for this record schema
  *     (`./source-text`, CR-V2-1A);
  *   - a current, eligible ledger entry that is incomplete, duplicated, stale,
- *     lapsed, for an unknown claim, or that names a caveat with no text.
+ *     lapsed, for an unknown claim, or that names a caveat with no text;
+ *   - anything that breaks the declaration integrity contracts
+ *     (`declarationIntegrityRefusals`, CR-V2-DECL-1A).
  *
  * An explicitly approved, EMPTY ledger is accepted (a declarations-only record,
  * PRD OD-14). Whether that may launch is a PM decision, not this module's.
@@ -22,7 +24,7 @@
  */
 
 import type { PublicationLedgerEntry } from '../contract/publication-ledger'
-import { loadQuestionRegistry, type QuestionRegistry } from '../contract/question-registry'
+import { declarationIntegrityRefusals, INTEGRITY_REFUSAL_CODES, loadQuestionRegistry, type QuestionRegistry } from '../contract/question-registry'
 import { isApproved, isIsoDate, type GovernanceApproval } from '../contract/types'
 import type { BuildDraftInput, CreatorRecordSources } from '../prototype/build-draft'
 import { checkSourceText, SOURCE_TEXT_REFUSAL_CODES, type AcknowledgementText, type SourceTextApproval, type SourceTextContent } from './source-text'
@@ -53,6 +55,7 @@ export const SOURCE_REFUSAL_CODES = [
   'ledger_claim_reverified',
   'ledger_refresh_lapsed',
   'caveat_text_missing',
+  ...INTEGRITY_REFUSAL_CODES,
 ] as const
 export type SourceRefusalCode = (typeof SOURCE_REFUSAL_CODES)[number]
 export interface SourceRefusal {
@@ -114,6 +117,8 @@ export function checkApprovedSources(sources: CreatorRecordSources, sourceText: 
     const questions = Array.from(registry.questions.values())
     for (const q of questions) if (approvalMarked(q.approval)) refuse('pilot_marker', q.q_id)
     for (const o of registry.observation_map) if (approvalMarked(o.approval)) refuse('pilot_marker', o.o_id)
+    for (const m of sources.registry_input.semantic_mappings ?? []) if (marked(m.review_ref)) refuse('pilot_marker', m.q_id)
+    for (const r of declarationIntegrityRefusals(sources.registry_input, sources.presentation)) refuse(r.code, r.ref)
     const approved = questions.filter((q) => isApproved(q.approval))
     if (approved.length === 0) refuse('no_approved_questions')
     for (const q of approved) {

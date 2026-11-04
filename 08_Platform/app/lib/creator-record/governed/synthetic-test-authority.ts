@@ -95,15 +95,20 @@ const QUESTIONS: QuestionEntry[] = [
 ]
 
 const OBSERVATION_MAP: ObservationMapEntry[] = [
-  observation({ o_id: 'SYN-M4C-O-P3-ADS', q_id: 'P3', applies_to: { kind: 'option', value: 'paid_advertising' }, target: { kind: 'dependency', dependency_id: 'advertisement_purpose_confirmed' } }),
   observation({ o_id: 'SYN-M4C-O-F1', q_id: 'F1', target: { kind: 'location', role: 'creator_base' } }),
   observation({ o_id: 'SYN-M4C-O-F2', q_id: 'F2', target: { kind: 'location', role: 'distribution_market' } }),
   ...TOOL_IDS.map((id) => observation({ o_id: `SYN-M4C-O-T1-${id}`, q_id: 'T1', applies_to: { kind: 'option', value: id }, target: { kind: 'tool_identity' } })),
   observation({ o_id: 'SYN-M4C-O-T3', q_id: 'T3', target: { kind: 'applicability_fact', fact: 'tool_plan_tier' } }),
-  observation({ o_id: 'SYN-M4C-O-L1', q_id: 'L1', applies_to: { kind: 'option', value: 'yes' }, observation_kind: 'declared_presence', target: { kind: 'dependency', dependency_id: 'synthetic_performer_present_confirmed' } }),
   observation({ o_id: 'SYN-M4C-O-M1-artlist', q_id: 'M1', applies_to: { kind: 'option', value: 'artlist' }, target: { kind: 'asset_provider_identity' } }),
   observation({ o_id: 'SYN-M4C-O-M1-DEP', q_id: 'M1', target: { kind: 'dependency', dependency_id: 'which_music_provider' } }),
   observation({ o_id: 'SYN-M4C-O-H1', q_id: 'H1', observation_kind: 'declared_description', target: { kind: 'dependency', dependency_id: 'human_contribution_description' } }),
+]
+
+/** CR-V2-DECL-1A: obeys the same semantic mapping contract as every bundle. Synthetic: no SI8 decision. */
+const SEMANTIC_REVIEW_REF = 'SYN-DECL-1A-SEMANTIC-REVIEW (synthetic test)'
+const SEMANTIC_MAPPINGS = [
+  { q_id: 'M1', q_version: 1, dependency_id: 'which_music_provider', review_ref: SEMANTIC_REVIEW_REF },
+  { q_id: 'H1', q_version: 1, dependency_id: 'human_contribution_description', review_ref: SEMANTIC_REVIEW_REF },
 ]
 
 /** Legal determinations and evidence-only dimensions a declaration may never target (kept as strict as governance). */
@@ -145,8 +150,8 @@ const PRESENTATION: CreatorRecordSources['presentation'] = {
   T1X: meta({ q_id: 'T1X', section: 'tools', input: 'text', required: true, per_tool: true, text: t('Test question T1X: type a test tool name.') }),
   T3: meta({ q_id: 'T3', section: 'tools', input: 'plan', required: true, per_tool: true, allow_not_sure: true, text: t('Test question T3: choose or type a test plan name.'), help: t('Help text for T3.') }),
   L1: meta({ q_id: 'L1', section: 'people', input: 'single', required: true, text: t('Test question L1: choose yes, no or not sure.'), option_labels: labels(YES_NO) }),
-  M0: meta({ q_id: 'M0', section: 'materials', input: 'multi', required: true, text: t('Test question M0: choose one or more test materials.'), option_labels: labels(MATERIALS) }),
-  M1: meta({ q_id: 'M1', section: 'materials', input: 'select', required: false, text: t('Test question M1: choose a test music service.'), option_labels: labels(MUSIC) }),
+  M0: meta({ q_id: 'M0', section: 'materials', input: 'multi', required: true, text: t('Test question M0: choose one or more test materials.'), option_labels: labels(MATERIALS), exclusive_options: ['none'] }),
+  M1: meta({ q_id: 'M1', section: 'materials', input: 'select', required: true, text: t('Test question M1: choose a test music service.'), option_labels: labels(MUSIC) }),
   M1X: meta({ q_id: 'M1X', section: 'materials', input: 'text', required: true, text: t('Test question M1X: type a test music service name.') }),
   H1: meta({ q_id: 'H1', section: 'contribution', input: 'multi', required: true, text: t('Test question H1: choose one or more test contributions.'), option_labels: labels(CONTRIBUTIONS) }),
 }
@@ -159,6 +164,7 @@ const ACKNOWLEDGEMENTS: Readonly<Record<string, string>> = {
 const CAVEAT_ID = 'SYN-M4C-CAVEAT-1'
 const CAVEATS: Readonly<Record<string, string>> = { [CAVEAT_ID]: t('Test caveat. Placeholder text for the staging rehearsal.') }
 
+// CR-V2-DECL-1A: two labels below no longer have a mapping. They stay because the pinned source-text digest covers them.
 const DEPENDENCY_LABELS: Readonly<Record<string, string>> = {
   advertisement_purpose_confirmed: t('Test dependency label: advertising use'),
   synthetic_performer_present_confirmed: t('Test dependency label: likeness'),
@@ -267,7 +273,7 @@ const PDF_TEMPLATE_APPROVAL: PdfTemplateApproval = {
 
 export const CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY: (PublicationAuthorityBundle & { readonly authority_class: 'synthetic_test' }) | null = Object.freeze({
   authority_class: 'synthetic_test' as const,
-  registry_input: { questions: QUESTIONS, observation_map: OBSERVATION_MAP, prohibited_dependency_targets: PROHIBITED_DEPENDENCY_TARGETS },
+  registry_input: { questions: QUESTIONS, observation_map: OBSERVATION_MAP, prohibited_dependency_targets: PROHIBITED_DEPENDENCY_TARGETS, semantic_mappings: SEMANTIC_MAPPINGS },
   publication_ledger: LEDGER,
   dependency_labels: DEPENDENCY_LABELS,
   presentation: PRESENTATION,

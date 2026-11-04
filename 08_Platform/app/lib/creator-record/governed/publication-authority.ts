@@ -116,6 +116,7 @@ function approvalTexts(b: PublicationAuthorityBundle): string[] {
   const out: (string | null | undefined)[] = []
   for (const q of b.registry_input.questions ?? []) out.push(q.approval?.approver, q.approval?.review_ref)
   for (const o of b.registry_input.observation_map ?? []) out.push(o.approval?.approver, o.approval?.review_ref)
+  for (const m of b.registry_input.semantic_mappings ?? []) out.push(m.review_ref)
   for (const e of b.publication_ledger) out.push(e.entry_id, e.approver)
   out.push(b.versions.registry, b.versions.ledger)
   out.push(b.source_text_approval?.authority, b.source_text_approval?.review_ref)

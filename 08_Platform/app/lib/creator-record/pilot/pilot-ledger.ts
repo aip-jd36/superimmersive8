@@ -82,8 +82,6 @@ export const PILOT_PUBLICATION_LEDGER: readonly PublicationLedgerEntry[] = [
 
 /** PILOT plain-language labels for the dependencies the pilot claims and questions use. Unapproved. */
 export const PILOT_DEPENDENCY_LABELS: Readonly<Record<string, string>> = {
-  advertisement_purpose_confirmed: 'Whether the video is used in advertising',
-  synthetic_performer_present_confirmed: 'Whether a real person’s likeness or voice appears',
   which_music_provider: 'Where the music came from',
   which_provider: 'Which stock service the material came from',
   human_contribution_description: 'Your own creative contribution',

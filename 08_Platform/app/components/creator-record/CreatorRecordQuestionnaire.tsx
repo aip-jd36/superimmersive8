@@ -31,7 +31,7 @@
 import { useMemo, useState } from 'react'
 import { loadQuestionRegistry, NOT_SURE, type RegistryInput } from '@/lib/creator-record/contract/question-registry'
 import type { ExaminedDocument, ExtractionMode, ToolDocument } from '@/lib/creator-record/evidence/document-observations'
-import { visibleQuestions, visibleToolQuestions, type CreatorRecordFormState, type FormConfig, type FormIssue, type QuestionPresentation } from '@/lib/creator-record/prototype/form'
+import { applyMultiSelection, visibleQuestions, visibleToolQuestions, type CreatorRecordFormState, type FormConfig, type FormIssue, type QuestionPresentation } from '@/lib/creator-record/prototype/form'
 import { DocumentReviewPanel } from './DocumentReviewPanel'
 
 export type ExamineResult = { ok: true; document: ExaminedDocument } | { ok: false; error: string }
@@ -75,6 +75,7 @@ const ISSUE_TEXT: Record<FormIssue['issue'], string> = {
   no_tools: 'Please add at least one tool.',
   acknowledgement_required: 'Please confirm this statement.',
   unknown_question: 'Unexpected answer.',
+  exclusive_option_conflict: 'This choice cannot be combined with your other choices.',
 }
 
 const docsFrom = (tools: number, initial: readonly ToolDocument[] | undefined): (ToolDocument | null)[] =>
@@ -272,7 +273,7 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
                 <input
                   type="checkbox"
                   checked={current.includes(o)}
-                  onChange={(e) => onChange(e.target.checked ? [...current, o] : current.filter((x) => x !== o))}
+                  onChange={(e) => onChange(applyMultiSelection(current, o, e.target.checked, p.exclusive_options))}
                 />
                 {p.option_labels[o] ?? o}
               </label>

@@ -23,6 +23,11 @@ export type QuestionKind = (typeof QUESTION_KINDS)[number]
 
 /** Reserved option code that never attaches to anything governed. */
 export const NOT_SURE = 'not_sure'
+/**
+ * Reserved option code, offered only where a question defines it. The creator says the question does not apply: it is
+ * neither uncertainty nor a "No". Like `not_sure`, it never attaches to anything governed.
+ */
+export const NOT_APPLICABLE = 'not_applicable'
 
 export type DisplayCondition =
   | { kind: 'always' }
@@ -62,6 +67,18 @@ export interface RegistryInput {
    * module holds no classification of its own.
    */
   prohibited_dependency_targets?: readonly string[]
+  /**
+   * CR-V2-DECL-1A: reviewed question-to-dependency pairs (`declarationIntegrityRefusals`). Each records that a person checked
+   * that this question version asks the same factual dimension as the dependency's governed definition.
+   */
+  semantic_mappings?: readonly SemanticMapping[]
+}
+
+export interface SemanticMapping {
+  q_id: string
+  q_version: number
+  dependency_id: string
+  review_ref: string
 }
 
 export interface QuestionRegistry {
@@ -70,6 +87,74 @@ export interface QuestionRegistry {
 }
 
 export type RegistryLoadResult = { ok: true; registry: QuestionRegistry } | { ok: false; errors: string[] }
+
+/**
+ * CR-V2-DECL-1A: the declaration integrity contracts every question bundle obeys (pilot, synthetic and governed).
+ * Generic: it holds no question id, dependency id or content domain. It decides nothing about applicability, evidence
+ * or conclusions.
+ *
+ *   SEMANTIC MAPPING. An answer may attach to a governed dependency only when a person has reviewed that the question
+ *   asks about the same factual dimension as the dependency's governed definition, for this question version. Code
+ *   cannot judge meaning, so a target that merely exists is never enough: each active dependency mapping needs a
+ *   reviewed pair. A pair for another question version, or one that no active mapping uses, is stale. A reviewed pair
+ *   only permits a declaration to be shown beside the dependency: the dependency stays open and is never resolved.
+ *
+ *   EXCLUSIVE OPTIONS. `exclusive_options` names closed multi-select options that cannot be selected with any other
+ *   option. `not_sure` can never be one: partial uncertainty is a legitimate answer.
+ *
+ *   CONDITIONAL COMPLETENESS. A conditional question is shown because an earlier answer made it material, so it must be
+ *   required when shown. A closed question always offers `not_sure`, and may offer `not_applicable`, so requiring an
+ *   answer never forces certainty or a negative answer.
+ */
+export const INTEGRITY_REFUSAL_CODES = ['semantic_mapping_unreviewed', 'semantic_mapping_stale', 'exclusive_option_invalid', 'conditional_question_not_required'] as const
+export type IntegrityRefusalCode = (typeof INTEGRITY_REFUSAL_CODES)[number]
+
+export interface IntegrityRefusal {
+  code: IntegrityRefusalCode
+  /** The entry concerned (question, map entry or pair), never free text. */
+  ref: string
+}
+
+/** The presentation metadata these contracts read. */
+export interface IntegrityPresentation {
+  input: string
+  required: boolean
+  exclusive_options?: readonly string[]
+}
+
+export function declarationIntegrityRefusals(registry: RegistryInput, presentation: Readonly<Record<string, IntegrityPresentation>>): IntegrityRefusal[] {
+  const refusals: IntegrityRefusal[] = []
+  const has = (id: string) => Object.prototype.hasOwnProperty.call(presentation, id)
+  const pairs = registry.semantic_mappings ?? []
+  const pairKey = (q_id: string, q_version: number, dependency_id: string) => `${q_id}\u0000${q_version}\u0000${dependency_id}`
+  const reviewed = (ref: unknown) => typeof ref === 'string' && ref.trim() !== ''
+
+  // Semantic mapping: only an approved map entry can attach anything, so only those need a reviewed pair.
+  const active = new Set<string>()
+  for (const o of registry.observation_map) {
+    if (o.target.kind !== 'dependency' || !isApproved(o.approval)) continue
+    const key = pairKey(o.q_id, o.q_version, o.target.dependency_id)
+    active.add(key)
+    if (!pairs.some((p) => pairKey(p.q_id, p.q_version, p.dependency_id) === key && reviewed(p.review_ref))) refusals.push({ code: 'semantic_mapping_unreviewed', ref: o.o_id })
+  }
+  for (const p of pairs) {
+    if (!active.has(pairKey(p.q_id, p.q_version, p.dependency_id))) refusals.push({ code: 'semantic_mapping_stale', ref: `${p.q_id} v${p.q_version} ${p.dependency_id}` })
+  }
+
+  for (const q of registry.questions) {
+    if (!isApproved(q.approval) || !has(q.q_id)) continue
+    const p = presentation[q.q_id]
+    const exclusive = p.exclusive_options
+    if (exclusive !== undefined) {
+      const usable =
+        p.input === 'multi' && q.options !== 'free_text' && Array.isArray(exclusive) && exclusive.length > 0 && new Set(exclusive).size === exclusive.length &&
+        exclusive.every((e) => e !== NOT_SURE && (q.options as string[]).includes(e))
+      if (!usable) refusals.push({ code: 'exclusive_option_invalid', ref: q.q_id })
+    }
+    if (q.display_condition.kind !== 'always' && p.required !== true) refusals.push({ code: 'conditional_question_not_required', ref: q.q_id })
+  }
+  return refusals
+}
 
 /** Validates the whole registry. Any error rejects all of it: a caller can only ever hold a fully valid registry. */
 export function loadQuestionRegistry(input: RegistryInput): RegistryLoadResult {
@@ -106,6 +191,7 @@ export function loadQuestionRegistry(input: RegistryInput): RegistryLoadResult {
     }
     if (o.applies_to.kind === 'option') {
       if (o.applies_to.value === NOT_SURE) errors.push(`${o.o_id}: '${NOT_SURE}' never attaches to a governed target`)
+      if (o.applies_to.value === NOT_APPLICABLE) errors.push(`${o.o_id}: '${NOT_APPLICABLE}' never attaches to a governed target`)
       if (q && q.options !== 'free_text' && !q.options.includes(o.applies_to.value)) errors.push(`${o.o_id}: option '${o.applies_to.value}' is not an option of ${o.q_id}`)
     }
     errors.push(...targetErrors(o, prohibited))
@@ -181,7 +267,7 @@ export type MapAnswerResult = { ok: true; observations: DeclaredObservation[] } 
 /**
  * Turns one answer into declared observations. Each selected value maps
  * through approved Observation Map entries; a value with no approved entry
- * (and `not_sure`, always) becomes one record-only observation attached to
+ * (and `not_sure` or `not_applicable`, always) becomes one record-only observation attached to
  * nothing governed. Answers to questions that are not currently shown are
  * refused, so nothing can be recorded against an unapproved question.
  */
@@ -214,7 +300,7 @@ export function mapAnswer(registry: QuestionRegistry, answers: Answers, ctx: Rec
   for (const value of answer.values) {
     const normalized = freeText ? null : value
     const entries =
-      value === NOT_SURE
+      value === NOT_SURE || (!freeText && value === NOT_APPLICABLE)
         ? []
         : registry.observation_map.filter(
             (o) => o.q_id === q.q_id && o.q_version === q.version && isApproved(o.approval) && (o.applies_to.kind === 'any_answer' || (!freeText && o.applies_to.value === value)),

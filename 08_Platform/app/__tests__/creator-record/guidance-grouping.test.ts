@@ -91,7 +91,7 @@ describe('G2 — invariants on every real public UAT scenario (synthetic fixture
     ['R4 Pika / Pro + Kling / Standard', [tool('pika', 'Pro'), tool('kling', 'Standard')], [ref('pdf-pika-pro-no-period')], {}],
     ['R5 Runway / Pro + F', [tool('runway-gen3', 'Pro')], [ref('conflict-two-plan-names')], {}],
     ['E2 Kling / Standard + E', [tool('kling', 'Standard')], [ref('pdf-kling-pro-monthly')], {}],
-    ['Pika + Kling + Getty stock + Artlist music', [tool('pika', 'Pro'), tool('kling', 'not_sure')], [], { M0: ['stock'], M1: ['getty'], M3: ['artlist'] }],
+    ['Pika + Kling + Getty stock + Artlist music', [tool('pika', 'Pro'), tool('kling', 'not_sure')], [], { M0: ['stock'], M1: ['getty'], M3: ['artlist'], M3D: ['yes'] }],
   ])('%s', (_n, tools, refs, extra) => {
     const r = buildPublicUatDraft({ state: { answers: { ...ANS, ...extra }, tools, acknowledgements: { A1: true, A2: true } }, refs, topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: '2026-10-28', record: { record_id: 'UAT-G', record_version: 1, captured_at: '2026-10-28T00:00:00Z' } })
     expect(r.ok).toBe(true)
@@ -140,7 +140,7 @@ describe('G4 — caveats and source lines are claim-intrinsic (independent of ap
     { tools: [tool('pika', 'Pro')], answers: {} },
     { tools: [tool('pika', 'not_sure')], answers: {} },
     { tools: [tool('pika', 'Standard'), tool('kling', 'not_sure')], answers: {} },
-    { tools: [tool('kling', 'Pro')], answers: { M0: ['music', 'stock'], M1: ['artlist'], M3: ['getty'] } },
+    { tools: [tool('kling', 'Pro')], answers: { M0: ['music', 'stock'], M1: ['artlist'], M2: ['yes'], M3: ['getty'], M3D: ['yes'] } },
   ]
   const drafts = states.map((s) => {
     const r = buildCreatorRecordDraft({ state: { answers: { ...ANS, ...s.answers }, tools: s.tools, acknowledgements: { A1: true, A2: true } }, sources: pilotSources(), topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: '2026-10-28', record: { record_id: 'G4', record_version: 1, captured_at: '2026-10-28T00:00:00Z' } })

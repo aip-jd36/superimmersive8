@@ -29,6 +29,8 @@ export interface QuestionPresentation {
   per_tool: boolean
   option_labels: Readonly<Record<string, string>>
   allow_not_sure: boolean
+  /** Closed multi-select options that cannot be selected with any other option (`declarationIntegrityRefusals`). */
+  exclusive_options?: readonly string[]
 }
 
 /** What the browser submits. Values are option codes, or one free-text value (`not_sure` for "Not sure"). */
@@ -49,7 +51,7 @@ export interface FormConfig {
 export interface FormIssue {
   q_id: string | null
   tool_index: number | null
-  issue: 'required' | 'invalid_option' | 'too_long' | 'single_choice_only' | 'too_many_tools' | 'no_tools' | 'acknowledgement_required' | 'unknown_question'
+  issue: 'required' | 'invalid_option' | 'too_long' | 'single_choice_only' | 'too_many_tools' | 'no_tools' | 'acknowledgement_required' | 'unknown_question' | 'exclusive_option_conflict'
 }
 
 export interface DiscardedAnswer {
@@ -67,9 +69,21 @@ const isPerTool = (config: FormConfig, q_id: string) => config.presentation[q_id
  * and the per-tool questions shown on the single answers alone. A per-tool
  * question conditioned on a block's own answers appears only through
  * `visibleToolQuestions` for that block.
+ *
+ * CR-V2-DECL-1A: visibility is the least fixed point over the answers to questions that are themselves shown, so a
+ * hidden answer can never reveal, or make required, a question further down a chain of conditions.
  */
 export function visibleQuestions(config: FormConfig, answers: Answers): { single: QuestionEntry[]; per_tool: QuestionEntry[] } {
-  const shown = eligibleQuestions(config.registry, answers).filter((q) => config.presentation[q.q_id] !== undefined)
+  const eligible = (scope: Answers) => eligibleQuestions(config.registry, scope).filter((q) => config.presentation[q.q_id] !== undefined)
+  let scope: Answers = {}
+  let shown = eligible(scope)
+  for (let i = 0; i <= config.registry.questions.size; i++) {
+    const ids = new Set(shown.map((q) => q.q_id))
+    const next = Object.fromEntries(Object.entries(answers).filter(([id, v]) => ids.has(id) && isAnswered(v)))
+    if (Object.keys(next).length === Object.keys(scope).length) break
+    scope = next
+    shown = eligible(scope)
+  }
   return {
     single: shown.filter((q) => !isPerTool(config, q.q_id)),
     per_tool: shown.filter((q) => isPerTool(config, q.q_id)),
@@ -119,8 +133,15 @@ function checkValues(q: QuestionEntry, p: QuestionPresentation, values: readonly
   } else {
     if (vs.some((v) => !(q.options as string[]).includes(v))) issues.push({ q_id: q.q_id, tool_index, issue: 'invalid_option' })
     if ((p.input === 'single' || p.input === 'select') && vs.length > 1) issues.push({ q_id: q.q_id, tool_index, issue: 'single_choice_only' })
+    if (vs.length > 1 && vs.some((v) => (p.exclusive_options ?? []).includes(v))) issues.push({ q_id: q.q_id, tool_index, issue: 'exclusive_option_conflict' })
   }
   return issues
+}
+
+/** One multi-select tick or untick. Ticking an exclusive option clears the others; ticking another option clears any exclusive one. The server still refuses a conflict. */
+export function applyMultiSelection(current: readonly string[], option: string, checked: boolean, exclusive: readonly string[] = []): string[] {
+  if (!checked) return current.filter((v) => v !== option)
+  return exclusive.includes(option) ? [option] : [...current.filter((v) => !exclusive.includes(v)), option]
 }
 
 /** All problems with the form as submitted. An empty list means a draft can be produced. */
@@ -144,7 +165,8 @@ export function validateForm(config: FormConfig, state: CreatorRecordFormState):
 }
 
 function verbatimFor(q: QuestionEntry, p: QuestionPresentation, values: readonly string[]): string {
-  if (q.options === 'free_text') return values[0] === NOT_SURE ? 'Not sure' : values[0].trim()
+  // Only a question that offers the "Not sure" choice can record it: anything else is the creator's own text, kept as typed.
+  if (q.options === 'free_text') return p.allow_not_sure && values[0] === NOT_SURE ? 'Not sure' : values[0].trim()
   return values.map((v) => p.option_labels[v] ?? v).join('; ')
 }
 

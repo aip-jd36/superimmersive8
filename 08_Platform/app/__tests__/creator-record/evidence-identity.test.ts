@@ -116,7 +116,7 @@ describe('server-side validation of identities', () => {
   })
 
   test('an unlisted music or stock service keeps its typed name and gets no guidance', () => {
-    const r = ok(state({ answers: { ...ANS, M0: ['music'], M1: [OTHER_PROVIDER], M1X: ['Tunes4U'] } }))
+    const r = ok(state({ answers: { ...ANS, M0: ['music'], M1: [OTHER_PROVIDER], M1X: ['Tunes4U'], M2: ['yes'] } }))
     expect(r.guidance.facts.assetProviderIds).toEqual([])
     expect(r.view.not_shown.lines).toContain(T.not_shown_unrecognized('Tunes4U'))
     const rows = r.view.declarations.groups.find((g) => g.id === 'materials')!.rows
@@ -124,7 +124,7 @@ describe('server-side validation of identities', () => {
   })
 
   test('a typed name for an unlisted service is discarded once a listed one is chosen', () => {
-    const r = ok(state({ answers: { ...ANS, M0: ['music'], M1: ['artlist'], M1X: ['Tunes4U'] } }))
+    const r = ok(state({ answers: { ...ANS, M0: ['music'], M1: ['artlist'], M1X: ['Tunes4U'], M2: ['yes'] } }))
     expect(r.view.trace.discarded_answers).toContainEqual({ q_id: 'M1X', tool_index: null })
     expect(JSON.stringify(r.view.declarations)).not.toContain('Tunes4U')
     expect(r.guidance.facts.assetProviderIds).toEqual(['artlist'])

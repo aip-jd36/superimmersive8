@@ -167,6 +167,7 @@ export const T = {
   existence_no: 'You told us you do not have one.',
   existence_some: 'You told us you have this for some of them. Nothing was provided to SI8.',
   existence_not_sure: 'You were not sure.',
+  existence_not_applicable: 'You told us this is not applicable.',
 
   guidance_intro: 'Each item below is general guidance SI8 holds about a tool or material you named. It describes the provider’s published terms; it is not a decision about this video.',
   guidance_none: 'SI8 has no guidance approved for Creator Records about the tools and materials you named yet.',

@@ -141,7 +141,7 @@ describe('4 — correcting an unknown plan updates both the guidance and the unr
   })
 
   test('evidence dependencies and unestablished information are counted together but listed separately', () => {
-    const r = draft(s([tool('kling', 'not_sure')], { M0: ['music', 'stock'], M1: ['artlist'], M3: ['getty'] }))
+    const r = draft(s([tool('kling', 'not_sure')], { M0: ['music', 'stock'], M1: ['artlist'], M2: ['yes'], M3: ['getty'], M3D: ['yes'] }))
     expect(r.view.open_items.not_established.map((n) => n.label)).toEqual(['Which Kling account type applies'])
     expect(r.view.open_items.items).toHaveLength(4)
     expect(summary(r)).toBe(T.summary_counts(4, 4))
@@ -168,7 +168,7 @@ describe('5 — guidance selection, exclusions and conclusions are unchanged (pi
       ['CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1', 'relevant_applicability_unresolved'],
       ['CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-PRO-001-v1', 'relevant_applicability_unresolved'],
     ]],
-    ['Getty + Artlist', s([tool('kling', 'not_sure')], { M0: ['music', 'stock'], M1: ['artlist'], M3: ['getty'] }), [
+    ['Getty + Artlist', s([tool('kling', 'not_sure')], { M0: ['music', 'stock'], M1: ['artlist'], M2: ['yes'], M3: ['getty'], M3D: ['yes'] }), [
       ['CLAIM-KLING-COMMERCIAL-USE-BASELINE-001-v1', 'relevant_applicability_unresolved'],
       ['CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1', 'relevant_applicability_unresolved'],
       ['CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1', 'relevant_applicability_unresolved'],
@@ -197,7 +197,7 @@ describe('6 — no presentation is stronger than Bounded Interpretation permits'
     s([tool('pika', 'Pro'), tool('kling', 'not_sure')]),
     s([tool('pika', 'Pro'), tool('pika', 'Standard')]),
     s([tool('other_tool', 'Pro')].map((t) => ({ ...t, T1X: ['X'] }))),
-    s([tool('kling', 'not_sure')], { M0: ['music', 'stock'], M1: ['artlist'], M3: ['getty'] }),
+    s([tool('kling', 'not_sure')], { M0: ['music', 'stock'], M1: ['artlist'], M2: ['yes'], M3: ['getty'], M3D: ['yes'] }),
   ]
   test.each(states.map((x, i) => [i, x]))('scenario %s', (_i, state) => {
     const r = draft(state as CreatorRecordFormState)

@@ -25,7 +25,7 @@
 
 import { CREATOR_RECORD_CONCLUSIONS } from '../contract/compose'
 import { isIsoDate } from '../contract/types'
-import { verifyCustomerRecord, type CustomerRecordV2 } from '../customer-record/record'
+import { isUncertainValue, verifyCustomerRecord, type CustomerRecordV2 } from '../customer-record/record'
 import { arr, int, nullable, obj, oneOf, opt, ProjectionRefusal, str, WITHHELD } from '../record-core/projection'
 import { EVIDENCE_CATEGORIES, EVIDENCE_MEDIA_TYPES } from '../evidence-intake/vocabulary'
 import { canonicalJson } from '../record-core/canonical'
@@ -209,7 +209,7 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
     if (!Object.prototype.hasOwnProperty.call(t.fact_labels, fact)) throw new CustomerPdfRefusal('fact_unlabelled', fact)
     return t.fact_labels[fact]
   }
-  const notSure = r.declarations.answers.filter((a) => a.values.some((v) => v.kind === 'not_sure'))
+  const notSure = r.declarations.answers.filter((a) => a.values.some(isUncertainValue))
   const dependencyRows = items.flatMap((i) => i.dependency_rows.map((d) => ({ item: i, row: d })))
   const notEstablished = new Map<string, { fact: string; indexes: number[] }>()
   for (const i of items) {

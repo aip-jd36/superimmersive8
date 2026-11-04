@@ -41,7 +41,7 @@ const CASES: Record<string, ReturnType<typeof st>> = {
   stock_shutterstock: st({ M0: ['stock'], M3: ['shutterstock'], M3D: ['no'] }, tool('pika', 'Pro')),
   stock_istock: st({ M0: ['stock'], M3: ['istock'], M3D: ['no'] }, tool('pika', 'Pro')),
   music_epidemic: st({ M0: ['music'], M1: ['epidemic-sound'], M2: ['yes'] }, tool('pika', 'Pro')),
-  likeness_ads: st({ L1: ['yes'], P3: ['paid_advertising'] }, tool('kling', 'Pro')),
+  likeness_ads: st({ L1: ['yes'], L3: ['yes'], P3: ['paid_advertising'], F3: ['US'] }, tool('kling', 'Pro')),
 }
 /** Computed by the pre-change code (HEAD 0b1e571f) on CASES. */
 const SELECTION_SNAPSHOT_BEFORE = '970d35aac5d99f0cdcfa6eb487cffe63f7d01d3076b4ce4ad61aeaf2d35be043'

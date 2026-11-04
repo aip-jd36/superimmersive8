@@ -31,6 +31,7 @@ import type { CreatorRecordGuidanceResult } from '../integration/run-creator-rec
 import type { ApplicabilityRequirement, TopicClaim } from '@/lib/retrieval-engine/types'
 import type { CreatorRecordFormState, DiscardedAnswer, QuestionPresentation } from '../prototype/form'
 import { toolInstance } from '../prototype/form'
+import { NOT_APPLICABLE } from '../contract/question-registry'
 import { identityLabel, OTHER_PROVIDER, OTHER_TOOL } from '../identity/selectable-identities'
 import { DOCUMENT_FIELDS } from '../evidence/document-observations'
 import { T } from './templates'
@@ -170,6 +171,8 @@ function existenceSentence(value: string | undefined): string {
       return T.existence_no
     case 'some':
       return T.existence_some
+    case NOT_APPLICABLE:
+      return T.existence_not_applicable
     default:
       return T.existence_not_sure
   }
@@ -315,7 +318,7 @@ export function buildDraftRecord(input: DraftRecordInput): DraftRecordView {
   const notEstablished = Array.from(notEstablishedByKey.values())
   const unresolvedGuidance = cards.filter((c) => c.conclusion === 'relevant_applicability_unresolved').length
   const documentsMentioned: DraftRow[] = input.question_order
-    .filter((q) => EXISTENCE_QUESTIONS.has(q) && input.shown.single.includes(q) && (state.answers[q] ?? []).length > 0)
+    .filter((q) => EXISTENCE_QUESTIONS.has(q) && input.shown.single.includes(q) && (state.answers[q] ?? []).length > 0 && state.answers[q][0] !== NOT_APPLICABLE)
     .map((q) => ({ label: input.presentation[q].text, value: answerText(input.presentation[q], state.answers[q]), note: existenceSentence(state.answers[q][0]) }))
 
   // ── Not shown ──

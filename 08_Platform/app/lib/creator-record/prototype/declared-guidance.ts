@@ -8,7 +8,7 @@
  * nor influence guidance.
  */
 
-import { loadQuestionRegistry } from '../contract/question-registry'
+import { declarationIntegrityRefusals, loadQuestionRegistry } from '../contract/question-registry'
 import type { DeclaredObservation } from '../contract/provenance'
 import { runCreatorRecordGuidance, type CreatorRecordGuidanceResult } from '../integration/run-creator-record-guidance'
 import type { BuildDraftInput, CreatorRecordSources } from './build-draft'
@@ -17,6 +17,9 @@ import { formToObservations, validateForm, type DiscardedAnswer, type FormConfig
 export function loadFormConfig(sources: CreatorRecordSources): FormConfig {
   const r = loadQuestionRegistry(sources.registry_input)
   if (!r.ok) throw new Error(`Creator Record registry rejected: ${r.errors.join('; ')}`)
+  // CR-V2-DECL-1A: every bundle obeys the same contracts, whichever path builds from it.
+  const integrity = declarationIntegrityRefusals(sources.registry_input, sources.presentation)
+  if (integrity.length > 0) throw new Error(`Creator Record registry rejected: ${integrity.map((x) => `${x.code}: ${x.ref}`).join('; ')}`)
   return { registry: r.registry, presentation: sources.presentation, acknowledgement_ids: sources.acknowledgement_ids, max_tools: sources.max_tools }
 }
 
