@@ -210,8 +210,10 @@ describe('route: no client authority, stopped in Production, replay only', () =>
   test('the route reads only the session user and the path id; it never reads a grant, nonce, envelope or credential from the request; gate before body', () => {
     const src = read('app/api/creator-record-v2/evidence/[id]/examination/route.ts').replace(/\/\*[\s\S]*?\*\//g, '')
     expect(src).not.toMatch(/request\.(json|formData|text|headers)|searchParams|uat_grant|nonce|envelope_canonical|service_role|SUPABASE/i)
-    expect(src.indexOf('checkCustomerExaminationGate(deps, userId)')).toBeLessThan(src.indexOf('emptyRequestBody(request)'))
-    expect(src).toMatch(/requestCustomerExamination\(deps, userId, params\.id\)/)
+    const handler = read('lib/creator-record-flow/route-handlers.ts')
+    expect(handler.indexOf('checkCustomerExaminationGate(deps, userId)')).toBeLessThan(handler.indexOf('emptyRequestBody(request)'))
+    expect(handler).toMatch(/requestCustomerExamination\(deps, userId, documentId\)/)
+    expect(src).toMatch(/handleExaminationRequest\(request, userId, params\.id, productionCustomerExaminationDeps\(\)\)/)
     expect(src).toMatch(/customerExaminationHistory\(productionCustomerExaminationDeps\(\), userId, params\.id\)/)
     // Neither the service nor its wiring touches a grant, the marker or the status function.
     for (const f of ['lib/creator-record/customer-flow/examination.ts', 'lib/creator-record-flow/examination-customer.ts'])

@@ -31,10 +31,9 @@
  *     server only LISTS those whose target is unchanged (`carry_forward_candidates`) for explicit re-affirmation.
  *   - Without `include_examinations` (or with no examined document) the record is the v5 record, byte for byte.
  *
- * CR-V2-UAT-PROD-MIN-1 (identity-scoped synthetic UAT, `./synthetic-uat`): while the submissions stop is in force,
- * `deps.syntheticUat` may admit ONE named identity inside ONE fixed window, still requiring the pilot invitation; that
- * request alone is served the synthetic test inputs. A version built from synthetic sources is readable only by a
- * request admitted to synthetic inputs, so expiry or a removed invitation also closes retrieval and review.
+ * Synthetic inputs (`./synthetic-uat`): while the submissions stop is in force, `deps.syntheticUat` may admit an
+ * identity. Only the admin UAT wiring supplies that port; customer wiring never does. A version built from synthetic
+ * sources is readable only by a request admitted to synthetic inputs, so customer routes can never read one.
  */
 
 import type { FormIssue } from '../prototype/form'
@@ -108,7 +107,7 @@ export interface FlowDeps {
    * Absent → a version asking to include examinations is refused (fail closed).
    */
   examinations?: { projectionFor(userId: string, documentId: string): Promise<DocumentProjection> }
-  /** CR-V2-UAT-PROD-MIN-1: the identity-scoped synthetic UAT exception. Absent or inert = none. */
+  /** Supplied only by the admin UAT wiring. Absent = no synthetic path. */
   syntheticUat?: SyntheticUatPorts
 }
 
@@ -184,7 +183,7 @@ const refused = (a: Admission | FlowError): a is FlowError => 'ok' in a
 
 /**
  * CR-V2-UAT-PROD-MIN-1: a version built from synthetic sources is readable only by a request admitted to synthetic
- * inputs (an open UAT window for this identity, or an environment whose own inputs are synthetic). Otherwise it is
+ * inputs (the admin UAT path, or an environment whose own inputs are synthetic). Otherwise it is
  * closed: the stop's answer when no admission exists, not_found when admitted only to non-synthetic inputs.
  */
 async function syntheticClosed(deps: FlowDeps, userId: string, record: CustomerRecordV2): Promise<FlowError | null> {

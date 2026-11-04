@@ -17,6 +17,7 @@ on:
       - '08_Platform/app/supabase/migrations/20261103000000_creator_record_v2_evidence.sql'
       - '08_Platform/app/supabase/migrations/20261104000000_creator_record_v2_examination_runs.sql'
       - '08_Platform/app/supabase/migrations/20261105000000_creator_record_v2_operator_synthetic_uat.sql'
+      - '08_Platform/app/supabase/migrations/20261107000000_creator_record_v2_admin_uat.sql'
       - '08_Platform/app/supabase/operator/creator-record-v2-uat/**'
       - '08_Platform/app/supabase/verification/cr-v2-uat-preflight/**'
       - '08_Platform/implementation/caa-3b/CAA_3B_FIX_1_*.sql'

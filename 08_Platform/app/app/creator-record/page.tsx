@@ -10,9 +10,7 @@
  * (default: stopped); the purchase and checkout routes re-check every condition.
  * CR-V2-EXAM-INTEGRATION-X3: documents and examination are offered only when the approved inputs also approve the
  * examination-bearing record (schema v6). Otherwise the page is exactly the v5 journey (Production today).
- * CR-V2-UAT-PROD-MIN-1: while the submissions stop is in force, the one identity of an open synthetic UAT window
- * (`synthetic-uat.ts`, inert by default) is admitted, still only with a pilot invitation, and is served the synthetic
- * test inputs under a visible synthetic-test notice. Payment is never offered to it.
+ * This page never serves synthetic content. Administrator testing has its own page: /admin/creator-record-v2/uat.
  */
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
@@ -45,11 +43,10 @@ export default async function CreatorRecordPage() {
   if (!userId) redirect('/auth/login')
 
   const deps = productionFlowDeps()
-  const syntheticUat = deps.submissions !== 'open' && deps.syntheticUat !== undefined && deps.syntheticUat.admits(userId, deps.now())
-  if (deps.submissions !== 'open' && !syntheticUat) return <Unavailable message="Creator Record is not taking new submissions right now." />
+  if (deps.submissions !== 'open') return <Unavailable message="Creator Record is not taking new submissions right now." />
   if (!(await deps.hasPilotAccess(userId))) return <Unavailable message="Creator Record is currently available by invitation only." />
 
-  const inputs = syntheticUat ? deps.syntheticUat!.inputs() : deps.inputs()
+  const inputs = deps.inputs()
   const today = deps.now().toISOString().slice(0, 10)
   const check = checkApprovedSources(inputs.sources, inputs.source_text, TOPIC_CLAIMS_FIXTURE, today, { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION })
   if (!check.ok || !inputs.source_text) return <Unavailable message="Creator Record is not available yet." />
@@ -63,8 +60,7 @@ export default async function CreatorRecordPage() {
         presentation={inputs.sources.presentation}
         acknowledgements={inputs.source_text.acknowledgements}
         maxTools={inputs.sources.max_tools}
-        paymentOpen={!syntheticUat && CREATOR_RECORD_V2_ISSUANCE === 'enabled'}
-        syntheticUat={syntheticUat}
+        paymentOpen={CREATOR_RECORD_V2_ISSUANCE === 'enabled'}
         {...(examinationOffered ? { examination: { consentVersion: EVIDENCE_CONSENT_DRAFT_VERSION } } : {})}
       />
     </main>

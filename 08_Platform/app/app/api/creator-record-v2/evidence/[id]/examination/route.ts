@@ -5,13 +5,14 @@
  * GET  — that document's examination history, every stored run re-verified.
  *
  * Stopped by default: while CREATOR_RECORD_V2_SUBMISSIONS is 'stopped' (Production) both answer 503 before anything
- * else is read. Invite-only. Even when open, the database permits an examination read only under the isolated-test
- * marker or an active UAT grant for this identity and document; with neither it is refused and nothing is read.
+ * else is read. Invite-only. Even when open, the database decides whether an examination read is permitted; a
+ * customer has no such authority today, so it is refused and nothing is read.
  * The browser never supplies a grant, nonce, envelope or credential. Observations are not verified.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { checkCustomerExaminationGate, customerExaminationHistory, requestCustomerExamination } from '@/lib/creator-record/customer-flow/examination'
-import { emptyRequestBody, examinationError, productionCustomerExaminationDeps } from '@/lib/creator-record-flow/examination-customer'
+import { customerExaminationHistory } from '@/lib/creator-record/customer-flow/examination'
+import { examinationError, productionCustomerExaminationDeps } from '@/lib/creator-record-flow/examination-customer'
+import { handleExaminationRequest } from '@/lib/creator-record-flow/route-handlers'
 import { internalError, NO_STORE, sessionUserId, unauthorized } from '@/lib/creator-record-flow/http'
 
 export const dynamic = 'force-dynamic'
@@ -21,12 +22,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   const userId = await sessionUserId()
   if (!userId) return unauthorized()
   try {
-    const deps = productionCustomerExaminationDeps()
-    const gated = await checkCustomerExaminationGate(deps, userId)
-    if (gated) return examinationError(gated)
-    if (!(await emptyRequestBody(request))) return examinationError({ status: 400, code: 'invalid_request' })
-    const r = await requestCustomerExamination(deps, userId, params.id)
-    return r.ok ? NextResponse.json({ examination: { run_id: r.run_id, result: r.result } }, { status: 200, headers: NO_STORE }) : examinationError(r)
+    return await handleExaminationRequest(request, userId, params.id, productionCustomerExaminationDeps())
   } catch (err) {
     console.error('[creator-record-v2/examination] request failed', { error: err instanceof Error ? err.message : 'unknown' })
     return internalError()

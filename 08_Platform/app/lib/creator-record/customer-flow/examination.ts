@@ -43,11 +43,13 @@ export interface CustomerExaminationDeps {
   adapter: ExaminationAdapterDeps
   log?(event: string, detail: Record<string, unknown>): void
   /**
-   * CR-V2-UAT-PROD-MIN-1: the identity-scoped synthetic UAT exception to the submissions stop (pilot invitation still
-   * required). Examination authority itself stays with the database grant.
+   * Supplied only by the admin UAT wiring: the exception to the submissions stop. Examination authority itself stays
+   * with the database.
    */
   syntheticUat?: { admits(userId: string, now: Date): boolean }
   now?(): Date
+  /** The boundaries this path may read. Defaults to the customer list; only the admin UAT wiring sets it. */
+  visibleBoundaries?: readonly string[]
 }
 
 export type CustomerExaminationErrorCode =
@@ -153,7 +155,8 @@ export async function customerExaminationHistory(
   const visible = {
     async listRuns(owner: string, id: string): Promise<PersistedRunRow[]> {
       const rows = await deps.adapter.storage.listRuns(owner, id)
-      if (rows.some((row) => !(CUSTOMER_VISIBLE_BOUNDARIES as readonly string[]).includes(row.execution_boundary))) throw new Error('boundary_not_customer_visible')
+      const allowed: readonly string[] = deps.visibleBoundaries ?? CUSTOMER_VISIBLE_BOUNDARIES
+      if (rows.some((row) => !allowed.includes(row.execution_boundary))) throw new Error('boundary_not_customer_visible')
       return rows
     },
   }
@@ -178,14 +181,14 @@ export type DocumentProjection =
  * Fail closed on anything else: a run outside the customer-visible boundaries (an operator-seeded run), more than one
  * run (which one a record should carry is not decided), or any integrity failure. Never reads a grant.
  */
-export async function examinationProjectionFor(storage: Pick<ExaminationAdapterDeps['storage'], 'listRuns'>, userId: string, documentId: string): Promise<DocumentProjection> {
+export async function examinationProjectionFor(storage: Pick<ExaminationAdapterDeps['storage'], 'listRuns'>, userId: string, documentId: string, visibleBoundaries: readonly string[] = CUSTOMER_VISIBLE_BOUNDARIES): Promise<DocumentProjection> {
   let rows: PersistedRunRow[]
   try {
     rows = await storage.listRuns(userId, documentId)
   } catch {
     return { kind: 'unavailable', reason: 'storage_unavailable' }
   }
-  if (rows.some((row) => !(CUSTOMER_VISIBLE_BOUNDARIES as readonly string[]).includes(row.execution_boundary))) return { kind: 'unavailable', reason: 'boundary_not_customer_visible' }
+  if (rows.some((row) => !visibleBoundaries.includes(row.execution_boundary))) return { kind: 'unavailable', reason: 'boundary_not_customer_visible' }
   if (rows.length === 0) return { kind: 'none' }
   if (rows.length > 1) return { kind: 'unavailable', reason: 'multiple_runs' }
   const p = projectVerifiedRun(rows[0], userId, documentId)

@@ -122,9 +122,10 @@ export const PERSISTED_RUN_COLUMNS = 'id, examination_key, document_id, user_id,
 /**
  * The execution boundaries the database can stamp (20261104000000 + 20261105000000; CR-V2-EXAM-INTEGRATION-X1 /
  * 20261106000000 adds `customer_path_synthetic_uat`: a run of an approved test identity's own upload under a
- * customer_path_uat grant). Every boundary but the isolated one carries its grant.
+ * customer_path_uat grant). 20261107000000 adds `admin_synthetic_uat`: an administrator's own upload of a committed
+ * fixture. The operator and customer-path boundaries carry their grant; the isolated and admin boundaries carry none.
  */
-export const EXECUTION_BOUNDARIES = ['isolated_synthetic_test', 'operator_synthetic_uat', 'customer_path_synthetic_uat'] as const
+export const EXECUTION_BOUNDARIES = ['isolated_synthetic_test', 'operator_synthetic_uat', 'customer_path_synthetic_uat', 'admin_synthetic_uat'] as const
 export type ExecutionBoundary = (typeof EXECUTION_BOUNDARIES)[number]
 /** The Production project ref, which the isolated boundary may never carry (mirrors the database CHECK). */
 export const PRODUCTION_PROJECT_REF = 'lehqgcgnenwdmuzudbrs'
@@ -248,6 +249,8 @@ function verifyAuthorityStamp(row: PersistedRunRow, expectation?: RunExpectation
   if (row.execution_boundary === 'isolated_synthetic_test') {
     if (row.uat_grant_id !== null) return 'uat_grant_id'
     if (row.environment_project_ref === PRODUCTION_PROJECT_REF) return 'environment_project_ref'
+  } else if (row.execution_boundary === 'admin_synthetic_uat') {
+    if (row.uat_grant_id !== null) return 'uat_grant_id'
   } else if (typeof row.uat_grant_id !== 'string' || !UUID.test(row.uat_grant_id)) return 'uat_grant_id'
   if (expectation) {
     if (row.execution_boundary !== expectation.boundary) return 'expected_boundary'

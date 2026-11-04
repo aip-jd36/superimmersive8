@@ -17,7 +17,6 @@ import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/confi
 import { hasPilotAccess, PILOT_ACCESS_TABLE } from './pilot-access'
 import { evidenceObjects, evidenceStore } from './evidence-production'
 import { productionExaminationProjections } from '@/lib/creator-record-flow/examination-customer'
-import { productionSyntheticUat } from '@/lib/creator-record/customer-flow/synthetic-uat'
 import { verifyEvidenceIntact } from '@/lib/creator-record/evidence-intake/service'
 
 /** CR-V2-DOC-1B: referenced documents still held intact (row stored, same fingerprint, bytes present and re-hashed). */
@@ -65,6 +64,13 @@ export const preparedStore: PreparedStore = {
   },
 }
 
+/** One user's most recent prepared versions, newest first (admin UAT only). */
+export async function preparedVersionsOf(userId: string, limit: number): Promise<PreparedRow[]> {
+  const { data, error } = await supabaseAdmin.from(PREPARED_TABLE).select(COLUMNS).eq('user_id', userId).order('created_at', { ascending: false }).limit(limit)
+  if (error) throw new PreparedStoreError('list', error.code)
+  return (data ?? []) as PreparedRow[]
+}
+
 /** CR-V2-MVP-M3: the version bound to a submission (submission_id is UNIQUE), or null. */
 export async function preparedBoundTo(submissionId: string): Promise<PreparedRow | null> {
   const { data, error } = await supabaseAdmin.from(PREPARED_TABLE).select(COLUMNS).eq('submission_id', submissionId).maybeSingle()
@@ -101,8 +107,6 @@ export function productionFlowDeps(): FlowDeps {
     evidence: evidenceStore,
     // CR-V2-EXAM-INTEGRATION-X3: the persisted, re-verified projection of an owned document's run (only when asked).
     examinations: productionExaminationProjections,
-    // CR-V2-UAT-PROD-MIN-1: inert unless the committed UAT window names this identity and is open.
-    syntheticUat: productionSyntheticUat,
   }
 }
 

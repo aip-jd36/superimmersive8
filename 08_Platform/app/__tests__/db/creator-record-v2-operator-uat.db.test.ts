@@ -742,7 +742,7 @@ maybe('creator record v2 operator synthetic UAT (PostgreSQL)', () => {
         await removeMarker()
       })
       const createSql = (o: { target: string; ref: string; email: string; fixture: string; hash: string }) => {
-        let sql = readFileSync(join(OPERATOR, 'create_grant.sql'), 'utf8')
+        let sql = readFileSync(join(OPERATOR, 'archive', 'create_grant.sql'), 'utf8')
         sql = setConst(sql, 'c_target', o.target)
         sql = setConst(sql, 'c_project_ref', o.ref)
         sql = setConst(sql, 'c_test_user_email', o.email)
@@ -754,7 +754,7 @@ maybe('creator record v2 operator synthetic UAT (PostgreSQL)', () => {
       }
 
       test('create_grant.sql: refuses placeholders and a mismatched target; creates exactly one grant on a Production-shaped database; revoke_grant.sql revokes and deletes nothing', async () => {
-        expect((await fail(admin.query(readFileSync(join(OPERATOR, 'create_grant.sql'), 'utf8')))).message).toBe('REFUSED: edit every EDIT constant first')
+        expect((await fail(admin.query(readFileSync(join(OPERATOR, 'archive', 'create_grant.sql'), 'utf8')))).message).toBe('REFUSED: edit every EDIT constant first')
         // STUB: the assessments rows that tell Production from staging.
         await admin.query(`CREATE TABLE IF NOT EXISTS public.assessments (assessment_number text PRIMARY KEY, methodology_version text, is_system_test boolean)`)
         await admin.query(`DELETE FROM public.assessments`)
@@ -775,7 +775,7 @@ maybe('creator record v2 operator synthetic UAT (PostgreSQL)', () => {
         expect(rows[0]).toMatchObject({ test_user_id: owner, document_sha256: F.sha256, supabase_project_ref: PROD_REF, active: true, max_read_events: 4 })
         expect(new Date(rows[0].expires_at).getTime() - new Date(rows[0].created_at).getTime()).toBe(120 * 60 * 1000)
         const docId = await seed(rows[0].grant_id, owner)
-        let revoke = readFileSync(join(OPERATOR, 'revoke_grant.sql'), 'utf8')
+        let revoke = readFileSync(join(OPERATOR, 'archive', 'revoke_grant.sql'), 'utf8')
         expect((await fail(admin.query(revoke))).message).toBe('REFUSED: edit both EDIT constants first')
         revoke = setConst(setConst(revoke, 'c_revoked_by', 'db test operator'), 'c_revoke_reason', 'test complete')
         await admin.query(revoke)

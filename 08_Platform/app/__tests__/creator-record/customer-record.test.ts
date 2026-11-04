@@ -450,6 +450,7 @@ describe('independence', () => {
     // CR-V2-MVP-M3: the governance snapshot (approved inputs) and the purchase / issuance rules.
     // CR-V2-MVP-M4B: a type-only import of the Source Text Approval shape by the publication authority bundle.
     expect(importers).toEqual([
+      'app/admin/creator-record-v2/uat/page.tsx', // permanent admin-only UAT: the same source and schema checks as the customer page
       'app/creator-record/page.tsx',
       'lib/creator-record/customer-flow/approved-inputs.ts',
       'lib/creator-record/customer-flow/guidance-with-documents.ts', // type-only: the review view of a verified record (runtime imports pinned in guidance-with-documents.test.tsx)
@@ -464,7 +465,12 @@ describe('independence', () => {
       expect(readFileSync(path.join(APP_ROOT, f), 'utf8')).not.toMatch(/^\s*import\s+(?!type\s)/m)
     // CR-V2-MVP-M3: payment, checkout, webhook, admin and artifact-issuance code reach the v2 flow ONLY through these
     // exact files (checkout preconditions, the registered v2 renderer). Exact list, including dynamic imports.
-    const issuance = files.map(rel).filter((f) => /^lib\/(payments|creator-record-artifacts)\/|^app\/api\/(webhooks|checkout|admin)\//.test(f))
+    // The permanent admin-only UAT routes use the customer flow by design. They are exempt from this list only, and may never reach purchase or issuance.
+    const ADMIN_UAT = 'app/api/admin/creator-record-v2/uat/'
+    const adminUatRoutes = files.map(rel).filter((f) => f.startsWith(ADMIN_UAT))
+    expect(adminUatRoutes.length).toBe(5)
+    for (const f of adminUatRoutes) expect([f, importsOf(path.join(APP_ROOT, f)).filter((i) => /purchase|artifact|payment|checkout|customer-pdf/.test(i))]).toEqual([f, []])
+    const issuance = files.map(rel).filter((f) => !f.startsWith(ADMIN_UAT) && /^lib\/(payments|creator-record-artifacts)\/|^app\/api\/(webhooks|checkout|admin)\//.test(f))
     expect(issuance.length).toBeGreaterThan(0)
     const reach = (f: string) => Array.from(new Set(readFileSync(path.join(APP_ROOT, f), 'utf8').match(/@\/lib\/(creator-record\/customer-[a-z-]+\/[a-z-]+|creator-record-flow\/[a-z-]+)/g) ?? [])).sort()
     expect(issuance.filter((f) => reach(f).length > 0).map((f) => [f, reach(f)])).toEqual([

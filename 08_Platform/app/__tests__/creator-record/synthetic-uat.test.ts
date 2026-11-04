@@ -1,6 +1,7 @@
 /**
- * CR-V2-UAT-PROD-MIN-1 — the identity-scoped synthetic Production UAT exception: one named identity, one fixed window,
- * pilot invitation still required, synthetic inputs only inside that context; every other path exactly as before.
+ * The service-level guarantees of the synthetic path, over a test-local port: only an admitted identity gets synthetic
+ * inputs, closing admission closes every operation, and every other path is exactly as before. The temporary window is
+ * retired; only the admin UAT wiring supplies this port (admin-uat.test.ts).
  * Production conditions are simulated: submissions STOPPED and an EMPTY governance bundle.
  */
 
@@ -13,10 +14,8 @@ import { sha256Hex } from '@/lib/creator-record/record-core/canonical'
 import type { ExaminationEnvelope } from '@/lib/creator-record/examination/envelope'
 import { defaultProfileRegistry, knownFixtureRegistry, replayExecutor } from '@/lib/creator-record/examination/replay-executor'
 import { examineAndRecord, ExaminationPortError, type ExaminationAdapterDeps, type PersistedRunRow } from '@/lib/creator-record/examination/persistence'
-import {
-  CREATOR_RECORD_V2_SYNTHETIC_UAT, SYNTHETIC_UAT_MAX_WINDOW_MS, productionSyntheticUat, syntheticUatInputs, syntheticUatWindowOpen, type SyntheticUatConfig, type SyntheticUatPorts,
-} from '@/lib/creator-record/customer-flow/synthetic-uat'
-import { approvedCustomerRecordInputs, CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flow/approved-inputs'
+import { syntheticUatInputs, type SyntheticUatPorts } from '@/lib/creator-record/customer-flow/synthetic-uat'
+import { approvedCustomerRecordInputs, approvedGovernanceSnapshot, CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flow/approved-inputs'
 import { examinationProjectionFor, requestCustomerExamination, customerExaminationHistory, type CustomerExaminationDeps } from '@/lib/creator-record/customer-flow/examination'
 import { getPrepared, preparePrepared, reviewPrepared, type ApprovedInputs, type FlowDeps, type NewPreparedRow, type PreparedRow, type PreparedView } from '@/lib/creator-record/customer-flow/service'
 import { startPurchase, type PurchaseDeps } from '@/lib/creator-record/customer-flow/purchase'
@@ -38,7 +37,10 @@ const RUN_ID = '44444444-4444-4444-8444-444444444444'
 const START = new Date('2026-11-05T09:00:00.000Z')
 const INSIDE = new Date('2026-11-05T10:00:00.000Z')
 const EXPIRED = new Date('2026-11-05T15:00:00.000Z')
-const CONFIG: SyntheticUatConfig = { user_id: UAT_USER, starts_at: '2026-11-05T09:00:00.000Z', expires_at: '2026-11-05T15:00:00.000Z', change_ref: 'CR-V2-UAT-PROD-MIN-TEST' }
+type TestConfig = { user_id: string; ends: Date }
+const CONFIG: TestConfig = { user_id: UAT_USER, ends: EXPIRED }
+/** Test-local admission: the port decides; these suites only need it to be able to close. */
+const syntheticUatWindowOpen = (config: TestConfig | null, userId: unknown, now: Date) => !!config && userId === config.user_id && now.getTime() >= START.getTime() && now.getTime() < config.ends.getTime()
 
 // The synthetic bundle's own questionnaire: the answer set its own suite uses (synthetic-test-authority.test.ts).
 const B = CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY!
@@ -78,7 +80,7 @@ const runRow = (): PersistedRunRow => ({
 })
 
 /** Production conditions: submissions stopped, empty governance, the UAT ports over CONFIG and a controllable clock. */
-function production(o: { config?: SyntheticUatConfig | null; invited?: (u: string) => boolean } = {}) {
+function production(o: { config?: TestConfig | null; invited?: (u: string) => boolean } = {}) {
   let now = INSIDE
   const config = o.config === undefined ? CONFIG : o.config
   const invited = o.invited ?? ((u: string) => u === UAT_USER || u === OTHER)
@@ -108,27 +110,16 @@ function production(o: { config?: SyntheticUatConfig | null; invited?: (u: strin
 const REF = [{ document_id: DOC_ID, category: 'billing_receipt', tool_index: 0 }]
 const viewOf = (r: Awaited<ReturnType<typeof preparePrepared>>): PreparedView => { if (!r.ok) throw new Error(JSON.stringify(r)); return r.view }
 
-describe('the window', () => {
-  test('admits only the named identity, only inside [starts_at, expires_at), only for a bounded window; inert when null', () => {
-    expect(syntheticUatWindowOpen(CONFIG, UAT_USER, INSIDE)).toBe(true)
-    expect(syntheticUatWindowOpen(CONFIG, UAT_USER, START)).toBe(true)
-    expect(syntheticUatWindowOpen(CONFIG, UAT_USER, new Date(START.getTime() - 1))).toBe(false)
-    expect(syntheticUatWindowOpen(CONFIG, UAT_USER, EXPIRED)).toBe(false) // expires_at itself is closed
-    expect(syntheticUatWindowOpen(CONFIG, OTHER, INSIDE)).toBe(false)
-    expect(syntheticUatWindowOpen(null, UAT_USER, INSIDE)).toBe(false)
-    for (const bad of [
-      { ...CONFIG, expires_at: new Date(START.getTime() + SYNTHETIC_UAT_MAX_WINDOW_MS + 1000).toISOString() },
-      { ...CONFIG, expires_at: CONFIG.starts_at },
-      { ...CONFIG, user_id: 'not-a-uuid' },
-      { ...CONFIG, starts_at: '2026-11-05 09:00' },
-      { ...CONFIG, change_ref: ' ' },
-    ]) expect(syntheticUatWindowOpen(bad, UAT_USER, INSIDE)).toBe(false)
-    expect(syntheticUatWindowOpen(CONFIG, undefined, INSIDE)).toBe(false)
+describe('the retired window', () => {
+  test('no window configuration, identity or expiry remains in code', () => {
+    const src = read('lib/creator-record/customer-flow/synthetic-uat.ts').replace(/\/\*[\s\S]*?\*\//g, '')
+    expect(src).not.toMatch(/CREATOR_RECORD_V2_SYNTHETIC_UAT|syntheticUatWindowOpen|productionSyntheticUat|expires_at|starts_at|user_id/)
+    for (const f of ['lib', 'app', 'components']) expect(require('node:child_process').execSync(`git grep -l "3adfe2e0-3a48" -- ${f} || true`, { cwd: APP }).toString()).toBe('')
   })
 
-  test('the committed configuration is INERT: Production admits nobody', () => {
-    expect(CREATOR_RECORD_V2_SYNTHETIC_UAT).toBeNull()
-    expect(productionSyntheticUat.admits(UAT_USER, INSIDE)).toBe(false)
+  test('customer wiring supplies no synthetic port', () => {
+    for (const f of ['lib/creator-record-flow/production.ts', 'lib/creator-record-flow/evidence-production.ts', 'lib/creator-record-flow/examination-customer.ts', 'app/creator-record/page.tsx'])
+      expect([f, /syntheticUat|synthetic-uat/.test(read(f))]).toEqual([f, false])
   })
 })
 
@@ -290,11 +281,20 @@ describe('closed paths and unchanged controls', () => {
       expect([f, /synthetic[-_]?uat|syntheticUat|SYNTHETIC_UAT/i.test(read(f).replace(/\/\*[\s\S]*?\*\//g, ''))]).toEqual([f, false])
   })
 
-  test('the page admits the window identity only after the stop check, still requires the invitation, and shows the notice', () => {
+  test('a synthetic version cannot be bought even after launch: every stop open, real governance, nothing bound', async () => {
+    const w = production()
+    viewOf(await preparePrepared(w.deps, UAT_USER, { state: syntheticState() }))
+    const row = { ...w.rows[0], status: 'reviewed' as const, reviewed_at: INSIDE.toISOString() }
+    const deps: PurchaseDeps = { submissions: 'open', issuance: 'enabled', hasPilotAccess: async () => true, getPrepared: async () => row, latestVersion: async () => row, boundTo: async () => null, bind: async () => { throw new Error('must not bind') }, governance: (d) => approvedGovernanceSnapshot(d, TOPIC_CLAIMS_FIXTURE), now: () => INSIDE }
+    const r = await startPurchase(deps, UAT_USER, row.id)
+    expect(r.ok).toBe(false)
+    expect(['ineligible', 'unavailable']).toContain((r as { code: string }).code)
+  })
+
+  test('the customer page never serves synthetic content; the notice lives in the shared client for the admin page', () => {
     const page = read('app/creator-record/page.tsx')
-    expect(page).toContain("const syntheticUat = deps.submissions !== 'open' && deps.syntheticUat !== undefined && deps.syntheticUat.admits(userId, deps.now())")
-    expect(page.indexOf('await deps.hasPilotAccess(userId)')).toBeGreaterThan(page.indexOf('&& !syntheticUat) return <Unavailable'))
-    expect(page).toContain('paymentOpen={!syntheticUat && ')
+    expect(page).not.toMatch(/syntheticUat|synthetic-uat/)
+    expect(page).toContain("paymentOpen={CREATOR_RECORD_V2_ISSUANCE === 'enabled'}")
     expect(read('app/creator-record/CreatorRecordV2Client.tsx')).toContain('data-synthetic-uat')
   })
 })
@@ -314,9 +314,8 @@ describe('isolation pins', () => {
 
   test('only the gated services and their production wiring know the UAT module; purchase and issuance never do', () => {
     expect(importing(/from\s+['"][^'"]*synthetic-uat['"]/)).toEqual([
-      'lib/creator-record-flow/evidence-production.ts',
-      'lib/creator-record-flow/examination-customer.ts',
-      'lib/creator-record-flow/production.ts',
+      'app/admin/creator-record-v2/uat/page.tsx',
+      'lib/creator-record-flow/admin-uat.ts',
       'lib/creator-record/customer-flow/service.ts',
     ])
   })

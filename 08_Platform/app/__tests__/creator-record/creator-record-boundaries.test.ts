@@ -188,8 +188,13 @@ describe('lib/creator-record boundaries', () => {
     expect(importers).toEqual([
       'app/admin/creator-record-v2/CreatorRecordPrototypeClient.tsx',
       'app/admin/creator-record-v2/page.tsx',
+      'app/admin/creator-record-v2/uat/page.tsx', // permanent admin-only UAT: the page and its thin routes
       'app/api/admin/creator-record-v2/draft/route.ts',
       'app/api/admin/creator-record-v2/examine/route.ts',
+      'app/api/admin/creator-record-v2/uat/evidence/[id]/examination/route.ts',
+      'app/api/admin/creator-record-v2/uat/evidence/route.ts',
+      'app/api/admin/creator-record-v2/uat/prepared/[id]/review/route.ts',
+      'app/api/admin/creator-record-v2/uat/prepared/[id]/route.ts',
       // CR-V2-MVP-M3: checkout runs the v2 preconditions; the purchase route binds a reviewed version.
       'app/api/checkout/create-session/route.ts',
       // CR-V2-DOC-1: evidence intake routes (stopped by default, invite-only, synthetic-only code lock).
@@ -201,7 +206,6 @@ describe('lib/creator-record boundaries', () => {
       'app/api/creator-record-v2/prepared/[id]/purchase/route.ts',
       'app/api/creator-record-v2/prepared/[id]/review/route.ts',
       'app/api/creator-record-v2/prepared/[id]/route.ts',
-      'app/api/creator-record-v2/prepared/route.ts',
       'app/api/uat/creator-record-v2/draft/route.ts',
       'app/creator-record/CreatorRecordV2Client.tsx',
       'app/creator-record/page.tsx',
@@ -211,14 +215,15 @@ describe('lib/creator-record boundaries', () => {
       'components/creator-record/DocumentReviewPanel.tsx',
       'components/creator-record/DraftRecordView.tsx',
       'components/creator-record/ExaminationReview.tsx', // CR-V2-EXAM-INTEGRATION-X3: the prepared view's type only
+      'lib/creator-record-flow/admin-uat.ts', // Permanent admin-only UAT: the injected dependencies
       'lib/creator-record-flow/evidence-http.ts', // CR-V2-DOC-1: evidence route helpers
       'lib/creator-record-flow/evidence-production.ts', // CR-V2-DOC-1: evidence intake ports
       'lib/creator-record-flow/examination-customer.ts', // CR-V2-EXAM-INTEGRATION-X2: creator examination wiring (one route)
       'lib/creator-record-flow/examination-production.ts', // CR-V2-DOC-2C-C-B: examination persistence ports (operator CLI; X2: the creator examination wiring)
-      'lib/creator-record-flow/examination-uat.ts', // CR-V2-PROD-UAT-B: operator synthetic UAT logic (only the operator CLI; no route)
       'lib/creator-record-flow/examination-ui.ts', // CR-V2-EXAM-INTEGRATION-X3: browser helpers (vocabulary at runtime; types otherwise)
       'lib/creator-record-flow/http.ts',
       'lib/creator-record-flow/production.ts',
+      'lib/creator-record-flow/route-handlers.ts', // request parsing shared by the customer and admin UAT routes
     ])
   })
 

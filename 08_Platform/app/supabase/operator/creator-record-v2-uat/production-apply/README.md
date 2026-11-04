@@ -4,6 +4,24 @@
 
 This pack applies the two committed migrations to Production, each in one bounded transaction, and proves the result. It creates **no** grant, marker, user, document or run, and it changes no Production stop.
 
+## 20261107000000: permanent admin-only UAT
+
+`build_20261107.js` generates three files from the committed migration: `08_apply_20261107.sql` (one transaction), `09_verify_20261107.sql` (read-only) and `../rollback_20261107.sql`.
+
+1. Confirm the project ref in the dashboard URL. A database can't prove its own ref, so this stays an operator step.
+2. Run `09_verify_20261107.sql`. Before applying, `state` must be `absent`.
+3. Run `08_apply_20261107.sql`. Success is one row: `result = '20261107000000 COMMITTED'`.
+4. Run `09_verify_20261107.sql`. `state` must be `applied`, `all_pass` true and `failed` empty.
+5. On an error or unclear response: run `ROLLBACK;` alone, then `09_verify_20261107.sql`, and read its `state` first.
+
+**What 08 refuses, before any change:** no Cloud World assessment or a staging placeholder; the exact CR-V2-UAT-PROD-9 run, grant and project ref not found; any state but `absent`; an active grant; the marker. Its post-check refuses, and commits nothing, unless the function bodies and run constraint match the digests pinned in `expected.json`.
+
+**States:** `absent` (not applied), `applied`, `disabled` (rolled back after an admin run existed), `partial` (stop and report).
+
+Rollback restores the 20261106 functions, so admin reads and new runs are refused. It restores the old run CHECK only if no admin run exists; otherwise the CHECK stays, because that history is append-only.
+
+If `20261107000000` ever changes, its new digests must be pinned in `expected.json`, or the build refuses.
+
 ## Files
 
 | File | Kind | What it does |

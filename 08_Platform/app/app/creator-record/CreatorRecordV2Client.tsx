@@ -49,13 +49,18 @@ interface Props {
   paymentOpen: boolean
   /** CR-V2-EXAM-INTEGRATION-X3: offered only when the page says so (display only; the server decides). */
   examination?: { consentVersion: string }
-  /** CR-V2-UAT-PROD-MIN-1: this session is the identity-scoped synthetic UAT (display only; the server decides). */
+  /** This session is on synthetic inputs (display only; the server decides). */
   syntheticUat?: boolean
+  /** The admin UAT page's own API routes. Defaults to the customer routes. */
+  apiBase?: string
+  /** A version to open on arrival (admin UAT: reopening an earlier version). */
+  initialView?: PreparedView | null
 }
 
 export function CreatorRecordV2Client(props: Props) {
-  const [mode, setMode] = useState<'form' | 'review'>('form')
-  const [view, setView] = useState<PreparedView | null>(null)
+  const apiBase = props.apiBase ?? '/api/creator-record-v2'
+  const [mode, setMode] = useState<'form' | 'review'>(props.initialView ? 'review' : 'form')
+  const [view, setView] = useState<PreparedView | null>(props.initialView ?? null)
   const [lastState, setLastState] = useState<CreatorRecordFormState | undefined>(undefined)
   const [issues, setIssues] = useState<FormIssue[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -65,7 +70,7 @@ export function CreatorRecordV2Client(props: Props) {
   const [includeExaminations, setIncludeExaminations] = useState(false)
 
   async function post(body: Record<string, unknown>): Promise<boolean> {
-    const res = await fetch('/api/creator-record-v2/prepared', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+    const res = await fetch(`${apiBase}/prepared`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
     const json = await res.json().catch(() => ({}))
     if (res.ok && json.prepared) {
       setView(json.prepared as PreparedView)
@@ -113,7 +118,7 @@ export function CreatorRecordV2Client(props: Props) {
     setBusy(true)
     setError(null)
     try {
-      const res = await fetch(`/api/creator-record-v2/prepared/${view.id}/review`, { method: 'POST' })
+      const res = await fetch(`${apiBase}/prepared/${view.id}/review`, { method: 'POST' })
       const json = await res.json().catch(() => ({}))
       if (res.ok && json.prepared) setView(json.prepared as PreparedView)
       else setError(typeof json.error === 'string' ? json.error : FAILED)
@@ -263,6 +268,7 @@ export function CreatorRecordV2Client(props: Props) {
       {props.examination && (
         <EvidencePanel
           consentVersion={props.examination.consentVersion}
+          apiBase={apiBase}
           maxTools={props.maxTools}
           attachments={attachments}
           onAttachmentsChange={setAttachments}

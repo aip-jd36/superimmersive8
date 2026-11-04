@@ -28,9 +28,12 @@ export interface EvidencePanelProps {
   onIncludeExaminationsChange: (next: boolean) => void
   /** Server-rendered tests pass a list; the browser loads it. */
   initialDocuments?: EvidenceDocument[]
+  /** The admin UAT page's own API routes. Defaults to the customer routes. */
+  apiBase?: string
 }
 
 export function EvidencePanel(props: EvidencePanelProps) {
+  const apiBase = props.apiBase ?? '/api/creator-record-v2'
   const [documents, setDocuments] = useState<EvidenceDocument[]>(props.initialDocuments ?? [])
   const [loading, setLoading] = useState(props.initialDocuments === undefined)
   const [listError, setListError] = useState<string | null>(null)
@@ -44,7 +47,7 @@ export function EvidencePanel(props: EvidencePanelProps) {
     setLoading(true)
     setListError(null)
     try {
-      const res = await fetch('/api/creator-record-v2/evidence')
+      const res = await fetch(`${apiBase}/evidence`)
       const json = await res.json().catch(() => ({}))
       if (res.ok && Array.isArray(json.documents)) setDocuments(json.documents as EvidenceDocument[])
       else setListError(typeof json.error === 'string' ? json.error : FAILED)
@@ -53,7 +56,7 @@ export function EvidencePanel(props: EvidencePanelProps) {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [apiBase])
   useEffect(() => { if (props.initialDocuments === undefined) void load() }, [load, props.initialDocuments])
 
   async function upload() {
@@ -64,7 +67,7 @@ export function EvidencePanel(props: EvidencePanelProps) {
       const form = new FormData()
       form.append('file', file)
       form.append('consent', props.consentVersion)
-      const res = await fetch('/api/creator-record-v2/evidence', { method: 'POST', body: form })
+      const res = await fetch(`${apiBase}/evidence`, { method: 'POST', body: form })
       const json = await res.json().catch(() => ({}))
       if (!res.ok) setUploadError(typeof json.error === 'string' ? json.error : FAILED)
       else { setFile(null); await load() }
@@ -78,7 +81,7 @@ export function EvidencePanel(props: EvidencePanelProps) {
   async function runExamination(id: string) {
     setExamine((s) => ({ ...s, [id]: { kind: 'working' } }))
     try {
-      const res = await fetch(`/api/creator-record-v2/evidence/${id}/examination`, { method: 'POST' })
+      const res = await fetch(`${apiBase}/evidence/${id}/examination`, { method: 'POST' })
       const json = await res.json().catch(() => ({}))
       setExamine((s) => ({ ...s, [id]: examineStateFrom(res.status, json) }))
     } catch {

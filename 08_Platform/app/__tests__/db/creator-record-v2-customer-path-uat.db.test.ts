@@ -518,11 +518,11 @@ maybe('creator record v2 customer-path synthetic UAT grant (PostgreSQL)', () => 
     describe('operator SQL', () => {
       test('create_customer_path_grant.sql: refuses placeholders, an unapplied migration and mismatched targets; creates exactly one customer_path_uat grant; revoke_grant.sql revokes it', async () => {
         const createSql = (o: { target: string; ref: string; email: string; fixture: string; hash: string }) => {
-          let sql = readFileSync(join(OPERATOR, 'create_customer_path_grant.sql'), 'utf8')
+          let sql = readFileSync(join(OPERATOR, 'archive', 'create_customer_path_grant.sql'), 'utf8')
           for (const [k, v] of Object.entries({ c_target: o.target, c_project_ref: o.ref, c_test_user_email: o.email, c_fixture_id: o.fixture, c_nonce_sha256: o.hash, c_established_by: 'db test operator', c_change_ref: 'TEST-X1', c_reason: 'operator SQL test' })) sql = setConst(sql, k, v)
           return sql
         }
-        expect((await fail(admin.query(readFileSync(join(OPERATOR, 'create_customer_path_grant.sql'), 'utf8')))).message).toBe('REFUSED: edit every EDIT constant first')
+        expect((await fail(admin.query(readFileSync(join(OPERATOR, 'archive', 'create_customer_path_grant.sql'), 'utf8')))).message).toBe('REFUSED: edit every EDIT constant first')
         await admin.query(`CREATE TABLE IF NOT EXISTS public.assessments (assessment_number text PRIMARY KEY, methodology_version text, is_system_test boolean)`)
         await admin.query(`DELETE FROM public.assessments`)
         const email = `x1-${randomUUID()}@example.test`
@@ -542,7 +542,7 @@ maybe('creator record v2 customer-path synthetic UAT grant (PostgreSQL)', () => 
         expect(rows).toHaveLength(1)
         expect(rows[0]).toMatchObject({ grant_kind: 'customer_path_uat', test_user_id: owner, document_sha256: F.sha256, bound_document_id: null, active: true, max_read_events: 4, max_new_runs: 1 })
         expect(new Date(rows[0].expires_at).getTime() - new Date(rows[0].created_at).getTime()).toBe(120 * 60 * 1000)
-        const revoke = setConst(setConst(readFileSync(join(OPERATOR, 'revoke_grant.sql'), 'utf8'), 'c_revoked_by', 'db test operator'), 'c_revoke_reason', 'test complete')
+        const revoke = setConst(setConst(readFileSync(join(OPERATOR, 'archive', 'revoke_grant.sql'), 'utf8'), 'c_revoked_by', 'db test operator'), 'c_revoke_reason', 'test complete')
         await admin.query(revoke)
         expect((await status(svc, nonce))[0]).toMatchObject({ active: false, revoked: true })
         await admin.query('DROP TABLE public.assessments')
@@ -550,7 +550,7 @@ maybe('creator record v2 customer-path synthetic UAT grant (PostgreSQL)', () => 
 
       test('create_customer_path_grant.sql refuses where 20261106 is not applied', async () => {
         await schema([...BEFORE, M05])
-        let sql = readFileSync(join(OPERATOR, 'create_customer_path_grant.sql'), 'utf8')
+        let sql = readFileSync(join(OPERATOR, 'archive', 'create_customer_path_grant.sql'), 'utf8')
         for (const [k, v] of Object.entries({ c_target: 'production', c_project_ref: PROD_REF, c_test_user_email: 'a@b.c', c_fixture_id: F.fixture_id, c_nonce_sha256: 'a'.repeat(64), c_established_by: 'x', c_change_ref: 'y', c_reason: 'z' })) sql = setConst(sql, k, v)
         expect((await fail(admin.query(sql))).message).toBe('REFUSED: migration 20261106000000 is not applied here')
         await schema([...BEFORE, M05, M06])

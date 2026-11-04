@@ -601,5 +601,23 @@
     "document_id": "daa1f62d-1655-46cd-906b-7d44817d1f88",
     "run_id": "5a2f9a72-1ae5-4db0-9d27-7dbee34ff697",
     "examination_key": "d1e75f5c11bac55f5be45271188d733aca815370af6312ad64928e78bac6fcf5"
+  },
+  "_comment_20261107": "CR-V2 admin-only UAT. functions_20261107: md5(prosrc) of each function as committed, LF then CRLF. run_constraint_20261107: pg_get_constraintdef on PostgreSQL 15. prod9_20261107: the exact CR-V2-UAT-PROD-9 history used as Production identity evidence (operator-reported Q1).",
+  "functions_20261107": {
+    "creator_record_v2_evidence_access_log_insert_guard": [
+      "1368df2fcf0aab49b2b840608172bc7d",
+      "8c071736a1adddfe3dc467d80cd565d6"
+    ],
+    "creator_record_v2_record_examination": [
+      "e7d8fabdf5e71f194d3abf735ef3d27e",
+      "e3d4efc1e0e09437e1a4b629f9c78efc"
+    ]
+  },
+  "run_constraint_20261107": "CHECK (((environment_project_ref ~ '^[a-z0-9]{20}$'::text) AND (((execution_boundary = 'isolated_synthetic_test'::text) AND (uat_grant_id IS NULL) AND (environment_project_ref <> 'lehqgcgnenwdmuzudbrs'::text)) OR ((execution_boundary = ANY (ARRAY['operator_synthetic_uat'::text, 'customer_path_synthetic_uat'::text])) AND (uat_grant_id IS NOT NULL)) OR ((execution_boundary = 'admin_synthetic_uat'::text) AND (uat_grant_id IS NULL)))))",
+  "prod9_20261107": {
+    "run_id": "25ed8ef3-e77a-4371-b6f3-a1b0249b159b",
+    "test_user_id": "3adfe2e0-3a48-45cb-a2e9-2f6d2b3683a6",
+    "project_ref": "lehqgcgnenwdmuzudbrs",
+    "change_ref": "CR-V2-UAT-PROD-9"
   }
 }

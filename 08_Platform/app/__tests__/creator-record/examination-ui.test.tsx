@@ -159,9 +159,9 @@ describe('client and page boundaries', () => {
   })
 
   test('examination is offered only with an approval for the v6 record; the page gates are unchanged', () => {
-    // CR-V2-UAT-PROD-MIN-1: the stop admits only the identity of an open synthetic UAT window (pilot still required).
-    expect(page).toContain("if (deps.submissions !== 'open' && !syntheticUat) return <Unavailable")
-    expect(page.indexOf('deps.hasPilotAccess(userId)')).toBeGreaterThan(page.indexOf('&& !syntheticUat) return <Unavailable'))
+    expect(page).toContain("if (deps.submissions !== 'open') return <Unavailable")
+    expect(page.indexOf('deps.hasPilotAccess(userId)')).toBeGreaterThan(page.indexOf("if (deps.submissions !== 'open') return <Unavailable"))
+    expect(page).not.toMatch(/syntheticUat|synthetic-uat/)
     expect(page).toContain('CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION }).ok')
     expect(page).toContain('...(examinationOffered ? { examination: { consentVersion: EVIDENCE_CONSENT_DRAFT_VERSION } } : {})')
   })
@@ -176,8 +176,9 @@ describe('client and page boundaries', () => {
       expect(src).not.toMatch(/localStorage|sessionStorage|indexedDB/)
       expect(src.replace(/\/\*[\s\S]*?\*\//g, '')).not.toMatch(/uat_grant|nonce|service_role|SUPABASE|envelope_canonical/)
     }
-    expect(panel).toContain("fetch(`/api/creator-record-v2/evidence/${id}/examination`, { method: 'POST' })")
-    expect(panel).toContain("fetch('/api/creator-record-v2/evidence', { method: 'POST', body: form })")
+    expect(panel).toContain("fetch(`${apiBase}/evidence/${id}/examination`, { method: 'POST' })")
+    expect(panel).toContain("props.apiBase ?? '/api/creator-record-v2'")
+    expect(panel).toContain("fetch(`${apiBase}/evidence`, { method: 'POST', body: form })")
   })
 
   test('no provider-specific branches in the experience', () => {

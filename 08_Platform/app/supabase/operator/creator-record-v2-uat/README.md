@@ -1,5 +1,7 @@
 # CR-V2-PROD-UAT-B: Operator Synthetic Examination UAT Runbook
 
+> **RETIRED for routine UAT.** Administrators now test at `/admin/creator-record-v2/uat`; see `08_Platform/implementation/production-uat/SI8_Production_UAT_Operational_Runbook.md`. Routine UAT needs nothing in this folder. The grant and invitation scripts moved to `archive/` and the operator CLI was removed. This file remains as the record of how the historical E4 and PROD-9 grants were run. Migrations, grants, runs and the `production-apply/` pack are kept.
+
 **Status: reviewed tooling only. Running any step against staging or Production needs its own explicit approval.**
 **Production progress:**
 - **Steps 1–2 (preflight, migrations): done on 2026-11-03** (operator-reported). See `08_Platform/implementation/CR_V2_PROD_UAT_D_MIGRATION_RECORD.md`.

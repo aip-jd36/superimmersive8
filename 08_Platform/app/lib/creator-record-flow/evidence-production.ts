@@ -16,7 +16,6 @@ import { CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flo
 import { EVIDENCE_BUCKET, EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED } from '@/lib/creator-record/evidence-intake/contract'
 import type { EvidenceDeps, EvidenceObjects, EvidenceRow, EvidenceStore, NewEvidenceRow } from '@/lib/creator-record/evidence-intake/service'
 import { hasPilotAccess } from './pilot-access'
-import { productionSyntheticUat } from '@/lib/creator-record/customer-flow/synthetic-uat'
 
 export const EVIDENCE_TABLE = 'creator_record_v2_documents'
 export const EVIDENCE_ACCESS_LOG_TABLE = 'creator_record_v2_evidence_access_log'
@@ -128,7 +127,5 @@ export function productionEvidenceDeps(): EvidenceDeps {
     newId: () => randomUUID(),
     now: () => new Date(),
     log: (event, detail) => console.warn(event, detail),
-    // CR-V2-UAT-PROD-MIN-1: inert unless the committed UAT window names this identity and is open.
-    syntheticUat: productionSyntheticUat,
   }
 }

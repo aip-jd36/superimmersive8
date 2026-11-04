@@ -43,12 +43,12 @@ const setConst = (sql: string, name: string, value: string) => {
 maybe('synthetic UAT pilot invitation scripts (PostgreSQL)', () => {
   let admin: Client
   const invite = (o: { target?: string; ref?: string; email: string }) => {
-    let s = readFileSync(join(OPERATOR, 'invite_pilot_user.sql'), 'utf8')
+    let s = readFileSync(join(OPERATOR, 'archive', 'invite_pilot_user.sql'), 'utf8')
     for (const [k, v] of Object.entries({ c_target: o.target ?? 'production', c_project_ref: o.ref ?? PROD_REF, c_test_user_email: o.email, c_added_by: 'db test operator', c_change_ref: 'TEST-UAT-MIN' })) s = setConst(s, k, v)
     return admin.query(s)
   }
   const remove = (o: { target?: string; ref?: string; email: string }) => {
-    let s = readFileSync(join(OPERATOR, 'remove_pilot_user.sql'), 'utf8')
+    let s = readFileSync(join(OPERATOR, 'archive', 'remove_pilot_user.sql'), 'utf8')
     for (const [k, v] of Object.entries({ c_target: o.target ?? 'production', c_project_ref: o.ref ?? PROD_REF, c_test_user_email: o.email })) s = setConst(s, k, v)
     return admin.query(s)
   }
@@ -77,8 +77,8 @@ maybe('synthetic UAT pilot invitation scripts (PostgreSQL)', () => {
   afterAll(async () => { await admin?.end() })
 
   test('placeholders, malformed or mismatched targets are refused; nothing is written', async () => {
-    expect(await fail(admin.query(readFileSync(join(OPERATOR, 'invite_pilot_user.sql'), 'utf8')))).toBe('REFUSED: edit every EDIT constant first')
-    expect(await fail(admin.query(readFileSync(join(OPERATOR, 'remove_pilot_user.sql'), 'utf8')))).toBe('REFUSED: edit every EDIT constant first')
+    expect(await fail(admin.query(readFileSync(join(OPERATOR, 'archive', 'invite_pilot_user.sql'), 'utf8')))).toBe('REFUSED: edit every EDIT constant first')
+    expect(await fail(admin.query(readFileSync(join(OPERATOR, 'archive', 'remove_pilot_user.sql'), 'utf8')))).toBe('REFUSED: edit every EDIT constant first')
     const u = await user()
     expect(await fail(invite({ email: u.email, ref: STAGING_REF }))).toBe('REFUSED: a production invitation must name the Production project ref')
     expect(await fail(invite({ email: u.email, target: 'staging', ref: STAGING_REF }))).toBe('REFUSED: this database does not look like the staging database')
