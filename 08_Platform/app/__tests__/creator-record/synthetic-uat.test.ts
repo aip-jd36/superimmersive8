@@ -126,32 +126,9 @@ describe('the window', () => {
     expect(syntheticUatWindowOpen(CONFIG, undefined, INSIDE)).toBe(false)
   })
 
-  // TEMPORARY — CR-V2-UAT-PROD-8A (revert together with the configuration). While the window is set, it must be EXACTLY
-  // the PM-approved one: the single invited synthetic identity, this change reference and the approved UTC instants
-  // (exactly 12 hours, the unchanged cap). Restoring `null` restores the original inert assertion below.
-  const APPROVED_UAT_USER = '3adfe2e0-3a48-45cb-a2e9-2f6d2b3683a6'
-  test('the committed configuration is either inert or exactly the approved CR-V2-UAT-PROD-8A window', () => {
-    const c = CREATOR_RECORD_V2_SYNTHETIC_UAT
-    if (c === null) {
-      expect(productionSyntheticUat.admits(UAT_USER, INSIDE)).toBe(false)
-      return
-    }
-    expect(Object.keys(c).sort()).toEqual(['change_ref', 'expires_at', 'starts_at', 'user_id'])
-    expect([c.user_id, c.change_ref]).toEqual([APPROVED_UAT_USER, 'CR-V2-UAT-PROD-8A'])
-    expect([c.starts_at, c.expires_at]).toEqual(['2026-11-04T03:55:00.000Z', '2026-11-04T15:55:00.000Z'])
-    const start = Date.parse(c.starts_at)
-    const end = Date.parse(c.expires_at)
-    // Exactly at the unchanged cap, which the implementation accepts (it refuses only windows LONGER than the cap).
-    expect(SYNTHETIC_UAT_MAX_WINDOW_MS).toBe(12 * 60 * 60 * 1000)
-    expect(end - start).toBe(SYNTHETIC_UAT_MAX_WINDOW_MS)
-    expect(syntheticUatWindowOpen({ ...c, expires_at: new Date(end + 1).toISOString() }, APPROVED_UAT_USER, new Date(start))).toBe(false) // 1 ms over the cap
-    // The configured window admits ONLY the approved identity, ONLY inside [starts_at, expires_at).
-    expect(productionSyntheticUat.admits(APPROVED_UAT_USER, new Date(start))).toBe(true)
-    expect(productionSyntheticUat.admits(APPROVED_UAT_USER, new Date(end - 1))).toBe(true)
-    expect(productionSyntheticUat.admits(APPROVED_UAT_USER, new Date(start - 1))).toBe(false)
-    expect(productionSyntheticUat.admits(APPROVED_UAT_USER, new Date(end))).toBe(false)
-    for (const other of [UAT_USER, OTHER, '45f0d04f-4082-42ba-b65e-d8e28a3fc8bf', APPROVED_UAT_USER.toUpperCase(), ''])
-      expect([other, productionSyntheticUat.admits(other, new Date(start))]).toEqual([other, false])
+  test('the committed configuration is INERT: Production admits nobody', () => {
+    expect(CREATOR_RECORD_V2_SYNTHETIC_UAT).toBeNull()
+    expect(productionSyntheticUat.admits(UAT_USER, INSIDE)).toBe(false)
   })
 })
 
