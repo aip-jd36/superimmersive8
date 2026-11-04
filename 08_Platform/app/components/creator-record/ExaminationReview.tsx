@@ -13,6 +13,7 @@ import {
   COMPARISON_LABELS, EXAM_TEXT, OBSERVATION_STATUS_LABELS, RESPONSE_LABELS, chosenResponses, limitationText, targetKey,
   type ResponseInput, type ResponseTarget,
 } from '@/lib/creator-record-flow/examination-ui'
+import { T } from '@/lib/creator-record/presentation/templates'
 
 const INK = '#1a1918'
 const MUTED = '#6b6560'
@@ -26,6 +27,14 @@ export interface ExaminationReviewProps {
 }
 
 const fieldLabel = (field: string) => field.replace(/_/g, ' ')
+
+type UnresolvedRequirement = NonNullable<PreparedView['examination']>['guidance'][number]['unresolved_requirements'][number]
+/** The existing wording for what a record has not established. Unknown shapes get the generic line, never an inference. */
+function unresolvedText(r: UnresolvedRequirement): string {
+  if (r.fact === 'tool_account_status' && r.tool_label) return T.not_established_next_account(r.tool_label, r.value)
+  if (r.fact === 'tool_plan_tier' && r.tool_label) return T.not_established_next_plan(r.tool_label, [r.value])
+  return T.not_established_other
+}
 
 export function ExaminationReview({ view, busy, onRespond }: ExaminationReviewProps) {
   const e = view.examination
@@ -109,6 +118,50 @@ export function ExaminationReview({ view, busy, onRespond }: ExaminationReviewPr
               })}
             </div>
           ))}
+        </div>
+      )}
+
+      {e.guidance.length > 0 && (
+        <div className="mb-6" data-guidance-beside-documents>
+          <h3 className="text-sm font-semibold mb-1" style={{ color: INK }}>{EXAM_TEXT.guidance_title}</h3>
+          <p className="text-sm mb-2" style={{ color: MUTED }}>{T.guidance_intro}</p>
+          {e.guidance.map((g) => {
+            const notEstablished = [
+              ...g.unresolved_requirements.map((r) => unresolvedText(r)),
+              ...g.open_dependencies.map((d) => EXAM_TEXT.guidance_open_dependency(d.label ?? T.open_unlabelled)),
+            ]
+            return (
+              <article key={g.claim_id} className="mb-3 rounded-md border p-3 text-sm" style={{ borderColor: LINE }} data-guidance-claim={g.claim_id}>
+                {g.tool_labels.length > 0 && <p className="text-xs font-semibold" style={{ color: MUTED }}>{g.tool_labels.map(T.subject_tool).join('; ')}</p>}
+                <p className="mt-1" style={{ color: INK }} data-guidance-conclusion={g.conclusion}><strong>{T.conclusion_label[g.conclusion]}</strong></p>
+                <p className="mt-1" style={{ color: INK }}>{g.explanation}</p>
+                {g.declared_plans.map((d) => <p key={`${d.tool_label}-${d.plan}`} className="mt-1 text-xs" style={{ color: MUTED }} data-guidance-declared>{T.basis_plan(d.tool_label, d.plan)}</p>)}
+                {notEstablished.length > 0 && (
+                  <div className="mt-2 text-xs" data-guidance-not-established>
+                    <span className="font-semibold" style={{ color: INK }}>{EXAM_TEXT.guidance_not_established_label}</span>
+                    <ul className="list-disc pl-5" style={{ color: MUTED }}>{notEstablished.map((n) => <li key={n}>{n}</li>)}</ul>
+                  </div>
+                )}
+                {g.conclusion === 'relevant_applicability_unresolved' && notEstablished.length === 0 && <p className="mt-2 text-xs" style={{ color: MUTED }}>{T.depends_shared_purpose}</p>}
+                {g.caveats.map((c) => <p key={c} className="mt-1 text-xs" style={{ color: MUTED }}>{c}</p>)}
+                <div className="mt-2 text-xs" data-guidance-documents>
+                  <span className="font-semibold" style={{ color: INK }}>{EXAM_TEXT.guidance_documents_label}</span>
+                  {g.documents.length === 0 && <p style={{ color: MUTED }} data-guidance-no-document>{EXAM_TEXT.guidance_no_document}</p>}
+                  {g.documents.map((d) => (
+                    <div key={d.document_id} className="mt-1" style={{ color: MUTED }} data-guidance-document={d.document_id}>
+                      <p>
+                        {fileName(d.document_id)} — {d.examination.status === 'examined' ? EXAM_TEXT.guidance_examined(d.examination.observation_ids.length) : EXAM_TEXT.guidance_not_examined}
+                        {d.examination.status === 'examined' && <span className="ml-2 rounded border px-1 py-0.5" style={{ borderColor: '#d97706', color: '#92400e' }} data-not-verified>{EXAM_TEXT.not_verified}</span>}
+                      </p>
+                      {d.comparison && <p>Provider: {COMPARISON_LABELS[d.comparison.provider.result] ?? d.comparison.provider.result}. Plan: {COMPARISON_LABELS[d.comparison.plan.result] ?? d.comparison.plan.result}.</p>}
+                    </div>
+                  ))}
+                  {g.documents.length > 0 && <p className="mt-1" style={{ color: MUTED }}>{EXAM_TEXT.guidance_document_effect}</p>}
+                </div>
+                <p className="mt-2 text-xs" style={{ color: MUTED }} data-guidance-provenance>{T.source_line(g.provenance.claim_last_verified)} Reference: {g.claim_id}</p>
+              </article>
+            )
+          })}
         </div>
       )}
 

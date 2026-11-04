@@ -45,6 +45,14 @@ export const EXAM_TEXT = {
   earlier_title: 'Responses from your previous version',
   earlier_intro: 'These targets did not change. Earlier responses are not carried over automatically: tick any you want to give again.',
   no_response: 'No response',
+  guidance_title: 'Guidance beside your documents',
+  guidance_documents_label: 'Documents linked to this tool',
+  guidance_document_effect: 'Shown for reference. Documents were not used to decide this guidance or its status, and they do not establish any condition it depends on.',
+  guidance_no_document: 'No document is linked to this tool in this version.',
+  guidance_not_examined: 'Linked, but not examined.',
+  guidance_examined: (count: number) => `${count} unverified ${count === 1 ? 'observation' : 'observations'}, listed above.`,
+  guidance_not_established_label: 'Not established by this record',
+  guidance_open_dependency: (label: string) => `Open: ${label}`,
   payment_blocked: 'This version includes examination findings, so it cannot be paid for or issued. Prepare a version without them to continue.',
 } as const
 

@@ -452,6 +452,7 @@ describe('independence', () => {
     expect(importers).toEqual([
       'app/creator-record/page.tsx',
       'lib/creator-record/customer-flow/approved-inputs.ts',
+      'lib/creator-record/customer-flow/guidance-with-documents.ts', // type-only: the review view of a verified record (runtime imports pinned in guidance-with-documents.test.tsx)
       'lib/creator-record/customer-flow/purchase.ts',
       'lib/creator-record/customer-flow/service.ts',
       'lib/creator-record/customer-pdf/document-model.ts',

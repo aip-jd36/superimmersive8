@@ -45,6 +45,7 @@ import { buildCustomerRecord, verifyCustomerRecord, CUSTOMER_RECORD_SCHEMA, type
 import type { SourceTextInput, TopicClaims } from '../customer-record/sources'
 import { parseEvidenceReferences } from '../evidence-intake/contract'
 import { carryForwardCandidates, CREATOR_RESPONSE_CODES, type CreatorResponseInput, type CustomerRecordExaminationInput } from '../customer-record/examination-section'
+import { guidanceWithDocuments, type GuidanceWithDocuments } from './guidance-with-documents'
 import type { DocumentProjection } from './examination'
 import { isSyntheticRecordAuthority, type SyntheticUatPorts } from './synthetic-uat'
 import { resolveEvidenceReferences, type EvidenceStore } from '../evidence-intake/service'
@@ -151,6 +152,8 @@ export interface ExaminationView {
   comparisons: { tool_index: number; document_id: string; run_id: string; declared: { tool_id: string | null; plan: string | null }; provider: { result: string; reason: string }; plan: { result: string; reason: string } }[]
   responses: { target: CreatorResponseInput['target']; code: CreatorResponseInput['code']; given_in_version: number }[]
   response_codes: readonly string[]
+  /** The record's governed guidance, as recorded, with the examined documents of the same tool beside it. */
+  guidance: GuidanceWithDocuments[]
 }
 
 export type FlowError =
@@ -233,6 +236,7 @@ function examinationViewOf(record: CustomerRecordV2): ExaminationView {
     comparisons: comparisons.map((c) => ({ tool_index: c.tool_index, document_id: c.document_id, run_id: c.run_id, declared: { ...c.declared }, provider: { result: c.provider.result, reason: c.provider.reason }, plan: { result: c.plan.result, reason: c.plan.reason } })),
     responses: (record.creator_responses?.items ?? []).map((r) => ({ target: r.target, code: r.code, given_in_version: r.given_in_version })),
     response_codes: CREATOR_RESPONSE_CODES,
+    guidance: guidanceWithDocuments(record),
   }
 }
 

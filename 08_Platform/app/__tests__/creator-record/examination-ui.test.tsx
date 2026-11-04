@@ -38,6 +38,7 @@ function view(over: Partial<PreparedView> = {}): PreparedView {
       comparisons: [{ tool_index: 0, document_id: DOC, run_id: RUN, declared: { tool_id: 'kling', plan: 'Pro' }, provider: { result: 'appears_consistent', reason: 'r' }, plan: { result: 'appears_to_conflict', reason: 'r' } }],
       responses: [{ target: { kind: 'comparison', tool_index: 0, document_id: DOC, field: 'plan' }, code: 'other_plan_applies', given_in_version: 2 }],
       response_codes: ['reading_incorrect', 'wrong_document', 'other_plan_applies', 'not_relevant'],
+      guidance: [],
     },
     ...over,
   }
