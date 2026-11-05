@@ -30,6 +30,7 @@ import { buildDraftRecord, type DraftRecordView } from '../presentation/build-dr
 import { PILOT_CAVEATS, PILOT_DEPENDENCY_LABELS, PILOT_LEDGER_VERSION, PILOT_PUBLICATION_LEDGER } from '../pilot/pilot-ledger'
 import { PILOT_ACKNOWLEDGEMENTS, PILOT_MAX_TOOLS, PILOT_QUESTION_META, PILOT_REGISTRY_INPUT, PILOT_REGISTRY_VERSION, type PilotQuestionMeta } from '../pilot/pilot-registry'
 import type { TopicClaim } from '@/lib/retrieval-engine/types'
+import type { QuestionnaireContractApproval } from '../customer-record/questionnaire-contract'
 import { reconcileToolEvidence, toDocumentObservations, type EvidenceReconciliation, type ToolDocument } from '../evidence/document-observations'
 import { resolveSellerIdentity } from '../integration/seller-identity'
 import { shownToolQuestionIds, toolInstance, visibleQuestions, type CreatorRecordFormState, type FormIssue } from './form'
@@ -45,6 +46,8 @@ export interface CreatorRecordSources {
   caveats: Readonly<Record<string, string>>
   versions: { registry: string; ledger: string }
   max_tools: number
+  /** CR-V2-DECL-1B-1: names the exact questionnaire contract of these sources. Checked by `checkApprovedSources`; pilot sources have none. */
+  questionnaire_approval: QuestionnaireContractApproval | null
 }
 
 /** The authoritative sources. Empty today: no question is shown and nothing is published. */
@@ -59,6 +62,7 @@ export function governedSources(): CreatorRecordSources {
     caveats: {},
     versions: { registry: 'none approved', ledger: 'none approved' },
     max_tools: PILOT_MAX_TOOLS,
+    questionnaire_approval: null,
   }
 }
 
@@ -74,6 +78,7 @@ export function pilotSources(): CreatorRecordSources {
     caveats: PILOT_CAVEATS,
     versions: { registry: `${PILOT_REGISTRY_VERSION} (internal, unapproved)`, ledger: `${PILOT_LEDGER_VERSION} (internal, unapproved)` },
     max_tools: PILOT_MAX_TOOLS,
+    questionnaire_approval: null,
   }
 }
 

@@ -26,6 +26,7 @@ import type { GovernanceApproval } from '../contract/types'
 import type { ObservationMapEntry, QuestionEntry } from '../contract/question-registry'
 import type { PublicationLedgerEntry } from '../contract/publication-ledger'
 import type { CreatorRecordSources } from '../prototype/build-draft'
+import type { QuestionnaireContractApproval } from '../customer-record/questionnaire-contract'
 import type { SourceTextApproval } from '../customer-record/source-text'
 import type { PdfTemplateApproval } from '../customer-pdf/templates'
 import type { PublicationAuthorityBundle } from './publication-authority'
@@ -237,6 +238,21 @@ const PDF_TEMPLATES = {
 export const SYNTHETIC_SOURCE_TEXT_SHA256 = 'e589b6d8b9172463994a2f6335f622e08f11a53e0e3822e3c9acfce4003c221e'
 export const SYNTHETIC_PDF_TEMPLATES_FINGERPRINT = '0a2ce73b68d1223f61a8bcd28a297b65f0beec9a08d7f77229d0fd8f2aa6acfd'
 
+/**
+ * CR-V2-DECL-1B-1: the exact synthetic questionnaire contract. Test authorization only, like everything in this bundle: it
+ * is no SI8 decision, carries no customer approval, and governance mode refuses it by its class and its text.
+ */
+export const SYNTHETIC_QUESTIONNAIRE_CONTRACT_SHA256 = '1aefef89527e17670a82be11cfe8e312386c8e1b30a03f3b1c665f228fbc1d4a'
+const QUESTIONNAIRE_APPROVAL: QuestionnaireContractApproval = Object.freeze({
+  contract_id: 'si8/creator-record-v2-questionnaire-contract',
+  contract_version: 1,
+  contract_sha256: SYNTHETIC_QUESTIONNAIRE_CONTRACT_SHA256,
+  lifecycle: 'approved',
+  authority: SYNTHETIC_TEST_AUTHORITY_NAME,
+  decision_date: DECISION_DATE,
+  review_ref: 'SYN-DECL-1B-1-CONTRACT (synthetic test)',
+})
+
 const SOURCE_TEXT_APPROVAL: SourceTextApproval = {
   source_id: 'si8/creator-record-v2-source-text',
   version: 1,
@@ -282,6 +298,7 @@ export const CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY: (PublicationAuthorityBundl
   versions: { registry: 'SYN-M4C-REGISTRY-1 (synthetic test)', ledger: 'SYN-M4C-LEDGER-1 (synthetic test)' },
   max_tools: 2,
   source_text_approval: SOURCE_TEXT_APPROVAL,
+  questionnaire_approval: QUESTIONNAIRE_APPROVAL,
   pdf_templates: PDF_TEMPLATES,
   pdf_template_approval: PDF_TEMPLATE_APPROVAL,
 })

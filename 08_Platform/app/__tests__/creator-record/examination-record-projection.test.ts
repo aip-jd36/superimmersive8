@@ -37,6 +37,7 @@ import { renderV2ForIssuance, startPurchase, V2IssuanceRefusal, type PurchaseDep
 import { buildCustomerDocument } from '@/lib/creator-record/customer-pdf/document-model'
 import { CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY } from '@/lib/creator-record/governed/synthetic-test-authority'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
+import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
 
 const APP_ROOT = path.resolve(__dirname, '..', '..')
 const OWNER = '11111111-1111-4111-8111-111111111111'
@@ -49,6 +50,9 @@ const clone = <V,>(v: V): V => JSON.parse(JSON.stringify(v)) as V
 // ── Synthetic approved governance (test fixture only) ──
 const SYNTHETIC: GovernanceApproval = { status: 'approved', approver: 'SYNTHETIC TEST APPROVER (fixture only)', decision_date: '2026-10-30', review_ref: 'SYNTHETIC-REVIEW-1' }
 function syntheticSources(): CreatorRecordSources {
+  return withQuestionnaireApproval(unapprovedSources())
+}
+function unapprovedSources(): CreatorRecordSources {
   const p = pilotSources()
   return {
     ...p,

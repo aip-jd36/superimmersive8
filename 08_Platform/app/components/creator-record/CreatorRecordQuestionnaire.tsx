@@ -31,6 +31,7 @@
 import { useMemo, useState } from 'react'
 import { loadQuestionRegistry, NOT_SURE, type RegistryInput } from '@/lib/creator-record/contract/question-registry'
 import type { ExaminedDocument, ExtractionMode, ToolDocument } from '@/lib/creator-record/evidence/document-observations'
+import { QUESTIONNAIRE_SECTION_ORDER, TOOL_QUESTION_ROLES } from '@/lib/creator-record/prototype/questionnaire-structure'
 import { applyMultiSelection, visibleQuestions, visibleToolQuestions, type CreatorRecordFormState, type FormConfig, type FormIssue, type QuestionPresentation } from '@/lib/creator-record/prototype/form'
 import { DocumentReviewPanel } from './DocumentReviewPanel'
 
@@ -61,8 +62,8 @@ export interface QuestionnaireProps {
   onSubmit: (state: CreatorRecordFormState, documents: ToolDocument[]) => void
 }
 
-const SECTION_ORDER = ['project', 'locations', 'tools', 'people', 'materials', 'contribution']
 const EMPTY: CreatorRecordFormState = { answers: {}, tools: [{}], acknowledgements: {} }
+const ROLES = TOOL_QUESTION_ROLES
 const ANOTHER = '__another_plan'
 const UNSURE = '__not_sure'
 
@@ -109,14 +110,14 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
         if (i !== index) return t
         const next = { ...t, [q_id]: values }
         // A different tool: the plan answer and any typed tool name belonged to the old one.
-        if (q_id === 'T1' && (t.T1 ?? [])[0] !== values[0]) {
-          delete next.T3
-          if (values[0] !== 'other_tool') delete next.T1X
+        if (q_id === ROLES.identity && (t[ROLES.identity] ?? [])[0] !== values[0]) {
+          delete next[ROLES.plan]
+          if (values[0] !== ROLES.other_tool_option) delete next[ROLES.other_name]
         }
         return next
       }),
     }))
-    if (q_id === 'T1') setAnotherPlan((a) => a.map((v, i) => (i === index ? false : v)))
+    if (q_id === ROLES.identity) setAnotherPlan((a) => a.map((v, i) => (i === index ? false : v)))
   }
 
   const examine = async (index: number, file: File) => {
@@ -141,7 +142,7 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
     const selectClass = 'w-full rounded-md border px-3 py-2 text-sm bg-white'
     const renderPlan = () => {
       if (tool_index === null) return null
-      const suggestions = props.planSuggestions?.[(toolAnswers?.T1 ?? [])[0] ?? ''] ?? []
+      const suggestions = props.planSuggestions?.[(toolAnswers?.[ROLES.identity] ?? [])[0] ?? ''] ?? []
       const v = current[0] ?? ''
       const selectValue = v === NOT_SURE ? UNSURE : suggestions.includes(v) ? v : v !== '' || anotherPlan[tool_index] ? ANOTHER : ''
       return (
@@ -329,7 +330,7 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
           </ul>
         </div>
       )}
-      {SECTION_ORDER.map((section) => {
+      {QUESTIONNAIRE_SECTION_ORDER.map((section) => {
         const singles = shown.single.filter((q) => props.presentation[q.q_id].section === section)
         const hasTools = section === 'tools' && shown.per_tool.length > 0
         if (singles.length === 0 && !hasTools) return null

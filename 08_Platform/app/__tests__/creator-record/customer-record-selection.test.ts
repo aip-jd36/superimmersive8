@@ -21,6 +21,7 @@ import { SOURCE_TEXT_CATEGORIES, SOURCE_TEXT_SOURCE_ID, sourceTextContent, sourc
 import { evaluateIssuanceEligibility } from '@/lib/creator-record/customer-record/eligibility'
 import { governanceSnapshotFrom } from '@/lib/creator-record/customer-record/governance-state'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
+import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
 
 const RECORD = { record_id: 'PROTOTYPE-SEL', record_version: 1, captured_at: '2026-10-31T00:00:00Z' }
 const AS_OF = '2026-10-31'
@@ -56,6 +57,9 @@ const claimsById = new Map(TOPIC_CLAIMS_FIXTURE.map((c) => [c.claim_id, c]))
 // ── synthetic approved sources (test fixture only) ──
 const SYNTHETIC: GovernanceApproval = { status: 'approved', approver: 'SYNTHETIC TEST APPROVER (fixture only)', decision_date: '2026-10-30', review_ref: 'SYNTHETIC-REVIEW-1' }
 function approvedSources(): CreatorRecordSources {
+  return withQuestionnaireApproval(unapprovedSources())
+}
+function unapprovedSources(): CreatorRecordSources {
   const p = pilotSources()
   return {
     ...p,

@@ -48,6 +48,7 @@ import { isIsoDate } from '../contract/types'
 import type { CreatorRecordSources } from '../prototype/build-draft'
 import { runDeclaredGuidance } from '../prototype/declared-guidance'
 import { toolInstance, type FormIssue } from '../prototype/form'
+import { TOOL_QUESTION_ROLES } from '../prototype/questionnaire-structure'
 import { parseFormState } from '../prototype/parse-form-state'
 import { canonicalJson, sha256Hex, CanonicalizationError } from '../record-core/canonical'
 import { arr, int, nullable, obj, oneOf, ProjectionRefusal, str, type P } from '../record-core/projection'
@@ -497,7 +498,7 @@ export function buildCustomerRecord(input: CustomerRecordInput): CustomerRecordR
   const prov = guidance.facts.provenance
   const declaredFor = (i: number) => {
     const ids = Array.from(new Set(prov.tools.filter((x) => x.instance === toolInstance(i)).map((x) => x.tool_id)))
-    return { tool_id: ids.length === 1 ? ids[0] : null, plan: (state.tools[i]?.T3 ?? [])[0] ?? null }
+    return { tool_id: ids.length === 1 ? ids[0] : null, plan: (state.tools[i]?.[TOOL_QUESTION_ROLES.plan] ?? [])[0] ?? null }
   }
   const comparisons = examinationBearing ? deriveComparisons(documents, attached.byDocument, declaredFor) : []
   const responded = recordResponses(responseInputs, attached.byDocument, comparisons, input.record.record_version)

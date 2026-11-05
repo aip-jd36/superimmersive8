@@ -243,6 +243,7 @@ describe('lib/creator-record boundaries', () => {
     ])
     expect(importsOf('app/admin/creator-record-v2/page.tsx').sort()).toEqual(['@/lib/creator-record/evidence/config', '@/lib/creator-record/integration/plan-suggestions'])
     const BROWSER_ALLOWED = [
+      '@/lib/creator-record/prototype/questionnaire-structure', // CR-V2-DECL-1B-1: constants only
       '@/lib/creator-record/contract/question-registry',
       '@/lib/creator-record/evidence/document-observations',
       '@/lib/creator-record/pilot/pilot-registry',

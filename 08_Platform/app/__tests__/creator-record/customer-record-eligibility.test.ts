@@ -23,6 +23,7 @@ import {
 } from '@/lib/creator-record/customer-record/record'
 import { SOURCE_TEXT_CATEGORIES, SOURCE_TEXT_SOURCE_ID, sourceTextContent, sourceTextDigest, type SourceTextApproval } from '@/lib/creator-record/customer-record/source-text'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
+import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
 
 const RECORD = { record_id: 'PREP-CRV21CTEST', record_version: 1, captured_at: '2026-10-31T00:00:00Z' }
 const AS_OF = '2026-10-31'
@@ -32,6 +33,9 @@ const clone = <V,>(v: V): V => JSON.parse(JSON.stringify(v)) as V
 
 const SYNTHETIC: GovernanceApproval = { status: 'approved', approver: 'SYNTHETIC TEST APPROVER (fixture only)', decision_date: '2026-10-30', review_ref: 'SYNTHETIC-REVIEW-1' }
 function approvedSources(): CreatorRecordSources {
+  return withQuestionnaireApproval(unapprovedSources())
+}
+function unapprovedSources(): CreatorRecordSources {
   const p = pilotSources()
   return {
     ...p,

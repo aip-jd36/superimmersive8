@@ -43,6 +43,7 @@ import { ArtifactFamilyMismatchError, issueCreatorRecordArtifact, sha256Hex, typ
 import { legacyGenerateFor } from '@/lib/creator-record-artifacts/production'
 import * as production from '@/lib/creator-record-flow/production'
 import type { FulfillmentSubmission } from '@/lib/payments/repository'
+import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
 
 const OWNER = '11111111-1111-4111-8111-111111111111'
 const OTHER = '22222222-2222-4222-8222-222222222222'
@@ -52,6 +53,9 @@ const clone = <V,>(v: V): V => JSON.parse(JSON.stringify(v)) as V
 // ── Synthetic approved governance (test fixture only) ──
 const SYNTHETIC: GovernanceApproval = { status: 'approved', approver: 'SYNTHETIC TEST APPROVER (fixture only)', decision_date: '2026-10-30', review_ref: 'SYNTHETIC-REVIEW-1' }
 function syntheticSources(): CreatorRecordSources {
+  return withQuestionnaireApproval(unapprovedSources())
+}
+function unapprovedSources(): CreatorRecordSources {
   const p = pilotSources()
   return {
     ...p,

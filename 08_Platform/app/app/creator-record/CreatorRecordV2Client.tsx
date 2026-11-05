@@ -18,20 +18,12 @@
 import { useState } from 'react'
 import { CreatorRecordQuestionnaire, type QuestionnaireProps } from '@/components/creator-record/CreatorRecordQuestionnaire'
 import type { CreatorRecordFormState, FormIssue } from '@/lib/creator-record/prototype/form'
+import { CUSTOMER_SECTION_TITLES } from '@/lib/creator-record/prototype/questionnaire-structure'
 import type { PreparedView } from '@/lib/creator-record/customer-flow/service'
 import { V2_REVIEW_PAGE } from '@/lib/creator-record-flow/wording'
 import { EvidencePanel } from '@/components/creator-record/EvidencePanel'
 import { ExaminationReview } from '@/components/creator-record/ExaminationReview'
 import { EXAM_TEXT, SYNTHETIC_UAT_NOTICE, attachmentsOf, preparedBody, type Attachment, type ResponseInput } from '@/lib/creator-record-flow/examination-ui'
-
-const SECTION_TITLES: Record<string, string> = {
-  project: 'About the video',
-  locations: 'Where',
-  tools: 'AI tools',
-  people: 'People',
-  materials: 'Other material in the video',
-  contribution: 'Your contribution',
-}
 
 const INK = '#1a1918'
 const MUTED = '#6b6560'
@@ -257,7 +249,7 @@ export function CreatorRecordV2Client(props: Props) {
         key={formKey}
         registryInput={props.registryInput}
         presentation={props.presentation}
-        sectionTitles={SECTION_TITLES}
+        sectionTitles={CUSTOMER_SECTION_TITLES}
         acknowledgements={props.acknowledgements}
         maxTools={props.maxTools}
         initialState={lastState}

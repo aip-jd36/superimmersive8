@@ -28,6 +28,7 @@ import type { CreatorRecordFormState } from '@/lib/creator-record/prototype/form
 import { sha256Hex } from '@/lib/creator-record/record-core/canonical'
 import { EXAM_TEXT } from '@/lib/creator-record-flow/examination-ui'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
+import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
 
 const OWNER = '11111111-1111-4111-8111-111111111111'
 const DOC_ID = '33333333-3333-4333-8333-333333333333'
@@ -39,6 +40,9 @@ const PIKA_PRO = 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-PRO-001-v1'
 
 const SYNTHETIC: GovernanceApproval = { status: 'approved', approver: 'SYNTHETIC TEST APPROVER (fixture only)', decision_date: '2026-10-30', review_ref: 'SYNTHETIC-REVIEW-1' }
 function syntheticSources(): CreatorRecordSources {
+  return withQuestionnaireApproval(unapprovedSources())
+}
+function unapprovedSources(): CreatorRecordSources {
   const p = pilotSources()
   return {
     ...p,

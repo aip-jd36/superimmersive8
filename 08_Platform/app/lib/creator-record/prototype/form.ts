@@ -22,6 +22,11 @@ import { eligibleQuestions, mapAnswer, NOT_SURE, type Answers, type QuestionEntr
 
 export const MAX_TEXT_LENGTH = 500
 
+/** The input types the questionnaire can render. Part of the questionnaire contract. */
+export const QUESTION_INPUTS = ['text', 'textarea', 'single', 'multi', 'select', 'plan'] as const
+/** What a free-text "Not sure" is recorded as. Part of the questionnaire contract. */
+export const FREE_TEXT_NOT_SURE_VERBATIM = 'Not sure'
+
 export interface QuestionPresentation {
   q_id: string
   input: 'text' | 'textarea' | 'single' | 'multi' | 'select' | 'plan'
@@ -166,7 +171,7 @@ export function validateForm(config: FormConfig, state: CreatorRecordFormState):
 
 function verbatimFor(q: QuestionEntry, p: QuestionPresentation, values: readonly string[]): string {
   // Only a question that offers the "Not sure" choice can record it: anything else is the creator's own text, kept as typed.
-  if (q.options === 'free_text') return p.allow_not_sure && values[0] === NOT_SURE ? 'Not sure' : values[0].trim()
+  if (q.options === 'free_text') return p.allow_not_sure && values[0] === NOT_SURE ? FREE_TEXT_NOT_SURE_VERBATIM : values[0].trim()
   return values.map((v) => p.option_labels[v] ?? v).join('; ')
 }
 

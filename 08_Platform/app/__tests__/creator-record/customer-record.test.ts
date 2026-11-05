@@ -28,6 +28,7 @@ import type { SourceRefusalCode, SourceTextInput } from '@/lib/creator-record/cu
 import { SOURCE_TEXT_CATEGORIES, SOURCE_TEXT_SOURCE_ID, sourceTextContent, sourceTextDigest, type SourceTextApproval } from '@/lib/creator-record/customer-record/source-text'
 import { loadQuestionRegistry } from '@/lib/creator-record/contract/question-registry'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
+import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
 
 const RECORD = { record_id: 'PREP-CRV21TEST', record_version: 1, captured_at: '2026-10-31T00:00:00Z' }
 const AS_OF = '2026-10-31'
@@ -38,6 +39,9 @@ const SYNTHETIC: GovernanceApproval = { status: 'approved', approver: 'SYNTHETIC
 
 /** Synthetic "approved governed" sources: the pilot content, relabelled. Test fixture only. */
 function approvedSources(): CreatorRecordSources {
+  return withQuestionnaireApproval(unapprovedSources())
+}
+function unapprovedSources(): CreatorRecordSources {
   const p = pilotSources()
   return {
     ...p,
@@ -77,7 +81,9 @@ function built(r: CustomerRecordResult): { record: CustomerRecordV2; canonical: 
 }
 const refusalCodes = (r: CustomerRecordResult): SourceRefusalCode[] => {
   if (r.ok || r.stage !== 'sources') throw new Error(`expected a sources refusal, got ${JSON.stringify(r).slice(0, 300)}`)
-  return Array.from(new Set(r.refusals.map((x) => x.code))).sort()
+  // CR-V2-DECL-1B-1: any change to a fixture also changes its questionnaire contract. That refusal has its own tests
+  // (questionnaire-contract.test.ts); these tests are about the refusals below it.
+  return Array.from(new Set(r.refusals.map((x) => x.code))).filter((c) => c !== 'questionnaire_contract_digest_mismatch').sort()
 }
 
 const PNG = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]
@@ -93,7 +99,7 @@ async function toolDoc(fixtureId: string): Promise<ToolDocument> {
 describe('only approved governed sources are accepted', () => {
   test('the real governed sources (nothing approved yet) are refused, with every reason', () => {
     const r = buildCustomerRecord(input({ sources: governedSources(), source_text: null }))
-    expect(refusalCodes(r)).toEqual(['ledger_version_missing', 'no_approved_questions', 'registry_version_missing', 'source_text_missing'])
+    expect(refusalCodes(r)).toEqual(['ledger_version_missing', 'no_approved_questions', 'questionnaire_contract_missing', 'registry_version_missing', 'source_text_missing'])
   })
 
   test('pilot sources are refused', () => {
@@ -105,7 +111,7 @@ describe('only approved governed sources are accepted', () => {
   test('pilot content relabelled "governed" but still carrying pilot approvals is refused', () => {
     const p = pilotSources()
     const codes = refusalCodes(buildCustomerRecord(input({ sources: { ...p, kind: 'governed', versions: { registry: 'R-1', ledger: 'L-1' } } })))
-    expect(codes).toEqual(['pilot_marker'])
+    expect(codes).toEqual(['pilot_marker', 'questionnaire_contract_missing'])
   })
 
   test.each([
@@ -421,6 +427,7 @@ describe('independence', () => {
       'contract/compose', 'contract/provenance', 'contract/publication-ledger', 'contract/question-registry', 'contract/types',
       // CR-V2-1C: the authority digests and the eligibility check are part of the module.
       'customer-record/authority-content', 'customer-record/eligibility', 'customer-record/record',
+      'customer-record/questionnaire-contract', 'prototype/questionnaire-structure',
       'customer-record/source-text', 'customer-record/sources', 'prototype/build-draft', 'prototype/declared-guidance', 'prototype/form', 'prototype/parse-form-state',
       'record-core/canonical', 'record-core/projection',
       // CR-V2-DOC-1: the pure document vocabulary (no I/O, no examination).
@@ -460,6 +467,7 @@ describe('independence', () => {
       'lib/creator-record/governed/publication-authority.ts',
       'lib/creator-record/governed/sources.ts',
       'lib/creator-record/governed/synthetic-test-authority.ts', // CR-V2-MVP-M4C: type-only (the synthetic test bundle)
+      'lib/creator-record/prototype/build-draft.ts', // CR-V2-DECL-1B-1: type-only (the questionnaire approval on the sources)
     ])
     for (const f of ['lib/creator-record/governed/publication-authority.ts', 'lib/creator-record/governed/synthetic-test-authority.ts'])
       expect(readFileSync(path.join(APP_ROOT, f), 'utf8')).not.toMatch(/^\s*import\s+(?!type\s)/m)
@@ -510,7 +518,7 @@ describe('Source Text Approval: approval is bound to exact, immutable wording', 
     s.presentation.P1 = { ...s.presentation.P1, text: 'What is the title of this project?' }
     expect(refusalCodes(withText(s, stale()))).toEqual(['source_text_digest_mismatch'])
     expect(refusalCodes(withText(s, { approval: { ...approvalFor(base), version: 2 }, acknowledgements: ACKS(base) }))).toEqual(['source_text_digest_mismatch'])
-    const { record } = built(withText(s, { approval: approvalFor(s, ACKS(s), { version: 2 }), acknowledgements: ACKS(s) }))
+    const { record } = built(withText(withQuestionnaireApproval(s), { approval: approvalFor(s, ACKS(s), { version: 2 }), acknowledgements: ACKS(s) }))
     expect(record.sources.source_text.version).toBe(2)
     expect(record.declarations.answers.find((a) => a.q_id === 'P1')!.question).toBe('What is the title of this project?')
   })
@@ -575,7 +583,7 @@ describe('Source Text Approval: approval is bound to exact, immutable wording', 
     const s = clone(base)
     s.caveats = Object.fromEntries(Object.keys(s.caveats).map((k) => [k, 'Your use is cleared and fully licensed for commercial use.']))
     s.dependency_labels = Object.fromEntries(Object.keys(s.dependency_labels).map((k) => [k, 'Confirmed: no further evidence needed']))
-    const { record } = built(buildCustomerRecord(input({ sources: s, state: state('not_sure') })))
+    const { record } = built(buildCustomerRecord(input({ sources: withQuestionnaireApproval(s), state: state('not_sure') })))
     const strip = (r: CustomerRecordV2) => r.guidance.items.map((i) => [i.claim_id, i.conclusion, i.explanation, i.applicability, i.provenance])
     expect(strip(record)).toEqual(strip(control))
     expect(record.sources.publications).toEqual(control.sources.publications)

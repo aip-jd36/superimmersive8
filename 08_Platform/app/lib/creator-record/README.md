@@ -339,3 +339,11 @@ Tests:
 - `security/creator-record-v1-cutover`;
 - the cutover blocks in `security/checkout-integrity`, `security/submission-create-route` and `security/legacy-certified-containment`;
 - `creator-record-flow/v2-checkout-route`.
+
+## Questionnaire contract approval (CR-V2-DECL-1B-1)
+
+`customer-record/questionnaire-contract.ts` binds everything about the questionnaire that the Source Text Approval (wording only) does not: order, options, requiredness, visibility, input types, per-tool behaviour, exclusive options, mappings and their review references, prohibited targets, acknowledgement ids, sections, limits, and the wording digest. One approval in the authority bundle (`questionnaire_approval`) names its SHA-256; `checkApprovedSources` refuses a missing, malformed, withdrawn, superseded or mismatched approval, so the form gate and preparation both refuse. A field with no entry in `QUESTIONNAIRE_FIELD_CLASSES` is refused until classified.
+
+- **What a digest proves:** this contract is exactly the one the approval names. It does not authenticate a reviewer; `authority` and `review_ref` are recorded text.
+- **Rules version:** `QUESTIONNAIRE_VALIDATION_RULES` is raised by hand. `__tests__/creator-record/questionnaire-validation-rules.test.ts` pins behaviour and the rule files: a test-time guard only, with no runtime detection.
+- **Not yet:** prepared records carry no contract identity, submissions are not checked for a stale contract, and issuance does not read the contract.

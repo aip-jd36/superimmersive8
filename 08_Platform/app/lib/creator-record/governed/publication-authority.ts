@@ -32,6 +32,7 @@
 import type { PublicationLedgerEntry } from '../contract/publication-ledger'
 import type { RegistryInput } from '../contract/question-registry'
 import type { CreatorRecordSources } from '../prototype/build-draft'
+import type { QuestionnaireContractApproval } from '../customer-record/questionnaire-contract'
 import type { SourceTextApproval } from '../customer-record/source-text'
 import type { PdfTemplateApproval } from '../customer-pdf/templates'
 
@@ -48,6 +49,7 @@ export interface PublicationAuthorityBundle {
   readonly versions: Readonly<{ registry: string; ledger: string }>
   readonly max_tools: number
   readonly source_text_approval: SourceTextApproval | null
+  readonly questionnaire_approval: QuestionnaireContractApproval | null
   readonly pdf_templates: unknown
   readonly pdf_template_approval: PdfTemplateApproval | null
 }
@@ -120,6 +122,7 @@ function approvalTexts(b: PublicationAuthorityBundle): string[] {
   for (const e of b.publication_ledger) out.push(e.entry_id, e.approver)
   out.push(b.versions.registry, b.versions.ledger)
   out.push(b.source_text_approval?.authority, b.source_text_approval?.review_ref)
+  out.push(b.questionnaire_approval?.authority, b.questionnaire_approval?.review_ref)
   out.push(b.pdf_template_approval?.authority, b.pdf_template_approval?.review_ref)
   return out.filter((x): x is string => typeof x === 'string')
 }

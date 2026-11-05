@@ -15,7 +15,9 @@
  *   - a current, eligible ledger entry that is incomplete, duplicated, stale,
  *     lapsed, for an unknown claim, or that names a caveat with no text;
  *   - anything that breaks the declaration integrity contracts
- *     (`declarationIntegrityRefusals`, CR-V2-DECL-1A).
+ *     (`declarationIntegrityRefusals`, CR-V2-DECL-1A);
+ *   - a questionnaire that is not exactly the contract its approval names, or that
+ *     has a field nobody has classified (`./questionnaire-contract`, CR-V2-DECL-1B-1).
  *
  * An explicitly approved, EMPTY ledger is accepted (a declarations-only record,
  * PRD OD-14). Whether that may launch is a PM decision, not this module's.
@@ -27,7 +29,8 @@ import type { PublicationLedgerEntry } from '../contract/publication-ledger'
 import { declarationIntegrityRefusals, INTEGRITY_REFUSAL_CODES, loadQuestionRegistry, type QuestionRegistry } from '../contract/question-registry'
 import { isApproved, isIsoDate, type GovernanceApproval } from '../contract/types'
 import type { BuildDraftInput, CreatorRecordSources } from '../prototype/build-draft'
-import { checkSourceText, SOURCE_TEXT_REFUSAL_CODES, type AcknowledgementText, type SourceTextApproval, type SourceTextContent } from './source-text'
+import { checkQuestionnaireContract, QUESTIONNAIRE_CONTRACT_REFUSAL_CODES } from './questionnaire-contract'
+import { checkSourceText, SOURCE_TEXT_REFUSAL_CODES, sourceTextContent, sourceTextDigest, type AcknowledgementText, type SourceTextApproval, type SourceTextContent } from './source-text'
 
 export type TopicClaims = BuildDraftInput['topicClaims']
 
@@ -56,6 +59,7 @@ export const SOURCE_REFUSAL_CODES = [
   'ledger_refresh_lapsed',
   'caveat_text_missing',
   ...INTEGRITY_REFUSAL_CODES,
+  ...QUESTIONNAIRE_CONTRACT_REFUSAL_CODES,
 ] as const
 export type SourceRefusalCode = (typeof SOURCE_REFUSAL_CODES)[number]
 export interface SourceRefusal {
@@ -139,6 +143,9 @@ export function checkApprovedSources(sources: CreatorRecordSources, sourceText: 
   if (registry) {
     text = checkSourceText(sources, registry, sourceText?.acknowledgements ?? null, sourceText?.approval ?? null, recordSchema)
     if (!text.ok) for (const r of text.refusals) refuse(r.code, r.ref)
+    // CR-V2-DECL-1B-1: the same `sources` validation and the builder then read, so what is approved is what runs.
+    const wording = sourceTextDigest(sourceTextContent(sources, registry, sourceText?.acknowledgements ?? {}))
+    for (const r of checkQuestionnaireContract(sources, wording)) refuse(r.code, r.ref)
   }
 
   // ── Publication ledger ──

@@ -18,6 +18,7 @@ import {
   type ApprovedInputs, type FlowDeps, type NewPreparedRow, type PreparedRow, type PreparedStore,
 } from '@/lib/creator-record/customer-flow/service'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
+import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
 
 const OWNER = '11111111-1111-4111-8111-111111111111'
 const OTHER = '22222222-2222-4222-8222-222222222222'
@@ -26,6 +27,9 @@ const NOW = new Date('2026-11-01T09:00:00.000Z')
 // ── Synthetic approved inputs (test fixture only) ──
 const SYNTHETIC: GovernanceApproval = { status: 'approved', approver: 'SYNTHETIC TEST APPROVER (fixture only)', decision_date: '2026-10-30', review_ref: 'SYNTHETIC-REVIEW-1' }
 function syntheticSources(): CreatorRecordSources {
+  return withQuestionnaireApproval(unapprovedSources())
+}
+function unapprovedSources(): CreatorRecordSources {
   const p = pilotSources()
   return {
     ...p,

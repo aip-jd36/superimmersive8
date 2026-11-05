@@ -24,6 +24,7 @@ import { templateFingerprint } from '@/lib/creator-record/customer-pdf/templates
 import { getPrepared, preparePrepared, reviewPrepared, type ApprovedInputs, type FlowDeps, type NewPreparedRow, type PreparedRow, type PreparedStore } from '@/lib/creator-record/customer-flow/service'
 import { T } from '@/lib/creator-record/presentation/templates'
 import { TOPIC_CLAIMS_FIXTURE as CLAIMS } from '@/lib/retrieval-engine/topic-claims-fixture'
+import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
 
 if (!SYN_NULLABLE) throw new Error('synthetic authority is not populated')
 const SYN = SYN_NULLABLE
@@ -383,7 +384,7 @@ describe('D. conditional completeness', () => {
       }
       const reg = loadQuestionRegistry(sources.registry_input)
       if (!reg.ok) throw new Error('registry')
-      const inputs: ApprovedInputs = { sources, source_text: { acknowledgements: SYN.acknowledgements, approval: { ...SYN.source_text_approval!, content_sha256: sourceTextDigest(sourceTextContent(sources, reg.registry, SYN.acknowledgements)) } } }
+      const inputs: ApprovedInputs = { sources: withQuestionnaireApproval(sources, SYN.acknowledgements), source_text: { acknowledgements: SYN.acknowledgements, approval: { ...SYN.source_text_approval!, content_sha256: sourceTextDigest(sourceTextContent(sources, reg.registry, SYN.acknowledgements)) } } }
       const b = built(synState({ L1: [NOT_APPLICABLE] }), inputs)
       const l1 = b.record.declarations.answers.find((a) => a.q_id === 'L1')!
       expect(l1.values).toEqual([{ value: NOT_APPLICABLE, kind: 'option', label }])
@@ -416,7 +417,7 @@ describe('correction and version semantics', () => {
     const reg = loadQuestionRegistry(sources.registry_input)
     if (!reg.ok) throw new Error('registry')
     return {
-      sources,
+      sources: withQuestionnaireApproval(sources, acks),
       source_text: {
         acknowledgements: acks,
         approval: {

@@ -31,6 +31,7 @@ import * as Governed from '@/lib/creator-record/governed/sources'
 import { CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY } from '@/lib/creator-record/governed/synthetic-test-authority'
 import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/config'
 import { CreatorRecordIssuanceStoppedError, rendererForFamily } from '@/lib/creator-record-artifacts/renderers'
+import { questionnaireApprovalFor } from '@/test-support/questionnaire-approval'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { APPLICABILITY_FACTS } from '@/lib/retrieval-engine/types'
 
@@ -85,7 +86,7 @@ function syntheticBundle(over: Partial<PublicationAuthorityBundle> = {}, approve
     authority_class: 'synthetic_test',
     registry_input: sources.registry_input, publication_ledger: sources.ledger, dependency_labels: sources.dependency_labels, presentation: sources.presentation,
     acknowledgements: acks, caveats: sources.caveats, versions: sources.versions, max_tools: sources.max_tools,
-    source_text_approval: text, pdf_templates: templates, pdf_template_approval: templateApproval,
+    source_text_approval: text, questionnaire_approval: questionnaireApprovalFor(sources, acks, { authority: approver, review_ref: 'SYN-CONTRACT-REVIEW-1' }), pdf_templates: templates, pdf_template_approval: templateApproval,
     ...over,
   }
 }
@@ -122,6 +123,11 @@ function placeholderTemplates(p: CreatorRecordSources) {
 const SYNTHETIC = syntheticBundle()
 /** The same approvals with nothing synthetic-looking in any approval text; the class is kept. */
 function cleanText(b: PublicationAuthorityBundle): PublicationAuthorityBundle {
+  // CR-V2-DECL-1B-1: relabelling is a change to the contract, so it needs its own contract approval.
+  const out = relabelled(b)
+  return { ...out, questionnaire_approval: questionnaireApprovalFor(approvedCustomerRecordInputs(out).sources, out.acknowledgements, { authority: 'Head of Governance', review_ref: 'GOV-CONTRACT-1' }) }
+}
+function relabelled(b: PublicationAuthorityBundle): PublicationAuthorityBundle {
   const relabel = (a: GovernanceApproval): GovernanceApproval => ({ ...a, approver: 'Head of Governance', review_ref: 'GOV-1' })
   return {
     ...b,
@@ -295,6 +301,7 @@ describe('genuine governance behaviour is unchanged', () => {
         acknowledgement_ids: Object.keys(Governed.CREATOR_RECORD_ACKNOWLEDGEMENTS), ledger: Governed.CREATOR_RECORD_PUBLICATION_LEDGER,
         dependency_labels: Governed.CREATOR_RECORD_DEPENDENCY_LABELS, caveats: Governed.CREATOR_RECORD_CAVEATS,
         versions: { ...Governed.CREATOR_RECORD_VERSIONS }, max_tools: Governed.CREATOR_RECORD_MAX_TOOLS,
+        questionnaire_approval: Governed.CREATOR_RECORD_QUESTIONNAIRE_APPROVAL,
       },
       source_text: null,
     })

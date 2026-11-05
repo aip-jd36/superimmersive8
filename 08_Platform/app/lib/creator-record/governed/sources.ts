@@ -16,6 +16,7 @@
 import type { PublicationLedgerEntry } from '../contract/publication-ledger'
 import type { RegistryInput } from '../contract/question-registry'
 import type { CreatorRecordSources } from '../prototype/build-draft'
+import type { QuestionnaireContractApproval } from '../customer-record/questionnaire-contract'
 import type { SourceTextApproval } from '../customer-record/source-text'
 import type { PdfTemplateApproval } from '../customer-pdf/templates'
 import type { PublicationAuthorityBundle } from './publication-authority'
@@ -50,6 +51,9 @@ export const CREATOR_RECORD_MAX_TOOLS = 3
 /** The Source Text Approval covering the wording above. None issued yet. */
 export const CREATOR_RECORD_SOURCE_TEXT_APPROVAL: SourceTextApproval | null = null
 
+/** The approval of the exact questionnaire contract (CR-V2-DECL-1B-1). None issued yet. */
+export const CREATOR_RECORD_QUESTIONNAIRE_APPROVAL: QuestionnaireContractApproval | null = null
+
 // CR-V2-MVP-M3: the customer PDF template set and its approval (`../customer-pdf/templates`). Rendering
 // refuses without both, so no Creator Record v2 PDF can be issued until they are approved (M0).
 
@@ -75,6 +79,7 @@ export const CREATOR_RECORD_GOVERNANCE_AUTHORITY: PublicationAuthorityBundle = O
   versions: CREATOR_RECORD_VERSIONS,
   max_tools: CREATOR_RECORD_MAX_TOOLS,
   source_text_approval: CREATOR_RECORD_SOURCE_TEXT_APPROVAL,
+  questionnaire_approval: CREATOR_RECORD_QUESTIONNAIRE_APPROVAL,
   pdf_templates: CREATOR_RECORD_PDF_TEMPLATES,
   pdf_template_approval: CREATOR_RECORD_PDF_TEMPLATE_APPROVAL,
 })

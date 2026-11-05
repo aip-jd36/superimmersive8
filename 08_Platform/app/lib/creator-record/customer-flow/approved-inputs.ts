@@ -42,6 +42,7 @@ const NO_AUTHORITY_INPUTS: ApprovedInputs = Object.freeze({
     caveats: {},
     versions: { registry: 'none approved', ledger: 'none approved' },
     max_tools: 0,
+    questionnaire_approval: null,
   },
   source_text: null,
 }) as ApprovedInputs
@@ -59,6 +60,7 @@ export function approvedCustomerRecordInputs(bundle: PublicationAuthorityBundle 
       caveats: bundle.caveats,
       versions: { registry: bundle.versions.registry, ledger: bundle.versions.ledger },
       max_tools: bundle.max_tools,
+      questionnaire_approval: bundle.questionnaire_approval,
     },
     source_text: bundle.source_text_approval === null ? null : { approval: bundle.source_text_approval, acknowledgements: bundle.acknowledgements },
   }

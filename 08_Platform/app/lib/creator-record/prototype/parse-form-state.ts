@@ -16,8 +16,10 @@ import type { CreatorRecordFormState } from './form'
 
 /** Upper bound on the raw body: a full questionnaire is a few KB; three documents add under 10 KB. */
 export const MAX_BODY_BYTES = 32_000
-const MAX_VALUES_PER_ANSWER = 12
-const MAX_TOOL_BLOCKS = 10
+export const MAX_VALUES_PER_ANSWER = 12
+export const MAX_TOOL_BLOCKS = 10
+export const QUESTION_ID_PATTERN = /^[A-Z][A-Z0-9]{0,5}$/
+export const ACKNOWLEDGEMENT_ID_PATTERN = /^A[0-9]$/
 const MAX_DOCUMENTS = 3
 
 type ParseResult = { ok: true; state: CreatorRecordFormState; documents: ToolDocument[] } | { ok: false }
@@ -26,7 +28,7 @@ function stringArrayMap(v: unknown): Record<string, string[]> | null {
   if (!v || typeof v !== 'object' || Array.isArray(v)) return null
   const out: Record<string, string[]> = {}
   for (const [k, vals] of Object.entries(v as Record<string, unknown>)) {
-    if (!/^[A-Z][A-Z0-9]{0,5}$/.test(k)) return null
+    if (!QUESTION_ID_PATTERN.test(k)) return null
     if (!Array.isArray(vals) || vals.length > MAX_VALUES_PER_ANSWER || !vals.every((x) => typeof x === 'string')) return null
     out[k] = vals as string[]
   }
@@ -69,7 +71,7 @@ export function parseFormState(body: unknown): ParseResult {
   if (!ack || typeof ack !== 'object' || Array.isArray(ack)) return { ok: false }
   const acknowledgements: Record<string, boolean> = {}
   for (const [k, v] of Object.entries(ack as Record<string, unknown>)) {
-    if (!/^A[0-9]$/.test(k) || typeof v !== 'boolean') return { ok: false }
+    if (!ACKNOWLEDGEMENT_ID_PATTERN.test(k) || typeof v !== 'boolean') return { ok: false }
     acknowledgements[k] = v
   }
   const documents = parseDocuments(b.documents, tools.length)
