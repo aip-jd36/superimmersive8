@@ -14,7 +14,10 @@
  * authenticate a reviewer or prove anyone read it: `authority` and `review_ref` are recorded text, and anyone who can commit
  * can change them and the digest together. Approval is only as strong as the review of the commit that carries it.
  *
- * Not recorded in prepared records in this version: a stored record does not yet say which contract it was prepared under.
+ * CR-V2-DECL-1B-2: a prepared record of schema 7 or 8 embeds the whole contract and wording set it was prepared under
+ * (`EmbeddedQuestionnaireContract`), so it can be read and reconstructed without the questionnaire deployed today. Schema 5
+ * and 6 records carry none and are never given one. The contract the browser says it displayed is compared with the current
+ * one by `preparePrepared`: a client's digest can only refuse, it never authorizes.
  *
  * Pure: no I/O, no clock.
  */
@@ -26,7 +29,7 @@ import { FREE_TEXT_NOT_SURE_VERBATIM, MAX_TEXT_LENGTH, QUESTION_INPUTS } from '.
 import { ACKNOWLEDGEMENT_ID_PATTERN, MAX_BODY_BYTES, MAX_TOOL_BLOCKS, MAX_VALUES_PER_ANSWER, QUESTION_ID_PATTERN } from '../prototype/parse-form-state'
 import { CUSTOMER_SECTION_TITLES, QUESTIONNAIRE_SECTION_ORDER, TOOL_QUESTION_ROLES } from '../prototype/questionnaire-structure'
 import { canonicalJson, CanonicalizationError, sha256Hex } from '../record-core/canonical'
-import { SOURCE_TEXT_LIFECYCLE, type SourceTextLifecycle } from './source-text'
+import { SOURCE_TEXT_LIFECYCLE, SOURCE_TEXT_SOURCE_ID, type SourceTextContent, type SourceTextLifecycle } from './source-text'
 
 export const QUESTIONNAIRE_CONTRACT_ID = 'si8/creator-record-v2-questionnaire-contract'
 /** The shape of the canonical object below. Raise it when the shape changes. */
@@ -234,6 +237,47 @@ function orphanLabels(sources: CreatorRecordSources): QuestionnaireContractRefus
     for (const label of Object.keys(p.option_labels)) if (!allowed.has(label)) out.push({ code: 'option_label_orphan', ref: `${q.q_id}.${label}` })
   }
   return out
+}
+
+/** The approved contract as `checkApprovedSources` reports it: what the approval names, and the body it names. */
+export interface ApprovedQuestionnaireContract {
+  contract_id: typeof QUESTIONNAIRE_CONTRACT_ID
+  contract_version: number
+  contract_sha256: string
+  authority: string
+  decision_date: string
+  review_ref: string
+  body: Record<string, unknown>
+}
+
+/** What a schema 7 or 8 record stores, inside its own digest: the approved contract plus the whole wording set it names. */
+export interface EmbeddedQuestionnaireContract extends ApprovedQuestionnaireContract {
+  /** Every approved question, not only the answered ones. */
+  wording: SourceTextContent
+}
+
+const EMBEDDED_KEYS = 'authority,body,contract_id,contract_sha256,contract_version,decision_date,review_ref,wording'
+
+/**
+ * Whether an embedded contract is exactly what it says it is, from the record alone: nothing here reads the current
+ * questionnaire, its approval or any constant that could change later, apart from the contract and wording identifiers.
+ */
+export function embeddedContractValid(sources: { registry_version?: unknown; source_text?: { content_sha256?: unknown }; questionnaire_contract?: unknown }): boolean {
+  const e = sources.questionnaire_contract
+  if (!isPlain(e) || Object.keys(e).sort().join(',') !== EMBEDDED_KEYS) return false
+  if (e.contract_id !== QUESTIONNAIRE_CONTRACT_ID || !Number.isInteger(e.contract_version) || (e.contract_version as number) < 1) return false
+  if (typeof e.contract_sha256 !== 'string' || !HEX64.test(e.contract_sha256) || !text(e.authority) || !text(e.review_ref) || !isIsoDate(e.decision_date)) return false
+  if (!isPlain(e.body) || !isPlain(e.wording) || e.wording.source_id !== SOURCE_TEXT_SOURCE_ID) return false
+  try {
+    if (sha256Hex(canonicalJson(e.body)) !== e.contract_sha256) return false
+    const wording = sha256Hex(canonicalJson(e.wording))
+    if (e.body.wording_sha256 !== wording || sources.source_text?.content_sha256 !== wording) return false
+  } catch (err) {
+    if (err instanceof CanonicalizationError) return false
+    throw err
+  }
+  const declared = e.body.contract
+  return isPlain(declared) && declared.id === e.contract_id && e.body.registry_version === sources.registry_version
 }
 
 /** Whether these sources are exactly the contract their approval names. Every reason found, never only the first. */

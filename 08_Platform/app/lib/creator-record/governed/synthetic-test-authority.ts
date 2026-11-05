@@ -202,13 +202,15 @@ const LEDGER: readonly PublicationLedgerEntry[] = [
 ]
 
 /** Must equal CUSTOMER_RECORD_SCHEMA / _VERSION (test-checked). */
-const RECORD_SCHEMA = { id: 'si8/creator-record-v2-record', version: 5 }
+const RECORD_SCHEMA = { id: 'si8/creator-record-v2-record', version: 7 }
+/** The customer PDF stays on schema 5: it is closed for 7 and 8 until separately authorized. */
+const PDF_RECORD_SCHEMA = { id: 'si8/creator-record-v2-record', version: 5 }
 
 /** Placeholder PDF templates (data only). Every string is marked TEST; the wording lock applies unchanged. */
 const PDF_TEMPLATES = {
   template_id: 'si8/creator-record-v2-pdf-templates',
   version: 1,
-  record_schema: RECORD_SCHEMA,
+  record_schema: PDF_RECORD_SCHEMA,
   document_title: t('Synthetic test record {record_id}'),
   stamp: 'SYNTHETIC TEST RECORD · STAGING REHEARSAL ONLY · NOT A CREATOR RECORD · NOT A CLEARANCE OR LEGAL OPINION',
   footer: t('Synthetic test record {record_id}'),
@@ -255,32 +257,32 @@ const QUESTIONNAIRE_APPROVAL: QuestionnaireContractApproval = Object.freeze({
 
 const SOURCE_TEXT_APPROVAL: SourceTextApproval = {
   source_id: 'si8/creator-record-v2-source-text',
-  version: 1,
+  version: 2,
   content_sha256: SYNTHETIC_SOURCE_TEXT_SHA256,
   categories: ['question_wording', 'option_labels', 'acknowledgement_wording', 'dependency_labels', 'caveat_wording'],
   record_schema: RECORD_SCHEMA,
   lifecycle: 'approved',
   authority: SYNTHETIC_TEST_AUTHORITY_NAME,
   decision_date: DECISION_DATE,
-  review_ref: 'SYN-M4C-TEXT-1',
+  review_ref: 'SYN-DECL-1B-2-TEXT-V7-1',
 }
 
 /**
  * CR-V2-UAT-PROD-MIN-1: the same synthetic wording, approved by the SAME synthetic test authority for the
- * examination-bearing record (schema v6). Served only to the one identity of an open synthetic UAT window
+ * examination-bearing record (schema 8). Served only to the one identity of an open synthetic UAT window
  * (`../customer-flow/synthetic-uat`); never part of any governance bundle.
  */
-export const SYNTHETIC_TEST_V6_SOURCE_TEXT_APPROVAL: SourceTextApproval = Object.freeze({
+export const SYNTHETIC_TEST_EXAMINATION_SOURCE_TEXT_APPROVAL: SourceTextApproval = Object.freeze({
   ...SOURCE_TEXT_APPROVAL,
-  record_schema: { id: RECORD_SCHEMA.id, version: 6 },
-  review_ref: 'SYN-UAT-PROD-MIN-TEXT-V6-1',
+  record_schema: { id: RECORD_SCHEMA.id, version: 8 },
+  review_ref: 'SYN-DECL-1B-2-TEXT-V8-1',
 })
 
 const PDF_TEMPLATE_APPROVAL: PdfTemplateApproval = {
   template_id: 'si8/creator-record-v2-pdf-templates',
   version: 1,
   fingerprint: SYNTHETIC_PDF_TEMPLATES_FINGERPRINT,
-  record_schema: RECORD_SCHEMA,
+  record_schema: PDF_RECORD_SCHEMA,
   lifecycle: 'approved',
   authority: SYNTHETIC_TEST_AUTHORITY_NAME,
   decision_date: DECISION_DATE,

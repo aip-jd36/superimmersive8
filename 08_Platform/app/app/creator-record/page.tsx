@@ -9,7 +9,8 @@
  * CR-V2-MVP-M3: payment is offered after review only while v2 issuance is enabled
  * (default: stopped); the purchase and checkout routes re-check every condition.
  * CR-V2-EXAM-INTEGRATION-X3: documents and examination are offered only when the approved inputs also approve the
- * examination-bearing record (schema v6). Otherwise the page is exactly the v5 journey (Production today).
+ * examination-bearing record (schema 8). Otherwise the page has no examination.
+ * CR-V2-DECL-1B-2: the contract's digest goes to the client in this same render as the questions it identifies.
  * This page never serves synthetic content. Administrator testing has its own page: /admin/creator-record-v2/uat.
  */
 import type { Metadata } from 'next'
@@ -60,6 +61,7 @@ export default async function CreatorRecordPage() {
         presentation={inputs.sources.presentation}
         acknowledgements={inputs.source_text.acknowledgements}
         maxTools={inputs.sources.max_tools}
+        questionnaireContractSha256={check.approved.questionnaire_contract.contract_sha256}
         paymentOpen={CREATOR_RECORD_V2_ISSUANCE === 'enabled'}
         {...(examinationOffered ? { examination: { consentVersion: EVIDENCE_CONSENT_DRAFT_VERSION } } : {})}
       />

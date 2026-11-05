@@ -21,7 +21,7 @@ import type { GovernanceApproval } from '@/lib/creator-record/contract/types'
 import { loadQuestionRegistry } from '@/lib/creator-record/contract/question-registry'
 import { pilotSources, type CreatorRecordSources } from '@/lib/creator-record/prototype/build-draft'
 import type { CreatorRecordFormState } from '@/lib/creator-record/prototype/form'
-import { buildCustomerRecord, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
+import { buildCustomerRecord as buildCurrentRecord, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION, HISTORICAL_RECORD_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
 import { SOURCE_TEXT_CATEGORIES, SOURCE_TEXT_SOURCE_ID, sourceTextContent, sourceTextDigest, type SourceTextApproval } from '@/lib/creator-record/customer-record/source-text'
 import { governanceSnapshotFrom, UNAVAILABLE } from '@/lib/creator-record/customer-record/governance-state'
 import type { GovernanceSnapshot } from '@/lib/creator-record/customer-record/eligibility'
@@ -44,6 +44,10 @@ import { legacyGenerateFor } from '@/lib/creator-record-artifacts/production'
 import * as production from '@/lib/creator-record-flow/production'
 import type { FulfillmentSubmission } from '@/lib/payments/repository'
 import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
+import { historicalForm } from '@/test-support/historical-record'
+
+/** Issuance and the customer PDF support schema 5 only: records in that format, as a row prepared then would be. */
+const buildCustomerRecord = (input: Parameters<typeof buildCurrentRecord>[0]) => historicalForm(buildCurrentRecord(input))
 
 const OWNER = '11111111-1111-4111-8111-111111111111'
 const OTHER = '22222222-2222-4222-8222-222222222222'
@@ -277,7 +281,7 @@ function placeholderTemplates(): CustomerPdfTemplates {
   for (const [q, p] of Object.entries(meta)) if (!p.per_tool) question_sections[q] = p.section === 'project' || p.section === 'locations' ? 'project' : 'contribution'
   const t = (x: string) => `${PH}${x}`
   return {
-    template_id: CUSTOMER_PDF_TEMPLATE_ID, version: 1, record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION },
+    template_id: CUSTOMER_PDF_TEMPLATE_ID, version: 1, record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: HISTORICAL_RECORD_SCHEMA_VERSION },
     document_title: t('Creator Record {record_id}'), stamp: 'PLACEHOLDER WORDING FOR TESTING ONLY · CREATOR RECORD · SELF-DECLARED · NOT A CLEARANCE OR LEGAL OPINION',
     footer: t('Creator Record {record_id}'), page_label: 'Page {page} of {pages}',
     sections: {
@@ -319,7 +323,7 @@ function placeholderTemplates(): CustomerPdfTemplates {
   }
 }
 const approvalOf = (t: unknown): PdfTemplateApproval => ({
-  template_id: CUSTOMER_PDF_TEMPLATE_ID, version: 1, fingerprint: templateFingerprint(t), record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION },
+  template_id: CUSTOMER_PDF_TEMPLATE_ID, version: 1, fingerprint: templateFingerprint(t), record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: HISTORICAL_RECORD_SCHEMA_VERSION },
   lifecycle: 'approved', authority: 'SYNTHETIC TEMPLATE AUTHORITY (fixture only)', decision_date: '2026-10-30', review_ref: 'SYNTHETIC-TEMPLATE-REVIEW-1',
 })
 const TEMPLATES = placeholderTemplates()

@@ -20,4 +20,20 @@ export function questionnaireApprovalFor(s: CreatorRecordSources, acknowledgemen
   return { contract_id: QUESTIONNAIRE_CONTRACT_ID, contract_version: 1, contract_sha256: built.sha256, lifecycle: 'approved', authority: 'SYNTHETIC TEST AUTHORITY (fixture only)', decision_date: '2026-10-30', review_ref: 'SYNTHETIC-CONTRACT-REVIEW-1', ...over }
 }
 
+/**
+ * A prepare call as the real client makes it: naming the contract of the questionnaire it was given (CR-V2-DECL-1B-2). Tests of the
+ * identity itself pass `questionnaire_contract_sha256` explicitly, or call the service directly.
+ */
+export const namingCurrentContract = <D extends { inputs(): { sources: CreatorRecordSources }; syntheticUat?: { inputs(): { sources: CreatorRecordSources } } }, U, R>(prepare: (deps: D, user: U, body: unknown) => R) =>
+  (deps: D, user: U, body: unknown): R => {
+    if (!body || typeof body !== 'object' || Array.isArray(body) || 'questionnaire_contract_sha256' in body) return prepare(deps, user, body)
+    let sha256: string | undefined
+    try {
+      sha256 = (deps.syntheticUat?.inputs ?? deps.inputs)().sources.questionnaire_approval?.contract_sha256
+    } catch {
+      // A test whose inputs must not be read: the flow refuses before reading them.
+    }
+    return prepare(deps, user, sha256 ? { ...body, questionnaire_contract_sha256: sha256 } : body)
+  }
+
 export const withQuestionnaireApproval = <S extends CreatorRecordSources>(s: S, acknowledgements?: Readonly<Record<string, string>>): S => ({ ...s, questionnaire_approval: questionnaireApprovalFor(s, acknowledgements) })

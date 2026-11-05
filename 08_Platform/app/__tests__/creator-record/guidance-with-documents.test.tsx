@@ -12,7 +12,7 @@ import { ExaminationReview } from '@/components/creator-record/ExaminationReview
 import type { GovernanceApproval } from '@/lib/creator-record/contract/types'
 import { loadQuestionRegistry } from '@/lib/creator-record/contract/question-registry'
 import { examinationProjectionFor } from '@/lib/creator-record/customer-flow/examination'
-import { preparePrepared, verifiedRecord, type FlowDeps, type NewPreparedRow, type PreparedRow, type PreparedView } from '@/lib/creator-record/customer-flow/service'
+import { preparePrepared as prepareAsSent, verifiedRecord, type FlowDeps, type NewPreparedRow, type PreparedRow, type PreparedView } from '@/lib/creator-record/customer-flow/service'
 import { guidanceWithDocuments } from '@/lib/creator-record/customer-flow/guidance-with-documents'
 import { CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION, CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION, type CustomerRecordV2 } from '@/lib/creator-record/customer-record/record'
 import { SOURCE_TEXT_CATEGORIES, SOURCE_TEXT_SOURCE_ID, sourceTextContent, sourceTextDigest, type SourceTextApproval } from '@/lib/creator-record/customer-record/source-text'
@@ -29,6 +29,9 @@ import { sha256Hex } from '@/lib/creator-record/record-core/canonical'
 import { EXAM_TEXT } from '@/lib/creator-record-flow/examination-ui'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
+import { namingCurrentContract } from '@/test-support/questionnaire-approval'
+
+const preparePrepared = namingCurrentContract(prepareAsSent)
 
 const OWNER = '11111111-1111-4111-8111-111111111111'
 const DOC_ID = '33333333-3333-4333-8333-333333333333'
@@ -147,7 +150,7 @@ const guidanceOnly = (r: CustomerRecordV2) => JSON.stringify(r.guidance)
 describe('the Kling fixture: governed guidance beside the document observations', () => {
   test('both Kling claims are shown exactly as recorded, each linked to the examined document', async () => {
     const { view, record } = await prepared({ tools: [KLING] })
-    expect(record.schema_version).toBe(6)
+    expect(record.schema_version).toBe(8)
     expect(view.examination?.guidance.map((g) => g.claim_id).sort()).toEqual([BASELINE, MEMBER].sort())
     for (const g of view.examination!.guidance) {
       const recorded = record.guidance.items.find((i) => i.claim_id === g.claim_id)!
@@ -200,8 +203,8 @@ describe('unchanged conclusions: documents never reach guidance', () => {
   ] as const)('%s: guidance is byte-identical to the same declarations with no document', async (_n, tools, toolIndex) => {
     const withDocument = await prepared({ tools: [...tools], toolIndex })
     const without = await prepared({ tools: [...tools], include: false, attach: false })
-    expect(withDocument.record.schema_version).toBe(6)
-    expect(without.record.schema_version).toBe(5)
+    expect(withDocument.record.schema_version).toBe(8)
+    expect(without.record.schema_version).toBe(7)
     expect(guidanceOnly(withDocument.record)).toBe(guidanceOnly(without.record))
   })
 })

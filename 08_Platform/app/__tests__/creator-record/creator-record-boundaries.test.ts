@@ -223,6 +223,7 @@ describe('lib/creator-record boundaries', () => {
       'lib/creator-record-flow/examination-ui.ts', // CR-V2-EXAM-INTEGRATION-X3: browser helpers (vocabulary at runtime; types otherwise)
       'lib/creator-record-flow/http.ts',
       'lib/creator-record-flow/production.ts',
+      'lib/creator-record-flow/questionnaire-recovery.ts', // CR-V2-DECL-1B-2: browser helper (types only)
       'lib/creator-record-flow/route-handlers.ts', // request parsing shared by the customer and admin UAT routes
     ])
   })
@@ -262,6 +263,8 @@ describe('lib/creator-record boundaries', () => {
       '@/components/creator-record/EvidencePanel',
       '@/components/creator-record/ExaminationReview',
       '@/lib/creator-record-flow/examination-ui',
+      // CR-V2-DECL-1B-2: pure recovery after a questionnaire change (types only at compile time).
+      '@/lib/creator-record-flow/questionnaire-recovery',
       '@/lib/creator-record/evidence-intake/vocabulary',
     ]
     expect(staticImports(readFileSync(path.join(APP_ROOT, 'lib/creator-record/evidence-intake/vocabulary.ts'), 'utf8'))).toEqual([])

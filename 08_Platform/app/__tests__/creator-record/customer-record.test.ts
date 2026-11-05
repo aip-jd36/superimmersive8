@@ -191,7 +191,7 @@ describe('the record', () => {
     const { record } = built(buildCustomerRecord(input()))
     expect(record.schema).toBe(CUSTOMER_RECORD_SCHEMA)
     expect(record.status).toBe('prepared_not_issued')
-    expect(record.content).toEqual({ id: 'si8/creator-record-v2-record-content', version: 2, generated_text: 'none' })
+    expect(record.content).toEqual({ id: 'si8/creator-record-v2-record-content', version: 4, generated_text: 'none' })
     expect(record.sources).toEqual(expect.objectContaining({
       kind: 'governed', registry_version: 'SYNTHETIC-REGISTRY-1', ledger_version: 'SYNTHETIC-LEDGER-1', guidance_as_of: AS_OF,
       source_text: {
@@ -333,7 +333,11 @@ describe('no generated prose, and never a stronger conclusion than permitted', (
       .filter((t) => t.includes(' '))
     expect(templates.length).toBeGreaterThan(50)
     const own = new Set([...Object.values(s.presentation).flatMap((p) => [p.text, ...Object.values(p.option_labels)]), ...ledgerText, ...Object.values(s.caveats), ...Object.values(s.dependency_labels)])
-    for (const t of templates) if (!own.has(t)) expect([t, canonical.includes(t)]).toEqual([t, false])
+    // The embedded contract is the approved questionnaire, kept whole (CR-V2-DECL-1B-2); this checks what the record itself says.
+    const parsed = JSON.parse(canonical)
+    delete parsed.sources.questionnaire_contract
+    const said = JSON.stringify(parsed)
+    for (const t of templates) if (!own.has(t)) expect([t, said.includes(t)]).toEqual([t, false])
   })
 
   // Tamper with the guidance pipeline's output; the record must refuse it.

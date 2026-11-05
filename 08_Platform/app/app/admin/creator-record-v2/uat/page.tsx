@@ -26,10 +26,11 @@ export default async function AdminCreatorRecordUatPage({ searchParams }: { sear
   const deps = adminUatFlowDeps(access.userId)
   const inputs = syntheticUatInputs()
   const today = deps.now().toISOString().slice(0, 10)
+  const check = checkApprovedSources(inputs.sources, inputs.source_text, TOPIC_CLAIMS_FIXTURE, today, { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION })
   const available = inputs.source_text !== null
-    && checkApprovedSources(inputs.sources, inputs.source_text, TOPIC_CLAIMS_FIXTURE, today, { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION }).ok
+    && check.ok
     && checkApprovedSources(inputs.sources, inputs.source_text_examination ?? inputs.source_text, TOPIC_CLAIMS_FIXTURE, today, { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION }).ok
-  if (!available) {
+  if (!available || !check.ok) {
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
         <h1 className="font-display text-2xl font-bold mb-3" style={{ color: '#1a1918' }}>Creator Record UAT</h1>
@@ -73,6 +74,7 @@ export default async function AdminCreatorRecordUatPage({ searchParams }: { sear
         presentation={inputs.sources.presentation}
         acknowledgements={inputs.source_text!.acknowledgements}
         maxTools={inputs.sources.max_tools}
+        questionnaireContractSha256={check.approved.questionnaire_contract.contract_sha256}
         paymentOpen={false}
         syntheticUat
         apiBase={ADMIN_UAT_API_BASE}

@@ -21,10 +21,14 @@ import { checkApprovedSources } from '@/lib/creator-record/customer-record/sourc
 import { SOURCE_TEXT_CATEGORIES, SOURCE_TEXT_SOURCE_ID, sourceTextContent, sourceTextDigest } from '@/lib/creator-record/customer-record/source-text'
 import { buildCustomerDocument } from '@/lib/creator-record/customer-pdf/document-model'
 import { templateFingerprint } from '@/lib/creator-record/customer-pdf/templates'
-import { getPrepared, preparePrepared, reviewPrepared, type ApprovedInputs, type FlowDeps, type NewPreparedRow, type PreparedRow, type PreparedStore } from '@/lib/creator-record/customer-flow/service'
+import { getPrepared, preparePrepared as prepareAsSent, reviewPrepared, type ApprovedInputs, type FlowDeps, type NewPreparedRow, type PreparedRow, type PreparedStore } from '@/lib/creator-record/customer-flow/service'
 import { T } from '@/lib/creator-record/presentation/templates'
 import { TOPIC_CLAIMS_FIXTURE as CLAIMS } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
+import { namingCurrentContract } from '@/test-support/questionnaire-approval'
+import { historicalRow } from '@/test-support/historical-record'
+
+const preparePrepared = namingCurrentContract(prepareAsSent)
 
 if (!SYN_NULLABLE) throw new Error('synthetic authority is not populated')
 const SYN = SYN_NULLABLE
@@ -57,7 +61,7 @@ function built(state: unknown, inputs: ApprovedInputs = synInputs) {
   if (!b.ok) throw new Error(`not built: ${JSON.stringify(b)}`)
   return b
 }
-const pdfModel = (b: { canonical: string; sha256: string }) => buildCustomerDocument({ canonical: b.canonical, sha256: b.sha256, issued: { record_id: 'CR-2026-ABCDEF12', issued_on: AS_OF }, templates: synPdf.templates, template_approval: synPdf.approval })
+const pdfModel = (stored: { canonical: string; sha256: string }) => { const b = historicalRow({ ...stored, record_schema_version: 7 }); return buildCustomerDocument({ canonical: b.canonical, sha256: b.sha256, issued: { record_id: 'CR-2026-ABCDEF12', issued_on: AS_OF }, templates: synPdf.templates, template_approval: synPdf.approval }) }
 function pdfNotSureList(b: { canonical: string; sha256: string }): string[] {
   const blocks = pdfModel(b).sections.find((s) => s.id === 'open_items')!.blocks
   const at = blocks.findIndex((x) => 'text' in x && x.text === '[TEST ONLY] Not sure')
@@ -272,7 +276,7 @@ describe('D. conditional completeness', () => {
     const r = formToObservations(config(), stale, CTX)
     expect(r.discarded.map((d) => d.q_id).sort()).toEqual(['L3', 'M1', 'M2'])
     expect(r.observations.map((o) => o.question.q_id)).not.toEqual(expect.arrayContaining(['M1']))
-    expect(built(synState({ M0: ['none'], M1: ['artlist'] })).canonical).not.toContain('artlist')
+    expect(JSON.stringify(built(synState({ M0: ['none'], M1: ['artlist'] })).record.declarations)).not.toContain('artlist')
   })
 
   test('a conditional question that is not required is refused as configuration', () => {

@@ -21,7 +21,7 @@ const STATE = { answers: { P1: ['x'] }, tools: [{ T1: ['kling'], T3: ['Pro'] }],
 
 function view(over: Partial<PreparedView> = {}): PreparedView {
   return {
-    id: '00000002-aaaa-4aaa-8aaa-aaaaaaaaaaaa', draft_id: '00000001-aaaa-4aaa-8aaa-aaaaaaaaaaaa', version: 2, status: 'prepared', record_ref: 'PREP-x', created_at: '', reviewed_at: null,
+    id: '00000002-aaaa-4aaa-8aaa-aaaaaaaaaaaa', draft_id: '00000001-aaaa-4aaa-8aaa-aaaaaaaaaaaa', version: 2, status: 'prepared', record_ref: 'PREP-x', created_at: '', reviewed_at: null, questionnaire_contract: { contract_id: 'c', contract_version: 1, contract_sha256: 'c'.repeat(64) },
     form_state: STATE,
     declarations: { answers: [{ q_id: 'T3', tool_index: 0, question: 'Plan?', answer: 'Pro' }], acknowledgements: [] },
     documents: [{ document_id: DOC, file_name: 'synthetic-receipt.png', media_type: 'image/png', byte_size: 10, sha256: 'a'.repeat(64), category: 'billing_receipt', tool_index: 0 }],
@@ -47,11 +47,12 @@ function view(over: Partial<PreparedView> = {}): PreparedView {
 describe('request bodies: only the keys the server accepts, never a projection, comparison or envelope', () => {
   test('preparedBody', () => {
     const atts = [{ document_id: DOC, category: 'billing_receipt', tool_index: 0 }]
-    expect(preparedBody({ state: STATE, attachments: [], includeExaminations: false })).toEqual({ state: STATE })
-    expect(preparedBody({ state: STATE, draftId: 'd', attachments: atts, includeExaminations: true })).toEqual({ state: STATE, draft_id: 'd', documents: atts, include_examinations: true })
+    expect(preparedBody({ state: STATE, contractSha256: null, attachments: [], includeExaminations: false })).toEqual({ state: STATE })
+    expect(preparedBody({ state: STATE, contractSha256: 'c'.repeat(64), attachments: [], includeExaminations: false })).toEqual({ state: STATE, questionnaire_contract_sha256: 'c'.repeat(64) })
+    expect(preparedBody({ state: STATE, contractSha256: null, draftId: 'd', attachments: atts, includeExaminations: true })).toEqual({ state: STATE, draft_id: 'd', documents: atts, include_examinations: true })
     const r: ResponseInput[] = [{ target: { kind: 'comparison', tool_index: 0, document_id: DOC, field: 'plan' }, code: 'not_relevant' }]
-    expect(preparedBody({ state: STATE, attachments: atts, includeExaminations: false, responses: r })).not.toHaveProperty('responses')
-    const b = preparedBody({ state: STATE, attachments: atts, includeExaminations: true, responses: r })
+    expect(preparedBody({ state: STATE, contractSha256: null, attachments: atts, includeExaminations: false, responses: r })).not.toHaveProperty('responses')
+    const b = preparedBody({ state: STATE, contractSha256: null, attachments: atts, includeExaminations: true, responses: r })
     expect(Object.keys(b).sort()).toEqual(['documents', 'include_examinations', 'responses', 'state'])
     expect(JSON.stringify(b)).not.toMatch(/"(envelope|projection|comparison|examinations|uat_grant_id|nonce)":/)
   })
@@ -152,8 +153,8 @@ describe('client and page boundaries', () => {
   const panel = read('components/creator-record/EvidencePanel.tsx')
   const review = read('components/creator-record/ExaminationReview.tsx')
 
-  test('the v5 journey is unchanged without examination: the original prepare body, no panel, no review', () => {
-    expect(client).toContain(": { state, ...(view ? { draft_id: view.draft_id } : {}) })")
+  test('without examination: the plain prepare body, no panel, no review', () => {
+    expect(client).toContain(": { state, questionnaire_contract_sha256: displayed.sha256, ...(view ? { draft_id: view.draft_id } : {}) })")
     expect(client).toMatch(/\{props\.examination && \(\s*<EvidencePanel/)
     expect(client).toContain('{view.examination && <ExaminationReview')
   })

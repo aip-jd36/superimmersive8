@@ -13,7 +13,7 @@ import { loadQuestionRegistry } from '@/lib/creator-record/contract/question-reg
 import { pilotSources, type CreatorRecordSources } from '@/lib/creator-record/prototype/build-draft'
 import type { CreatorRecordFormState } from '@/lib/creator-record/prototype/form'
 import { canonicalJson, sha256Hex } from '@/lib/creator-record/record-core/canonical'
-import { buildCustomerRecord, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION, type CustomerRecordInput, type CustomerRecordV2 } from '@/lib/creator-record/customer-record/record'
+import { buildCustomerRecord as buildCurrentRecord, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION, type CustomerRecordInput, type CustomerRecordV2, HISTORICAL_RECORD_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
 import { SOURCE_TEXT_CATEGORIES, SOURCE_TEXT_SOURCE_ID, sourceTextContent, sourceTextDigest } from '@/lib/creator-record/customer-record/source-text'
 import { evaluateIssuanceEligibility } from '@/lib/creator-record/customer-record/eligibility'
 import { governanceSnapshotFrom } from '@/lib/creator-record/customer-record/governance-state'
@@ -23,6 +23,10 @@ import { buildCustomerDocument, CustomerPdfRefusal, documentModelCanonical, docu
 import { APPLICABILITY_FACTS } from '@/lib/retrieval-engine/types'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
+import { historicalForm } from '@/test-support/historical-record'
+
+/** Issuance and the customer PDF support schema 5 only: records in that format, as a row prepared then would be. */
+const buildCustomerRecord = (input: Parameters<typeof buildCurrentRecord>[0]) => historicalForm(buildCurrentRecord(input))
 
 const RECORD = { record_id: 'PREP-CRV22BTEST', record_version: 1, captured_at: '2026-10-31T00:00:00Z' }
 const AS_OF = '2026-10-31'
@@ -76,7 +80,7 @@ function placeholderTemplates(): CustomerPdfTemplates {
   return {
     template_id: CUSTOMER_PDF_TEMPLATE_ID,
     version: 1,
-    record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION },
+    record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: HISTORICAL_RECORD_SCHEMA_VERSION },
     document_title: `${PH}Creator Record {record_id}`,
     stamp: 'PLACEHOLDER WORDING FOR TESTING ONLY · CREATOR RECORD · SELF-DECLARED · NOT A CLEARANCE OR LEGAL OPINION',
     footer: `${PH}Creator Record {record_id}`,
@@ -129,7 +133,7 @@ function placeholderTemplates(): CustomerPdfTemplates {
   }
 }
 const approvalOf = (t: unknown, over: Partial<PdfTemplateApproval> = {}): PdfTemplateApproval => ({
-  template_id: CUSTOMER_PDF_TEMPLATE_ID, version: 1, fingerprint: templateFingerprint(t), record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION },
+  template_id: CUSTOMER_PDF_TEMPLATE_ID, version: 1, fingerprint: templateFingerprint(t), record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: HISTORICAL_RECORD_SCHEMA_VERSION },
   lifecycle: 'approved', authority: 'SYNTHETIC TEMPLATE AUTHORITY (fixture only)', decision_date: '2026-10-30', review_ref: 'SYNTHETIC-TEMPLATE-REVIEW-1', ...over,
 })
 function docInput(over: Partial<CustomerDocumentInput> = {}, rec = prepare()): CustomerDocumentInput {

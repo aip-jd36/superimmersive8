@@ -13,7 +13,7 @@
 import { pilotSources, type CreatorRecordSources } from '@/lib/creator-record/prototype/build-draft'
 import type { GovernanceApproval } from '@/lib/creator-record/contract/types'
 import { loadQuestionRegistry } from '@/lib/creator-record/contract/question-registry'
-import { buildCustomerRecord, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
+import { buildCustomerRecord as buildCurrentRecord, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION, HISTORICAL_RECORD_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
 import { SOURCE_TEXT_CATEGORIES, SOURCE_TEXT_SOURCE_ID, sourceTextContent, sourceTextDigest, type SourceTextApproval } from '@/lib/creator-record/customer-record/source-text'
 import { evaluateIssuanceEligibility } from '@/lib/creator-record/customer-record/eligibility'
 import { CUSTOMER_PDF_TEMPLATE_ID, templateFingerprint, type PdfTemplateApproval } from '@/lib/creator-record/customer-pdf/templates'
@@ -34,6 +34,10 @@ import { CreatorRecordIssuanceStoppedError, rendererForFamily } from '@/lib/crea
 import { questionnaireApprovalFor } from '@/test-support/questionnaire-approval'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { APPLICABILITY_FACTS } from '@/lib/retrieval-engine/types'
+import { historicalForm } from '@/test-support/historical-record'
+
+/** Issuance and the customer PDF support schema 5 only: records in that format, as a row prepared then would be. */
+const buildCustomerRecord = (input: Parameters<typeof buildCurrentRecord>[0]) => historicalForm(buildCurrentRecord(input))
 
 jest.mock('@/lib/creator-record-flow/production', () => ({ renderCreatorRecordV2Pdf: jest.fn() }))
 
@@ -79,7 +83,7 @@ function syntheticBundle(over: Partial<PublicationAuthorityBundle> = {}, approve
   }
   const templates = placeholderTemplates(p)
   const templateApproval: PdfTemplateApproval = {
-    template_id: CUSTOMER_PDF_TEMPLATE_ID, version: 1, fingerprint: templateFingerprint(templates), record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION },
+    template_id: CUSTOMER_PDF_TEMPLATE_ID, version: 1, fingerprint: templateFingerprint(templates), record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: HISTORICAL_RECORD_SCHEMA_VERSION },
     lifecycle: 'approved', authority: approver, decision_date: '2026-10-30', review_ref: 'SYN-TEMPLATE-REVIEW-1',
   }
   return {
@@ -96,7 +100,7 @@ function placeholderTemplates(p: CreatorRecordSources) {
   const qs: Record<string, 'project' | 'contribution'> = {}
   for (const [q, m] of Object.entries(p.presentation)) if (!m.per_tool) qs[q] = m.section === 'project' || m.section === 'locations' ? 'project' : 'contribution'
   return {
-    template_id: CUSTOMER_PDF_TEMPLATE_ID, version: 1, record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION },
+    template_id: CUSTOMER_PDF_TEMPLATE_ID, version: 1, record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: HISTORICAL_RECORD_SCHEMA_VERSION },
     document_title: t('Creator Record {record_id}'), stamp: 'PLACEHOLDER WORDING FOR TESTING ONLY · CREATOR RECORD · SELF-DECLARED · NOT A CLEARANCE OR LEGAL OPINION', footer: t('Creator Record {record_id}'), page_label: 'Page {page} of {pages}',
     sections: {
       about: { heading: t('1. About'), intro: [t('Intro.')], counts: { answers: { one: t('{n} answer.'), other: t('{n} answers.') }, guidance: { one: t('{n} item.'), other: t('{n} items.') }, open_items: { one: t('{n} open.'), other: t('{n} open.') } } },

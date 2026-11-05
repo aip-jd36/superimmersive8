@@ -9,7 +9,7 @@
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import { createHash } from 'node:crypto'
-import { getPrepared, preparePrepared, verifiedRecord, type ApprovedInputs, type FlowDeps, type NewPreparedRow, type PreparedRow } from '@/lib/creator-record/customer-flow/service'
+import { getPrepared, preparePrepared as prepareAsSent, verifiedRecord, type ApprovedInputs, type FlowDeps, type NewPreparedRow, type PreparedRow } from '@/lib/creator-record/customer-flow/service'
 import { approvedCustomerRecordInputs, CREATOR_RECORD_V2_SUBMISSIONS, currentPublicationAuthority } from '@/lib/creator-record/customer-flow/approved-inputs'
 import { syntheticUatInputs } from '@/lib/creator-record/customer-flow/synthetic-uat'
 import { AUTHORITY_KINDS } from '@/lib/creator-record/customer-record/authority-content'
@@ -30,6 +30,10 @@ import { CUSTOMER_SECTION_TITLES, QUESTIONNAIRE_SECTION_ORDER, TOOL_QUESTION_ROL
 import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/config'
 import { TOPIC_CLAIMS_FIXTURE as CLAIMS } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { questionnaireApprovalFor } from '@/test-support/questionnaire-approval'
+import { namingCurrentContract } from '@/test-support/questionnaire-approval'
+import { historicalForm } from '@/test-support/historical-record'
+
+const preparePrepared = namingCurrentContract(prepareAsSent)
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const SYN = SYN_N!
@@ -468,14 +472,17 @@ describe('records prepared before this contract', () => {
     expect(await getPrepared(d, OWNER, row.id)).toMatchObject({ ok: true, view: { id: row.id, status: row.status } })
   })
 
-  test('a record prepared now is byte-identical to one prepared before: no stamp, same digest', () => {
+  test('schema 7 is schema 5 plus the contract and nothing else: its historical form is the saved row, byte for byte', () => {
     const row = saved.find((r) => r.record_schema_version === 5)!
     const record = JSON.parse(row.canonical)
-    const rebuilt = buildCustomerRecord({
-      state: row.form_state, sources: syntheticUatInputs().sources, source_text: sourceText(), topicClaims: CLAIMS, as_of: record.record.prepared_on,
+    // The approval details the row was prepared under; everything else is what is approved today.
+    const text = sourceText()!
+    const asThen = { ...text, approval: { ...text.approval!, version: record.sources.source_text.version, review_ref: record.sources.source_text.review_ref } }
+    const rebuilt = historicalForm(buildCustomerRecord({
+      state: row.form_state, sources: syntheticUatInputs().sources, source_text: asThen, topicClaims: CLAIMS, as_of: record.record.prepared_on,
       record: { record_id: row.record_ref, record_version: row.version, captured_at: record.record.captured_at },
       documents: record.documents.items.map(({ examination: _e, ...d }: any) => d),
-    })
+    }))
     expect(rebuilt).toMatchObject({ ok: true, canonical: row.canonical, sha256: row.sha256 })
   })
 })

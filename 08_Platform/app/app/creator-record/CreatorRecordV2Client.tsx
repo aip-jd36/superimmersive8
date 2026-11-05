@@ -13,9 +13,16 @@
  *
  * CR-V2-EXAM-INTEGRATION-X3: only when the page offers examination (`examination`), the creator can add synthetic test
  * documents, examine them, include the findings in a version, and respond to them. Every step goes through the server;
- * a response is recorded by preparing a new version. Without `examination` this client is exactly the v5 journey.
+ * a response is recorded by preparing a new version. Without `examination` this client has no documents or examination.
+ *
+ * CR-V2-DECL-1B-2: every submission names the contract of the questionnaire on screen. If the server answers
+ * `questionnaire_changed`, the form is withdrawn and nothing is resubmitted. The creator asks for the updated questions, which
+ * arrive in one server render with their digest; answers that still mean the same are kept (`questionnaire-recovery`), the rest
+ * are reported, and only a new explicit submit sends anything. A response is never turned into a correction: it names its own
+ * version's contract, and if refused it stays refused until the creator chooses "Correct my answers".
  */
-import { useState } from 'react'
+import { useEffect, useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { CreatorRecordQuestionnaire, type QuestionnaireProps } from '@/components/creator-record/CreatorRecordQuestionnaire'
 import type { CreatorRecordFormState, FormIssue } from '@/lib/creator-record/prototype/form'
 import { CUSTOMER_SECTION_TITLES } from '@/lib/creator-record/prototype/questionnaire-structure'
@@ -24,6 +31,7 @@ import { V2_REVIEW_PAGE } from '@/lib/creator-record-flow/wording'
 import { EvidencePanel } from '@/components/creator-record/EvidencePanel'
 import { ExaminationReview } from '@/components/creator-record/ExaminationReview'
 import { EXAM_TEXT, SYNTHETIC_UAT_NOTICE, attachmentsOf, preparedBody, type Attachment, type ResponseInput } from '@/lib/creator-record-flow/examination-ui'
+import { carryAnswersToContract, RECOVERY_TEXT, type QuestionnaireDefinition, type QuestionnaireRecovery } from '@/lib/creator-record-flow/questionnaire-recovery'
 
 const INK = '#1a1918'
 const MUTED = '#6b6560'
@@ -37,6 +45,8 @@ interface Props {
   presentation: QuestionnaireProps['presentation']
   acknowledgements: QuestionnaireProps['acknowledgements']
   maxTools: number
+  /** CR-V2-DECL-1B-2: the approved contract of exactly the questionnaire in these props, from the same server render. */
+  questionnaireContractSha256: string
   /** CR-V2-MVP-M3: whether v2 issuance is enabled (display only; the server decides). */
   paymentOpen: boolean
   /** CR-V2-EXAM-INTEGRATION-X3: offered only when the page says so (display only; the server decides). */
@@ -49,8 +59,11 @@ interface Props {
   initialView?: PreparedView | null
 }
 
+const definitionOf = (p: Props): QuestionnaireDefinition => ({ registryInput: p.registryInput, presentation: p.presentation, acknowledgements: p.acknowledgements, maxTools: p.maxTools })
+
 export function CreatorRecordV2Client(props: Props) {
   const apiBase = props.apiBase ?? '/api/creator-record-v2'
+  const router = useRouter()
   const [mode, setMode] = useState<'form' | 'review'>(props.initialView ? 'review' : 'form')
   const [view, setView] = useState<PreparedView | null>(props.initialView ?? null)
   const [lastState, setLastState] = useState<CreatorRecordFormState | undefined>(undefined)
@@ -60,19 +73,45 @@ export function CreatorRecordV2Client(props: Props) {
   const [formKey, setFormKey] = useState(0)
   const [attachments, setAttachments] = useState<Attachment[]>([])
   const [includeExaminations, setIncludeExaminations] = useState(false)
+  // The questionnaire actually on screen, and the digest that identifies it.
+  const [displayed, setDisplayed] = useState(() => ({ sha256: props.questionnaireContractSha256, definition: definitionOf(props) }))
+  // CR-V2-DECL-1B-2: the server said this questionnaire is out of date. The form is withdrawn until the update has arrived.
+  const [questionnaireChanged, setQuestionnaireChanged] = useState(false)
+  const [updateRequested, setUpdateRequested] = useState(false)
+  const [updating, startUpdate] = useTransition()
+  const [recovery, setRecovery] = useState<QuestionnaireRecovery | null>(null)
+  const [earlierAnswers, setEarlierAnswers] = useState<PreparedView['declarations']['answers'] | null>(null)
 
-  async function post(body: Record<string, unknown>): Promise<boolean> {
+  // A different questionnaire arrived: keep only the answers that still mean the same, and report the rest. Sends nothing.
+  useEffect(() => {
+    if (props.questionnaireContractSha256 === displayed.sha256) return
+    const next = definitionOf(props)
+    const carried = carryAnswersToContract(displayed.definition, next, lastState)
+    setDisplayed({ sha256: props.questionnaireContractSha256, definition: next })
+    setLastState(carried.state)
+    setRecovery(carried.recovery)
+    setEarlierAnswers(null)
+    if (carried.state) setAttachments((list) => list.filter((a) => a.tool_index === null || a.tool_index < carried.state!.tools.length))
+    setIssues([])
+    setError(null)
+    setQuestionnaireChanged(false)
+    setUpdateRequested(false)
+    setFormKey((k) => k + 1)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.questionnaireContractSha256])
+
+  async function post(body: Record<string, unknown>): Promise<{ ok: boolean; code?: unknown }> {
     const res = await fetch(`${apiBase}/prepared`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
     const json = await res.json().catch(() => ({}))
     if (res.ok && json.prepared) {
       setView(json.prepared as PreparedView)
       setMode('review')
       window.scrollTo({ top: 0 })
-      return true
+      return { ok: true }
     }
     setIssues(Array.isArray(json.issues) ? json.issues : [])
     setError(typeof json.error === 'string' ? json.error : FAILED)
-    return false
+    return { ok: false, code: json.code }
   }
 
   /** CR-V2-EXAM-INTEGRATION-X3: responses are recorded on a NEW version with exactly this version's inputs. */
@@ -81,7 +120,9 @@ export function CreatorRecordV2Client(props: Props) {
     setBusy(true)
     setError(null)
     try {
-      await post(preparedBody({ state: view.form_state, draftId: view.draft_id, attachments: attachmentsOf(view), includeExaminations: true, responses }))
+      // This version's own contract, never the page's: a response must not rebuild it under another questionnaire.
+      const r = await post(preparedBody({ state: view.form_state, contractSha256: view.questionnaire_contract?.contract_sha256 ?? null, draftId: view.draft_id, attachments: attachmentsOf(view), includeExaminations: true, responses }))
+      if (r.code === 'questionnaire_changed') setError(RECOVERY_TEXT.respond_blocked)
     } catch {
       setError(FAILED)
     } finally {
@@ -95,9 +136,18 @@ export function CreatorRecordV2Client(props: Props) {
     setIssues([])
     setLastState(state)
     try {
-      await post(props.examination
-        ? preparedBody({ state, draftId: view?.draft_id ?? null, attachments, includeExaminations })
-        : { state, ...(view ? { draft_id: view.draft_id } : {}) })
+      const r = await post(props.examination
+        ? preparedBody({ state, contractSha256: displayed.sha256, draftId: view?.draft_id ?? null, attachments, includeExaminations })
+        : { state, questionnaire_contract_sha256: displayed.sha256, ...(view ? { draft_id: view.draft_id } : {}) })
+      if (r.code === 'questionnaire_changed') {
+        setQuestionnaireChanged(true)
+        setUpdateRequested(false)
+        setRecovery(null)
+        setError(null)
+      } else if (r.ok) {
+        setRecovery(null)
+        setEarlierAnswers(null)
+      }
     } catch {
       setError(FAILED)
     } finally {
@@ -152,7 +202,12 @@ export function CreatorRecordV2Client(props: Props) {
 
   function correct() {
     if (!view) return
-    setLastState(view.form_state)
+    // Another contract (or a schema 5 or 6 version, which names none): its answers are shown for reference, not filled in.
+    const sameQuestionnaire = view.questionnaire_contract?.contract_sha256 === displayed.sha256
+    setLastState(sameQuestionnaire ? view.form_state : undefined)
+    setEarlierAnswers(sameQuestionnaire ? null : view.declarations.answers)
+    setRecovery(null)
+    setError(null)
     if (props.examination) {
       setAttachments(attachmentsOf(view))
       setIncludeExaminations(view.examination !== undefined)
@@ -237,6 +292,22 @@ export function CreatorRecordV2Client(props: Props) {
     )
   }
 
+  if (questionnaireChanged) {
+    return (
+      <div>
+        {uatNotice}
+        <div role="alert" className="rounded-lg border p-6" style={{ borderColor: '#b42318', backgroundColor: '#FEF3F2' }} data-questionnaire-changed>
+          <h1 className="font-display text-xl font-bold mb-2" style={{ color: INK }}>{RECOVERY_TEXT.changed_heading}</h1>
+          <p className="text-sm mb-4" style={{ color: INK }}>{RECOVERY_TEXT.changed_body}</p>
+          {updateRequested && !updating && <p className="text-sm font-medium mb-4" style={{ color: '#b42318' }}>{RECOVERY_TEXT.load_failed}</p>}
+          <button type="button" className={primaryClass} style={{ backgroundColor: INK }} disabled={updating} onClick={() => { setUpdateRequested(true); startUpdate(() => router.refresh()) }}>
+            {updating ? RECOVERY_TEXT.loading : RECOVERY_TEXT.load}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div>
       {uatNotice}
@@ -245,6 +316,40 @@ export function CreatorRecordV2Client(props: Props) {
         Tell us about your video and how you made it. You will check your declarations before anything is completed. SI8 does not check your answers.
       </p>
       {error && issues.length === 0 && <p className="mb-4 text-sm font-medium" style={{ color: '#b42318' }} role="alert">{error}</p>}
+      {recovery && (
+        <section role="status" className="mb-6 rounded-lg border p-4 text-sm" style={{ borderColor: LINE, backgroundColor: '#FFFBEB' }} data-questionnaire-updated>
+          <h2 className="font-semibold mb-1" style={{ color: INK }}>{RECOVERY_TEXT.updated_heading}</h2>
+          <p className="mb-2" style={{ color: MUTED }}>{RECOVERY_TEXT.updated_body}</p>
+          {recovery.changes.length > 0 && (
+            <ul className="list-disc pl-5 space-y-2 mb-2">
+              {recovery.changes.map((c, i) => (
+                <li key={`${c.q_id}-${c.tool_index}-${i}`} data-answer-change={c.reason}>
+                  <span className="font-medium" style={{ color: INK }}>{c.tool_index !== null ? `Tool ${c.tool_index + 1}: ` : ''}{c.question}</span>
+                  <br />{RECOVERY_TEXT.reasons[c.reason]}. {RECOVERY_TEXT.earlier_answer}: {c.previous}
+                </li>
+              ))}
+            </ul>
+          )}
+          {recovery.added_questions.length > 0 && (
+            <p className="mb-2" style={{ color: MUTED }} data-added-questions>{RECOVERY_TEXT.added_heading}: {recovery.added_questions.join('; ')}</p>
+          )}
+          {recovery.acknowledgements_cleared && <p className="font-medium" style={{ color: INK }} data-acknowledgements-cleared>{RECOVERY_TEXT.acknowledgements}</p>}
+        </section>
+      )}
+      {earlierAnswers && (
+        <section role="status" className="mb-6 rounded-lg border p-4 text-sm" style={{ borderColor: LINE, backgroundColor: '#FFFBEB' }} data-earlier-answers>
+          <h2 className="font-semibold mb-1" style={{ color: INK }}>{RECOVERY_TEXT.correction_heading}</h2>
+          <p className="mb-2" style={{ color: MUTED }}>{RECOVERY_TEXT.correction_body}</p>
+          <dl className="space-y-2">
+            {earlierAnswers.map((a, i) => (
+              <div key={`${a.q_id}-${a.tool_index}-${i}`}>
+                <dt className="font-medium" style={{ color: INK }}>{a.tool_index !== null ? `Tool ${a.tool_index + 1}: ` : ''}{a.question}</dt>
+                <dd style={{ color: MUTED }}>{a.answer}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
       <CreatorRecordQuestionnaire
         key={formKey}
         registryInput={props.registryInput}

@@ -18,12 +18,15 @@ import {
 } from '@/lib/creator-record/customer-record/eligibility'
 import { CURRENT_ISSUANCE_SUPPORT, governanceSnapshotFrom, UNAVAILABLE, type CurrentGovernance } from '@/lib/creator-record/customer-record/governance-state'
 import {
-  buildCustomerRecord, verifyCustomerRecord, CUSTOMER_RECORD_BUILDER, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION,
-  type CustomerRecordInput, type CustomerRecordV2,
-} from '@/lib/creator-record/customer-record/record'
+  buildCustomerRecord as buildCurrentRecord, verifyCustomerRecord, HISTORICAL_RECORD_BUILDER, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION,
+  type CustomerRecordInput, type CustomerRecordV2, HISTORICAL_RECORD_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
 import { SOURCE_TEXT_CATEGORIES, SOURCE_TEXT_SOURCE_ID, sourceTextContent, sourceTextDigest, type SourceTextApproval } from '@/lib/creator-record/customer-record/source-text'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
+import { historicalForm } from '@/test-support/historical-record'
+
+/** Issuance and the customer PDF support schema 5 only: records in that format, as a row prepared then would be. */
+const buildCustomerRecord = (input: Parameters<typeof buildCurrentRecord>[0]) => historicalForm(buildCurrentRecord(input))
 
 const RECORD = { record_id: 'PREP-CRV21CTEST', record_version: 1, captured_at: '2026-10-31T00:00:00Z' }
 const AS_OF = '2026-10-31'
@@ -88,8 +91,8 @@ describe('approved and valid authorities', () => {
 
   test('the record carries builder provenance and a content digest for every governed entry it uses', () => {
     const { record } = prepare()
-    expect(record.schema_version).toBe(CUSTOMER_RECORD_SCHEMA_VERSION)
-    expect(record.builder).toEqual(CUSTOMER_RECORD_BUILDER)
+    expect(record.schema_version).toBe(HISTORICAL_RECORD_SCHEMA_VERSION)
+    expect(record.builder).toEqual(HISTORICAL_RECORD_BUILDER)
     const refs = issuanceReferences(record)
     for (const k of DIGESTED_KINDS) expect(refs.some((x) => x.kind === k && /^[0-9a-f]{64}$/.test(x.content_sha256 ?? ''))).toBe(true)
     expect(record.sources.authority_digests.length).toBe(refs.filter((x) => (DIGESTED_KINDS as readonly string[]).includes(x.kind)).length)
@@ -257,7 +260,7 @@ describe('withdrawn, superseded, retired and pending authority in the current so
   })
 
   test('an unsupported builder or record schema blocks issuance; a supported one grants nothing else', () => {
-    const builders = [{ id: CUSTOMER_RECORD_BUILDER.id, version: CUSTOMER_RECORD_BUILDER.version + 1 }]
+    const builders = [{ id: HISTORICAL_RECORD_BUILDER.id, version: HISTORICAL_RECORD_BUILDER.version + 1 }]
     expect(codes(evaluate(governance({ support: { ...CURRENT_ISSUANCE_SUPPORT, builders } }), rec))).toEqual(['builder:version_not_current'])
     expect(codes(evaluate(governance({ support: { ...CURRENT_ISSUANCE_SUPPORT, record_schemas: [] } }), rec))).toEqual(['record_schema:reference_missing'])
     // Supported builder and schema, but withdrawn wording: still ineligible.

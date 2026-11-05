@@ -8,6 +8,9 @@
  *
  * Pure: no database, payment, Storage, email, PDF, network, clock or randomness.
  *
+ * Schemas: this builder writes 7 (declarations) and 8 (examination-bearing) only. 5 and 6 are historical formats, kept
+ * readable exactly as stored; nothing writes them, and they are never upgraded or stamped.
+ *
  * Contract:
  *   - Sources: approved governed sources only (`./sources`), or nothing is built.
  *   - Declarations: the existing form validation and declaration mapping
@@ -56,6 +59,7 @@ import {
   claimContentDigest, claimRef, observationMapContentDigest, observationMapRef, publicationContentDigest, publicationRef,
   questionContentDigest, questionRef, type DigestedKind,
 } from './authority-content'
+import { embeddedContractValid, type EmbeddedQuestionnaireContract } from './questionnaire-contract'
 import { checkApprovedSources, type SourceRefusal, type SourceTextInput, type TopicClaims } from './sources'
 import {
   EVIDENCE_CATEGORIES, EVIDENCE_EXAMINATION_NOT_EXAMINED, EVIDENCE_MAX_BYTES, EVIDENCE_MAX_FILE_NAME_CHARS, EVIDENCE_MAX_PER_RECORD, EVIDENCE_MAX_PER_TOOL, EVIDENCE_MEDIA_TYPES,
@@ -75,24 +79,33 @@ export const CUSTOMER_RECORD_SCHEMA = 'si8/creator-record-v2-record'
  * v5 (CR-V2-DOC-1): `documents` is an inventory of the creator's own stored documents, each fixed by its
  *     SHA-256 (never examined in this version; no document reaches guidance).
  */
-export const CUSTOMER_RECORD_SCHEMA_VERSION = 5
+export const HISTORICAL_RECORD_SCHEMA_VERSION = 5
 /**
  * v6 (CR-V2-EXAM-INTEGRATION-X0): the EXAMINATION-BEARING record: v5 plus per-document examination projections,
  * derived comparisons and version-specific creator responses. Used only when examinations are supplied.
  */
-export const CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION = 6
+export const HISTORICAL_EXAMINATION_SCHEMA_VERSION = 6
+/**
+ * v7, v8 (CR-V2-DECL-1B-2): v5 and v6 plus `sources.questionnaire_contract`: the approved contract's identity, its approval
+ * details, its whole body and the whole wording set, so a record says what it was prepared under without any deployed code.
+ * Neither is issuable: not in `CURRENT_ISSUANCE_SUPPORT`, and the customer PDF does not read them.
+ */
+export const CUSTOMER_RECORD_SCHEMA_VERSION = 7
+export const CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION = 8
 /**
  * The code that prepared the record. Technical provenance only: it grants no
  * commercial authority, and an issuance check can only refuse an unsupported
  * builder, never be satisfied by one. Raise the version with any change to how
  * a record is built or to the guidance pipeline it runs.
  */
-export const CUSTOMER_RECORD_BUILDER = { id: 'si8/creator-record-v2-record-builder', version: 3 } as const
+export const CUSTOMER_RECORD_BUILDER = { id: 'si8/creator-record-v2-record-builder', version: 5 } as const
+/** The builder of a v5 record, which is the only builder issuance supports today. */
+export const HISTORICAL_RECORD_BUILDER = { id: 'si8/creator-record-v2-record-builder', version: 3 } as const
 /** The content contract: what may appear in the record (no generated prose). Bump with any content change. */
-export const CUSTOMER_RECORD_CONTENT = { id: 'si8/creator-record-v2-record-content', version: 2, generated_text: 'none' } as const
-/** CR-V2-EXAM-INTEGRATION-X0: the builder and content identities of a v6 (examination-bearing) record. */
-export const CUSTOMER_RECORD_EXAMINATION_BUILDER = { id: 'si8/creator-record-v2-record-builder', version: 4 } as const
-export const CUSTOMER_RECORD_EXAMINATION_CONTENT = { id: 'si8/creator-record-v2-record-content', version: 3, generated_text: 'none' } as const
+export const CUSTOMER_RECORD_CONTENT = { id: 'si8/creator-record-v2-record-content', version: 4, generated_text: 'none' } as const
+/** CR-V2-EXAM-INTEGRATION-X0: the builder and content identities of an examination-bearing record. */
+export const CUSTOMER_RECORD_EXAMINATION_BUILDER = { id: 'si8/creator-record-v2-record-builder', version: 6 } as const
+export const CUSTOMER_RECORD_EXAMINATION_CONTENT = { id: 'si8/creator-record-v2-record-content', version: 5, generated_text: 'none' } as const
 /** Issued Creator Record ids (CR-YYYY-8 hex): assigned at issuance, never part of a prepared record. */
 const ISSUED_RECORD_ID = /^CR-\d{4}-[0-9A-F]{8}$/i
 const ISO_DATETIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/
@@ -176,9 +189,9 @@ export interface CustomerGuidanceItem {
 
 export interface CustomerRecordV2 {
   schema: typeof CUSTOMER_RECORD_SCHEMA
-  schema_version: typeof CUSTOMER_RECORD_SCHEMA_VERSION | typeof CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION
+  schema_version: typeof HISTORICAL_RECORD_SCHEMA_VERSION | typeof HISTORICAL_EXAMINATION_SCHEMA_VERSION | typeof CUSTOMER_RECORD_SCHEMA_VERSION | typeof CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION
   status: 'prepared_not_issued'
-  content: typeof CUSTOMER_RECORD_CONTENT | typeof CUSTOMER_RECORD_EXAMINATION_CONTENT
+  content: { id: string; version: number; generated_text: 'none' }
   builder: { id: string; version: number }
   record: { record_ref: string; record_version: number; prepared_on: string; captured_at: string }
   sources: {
@@ -204,15 +217,17 @@ export interface CustomerRecordV2 {
      * id and version. Version labels alone are not proof of content (`./authority-content`).
      */
     authority_digests: { kind: DigestedKind; id: string; version: string; content_sha256: string }[]
+    /** CR-V2-DECL-1B-2: required on v7 and v8, absent on v5 and v6. */
+    questionnaire_contract?: EmbeddedQuestionnaireContract
   }
   /** Acknowledgements the creator accepted, with the exact approved wording shown. */
   declarations: { answers: DeclaredAnswer[]; observations: DeclaredObservation[]; acknowledgements: { id: string; text: string }[] }
-  /** v5: `inventory_only`, every item `not_examined`. v6: `inventory_with_examination`, each item `not_examined` or a projection. */
+  /** v5, v7: `inventory_only`, every item `not_examined`. v6, v8: `inventory_with_examination`, each item `not_examined` or a projection. */
   documents: { policy: 'inventory_only' | 'inventory_with_examination'; items: (CustomerRecordDocument & { examination: typeof EVIDENCE_EXAMINATION_NOT_EXAMINED | ExaminationProjection })[] }
-  /** v5: disabled. v6: derived from this version's declarations (never supplied, never carried). */
+  /** v5, v7: disabled. v6, v8: derived from this version's declarations (never supplied, never carried). */
   comparison: { policy: 'disabled' } | { policy: 'derived_per_version'; method: typeof PERSISTED_COMPARISON_METHOD; items: CustomerComparison[] }
   guidance: { items: CustomerGuidanceItem[] }
-  /** v6 only: this version's closed-code creator responses. */
+  /** v6, v8 only: this version's closed-code creator responses. */
   creator_responses?: { policy: 'closed_codes_this_version_only'; items: CreatorResponse[] }
 }
 
@@ -523,6 +538,7 @@ export function buildCustomerRecord(input: CustomerRecordInput): CustomerRecordR
         questions,
         publications,
         authority_digests,
+        questionnaire_contract: { ...approved.questionnaire_contract, wording: text },
       },
       declarations: {
         answers,
@@ -575,8 +591,25 @@ export function verifyCustomerRecord(canonical: string, sha256: string): { ok: t
   }
   const r = parsed as Partial<CustomerRecordV2>
   if (r.schema !== CUSTOMER_RECORD_SCHEMA || r.status !== 'prepared_not_issued') return { ok: false, reason: 'wrong_schema' }
-  if (r.schema_version === CUSTOMER_RECORD_SCHEMA_VERSION) return { ok: true, record: r as CustomerRecordV2 }
-  // CR-V2-EXAM-INTEGRATION-X0: a v6 record's examination parts must re-verify strictly.
-  if (r.schema_version === CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION && r.record && examinationSectionsValid(r as unknown as Parameters<typeof examinationSectionsValid>[0])) return { ok: true, record: r as CustomerRecordV2 }
+  const examinationValid = () => !!r.record && examinationSectionsValid(r as unknown as Parameters<typeof examinationSectionsValid>[0])
+  const sources = r.sources as (CustomerRecordV2['sources'] | undefined)
+  // Historical formats: exactly what they were, and they never carry a contract.
+  if (r.schema_version === HISTORICAL_RECORD_SCHEMA_VERSION || r.schema_version === HISTORICAL_EXAMINATION_SCHEMA_VERSION) {
+    if (sources && 'questionnaire_contract' in sources) return { ok: false, reason: 'wrong_schema' }
+    // CR-V2-EXAM-INTEGRATION-X0: a v6 record's examination parts must re-verify strictly.
+    return r.schema_version === HISTORICAL_RECORD_SCHEMA_VERSION || examinationValid() ? { ok: true, record: r as CustomerRecordV2 } : { ok: false, reason: 'wrong_schema' }
+  }
+  // CR-V2-DECL-1B-2: v7 and v8 must prove their embedded contract and wording, and be of their own kind.
+  if (r.schema_version === CUSTOMER_RECORD_SCHEMA_VERSION || r.schema_version === CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION) {
+    if (!sources || sources.source_text?.record_schema?.version !== r.schema_version || !embeddedContractValid(sources)) return { ok: false, reason: 'wrong_schema' }
+    const kindValid = r.schema_version === CUSTOMER_RECORD_SCHEMA_VERSION
+      ? r.documents?.policy === 'inventory_only' && r.comparison?.policy === 'disabled' && !('creator_responses' in r)
+      : examinationValid()
+    if (kindValid) return { ok: true, record: r as CustomerRecordV2 }
+  }
   return { ok: false, reason: 'wrong_schema' }
 }
+
+/** Whether a verified record is examination-bearing, whichever schema generation it belongs to. */
+export const isExaminationBearing = (record: Pick<CustomerRecordV2, 'schema_version'>): boolean =>
+  record.schema_version === HISTORICAL_EXAMINATION_SCHEMA_VERSION || record.schema_version === CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION

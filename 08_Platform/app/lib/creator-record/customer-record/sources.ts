@@ -29,7 +29,7 @@ import type { PublicationLedgerEntry } from '../contract/publication-ledger'
 import { declarationIntegrityRefusals, INTEGRITY_REFUSAL_CODES, loadQuestionRegistry, type QuestionRegistry } from '../contract/question-registry'
 import { isApproved, isIsoDate, type GovernanceApproval } from '../contract/types'
 import type { BuildDraftInput, CreatorRecordSources } from '../prototype/build-draft'
-import { checkQuestionnaireContract, QUESTIONNAIRE_CONTRACT_REFUSAL_CODES } from './questionnaire-contract'
+import { checkQuestionnaireContract, QUESTIONNAIRE_CONTRACT_REFUSAL_CODES, questionnaireContract, type ApprovedQuestionnaireContract } from './questionnaire-contract'
 import { checkSourceText, SOURCE_TEXT_REFUSAL_CODES, sourceTextContent, sourceTextDigest, type AcknowledgementText, type SourceTextApproval, type SourceTextContent } from './source-text'
 
 export type TopicClaims = BuildDraftInput['topicClaims']
@@ -84,6 +84,8 @@ export interface ApprovedSources {
   }
   /** The approved wording itself, exactly as approved. */
   source_text_content: SourceTextContent
+  /** CR-V2-DECL-1B-2: the contract these sources are, as approved. The same object the form and the record are built from. */
+  questionnaire_contract: ApprovedQuestionnaireContract
 }
 
 export type SourceCheck = { ok: true; approved: ApprovedSources } | { ok: false; refusals: SourceRefusal[] }
@@ -140,11 +142,12 @@ export function checkApprovedSources(sources: CreatorRecordSources, sourceText: 
 
   // ── Wording: exactly the content an approved Source Text Approval names (CR-V2-1A) ──
   let text: ReturnType<typeof checkSourceText> | null = null
+  let wording: string | null = null
   if (registry) {
     text = checkSourceText(sources, registry, sourceText?.acknowledgements ?? null, sourceText?.approval ?? null, recordSchema)
     if (!text.ok) for (const r of text.refusals) refuse(r.code, r.ref)
     // CR-V2-DECL-1B-1: the same `sources` validation and the builder then read, so what is approved is what runs.
-    const wording = sourceTextDigest(sourceTextContent(sources, registry, sourceText?.acknowledgements ?? {}))
+    wording = sourceTextDigest(sourceTextContent(sources, registry, sourceText?.acknowledgements ?? {}))
     for (const r of checkQuestionnaireContract(sources, wording)) refuse(r.code, r.ref)
   }
 
@@ -165,8 +168,12 @@ export function checkApprovedSources(sources: CreatorRecordSources, sourceText: 
     for (const id of e.required_caveats) if (!has(sources.caveats, id) || String(sources.caveats[id]).trim() === '') refuse('caveat_text_missing', `${e.entry_id}.${id}`)
   }
 
-  if (refusals.length > 0 || !registry || !text || !text.ok) return { ok: false, refusals }
+  if (refusals.length > 0 || !registry || !text || !text.ok || wording === null) return { ok: false, refusals }
   const a = text.approval
+  // No refusal above means the contract built, and its approval is well formed and names it.
+  const built = questionnaireContract(sources, wording)
+  const contract = sources.questionnaire_approval
+  if (!built.ok || !contract) return { ok: false, refusals: [{ code: 'questionnaire_contract_malformed', ref: null }] }
   return {
     ok: true,
     approved: {
@@ -178,6 +185,10 @@ export function checkApprovedSources(sources: CreatorRecordSources, sourceText: 
         record_schema: { id: a.record_schema.id, version: a.record_schema.version }, authority: a.authority, decision_date: a.decision_date, review_ref: a.review_ref,
       },
       source_text_content: text.content,
+      questionnaire_contract: {
+        contract_id: contract.contract_id, contract_version: contract.contract_version, contract_sha256: built.sha256,
+        authority: contract.authority, decision_date: contract.decision_date, review_ref: contract.review_ref, body: built.contract,
+      },
     },
   }
 }

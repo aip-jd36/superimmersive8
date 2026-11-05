@@ -13,14 +13,14 @@
  */
 import { approvedCustomerRecordInputs } from './approved-inputs'
 import type { ApprovedInputs } from './service'
-import { CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY, SYNTHETIC_TEST_V6_SOURCE_TEXT_APPROVAL } from '../governed/synthetic-test-authority'
+import { CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY, SYNTHETIC_TEST_EXAMINATION_SOURCE_TEXT_APPROVAL } from '../governed/synthetic-test-authority'
 
-/** The synthetic test bundle (every visible string marked TEST) plus its v6 wording approval. Never part of governance. */
+/** The synthetic test bundle (every visible string marked TEST) plus its examination wording approval. Never part of governance. */
 export function syntheticUatInputs(): ApprovedInputs {
   const bundle = CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY
   if (!bundle) return approvedCustomerRecordInputs(null)
   const base = approvedCustomerRecordInputs(bundle)
-  return { ...base, source_text_examination: { approval: SYNTHETIC_TEST_V6_SOURCE_TEXT_APPROVAL, acknowledgements: bundle.acknowledgements } }
+  return { ...base, source_text_examination: { approval: SYNTHETIC_TEST_EXAMINATION_SOURCE_TEXT_APPROVAL, acknowledgements: bundle.acknowledgements } }
 }
 
 /** The ports the gates consult. Absent = no synthetic path, which is every customer request. */

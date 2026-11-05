@@ -20,11 +20,14 @@ import { examineAndRecord, type ExaminationAdapterDeps, type PersistedRunRow } f
 import { CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION, CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
 import { SOURCE_TEXT_CATEGORIES, SOURCE_TEXT_SOURCE_ID, sourceTextContent, sourceTextDigest, type SourceTextApproval } from '@/lib/creator-record/customer-record/source-text'
 import { examinationProjectionFor, type DocumentProjection } from '@/lib/creator-record/customer-flow/examination'
-import { getPrepared, preparePrepared, type FlowDeps, type NewPreparedRow, type PreparedRow, type PreparedView } from '@/lib/creator-record/customer-flow/service'
+import { getPrepared, preparePrepared as prepareAsSent, type FlowDeps, type NewPreparedRow, type PreparedRow, type PreparedView } from '@/lib/creator-record/customer-flow/service'
 import { startPurchase, type PurchaseDeps } from '@/lib/creator-record/customer-flow/purchase'
 import type { EvidenceRow } from '@/lib/creator-record/evidence-intake/service'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
+import { namingCurrentContract } from '@/test-support/questionnaire-approval'
+
+const preparePrepared = namingCurrentContract(prepareAsSent)
 
 const OWNER = '11111111-1111-4111-8111-111111111111'
 const OTHER = '22222222-2222-4222-8222-222222222222'

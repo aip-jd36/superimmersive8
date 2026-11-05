@@ -14,11 +14,14 @@ import { CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION, verifyCustomerR
 import { SOURCE_TEXT_CATEGORIES, SOURCE_TEXT_SOURCE_ID, sourceTextContent, sourceTextDigest } from '@/lib/creator-record/customer-record/source-text'
 import { approvedCustomerRecordInputs, CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flow/approved-inputs'
 import {
-  getPrepared, preparePrepared, reviewPrepared,
+  getPrepared, preparePrepared as prepareAsSent, reviewPrepared,
   type ApprovedInputs, type FlowDeps, type NewPreparedRow, type PreparedRow, type PreparedStore,
 } from '@/lib/creator-record/customer-flow/service'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
+import { namingCurrentContract } from '@/test-support/questionnaire-approval'
+
+const preparePrepared = namingCurrentContract(prepareAsSent)
 
 const OWNER = '11111111-1111-4111-8111-111111111111'
 const OTHER = '22222222-2222-4222-8222-222222222222'

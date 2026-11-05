@@ -109,9 +109,10 @@ export interface Attachment { document_id: string; category: string; tool_index:
 export const targetKey = (t: ResponseTarget) => (t.kind === 'observation' ? `o:${t.run_id}:${t.observation_id}` : `c:${t.tool_index}:${t.document_id}:${t.field}`)
 
 /** The prepare request body. Only these keys exist; the server rejects anything else. */
-export function preparedBody(o: { state: CreatorRecordFormState; draftId?: string | null; attachments: Attachment[]; includeExaminations: boolean; responses?: ResponseInput[] }): Record<string, unknown> {
+export function preparedBody(o: { state: CreatorRecordFormState; contractSha256: string | null; draftId?: string | null; attachments: Attachment[]; includeExaminations: boolean; responses?: ResponseInput[] }): Record<string, unknown> {
   return {
     state: o.state,
+    ...(o.contractSha256 ? { questionnaire_contract_sha256: o.contractSha256 } : {}),
     ...(o.draftId ? { draft_id: o.draftId } : {}),
     ...(o.attachments.length > 0 ? { documents: o.attachments.map((a) => ({ document_id: a.document_id, category: a.category, tool_index: a.tool_index })) } : {}),
     ...(o.includeExaminations ? { include_examinations: true } : {}),

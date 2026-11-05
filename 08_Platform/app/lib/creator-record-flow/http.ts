@@ -31,6 +31,8 @@ const MESSAGES: Record<string, string> = {
   not_found: 'Not found.',
   superseded: 'A newer version of these answers exists. Review the latest version.',
   conflict: 'This version changed while you were reviewing it. Reload and try again.',
+  // CR-V2-DECL-1B-2. Draft wording, not approved.
+  questionnaire_changed: 'The questionnaire has changed since this page was loaded. Nothing was recorded.',
   integrity_failure: 'This record could not be verified. Nothing was changed.',
   submissions_stopped: 'Creator Record is not taking new submissions right now.',
   unavailable: 'Creator Record is not available yet.',

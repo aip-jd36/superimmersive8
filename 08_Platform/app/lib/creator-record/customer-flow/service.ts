@@ -29,7 +29,14 @@
  *   - `responses` (closed codes) are recorded for THIS version only and must target an observation or comparison that
  *     exists in it. A response is therefore given by preparing a new version. Earlier responses are never copied: the
  *     server only LISTS those whose target is unchanged (`carry_forward_candidates`) for explicit re-affirmation.
- *   - Without `include_examinations` (or with no examined document) the record is the v5 record, byte for byte.
+ *   - Without `include_examinations` (or with no examined document) the record has no examination section.
+ *
+ * CR-V2-DECL-1B-2 (questionnaire contract identity):
+ *   - `questionnaire_contract_sha256` says which contract the browser displayed. It can only refuse: a match authorizes
+ *     nothing, because the server still checks its own approval first and validates the answers afterwards.
+ *   - Order: server approval (503), then identity (409 `questionnaire_changed`), then the answers. Nothing is written on a refusal.
+ *   - A response re-sends a stored version's answers without showing the questionnaire, so it is accepted only while that
+ *     version's own contract is the current one. A schema 5 or 6 version has none: it is never rebuilt by a response.
  *
  * Synthetic inputs (`./synthetic-uat`): while the submissions stop is in force, `deps.syntheticUat` may admit an
  * identity. Only the admin UAT wiring supplies that port; customer wiring never does. A version built from synthetic
@@ -40,8 +47,8 @@ import type { FormIssue } from '../prototype/form'
 import { parseFormState } from '../prototype/parse-form-state'
 import type { CreatorRecordFormState } from '../prototype/form'
 import type { CreatorRecordSources } from '../prototype/build-draft'
-import { buildCustomerRecord, verifyCustomerRecord, CUSTOMER_RECORD_SCHEMA, type CustomerRecordV2 } from '../customer-record/record'
-import type { SourceTextInput, TopicClaims } from '../customer-record/sources'
+import { buildCustomerRecord, isExaminationBearing, verifyCustomerRecord, CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION, type CustomerRecordV2 } from '../customer-record/record'
+import { checkApprovedSources, type SourceTextInput, type TopicClaims } from '../customer-record/sources'
 import { parseEvidenceReferences } from '../evidence-intake/contract'
 import { carryForwardCandidates, CREATOR_RESPONSE_CODES, type CreatorResponseInput, type CustomerRecordExaminationInput } from '../customer-record/examination-section'
 import { guidanceWithDocuments, type GuidanceWithDocuments } from './guidance-with-documents'
@@ -119,6 +126,8 @@ export interface PreparedView {
   record_ref: string
   created_at: string
   reviewed_at: string | null
+  /** CR-V2-DECL-1B-2: the contract this version was prepared under, from its own record. Null on schema 5 and 6. */
+  questionnaire_contract: { contract_id: string; contract_version: number; contract_sha256: string } | null
   /** The answers as submitted, for correcting them. */
   form_state: CreatorRecordFormState
   /** Exactly as recorded in the prepared record. */
@@ -130,7 +139,7 @@ export interface PreparedView {
   documents: { document_id: string; file_name: string; media_type: string; byte_size: number; sha256: string; category: string; tool_index: number | null }[]
   guidance_items: number
   /**
-   * CR-V2-EXAM-INTEGRATION-X3: present only on an examination-bearing version (record schema v6), exactly as recorded:
+   * CR-V2-EXAM-INTEGRATION-X3: present only on an examination-bearing version (record schema 6 or 8), exactly as recorded:
    * each examined document's unverified observations and limitations, the comparisons derived from THIS version's
    * declarations, and THIS version's creator responses. Never a verification, finding or clearance.
    */
@@ -160,13 +169,14 @@ export type FlowError =
   | { ok: false; status: 400; code: 'invalid_answers'; issues: FormIssue[] }
   | { ok: false; status: 403; code: 'not_invited' }
   | { ok: false; status: 404; code: 'not_found' }
-  | { ok: false; status: 409; code: 'superseded' | 'conflict' | 'examination_unavailable' }
+  | { ok: false; status: 409; code: 'superseded' | 'conflict' | 'examination_unavailable' | 'questionnaire_changed' }
   | { ok: false; status: 500; code: 'integrity_failure' }
   | { ok: false; status: 503; code: 'submissions_stopped' | 'unavailable' }
 
 export type FlowResult = { ok: true; view: PreparedView } | FlowError
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+const HEX64 = /^[0-9a-f]{64}$/
 
 type WithoutOk<T> = T extends unknown ? Omit<T, 'ok'> : never
 const err = (e: WithoutOk<FlowError>): FlowError => ({ ok: false, ...e }) as FlowError
@@ -195,6 +205,7 @@ async function syntheticClosed(deps: FlowDeps, userId: string, record: CustomerR
 }
 
 function viewOf(row: PreparedRow, record: CustomerRecordV2): PreparedView {
+  const contract = record.sources.questionnaire_contract
   return {
     id: row.id,
     draft_id: row.draft_id,
@@ -203,6 +214,7 @@ function viewOf(row: PreparedRow, record: CustomerRecordV2): PreparedView {
     record_ref: row.record_ref,
     created_at: row.created_at,
     reviewed_at: row.reviewed_at,
+    questionnaire_contract: contract ? { contract_id: contract.contract_id, contract_version: contract.contract_version, contract_sha256: contract.contract_sha256 } : null,
     form_state: row.form_state,
     declarations: {
       answers: record.declarations.answers.map((a) => ({ q_id: a.q_id, tool_index: a.tool_index, question: a.question, answer: a.answer_verbatim })),
@@ -210,11 +222,11 @@ function viewOf(row: PreparedRow, record: CustomerRecordV2): PreparedView {
     },
     documents: record.documents.items.map((d) => ({ document_id: d.document_id, file_name: d.file_name, media_type: d.media_type, byte_size: d.byte_size, sha256: d.sha256, category: d.category, tool_index: d.tool_index })),
     guidance_items: record.guidance.items.length,
-    ...(record.schema_version === 6 ? { examination: examinationViewOf(record) } : {}),
+    ...(isExaminationBearing(record) ? { examination: examinationViewOf(record) } : {}),
   }
 }
 
-/** CR-V2-EXAM-INTEGRATION-X3: the examination-bearing parts of a verified v6 record, as recorded (no interpretation). */
+/** CR-V2-EXAM-INTEGRATION-X3: the examination-bearing parts of a verified record, as recorded (no interpretation). */
 function examinationViewOf(record: CustomerRecordV2): ExaminationView {
   const documents: ExaminationView['documents'] = []
   for (const d of record.documents.items) {
@@ -264,7 +276,7 @@ async function ownedVerified(deps: FlowDeps, userId: string, id: unknown): Promi
 
 /**
  * Prepare a new version from submitted answers. `body` is the untrusted request body:
- * `{ state, draft_id?, documents? }`, where `documents` references the creator's OWN stored documents
+ * `{ state, questionnaire_contract_sha256, draft_id?, documents? }`, where `documents` references the creator's OWN stored documents
  * (CR-V2-DOC-1). Each reference is resolved here against the evidence store and recorded with its SHA-256;
  * the database re-checks the same at insert. A foreign, missing, pending or deleted document refuses.
  */
@@ -276,13 +288,33 @@ export async function preparePrepared(deps: FlowDeps, userId: string, body: unkn
   const b = body as Record<string, unknown>
   // CR-V2-EXAM-INTEGRATION-X3: `include_examinations` and `responses` are the only additions. A projection, a
   // comparison or an examination envelope is never accepted from the request.
-  if (Object.keys(b).some((k) => k !== 'state' && k !== 'draft_id' && k !== 'documents' && k !== 'include_examinations' && k !== 'responses')) return err({ status: 400, code: 'invalid_request' })
+  if (Object.keys(b).some((k) => k !== 'state' && k !== 'draft_id' && k !== 'documents' && k !== 'include_examinations' && k !== 'responses' && k !== 'questionnaire_contract_sha256')) return err({ status: 400, code: 'invalid_request' })
   if (b.include_examinations !== undefined && b.include_examinations !== true) return err({ status: 400, code: 'invalid_request' })
   const includeExaminations = b.include_examinations === true
   if (b.responses !== undefined && (!includeExaminations || !Array.isArray(b.responses))) return err({ status: 400, code: 'invalid_responses' })
   const responses = (b.responses ?? []) as CreatorResponseInput[]
   const draftParam = b.draft_id
   if (draftParam !== undefined && draftParam !== null && (typeof draftParam !== 'string' || !UUID.test(draftParam))) return err({ status: 400, code: 'invalid_request' })
+
+  // CR-V2-DECL-1B-2: a malformed identity is a bad request; absent is treated as stale, because only a page from before this
+  // check omits it, and the answer to that is the updated questionnaire. Nothing about the answers is read until both pass.
+  const displayedContract = b.questionnaire_contract_sha256
+  if (displayedContract !== undefined && (typeof displayedContract !== 'string' || !HEX64.test(displayedContract))) return err({ status: 400, code: 'invalid_request' })
+  const now = deps.now()
+  const inputs = admission.inputs()
+  // Approved for whichever record this request can become. The contract is the same either way; the builder decides the schema.
+  const asOf = now.toISOString().slice(0, 10)
+  let current = checkApprovedSources(inputs.sources, inputs.source_text, deps.topicClaims, asOf, { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION })
+  if (!current.ok && (includeExaminations || responses.length > 0)) current = checkApprovedSources(inputs.sources, inputs.source_text_examination ?? inputs.source_text, deps.topicClaims, asOf, { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION })
+  if (!current.ok) {
+    deps.log?.('creator_record_v2_sources_unavailable', { codes: Array.from(new Set(current.refusals.map((r) => r.code))).sort() })
+    return err({ status: 503, code: 'unavailable' })
+  }
+  const currentContract = current.approved.questionnaire_contract.contract_sha256
+  if (displayedContract !== currentContract) {
+    deps.log?.('creator_record_v2_questionnaire_changed', { identity_present: displayedContract !== undefined })
+    return err({ status: 409, code: 'questionnaire_changed' })
+  }
 
   // The prototype's display-only examined documents are never accepted in the state.
   if (b.state && typeof b.state === 'object' && !Array.isArray(b.state) && Object.prototype.hasOwnProperty.call(b.state, 'documents')) return err({ status: 400, code: 'invalid_request' })
@@ -327,15 +359,18 @@ export async function preparePrepared(deps: FlowDeps, userId: string, body: unkn
     draftId = draftParam
     version = latest.version + 1
     previous = latest
+    // CR-V2-DECL-1B-2: a response never rebuilds a version under a questionnaire other than its own.
+    if (responses.length > 0 && verifiedRecord(latest)?.sources.questionnaire_contract?.contract_sha256 !== currentContract) {
+      deps.log?.('creator_record_v2_questionnaire_changed', { at: 'response' })
+      return err({ status: 409, code: 'questionnaire_changed' })
+    }
   } else {
     draftId = deps.newId()
     version = 1
   }
 
   const id = deps.newId()
-  const now = deps.now()
-  const inputs = admission.inputs()
-  // CR-V2-UAT-PROD-MIN-1: an examination-bearing version uses the inputs' v6 approval when they have one.
+  // CR-V2-UAT-PROD-MIN-1: an examination-bearing version uses the inputs' examination approval when they have one.
   const examinationBearing = examinations.length > 0 || responses.length > 0
   const sourceText = examinationBearing && inputs.source_text_examination ? inputs.source_text_examination : inputs.source_text
   const built = buildCustomerRecord({
@@ -343,7 +378,7 @@ export async function preparePrepared(deps: FlowDeps, userId: string, body: unkn
     sources: inputs.sources,
     source_text: sourceText,
     topicClaims: deps.topicClaims,
-    as_of: now.toISOString().slice(0, 10),
+    as_of: asOf,
     record: { record_id: `PREP-${id}`, record_version: version, captured_at: now.toISOString() },
     documents: documents.documents,
     ...(examinations.length > 0 ? { examinations } : {}),
@@ -381,7 +416,9 @@ export async function preparePrepared(deps: FlowDeps, userId: string, body: unkn
   if (!record) return err({ status: 500, code: 'integrity_failure' })
   // CR-V2-EXAM-INTEGRATION-X3: earlier responses whose target is unchanged, LISTED for re-affirmation; never applied.
   const prior = previous ? verifiedRecord(previous) : null
-  const candidates = prior && prior.schema_version === 6 && record.schema_version === 6 ? carryForwardCandidates(prior, record) : []
+  // CR-V2-DECL-1B-2: only between versions of one contract. Nothing from a schema 5 or 6 version is offered.
+  const sameContract = !!prior?.sources.questionnaire_contract && prior.sources.questionnaire_contract.contract_sha256 === record.sources.questionnaire_contract?.contract_sha256
+  const candidates = prior && sameContract && isExaminationBearing(prior) && isExaminationBearing(record) ? carryForwardCandidates(prior, record) : []
   return { ok: true, view: { ...viewOf(row, record), ...(candidates.length > 0 ? { carry_forward_candidates: candidates } : {}) } }
 }
 

@@ -32,12 +32,16 @@ import {
 import { carryForwardCandidates, type CreatorResponseInput } from '@/lib/creator-record/customer-record/examination-section'
 import { SOURCE_TEXT_CATEGORIES, SOURCE_TEXT_SOURCE_ID, sourceTextContent, sourceTextDigest, type SourceTextApproval } from '@/lib/creator-record/customer-record/source-text'
 import { CURRENT_ISSUANCE_SUPPORT, governanceSnapshotFrom } from '@/lib/creator-record/customer-record/governance-state'
-import { preparePrepared, type FlowDeps, type PreparedRow } from '@/lib/creator-record/customer-flow/service'
+import { preparePrepared as prepareAsSent, type FlowDeps, type PreparedRow } from '@/lib/creator-record/customer-flow/service'
 import { renderV2ForIssuance, startPurchase, V2IssuanceRefusal, type PurchaseDeps, type V2IssuanceDeps } from '@/lib/creator-record/customer-flow/purchase'
 import { buildCustomerDocument } from '@/lib/creator-record/customer-pdf/document-model'
 import { CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY } from '@/lib/creator-record/governed/synthetic-test-authority'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
+import { namingCurrentContract } from '@/test-support/questionnaire-approval'
+import { historicalRow } from '@/test-support/historical-record'
+
+const preparePrepared = namingCurrentContract(prepareAsSent)
 
 const APP_ROOT = path.resolve(__dirname, '..', '..')
 const OWNER = '11111111-1111-4111-8111-111111111111'
@@ -211,11 +215,11 @@ describe('receipt reading recovered exactly', () => {
 // ───────────────────────────────────────────── record
 
 describe('record compatibility (no examinations)', () => {
-  test('without examinations the record is the v5 record, byte for byte, with no new section', () => {
+  test('without examinations the record has no examination section, byte for byte', () => {
     const a = built(buildCustomerRecord(input()))
     const b = built(buildCustomerRecord(input({ examinations: [], responses: [] })))
     expect(b.canonical).toBe(a.canonical)
-    expect(a.record.schema_version).toBe(5)
+    expect(a.record.schema_version).toBe(CUSTOMER_RECORD_SCHEMA_VERSION)
     expect(a.record.documents.policy).toBe('inventory_only')
     expect(a.record.documents.items.every((d) => d.examination === 'not_examined')).toBe(true)
     expect(a.record.comparison).toEqual({ policy: 'disabled' })
@@ -228,7 +232,7 @@ describe('examination-bearing record (v6)', () => {
   test('holds the projection separately; declarations and guidance are identical to the record without it', () => {
     const plain = built(buildCustomerRecord(input()))
     const v6 = built(buildCustomerRecord(examined()))
-    expect(v6.record.schema_version).toBe(6)
+    expect(v6.record.schema_version).toBe(CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION)
     expect(v6.record.documents.policy).toBe('inventory_with_examination')
     expect(v6.record.documents.items[0].examination).toEqual(projection())
     expect(v6.record.declarations).toEqual(plain.record.declarations)
@@ -361,7 +365,7 @@ describe('referenced runs at payment and issuance', () => {
   })
 
   const v6Row = (): PreparedRow => {
-    const r = built(buildCustomerRecord(examined({ record: { record_id: 'PREP-88888888-8888-4888-8888-888888888888', record_version: 1, captured_at: NOW.toISOString() } })))
+    const r = historicalRow({ ...built(buildCustomerRecord(examined({ record: { record_id: 'PREP-88888888-8888-4888-8888-888888888888', record_version: 1, captured_at: NOW.toISOString() } }))), record_schema_version: 8 })
     return {
       id: '88888888-8888-4888-8888-888888888888', user_id: OWNER, draft_id: '99999999-9999-4999-8999-999999999999', version: 1, record_ref: 'PREP-88888888-8888-4888-8888-888888888888',
       record_schema: CUSTOMER_RECORD_SCHEMA, record_schema_version: 6, canonical: r.canonical, sha256: r.sha256, form_state: state(), status: 'reviewed',
@@ -399,7 +403,7 @@ describe('referenced runs at payment and issuance', () => {
   })
 
   test('a record without examinations never consults the run check', async () => {
-    const r = built(buildCustomerRecord(input({ documents: [] })))
+    const r = historicalRow({ ...built(buildCustomerRecord(input({ documents: [] }))), record_schema_version: 7 })
     const row: PreparedRow = { ...v6Row(), record_schema_version: 5, canonical: r.canonical, sha256: r.sha256, record_ref: 'PREP-X0TEST', submission_id: null }
     const spy = jest.fn(async () => ({ ok: true as const }))
     const r2 = await startPurchase(purchaseDeps(row, { examinationsIntact: spy, bind: async () => ({ submissionId: null, reason: 'not_found' }) }), OWNER, row.id)
@@ -408,7 +412,7 @@ describe('referenced runs at payment and issuance', () => {
   })
 
   test('v6 is not an issuable record schema, and current templates do not render it', () => {
-    expect(CURRENT_ISSUANCE_SUPPORT.record_schemas).toEqual([{ id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION }])
+    expect(CURRENT_ISSUANCE_SUPPORT.record_schemas).toEqual([{ id: CUSTOMER_RECORD_SCHEMA, version: 5 }])
     const r = built(buildCustomerRecord(examined()))
     const b = CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY
     expect(() => buildCustomerDocument({ canonical: r.canonical, sha256: r.sha256, issued: { record_id: 'CR-2026-AAAAAAAA', issued_on: '2026-11-01' }, templates: b?.pdf_templates ?? null, template_approval: b?.pdf_template_approval ?? null })).toThrow()

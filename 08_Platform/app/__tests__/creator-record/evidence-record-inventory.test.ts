@@ -7,13 +7,17 @@
  * documents never change guidance; the PDF prints the inventory under the wording lock and refuses an
  * unknown document state.
  */
-import { preparePrepared, verifiedRecord, type FlowDeps, type NewPreparedRow, type PreparedRow, type PreparedStore } from '@/lib/creator-record/customer-flow/service'
+import { preparePrepared as prepareAsSent, verifiedRecord, type FlowDeps, type NewPreparedRow, type PreparedRow, type PreparedStore } from '@/lib/creator-record/customer-flow/service'
 import { approvedCustomerRecordInputs, approvedPdfTemplates, currentPublicationAuthority } from '@/lib/creator-record/customer-flow/approved-inputs'
 import { buildCustomerDocument, CustomerPdfRefusal, documentModelCanonical } from '@/lib/creator-record/customer-pdf/document-model'
 import { wordingLockViolations, type CustomerPdfTemplates } from '@/lib/creator-record/customer-pdf/templates'
 import type { EvidenceRow } from '@/lib/creator-record/evidence-intake/service'
 import { canonicalJson, sha256Hex } from '@/lib/creator-record/record-core/canonical'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
+import { namingCurrentContract } from '@/test-support/questionnaire-approval'
+import { historicalRow } from '@/test-support/historical-record'
+
+const preparePrepared = namingCurrentContract(prepareAsSent)
 
 jest.mock('@/lib/creator-record-flow/production', () => ({ renderCreatorRecordV2Pdf: jest.fn() }))
 
@@ -71,7 +75,7 @@ describe('prepared versions record their documents', () => {
       { document_id: doc(1).id, file_name: 'receipt-1.pdf', media_type: 'application/pdf', byte_size: 1001, sha256: '1'.repeat(64), category: 'billing_receipt', tool_index: 0 },
     ])
     const record = verifiedRecord(mem.rows.get(r.view.id)!)!
-    expect(record.schema_version).toBe(5)
+    expect(record.schema_version).toBe(7)
     expect(record.documents.policy).toBe('inventory_only')
     expect(record.documents.items.map((x) => x.examination)).toEqual(['not_examined', 'not_examined'])
   })
@@ -133,7 +137,7 @@ describe('synthetic PDF inventory', () => {
     const { d, mem } = deps()
     const r = await prepare(d, documents)
     if (!r.ok) throw new Error(`prepare: ${r.code}`)
-    const row = mem.rows.get(r.view.id)!
+    const row = historicalRow(mem.rows.get(r.view.id)!)
     const t = approvedPdfTemplates(bundle)
     return { row, model: buildCustomerDocument({ canonical: row.canonical, sha256: row.sha256, issued: { record_id: 'CR-2026-ABCDEF12', issued_on: '2026-11-01' }, templates: t.templates, template_approval: t.approval }) }
   }
@@ -189,7 +193,7 @@ describe('CR-V2-DOC-1B: payment and issuance refuse a record whose documents are
     row.status = 'reviewed'
     row.reviewed_at = NOW.toISOString()
     row.submission_id = SUB
-    return row
+    return historicalRow(row)
   }
   const issue = (row: PreparedRow, evidenceIntact?: (u: string, items: readonly { document_id: string }[]) => Promise<Integrity>) =>
     renderV2ForIssuance({

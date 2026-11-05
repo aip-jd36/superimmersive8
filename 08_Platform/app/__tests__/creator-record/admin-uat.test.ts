@@ -12,7 +12,7 @@ import { productionEvidenceDeps } from '@/lib/creator-record-flow/evidence-produ
 import { productionCustomerExaminationDeps } from '@/lib/creator-record-flow/examination-customer'
 import { productionFlowDeps } from '@/lib/creator-record-flow/production'
 import { CUSTOMER_VISIBLE_BOUNDARIES, customerExaminationHistory, examinationProjectionFor } from '@/lib/creator-record/customer-flow/examination'
-import { getPrepared, preparePrepared, reviewPrepared, type FlowDeps, type NewPreparedRow, type PreparedRow } from '@/lib/creator-record/customer-flow/service'
+import { getPrepared, preparePrepared as prepareAsSent, reviewPrepared, type FlowDeps, type NewPreparedRow, type PreparedRow } from '@/lib/creator-record/customer-flow/service'
 import { CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flow/approved-inputs'
 import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/config'
 import { uploadEvidence, listEvidence } from '@/lib/creator-record/evidence-intake/service'
@@ -24,6 +24,9 @@ import type { ExaminationEnvelope } from '@/lib/creator-record/examination/envel
 import { examineAndRecord, verifyRunRow, type PersistedRunRow } from '@/lib/creator-record/examination/persistence'
 import { defaultProfileRegistry, knownFixtureRegistry, replayExecutor } from '@/lib/creator-record/examination/replay-executor'
 import { sha256Hex } from '@/lib/creator-record/record-core/canonical'
+import { namingCurrentContract } from '@/test-support/questionnaire-approval'
+
+const preparePrepared = namingCurrentContract(prepareAsSent)
 
 jest.mock('@/lib/supabase/server', () => ({ createClient: () => ({}) }))
 

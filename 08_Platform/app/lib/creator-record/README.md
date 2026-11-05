@@ -346,4 +346,13 @@ Tests:
 
 - **What a digest proves:** this contract is exactly the one the approval names. It does not authenticate a reviewer; `authority` and `review_ref` are recorded text.
 - **Rules version:** `QUESTIONNAIRE_VALIDATION_RULES` is raised by hand. `__tests__/creator-record/questionnaire-validation-rules.test.ts` pins behaviour and the rule files: a test-time guard only, with no runtime detection.
-- **Not yet:** prepared records carry no contract identity, submissions are not checked for a stale contract, and issuance does not read the contract.
+
+## Contract identity and record provenance (CR-V2-DECL-1B-2)
+
+- **Display to submission:** both pages pass the approved digest in the same render as the questions, and the client submits it as `questionnaire_contract_sha256`. `preparePrepared` checks the server's own approval first (503), then the identity (409 `questionnaire_changed`; 400 `invalid_request` if malformed), then the answers. Nothing is written on a refusal, and a match authorizes nothing.
+- **Limit:** the digest is what the client states it displayed, compared with the current contract. It does not prove what a person read.
+- **Recovery:** `lib/creator-record-flow/questionnaire-recovery.ts` keeps an answer only when nothing about its meaning changed, reports every other one, and always clears acknowledgements. `router.refresh()` delivers the update. Only an explicit submit sends anything.
+- **Responses and corrections:** a response names its own version's contract and is refused unless that is the current one, so it never rebuilds a version under another questionnaire. A schema 5 or 6 version has none. A correction across contracts lists the earlier answers and fills none in.
+- **Schemas:** the builder writes 7 and 8: 5 and 6 plus `sources.questionnaire_contract` (identity, approval details, whole body, whole wording). `verifyCustomerRecord` checks them from the record alone. 5 and 6 stay readable exactly as stored and are never stamped.
+- **Reconstruction limit:** the body holds the validation rules' version, not their code. Behaviour under that version is recoverable from git only.
+- **Not yet:** issuance does not read the contract, schemas 7 and 8 are not issuable and the customer PDF refuses them, and whether confirmation should need a current contract is undecided.

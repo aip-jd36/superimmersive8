@@ -27,7 +27,7 @@ import {
   questionContentDigest, questionRef, type AuthorityKind,
 } from './authority-content'
 import type { AuthorityLifecycle, AuthorityState, GovernanceSnapshot, Lookup } from './eligibility'
-import { CUSTOMER_RECORD_BUILDER, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION } from './record'
+import { CUSTOMER_RECORD_SCHEMA, HISTORICAL_RECORD_BUILDER, HISTORICAL_RECORD_SCHEMA_VERSION } from './record'
 import { SOURCE_TEXT_CATEGORIES, type SourceTextApproval } from './source-text'
 import type { TopicClaims } from './sources'
 
@@ -39,10 +39,13 @@ export interface Identity {
   version: number
 }
 
-/** The record schemas and builders this build can issue. Technical identities only. */
+/**
+ * The record schemas and builders this build can issue. Technical identities only.
+ * CR-V2-DECL-1B-2: unchanged, so a schema 7 or 8 record is refused until issuance is separately authorized for it.
+ */
 export const CURRENT_ISSUANCE_SUPPORT: { record_schemas: readonly Identity[]; builders: readonly Identity[] } = Object.freeze({
-  record_schemas: [{ id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION }],
-  builders: [{ id: CUSTOMER_RECORD_BUILDER.id, version: CUSTOMER_RECORD_BUILDER.version }],
+  record_schemas: [{ id: CUSTOMER_RECORD_SCHEMA, version: HISTORICAL_RECORD_SCHEMA_VERSION }],
+  builders: [{ id: HISTORICAL_RECORD_BUILDER.id, version: HISTORICAL_RECORD_BUILDER.version }],
 })
 
 export interface CurrentGovernance {

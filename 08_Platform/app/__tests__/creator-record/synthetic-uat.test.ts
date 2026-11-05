@@ -17,7 +17,7 @@ import { examineAndRecord, ExaminationPortError, type ExaminationAdapterDeps, ty
 import { syntheticUatInputs, type SyntheticUatPorts } from '@/lib/creator-record/customer-flow/synthetic-uat'
 import { approvedCustomerRecordInputs, approvedGovernanceSnapshot, CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flow/approved-inputs'
 import { examinationProjectionFor, requestCustomerExamination, customerExaminationHistory, type CustomerExaminationDeps } from '@/lib/creator-record/customer-flow/examination'
-import { getPrepared, preparePrepared, reviewPrepared, type ApprovedInputs, type FlowDeps, type NewPreparedRow, type PreparedRow, type PreparedView } from '@/lib/creator-record/customer-flow/service'
+import { getPrepared, preparePrepared as prepareAsSent, reviewPrepared, type ApprovedInputs, type FlowDeps, type NewPreparedRow, type PreparedRow, type PreparedView } from '@/lib/creator-record/customer-flow/service'
 import { startPurchase, type PurchaseDeps } from '@/lib/creator-record/customer-flow/purchase'
 import { listEvidence, type EvidenceDeps, type EvidenceRow } from '@/lib/creator-record/evidence-intake/service'
 import { CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY } from '@/lib/creator-record/governed/synthetic-test-authority'
@@ -25,6 +25,9 @@ import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/confi
 import { LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD } from '@/lib/creator-record/evidence/config'
 import { EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED } from '@/lib/creator-record/evidence-intake/contract'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
+import { namingCurrentContract } from '@/test-support/questionnaire-approval'
+
+const preparePrepared = namingCurrentContract(prepareAsSent)
 
 jest.mock('@/lib/supabase/server', () => ({ createClient: () => ({}) }))
 
@@ -130,15 +133,15 @@ describe('the customer flow under Production conditions (submissions stopped, em
     const rec = JSON.parse(w.rows[0].canonical)
     expect(rec.sources.source_text.authority).toMatch(/^SYNTHETIC TEST AUTHORITY/)
     expect(rec.sources.registry_version).toMatch(/synthetic test/)
-    expect(rec.schema_version).toBe(5)
+    expect(rec.schema_version).toBe(7)
     expect(v.version).toBe(1)
   })
 
   test('an examination-bearing version uses the synthetic v6 approval; findings, comparisons and responses work', async () => {
     const w = production()
     const v1 = viewOf(await preparePrepared(w.deps, UAT_USER, { state: syntheticState(), documents: REF, include_examinations: true }))
-    expect(JSON.parse(w.rows[0].canonical).schema_version).toBe(6)
-    expect(JSON.parse(w.rows[0].canonical).sources.source_text.record_schema.version).toBe(6)
+    expect(JSON.parse(w.rows[0].canonical).schema_version).toBe(8)
+    expect(JSON.parse(w.rows[0].canonical).sources.source_text.record_schema.version).toBe(8)
     expect(JSON.parse(w.rows[0].canonical).sources.source_text.authority).toMatch(/^SYNTHETIC TEST AUTHORITY/)
     expect(v1.examination!.documents[0].verification).toBe('not_verified')
     const obs = v1.examination!.documents[0].observations[0]

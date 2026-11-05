@@ -17,7 +17,7 @@ import {
   approvedCustomerRecordInputs, approvedGovernanceSnapshot, approvedPdfTemplates, currentPublicationAuthority, CREATOR_RECORD_V2_SUBMISSIONS,
 } from '@/lib/creator-record/customer-flow/approved-inputs'
 import { loadQuestionRegistry } from '@/lib/creator-record/contract/question-registry'
-import { buildCustomerRecord, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
+import { buildCustomerRecord as buildCurrentRecord, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION, HISTORICAL_RECORD_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
 import { checkSourceText, sourceTextContent, sourceTextDigest } from '@/lib/creator-record/customer-record/source-text'
 import { evaluateIssuanceEligibility } from '@/lib/creator-record/customer-record/eligibility'
 import { checkTemplates, CUSTOMER_PDF_TEMPLATE_ID, templateFingerprint } from '@/lib/creator-record/customer-pdf/templates'
@@ -30,6 +30,10 @@ import { PILOT_CAVEATS, PILOT_DEPENDENCY_LABELS, PILOT_PUBLICATION_LEDGER } from
 import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/config'
 import { CreatorRecordIssuanceStoppedError, rendererForFamily } from '@/lib/creator-record-artifacts/renderers'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
+import { historicalForm } from '@/test-support/historical-record'
+
+/** Issuance and the customer PDF support schema 5 only: records in that format, as a row prepared then would be. */
+const buildCustomerRecord = (input: Parameters<typeof buildCurrentRecord>[0]) => historicalForm(buildCurrentRecord(input))
 
 jest.mock('@/lib/creator-record-flow/production', () => ({ renderCreatorRecordV2Pdf: jest.fn() }))
 
@@ -127,7 +131,7 @@ describe('the synthetic test authority is structurally sound and pinned like a r
   test('the template fingerprint is pinned, and the templates pass the wording lock', () => {
     expect(SYNTHETIC_PDF_TEMPLATES_FINGERPRINT).toBe(templateFingerprint(bundle.pdf_templates))
     expect(bundle.pdf_template_approval?.template_id).toBe(CUSTOMER_PDF_TEMPLATE_ID)
-    expect(checkTemplates(bundle.pdf_templates, bundle.pdf_template_approval, { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION })).toMatchObject({ ok: true })
+    expect(checkTemplates(bundle.pdf_templates, bundle.pdf_template_approval, { id: CUSTOMER_RECORD_SCHEMA, version: HISTORICAL_RECORD_SCHEMA_VERSION })).toMatchObject({ ok: true })
   })
 
   test('a wording change without re-pinning is refused (digest mismatch)', () => {

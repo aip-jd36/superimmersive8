@@ -7,6 +7,7 @@
  * identical apart from the new `selection_basis` field.
  */
 
+import { historicalForm } from '@/test-support/historical-record'
 import { createHash } from 'node:crypto'
 import type { GovernanceApproval } from '@/lib/creator-record/contract/types'
 import { loadQuestionRegistry } from '@/lib/creator-record/contract/question-registry'
@@ -214,7 +215,7 @@ describe('the prepared record carries it, deterministically and fail-closed', ()
   test('schema v4: every guidance item has its selection basis, grounded in the record; hashing is deterministic; verification and eligibility hold', () => {
     const a = prepare(CASES.materials_getty_artlist)
     const b = prepare(CASES.materials_getty_artlist)
-    expect(a.record.schema_version).toBe(5) // CR-V2-DOC-1: v5 adds the document inventory; selection basis unchanged
+    expect(a.record.schema_version).toBe(CUSTOMER_RECORD_SCHEMA_VERSION) // selection basis unchanged since v4
     expect(b.canonical).toBe(a.canonical)
     expect(a.sha256).toBe(sha256Hex(a.canonical))
     const obs = new Map(a.record.declarations.observations.map((o) => [o.observation_id, o]))
@@ -224,7 +225,8 @@ describe('the prepared record carries it, deterministically and fail-closed', ()
     expect(verifyCustomerRecord(a.canonical, a.sha256).ok).toBe(true)
     const sources = approvedSources()
     const g = governanceSnapshotFrom({ issuance_date: '2026-11-02', sources, topicClaims: TOPIC_CLAIMS_FIXTURE, source_text_approvals: [textApproval(sources)] })
-    expect(evaluateIssuanceEligibility(a.canonical, a.sha256, g).decision).toBe('eligible')
+    const issuable = historicalForm(a) // Issuance supports schema 5 only
+    expect(evaluateIssuanceEligibility(issuable.canonical, issuable.sha256, g).decision).toBe('eligible')
   })
 
   test('a v3 record (no selection provenance) is not a supported record: verification and issuance refuse it', () => {
