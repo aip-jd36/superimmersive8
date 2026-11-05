@@ -39,6 +39,11 @@ export interface QuestionnaireRecovery {
   acknowledgements_cleared: boolean
 }
 
+export type ContractProvenance = 'not_recorded' | 'changed'
+
+const SEPARATE_FROM_DECLARATIONS = 'A response to a document observation is separate from your declarations. “Correct my answers” prepares a new declaration version, and the responses you chose here do not carry forward.'
+const NEW_DECLARATION_VERSION = 'Submitting prepares a new declaration version, and this version stays as it is. Responses to document observations do not carry forward.'
+
 export const RECOVERY_TEXT = {
   changed_heading: 'The questionnaire has changed',
   changed_body: 'It changed after this page was loaded. Nothing was recorded, and your answers have not been lost. Load the updated questions to review them. Nothing is submitted until you choose to submit again.',
@@ -58,10 +63,28 @@ export const RECOVERY_TEXT = {
   earlier_answer: 'You had entered',
   added_heading: 'New questions',
   acknowledgements: 'Please confirm the statements at the end of the form again.',
-  respond_blocked: 'Your responses were not recorded, because this version was prepared under a different questionnaire. To continue, use “Correct my answers” to prepare a new version under the current questionnaire.',
-  correction_heading: 'This version was prepared under a different questionnaire',
-  correction_body: 'Your earlier answers are listed for reference and are not filled in, because their questions may no longer mean the same thing. Please answer the questions below.',
+  respond_blocked: {
+    not_recorded: `Your responses to the document observations were not recorded, and this version was not changed. This version does not record which questionnaire contract it was prepared under, so that cannot be established and responses cannot be added to it. ${SEPARATE_FROM_DECLARATIONS}`,
+    changed: `Your responses to the document observations were not recorded, and this version was not changed. The questionnaire contract has changed since this version was prepared, so responses cannot be added to it. ${SEPARATE_FROM_DECLARATIONS}`,
+  } satisfies Record<ContractProvenance, string>,
+  correction: {
+    not_recorded: {
+      heading: 'This version does not record its questionnaire contract',
+      body: `Which questionnaire contract it was prepared under cannot be established, so your earlier answers are listed for reference and are not filled in. Please answer the questions below. ${NEW_DECLARATION_VERSION}`,
+    },
+    changed: {
+      heading: 'The questionnaire contract has changed since this version was prepared',
+      body: `Your earlier answers are listed for reference and are not filled in, because their questions may no longer mean the same thing. Please answer the questions below. ${NEW_DECLARATION_VERSION}`,
+    },
+  } satisfies Record<ContractProvenance, { heading: string; body: string }>,
 } as const
+
+/**
+ * Why a version cannot take a response, or have its answers filled in, stated only as far as its own record establishes it. Call
+ * this only once the version is known not to be under the current contract. A version with no recorded contract is never
+ * described as a mismatch: nothing shows that its questionnaire differed.
+ */
+export const contractProvenanceOf = (recorded: { contract_sha256: string } | null): ContractProvenance => (recorded ? 'changed' : 'not_recorded')
 
 /** Key-order independent, so a difference is always a difference in content. */
 function stable(v: unknown): string {

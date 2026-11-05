@@ -6,9 +6,10 @@
  */
 import { readFileSync } from 'fs'
 import { join } from 'path'
-import { carryAnswersToContract, RECOVERY_TEXT, type AnswerChangeReason, type QuestionnaireDefinition } from '@/lib/creator-record-flow/questionnaire-recovery'
+import { carryAnswersToContract, contractProvenanceOf, RECOVERY_TEXT, type AnswerChangeReason, type QuestionnaireDefinition } from '@/lib/creator-record-flow/questionnaire-recovery'
 import { syntheticUatInputs } from '@/lib/creator-record/customer-flow/synthetic-uat'
 import type { CreatorRecordFormState } from '@/lib/creator-record/prototype/form'
+import { verifiedRecord, type PreparedRow } from '@/lib/creator-record/customer-flow/service'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const APP = join(__dirname, '..', '..')
@@ -170,6 +171,50 @@ describe('generic, and client safe', () => {
   })
 })
 
+describe('what a refusal says is only what the record establishes', () => {
+  const saved = JSON.parse(readFileSync(join(APP, 'test-support', 'fixtures', 'pre-questionnaire-contract-rows.json'), 'utf8')) as PreparedRow[]
+  const notRecorded = [RECOVERY_TEXT.respond_blocked.not_recorded, RECOVERY_TEXT.correction.not_recorded.heading, RECOVERY_TEXT.correction.not_recorded.body]
+  const changed = [RECOVERY_TEXT.respond_blocked.changed, RECOVERY_TEXT.correction.changed.heading, RECOVERY_TEXT.correction.changed.body]
+
+  test.each(saved.map((r) => [r.record_schema_version, r] as const))('a real schema %i record has no contract, so it selects "not recorded"', (_v, row) => {
+    expect(verifiedRecord(row)!.sources.questionnaire_contract).toBeUndefined()
+    expect(contractProvenanceOf(verifiedRecord(row)!.sources.questionnaire_contract ?? null)).toBe('not_recorded')
+  })
+
+  test('a recorded contract selects "changed", and a client never derives a mismatch from a missing identity', () => {
+    expect(contractProvenanceOf({ contract_sha256: 'a'.repeat(64) })).toBe('changed')
+    expect(contractProvenanceOf(null)).toBe('not_recorded')
+  })
+
+  test('NOT RECORDED: says the contract cannot be established, and never claims a mismatch', () => {
+    expect(RECOVERY_TEXT.respond_blocked.not_recorded).toContain('does not record which questionnaire contract it was prepared under')
+    expect(RECOVERY_TEXT.respond_blocked.not_recorded).toContain('cannot be established')
+    expect(RECOVERY_TEXT.correction.not_recorded.body).toContain('cannot be established')
+    for (const text of notRecorded) expect(text).not.toMatch(/has changed|different questionnaire|no longer mean|mismatch|differs/i)
+  })
+
+  test('CHANGED: says the contract has changed, and does not say it is unknown', () => {
+    expect(RECOVERY_TEXT.respond_blocked.changed).toContain('The questionnaire contract has changed since this version was prepared')
+    expect(RECOVERY_TEXT.correction.changed.heading).toBe('The questionnaire contract has changed since this version was prepared')
+    for (const text of changed) expect(text).not.toMatch(/cannot be established|does not record/i)
+  })
+
+  test.each([['not recorded', RECOVERY_TEXT.respond_blocked.not_recorded], ['changed', RECOVERY_TEXT.respond_blocked.changed]])('refusal, %s: not recorded, not changed, separate from declarations, nothing carried', (_n, text) => {
+    expect(text).toContain('responses to the document observations were not recorded')
+    expect(text).toContain('this version was not changed')
+    expect(text).toContain('separate from your declarations')
+    expect(text).toContain('prepares a new declaration version')
+    expect(text).toContain('do not carry forward')
+  })
+
+  test.each([['not recorded', RECOVERY_TEXT.correction.not_recorded.body], ['changed', RECOVERY_TEXT.correction.changed.body]])('correction notice, %s: a new declaration version, nothing carried, old version kept', (_n, text) => {
+    expect(text).toContain('prepares a new declaration version')
+    expect(text).toContain('this version stays as it is')
+    expect(text).toContain('do not carry forward')
+    expect(text).toContain('not filled in')
+  })
+})
+
 describe('the client', () => {
   const client = readFileSync(join(APP, 'app', 'creator-record', 'CreatorRecordV2Client.tsx'), 'utf8').replace(/\r\n/g, '\n')
   const effect = client.slice(client.indexOf('useEffect(() => {'), client.indexOf('[props.questionnaireContractSha256])'))
@@ -200,14 +245,16 @@ describe('the client', () => {
     const respond = client.slice(client.indexOf('async function respond('), client.indexOf('async function submit('))
     expect(respond).toContain('contractSha256: view.questionnaire_contract?.contract_sha256 ?? null')
     expect(respond).not.toContain('displayed.sha256')
-    expect(respond).toContain('setError(RECOVERY_TEXT.respond_blocked)')
+    expect(respond).toContain('setError(RECOVERY_TEXT.respond_blocked[contractProvenanceOf(view.questionnaire_contract)])')
     expect(respond).not.toMatch(/setMode|setQuestionnaireChanged|correct\(/)
   })
   test('a correction fills in answers only under the same contract; otherwise it lists them', () => {
     const correct = client.slice(client.indexOf('function correct()'), client.indexOf('const uatNotice'))
     expect(correct).toContain('view.questionnaire_contract?.contract_sha256 === displayed.sha256')
     expect(correct).toContain('setLastState(sameQuestionnaire ? view.form_state : undefined)')
-    expect(correct).toContain('setEarlierAnswers(sameQuestionnaire ? null : view.declarations.answers)')
+    expect(correct).toContain('setEarlierAnswers(sameQuestionnaire ? null : { answers: view.declarations.answers, provenance: contractProvenanceOf(view.questionnaire_contract) })')
+    expect(client).toContain('RECOVERY_TEXT.correction[earlierAnswers.provenance].heading')
+    expect(client).toContain('RECOVERY_TEXT.correction[earlierAnswers.provenance].body')
   })
   test('both pages pass the digest from the same render as the questions', () => {
     for (const page of [['app', 'creator-record', 'page.tsx'], ['app', 'admin', 'creator-record-v2', 'uat', 'page.tsx']]) {

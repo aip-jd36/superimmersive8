@@ -31,7 +31,7 @@ import { V2_REVIEW_PAGE } from '@/lib/creator-record-flow/wording'
 import { EvidencePanel } from '@/components/creator-record/EvidencePanel'
 import { ExaminationReview } from '@/components/creator-record/ExaminationReview'
 import { EXAM_TEXT, SYNTHETIC_UAT_NOTICE, attachmentsOf, preparedBody, type Attachment, type ResponseInput } from '@/lib/creator-record-flow/examination-ui'
-import { carryAnswersToContract, RECOVERY_TEXT, type QuestionnaireDefinition, type QuestionnaireRecovery } from '@/lib/creator-record-flow/questionnaire-recovery'
+import { carryAnswersToContract, contractProvenanceOf, RECOVERY_TEXT, type ContractProvenance, type QuestionnaireDefinition, type QuestionnaireRecovery } from '@/lib/creator-record-flow/questionnaire-recovery'
 
 const INK = '#1a1918'
 const MUTED = '#6b6560'
@@ -80,7 +80,7 @@ export function CreatorRecordV2Client(props: Props) {
   const [updateRequested, setUpdateRequested] = useState(false)
   const [updating, startUpdate] = useTransition()
   const [recovery, setRecovery] = useState<QuestionnaireRecovery | null>(null)
-  const [earlierAnswers, setEarlierAnswers] = useState<PreparedView['declarations']['answers'] | null>(null)
+  const [earlierAnswers, setEarlierAnswers] = useState<{ answers: PreparedView['declarations']['answers']; provenance: ContractProvenance } | null>(null)
 
   // A different questionnaire arrived: keep only the answers that still mean the same, and report the rest. Sends nothing.
   useEffect(() => {
@@ -122,7 +122,7 @@ export function CreatorRecordV2Client(props: Props) {
     try {
       // This version's own contract, never the page's: a response must not rebuild it under another questionnaire.
       const r = await post(preparedBody({ state: view.form_state, contractSha256: view.questionnaire_contract?.contract_sha256 ?? null, draftId: view.draft_id, attachments: attachmentsOf(view), includeExaminations: true, responses }))
-      if (r.code === 'questionnaire_changed') setError(RECOVERY_TEXT.respond_blocked)
+      if (r.code === 'questionnaire_changed') setError(RECOVERY_TEXT.respond_blocked[contractProvenanceOf(view.questionnaire_contract)])
     } catch {
       setError(FAILED)
     } finally {
@@ -205,7 +205,7 @@ export function CreatorRecordV2Client(props: Props) {
     // Another contract (or a schema 5 or 6 version, which names none): its answers are shown for reference, not filled in.
     const sameQuestionnaire = view.questionnaire_contract?.contract_sha256 === displayed.sha256
     setLastState(sameQuestionnaire ? view.form_state : undefined)
-    setEarlierAnswers(sameQuestionnaire ? null : view.declarations.answers)
+    setEarlierAnswers(sameQuestionnaire ? null : { answers: view.declarations.answers, provenance: contractProvenanceOf(view.questionnaire_contract) })
     setRecovery(null)
     setError(null)
     if (props.examination) {
@@ -338,10 +338,10 @@ export function CreatorRecordV2Client(props: Props) {
       )}
       {earlierAnswers && (
         <section role="status" className="mb-6 rounded-lg border p-4 text-sm" style={{ borderColor: LINE, backgroundColor: '#FFFBEB' }} data-earlier-answers>
-          <h2 className="font-semibold mb-1" style={{ color: INK }}>{RECOVERY_TEXT.correction_heading}</h2>
-          <p className="mb-2" style={{ color: MUTED }}>{RECOVERY_TEXT.correction_body}</p>
+          <h2 className="font-semibold mb-1" style={{ color: INK }}>{RECOVERY_TEXT.correction[earlierAnswers.provenance].heading}</h2>
+          <p className="mb-2" style={{ color: MUTED }}>{RECOVERY_TEXT.correction[earlierAnswers.provenance].body}</p>
           <dl className="space-y-2">
-            {earlierAnswers.map((a, i) => (
+            {earlierAnswers.answers.map((a, i) => (
               <div key={`${a.q_id}-${a.tool_index}-${i}`}>
                 <dt className="font-medium" style={{ color: INK }}>{a.tool_index !== null ? `Tool ${a.tool_index + 1}: ` : ''}{a.question}</dt>
                 <dd style={{ color: MUTED }}>{a.answer}</dd>
