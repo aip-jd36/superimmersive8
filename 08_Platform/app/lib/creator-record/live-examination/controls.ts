@@ -7,12 +7,13 @@
  *
  * What actually stands between this code and a model call today:
  *   - This compile-time lock is the principal barrier, together with the fact that no runner or route exists.
- *   - Runtime authorization is caller-supplied and not independently verified: the object below is unsigned and not stored, and
- *     `consent_reference` is checked for format only. The environment variable and the dedicated key must also be present.
- *   - The spend ceiling is an in-memory estimate for one executor instance, reset by a reload. It is not a durable hard limit. The
+ *   - The object below is the executor's SESSION view of an authorization. Called directly, it is caller-supplied and unverified. The
+ *     one entry point (`./evaluation`, CR-V2-DOC-LIVE-1C-A) builds it only from a durable authorization the database returned, and
+ *     takes a durable reservation before each attempt. That schema is evaluation-only and applied to no deployed database.
+ *   - `consent_reference` is checked for format only; nothing verifies the consent it refers to.
+ *   - The in-memory spend ceiling here resets on a reload; the durable ledger is in the evaluation-only schema. Both are estimates. The
  *     external workspace spending limit would be the hard limit, and it is not yet configured.
- *   - The database does NOT stop a model call. Migration 20261108000000 stops a live result from being STORED, so a run could pay for a
- *     call and then discard the result.
+ *   - The deployed database does NOT stop a model call: migration 20261108000000 stops a live result from being STORED.
  *
  * Proposed controls and prerequisites: `08_Platform/implementation/CR_V2_DOC_LIVE_EVALUATION_PROTOCOL.md`. No real-document evaluation
  * has been authorized.
@@ -25,6 +26,19 @@ import { BASE_MAX_TOKENS, RETRY_MAX_TOKENS } from '../receipt-examination/examin
 
 export const LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: boolean = false
 export const LIVE_EVALUATION_ENV = 'CREATOR_RECORD_LIVE_EVALUATION'
+
+/**
+ * CR-V2-DOC-LIVE-1C-A. Environment variables the Anthropic SDK reads on its own. The adapter overrides the first four, and refuses the
+ * fifth, but a real executor is not built at all while any of them is set: an evaluation runs with none of them.
+ */
+export const UNSAFE_SDK_ENVIRONMENT = ['ANTHROPIC_BASE_URL', 'ANTHROPIC_LOG', 'ANTHROPIC_AUTH_TOKEN', 'ANTHROPIC_PROFILE', 'ANTHROPIC_CUSTOM_HEADERS'] as const
+
+export function unsafeSdkEnvironment(...envs: Readonly<Record<string, string | undefined>>[]): string[] {
+  return UNSAFE_SDK_ENVIRONMENT.filter((k) => envs.some((e) => e[k] !== undefined && e[k] !== ''))
+}
+
+/** Whole micro-dollars, rounded up: the unit the durable ledger uses, so a cost is never under-recorded by rounding. */
+export const toMicroUsd = (usd: number): number => Math.max(0, Math.ceil(usd * 1_000_000 - 1e-6))
 
 /** Checked before any model call. */
 export const LIVE_BOUNDS = {

@@ -58,8 +58,8 @@ export class LiveModelTimeout extends Error {
 export interface LiveAttemptGuard {
   /** Named by the authorization for this run. Asked before the bytes are read. */
   documentPermitted(sha256: string): boolean
-  /** Reserves the spend for one attempt. Asked last, just before the first model call. */
-  reserveAttempt(): boolean
+  /** Reserves the spend for one attempt. Asked last, just before the first model call. May be durable (CR-V2-DOC-LIVE-1C-A). */
+  reserveAttempt(): boolean | Promise<boolean>
 }
 
 export interface LiveExecutor {
@@ -158,7 +158,7 @@ export async function runLiveExamination(deps: LiveExaminationDeps, rawRequest: 
   if (executor.mode === 'mock_test' && !fixture) return refuse('mock_requires_known_fixture')
   if (executor.mode === 'live_model' && fixture) return refuse('live_refuses_known_fixture')
   if (guard && checkLiveDocumentBounds(bytes, record.media_type) !== 'within_bounds') return refuse('document_exceeds_live_bounds')
-  if (guard && !guard.reserveAttempt()) return refuse('live_budget_exhausted')
+  if (guard && (await guard.reserveAttempt()) !== true) return refuse('live_budget_exhausted')
 
   let thrown: 'model_timeout' | 'provider_failure' = 'provider_failure'
   let responseId: string | null = null

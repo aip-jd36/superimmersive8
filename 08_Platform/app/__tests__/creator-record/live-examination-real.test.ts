@@ -5,7 +5,6 @@
 import { createHash } from 'node:crypto'
 import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import { deflateSync } from 'node:zlib'
 import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/config'
 import { CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flow/approved-inputs'
 import { extractionMode, LIVE_EXTRACTION_ENV, LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD } from '@/lib/creator-record/evidence/config'
@@ -31,6 +30,7 @@ import { canonicalJson, sha256Hex } from '@/lib/creator-record/record-core/canon
 import { RECEIPT_EXAMINATION_SYSTEM_PROMPT } from '@/lib/creator-record/receipt-examination/prompt'
 import { validateReceiptExtraction } from '@/lib/creator-record/receipt-examination/schema'
 import { mockLiveExecutor } from '@/test-support/mock-live-executor'
+import { syntheticObjStmPdf, syntheticPdf } from '@/test-support/synthetic-pdf'
 
 jest.mock('@anthropic-ai/sdk', () => {
   throw new Error('the Anthropic SDK must not load in this file')
@@ -52,11 +52,9 @@ const PROFILES = new Map([[profileKey(RECEIPT_LIVE_PROFILE.ref), RECEIPT_LIVE_PR
 const AUTH = { authorization_id: 'eval-2026-test', expires_at: '2027-01-01T00:00:00.000Z', max_estimated_usd: 5, permitted_documents: [{ sha256: SHA, consent_reference: 'consent-ref-1' }] }
 const ENV = { [LIVE_EVALUATION_ENV]: AUTH.authorization_id, CREATOR_RECORD_EXTRACTION_API_KEY: 'x' }
 
-const pdf = (pages: number, extra = '') => {
-  const kids = Array.from({ length: pages }, (_, i) => `${i + 3} 0 R`).join(' ')
-  const objs = Array.from({ length: pages }, (_, i) => `${i + 3} 0 obj\n<< /Type /Page /Parent 2 0 R >>\nendobj\n`).join('')
-  return new Uint8Array(Buffer.from(`%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [${kids}] /Count ${pages} >>\nendobj\n${objs}${extra}%%EOF\n`))
-}
+// CR-V2-DOC-LIVE-1C-A: a real page tree; the counter no longer accepts page objects without one.
+const pdf = (pages: number, extra = '') => syntheticPdf(pages, 'synthetic-test', { extra })
+
 
 describe('the code lock', () => {
   test('every lock is false in this build', () => {
@@ -130,17 +128,14 @@ describe('document bounds', () => {
     expect(countPdfPages(pdf(6))).toBe(6)
   })
 
-  test('a page tree that declares more than the objects found counts as the larger number', () => {
-    const s = Buffer.from(pdf(2)).toString('latin1').replace('/Count 2', '/Count 40')
-    expect(countPdfPages(new Uint8Array(Buffer.from(s, 'latin1')))).toBe(40)
+  // CR-V2-DOC-LIVE-1C-A: stricter than 1B, which counted this as 40. A tree whose /Count disagrees with its pages is ambiguous, so unreadable.
+  test('a page tree that declares more than the pages it holds cannot be counted', () => {
+    expect(countPdfPages(syntheticPdf(2, 'synthetic-test', { count: 40 }))).toBeNull()
   })
 
   test('pages inside a compressed object stream are counted', () => {
-    const body = '1 0 << /Type /Page >> '.repeat(1).replace('1 0 ', '')
-    const head = '7 0 '
-    const packed = deflateSync(Buffer.from(head + body))
-    const bytes = Buffer.concat([Buffer.from(`%PDF-1.5\n9 0 obj\n<< /Type /ObjStm /N 1 /First ${head.length} /Filter /FlateDecode /Length ${packed.length} >>\nstream\n`), packed, Buffer.from('\nendstream\nendobj\n%%EOF\n')])
-    expect(countPdfPages(new Uint8Array(bytes))).toBe(1)
+    expect(countPdfPages(syntheticObjStmPdf(1))).toBe(1)
+    expect(countPdfPages(syntheticObjStmPdf(6))).toBe(6)
   })
 
   test.each([
@@ -162,7 +157,7 @@ describe('the document binding', () => {
   const canonical = (items: unknown[]) => canonicalJson({ documents: { items } })
   const row = (items: unknown[] = [{ document_id: DOC, sha256: SHA, tool_index: 1 }]): PreparedBindingRow => {
     const text = canonical(items)
-    return { id: PREPARED, user_id: OWNER, canonical: text, sha256: sha256Hex(text) }
+    return { id: PREPARED, user_id: OWNER, canonical: text, sha256: sha256Hex(text), draft_id: OTHER, version: 2, status: 'reviewed', latest_version: 2 }
   }
   const SCOPE = { actor_user_id: OWNER, prepared_id: PREPARED, document_id: DOC, tool_index: 1 }
 
@@ -286,14 +281,15 @@ describe('the document binding', () => {
 
 describe('production ports (mocked Supabase client)', () => {
   const calls: { op: string; args: unknown[] }[] = []
-  const result: { rpc?: unknown; select?: unknown; insert?: unknown } = {}
+  const result: { rpc?: unknown; select?: unknown; insert?: unknown; latest?: unknown } = {}
   beforeAll(() => {
     jest.resetModules()
     jest.doMock('@/lib/supabase/admin', () => {
       const chain = (table: string) => {
         const q: Record<string, (...a: unknown[]) => unknown> = {}
-        for (const m of ['select', 'eq']) q[m] = (...a: unknown[]) => { calls.push({ op: `${table}.${m}`, args: a }); return q }
-        q.maybeSingle = () => Promise.resolve(result.select)
+        let ordered = false
+        for (const m of ['select', 'eq', 'order', 'limit']) q[m] = (...a: unknown[]) => { calls.push({ op: `${table}.${m}`, args: a }); if (m === 'order') ordered = true; return q }
+        q.maybeSingle = () => Promise.resolve(ordered ? result.latest : result.select)
         ;(q as unknown as { then: unknown }).then = (ok: (v: unknown) => unknown) => Promise.resolve(result.select).then(ok)
         q.insert = (...a: unknown[]) => { calls.push({ op: `${table}.insert`, args: a }); return { select: () => ({ single: () => Promise.resolve(result.insert) }) } }
         return q
@@ -331,10 +327,17 @@ describe('production ports (mocked Supabase client)', () => {
     result.select = { data: [{ id: 'a', access_log_id: '9' }], error: null }
     expect(await liveExaminationStorage.listLiveAttempts('u', 'd', 'receipt')).toEqual([{ id: 'a', access_log_id: 9 }])
     expect(calls.filter((c) => c.op === 'creator_record_v2_live_examination_attempts.eq').map((c) => c.args)).toEqual([['user_id', 'u'], ['document_id', 'd'], ['profile_id', 'receipt']])
-    result.select = { data: { id: 'p', user_id: 'u', canonical: '{}', sha256: 'x' }, error: null }
-    expect(await livePreparedSource.getPrepared('p')).toEqual({ id: 'p', user_id: 'u', canonical: '{}', sha256: 'x' })
+    result.select = { data: { id: 'p', user_id: 'u', canonical: '{}', sha256: 'x', draft_id: 'dr', version: 2, status: 'reviewed' }, error: null }
+    result.latest = { data: { version: 3 }, error: null }
+    expect(await livePreparedSource.getPrepared('p')).toEqual({ id: 'p', user_id: 'u', canonical: '{}', sha256: 'x', draft_id: 'dr', version: 2, status: 'reviewed', latest_version: 3 })
+    // CR-V2-DOC-LIVE-1C-A: the newest version of the same draft is read, so a superseded version is told apart.
+    expect(calls.filter((c) => c.op.startsWith('creator_record_v2_prepared.') && ['eq', 'order', 'limit'].some((m) => c.op.endsWith(m))).map((c) => [c.op.split('.')[1], ...c.args])).toEqual([['eq', 'id', 'p'], ['eq', 'draft_id', 'dr'], ['order', 'version', { ascending: false }], ['limit', 1]])
+    result.latest = { data: null, error: { code: '500' } }
+    await expect(livePreparedSource.getPrepared('p')).rejects.toThrow('unavailable')
     result.select = { data: null, error: { code: '500' } }
     await expect(livePreparedSource.getPrepared('p')).rejects.toThrow('unavailable')
+    result.select = { data: null, error: null }
+    expect(await livePreparedSource.getPrepared('p')).toBeNull()
   })
 })
 
@@ -343,7 +346,7 @@ describe('what stays closed', () => {
   const rel = (f: string) => path.relative(root, f).split(path.sep).join('/')
   const walk = (d: string): string[] => readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? (e.name === 'node_modules' ? [] : walk(path.join(d, e.name))) : /\.(ts|tsx)$/.test(e.name) ? [path.join(d, e.name)] : []))
   const files = ['lib', 'app', 'components', 'scripts'].flatMap((r) => { try { return walk(path.join(root, r)) } catch { return [] } })
-  const NEW = ['lib/creator-record/live-examination/controls.ts', 'lib/creator-record/live-examination/real-executor.ts', 'lib/creator-record/live-examination/document-access.ts', 'lib/creator-record-flow/live-examination-production.ts']
+  const NEW = ['lib/creator-record/live-examination/controls.ts', 'lib/creator-record/live-examination/real-executor.ts', 'lib/creator-record/live-examination/document-access.ts', 'lib/creator-record/live-examination/evaluation.ts', 'lib/creator-record-flow/live-examination-production.ts']
 
   test('customer submissions and issuance are stopped', () => {
     expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
@@ -354,7 +357,9 @@ describe('what stays closed', () => {
     const importers = (pattern: RegExp) => files.filter((f) => pattern.test(readFileSync(f, 'utf8'))).map(rel)
     expect(importers(/from\s+['"][^'"]*live-examination\/real-executor['"]|import\(\s*['"][^'"]*real-executor['"]/)).toEqual([])
     expect(importers(/['"][^'"]*live-examination-production['"]/)).toEqual([])
-    expect(importers(/['"]\.\/real-executor['"]/)).toEqual([])
+    // CR-V2-DOC-LIVE-1C-A: the one entry point builds the executor, and only the (unimported) production ports name the entry point.
+    expect(importers(/['"]\.\/real-executor['"]/)).toEqual(['lib/creator-record/live-examination/evaluation.ts'])
+    expect(importers(/['"][^'"]*live-examination\/evaluation['"]|['"]\.\/evaluation['"]/)).toEqual(['lib/creator-record-flow/live-examination-production.ts'])
     expect(files.map(rel).filter((f) => f.startsWith('app/') && /live-examination/.test(readFileSync(path.join(root, f), 'utf8')))).toEqual([])
     expect(files.map(rel).filter((f) => f.startsWith('components/') && /live-examination/.test(readFileSync(path.join(root, f), 'utf8')))).toEqual([])
   })

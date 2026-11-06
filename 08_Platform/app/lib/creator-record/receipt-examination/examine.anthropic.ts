@@ -18,6 +18,9 @@ import { RECEIPT_EXTRACTION_SCHEMA } from './schema'
 import type { ReceiptModelCaller, ReceiptModelResponse } from './examine'
 
 export const DEFAULT_RECEIPT_MODEL = 'claude-sonnet-5'
+/** The only endpoint. Set explicitly, so ANTHROPIC_BASE_URL cannot redirect a request. */
+export const ANTHROPIC_API_BASE_URL = 'https://api.anthropic.com'
+const SILENT_LOGGER = { debug: () => undefined, info: () => undefined, warn: () => undefined, error: () => undefined }
 
 export interface AnthropicReceiptCallerOptions {
   model?: string
@@ -55,8 +58,19 @@ export function createAnthropicReceiptCaller(options?: AnthropicReceiptCallerOpt
   if (!apiKey) {
     throw new Error(`${keyEnv} is not set in this process environment. Live receipt examination cannot run.`)
   }
+  // CR-V2-DOC-LIVE-1C-A. The SDK also reads its own environment variables. Each one that could redirect a request, log its content or
+  // add a credential is fixed here. ANTHROPIC_CUSTOM_HEADERS has no option that turns it off, so its presence refuses.
+  if (process.env.ANTHROPIC_CUSTOM_HEADERS) throw new Error('ANTHROPIC_CUSTOM_HEADERS is set. Live receipt examination cannot run.')
   const model = resolveReceiptModel(options)
-  const client = new Anthropic({ apiKey, timeout: options?.timeoutMs ?? 55_000, maxRetries: 0 })
+  const client = new Anthropic({
+    apiKey,
+    authToken: null,
+    baseURL: ANTHROPIC_API_BASE_URL,
+    logLevel: 'off',
+    logger: SILENT_LOGGER,
+    timeout: options?.timeoutMs ?? 55_000,
+    maxRetries: 0,
+  })
 
   return async ({ content, maxTokens }) => {
     const response = await client.messages.parse({

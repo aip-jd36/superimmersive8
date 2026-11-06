@@ -17,6 +17,7 @@ import { loadRealLiveExecutor, LiveExaminationDisabled, type LiveAnthropicAdapte
 import { canonicalJson, sha256Hex } from '@/lib/creator-record/record-core/canonical'
 import { classifyAnthropicFailure, type ProviderFailureKind } from '@/lib/creator-record/receipt-examination/examine.anthropic'
 import { RECEIPT_EXAMINATION_SYSTEM_PROMPT } from '@/lib/creator-record/receipt-examination/prompt'
+import { syntheticPdf } from '@/test-support/synthetic-pdf'
 
 jest.mock('@/lib/creator-record/live-examination/controls', () => {
   const actual = jest.requireActual('@/lib/creator-record/live-examination/controls')
@@ -27,10 +28,8 @@ const OWNER = '11111111-1111-4111-8111-111111111111'
 const DOC = '33333333-3333-4333-8333-333333333333'
 const NOW = new Date('2026-11-06T10:00:00.000Z')
 const MODEL = LIVE_EXTRACTION_MODEL
-const pdf = (pages: number, salt = 'real-unlocked') => {
-  const objs = Array.from({ length: pages }, (_, i) => `${i + 3} 0 obj\n<< /Type /Page /Parent 2 0 R >>\nendobj\n`).join('')
-  return new Uint8Array(Buffer.from(`%PDF-1.4\n%${salt}\n2 0 obj\n<< /Type /Pages /Count ${pages} >>\nendobj\n${objs}%%EOF\n`))
-}
+const pdf = (pages: number, salt = 'real-unlocked') => syntheticPdf(pages, salt)
+
 const sha = (b: Uint8Array) => createHash('sha256').update(b).digest('hex')
 const BYTES = pdf(1)
 const SHA = sha(BYTES)

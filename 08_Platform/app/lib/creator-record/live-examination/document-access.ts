@@ -25,6 +25,12 @@ export interface PreparedBindingRow {
   user_id: string
   canonical: string
   sha256: string
+  /** CR-V2-DOC-LIVE-1C-A: only the current version of a draft binds. A version a later one replaced is superseded. */
+  draft_id: string
+  version: number
+  status: string
+  /** The highest version of the same draft, read by the port. */
+  latest_version: number
 }
 
 export interface LivePreparedSource {
@@ -42,10 +48,12 @@ export function parseLiveDocumentScope(raw: unknown): LiveDocumentScope | null {
   return { actor_user_id, prepared_id, document_id, tool_index }
 }
 
-/** Null when the prepared version belongs to this user, is intact, and links this document, with these bytes, to this tool. Otherwise the failing check. */
+/** Null when the prepared version belongs to this user, is the current version of its draft, is intact, and links this document, with these bytes, to this tool. Otherwise the failing check. */
 export function verifyDocumentBinding(row: PreparedBindingRow, scope: LiveDocumentScope, documentSha256: string): string | null {
   if (row.id !== scope.prepared_id) return 'prepared_id'
   if (row.user_id !== scope.actor_user_id) return 'prepared_owner'
+  if (row.status !== 'prepared' && row.status !== 'reviewed') return 'prepared_status'
+  if (!Number.isInteger(row.version) || row.version < 1 || row.version !== row.latest_version) return 'prepared_superseded'
   if (typeof row.canonical !== 'string' || sha256Hex(row.canonical) !== row.sha256) return 'prepared_digest'
   let record: unknown
   try {

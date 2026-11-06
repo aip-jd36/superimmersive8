@@ -206,7 +206,20 @@ function decodeStream(dict: PdfValue, raw: Uint8Array, budget: { inflated: numbe
   return data
 }
 
-function loadObjects(bytes: Uint8Array): Map<number, PdfObject> {
+/** Only `countPdfPages` asks for these. Text extraction passes none, and its behaviour is unchanged. */
+interface LoadStats {
+  /** Top-level object definitions that parse as a /Type /Page dictionary, counting each redefinition. */
+  topLevelPageDefs: number
+  /** Inside decoded object streams: page markers in the bytes, and page dictionaries actually parsed. */
+  objStmPageMarkers: number
+  objStmPageObjects: number
+  /** An object stream whose header disagrees with its /N, or that is not compressed. */
+  objStmIrregular: boolean
+  /** CR-V2-DOC-LIVE-1C-A-FIX: every object number an object stream's header defines, once per definition. */
+  objStmDefinitions: number[]
+}
+
+function loadObjects(bytes: Uint8Array, stats?: LoadStats): Map<number, PdfObject> {
   const s = Buffer.from(bytes).toString('latin1')
   const objects = new Map<number, PdfObject>()
   const re = /(\d+)\s+(\d+)\s+obj\b/g
@@ -226,6 +239,7 @@ function loadObjects(bytes: Uint8Array): Map<number, PdfObject> {
       continue
     }
     if (dict === undefined) continue
+    if (stats && isDict(dict) && isName(dict.Type) && dict.Type.name === 'Page') stats.topLevelPageDefs++
     p.ws()
     let stream: Uint8Array | null = null
     if (s.startsWith('stream', p.i)) {
@@ -252,15 +266,23 @@ function loadObjects(bytes: Uint8Array): Map<number, PdfObject> {
     const data = Buffer.from(decodeStream(d, os.raw, budget)).toString('latin1')
     const n = typeof d.N === 'number' ? d.N : 0
     const first = typeof d.First === 'number' ? d.First : 0
-    const head = data.slice(0, first).trim().split(/\s+/).map(Number)
+    const head = data.slice(0, first).trim().split(/\s+/).filter(Boolean).map(Number)
+    if (stats) {
+      const f = d.Filter
+      if (!isName(f) || f.name !== 'FlateDecode' || head.length !== 2 * n || head.some((x) => !Number.isInteger(x))) stats.objStmIrregular = true
+      stats.objStmPageMarkers += (data.slice(first).match(PAGE_MARKER) ?? []).length
+      for (let k = 0; 2 * k < head.length; k++) stats.objStmDefinitions.push(head[2 * k])
+    }
     for (let k = 0; k < n && 2 * k + 1 < head.length; k++) {
       const num = head[2 * k]
-      if (objects.has(num)) continue
+      if (objects.has(num) && !stats) continue
       const p = new Parser(data)
       p.i = first + head[2 * k + 1]
       try {
         const v = p.value()
-        if (v !== undefined) objects.set(num, { dict: v, stream: null })
+        if (v === undefined) continue
+        if (stats && isDict(v) && isName(v.Type) && v.Type.name === 'Page') stats.objStmPageObjects++
+        if (!objects.has(num)) objects.set(num, { dict: v, stream: null })
       } catch {
         /* skip one unreadable object */
       }
@@ -269,25 +291,70 @@ function loadObjects(bytes: Uint8Array): Map<number, PdfObject> {
   return objects
 }
 
+const PAGE_MARKER = /\/Type\s*\/Page(?![A-Za-z0-9#])/g
+const MAX_TREE_DEPTH = 32
+const MAX_TREE_PAGES = 1000
+
 /**
- * CR-V2-DOC-LIVE-1B — how many pages a PDF has, or null when that cannot be told. For a bound checked BEFORE a model call, so it
- * takes the largest of three counts (page objects, declared page-tree counts, raw page markers) and fails closed: an unparseable,
- * encrypted or page-less file is null, never a low number.
+ * CR-V2-DOC-LIVE-1B / 1C-A — how many pages a PDF has, or null when that cannot be told with confidence. For a bound checked BEFORE a
+ * model call, so anything ambiguous is null, never a low number. The count is the page tree walked from the document catalog, and it
+ * must agree with every other view of the file:
+ *   - exactly one catalog is named (every /Root reference agrees), and it is a /Catalog with a /Pages tree;
+ *   - every node in the tree is a typed /Pages or /Page dictionary, with no cycle, and each /Count equals the pages found under it;
+ *   - every /Page dictionary in the file is in that tree (no unreachable pages);
+ *   - every page marker in the bytes, and in every decoded object stream, belongs to a page dictionary that was read;
+ *   - object streams are compressed and their headers agree with /N;
+ *   - the catalog and every object in the tree are defined exactly once in the file (1C-A-FIX), since a reader may follow the
+ *     cross-reference table to a definition other than the one this reader keeps.
+ * Encrypted, malformed or unsupported files are null. Deliberately conservative: valid PDFs that a lenient reader accepts, including
+ * incrementally updated ones that redefine a page, may be refused. That is intended.
  */
 export function countPdfPages(bytes: Uint8Array): number | null {
   try {
     if (!Buffer.from(bytes.subarray(0, 1024)).toString('latin1').startsWith('%PDF-')) return null
     const all = Buffer.from(bytes).toString('latin1')
     if (/\/Encrypt[\s/<]/.test(all)) return null
-    let found = 0
-    let declared = 0
-    for (const o of Array.from(loadObjects(bytes).values())) {
-      if (!isDict(o.dict) || !isName(o.dict.Type)) continue
-      if (o.dict.Type.name === 'Page') found++
-      if (o.dict.Type.name === 'Pages' && typeof o.dict.Count === 'number') declared = Math.max(declared, o.dict.Count)
+    const stats: LoadStats = { topLevelPageDefs: 0, objStmPageMarkers: 0, objStmPageObjects: 0, objStmIrregular: false, objStmDefinitions: [] }
+    const objects = loadObjects(bytes, stats)
+    if (stats.objStmIrregular || stats.objStmPageMarkers !== stats.objStmPageObjects) return null
+    if ((all.match(PAGE_MARKER) ?? []).length !== stats.topLevelPageDefs) return null
+
+    const roots = new Set(Array.from(all.matchAll(/\/Root\s+(\d+)\s+(\d+)\s+R(?![A-Za-z0-9])/g)).map((m) => Number(m[1])))
+    if (roots.size !== 1) return null
+    const catalog = objects.get(Array.from(roots)[0])?.dict
+    if (!isDict(catalog) || !isName(catalog.Type) || catalog.Type.name !== 'Catalog') return null
+
+    // CR-V2-DOC-LIVE-1C-A-FIX. A reader follows the cross-reference table, which can name any one of several definitions of the same
+    // object, while this reader keeps the last one in file order. So every object the walk reaches must be defined exactly once in the
+    // whole file: counted from the raw bytes (including inside uncompressed streams, which the reader skips) and from every object
+    // stream header. Incremental updates that redefine a page or the page tree are therefore refused too.
+    const definitions = new Map<number, number>()
+    for (const m of Array.from(all.matchAll(/(?<![0-9])(\d+)\s+\d+\s+obj\b/g))) definitions.set(Number(m[1]), (definitions.get(Number(m[1])) ?? 0) + 1)
+    for (const n of stats.objStmDefinitions) definitions.set(n, (definitions.get(n) ?? 0) + 1)
+    const once = (n: number) => definitions.get(n) === 1
+    if (!once(Array.from(roots)[0])) return null
+
+    const seen = new Set<number>()
+    let pages = 0
+    const walk = (ref: PdfValue | undefined, depth: number): number | null => {
+      if (!isRef(ref) || seen.has(ref.ref) || depth > MAX_TREE_DEPTH || !once(ref.ref)) return null
+      seen.add(ref.ref)
+      const node = objects.get(ref.ref)?.dict
+      if (!isDict(node) || !isName(node.Type)) return null
+      if (node.Type.name === 'Page') return ++pages > MAX_TREE_PAGES ? null : 1
+      if (node.Type.name !== 'Pages' || !Array.isArray(node.Kids) || typeof node.Count !== 'number') return null
+      let n = 0
+      for (const kid of node.Kids) {
+        const c = walk(kid, depth + 1)
+        if (c === null) return null
+        n += c
+      }
+      return n === node.Count ? n : null
     }
-    if (found === 0) return null
-    return Math.max(found, declared, (all.match(/\/Type\s*\/Page(?![A-Za-z])/g) ?? []).length)
+    const total = walk(catalog.Pages, 0)
+    if (total === null || total < 1) return null
+    const typed = Array.from(objects.values()).filter((o) => isDict(o.dict) && isName(o.dict.Type) && o.dict.Type.name === 'Page').length
+    return typed === total ? total : null
   } catch {
     return null
   }

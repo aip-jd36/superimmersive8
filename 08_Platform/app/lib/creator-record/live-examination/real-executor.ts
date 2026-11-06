@@ -20,7 +20,7 @@ import { isStructuredOutputParseFailure } from '@/lib/interview-engine/anthropic
 import { LIVE_EXTRACTION_API_KEY_ENV, LIVE_EXTRACTION_MODEL, LIVE_REQUEST_TIMEOUT_MS, withInstanceBudget } from '../evidence/live-caller'
 import type { ProviderFailureKind } from '../receipt-examination/examine.anthropic'
 import type { ReceiptModelCaller, ReceiptModelResponse } from '../receipt-examination/examine'
-import { estimatedUsd, LIVE_BOUNDS, LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD, liveEvaluationEnabled, parseLiveEvaluationAuthorization, worstCaseAttemptUsd } from './controls'
+import { estimatedUsd, LIVE_BOUNDS, LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD, liveEvaluationEnabled, parseLiveEvaluationAuthorization, unsafeSdkEnvironment, worstCaseAttemptUsd } from './controls'
 import { LiveModelTimeout, MAX_LIVE_ATTEMPTS, type LiveAttemptGuard, type LiveExecutor } from './examine'
 
 export class LiveExaminationDisabled extends Error {
@@ -29,7 +29,7 @@ export class LiveExaminationDisabled extends Error {
   }
 }
 
-export type LiveFailureKind = ProviderFailureKind | 'model_mismatch'
+export type LiveFailureKind = ProviderFailureKind | 'model_mismatch' | 'unexpected_response' | 'not_reserved'
 
 /** A provider failure of a fixed kind. Its message is the kind alone. */
 export class LiveProviderFailure extends Error {
@@ -39,7 +39,7 @@ export class LiveProviderFailure extends Error {
 }
 
 /** These do not get better by trying again, so the run stops admitting attempts. */
-const RUN_STOPPING: readonly LiveFailureKind[] = ['auth', 'rejected', 'model_mismatch']
+const RUN_STOPPING: readonly LiveFailureKind[] = ['auth', 'rejected', 'model_mismatch', 'not_reserved']
 
 export interface LiveAnthropicAdapter {
   createAnthropicReceiptCaller(options: { model: string; apiKeyEnv: string; timeoutMs: number }): ReceiptModelCaller
@@ -50,6 +50,8 @@ export interface LiveAnthropicAdapter {
 export interface LiveRunReport {
   attempts_admitted: number
   requests: number
+  /** Responses that carried complete token usage. Fewer than `requests` means the true cost is unknown. */
+  responses_with_usage: number
   input_tokens: number
   output_tokens: number
   total_request_ms: number
@@ -89,6 +91,8 @@ const withDeadline = async <T>(work: Promise<T>, ms: number): Promise<T> => {
 export async function loadRealLiveExecutor(rawAuthorization: unknown, options: LoadRealExecutorOptions = {}): Promise<RealLiveExecutor> {
   if (LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD !== true) throw new LiveExaminationDisabled('code_lock')
   const env = options.env ?? process.env
+  // The SDK reads the process environment itself, whatever `env` the caller passes, so both are checked.
+  if (unsafeSdkEnvironment(env, process.env).length > 0) throw new LiveExaminationDisabled('unsafe_sdk_environment')
   const now = options.now ?? (() => new Date())
   const authorization = parseLiveEvaluationAuthorization(rawAuthorization)
   if (!authorization) throw new LiveExaminationDisabled('authorization_invalid')
@@ -104,7 +108,7 @@ export async function loadRealLiveExecutor(rawAuthorization: unknown, options: L
   const deadlineMs = options.deadlineMs ?? LIVE_REQUEST_TIMEOUT_MS + LIVE_BOUNDS.deadline_margin_ms
   const permitted = new Set(authorization.permitted_documents.map((d) => d.sha256))
 
-  const r: LiveRunReport = { attempts_admitted: 0, requests: 0, input_tokens: 0, output_tokens: 0, total_request_ms: 0, estimated_usd: 0, reserved_usd: 0, not_end_turn: 0, parse_failures: 0, failures: {}, stopped: null }
+  const r: LiveRunReport = { attempts_admitted: 0, requests: 0, responses_with_usage: 0, input_tokens: 0, output_tokens: 0, total_request_ms: 0, estimated_usd: 0, reserved_usd: 0, not_end_turn: 0, parse_failures: 0, failures: {}, stopped: null }
   const fail = (kind: LiveFailureKind) => {
     r.failures[kind] = (r.failures[kind] ?? 0) + 1
     if (RUN_STOPPING.includes(kind) && r.stopped === null) r.stopped = kind
@@ -125,6 +129,11 @@ export async function loadRealLiveExecutor(rawAuthorization: unknown, options: L
     report: () => ({ ...r, failures: { ...r.failures } }),
     async callModel(request) {
       if (request.maxTokens > LIVE_BOUNDS.max_output_tokens_per_request) throw new LiveProviderFailure('rejected')
+      // Every request belongs to an admitted attempt: nothing reaches the provider without a reservation.
+      if (r.requests >= r.attempts_admitted * LIVE_BOUNDS.max_requests_per_attempt) {
+        fail('not_reserved')
+        throw new LiveProviderFailure('not_reserved')
+      }
       r.requests += 1
       const started = now().getTime()
       let response: ReceiptModelResponse
@@ -146,8 +155,17 @@ export async function loadRealLiveExecutor(rawAuthorization: unknown, options: L
       } finally {
         r.total_request_ms += now().getTime() - started
       }
-      r.input_tokens += response.usage?.input_tokens ?? 0
-      r.output_tokens += response.usage?.output_tokens ?? 0
+      if (typeof response !== 'object' || response === null || typeof response.id !== 'string' || !Array.isArray(response.content)) {
+        fail('unexpected_response')
+        throw new LiveProviderFailure('unexpected_response')
+      }
+      const usage = response.usage as { input_tokens?: unknown; output_tokens?: unknown } | undefined
+      const known = (n: unknown): n is number => typeof n === 'number' && Number.isInteger(n) && n >= 0
+      if (usage && known(usage.input_tokens) && known(usage.output_tokens)) {
+        r.input_tokens += usage.input_tokens
+        r.output_tokens += usage.output_tokens
+        r.responses_with_usage += 1
+      }
       r.estimated_usd = estimatedUsd(model, r.input_tokens, r.output_tokens) ?? r.estimated_usd
       if (r.estimated_usd > authorization.max_estimated_usd && r.stopped === null) r.stopped = 'over_ceiling'
       if ((response as unknown as { model?: unknown }).model !== model) {

@@ -425,8 +425,10 @@ describe('boundaries', () => {
       '../receipt-examination/schema',
       '../record-core/canonical',
       './controls',
+      './document-access', // CR-V2-DOC-LIVE-1C-A: evaluation.ts, the one entry point
       './envelope',
       './examine',
+      './real-executor', // CR-V2-DOC-LIVE-1C-A: evaluation.ts only (live-examination-real.test.ts)
       '@/lib/interview-engine/anthropic-structured-output-retry',
     ])
     const adapterUsers = files.filter((f) => f.startsWith(own) && /receipt-examination\/examine\.anthropic/.test(readFileSync(f, 'utf8')))

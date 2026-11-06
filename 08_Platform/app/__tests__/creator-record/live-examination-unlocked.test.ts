@@ -8,12 +8,13 @@ import { REPLAY_FIXTURES } from '@/lib/creator-record/evidence/replay-fixtures.d
 import { parseLiveEnvelope } from '@/lib/creator-record/live-examination/envelope'
 import { RECEIPT_LIVE_PROFILE, runLiveExamination, type LiveExaminationDeps } from '@/lib/creator-record/live-examination/examine'
 import { profileKey } from '@/lib/creator-record/examination/profile'
+import { syntheticPdf } from '@/test-support/synthetic-pdf'
 
 jest.mock('@/lib/creator-record/live-examination/controls', () => ({ ...jest.requireActual('@/lib/creator-record/live-examination/controls'), LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: true }))
 
 const OWNER = '11111111-1111-4111-8111-111111111111'
 const DOC = '33333333-3333-4333-8333-333333333333'
-const BYTES = new Uint8Array(Buffer.from('%PDF-1.4\n%synthetic-test:unlocked\n1 0 obj\n<< /Type /Page >>\nendobj\n%%EOF\n'))
+const BYTES = syntheticPdf(1, 'synthetic-test:unlocked')
 const SHA = createHash('sha256').update(BYTES).digest('hex')
 const RECORD = { id: DOC, user_id: OWNER, sha256: SHA, media_type: 'application/pdf' as const, byte_size: BYTES.length, state: 'stored' as const }
 const REQUEST = { actor_user_id: OWNER, document_id: DOC, profile: { id: 'receipt', version: 1 } }
