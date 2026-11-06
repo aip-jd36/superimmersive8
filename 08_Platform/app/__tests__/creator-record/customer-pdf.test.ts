@@ -649,7 +649,8 @@ describe('rendering boundary', () => {
   test('it reads only the verified record and the template contract: no database, Storage, payment, governance or v1 PDF code', () => {
     const targets = new Set(walk(ROOT).flatMap(importsOf))
     expect(Array.from(targets).sort()).toEqual([
-      '../contract/compose', '../contract/types', '../customer-record/record', '../evidence-intake/vocabulary', '../integration/objectives', '../record-core/canonical', '../record-core/projection',
+      // CR-V2-MVP-M3A: the examination envelope's closed codes and the response codes (schema 8), read-only vocabularies.
+      '../contract/compose', '../contract/types', '../customer-record/examination-section', '../customer-record/record', '../evidence-intake/vocabulary', '../examination/envelope', '../integration/objectives', '../record-core/canonical', '../record-core/projection',
       './document-model', './templates', './text-layout', '@react-pdf/renderer', 'node:path', 'react',
     ])
   })

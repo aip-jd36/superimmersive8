@@ -468,6 +468,7 @@ describe('independence', () => {
       'lib/creator-record/customer-flow/purchase.ts',
       'lib/creator-record/customer-flow/service.ts',
       'lib/creator-record/customer-pdf/document-model.ts',
+      'lib/creator-record/customer-pdf/templates.ts', // CR-V2-MVP-M3A: the creator response and comparison field codes (schema 8 template labels)
       'lib/creator-record/governed/publication-authority.ts',
       'lib/creator-record/governed/sources.ts',
       'lib/creator-record/governed/synthetic-test-authority.ts', // CR-V2-MVP-M4C: type-only (the synthetic test bundle)

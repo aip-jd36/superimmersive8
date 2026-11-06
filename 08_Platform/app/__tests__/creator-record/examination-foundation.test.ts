@@ -535,6 +535,9 @@ describe('CR-V2-DOC-2B examination foundation', () => {
       // CR-V2-EXAM-INTEGRATION-X3: and the bounded projection, for a prepared record to carry.
       ['lib/creator-record/customer-flow/examination.ts', ['examination/persistence', 'examination/projection', 'examination/receipt-reading']],
       ['lib/creator-record/customer-flow/purchase.ts', ['examination/projection']],
+      // CR-V2-MVP-M3A: the customer PDF prints a schema 8 record's projections, reading only the envelope's closed vocabularies.
+      ['lib/creator-record/customer-pdf/document-model.ts', ['examination/envelope']],
+      ['lib/creator-record/customer-pdf/templates.ts', ['examination/envelope']],
       ['lib/creator-record/customer-record/examination-section.ts', ['examination/projection']],
       ['lib/creator-record/customer-record/record.ts', ['examination/projection']],
       ['lib/creator-record/evidence/persisted-comparison.ts', ['examination/envelope', 'examination/receipt-reading']],

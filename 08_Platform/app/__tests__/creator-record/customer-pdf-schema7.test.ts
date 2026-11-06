@@ -176,7 +176,9 @@ describe('schema boundaries', () => {
     expect(sha256Hex(r.canonical)).toBe(r.sha256)
   })
 
-  test('schema 8 is refused by name', () => {
+  // CR-V2-MVP-M3A: schema 8 is no longer refused by name. It renders only through templates approved for schema 8
+  // (`customer-pdf-schema8.test.ts`); this schema 8 record, offered the schema 7 templates, is refused at the templates.
+  test('schema 8 renders only through schema 8 templates: the schema 7 set refuses it', () => {
     const r = JSON.parse(saved(6).canonical)
     r.schema_version = CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION
     r.builder = CUSTOMER_RECORD_EXAMINATION_BUILDER
@@ -186,7 +188,7 @@ describe('schema boundaries', () => {
     const canonical = canonicalJson(r)
     const stored = { canonical, sha256: sha256Hex(canonical) }
     expect(verifyCustomerRecord(stored.canonical, stored.sha256).ok).toBe(true)
-    expect(refusalOf(() => doc(stored))).toBe('record_schema_unsupported')
+    expect(refusalOf(() => doc(stored))).toMatch(/^templates_/)
   })
 
   test('historical artifacts do not depend on the renderer: delivery reads stored bytes only', () => {
