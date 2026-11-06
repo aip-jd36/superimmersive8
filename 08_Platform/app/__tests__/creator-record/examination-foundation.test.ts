@@ -538,6 +538,9 @@ describe('CR-V2-DOC-2B examination foundation', () => {
       ['lib/creator-record/customer-record/examination-section.ts', ['examination/projection']],
       ['lib/creator-record/customer-record/record.ts', ['examination/projection']],
       ['lib/creator-record/evidence/persisted-comparison.ts', ['examination/envelope', 'examination/receipt-reading']],
+      // CR-V2-DOC-LIVE-1A: the closed v3 contract, which nothing outside tests imports (live-examination.test.ts).
+      ['lib/creator-record/live-examination/envelope.ts', ['examination/envelope']],
+      ['lib/creator-record/live-examination/examine.ts', ['examination/envelope', 'examination/examine-document', 'examination/examine-document', 'examination/profile', 'examination/profile', 'examination/receipt-profile']],
       ['lib/creator-record-flow/examination-production.ts', ['examination/examine-document', 'examination/persistence', 'examination/replay-executor']],
     ])
     for (const f of ['lib/creator-record/customer-flow/purchase.ts', 'lib/creator-record/customer-record/record.ts'])

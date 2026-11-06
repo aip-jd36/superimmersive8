@@ -152,6 +152,7 @@ export type ReconciliationReason =
   | 'plan_not_identifiable'
   | 'same_plan_name'
   | 'different_plan_name'
+  | 'determination_withheld'
 
 export interface FieldReconciliation {
   result: ReconciliationResult

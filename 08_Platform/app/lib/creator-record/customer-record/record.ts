@@ -105,7 +105,7 @@ export const HISTORICAL_RECORD_BUILDER = { id: 'si8/creator-record-v2-record-bui
 /** The content contract: what may appear in the record (no generated prose). Bump with any content change. */
 export const CUSTOMER_RECORD_CONTENT = { id: 'si8/creator-record-v2-record-content', version: 4, generated_text: 'none' } as const
 /** CR-V2-EXAM-INTEGRATION-X0: the builder and content identities of an examination-bearing record. */
-export const CUSTOMER_RECORD_EXAMINATION_BUILDER = { id: 'si8/creator-record-v2-record-builder', version: 6 } as const
+export const CUSTOMER_RECORD_EXAMINATION_BUILDER = { id: 'si8/creator-record-v2-record-builder', version: 7 } as const
 export const CUSTOMER_RECORD_EXAMINATION_CONTENT = { id: 'si8/creator-record-v2-record-content', version: 5, generated_text: 'none' } as const
 /** Issued Creator Record ids (CR-YYYY-8 hex): assigned at issuance, never part of a prepared record. */
 const ISSUED_RECORD_ID = /^CR-\d{4}-[0-9A-F]{8}$/i
