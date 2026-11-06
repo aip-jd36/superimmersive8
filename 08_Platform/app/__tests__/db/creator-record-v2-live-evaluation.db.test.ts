@@ -25,7 +25,10 @@ const CHAIN = [
   '20261104000000_creator_record_v2_examination_runs.sql', '20261105000000_creator_record_v2_operator_synthetic_uat.sql', '20261106000000_creator_record_v2_customer_path_uat.sql',
   '20261107000000_creator_record_v2_admin_uat.sql', '20261108000000_creator_record_v2_live_examination_foundation.sql',
 ].map((f) => join(DIR, f))
-const EVALUATION_SQL = readFileSync(join(__dirname, '..', '..', 'supabase', 'evaluation-only', '20261109000000_creator_record_v2_live_evaluation.sql'), 'utf8')
+const EVALUATION_DIR = join(__dirname, '..', '..', 'supabase', 'evaluation-only')
+const EVALUATION_SQL = readFileSync(join(EVALUATION_DIR, '20261109000000_creator_record_v2_live_evaluation.sql'), 'utf8')
+const VERIFY_SQL = readFileSync(join(EVALUATION_DIR, 'verify_live_evaluation_environment.sql'), 'utf8')
+const ROLLBACK_SQL = readFileSync(join(EVALUATION_DIR, 'rollback_20261109000000.sql'), 'utf8')
 const CONSENT = 'DRAFT-UNAPPROVED-cr-v2-evidence-storage-consent-0'
 const PROJECT = 'localpg15examination'
 const MODEL = 'claude-sonnet-5'
@@ -121,15 +124,23 @@ maybe('creator record v2 live evaluation schema (PostgreSQL)', () => {
     await admin?.end().catch(() => undefined)
   })
 
-  test('applies after 20261108000000 and changes nothing that exists', async () => {
-    const before = await snapshot()
+  let beforeInstall: unknown[] = []
+  test('the install guard: only where the isolated-test marker exists and no customer data is present; then nothing that exists changes', async () => {
+    expect(await fail(admin.query(EVALUATION_SQL))).toBe('the evaluation schema installs only where the isolated-test environment marker exists')
+    // The 1104 marker is needed for the examination read log, and is what the install guard requires.
+    await admin.query(`INSERT INTO public.creator_record_v2_examination_environment (environment_kind, supabase_project_ref, established_by, reason) VALUES ('isolated_synthetic_test', $1, 'db test operator', 'isolated local PostgreSQL 15 test')`, [PROJECT])
+    const customer = await user()
+    await admin.query('INSERT INTO public.submissions (user_id) VALUES ($1)', [customer])
+    expect(await fail(admin.query(EVALUATION_SQL))).toBe('the evaluation schema installs only into a project with no customer, payment, issuance or UAT data (found rows in submissions)')
+    await admin.query('DELETE FROM public.submissions WHERE user_id = $1', [customer])
+    expect(Number((await admin.query(`SELECT count(*) n FROM pg_class WHERE relname LIKE 'creator_record_v2_live_evaluation_%'`)).rows[0].n)).toBe(0)
+    beforeInstall = await snapshot()
     await admin.query(EVALUATION_SQL)
-    expect(await snapshot()).toEqual(before)
+    expect(await snapshot()).toEqual(beforeInstall)
   })
 
   test('without the evaluation marker, every entry function refuses', async () => {
-    // The 1104 marker is needed for the examination read log; it alone does not open the evaluation store.
-    await admin.query(`INSERT INTO public.creator_record_v2_examination_environment (environment_kind, supabase_project_ref, established_by, reason) VALUES ('isolated_synthetic_test', $1, 'db test operator', 'isolated local PostgreSQL 15 test')`, [PROJECT])
+    // The 1104 marker, established above, does not alone open the evaluation store.
     const { operator, doc, evaluation } = await fresh()
     expect(await fail(preflight(evaluation, operator, doc.id))).toBe('live_evaluation_environment_not_established')
     expect(await fail(reserve(evaluation, operator, doc.id))).toBe('live_evaluation_environment_not_established')
@@ -305,4 +316,31 @@ maybe('creator record v2 live evaluation schema (PostgreSQL)', () => {
     const rows = (await svc.query('SELECT outcome_status, attempt_number FROM public.creator_record_v2_live_evaluation_attempts WHERE evaluation_id = $1 ORDER BY attempt_number', [c.evaluation])).rows
     expect(rows).toEqual([{ outcome_status: 'could_not_examine', attempt_number: 1 }, { outcome_status: 'examined', attempt_number: 2 }])
   })
+
+  test('the verification script reads, changes nothing, and reports each property', async () => {
+    const before = await snapshot()
+    const rows = (await admin.query(VERIFY_SQL)).rows as { check_name: string; ok: boolean; detail: string | null }[]
+    expect(await snapshot()).toEqual(before)
+    const by = Object.fromEntries(rows.map((r) => [r.check_name, r.ok]))
+    expect(Object.keys(by)).toHaveLength(11)
+    // An earlier test deliberately created an authorization for another project, so that check, and the total, must be false.
+    expect(by['every authorization names this project']).toBe(false)
+    expect(by['ALL CHECKS']).toBe(false)
+    for (const [k, v] of Object.entries(by)) if (k !== 'every authorization names this project' && k !== 'ALL CHECKS') expect([k, v]).toEqual([k, true])
+    expect(rows.find((r) => r.check_name === 'ALL CHECKS')!.detail).toBe(PROJECT)
+  })
+
+  test('rollback refuses while anything is held, and otherwise removes exactly the evaluation schema', async () => {
+    const c = await connect()
+    expect(await fail(c.query(ROLLBACK_SQL))).toBe('rollback refused: creator_record_v2_live_evaluation_attempts is not empty')
+    await c.query('ROLLBACK')
+    expect(Number((await admin.query(`SELECT count(*) n FROM pg_class WHERE relname LIKE 'creator_record_v2_live_evaluation_%' AND relkind = 'r'`)).rows[0].n)).toBe(5)
+    // Emptied only by the database operator (TRUNCATE fires no row trigger; no API role holds it), the rollback then runs.
+    await admin.query('TRUNCATE public.creator_record_v2_live_evaluation_attempts, public.creator_record_v2_live_evaluation_reservations, public.creator_record_v2_live_evaluation_documents, public.creator_record_v2_live_evaluation_authorizations, public.creator_record_v2_live_evaluation_environment')
+    await c.query(ROLLBACK_SQL)
+    expect(Number((await admin.query(`SELECT count(*) n FROM pg_class WHERE relname LIKE 'creator_record_v2_live_evaluation_%'`)).rows[0].n)).toBe(0)
+    expect(Number((await admin.query(`SELECT count(*) n FROM pg_proc WHERE proname LIKE 'creator_record_v2_live_evaluation_%'`)).rows[0].n)).toBe(0)
+    expect(await snapshot()).toEqual(beforeInstall)
+  })
+
 })

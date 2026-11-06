@@ -20,7 +20,8 @@ import { isStructuredOutputParseFailure } from '@/lib/interview-engine/anthropic
 import { LIVE_EXTRACTION_API_KEY_ENV, LIVE_EXTRACTION_MODEL, LIVE_REQUEST_TIMEOUT_MS, withInstanceBudget } from '../evidence/live-caller'
 import type { ProviderFailureKind } from '../receipt-examination/examine.anthropic'
 import type { ReceiptModelCaller, ReceiptModelResponse } from '../receipt-examination/examine'
-import { estimatedUsd, LIVE_BOUNDS, LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD, liveEvaluationEnabled, parseLiveEvaluationAuthorization, unsafeSdkEnvironment, worstCaseAttemptUsd } from './controls'
+import { RECEIPT_EXAMINATION_USER_TEXT } from '../receipt-examination/prompt'
+import { attemptCostBoundUsd, boundLiveInputTokens, estimatedUsd, LIVE_BOUNDS, LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD, liveEvaluationEnabled, parseLiveEvaluationAuthorization, unsafeSdkEnvironment, worstCaseAttemptUsd } from './controls'
 import { LiveModelTimeout, MAX_LIVE_ATTEMPTS, type LiveAttemptGuard, type LiveExecutor } from './examine'
 
 export class LiveExaminationDisabled extends Error {
@@ -29,7 +30,7 @@ export class LiveExaminationDisabled extends Error {
   }
 }
 
-export type LiveFailureKind = ProviderFailureKind | 'model_mismatch' | 'unexpected_response' | 'not_reserved'
+export type LiveFailureKind = ProviderFailureKind | 'model_mismatch' | 'unexpected_response' | 'not_reserved' | 'input_over_bound'
 
 /** A provider failure of a fixed kind. Its message is the kind alone. */
 export class LiveProviderFailure extends Error {
@@ -39,7 +40,7 @@ export class LiveProviderFailure extends Error {
 }
 
 /** These do not get better by trying again, so the run stops admitting attempts. */
-const RUN_STOPPING: readonly LiveFailureKind[] = ['auth', 'rejected', 'model_mismatch', 'not_reserved']
+const RUN_STOPPING: readonly LiveFailureKind[] = ['auth', 'rejected', 'model_mismatch', 'not_reserved', 'input_over_bound']
 
 export interface LiveAnthropicAdapter {
   createAnthropicReceiptCaller(options: { model: string; apiKeyEnv: string; timeoutMs: number }): ReceiptModelCaller
@@ -108,6 +109,7 @@ export async function loadRealLiveExecutor(rawAuthorization: unknown, options: L
   const deadlineMs = options.deadlineMs ?? LIVE_REQUEST_TIMEOUT_MS + LIVE_BOUNDS.deadline_margin_ms
   const permitted = new Set(authorization.permitted_documents.map((d) => d.sha256))
 
+  let admittedInputTokens = 0
   const r: LiveRunReport = { attempts_admitted: 0, requests: 0, responses_with_usage: 0, input_tokens: 0, output_tokens: 0, total_request_ms: 0, estimated_usd: 0, reserved_usd: 0, not_end_turn: 0, parse_failures: 0, failures: {}, stopped: null }
   const fail = (kind: LiveFailureKind) => {
     r.failures[kind] = (r.failures[kind] ?? 0) + 1
@@ -118,10 +120,16 @@ export async function loadRealLiveExecutor(rawAuthorization: unknown, options: L
     identity: { mode: 'live_model', provider: 'anthropic', model },
     guard: {
       documentPermitted: (sha256) => permitted.has(sha256),
-      reserveAttempt() {
+      reserveAttempt(inputTokensPerRequest) {
         if (r.stopped !== null || !liveEvaluationEnabled(env, authorization, now())) return false
-        if (Math.max(r.reserved_usd, r.estimated_usd) + attemptUsd > authorization.max_estimated_usd) return false
-        r.reserved_usd += attemptUsd
+        // CR-V2-DOC-LIVE-1C-B1: no bound, no attempt. The reservation is the larger of the planning maximum and this input's bound.
+        if (!Number.isInteger(inputTokensPerRequest) || inputTokensPerRequest < 1) return false
+        const bounded = attemptCostBoundUsd(model, inputTokensPerRequest)
+        if (bounded === null) return false
+        const reserve = Math.max(attemptUsd, bounded)
+        if (Math.max(r.reserved_usd, r.estimated_usd) + reserve > authorization.max_estimated_usd) return false
+        admittedInputTokens = inputTokensPerRequest
+        r.reserved_usd += reserve
         r.attempts_admitted += 1
         return true
       },
@@ -133,6 +141,19 @@ export async function loadRealLiveExecutor(rawAuthorization: unknown, options: L
       if (r.requests >= r.attempts_admitted * LIVE_BOUNDS.max_requests_per_attempt) {
         fail('not_reserved')
         throw new LiveProviderFailure('not_reserved')
+      }
+      // CR-V2-DOC-LIVE-1C-B1: what is about to be sent is bounded again, from the request itself: one document or image block and the
+      // fixed instruction, within the bound the attempt was admitted for. Anything else is not sent.
+      const blocks = request.content as { type: string; text?: string; source?: { media_type?: string; data?: string } }[]
+      const docs = blocks.filter((b) => b.type === 'document' || b.type === 'image')
+      const texts = blocks.filter((b) => b.type === 'text')
+      const media = docs[0]?.source?.media_type
+      const sent = docs.length === 1 && texts.length === 1 && texts[0].text === RECEIPT_EXAMINATION_USER_TEXT && blocks.length === 2 && typeof docs[0].source?.data === 'string' && (media === 'application/pdf' || media === 'image/png' || media === 'image/jpeg')
+        ? boundLiveInputTokens(new Uint8Array(Buffer.from(docs[0].source!.data!, 'base64')), media)
+        : null
+      if (!sent || !sent.ok || sent.input_tokens > admittedInputTokens) {
+        fail('input_over_bound')
+        throw new LiveProviderFailure('input_over_bound')
       }
       r.requests += 1
       const started = now().getTime()

@@ -39,7 +39,7 @@ import {
   type LiveFailureReason,
   type LiveLimitation,
 } from './envelope'
-import { checkLiveDocumentBounds, LIVE_BOUNDS, LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD } from './controls'
+import { boundLiveInputTokens, checkLiveDocumentBounds, LIVE_BOUNDS, LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD } from './controls'
 import type { ProfileObservation } from '../examination/profile'
 import { profileKey } from '../examination/profile'
 import { receiptLimitations, receiptObservations, RECEIPT_PROFILE_ID, RECEIPT_PROFILE_VERSION } from '../examination/receipt-profile'
@@ -58,8 +58,11 @@ export class LiveModelTimeout extends Error {
 export interface LiveAttemptGuard {
   /** Named by the authorization for this run. Asked before the bytes are read. */
   documentPermitted(sha256: string): boolean
-  /** Reserves the spend for one attempt. Asked last, just before the first model call. May be durable (CR-V2-DOC-LIVE-1C-A). */
-  reserveAttempt(): boolean | Promise<boolean>
+  /**
+   * Reserves the spend for one attempt. Asked last, just before the first model call. May be durable (CR-V2-DOC-LIVE-1C-A). Given the
+   * pre-call bound on one request's input tokens (CR-V2-DOC-LIVE-1C-B1), which the reservation must cover.
+   */
+  reserveAttempt(inputTokensPerRequest: number): boolean | Promise<boolean>
 }
 
 export interface LiveExecutor {
@@ -88,6 +91,9 @@ export const RECEIPT_LIVE_PROFILE: LiveExaminationProfile = {
     return { status: 'examined', observations: receiptObservations(outcome.extraction), limitations: receiptLimitations(outcome.extraction) as LiveLimitation[], usage: outcome.usage }
   },
 }
+
+/** CR-V2-DOC-LIVE-1C-B1: the only profiles a live examination may run. The fixed runner uses exactly this. */
+export const LIVE_PROFILE_REGISTRY: ReadonlyMap<string, LiveExaminationProfile> = new Map([[profileKey(RECEIPT_LIVE_PROFILE.ref), RECEIPT_LIVE_PROFILE]])
 
 export interface LiveDocumentSource {
   get(documentId: string): Promise<ExaminationDocumentRecord | null>
@@ -121,6 +127,7 @@ export const LIVE_REFUSALS = [
   'document_exceeds_live_bounds',
   'live_budget_exhausted',
   'document_not_bound',
+  'input_not_bounded',
 ] as const
 export type LiveRefusalCode = (typeof LIVE_REFUSALS)[number]
 export type LiveExamination = { kind: 'envelope'; envelope: LiveEnvelope } | { kind: 'refused'; code: LiveRefusalCode }
@@ -158,7 +165,9 @@ export async function runLiveExamination(deps: LiveExaminationDeps, rawRequest: 
   if (executor.mode === 'mock_test' && !fixture) return refuse('mock_requires_known_fixture')
   if (executor.mode === 'live_model' && fixture) return refuse('live_refuses_known_fixture')
   if (guard && checkLiveDocumentBounds(bytes, record.media_type) !== 'within_bounds') return refuse('document_exceeds_live_bounds')
-  if (guard && (await guard.reserveAttempt()) !== true) return refuse('live_budget_exhausted')
+  const inputBound = guard ? boundLiveInputTokens(bytes, record.media_type) : null
+  if (inputBound && !inputBound.ok) return refuse('input_not_bounded')
+  if (guard && (await guard.reserveAttempt(inputBound && inputBound.ok ? inputBound.input_tokens : Number.NaN)) !== true) return refuse('live_budget_exhausted')
 
   let thrown: 'model_timeout' | 'provider_failure' = 'provider_failure'
   let responseId: string | null = null

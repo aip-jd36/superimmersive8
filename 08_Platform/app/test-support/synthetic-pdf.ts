@@ -55,3 +55,45 @@ export function xrefPdf(objects: ({ num: number; body: string } | { raw: string;
   out += `trailer\n<< /Size ${size} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`
   return new Uint8Array(Buffer.from(out, 'latin1'))
 }
+
+/**
+ * CR-V2-DOC-LIVE-1C-B1: a one-page PDF whose page draws `text` with a simple font, so the text layer extracts it. `extra` objects
+ * (numbered 6 and up) are appended before the trailer, for annotations, forms and the like.
+ */
+export function syntheticTextPdf(text: string, opts: { salt?: string; extra?: string; pageExtra?: string } = {}): Uint8Array {
+  const escaped = text.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)')
+  const content = `BT /F1 12 Tf 72 720 Td (${escaped}) Tj ET`
+  return new Uint8Array(Buffer.from(
+    `%PDF-1.4\n%${opts.salt ?? 'synthetic-test'}\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n` +
+      `3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R${opts.pageExtra ?? ''} >>\nendobj\n` +
+      `4 0 obj\n<< /Length ${Buffer.byteLength(content, 'latin1')} >>\nstream\n${content}\nendstream\nendobj\n` +
+      `5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n${opts.extra ?? ''}trailer\n<< /Root 1 0 R >>\n%%EOF\n`,
+    'latin1',
+  ))
+}
+
+
+/**
+ * CR-V2-DOC-LIVE-1C-B1-FIX: a one-page PDF that draws text through Form XObjects. `draws` times the same form from the page; or a chain
+ * `depth` forms deep with the text in the last; or, with `cycle`, a chain whose last form draws the first again.
+ */
+export function syntheticFormPdf(opts: { text: string; draws?: number; depth?: number; cycle?: boolean; salt?: string }): Uint8Array {
+  const obj = (n: number, body: string) => `${n} 0 obj\n${body}\nendobj\n`
+  const stream = (n: number, dict: string, data: string) => obj(n, `<< ${dict} /Length ${Buffer.byteLength(data, 'latin1')} >>\nstream\n${data}\nendstream`)
+  const depth = opts.depth ?? 1
+  const text = `BT /F1 6 Tf 10 10 Td (${opts.text}) Tj ET`
+  let forms = ''
+  for (let d = 0; d < depth; d++) {
+    const last = d === depth - 1
+    const next = last ? (opts.cycle ? 10 : null) : 11 + d
+    const res = next === null ? '/Font << /F1 5 0 R >>' : `/XObject << /Fn ${next} 0 R >>`
+    forms += stream(10 + d, `/Type /XObject /Subtype /Form /BBox [0 0 612 792] /Resources << ${res} >>`, next === null ? text : '/Fn Do')
+  }
+  const page = Array.from({ length: opts.draws ?? 1 }, () => '/Fn Do').join('\n')
+  return new Uint8Array(Buffer.from(
+    `%PDF-1.4\n%${opts.salt ?? 'synthetic-test'}\n` + obj(1, '<< /Type /Catalog /Pages 2 0 R >>') + obj(2, '<< /Type /Pages /Kids [3 0 R] /Count 1 >>') +
+      obj(3, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Fn 10 0 R >> /Font << /F1 5 0 R >> >> /Contents 4 0 R >>') +
+      stream(4, '', page) + obj(5, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>') + forms + 'trailer\n<< /Root 1 0 R >>\n%%EOF\n',
+    'latin1',
+  ))
+}

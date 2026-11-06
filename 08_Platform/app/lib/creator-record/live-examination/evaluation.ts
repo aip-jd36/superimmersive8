@@ -1,6 +1,7 @@
 /**
  * CR-V2-DOC-LIVE-1C-A — the one entry point for an authorized evaluation attempt on one document. Disabled: the code lock is checked
- * before anything else, and no route, page, job or script imports this module (test-enforced). There is no runner.
+ * before anything else, and no route, page or job imports this module; only the fixed runner (`creator-record-flow/live-evaluation-runner`)
+ * calls it (test-enforced).
  *
  * Order, and nothing reaches the provider before every step before it has passed:
  *   1. the code lock;
@@ -23,12 +24,12 @@
  * reviewed production ports (`creator-record-flow/live-examination-production`), the registered receipt profile and the real Anthropic
  * adapter. A caller that supplied its own evaluation port could skip the durable preflight and reservation and still reach the model;
  * one that supplied its own adapter or profile could produce fabricated observations labelled `live_model`, which the database cannot
- * tell apart from real ones. There is no runner. A future runner must use one fixed, reviewed production composition and must not
- * inject evaluation ports, profiles or model adapters of its own.
+ * tell apart from real ones. The fixed runner (CR-V2-DOC-LIVE-1C-B1) is the one reviewed production composition: it passes exactly those
+ * and injects no ports, profiles or adapters of its own. Nothing else may call this function.
  */
 
 import { LIVE_EXTRACTION_MODEL } from '../evidence/live-caller'
-import { estimatedUsd, LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD, toMicroUsd, worstCaseAttemptUsd } from './controls'
+import { attemptCostBoundUsd, estimatedUsd, LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD, toMicroUsd, worstCaseAttemptUsd } from './controls'
 import { examineBoundDocument, type LivePreparedSource } from './document-access'
 import { LivePortError, type LiveAttemptRow, type LiveExaminationProfile, type LiveRecordResult, type LiveStoragePorts } from './examine'
 import { LiveExaminationDisabled, loadRealLiveExecutor, type LiveAnthropicAdapter } from './real-executor'
@@ -226,8 +227,15 @@ export async function runAuthorizedEvaluation(deps: EvaluationDeps, raw: unknown
   const guard = {
     // The executor was built for this one durable document, so its own allowlist is exactly that digest.
     documentPermitted: (sha256: string) => executor.guard.documentPermitted(sha256),
-    async reserveAttempt() {
-      if (reservation !== null || !executor.guard.reserveAttempt()) return false
+    async reserveAttempt(inputTokensPerRequest: number) {
+      if (reservation !== null) return false
+      // CR-V2-DOC-LIVE-1C-B1: the durable per-attempt reservation must cover this input's bound, or nothing is reserved or sent.
+      const bounded = attemptCostBoundUsd(auth.model, inputTokensPerRequest)
+      if (bounded === null || !Number.isInteger(inputTokensPerRequest) || toMicroUsd(bounded) > auth.attempt_reserve_micro_usd) {
+        reservationRefusal = 'input_bound_exceeds_reservation'
+        return false
+      }
+      if (!executor.guard.reserveAttempt(inputTokensPerRequest)) return false
       try {
         reservation = await deps.evaluation.reserve(auth.evaluation_id, operator!.user_id, auth.document_id)
         return true

@@ -360,6 +360,32 @@ export function countPdfPages(bytes: Uint8Array): number | null {
   }
 }
 
+/**
+ * CR-V2-DOC-LIVE-1C-B1 — whether a PDF holds content a model could read that `extractPdfTextLayer` does not count: interactive form
+ * fields, text-bearing annotations, embedded files or JavaScript; and (1C-B1-FIX) Type 3 fonts, whose glyphs are content streams, tiling
+ * patterns, whose cells are content streams, and link annotations with their own appearance stream. Plain link annotations are allowed.
+ * Null when the file cannot be read, which a caller must treat as unbounded. Every object is inspected, including in object streams.
+ */
+const HIDDEN_ANNOTATIONS = new Set(['Text', 'FreeText', 'Widget', 'FileAttachment', 'Popup', 'Ink', 'Sound', 'Movie', 'Screen', 'RichMedia', '3D', 'Redact', 'Stamp'])
+export function pdfHasUncountedContent(bytes: Uint8Array): boolean | null {
+  try {
+    if (!Buffer.from(bytes.subarray(0, 1024)).toString('latin1').startsWith('%PDF-')) return null
+    for (const o of Array.from(loadObjects(bytes).values())) {
+      if (!isDict(o.dict)) continue
+      const d = o.dict
+      if ('AcroForm' in d || 'EmbeddedFiles' in d || 'JavaScript' in d || 'JS' in d) return true
+      if (isName(d.Type) && (d.Type.name === 'EmbeddedFile' || d.Type.name === 'Filespec')) return true
+      if (isName(d.Subtype) && HIDDEN_ANNOTATIONS.has(d.Subtype.name)) return true
+      if (isName(d.Subtype) && d.Subtype.name === 'Type3') return true
+      if (d.PatternType === 1) return true
+      if (isName(d.Subtype) && d.Subtype.name === 'Link' && 'AP' in d) return true
+    }
+    return false
+  } catch {
+    return null
+  }
+}
+
 // ───────────────────────────────────────────── fonts
 
 interface FontMap {
@@ -403,7 +429,19 @@ function parseCMap(text: string): { map: Map<number, string>; codeBytes: 1 | 2 }
 
 // ───────────────────────────────────────────── extraction
 
-export function extractPdfTextLayer(bytes: Uint8Array): TextLayer {
+/**
+ * CR-V2-DOC-LIVE-1C-B1-FIX. `countEveryDraw` is for the live examination input bound only, never for display or the cross-check (which
+ * call with no options and are unchanged). In that mode a Form XObject is read again at every draw, so repeated text is counted every
+ * time it is drawn, and the file is unreadable (`unsupported_structure` / `too_large`) when a form would be skipped: nested deeper than
+ * `MAX_FORM_DEPTH`, drawn inside itself, or drawn more than `MAX_FORM_DRAWS` times in all.
+ */
+export interface TextLayerOptions {
+  countEveryDraw?: boolean
+}
+export const MAX_FORM_DEPTH = 4
+export const MAX_FORM_DRAWS = 100
+
+export function extractPdfTextLayer(bytes: Uint8Array, options: TextLayerOptions = {}): TextLayer {
   try {
     const head = Buffer.from(bytes.subarray(0, 1024)).toString('latin1')
     if (!head.startsWith('%PDF-')) return { status: 'unavailable', reason: 'not_pdf' }
@@ -446,6 +484,8 @@ export function extractPdfTextLayer(bytes: Uint8Array): TextLayer {
     let mapped = 0
     let unmapped = 0
     const visitedForms = new Set<number>()
+    const drawing = new Set<number>()
+    let formDraws = 0
 
     /** Runs one content stream with its resources; Form XObjects (`Do`) recurse, bounded. */
     const run = (stream: string, resources: PdfValue | undefined, depth: number) => {
@@ -516,6 +556,18 @@ export function extractPdfTextLayer(bytes: Uint8Array): TextLayer {
           case 'Do': {
             const n = operands[operands.length - 1]
             const ref = isName(n) && isDict(xobjects) ? xobjects[n.name] : undefined
+            if (options.countEveryDraw) {
+              // Every draw is read; nothing a reader would draw is skipped silently.
+              const o = isRef(ref) ? objects.get(ref.ref) : undefined
+              if (!isRef(ref) || !o?.stream || !isDict(o.dict) || !isName(o.dict.Subtype) || o.dict.Subtype.name !== 'Form') break
+              if (depth >= MAX_FORM_DEPTH || drawing.has(ref.ref)) throw new Fail('unsupported_structure')
+              if (++formDraws > MAX_FORM_DRAWS) throw new Fail('too_large')
+              drawing.add(ref.ref)
+              run(Buffer.from(decodeStream(o.dict, o.stream, budget)).toString('latin1'), o.dict.Resources ?? resources, depth + 1)
+              drawing.delete(ref.ref)
+              out += '\n'
+              break
+            }
             if (depth < 4 && isRef(ref) && !visitedForms.has(ref.ref)) {
               const o = objects.get(ref.ref)
               if (o?.stream && isDict(o.dict) && isName(o.dict.Subtype) && o.dict.Subtype.name === 'Form') {

@@ -402,8 +402,13 @@ describe('boundaries', () => {
 
   test('no production code imports the live foundation or the mock, except its own storage ports, which nothing imports', () => {
     const ports = path.join(process.cwd(), 'lib', 'creator-record-flow', 'live-examination-production.ts')
+    // CR-V2-DOC-LIVE-1C-B1: and the fixed runner, which only the operator CLI imports (live-evaluation-runner.test.ts).
+    const runner = path.join(process.cwd(), 'lib', 'creator-record-flow', 'live-evaluation-runner.ts')
+    const cli = path.join(process.cwd(), 'scripts', 'creator-record-live-evaluation.ts')
     const outside = files.filter((f) => !f.startsWith(own)).filter((f) => /live-examination|mock-live-executor/.test(readFileSync(f, 'utf8')))
-    expect(outside).toEqual([ports])
+    expect(outside.sort()).toEqual([runner, ports].sort())
+    expect(readFileSync(cli, 'utf8')).not.toMatch(/live-examination|mock-live-executor/)
+    expect(readFileSync(runner, 'utf8')).not.toMatch(/mock-live-executor|real-executor/)
     expect(readFileSync(ports, 'utf8')).not.toMatch(/mock-live-executor|real-executor/)
   })
 

@@ -184,7 +184,8 @@ describe('the evaluation-only schema', () => {
     const migrations = readdirSync(path.join(ROOT, 'supabase', 'migrations')).sort()
     expect(migrations[migrations.length - 1]).toBe('20261108000000_creator_record_v2_live_examination_foundation.sql')
     expect(migrations.some((m) => /live_evaluation/.test(m))).toBe(false)
-    expect(readdirSync(path.join(ROOT, 'supabase', 'evaluation-only'))).toEqual(['20261109000000_creator_record_v2_live_evaluation.sql'])
+    // CR-V2-DOC-LIVE-1C-B1: with its read-only verification and its guarded rollback beside it.
+    expect(readdirSync(path.join(ROOT, 'supabase', 'evaluation-only')).sort()).toEqual(['20261109000000_creator_record_v2_live_evaluation.sql', 'rollback_20261109000000.sql', 'verify_live_evaluation_environment.sql'])
     expect(sql).toContain('EVALUATION-ONLY. NOT A MIGRATION.')
   })
 

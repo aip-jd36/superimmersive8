@@ -356,10 +356,11 @@ describe('what stays closed', () => {
   test('no route or page reaches the foundation, the real executor or the production ports', () => {
     const importers = (pattern: RegExp) => files.filter((f) => pattern.test(readFileSync(f, 'utf8'))).map(rel)
     expect(importers(/from\s+['"][^'"]*live-examination\/real-executor['"]|import\(\s*['"][^'"]*real-executor['"]/)).toEqual([])
-    expect(importers(/['"][^'"]*live-examination-production['"]/)).toEqual([])
+    // CR-V2-DOC-LIVE-1C-B1: only the fixed runner loads the production ports.
+    expect(importers(/['"][^'"]*live-examination-production['"]/)).toEqual(['lib/creator-record-flow/live-evaluation-runner.ts'])
     // CR-V2-DOC-LIVE-1C-A: the one entry point builds the executor, and only the (unimported) production ports name the entry point.
     expect(importers(/['"]\.\/real-executor['"]/)).toEqual(['lib/creator-record/live-examination/evaluation.ts'])
-    expect(importers(/['"][^'"]*live-examination\/evaluation['"]|['"]\.\/evaluation['"]/)).toEqual(['lib/creator-record-flow/live-examination-production.ts'])
+    expect(importers(/['"][^'"]*live-examination\/evaluation['"]|['"]\.\/evaluation['"]/).sort()).toEqual(['lib/creator-record-flow/live-evaluation-runner.ts', 'lib/creator-record-flow/live-examination-production.ts'])
     expect(files.map(rel).filter((f) => f.startsWith('app/') && /live-examination/.test(readFileSync(path.join(root, f), 'utf8')))).toEqual([])
     expect(files.map(rel).filter((f) => f.startsWith('components/') && /live-examination/.test(readFileSync(path.join(root, f), 'utf8')))).toEqual([])
   })

@@ -222,6 +222,7 @@ describe('lib/creator-record boundaries', () => {
       'lib/creator-record-flow/examination-production.ts', // CR-V2-DOC-2C-C-B: examination persistence ports (operator CLI; X2: the creator examination wiring)
       'lib/creator-record-flow/examination-ui.ts', // CR-V2-EXAM-INTEGRATION-X3: browser helpers (vocabulary at runtime; types otherwise)
       'lib/creator-record-flow/http.ts',
+      'lib/creator-record-flow/live-evaluation-runner.ts', // CR-V2-DOC-LIVE-1C-B1: the fixed evaluation runner; only the operator CLI imports it (live-evaluation-runner.test.ts)
       'lib/creator-record-flow/live-examination-production.ts', // CR-V2-DOC-LIVE-1B: storage ports for a bound live examination; nothing imports it (live-examination-real.test.ts)
       'lib/creator-record-flow/production.ts',
       'lib/creator-record-flow/questionnaire-recovery.ts', // CR-V2-DECL-1B-2: browser helper (types only)

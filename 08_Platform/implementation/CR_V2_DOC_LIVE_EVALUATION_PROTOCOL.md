@@ -1,4 +1,4 @@
-# Creator Record V2: First Real-Document Evaluation Protocol (CR-V2-DOC-LIVE-1B, updated in 1C-A)
+# Creator Record V2: First Real-Document Evaluation Protocol (CR-V2-DOC-LIVE-1B, updated in 1C-A and 1C-B1)
 
 **Status: PROPOSED. NOT AUTHORIZED. No real-document evaluation has been authorized, and nothing in this document has been run.**
 
@@ -7,6 +7,38 @@ It specifies a bounded first evaluation of the document examination on real docu
 Every limit below is labelled. **Implemented** means the code does it today, behind the disabled lock. **Proposed** means it does not exist yet, or has not been approved.
 
 This repository is public. Evaluation documents, ground truth, observations, excerpts and per-document results must never be committed.
+
+## 0. Readiness (1C-B1)
+
+No operational prerequisite is complete. Code alone completes none of them.
+
+**Implemented and tested** (local code, mocks, stubbed network, disposable local PostgreSQL only):
+
+| Safeguard | Where |
+|---|---|
+| Fixed-composition runner and operator CLI, locked | `lib/creator-record-flow/live-evaluation-runner.ts`, `scripts/creator-record-live-evaluation.ts` |
+| Project identity from the connected Supabase URL, matched to a declared reference, Production refused | the runner |
+| Verified operator token, durable authorization, current prepared version, stored document, read audit before read | 1C-A entry point and schema |
+| Pre-call input bound, checked before the reservation and again on every request's content | `live-examination/controls.ts`, `real-executor.ts` |
+| Durable reservation that must cover the input bound, under a lock; ledger that cannot be reset | entry point and schema |
+| SDK environment hardening; PDF page-tree validation | adapter, `pdf-text-layer.ts` |
+| Install guard, read-only verification and guarded rollback for the evaluation schema | `supabase/evaluation-only/`, `CR_V2_DOC_LIVE_EVALUATION_ENVIRONMENT.md` |
+
+**Not yet established:**
+
+| Prerequisite | State |
+|---|---|
+| Dedicated remote environment | No project exists. Procedure only (`CR_V2_DOC_LIVE_EVALUATION_ENVIRONMENT.md`) |
+| Approved operator authorization | None written or approved |
+| Document-owner consent | None obtained. The code checks only that a reference exists |
+| Provider data terms | Not confirmed |
+| Model compatibility | Not confirmed by any live call. The pinned model's earlier evaluation is not evidenced |
+| Current pricing | Not confirmed. The code uses a table cached on 2026-10-06 |
+| The input-bound assumptions | Not confirmed: that a PDF page costs no more than one image at the model's limit, and the framing allowance. Needs a token count on synthetic documents |
+| External spending cap | No workspace, key or spending limit exists |
+| Retention and deletion policy | None |
+| Ground-truth documents | None prepared |
+| Real Supabase integration | The production ports and the runner have run only against mocks |
 
 ## 1. What is ready, and what is not
 
@@ -17,13 +49,14 @@ Prepared and disabled:
 | Real executor | `lib/creator-record/live-examination/real-executor.ts` | Throws on its first line while the code lock is false. Imported by nothing. |
 | Limits, authorization format, spend estimate | `live-examination/controls.ts` | Code lock `LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD` is false. |
 | Document binding (user, prepared version, tool, bytes, stored state) | `live-examination/document-access.ts` | Used only by tests. |
-| Storage and evaluation ports | `lib/creator-record-flow/live-examination-production.ts` | Imported by nothing. Builds no executor. |
-| **Entry point (1C-A)** | `live-examination/evaluation.ts`, `runAuthorizedEvaluation` | Refuses on its first line while the code lock is false. Imported only by the unimported ports file. |
+| Storage and evaluation ports | `lib/creator-record-flow/live-examination-production.ts` | Loaded only by the fixed runner, after its lock and identity checks. Builds no executor. |
+| **Entry point (1C-A)** | `live-examination/evaluation.ts`, `runAuthorizedEvaluation` | Refuses on its first line while the code lock is false. Imported only by the fixed runner and, for types, the ports file. |
+| **Fixed runner and CLI (1C-B1)** | `lib/creator-record-flow/live-evaluation-runner.ts`, `scripts/creator-record-live-evaluation.ts` | Refuse at the lock, before reading the environment or loading any client. The CLI takes one request file and no flags. No route, page or job imports either. |
 | **Durable authority, cost ledger and live result store (1C-A)** | `supabase/evaluation-only/20261109000000_creator_record_v2_live_evaluation.sql` | **Not a migration.** Applied only to disposable local test databases. |
 
 Deliberately not built:
 
-- **A runner.** Nothing calls `runAuthorizedEvaluation`. There is no CLI, route or job.
+- **A route or job.** The only caller is the locked operator CLI. Nothing on a command line can enable a model call.
 - **Live persistence anywhere real.** The deployed migration `20261108000000` still refuses to store `live_model` results. The evaluation-only schema can store them, but it exists in no deployed database, and applying it to an isolated project is a separate decision (section 7).
 - **A way to load a real document.** `EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED` stays false.
 
@@ -38,7 +71,9 @@ Deliberately not built:
 | `CREATOR_RECORD_LIVE_EVALUATION` and the dedicated key | Runtime | Must be present and match the evaluation id |
 | SDK environment (1C-A) | Runtime | The adapter fixes the endpoint, turns SDK logging off and sends no auth token. A real executor is not built at all while `ANTHROPIC_BASE_URL`, `ANTHROPIC_LOG`, `ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_PROFILE` or `ANTHROPIC_CUSTOM_HEADERS` is set |
 | Persistence preflight and durable reservation (1C-A) | Database | Checked before anything is read, and again under a lock just before the first request. A model request without an admitted reservation is refused by the executor itself |
-| Injected dependencies (1C-A-FIX) | **Trusted, not verified** | `runAuthorizedEvaluation` accepts every dependency from its caller: evaluation, document and prepared-version ports, profiles, fixture check, environment, clock and adapter loader. Everything in this table holds only with the reviewed production ports, the registered receipt profile and the real adapter. A caller's own evaluation port could skip the durable preflight and reservation and still reach the model; its own adapter or profile could produce fabricated observations labelled `live_model`, which the database cannot distinguish. No runner exists. A future runner must use one fixed, reviewed production composition and inject no ports, profiles or adapters of its own |
+| Fixed composition (1C-B1) | Code, test-enforced | `runFixedEvaluation` takes one request of exactly four fields and passes the production ports, the one registered profile, the fixture registry and no adapter seam. Its only seam is module replacement, used by tests |
+| Pre-call input bound (1C-B1) | Code | Section 8. Bounded before the reservation, from the document, and again on each request's content; anything unbounded is refused before any request |
+| Injected dependencies (1C-A-FIX) | **Trusted, not verified, below the runner** | `runAuthorizedEvaluation` still accepts every dependency from its caller; only the runner and tests call it, which a boundary test enforces: evaluation, document and prepared-version ports, profiles, fixture check, environment, clock and adapter loader. Everything in this table holds only with the reviewed production ports, the registered receipt profile and the real adapter. A caller's own evaluation port could skip the durable preflight and reservation and still reach the model; its own adapter or profile could produce fabricated observations labelled `live_model`, which the database cannot distinguish. No runner exists. A future runner must use one fixed, reviewed production composition and inject no ports, profiles or adapters of its own |
 | Lower-level functions | Test-enforced only | `loadRealLiveExecutor` and `examineLiveAndRecord` are still exported. Only `evaluation.ts` imports the executor, and a boundary test keeps it so. Once the code lock is lifted, new code that ignored this could skip the durable checks. A runner must use `runAuthorizedEvaluation` only |
 | Migration `20261108000000` | Database | Unchanged. **Blocks live-result persistence in the 1A table, not the model call** |
 
@@ -69,8 +104,8 @@ It is built for its generated synthetic fixtures. It has no consent reference, r
 | P11 | Dedicated Anthropic workspace and key (`CREATOR_RECORD_EXTRACTION_API_KEY`) | Not set up | Operator |
 | P12 | Current price of the pinned model confirmed. The code's figure comes from a price table cached on 2026-10-06 | Not confirmed | Engineering |
 | P13 | Isolated environment and the persistence schema (section 7) | Schema written as an evaluation-only file and tested locally. No isolated project exists, and nothing has been applied | Engineering, reviewed |
-| P14 | Reviewed runner: calls `runAuthorizedEvaluation` only, with one fixed, reviewed production composition (production ports, the registered profile, the real adapter, no `loadAdapter`), runs serially, stops on a stop condition, and writes only metadata to its report | Not built. The entry point it would call exists and trusts whatever dependencies it is given | Engineering, reviewed |
-| P16 | **A pre-call input bound, or a stronger reservation policy** (1C-A-FIX) | None. The per-attempt reservation assumes at most 5,000 input tokens a page, which is not a bound: a dense PDF within 1 MB and 5 pages can carry far more text. Required before live evaluation | Engineering |
+| P14 | Reviewed runner: one fixed, reviewed production composition, serial, stops on a stop condition, metadata-only report | **Implemented, locked, mock-tested (1C-B1).** One document per run. The stop conditions in section 8 that need a person remain the operator's. Never run against a real database | Engineering, reviewed |
+| P16 | **A pre-call input bound, or a stronger reservation policy** | **Implemented (1C-B1), with two unconfirmed assumptions** (section 8). The reservation must cover the bound or nothing is sent | Engineering |
 | P15 | Ground truth prepared before the run, stored outside this repository | Not done | PM |
 
 ## 3. What a run would need
@@ -183,6 +218,23 @@ Consequences to decide or accept:
 - **The dollar ceiling is not a guaranteed maximum** (1C-A-FIX). Reservations are hard-checked before a call, but actual usage is only added afterwards, so one attempt can carry spend past the ceiling. The $0.139 planning maximum is conservative for output tokens (bounded by `max_tokens`, thinking disabled) and for images (downsized by the API), but **not for PDFs**: it assumes 5,000 input tokens a page, and a dense PDF can exceed that many times over. When usage is unknown, the charge is the reservation, which may understate. A pre-call input bound or a stronger reservation policy is required before live evaluation (P16).
 
 **1B, still in place as a second check:** each executor instance also keeps an in-memory reservation, which a reload resets.
+
+**1C-B1: the pre-call input bound.** Before the reservation, the input tokens of one request are bounded from the document itself, and the executor bounds them again from the exact content it is about to send. Each term over-estimates:
+
+- text (the fixed prompt, the instruction, the output schema and the PDF's extracted text): two tokens per UTF-8 byte;
+- each image, and each PDF page: 5,000 tokens, above the documented ceiling for the pinned model's image limit (about 4,784 at 2,576 px);
+- 2,000 tokens for message framing and the provider's structured-output instructions.
+
+Refused before anything is reserved or sent: a PDF whose text layer cannot be read; a PDF with form fields, text-bearing annotations, embedded files or JavaScript (link annotations are allowed); an image whose dimensions cannot be read; any input above 60,000 tokens a request. Scanned PDFs with no text layer are allowed and counted as page images. Encrypted PDFs are refused.
+
+The durable per-attempt reservation must be at least the attempt's cost at this bound (both requests at the input bound, every output token). At the 60,000-token limit that is about $0.27; a one-page PDF is about $0.13. The executor refuses any request whose content is not one document and the fixed instruction within the bound it admitted.
+
+**Limits of this bound, stated plainly:**
+- It is an estimate, not a hard monetary cap. The provider's count cannot be known before the document is sent.
+- Two terms are **assumptions**: that a PDF page costs no more than one image at the model's limit, and the framing allowance. Both must be checked with a token count on synthetic documents before any run.
+- The external workspace spending limit remains a required, separate hard limit.
+
+**Proposed limits for the first batch, revised in 1C-B1, not approved:** per-attempt reservation $0.28, so any bounded input is covered; 6 documents, 18 attempts at most, so $5.04 at most in reservations; authorization ceiling $6; workspace spending limit $10; 7-day expiry; one document per run.
 
 - The ceiling lasts for one executor instance. Loading the same authorization again resets it.
 - It rests on an unmeasured estimate of 5,000 input tokens per page and a cached price.

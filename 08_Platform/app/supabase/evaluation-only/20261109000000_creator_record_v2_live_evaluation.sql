@@ -26,15 +26,38 @@
 --
 -- NOTHING READS these tables for a record, guidance, PDF, payment or eligibility.
 --
+-- INSTALL, VERIFY AND ROLL BACK: 08_Platform/implementation/CR_V2_DOC_LIVE_EVALUATION_ENVIRONMENT.md, with
+-- verify_live_evaluation_environment.sql and rollback_20261109000000.sql beside this file.
+--
 -- ROLLBACK (only while every table is empty): drop the six functions (authority, spent, preflight, reserve, settle, record), the five
 -- tables (environment, authorizations, documents, reservations, attempts) and the three trigger guard functions (authorization,
 -- document, reservation). The environment marker and the attempts reuse the existing creator_record_v2_examination_append_only_guard,
 -- which stays.
 
 DO $pre$
+DECLARE
+  v_table text;
+  v_found boolean;
 BEGIN
   IF to_regclass('public.creator_record_v2_live_examination_attempts') IS NULL THEN
     RAISE EXCEPTION 'the evaluation schema requires 20261108000000' USING ERRCODE = 'P0001';
+  END IF;
+  -- CR-V2-DOC-LIVE-1C-B1 install guard. Only where the operator has already established the isolated-test marker, which Production
+  -- does not have (and whose CHECK refuses the Production reference), and only into a project holding no customer, payment, issuance
+  -- or UAT data. It cannot observe which project it is in; it refuses the projects that look like anything but an empty isolated one.
+  IF NOT EXISTS (SELECT 1 FROM public.creator_record_v2_examination_environment WHERE singleton) THEN
+    RAISE EXCEPTION 'the evaluation schema installs only where the isolated-test environment marker exists' USING ERRCODE = 'P0001';
+  END IF;
+  FOR v_table IN SELECT unnest(ARRAY['submissions', 'rights_packages', 'payment_fulfillments', 'creator_record_artifacts', 'creator_record_artifact_uat', 'creator_record_v2_examination_uat_grants']) LOOP
+    IF to_regclass('public.' || v_table) IS NOT NULL THEN
+      EXECUTE format('SELECT EXISTS (SELECT 1 FROM public.%I)', v_table) INTO v_found;
+      IF v_found THEN
+        RAISE EXCEPTION 'the evaluation schema installs only into a project with no customer, payment, issuance or UAT data (found rows in %)', v_table USING ERRCODE = 'P0001';
+      END IF;
+    END IF;
+  END LOOP;
+  IF EXISTS (SELECT 1 FROM public.creator_record_v2_prepared WHERE submission_id IS NOT NULL) THEN
+    RAISE EXCEPTION 'the evaluation schema installs only into a project with no customer, payment, issuance or UAT data (found a submitted prepared version)' USING ERRCODE = 'P0001';
   END IF;
 END
 $pre$;

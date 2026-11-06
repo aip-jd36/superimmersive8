@@ -6,7 +6,8 @@
  * only this contract, which no route reaches. Lifting this lock is a reviewed code change and a separate decision.
  *
  * What actually stands between this code and a model call today:
- *   - This compile-time lock is the principal barrier, together with the fact that no runner or route exists.
+ *   - This compile-time lock is the principal barrier. No route reaches this code; the only runner (CR-V2-DOC-LIVE-1C-B1) is an operator
+ *     CLI that refuses at this lock.
  *   - The object below is the executor's SESSION view of an authorization. Called directly, it is caller-supplied and unverified. The
  *     one entry point (`./evaluation`, CR-V2-DOC-LIVE-1C-A) builds it only from a durable authorization the database returned, and
  *     takes a durable reservation before each attempt. That schema is evaluation-only and applied to no deployed database.
@@ -20,7 +21,9 @@
  */
 
 import { MAX_LIVE_UPLOAD_BYTES } from '../evidence/document-observations'
-import { countPdfPages } from '../evidence/pdf-text-layer'
+import { countPdfPages, extractPdfTextLayer, pdfHasUncountedContent } from '../evidence/pdf-text-layer'
+import { RECEIPT_EXAMINATION_SYSTEM_PROMPT, RECEIPT_EXAMINATION_USER_TEXT } from '../receipt-examination/prompt'
+import { RECEIPT_EXTRACTION_SCHEMA } from '../receipt-examination/schema'
 import type { EvidenceMediaType } from '../evidence-intake/vocabulary'
 import { BASE_MAX_TOKENS, RETRY_MAX_TOKENS } from '../receipt-examination/examine'
 
@@ -85,6 +88,91 @@ export function checkLiveDocumentBounds(bytes: Uint8Array, media: EvidenceMediaT
   const pages = countPdfPages(bytes)
   if (pages === null) return 'pages_undetermined'
   return pages > LIVE_BOUNDS.max_pdf_pages ? 'too_many_pages' : 'within_bounds'
+}
+
+// ── CR-V2-DOC-LIVE-1C-B1: the pre-call input bound ──────────────────────────────────────────────────
+//
+// An upper bound on the input tokens of ONE request, from the bytes that would be sent, computed before any reservation and again by
+// the executor on the content it is about to send. Nothing here is a measurement, and the provider's count is not available without
+// sending the document, so every term is a deliberate over-estimate, and anything that cannot be bounded is refused:
+//   - text (the fixed prompt, the fixed user text, the output schema and each PDF's extracted text): two tokens per UTF-8 byte. A
+//     byte-level tokenizer does not produce more than one token per byte; the factor of two covers layout and whitespace differences
+//     between this text layer and the provider's;
+//   - each image, and each PDF page (sent to the model as an image): the documented ceiling for the pinned model's image size limit
+//     (about 4,784 tokens at 2,576 px on the long edge), rounded up. That a PDF page image obeys the same ceiling is an ASSUMPTION;
+//   - a fixed allowance for message framing and the structured-output instructions the provider adds (ASSUMPTION).
+// A PDF is refused if its text layer cannot be read, or if it carries content the text layer would not count (form fields, text
+// annotations, embedded files, JavaScript, Type 3 fonts, tiling patterns, links with their own appearance). Its text is read with every
+// Form XObject draw counted again; a form nested too deep, drawn inside itself, or drawn too often makes it unreadable, so refused
+// (1C-B1-FIX). Both assumptions must be checked with a token count on synthetic documents before any run.
+
+export const INPUT_BOUND = {
+  tokens_per_text_byte: 2,
+  tokens_per_image: 5_000,
+  framing_tokens: 2_000,
+  /**
+   * The most one request may carry. With two requests per attempt, this bounds an attempt's input. Sized so a five-page PDF with a
+   * few kilobytes of text fits: at the limit an attempt costs about $0.27 for the pinned model, which the per-attempt reservation must cover.
+   */
+  max_input_tokens_per_request: 60_000,
+} as const
+
+const utf8 = (s: string) => Buffer.byteLength(s, 'utf8')
+const FIXED_TEXT_BYTES = utf8(RECEIPT_EXAMINATION_SYSTEM_PROMPT) + utf8(RECEIPT_EXAMINATION_USER_TEXT) + utf8(JSON.stringify(RECEIPT_EXTRACTION_SCHEMA))
+
+export type InputBoundRefusal = 'image_unreadable' | 'pdf_pages_undetermined' | 'pdf_text_unreadable' | 'pdf_uncounted_content' | 'input_over_limit'
+export type InputBound = { ok: true; input_tokens: number } | { ok: false; reason: InputBoundRefusal }
+
+/** Width and height from a PNG IHDR or a JPEG start-of-frame. Null when neither can be read. */
+export function imageDimensions(bytes: Uint8Array, media: 'image/png' | 'image/jpeg'): { width: number; height: number } | null {
+  const b = bytes
+  if (media === 'image/png') {
+    if (b.length < 24 || b[12] !== 0x49 || b[13] !== 0x48 || b[14] !== 0x44 || b[15] !== 0x52) return null
+    const w = ((b[16] << 24) >>> 0) + (b[17] << 16) + (b[18] << 8) + b[19]
+    const h = ((b[20] << 24) >>> 0) + (b[21] << 16) + (b[22] << 8) + b[23]
+    return w > 0 && h > 0 ? { width: w, height: h } : null
+  }
+  let i = 2
+  while (i + 9 < b.length) {
+    if (b[i] !== 0xff) return null
+    const marker = b[i + 1]
+    if (marker === 0xd8 || (marker >= 0xd0 && marker <= 0xd7) || marker === 0x01) { i += 2; continue }
+    const len = (b[i + 2] << 8) + b[i + 3]
+    if (len < 2) return null
+    if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
+      const h = (b[i + 5] << 8) + b[i + 6]
+      const w = (b[i + 7] << 8) + b[i + 8]
+      return w > 0 && h > 0 ? { width: w, height: h } : null
+    }
+    i += 2 + len
+  }
+  return null
+}
+
+export function boundLiveInputTokens(bytes: Uint8Array, media: EvidenceMediaType): InputBound {
+  let documentTokens: number
+  if (media === 'application/pdf') {
+    const pages = countPdfPages(bytes)
+    if (pages === null) return { ok: false, reason: 'pdf_pages_undetermined' }
+    const hidden = pdfHasUncountedContent(bytes)
+    if (hidden !== false) return { ok: false, reason: hidden === null ? 'pdf_text_unreadable' : 'pdf_uncounted_content' }
+    // Every form draw counted again, and anything that would be skipped makes the file unreadable (1C-B1-FIX).
+    const layer = extractPdfTextLayer(bytes, { countEveryDraw: true })
+    // `no_text`: no text is drawn at all (a scan, say). Every other unavailable reason means the text could not be read, so it is unbounded.
+    if (layer.status === 'unavailable' && layer.reason !== 'no_text') return { ok: false, reason: 'pdf_text_unreadable' }
+    const textBytes = layer.status === 'extracted' ? utf8(layer.text) : 0
+    documentTokens = textBytes * INPUT_BOUND.tokens_per_text_byte + pages * INPUT_BOUND.tokens_per_image
+  } else {
+    if (!imageDimensions(bytes, media)) return { ok: false, reason: 'image_unreadable' }
+    documentTokens = INPUT_BOUND.tokens_per_image
+  }
+  const total = FIXED_TEXT_BYTES * INPUT_BOUND.tokens_per_text_byte + INPUT_BOUND.framing_tokens + documentTokens
+  return total > INPUT_BOUND.max_input_tokens_per_request ? { ok: false, reason: 'input_over_limit' } : { ok: true, input_tokens: total }
+}
+
+/** The most one attempt can cost if every bound holds: both requests at the input bound, every output token. Null for an unpriced model. */
+export function attemptCostBoundUsd(model: string, inputTokensPerRequest: number): number | null {
+  return estimatedUsd(model, inputTokensPerRequest * LIVE_BOUNDS.max_requests_per_attempt, BASE_MAX_TOKENS + RETRY_MAX_TOKENS)
 }
 
 // ── The explicit authorization for one bounded evaluation ───────────────────────────────────────────
