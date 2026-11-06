@@ -32,6 +32,19 @@ export interface AnthropicReceiptCallerOptions {
   apiKeyEnv?: string
 }
 
+/** CR-V2-DOC-LIVE-1B. A fixed kind for a thrown provider error, decided by the SDK's own error classes. Carries no message or content. */
+export type ProviderFailureKind = 'timeout' | 'rate_limited' | 'overloaded' | 'server_error' | 'auth' | 'rejected' | 'connection' | 'unknown'
+
+export function classifyAnthropicFailure(err: unknown): ProviderFailureKind {
+  if (err instanceof Anthropic.APIConnectionTimeoutError) return 'timeout' // before its parent, APIConnectionError
+  if (err instanceof Anthropic.RateLimitError) return 'rate_limited'
+  if (err instanceof Anthropic.AuthenticationError || err instanceof Anthropic.PermissionDeniedError) return 'auth'
+  if (err instanceof Anthropic.BadRequestError || err instanceof Anthropic.NotFoundError || err instanceof Anthropic.UnprocessableEntityError || err instanceof Anthropic.ConflictError) return 'rejected'
+  if (err instanceof Anthropic.InternalServerError) return err.status === 529 ? 'overloaded' : 'server_error'
+  if (err instanceof Anthropic.APIConnectionError) return 'connection'
+  return 'unknown'
+}
+
 export function resolveReceiptModel(options?: AnthropicReceiptCallerOptions): string {
   return options?.model ?? process.env.CREATOR_RECORD_RECEIPT_MODEL ?? DEFAULT_RECEIPT_MODEL
 }

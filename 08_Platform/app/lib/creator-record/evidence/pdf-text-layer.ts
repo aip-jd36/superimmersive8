@@ -269,6 +269,30 @@ function loadObjects(bytes: Uint8Array): Map<number, PdfObject> {
   return objects
 }
 
+/**
+ * CR-V2-DOC-LIVE-1B — how many pages a PDF has, or null when that cannot be told. For a bound checked BEFORE a model call, so it
+ * takes the largest of three counts (page objects, declared page-tree counts, raw page markers) and fails closed: an unparseable,
+ * encrypted or page-less file is null, never a low number.
+ */
+export function countPdfPages(bytes: Uint8Array): number | null {
+  try {
+    if (!Buffer.from(bytes.subarray(0, 1024)).toString('latin1').startsWith('%PDF-')) return null
+    const all = Buffer.from(bytes).toString('latin1')
+    if (/\/Encrypt[\s/<]/.test(all)) return null
+    let found = 0
+    let declared = 0
+    for (const o of Array.from(loadObjects(bytes).values())) {
+      if (!isDict(o.dict) || !isName(o.dict.Type)) continue
+      if (o.dict.Type.name === 'Page') found++
+      if (o.dict.Type.name === 'Pages' && typeof o.dict.Count === 'number') declared = Math.max(declared, o.dict.Count)
+    }
+    if (found === 0) return null
+    return Math.max(found, declared, (all.match(/\/Type\s*\/Page(?![A-Za-z])/g) ?? []).length)
+  } catch {
+    return null
+  }
+}
+
 // ───────────────────────────────────────────── fonts
 
 interface FontMap {

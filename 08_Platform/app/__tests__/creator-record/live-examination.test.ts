@@ -400,9 +400,11 @@ describe('boundaries', () => {
   const own = path.join(process.cwd(), 'lib', 'creator-record', 'live-examination') + path.sep
   const files = roots.flatMap((r) => { try { return walk(r) } catch { return [] } })
 
-  test('no production code imports the live foundation or the mock', () => {
+  test('no production code imports the live foundation or the mock, except its own storage ports, which nothing imports', () => {
+    const ports = path.join(process.cwd(), 'lib', 'creator-record-flow', 'live-examination-production.ts')
     const outside = files.filter((f) => !f.startsWith(own)).filter((f) => /live-examination|mock-live-executor/.test(readFileSync(f, 'utf8')))
-    expect(outside).toEqual([])
+    expect(outside).toEqual([ports])
+    expect(readFileSync(ports, 'utf8')).not.toMatch(/mock-live-executor|real-executor/)
   })
 
   test('it imports no provider, record, guidance, governance, payment or eligibility code', () => {
@@ -410,17 +412,30 @@ describe('boundaries', () => {
     expect(Array.from(new Set(imports)).sort()).toEqual([
       '../evidence-intake/contract',
       '../evidence-intake/vocabulary',
-      '../evidence/config',
+      '../evidence/document-observations',
+      '../evidence/live-caller', // CR-V2-DOC-LIVE-1B: real-executor.ts, for the pinned model, key and timeout
+      '../evidence/pdf-text-layer',
       '../examination/envelope',
       '../examination/examine-document',
       '../examination/profile',
       '../examination/receipt-profile',
       '../receipt-examination/examine',
+      '../receipt-examination/examine.anthropic', // CR-V2-DOC-LIVE-1B: real-executor.ts only, dynamically, behind every lock (checked below)
       '../receipt-examination/prompt',
       '../receipt-examination/schema',
       '../record-core/canonical',
+      './controls',
       './envelope',
+      './examine',
+      '@/lib/interview-engine/anthropic-structured-output-retry',
     ])
+    const adapterUsers = files.filter((f) => f.startsWith(own) && /receipt-examination\/examine\.anthropic/.test(readFileSync(f, 'utf8')))
+    expect(adapterUsers.map((f) => path.basename(f))).toEqual(['real-executor.ts'])
+    const executor = readFileSync(adapterUsers[0], 'utf8')
+    expect(executor).toMatch(/import type \{ ProviderFailureKind \} from '\.\.\/receipt-examination\/examine\.anthropic'/)
+    expect(executor).not.toMatch(/^import (?!type )[^\n]*examine\.anthropic/m)
+    expect(executor).toContain("if (LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD !== true) throw new LiveExaminationDisabled('code_lock')")
+    expect(executor.indexOf("throw new LiveExaminationDisabled('code_lock')")).toBeLessThan(executor.indexOf("import('../receipt-examination/examine.anthropic')"))
   })
 
   test('the earlier comparison is no longer called by anything', () => {
@@ -431,6 +446,7 @@ describe('boundaries', () => {
   test('every gate stays closed', async () => {
     const lib = path.join(process.cwd(), 'lib', 'creator-record')
     expect(readFileSync(path.join(lib, 'evidence', 'config.ts'), 'utf8')).toContain('export const LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD: boolean = false')
+    expect(readFileSync(path.join(lib, 'live-examination', 'controls.ts'), 'utf8')).toContain('export const LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: boolean = false')
     expect(readFileSync(path.join(lib, 'evidence-intake', 'contract.ts'), 'utf8')).toContain('export const EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED: boolean = false')
     const { liveExtractionEnabled } = await import('@/lib/creator-record/evidence/config')
     expect(liveExtractionEnabled({ CREATOR_RECORD_LIVE_EXTRACTION: 'enabled' })).toBe(false)

@@ -2,8 +2,9 @@
  * CR-V2-DOC-LIVE-1A — one model-read examination of one stored document, and the policy for storing it. Closed.
  *
  * Pure apart from injected ports, and nothing imports this module except tests (test-enforced): no route, page, job or
- * production wiring. There is no real executor. A `live_model` executor is refused while the code lock
- * `LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD` is false, whatever the caller passes, and the database refuses `live_model` as well.
+ * production wiring. A `live_model` executor is refused while the code lock `LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD` (`./controls`)
+ * is false, whatever the caller passes, and the database refuses `live_model` as well. CR-V2-DOC-LIVE-1B adds the executor that would
+ * run behind that lock (`./real-executor`), its guard and the document bounds. Still disabled, and no route reaches any of it.
  *
  * Reused unchanged: the receipt engine (`examineReceiptDocument`: input checks, one recovery retry, strict validator, no repair),
  * its mapping to observations and limitations, the integrity re-check and the audit-before-read order of the replay path.
@@ -18,7 +19,6 @@
  * Single request, no queue or worker: the caller waits, as the replay path does.
  */
 
-import { LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD } from '../evidence/config'
 import { sha256Bytes, sniffMediaType } from '../evidence-intake/contract'
 import type { EvidenceMediaType } from '../evidence-intake/vocabulary'
 import { canonicalJson, sha256Hex } from '../record-core/canonical'
@@ -39,6 +39,7 @@ import {
   type LiveFailureReason,
   type LiveLimitation,
 } from './envelope'
+import { checkLiveDocumentBounds, LIVE_BOUNDS, LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD } from './controls'
 import type { ProfileObservation } from '../examination/profile'
 import { profileKey } from '../examination/profile'
 import { receiptLimitations, receiptObservations, RECEIPT_PROFILE_ID, RECEIPT_PROFILE_VERSION } from '../examination/receipt-profile'
@@ -53,9 +54,18 @@ export class LiveModelTimeout extends Error {
   }
 }
 
+/** What a real executor answers before anything is read or spent. A `live_model` executor without one cannot run. */
+export interface LiveAttemptGuard {
+  /** Named by the authorization for this run. Asked before the bytes are read. */
+  documentPermitted(sha256: string): boolean
+  /** Reserves the spend for one attempt. Asked last, just before the first model call. */
+  reserveAttempt(): boolean
+}
+
 export interface LiveExecutor {
   readonly identity: LiveExecutorIdentity
   readonly callModel: ReceiptModelCaller
+  readonly guard?: LiveAttemptGuard
 }
 
 type LiveReading =
@@ -89,7 +99,7 @@ export interface LiveExaminationDeps {
   isKnownSyntheticFixture(sha256: string): boolean
   executor: LiveExecutor
   profiles: ReadonlyMap<string, LiveExaminationProfile>
-  /** `liveExtractionEnabled()`. Required, with the code lock, for `live_model`. A mock never reaches a provider. */
+  /** `liveEvaluationEnabled()`. Required, with the code lock and a guard, for `live_model`. A mock never reaches a provider. */
   livePermitted: boolean
   now(): Date
 }
@@ -107,6 +117,10 @@ export const LIVE_REFUSALS = [
   'media_type_not_supported',
   'mock_requires_known_fixture',
   'live_refuses_known_fixture',
+  'document_not_authorized',
+  'document_exceeds_live_bounds',
+  'live_budget_exhausted',
+  'document_not_bound',
 ] as const
 export type LiveRefusalCode = (typeof LIVE_REFUSALS)[number]
 export type LiveExamination = { kind: 'envelope'; envelope: LiveEnvelope } | { kind: 'refused'; code: LiveRefusalCode }
@@ -123,12 +137,16 @@ export async function runLiveExamination(deps: LiveExaminationDeps, rawRequest: 
   const executor = deps.executor.identity
   if (executor.mode !== 'live_model' && executor.mode !== 'mock_test') return refuse('executor_not_permitted')
   if (!(LIVE_ORIGIN_RULES[executor.mode].providers as readonly string[]).includes(executor.provider)) return refuse('executor_not_permitted')
-  if (executor.mode === 'live_model' && (LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD !== true || deps.livePermitted !== true)) return refuse('live_examination_disabled')
+  const guard = executor.mode === 'live_model' ? deps.executor.guard : undefined
+  if (executor.mode === 'live_model' && (LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD !== true || deps.livePermitted !== true || !guard)) return refuse('live_examination_disabled')
 
   const record = await deps.documents.get(request.document_id)
   if (!record || record.id !== request.document_id) return refuse('document_not_found')
   if (record.state !== 'stored') return refuse('document_not_stored')
   if (record.user_id !== request.actor_user_id) return refuse('not_owner')
+  // Before the read is logged or the bytes fetched: a document this run may not touch is not touched.
+  if (guard && !guard.documentPermitted(record.sha256)) return refuse('document_not_authorized')
+  if (guard && record.byte_size > LIVE_BOUNDS.max_document_bytes) return refuse('document_exceeds_live_bounds')
 
   const bytes = await deps.documents.readBytes(record)
   if (!bytes) return refuse('object_unavailable')
@@ -139,6 +157,8 @@ export async function runLiveExamination(deps: LiveExaminationDeps, rawRequest: 
   const fixture = deps.isKnownSyntheticFixture(sha256)
   if (executor.mode === 'mock_test' && !fixture) return refuse('mock_requires_known_fixture')
   if (executor.mode === 'live_model' && fixture) return refuse('live_refuses_known_fixture')
+  if (guard && checkLiveDocumentBounds(bytes, record.media_type) !== 'within_bounds') return refuse('document_exceeds_live_bounds')
+  if (guard && !guard.reserveAttempt()) return refuse('live_budget_exhausted')
 
   let thrown: 'model_timeout' | 'provider_failure' = 'provider_failure'
   let responseId: string | null = null

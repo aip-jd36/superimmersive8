@@ -9,11 +9,11 @@ import { parseLiveEnvelope } from '@/lib/creator-record/live-examination/envelop
 import { RECEIPT_LIVE_PROFILE, runLiveExamination, type LiveExaminationDeps } from '@/lib/creator-record/live-examination/examine'
 import { profileKey } from '@/lib/creator-record/examination/profile'
 
-jest.mock('@/lib/creator-record/evidence/config', () => ({ ...jest.requireActual('@/lib/creator-record/evidence/config'), LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD: true }))
+jest.mock('@/lib/creator-record/live-examination/controls', () => ({ ...jest.requireActual('@/lib/creator-record/live-examination/controls'), LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: true }))
 
 const OWNER = '11111111-1111-4111-8111-111111111111'
 const DOC = '33333333-3333-4333-8333-333333333333'
-const BYTES = new Uint8Array(Buffer.from('%PDF-1.4\n%synthetic-test:unlocked\n%%EOF\n'))
+const BYTES = new Uint8Array(Buffer.from('%PDF-1.4\n%synthetic-test:unlocked\n1 0 obj\n<< /Type /Page >>\nendobj\n%%EOF\n'))
 const SHA = createHash('sha256').update(BYTES).digest('hex')
 const RECORD = { id: DOC, user_id: OWNER, sha256: SHA, media_type: 'application/pdf' as const, byte_size: BYTES.length, state: 'stored' as const }
 const REQUEST = { actor_user_id: OWNER, document_id: DOC, profile: { id: 'receipt', version: 1 } }
@@ -24,7 +24,7 @@ function deps(over: Partial<LiveExaminationDeps> = {}, id = 'msg_fake') {
   const out: LiveExaminationDeps = {
     documents: { get: async () => RECORD, readBytes: async () => BYTES },
     isKnownSyntheticFixture: () => false,
-    executor: { identity: { mode: 'live_model', provider: 'anthropic', model: 'a-real-model-name' }, callModel: callModel as never },
+    executor: { identity: { mode: 'live_model', provider: 'anthropic', model: 'a-real-model-name' }, callModel: callModel as never, guard: { documentPermitted: () => true, reserveAttempt: () => true } },
     profiles: new Map([[profileKey(RECEIPT_LIVE_PROFILE.ref), RECEIPT_LIVE_PROFILE]]),
     livePermitted: true,
     now: () => new Date('2026-11-06T10:00:00.000Z'),
