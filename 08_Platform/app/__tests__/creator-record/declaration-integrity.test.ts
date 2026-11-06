@@ -26,7 +26,6 @@ import { T } from '@/lib/creator-record/presentation/templates'
 import { TOPIC_CLAIMS_FIXTURE as CLAIMS } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
 import { namingCurrentContract } from '@/test-support/questionnaire-approval'
-import { historicalRow } from '@/test-support/historical-record'
 
 const preparePrepared = namingCurrentContract(prepareAsSent)
 
@@ -61,7 +60,7 @@ function built(state: unknown, inputs: ApprovedInputs = synInputs) {
   if (!b.ok) throw new Error(`not built: ${JSON.stringify(b)}`)
   return b
 }
-const pdfModel = (stored: { canonical: string; sha256: string }) => { const b = historicalRow({ ...stored, record_schema_version: 7 }); return buildCustomerDocument({ canonical: b.canonical, sha256: b.sha256, issued: { record_id: 'CR-2026-ABCDEF12', issued_on: AS_OF }, templates: synPdf.templates, template_approval: synPdf.approval }) }
+const pdfModel = (stored: { canonical: string; sha256: string }) => { const b = stored; return buildCustomerDocument({ canonical: b.canonical, sha256: b.sha256, issued: { record_id: 'CR-2026-ABCDEF12', issued_on: AS_OF }, templates: synPdf.templates, template_approval: synPdf.approval }) }
 function pdfNotSureList(b: { canonical: string; sha256: string }): string[] {
   const blocks = pdfModel(b).sections.find((s) => s.id === 'open_items')!.blocks
   const at = blocks.findIndex((x) => 'text' in x && x.text === '[TEST ONLY] Not sure')
@@ -554,7 +553,7 @@ describe('guidance is unchanged by removing the two mappings', () => {
 describe('compatibility', () => {
   test('synthetic pinned digests are unchanged, and still match the wording and templates', () => {
     expect(SYNTHETIC_SOURCE_TEXT_SHA256).toBe('e589b6d8b9172463994a2f6335f622e08f11a53e0e3822e3c9acfce4003c221e')
-    expect(SYNTHETIC_PDF_TEMPLATES_FINGERPRINT).toBe('0a2ce73b68d1223f61a8bcd28a297b65f0beec9a08d7f77229d0fd8f2aa6acfd')
+    expect(SYNTHETIC_PDF_TEMPLATES_FINGERPRINT).toBe('19857320de6f205f3c56d899beb5f05cf8b1359e3e6035dc32be123880458ec2')
     const reg = loadQuestionRegistry(SYN.registry_input)
     if (!reg.ok) throw new Error('registry')
     expect(sourceTextDigest(sourceTextContent(synInputs.sources, reg.registry, SYN.acknowledgements))).toBe(SYNTHETIC_SOURCE_TEXT_SHA256)

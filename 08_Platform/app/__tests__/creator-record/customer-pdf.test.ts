@@ -23,10 +23,8 @@ import { buildCustomerDocument, CustomerPdfRefusal, documentModelCanonical, docu
 import { APPLICABILITY_FACTS } from '@/lib/retrieval-engine/types'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
-import { historicalForm } from '@/test-support/historical-record'
 
-/** Issuance and the customer PDF support schema 5 only: records in that format, as a row prepared then would be. */
-const buildCustomerRecord = (input: Parameters<typeof buildCurrentRecord>[0]) => historicalForm(buildCurrentRecord(input))
+const buildCustomerRecord = buildCurrentRecord
 
 const RECORD = { record_id: 'PREP-CRV22BTEST', record_version: 1, captured_at: '2026-10-31T00:00:00Z' }
 const AS_OF = '2026-10-31'
@@ -80,7 +78,7 @@ function placeholderTemplates(): CustomerPdfTemplates {
   return {
     template_id: CUSTOMER_PDF_TEMPLATE_ID,
     version: 1,
-    record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: HISTORICAL_RECORD_SCHEMA_VERSION },
+    record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION },
     document_title: `${PH}Creator Record {record_id}`,
     stamp: 'PLACEHOLDER WORDING FOR TESTING ONLY · CREATOR RECORD · SELF-DECLARED · NOT A CLEARANCE OR LEGAL OPINION',
     footer: `${PH}Creator Record {record_id}`,
@@ -117,6 +115,7 @@ function placeholderTemplates(): CustomerPdfTemplates {
           record_schema: `${PH}Record schema`, record_schema_version: `${PH}Record schema version`, builder: `${PH}Builder`, builder_version: `${PH}Builder version`, registry_version: `${PH}Question registry`, ledger_version: `${PH}Publication ledger`,
           wording: `${PH}Questionnaire wording`, wording_version: `${PH}Wording version`, wording_digest: `${PH}Wording digest`,
           templates: `${PH}PDF templates`, templates_version: `${PH}Template version`, templates_fingerprint: `${PH}Template fingerprint`,
+          questionnaire_contract: `${PH}Questionnaire contract`, questionnaire_contract_version: `${PH}Questionnaire contract version`, questionnaire_contract_ref: `${PH}Questionnaire contract reference`,
           publication_version: `${PH}Entry version`,
         },
       },
@@ -133,7 +132,7 @@ function placeholderTemplates(): CustomerPdfTemplates {
   }
 }
 const approvalOf = (t: unknown, over: Partial<PdfTemplateApproval> = {}): PdfTemplateApproval => ({
-  template_id: CUSTOMER_PDF_TEMPLATE_ID, version: 1, fingerprint: templateFingerprint(t), record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: HISTORICAL_RECORD_SCHEMA_VERSION },
+  template_id: CUSTOMER_PDF_TEMPLATE_ID, version: 1, fingerprint: templateFingerprint(t), record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION },
   lifecycle: 'approved', authority: 'SYNTHETIC TEMPLATE AUTHORITY (fixture only)', decision_date: '2026-10-30', review_ref: 'SYNTHETIC-TEMPLATE-REVIEW-1', ...over,
 })
 function docInput(over: Partial<CustomerDocumentInput> = {}, rec = prepare()): CustomerDocumentInput {
@@ -165,7 +164,7 @@ describe('the document model', () => {
     const t = placeholderTemplates()
     const m = buildCustomerDocument(docInput({ templates: t }, rec))
     expect(m.sections.map((s) => s.id)).toEqual([...CUSTOMER_PDF_SECTIONS])
-    expect(m.identity).toEqual({ record_id: ISSUED.record_id, issued_on: ISSUED.issued_on, record_ref: RECORD.record_id, snapshot_sha256: rec.sha256, templates: { id: CUSTOMER_PDF_TEMPLATE_ID, version: 1, fingerprint: templateFingerprint(t) } })
+    expect(m.identity).toEqual({ record_id: ISSUED.record_id, issued_on: ISSUED.issued_on, record_ref: RECORD.record_id, record_version: RECORD.record_version, snapshot_sha256: rec.sha256, questionnaire_contract: { id: rec.record.sources.questionnaire_contract!.contract_id, version: rec.record.sources.questionnaire_contract!.contract_version, sha256: rec.record.sources.questionnaire_contract!.contract_sha256 }, templates: { id: CUSTOMER_PDF_TEMPLATE_ID, version: 1, fingerprint: templateFingerprint(t) } })
     expect(m.marking.record_id).toBe(ISSUED.record_id)
     expect(m.marking.stamp).toBe(t.stamp)
   })
@@ -188,6 +187,7 @@ describe('the document model', () => {
     }
     collect(rec.record)
     recordStrings.add(rec.sha256)
+    recordStrings.add(rec.record.sources.questionnaire_contract!.contract_sha256.slice(0, 12)) // the printed short reference
     const templateStrings: string[] = []
     const collectT = (v: unknown) => {
       if (typeof v === 'string') templateStrings.push(v)
@@ -270,13 +270,17 @@ describe('the record is verified before anything is read, and every unknown fail
     ['an unknown field on a guidance item', (x: any) => { x.guidance.items[0].commercial_status = 'ok' }],
     ['a missing field', (x: any) => { delete x.guidance.items[0].explanation }],
     ['a document state other than not provided', (x: any) => { x.documents.status = 'provided' }],
-    ['comparisons enabled', (x: any) => { x.comparison.policy = 'enabled' }],
     ['generated text', (x: any) => { x.content.generated_text = 'some' }],
     ['an unknown answer value kind', (x: any) => { x.declarations.answers[0].values[0].kind = 'inferred' }],
     ['a dependency status other than open', (x: any) => { if (x.guidance.items[0].dependency_rows.length === 0) x.guidance.items[0].dependency_rows.push({ dependency_id: 'd', label: 'L', declarations: [], evidence_note: null, evidence_requirement: 'not_defined_by_governance', treated_as: 'evidence_required', sufficiency: 'not_assessed', status: 'open' }); x.guidance.items[0].dependency_rows[0].status = 'met' }],
   ])('%s → record_unsupported', (_, f) => {
     const rec = reseal(prepare({ state: state('Standard') }), f)
     expect(refusal(() => buildCustomerDocument(docInput({}, rec)))).toBe('record_unsupported')
+  })
+
+  test('comparisons enabled: a schema 7 record cannot even verify', () => {
+    const rec = reseal(prepare({ state: state('Standard') }), (x: any) => { x.comparison.policy = 'enabled' })
+    expect(refusal(() => buildCustomerDocument(docInput({}, rec)))).toBe('record_invalid')
   })
 
   test('an unlabelled topic, fact or unmapped question refuses (no fallback text)', () => {

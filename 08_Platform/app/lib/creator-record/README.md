@@ -355,7 +355,7 @@ Tests:
 - **Responses and corrections:** a response names its own version's contract and is refused unless that is the current one, so it never rebuilds a version under another questionnaire. A schema 5 or 6 version has none, and is described as having no recorded contract, never as a mismatch. A correction across contracts lists the earlier answers and fills none in.
 - **Schemas:** the builder writes 7 and 8: 5 and 6 plus `sources.questionnaire_contract` (identity, approval details, whole body, whole wording). `verifyCustomerRecord` checks them from the record alone. 5 and 6 stay readable exactly as stored and are never stamped.
 - **Reconstruction limit:** the body holds the validation rules' version, not their code. Behaviour under that version is recoverable from git only.
-- **Not yet:** schemas 7 and 8 are not issuable and the customer PDF refuses them, and whether confirmation should need a current contract is undecided.
+- **Not yet:** schemas 7 and 8 are not issuable, the customer PDF renders schema 7 only, and whether confirmation should need a current contract is undecided.
 
 ## Commercial eligibility (CR-V2-MVP-ELIGIBILITY-1)
 
@@ -364,4 +364,5 @@ Tests:
 - **Contract:** the contract a record embeds must be the current approved one. Missing, replaced, superseded, withdrawn or pending refuses. This is a conservative MVP policy for new commercial actions, not a decision about records already issued.
 - **Never eligible:** a record with no contract (schema 5, 6), and a synthetic record unless the running bundle is `synthetic_test`, which Production can never select. Both stay readable.
 - **Support:** `CURRENT_ISSUANCE_SUPPORT` is empty. Enabling a schema is a separate decision.
+- **PDF (CR-V2-PDF-7):** `buildCustomerDocument` renders schema 7 only and refuses 5, 6 and 8 by name. Issued PDFs are stored bytes, so this affects no historical artifact. `declarationIncompatibilities` checks every answer against the contract the record embeds. The PDF prints the contract's id, version and a short reference, and never approval text. Only synthetic templates exist; none is approved.
 - **After payment:** `authorizeV2Issuance` refuses a bound version that is no longer the draft's latest, and runs again just before an artifact is marked issued, including on a resumed attempt. A refused payment stays recorded in the ledger: the step stays incomplete, retries, then reaches `needs_reconciliation` with an admin alert. No refund or customer message is automated.

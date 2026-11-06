@@ -34,7 +34,7 @@ import { CreatorRecordIssuanceStoppedError, rendererForFamily } from '@/lib/crea
 import { questionnaireApprovalFor } from '@/test-support/questionnaire-approval'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { APPLICABILITY_FACTS } from '@/lib/retrieval-engine/types'
-import { asRenderableSchema5, withCommercialSupportUnderTest } from '@/test-support/commercial-support'
+import { withCommercialSupportUnderTest } from '@/test-support/commercial-support'
 
 const buildCustomerRecord = buildCurrentRecord
 
@@ -82,7 +82,7 @@ function syntheticBundle(over: Partial<PublicationAuthorityBundle> = {}, approve
   }
   const templates = placeholderTemplates(p)
   const templateApproval: PdfTemplateApproval = {
-    template_id: CUSTOMER_PDF_TEMPLATE_ID, version: 1, fingerprint: templateFingerprint(templates), record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: HISTORICAL_RECORD_SCHEMA_VERSION },
+    template_id: CUSTOMER_PDF_TEMPLATE_ID, version: 1, fingerprint: templateFingerprint(templates), record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION },
     lifecycle: 'approved', authority: approver, decision_date: '2026-10-30', review_ref: 'SYN-TEMPLATE-REVIEW-1',
   }
   return {
@@ -99,7 +99,7 @@ function placeholderTemplates(p: CreatorRecordSources) {
   const qs: Record<string, 'project' | 'contribution'> = {}
   for (const [q, m] of Object.entries(p.presentation)) if (!m.per_tool) qs[q] = m.section === 'project' || m.section === 'locations' ? 'project' : 'contribution'
   return {
-    template_id: CUSTOMER_PDF_TEMPLATE_ID, version: 1, record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: HISTORICAL_RECORD_SCHEMA_VERSION },
+    template_id: CUSTOMER_PDF_TEMPLATE_ID, version: 1, record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION },
     document_title: t('Creator Record {record_id}'), stamp: 'PLACEHOLDER WORDING FOR TESTING ONLY · CREATOR RECORD · SELF-DECLARED · NOT A CLEARANCE OR LEGAL OPINION', footer: t('Creator Record {record_id}'), page_label: 'Page {page} of {pages}',
     sections: {
       about: { heading: t('1. About'), intro: [t('Intro.')], counts: { answers: { one: t('{n} answer.'), other: t('{n} answers.') }, guidance: { one: t('{n} item.'), other: t('{n} items.') }, open_items: { one: t('{n} open.'), other: t('{n} open.') } } },
@@ -109,7 +109,7 @@ function placeholderTemplates(p: CreatorRecordSources) {
       guidance: { heading: t('5. Guidance'), intro: t('Educational.'), empty: t('None.'), item_heading: t('Guidance {index}: {subject}'), subject_with_tool: '{topic} (tool {n})', conclusion: t('Reads'), selected_because: t('Because'), on_what_you_told_us: t('On what you told us'), depends_on: t('Depends on'), unspecified_condition: t('Unspecified.'), caveats: t('Note'), item_limitation: t('Describes published terms only.'), topic_level: t('Topic level.') },
       open_items: { heading: t('6. Open items'), intro: t('Not established.'), empty: t('None.'), item_ref: t('Guidance {index}'), for_guidance: t('For'), not_established_heading: t('Not established'), affects: t('Affects {items}'), unspecified_heading: t('Unspecified'), topic_qualified_heading: t('Topic qualified'), what_you_told_us: t('Told'), nothing_told: t('Nothing'), evidence_note: t('Evidence'), status: t('Status'), sufficiency: t('Evidence'), not_sure_heading: t('Not sure'), documents_heading: t('Documents'), documents_not_provided: t('No documents.'), limitations_heading: t('Limitations'), limitations: [t('Limited.')] },
       not_done: { heading: t('7. Not done'), lines: [t('No review.')] },
-      provenance: { heading: t('8. Provenance'), acknowledgements_heading: t('Acknowledged'), identity_heading: t('Record'), sources_heading: t('Sources'), publications_heading: t('Guidance sources'), labels: { record_id: t('Record id'), issued_on: t('Issued on'), prepared_ref: t('Ref'), record_version: t('Version'), prepared_on: t('Prepared'), captured_at: t('Captured'), snapshot: t('SHA-256'), record_schema: t('Schema'), record_schema_version: t('Schema version'), builder: t('Builder'), builder_version: t('Builder version'), registry_version: t('Registry'), ledger_version: t('Ledger'), wording: t('Wording'), wording_version: t('Wording version'), wording_digest: t('Wording digest'), templates: t('Templates'), templates_version: t('Templates version'), templates_fingerprint: t('Templates fingerprint'), publication_version: t('Entry version') } },
+      provenance: { heading: t('8. Provenance'), acknowledgements_heading: t('Acknowledged'), identity_heading: t('Record'), sources_heading: t('Sources'), publications_heading: t('Guidance sources'), labels: { record_id: t('Record id'), issued_on: t('Issued on'), prepared_ref: t('Ref'), record_version: t('Version'), prepared_on: t('Prepared'), captured_at: t('Captured'), snapshot: t('SHA-256'), record_schema: t('Schema'), record_schema_version: t('Schema version'), builder: t('Builder'), builder_version: t('Builder version'), registry_version: t('Registry'), ledger_version: t('Ledger'), wording: t('Wording'), wording_version: t('Wording version'), wording_digest: t('Wording digest'), templates: t('Templates'), templates_version: t('Templates version'), templates_fingerprint: t('Templates fingerprint'), questionnaire_contract: t('Questionnaire contract'), questionnaire_contract_version: t('Questionnaire contract version'), questionnaire_contract_ref: t('Questionnaire contract reference'), publication_version: t('Entry version') } },
     },
     question_sections: qs,
     conclusion_labels: { relevant_on_declared_facts: t('Relevant'), relevant_applicability_unresolved: t('Relevant, depending') },
@@ -172,7 +172,7 @@ const issueDeps = (bundle: PublicationAuthorityBundle | null): V2IssuanceDeps =>
   latestVersion: async () => ROW,
   governance: (d) => withCommercialSupportUnderTest(approvedGovernanceSnapshot(d, TOPIC_CLAIMS_FIXTURE, bundle)),
   templates: () => approvedPdfTemplates(bundle),
-  renderPdf: async (input) => new TextEncoder().encode(documentModelCanonical(buildCustomerDocument(asRenderableSchema5(input)))),
+  renderPdf: async (input) => new TextEncoder().encode(documentModelCanonical(buildCustomerDocument(input))),
 })
 const issue = (bundle: PublicationAuthorityBundle | null) =>
   renderV2ForIssuance(issueDeps(bundle), { id: SUB, user_id: 'u', tier: 'creator_record', creator_record_product: 'v2' }, 'CR-2026-33333333', new Date('2026-11-01T10:00:00Z'))

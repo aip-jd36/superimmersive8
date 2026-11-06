@@ -20,12 +20,17 @@
  *   - CR-V2-DOC-1: documents are printed as an inventory (fingerprint, type, size, the creator's own
  *     description) and always as not examined; any other document state refuses.
  *
+ *   - CR-V2-PDF-7: schema 7 only. Issued PDFs are stored bytes and are never re-rendered, so narrowing this affects no historical
+ *     artifact; schemas 5 and 6 are never commercially eligible, and schema 8 is not supported yet. Each refuses here by name. Every
+ *     answer must be what the record's own embedded contract allows. The PDF names the contract by id, version and a short
+ *     reference; the full digest stays in the record, which the printed snapshot digest fixes. Approval text is never printed.
+ *
  * Errors: `CustomerPdfRefusal` with a code, never a partial model.
  */
 
 import { CREATOR_RECORD_CONCLUSIONS } from '../contract/compose'
 import { isIsoDate } from '../contract/types'
-import { isUncertainValue, verifyCustomerRecord, type CustomerRecordV2 } from '../customer-record/record'
+import { CUSTOMER_RECORD_SCHEMA_VERSION, declarationIncompatibilities, isUncertainValue, verifyCustomerRecord, type CustomerRecordV2 } from '../customer-record/record'
 import { arr, int, nullable, obj, oneOf, opt, ProjectionRefusal, str, WITHHELD } from '../record-core/projection'
 import { EVIDENCE_CATEGORIES, EVIDENCE_MEDIA_TYPES } from '../evidence-intake/vocabulary'
 import { canonicalJson } from '../record-core/canonical'
@@ -50,7 +55,10 @@ export interface CustomerDocumentModel {
     record_id: string
     issued_on: string
     record_ref: string
+    record_version: number
     snapshot_sha256: string
+    /** The full identity, from the record. Only the short reference is printed. */
+    questionnaire_contract: { id: string; version: number; sha256: string }
     templates: { id: string; version: number; fingerprint: string }
   }
 }
@@ -71,7 +79,7 @@ export class CustomerPdfRefusal extends Error {
 
 const ISSUED_RECORD_ID = /^CR-\d{4}-[0-9A-F]{8}$/
 
-// ── The record, read through an exact-key projection (schema v3) ──
+// ── The record, read through an exact-key projection (schema 7) ──
 
 const answerValue = obj({ value: str, kind: oneOf(['option', 'free_text', 'not_sure'] as const), label: nullable(str) })
 const answer = obj({ q_id: str, q_version: int, tool_index: nullable(int), question: str, answer_verbatim: str, values: arr(answerValue) })
@@ -121,6 +129,7 @@ const recordSpec = obj({
     questions: WITHHELD,
     publications: arr(obj({ entry_id: str, version: int, claim_id: str, claim_last_verified: str, approver: str, decision_date: str, refresh_by: str })),
     authority_digests: WITHHELD,
+    questionnaire_contract: obj({ contract_id: str, contract_version: int, contract_sha256: str, authority: WITHHELD, decision_date: WITHHELD, review_ref: WITHHELD, body: WITHHELD, wording: WITHHELD }),
   }),
   declarations: obj({ answers: arr(answer), observations: arr(observation), acknowledgements: arr(obj({ id: str, text: str })) }),
   documents: obj({
@@ -139,6 +148,7 @@ export function buildCustomerDocument(input: CustomerDocumentInput): CustomerDoc
   // 1. The record first: nothing is read from a record that does not verify.
   const verified = verifyCustomerRecord(input.canonical, input.sha256)
   if (!verified.ok) throw new CustomerPdfRefusal('record_invalid', verified.reason)
+  if (verified.record.schema_version !== CUSTOMER_RECORD_SCHEMA_VERSION) throw new CustomerPdfRefusal('record_schema_unsupported', String(verified.record.schema_version))
   let r: RecordView
   try {
     r = recordSpec(verified.record as unknown, 'record')
@@ -146,6 +156,8 @@ export function buildCustomerDocument(input: CustomerDocumentInput): CustomerDoc
     if (err instanceof ProjectionRefusal) throw new CustomerPdfRefusal('record_unsupported', `${err.path}: ${err.reason}`)
     throw err
   }
+  const incompatible = declarationIncompatibilities(verified.record)
+  if (incompatible.length > 0) throw new CustomerPdfRefusal('declarations_incompatible', incompatible.join(', '))
 
   // 2. Issuance identity.
   const issued = input.issued
@@ -405,6 +417,9 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
           row(L.wording, st.source_id),
           row(L.wording_version, String(st.version)),
           row(L.wording_digest, st.content_sha256),
+          row(L.questionnaire_contract, r.sources.questionnaire_contract.contract_id),
+          row(L.questionnaire_contract_version, String(r.sources.questionnaire_contract.contract_version)),
+          row(L.questionnaire_contract_ref, r.sources.questionnaire_contract.contract_sha256.slice(0, 12)),
           row(L.templates, t.template_id, 'template'),
           row(L.templates_version, String(t.version), 'template'),
           row(L.templates_fingerprint, fingerprint, 'template'),
@@ -426,7 +441,7 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
     meta: { title: fill(t.document_title, { record_id: issued.record_id }), subject: t.stamp, creator: `${t.template_id} v${t.version}`, producer: `${r.builder.id} v${r.builder.version}` },
     marking: { stamp: t.stamp, record_id: issued.record_id, footer: fill(t.footer, { record_id: issued.record_id }), page_label: t.page_label },
     sections,
-    identity: { record_id: issued.record_id, issued_on: issued.issued_on, record_ref: r.record.record_ref, snapshot_sha256: sha256, templates: { id: t.template_id, version: t.version, fingerprint } },
+    identity: { record_id: issued.record_id, issued_on: issued.issued_on, record_ref: r.record.record_ref, record_version: r.record.record_version, snapshot_sha256: sha256, questionnaire_contract: { id: r.sources.questionnaire_contract.contract_id, version: r.sources.questionnaire_contract.contract_version, sha256: r.sources.questionnaire_contract.contract_sha256 }, templates: { id: t.template_id, version: t.version, fingerprint } },
   }
 }
 

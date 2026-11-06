@@ -15,7 +15,6 @@ import type { EvidenceRow } from '@/lib/creator-record/evidence-intake/service'
 import { canonicalJson, sha256Hex } from '@/lib/creator-record/record-core/canonical'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { namingCurrentContract } from '@/test-support/questionnaire-approval'
-import { historicalRow } from '@/test-support/historical-record'
 import { withCommercialSupportUnderTest } from '@/test-support/commercial-support'
 
 const preparePrepared = namingCurrentContract(prepareAsSent)
@@ -138,7 +137,7 @@ describe('synthetic PDF inventory', () => {
     const { d, mem } = deps()
     const r = await prepare(d, documents)
     if (!r.ok) throw new Error(`prepare: ${r.code}`)
-    const row = historicalRow(mem.rows.get(r.view.id)!)
+    const row = mem.rows.get(r.view.id)!
     const t = approvedPdfTemplates(bundle)
     return { row, model: buildCustomerDocument({ canonical: row.canonical, sha256: row.sha256, issued: { record_id: 'CR-2026-ABCDEF12', issued_on: '2026-11-01' }, templates: t.templates, template_approval: t.approval }) }
   }

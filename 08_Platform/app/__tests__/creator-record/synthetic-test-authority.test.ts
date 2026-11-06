@@ -30,7 +30,7 @@ import { PILOT_CAVEATS, PILOT_DEPENDENCY_LABELS, PILOT_PUBLICATION_LEDGER } from
 import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/config'
 import { CreatorRecordIssuanceStoppedError, rendererForFamily } from '@/lib/creator-record-artifacts/renderers'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
-import { asRenderableSchema5, withCommercialSupportUnderTest } from '@/test-support/commercial-support'
+import { withCommercialSupportUnderTest } from '@/test-support/commercial-support'
 
 const buildCustomerRecord = buildCurrentRecord
 
@@ -130,7 +130,7 @@ describe('the synthetic test authority is structurally sound and pinned like a r
   test('the template fingerprint is pinned, and the templates pass the wording lock', () => {
     expect(SYNTHETIC_PDF_TEMPLATES_FINGERPRINT).toBe(templateFingerprint(bundle.pdf_templates))
     expect(bundle.pdf_template_approval?.template_id).toBe(CUSTOMER_PDF_TEMPLATE_ID)
-    expect(checkTemplates(bundle.pdf_templates, bundle.pdf_template_approval, { id: CUSTOMER_RECORD_SCHEMA, version: HISTORICAL_RECORD_SCHEMA_VERSION })).toMatchObject({ ok: true })
+    expect(checkTemplates(bundle.pdf_templates, bundle.pdf_template_approval, { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION })).toMatchObject({ ok: true })
   })
 
   test('a wording change without re-pinning is refused (digest mismatch)', () => {
@@ -166,7 +166,7 @@ const issueWith = (b: ReturnType<typeof currentPublicationAuthority>) => {
     latestVersion: async () => row,
     governance: (d) => withCommercialSupportUnderTest(approvedGovernanceSnapshot(d, TOPIC_CLAIMS_FIXTURE, b)),
     templates: () => approvedPdfTemplates(b),
-    renderPdf: async (input) => new TextEncoder().encode(documentModelCanonical(buildCustomerDocument(asRenderableSchema5(input)))),
+    renderPdf: async (input) => new TextEncoder().encode(documentModelCanonical(buildCustomerDocument(input))),
   }
   return renderV2ForIssuance(deps, { id: SUB, user_id: 'u', tier: 'creator_record', creator_record_product: 'v2' }, 'CR-2026-44444444', new Date('2026-11-01T10:00:00Z'))
     .then((bytes) => ({ issued: true as const, text: new TextDecoder().decode(bytes) }))

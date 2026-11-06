@@ -82,6 +82,8 @@ const templateSpec = obj({
         record_schema: str, record_schema_version: str, builder: str, builder_version: str, registry_version: str, ledger_version: str,
         // CR-V2-2H: no approver name and no internal ledger identifier is printed (both stay in the verified record).
         wording: str, wording_version: str, wording_digest: str,
+        // CR-V2-PDF-7: the contract's id, version and a short reference. The full digest stays in the record.
+        questionnaire_contract: str, questionnaire_contract_version: str, questionnaire_contract_ref: str,
         templates: str, templates_version: str, templates_fingerprint: str,
         publication_version: str,
       }),

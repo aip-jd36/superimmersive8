@@ -45,12 +45,13 @@
  */
 
 import { CREATOR_RECORD_CONCLUSIONS, biRankForStatus, type GuidanceItem } from '../contract/compose'
+import { loadQuestionRegistry, type RegistryInput } from '../contract/question-registry'
 import { authorizePublication } from '../contract/publication-ledger'
 import type { DeclaredObservation, RecordContext } from '../contract/provenance'
 import { isIsoDate } from '../contract/types'
 import type { CreatorRecordSources } from '../prototype/build-draft'
 import { runDeclaredGuidance } from '../prototype/declared-guidance'
-import { toolInstance, type FormIssue } from '../prototype/form'
+import { toolInstance, validateForm, visibleQuestions, visibleToolQuestions, type CreatorRecordFormState, type FormConfig, type FormIssue, type QuestionPresentation } from '../prototype/form'
 import { TOOL_QUESTION_ROLES } from '../prototype/questionnaire-structure'
 import { parseFormState } from '../prototype/parse-form-state'
 import { canonicalJson, sha256Hex, CanonicalizationError } from '../record-core/canonical'
@@ -59,7 +60,7 @@ import {
   claimContentDigest, claimRef, observationMapContentDigest, observationMapRef, publicationContentDigest, publicationRef,
   questionContentDigest, questionRef, type DigestedKind,
 } from './authority-content'
-import { embeddedContractValid, type EmbeddedQuestionnaireContract } from './questionnaire-contract'
+import { embeddedContractValid, QUESTIONNAIRE_VALIDATION_RULES, type EmbeddedQuestionnaireContract } from './questionnaire-contract'
 import { checkApprovedSources, type SourceRefusal, type SourceTextInput, type TopicClaims } from './sources'
 import {
   EVIDENCE_CATEGORIES, EVIDENCE_EXAMINATION_NOT_EXAMINED, EVIDENCE_MAX_BYTES, EVIDENCE_MAX_FILE_NAME_CHARS, EVIDENCE_MAX_PER_RECORD, EVIDENCE_MAX_PER_TOOL, EVIDENCE_MEDIA_TYPES,
@@ -88,7 +89,7 @@ export const HISTORICAL_EXAMINATION_SCHEMA_VERSION = 6
 /**
  * v7, v8 (CR-V2-DECL-1B-2): v5 and v6 plus `sources.questionnaire_contract`: the approved contract's identity, its approval
  * details, its whole body and the whole wording set, so a record says what it was prepared under without any deployed code.
- * Neither is issuable: not in `CURRENT_ISSUANCE_SUPPORT`, and the customer PDF does not read them.
+ * Neither is issuable: not in `CURRENT_ISSUANCE_SUPPORT`. The customer PDF renders schema 7 only (CR-V2-PDF-7).
  */
 export const CUSTOMER_RECORD_SCHEMA_VERSION = 7
 export const CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION = 8
@@ -611,5 +612,56 @@ export function verifyCustomerRecord(canonical: string, sha256: string): { ok: t
 }
 
 /** Whether a verified record is examination-bearing, whichever schema generation it belongs to. */
+/**
+ * CR-V2-PDF-7: whether a record's declarations are exactly what its own embedded contract allows, using the same rules the form
+ * uses. Empty means they are. Reads the record alone: nothing here consults the questionnaire deployed today. Code strings only.
+ */
+export function declarationIncompatibilities(record: CustomerRecordV2): string[] {
+  const c = record.sources.questionnaire_contract
+  if (!c) return ['contract_not_recorded']
+  const body = c.body as Partial<RegistryInput> & { validation_rules?: unknown; presentation?: Record<string, QuestionPresentation>; acknowledgement_ids?: string[]; max_tools?: number }
+  if (canonicalJson(body.validation_rules ?? null) !== canonicalJson(QUESTIONNAIRE_VALIDATION_RULES)) return ['validation_rules_unsupported']
+  const loaded = loadQuestionRegistry({ questions: body.questions ?? [], observation_map: body.observation_map ?? [], semantic_mappings: body.semantic_mappings, prohibited_dependency_targets: body.prohibited_dependency_targets })
+  if (!loaded.ok || !body.presentation || !body.acknowledgement_ids || !Number.isInteger(body.max_tools)) return ['contract_unreadable']
+  const config: FormConfig = { registry: loaded.registry, presentation: body.presentation, acknowledgement_ids: body.acknowledgement_ids, max_tools: body.max_tools as number }
+  const issues: string[] = []
+  const state: CreatorRecordFormState = { answers: {}, tools: [], acknowledgements: {} }
+  for (const a of record.declarations.answers) {
+    const q = loaded.registry.questions.get(a.q_id)
+    const p = body.presentation[a.q_id]
+    if (!q || !p) {
+      issues.push(`unknown_question:${a.q_id}`)
+      continue
+    }
+    if (q.version !== a.q_version) issues.push(`question_version:${a.q_id}`)
+    if (p.per_tool !== (a.tool_index !== null)) issues.push(`question_scope:${a.q_id}`)
+    const w = c.wording.questions[a.q_id]
+    if (!w || w.q_version !== a.q_version || w.text !== a.question) issues.push(`question_wording:${a.q_id}`)
+    for (const v of a.values) {
+      const compatible = v.kind === 'option' ? q.options !== 'free_text' && q.options.includes(v.value) && w?.option_labels[v.value] === v.label
+        : q.options === 'free_text' && (v.kind === 'free_text' || p.allow_not_sure)
+      if (!compatible) issues.push(`answer_value:${a.q_id}`)
+    }
+    const into = a.tool_index === null ? state.answers : (state.tools[a.tool_index] ??= {})
+    if (Object.prototype.hasOwnProperty.call(into, a.q_id)) issues.push(`duplicate_answer:${a.q_id}`)
+    into[a.q_id] = a.values.map((v) => v.value)
+  }
+  // A gap in the tool blocks is an empty block: its required questions are reported as missing, not skipped.
+  state.tools = Array.from(state.tools, (t) => t ?? {})
+  const acknowledged = record.declarations.acknowledgements
+  for (const a of acknowledged) {
+    state.acknowledgements[a.id] = true
+    if (!body.acknowledgement_ids.includes(a.id) || c.wording.acknowledgements[a.id] !== a.text) issues.push(`acknowledgement:${a.id}`)
+  }
+  for (const i of validateForm(config, state)) issues.push(`${i.issue}:${i.q_id ?? 'form'}`)
+  const shown = new Set(visibleQuestions(config, state.answers).single.map((q) => q.q_id))
+  for (const id of Object.keys(state.answers)) if (!shown.has(id)) issues.push(`hidden_answer:${id}`)
+  state.tools.forEach((t) => {
+    const shownHere = new Set(visibleToolQuestions(config, state.answers, t).map((q) => q.q_id))
+    for (const id of Object.keys(t)) if (!shownHere.has(id)) issues.push(`hidden_answer:${id}`)
+  })
+  return Array.from(new Set(issues)).sort()
+}
+
 export const isExaminationBearing = (record: Pick<CustomerRecordV2, 'schema_version'>): boolean =>
   record.schema_version === HISTORICAL_EXAMINATION_SCHEMA_VERSION || record.schema_version === CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION

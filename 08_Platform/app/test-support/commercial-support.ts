@@ -6,7 +6,6 @@
  */
 import type { GovernanceSnapshot } from '@/lib/creator-record/customer-record/eligibility'
 import { CUSTOMER_RECORD_BUILDER, CUSTOMER_RECORD_EXAMINATION_BUILDER, CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
-import { historicalRow } from './historical-record'
 
 export const COMMERCIAL_SUPPORT_UNDER_TEST = {
   record_schemas: [{ id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION }, { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION }],
@@ -24,10 +23,4 @@ export function withCommercialSupportUnderTest(s: GovernanceSnapshot): Governanc
       builder: { status: 'ok', entries: COMMERCIAL_SUPPORT_UNDER_TEST.builders.map((i) => entry('builder', i)) },
     },
   }
-}
-
-/** The customer PDF renders schema 5 only, so a test running the real document builder after the real checks gives it that form. */
-export function asRenderableSchema5<I extends { canonical: string; sha256: string }>(input: I): I {
-  const h = historicalRow({ canonical: input.canonical, sha256: input.sha256, record_schema_version: 7 })
-  return { ...input, canonical: h.canonical, sha256: h.sha256 }
 }

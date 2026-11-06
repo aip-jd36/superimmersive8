@@ -203,14 +203,12 @@ const LEDGER: readonly PublicationLedgerEntry[] = [
 
 /** Must equal CUSTOMER_RECORD_SCHEMA / _VERSION (test-checked). */
 const RECORD_SCHEMA = { id: 'si8/creator-record-v2-record', version: 7 }
-/** The customer PDF stays on schema 5: it is closed for 7 and 8 until separately authorized. */
-const PDF_RECORD_SCHEMA = { id: 'si8/creator-record-v2-record', version: 5 }
 
 /** Placeholder PDF templates (data only). Every string is marked TEST; the wording lock applies unchanged. */
 const PDF_TEMPLATES = {
   template_id: 'si8/creator-record-v2-pdf-templates',
-  version: 1,
-  record_schema: PDF_RECORD_SCHEMA,
+  version: 2,
+  record_schema: RECORD_SCHEMA,
   document_title: t('Synthetic test record {record_id}'),
   stamp: 'SYNTHETIC TEST RECORD · STAGING REHEARSAL ONLY · NOT A CREATOR RECORD · NOT A CLEARANCE OR LEGAL OPINION',
   footer: t('Synthetic test record {record_id}'),
@@ -223,7 +221,7 @@ const PDF_TEMPLATES = {
     guidance: { heading: t('5. Placeholder items'), intro: t('Placeholder items for the rehearsal.'), empty: t('None.'), item_heading: t('Item {index}: {subject}'), subject_with_tool: '{topic} (tool {n})', conclusion: t('Reads'), selected_because: t('Because'), on_what_you_told_us: t('On what was entered'), depends_on: t('Depends on'), unspecified_condition: t('Unspecified.'), caveats: t('Note'), item_limitation: t('Placeholder limitation.'), topic_level: t('Topic level.') },
     open_items: { heading: t('6. Open items'), intro: t('Placeholder open items.'), empty: t('None.'), item_ref: t('Item {index}'), for_guidance: t('For'), not_established_heading: t('Not established'), affects: t('Affects {items}'), unspecified_heading: t('Unspecified'), topic_qualified_heading: t('Topic qualified'), what_you_told_us: t('Entered'), nothing_told: t('Nothing'), evidence_note: t('Evidence'), status: t('Status'), sufficiency: t('Evidence'), not_sure_heading: t('Not sure'), documents_heading: t('Documents'), documents_not_provided: t('No documents.'), limitations_heading: t('Limitations'), limitations: [t('Placeholder limitation.')] },
     not_done: { heading: t('7. Not done'), lines: [t('No review of any kind was performed. This is a synthetic test record.')] },
-    provenance: { heading: t('8. Provenance'), acknowledgements_heading: t('Acknowledged'), identity_heading: t('Record'), sources_heading: t('Sources'), publications_heading: t('Item sources'), labels: { record_id: t('Record id'), issued_on: t('Issued on'), prepared_ref: t('Ref'), record_version: t('Version'), prepared_on: t('Prepared'), captured_at: t('Captured'), snapshot: t('SHA-256'), record_schema: t('Schema'), record_schema_version: t('Schema version'), builder: t('Builder'), builder_version: t('Builder version'), registry_version: t('Registry'), ledger_version: t('Ledger'), wording: t('Wording'), wording_version: t('Wording version'), wording_digest: t('Wording digest'), templates: t('Templates'), templates_version: t('Templates version'), templates_fingerprint: t('Templates fingerprint'), publication_version: t('Entry version') } },
+    provenance: { heading: t('8. Provenance'), acknowledgements_heading: t('Acknowledged'), identity_heading: t('Record'), sources_heading: t('Sources'), publications_heading: t('Item sources'), labels: { record_id: t('Record id'), issued_on: t('Issued on'), prepared_ref: t('Ref'), record_version: t('Version'), prepared_on: t('Prepared'), captured_at: t('Captured'), snapshot: t('SHA-256'), record_schema: t('Schema'), record_schema_version: t('Schema version'), builder: t('Builder'), builder_version: t('Builder version'), registry_version: t('Registry'), ledger_version: t('Ledger'), wording: t('Wording'), wording_version: t('Wording version'), wording_digest: t('Wording digest'), questionnaire_contract: t('Questionnaire contract'), questionnaire_contract_version: t('Questionnaire contract version'), questionnaire_contract_ref: t('Questionnaire contract reference'), templates: t('Templates'), templates_version: t('Templates version'), templates_fingerprint: t('Templates fingerprint'), publication_version: t('Entry version') } },
   },
   question_sections: { P1: 'project', P3: 'project', F1: 'project', F2: 'project', L1: 'contribution', M0: 'contribution', M1: 'contribution', M1X: 'contribution', H1: 'contribution' },
   conclusion_labels: { relevant_on_declared_facts: t('Placeholder conclusion A'), relevant_applicability_unresolved: t('Placeholder conclusion B') },
@@ -238,7 +236,7 @@ const PDF_TEMPLATES = {
 
 /** Pinned digests (recomputed by the test; a mismatch means the wording changed and must be re-pinned). */
 export const SYNTHETIC_SOURCE_TEXT_SHA256 = 'e589b6d8b9172463994a2f6335f622e08f11a53e0e3822e3c9acfce4003c221e'
-export const SYNTHETIC_PDF_TEMPLATES_FINGERPRINT = '0a2ce73b68d1223f61a8bcd28a297b65f0beec9a08d7f77229d0fd8f2aa6acfd'
+export const SYNTHETIC_PDF_TEMPLATES_FINGERPRINT = '19857320de6f205f3c56d899beb5f05cf8b1359e3e6035dc32be123880458ec2'
 
 /**
  * CR-V2-DECL-1B-1: the exact synthetic questionnaire contract. Test authorization only, like everything in this bundle: it
@@ -280,13 +278,13 @@ export const SYNTHETIC_TEST_EXAMINATION_SOURCE_TEXT_APPROVAL: SourceTextApproval
 
 const PDF_TEMPLATE_APPROVAL: PdfTemplateApproval = {
   template_id: 'si8/creator-record-v2-pdf-templates',
-  version: 1,
+  version: 2,
   fingerprint: SYNTHETIC_PDF_TEMPLATES_FINGERPRINT,
-  record_schema: PDF_RECORD_SCHEMA,
+  record_schema: RECORD_SCHEMA,
   lifecycle: 'approved',
   authority: SYNTHETIC_TEST_AUTHORITY_NAME,
   decision_date: DECISION_DATE,
-  review_ref: 'SYN-M4C-TEMPLATE-1',
+  review_ref: 'SYN-PDF-7-TEMPLATE-1',
 }
 
 export const CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY: (PublicationAuthorityBundle & { readonly authority_class: 'synthetic_test' }) | null = Object.freeze({

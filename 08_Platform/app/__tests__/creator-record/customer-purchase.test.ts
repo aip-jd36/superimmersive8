@@ -44,7 +44,7 @@ import { legacyGenerateFor } from '@/lib/creator-record-artifacts/production'
 import * as production from '@/lib/creator-record-flow/production'
 import type { FulfillmentSubmission } from '@/lib/payments/repository'
 import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
-import { asRenderableSchema5, COMMERCIAL_SUPPORT_UNDER_TEST } from '@/test-support/commercial-support'
+import { COMMERCIAL_SUPPORT_UNDER_TEST } from '@/test-support/commercial-support'
 
 const buildCustomerRecord = buildCurrentRecord
 
@@ -280,7 +280,7 @@ function placeholderTemplates(): CustomerPdfTemplates {
   for (const [q, p] of Object.entries(meta)) if (!p.per_tool) question_sections[q] = p.section === 'project' || p.section === 'locations' ? 'project' : 'contribution'
   const t = (x: string) => `${PH}${x}`
   return {
-    template_id: CUSTOMER_PDF_TEMPLATE_ID, version: 1, record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: HISTORICAL_RECORD_SCHEMA_VERSION },
+    template_id: CUSTOMER_PDF_TEMPLATE_ID, version: 1, record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION },
     document_title: t('Creator Record {record_id}'), stamp: 'PLACEHOLDER WORDING FOR TESTING ONLY · CREATOR RECORD · SELF-DECLARED · NOT A CLEARANCE OR LEGAL OPINION',
     footer: t('Creator Record {record_id}'), page_label: 'Page {page} of {pages}',
     sections: {
@@ -306,7 +306,7 @@ function placeholderTemplates(): CustomerPdfTemplates {
           record_id: t('Record id'), issued_on: t('Issued on'), prepared_ref: t('Ref'), record_version: t('Version'), prepared_on: t('Prepared'), captured_at: t('Captured'), snapshot: t('SHA-256'),
           record_schema: t('Schema'), record_schema_version: t('Schema version'), builder: t('Builder'), builder_version: t('Builder version'), registry_version: t('Registry'), ledger_version: t('Ledger'),
           wording: t('Wording'), wording_version: t('Wording version'), wording_digest: t('Wording digest'), templates: t('Templates'), templates_version: t('Templates version'), templates_fingerprint: t('Templates fingerprint'),
-          publication_version: t('Entry version'),
+          questionnaire_contract: t('Questionnaire contract'), questionnaire_contract_version: t('Questionnaire contract version'), questionnaire_contract_ref: t('Questionnaire contract reference'), publication_version: t('Entry version'),
         },
       },
     },
@@ -322,7 +322,7 @@ function placeholderTemplates(): CustomerPdfTemplates {
   }
 }
 const approvalOf = (t: unknown): PdfTemplateApproval => ({
-  template_id: CUSTOMER_PDF_TEMPLATE_ID, version: 1, fingerprint: templateFingerprint(t), record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: HISTORICAL_RECORD_SCHEMA_VERSION },
+  template_id: CUSTOMER_PDF_TEMPLATE_ID, version: 1, fingerprint: templateFingerprint(t), record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION },
   lifecycle: 'approved', authority: 'SYNTHETIC TEMPLATE AUTHORITY (fixture only)', decision_date: '2026-10-30', review_ref: 'SYNTHETIC-TEMPLATE-REVIEW-1',
 })
 const TEMPLATES = placeholderTemplates()
@@ -335,7 +335,7 @@ function issuance(rows: PreparedRow[], over: Partial<V2IssuanceDeps> = {}) {
     latestVersion: async (d) => clone(rows.filter((r) => r.draft_id === d).sort((a, b) => b.version - a.version)[0] ?? null),
     governance: governance(),
     templates: () => ({ templates: TEMPLATES, approval: approvalOf(TEMPLATES) }),
-    renderPdf: async (input) => ((rendered.push(input)), new TextEncoder().encode(documentModelCanonical(buildCustomerDocument(asRenderableSchema5(input))))),
+    renderPdf: async (input) => ((rendered.push(input)), new TextEncoder().encode(documentModelCanonical(buildCustomerDocument(input)))),
     ...over,
   }
   return { deps, rendered }
@@ -349,7 +349,7 @@ describe('renderV2ForIssuance', () => {
     const { deps, rendered } = issuance([row])
     const bytes = await renderV2ForIssuance(deps, v2sub(), RECORD_ID, NOW)
     const model = JSON.parse(new TextDecoder().decode(bytes))
-    expect(model.identity).toMatchObject({ record_id: RECORD_ID, issued_on: '2026-11-01', record_ref: row.record_ref })
+    expect(model.identity).toMatchObject({ record_id: RECORD_ID, issued_on: '2026-11-01', record_ref: row.record_ref, snapshot_sha256: row.sha256 })
     expect(rendered).toHaveLength(1)
     expect(rendered[0]).toMatchObject({ canonical: row.canonical, sha256: row.sha256, issued: { record_id: RECORD_ID, issued_on: '2026-11-01' } })
   })

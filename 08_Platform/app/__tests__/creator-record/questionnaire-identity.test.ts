@@ -550,15 +550,17 @@ describe('locks: PDF and issuance stay closed for schemas 7 and 8', () => {
     expect(e.reasons.map((r) => `${r.kind}:${r.code}`)).toEqual(expect.arrayContaining(['builder:reference_missing', 'record_schema:reference_missing']))
   })
 
-  test.each([[7, false], [8, true]] as const)('schema %i: the PDF refuses it, with the shipped templates', (_v, examination) => {
-    const b = current(examination)
+  test('CR-V2-PDF-7: the PDF renders schema 7 with the synthetic templates, and refuses schema 8', () => {
     const t = approvedPdfTemplates(bundle)
-    expect(() => buildCustomerDocument({ canonical: b.canonical, sha256: b.sha256, issued, templates: t.templates, template_approval: t.approval })).toThrow(CustomerPdfRefusal)
+    const seven = current(false)
+    expect(buildCustomerDocument({ canonical: seven.canonical, sha256: seven.sha256, issued, templates: t.templates, template_approval: t.approval }).identity.snapshot_sha256).toBe(seven.sha256)
+    const eight = current(true)
+    expect(() => buildCustomerDocument({ canonical: eight.canonical, sha256: eight.sha256, issued, templates: t.templates, template_approval: t.approval })).toThrow(CustomerPdfRefusal)
   })
 
-  test('the synthetic PDF templates stay exactly as pinned, on schema 5', () => {
-    expect((bundle.pdf_templates as any).record_schema).toEqual({ id: 'si8/creator-record-v2-record', version: 5 })
-    expect(bundle.pdf_template_approval!.record_schema.version).toBe(5)
+  test('CR-V2-PDF-7: the synthetic PDF templates are pinned, on schema 7', () => {
+    expect((bundle.pdf_templates as any).record_schema).toEqual({ id: 'si8/creator-record-v2-record', version: 7 })
+    expect(bundle.pdf_template_approval!.record_schema.version).toBe(7)
     expect(bundle.pdf_template_approval!.fingerprint).toBe(SYNTHETIC_PDF_TEMPLATES_FINGERPRINT)
   })
 
