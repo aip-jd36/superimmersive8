@@ -21,11 +21,16 @@ two components, through an exact allowlist enforced by
 python -I lib/creator-record/eval/fixtures/generate_receipt_fixtures.py
 npx tsx lib/creator-record/eval/run-receipt-eval.ts                        # dry-run, first-paid subset
 npx tsx lib/creator-record/eval/run-receipt-eval.ts --mode mock --subset all
-# PAID — only with PM approval of the spend ceiling:
-npx tsx --env-file=.env.local lib/creator-record/eval/run-receipt-eval.ts --mode live \
-  --confirm-paid-calls --max-calls 26 --subset first-paid \
-  --input-usd-per-mtok <price> --output-usd-per-mtok <price>
+# PAID — only with PM approval of the spend ceiling, and with an external workspace spending limit in place.
+# CR-V2-DOC-LIVE-1C-B2B: the dedicated evaluation key only, set in this one process; no --env-file, so no app
+# environment (Supabase, other keys) is loaded. --model must be the live pin; --max-usd is predictive, not a cap.
+CREATOR_RECORD_EXTRACTION_API_KEY=<dedicated evaluation key> npx tsx lib/creator-record/eval/run-receipt-eval.ts --mode live \
+  --confirm-paid-calls --max-calls <n> --max-usd <approved> --model claude-sonnet-5 --subset first-paid \
+  --input-usd-per-mtok <confirmed price> --output-usd-per-mtok <confirmed price>
 ```
+
+The live report's `requests` lists every provider request (models, stop reason, tokens, latency, outcome, retry
+attempt, live input bound); `live_input_bound` gives each fixture's live pre-call bound in every mode.
 
 Current contract (SPIKE-1D): `receipt-extraction-v2`, `receipt-prompt-v2`,
 `receipt-comparison-v2`, `receipt-scoring-v2`, `receipt-fixtures-v2` (45 documents).
