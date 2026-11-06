@@ -7,7 +7,7 @@
  * identical apart from the new `selection_basis` field.
  */
 
-import { historicalForm } from '@/test-support/historical-record'
+import { COMMERCIAL_SUPPORT_UNDER_TEST } from '@/test-support/commercial-support'
 import { createHash } from 'node:crypto'
 import type { GovernanceApproval } from '@/lib/creator-record/contract/types'
 import { loadQuestionRegistry } from '@/lib/creator-record/contract/question-registry'
@@ -224,9 +224,8 @@ describe('the prepared record carries it, deterministically and fail-closed', ()
     }
     expect(verifyCustomerRecord(a.canonical, a.sha256).ok).toBe(true)
     const sources = approvedSources()
-    const g = governanceSnapshotFrom({ issuance_date: '2026-11-02', sources, topicClaims: TOPIC_CLAIMS_FIXTURE, source_text_approvals: [textApproval(sources)] })
-    const issuable = historicalForm(a) // Issuance supports schema 5 only
-    expect(evaluateIssuanceEligibility(issuable.canonical, issuable.sha256, g).decision).toBe('eligible')
+    const g = governanceSnapshotFrom({ issuance_date: '2026-11-02', sources, topicClaims: TOPIC_CLAIMS_FIXTURE, source_text_approvals: [textApproval(sources)], support: COMMERCIAL_SUPPORT_UNDER_TEST, authority_class: 'synthetic_test' })
+    expect(evaluateIssuanceEligibility(a.canonical, a.sha256, g).decision).toBe('eligible')
   })
 
   test('a v3 record (no selection provenance) is not a supported record: verification and issuance refuse it', () => {

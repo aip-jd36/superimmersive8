@@ -16,6 +16,7 @@ import { canonicalJson, sha256Hex } from '@/lib/creator-record/record-core/canon
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { namingCurrentContract } from '@/test-support/questionnaire-approval'
 import { historicalRow } from '@/test-support/historical-record'
+import { withCommercialSupportUnderTest } from '@/test-support/commercial-support'
 
 const preparePrepared = namingCurrentContract(prepareAsSent)
 
@@ -193,12 +194,13 @@ describe('CR-V2-DOC-1B: payment and issuance refuse a record whose documents are
     row.status = 'reviewed'
     row.reviewed_at = NOW.toISOString()
     row.submission_id = SUB
-    return historicalRow(row)
+    return row
   }
   const issue = (row: PreparedRow, evidenceIntact?: (u: string, items: readonly { document_id: string }[]) => Promise<Integrity>) =>
     renderV2ForIssuance({
       boundTo: async () => row,
-      governance: (date) => approvedGovernanceSnapshot(date, TOPIC_CLAIMS_FIXTURE, bundle),
+      latestVersion: async () => row,
+      governance: (date) => withCommercialSupportUnderTest(approvedGovernanceSnapshot(date, TOPIC_CLAIMS_FIXTURE, bundle)),
       templates: () => approvedPdfTemplates(bundle),
       renderPdf: async () => new Uint8Array([1]),
       ...(evidenceIntact ? { evidenceIntact } : {}),
@@ -207,7 +209,7 @@ describe('CR-V2-DOC-1B: payment and issuance refuse a record whose documents are
   const checkout = (row: PreparedRow, evidenceIntact?: (u: string, items: readonly { document_id: string }[]) => Promise<Integrity>) =>
     checkV2Checkout({
       submissions: 'open', issuance: 'enabled', hasPilotAccess: async () => true, getPrepared: async () => row, latestVersion: async () => row, boundTo: async () => row,
-      bind: async () => ({ submissionId: SUB, reason: 'existing' }), governance: (date) => approvedGovernanceSnapshot(date, TOPIC_CLAIMS_FIXTURE, bundle), now: () => NOW,
+      bind: async () => ({ submissionId: SUB, reason: 'existing' }), governance: (date) => withCommercialSupportUnderTest(approvedGovernanceSnapshot(date, TOPIC_CLAIMS_FIXTURE, bundle)), now: () => NOW,
       ...(evidenceIntact ? { evidenceIntact } : {}),
     }, USER, { id: SUB, user_id: USER, tier: 'creator_record', creator_record_product: 'v2' }).then((r) => (r.ok ? 'ok' : r.code))
 

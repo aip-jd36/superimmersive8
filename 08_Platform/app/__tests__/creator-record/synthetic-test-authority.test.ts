@@ -30,10 +30,9 @@ import { PILOT_CAVEATS, PILOT_DEPENDENCY_LABELS, PILOT_PUBLICATION_LEDGER } from
 import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/config'
 import { CreatorRecordIssuanceStoppedError, rendererForFamily } from '@/lib/creator-record-artifacts/renderers'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
-import { historicalForm } from '@/test-support/historical-record'
+import { asRenderableSchema5, withCommercialSupportUnderTest } from '@/test-support/commercial-support'
 
-/** Issuance and the customer PDF support schema 5 only: records in that format, as a row prepared then would be. */
-const buildCustomerRecord = (input: Parameters<typeof buildCurrentRecord>[0]) => historicalForm(buildCurrentRecord(input))
+const buildCustomerRecord = buildCurrentRecord
 
 jest.mock('@/lib/creator-record-flow/production', () => ({ renderCreatorRecordV2Pdf: jest.fn() }))
 
@@ -164,9 +163,10 @@ const issueWith = (b: ReturnType<typeof currentPublicationAuthority>) => {
   }
   const deps: V2IssuanceDeps = {
     boundTo: async () => row,
-    governance: (d) => approvedGovernanceSnapshot(d, TOPIC_CLAIMS_FIXTURE, b),
+    latestVersion: async () => row,
+    governance: (d) => withCommercialSupportUnderTest(approvedGovernanceSnapshot(d, TOPIC_CLAIMS_FIXTURE, b)),
     templates: () => approvedPdfTemplates(b),
-    renderPdf: async (input) => new TextEncoder().encode(documentModelCanonical(buildCustomerDocument(input))),
+    renderPdf: async (input) => new TextEncoder().encode(documentModelCanonical(buildCustomerDocument(asRenderableSchema5(input)))),
   }
   return renderV2ForIssuance(deps, { id: SUB, user_id: 'u', tier: 'creator_record', creator_record_product: 'v2' }, 'CR-2026-44444444', new Date('2026-11-01T10:00:00Z'))
     .then((bytes) => ({ issued: true as const, text: new TextDecoder().decode(bytes) }))
@@ -178,7 +178,7 @@ describe('end to end with the shipped fixture', () => {
     expect(currentPublicationAuthority(ISOLATED)).toBe(bundle)
     expect(built.ok).toBe(true)
     if (!built.ok) return
-    expect(evaluateIssuanceEligibility(built.canonical, built.sha256, approvedGovernanceSnapshot('2026-11-01', TOPIC_CLAIMS_FIXTURE, currentPublicationAuthority(ISOLATED))).decision).toBe('eligible')
+    expect(evaluateIssuanceEligibility(built.canonical, built.sha256, withCommercialSupportUnderTest(approvedGovernanceSnapshot('2026-11-01', TOPIC_CLAIMS_FIXTURE, currentPublicationAuthority(ISOLATED)))).decision).toBe('eligible')
     const out = await issueWith(currentPublicationAuthority(ISOLATED))
     expect(out.issued).toBe(true)
     if (out.issued) {

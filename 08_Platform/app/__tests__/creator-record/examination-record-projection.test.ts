@@ -40,6 +40,7 @@ import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixtur
 import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
 import { namingCurrentContract } from '@/test-support/questionnaire-approval'
 import { historicalRow } from '@/test-support/historical-record'
+import { COMMERCIAL_SUPPORT_UNDER_TEST } from '@/test-support/commercial-support'
 
 const preparePrepared = namingCurrentContract(prepareAsSent)
 
@@ -376,7 +377,7 @@ describe('referenced runs at payment and issuance', () => {
     submissions: 'open', issuance: 'enabled', hasPilotAccess: async () => true,
     getPrepared: async () => clone(row), latestVersion: async () => clone(row), boundTo: async () => clone(row),
     bind: async () => { throw new Error('must not bind') },
-    governance: (d) => governanceSnapshotFrom({ issuance_date: d, sources: SOURCES, topicClaims: TOPIC_CLAIMS_FIXTURE, source_text_approvals: [TEXT_V6] }),
+    governance: (d) => governanceSnapshotFrom({ issuance_date: d, sources: SOURCES, topicClaims: TOPIC_CLAIMS_FIXTURE, source_text_approvals: [TEXT_V6], support: COMMERCIAL_SUPPORT_UNDER_TEST, authority_class: 'synthetic_test' }),
     now: () => NOW, evidenceIntact: async () => ({ ok: true }), ...over,
   })
 
@@ -395,7 +396,7 @@ describe('referenced runs at payment and issuance', () => {
     const row = v6Row()
     const sub = { id: row.submission_id as string, user_id: OWNER, tier: 'creator_record', creator_record_product: 'v2' }
     const deps = (over: Partial<V2IssuanceDeps> = {}): V2IssuanceDeps => ({
-      boundTo: async () => clone(row), governance: purchaseDeps(row).governance, templates: () => ({ templates: null, approval: null }),
+      boundTo: async () => clone(row), latestVersion: async () => clone(row), governance: purchaseDeps(row).governance, templates: () => ({ templates: null, approval: null }),
       renderPdf: async () => { throw new Error('must not render') }, evidenceIntact: async () => ({ ok: true }), ...over,
     })
     await expect(renderV2ForIssuance(deps(), sub, 'CR-2026-AAAAAAAA', NOW)).rejects.toEqual(new V2IssuanceRefusal('evidence_unavailable'))
@@ -403,8 +404,8 @@ describe('referenced runs at payment and issuance', () => {
   })
 
   test('a record without examinations never consults the run check', async () => {
-    const r = historicalRow({ ...built(buildCustomerRecord(input({ documents: [] }))), record_schema_version: 7 })
-    const row: PreparedRow = { ...v6Row(), record_schema_version: 5, canonical: r.canonical, sha256: r.sha256, record_ref: 'PREP-X0TEST', submission_id: null }
+    const r = built(buildCustomerRecord(input({ documents: [] })))
+    const row: PreparedRow = { ...v6Row(), record_schema_version: 7, canonical: r.canonical, sha256: r.sha256, record_ref: 'PREP-X0TEST', submission_id: null }
     const spy = jest.fn(async () => ({ ok: true as const }))
     const r2 = await startPurchase(purchaseDeps(row, { examinationsIntact: spy, bind: async () => ({ submissionId: null, reason: 'not_found' }) }), OWNER, row.id)
     expect(r2).toEqual({ ok: false, status: 404, code: 'not_found' }) // reached bind: every pre-bind check passed without the run check
@@ -412,7 +413,7 @@ describe('referenced runs at payment and issuance', () => {
   })
 
   test('v6 is not an issuable record schema, and current templates do not render it', () => {
-    expect(CURRENT_ISSUANCE_SUPPORT.record_schemas).toEqual([{ id: CUSTOMER_RECORD_SCHEMA, version: 5 }])
+    expect(CURRENT_ISSUANCE_SUPPORT.record_schemas).toEqual([])
     const r = built(buildCustomerRecord(examined()))
     const b = CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY
     expect(() => buildCustomerDocument({ canonical: r.canonical, sha256: r.sha256, issued: { record_id: 'CR-2026-AAAAAAAA', issued_on: '2026-11-01' }, templates: b?.pdf_templates ?? null, template_approval: b?.pdf_template_approval ?? null })).toThrow()

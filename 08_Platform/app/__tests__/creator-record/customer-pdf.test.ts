@@ -16,7 +16,7 @@ import { canonicalJson, sha256Hex } from '@/lib/creator-record/record-core/canon
 import { buildCustomerRecord as buildCurrentRecord, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION, type CustomerRecordInput, type CustomerRecordV2, HISTORICAL_RECORD_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
 import { SOURCE_TEXT_CATEGORIES, SOURCE_TEXT_SOURCE_ID, sourceTextContent, sourceTextDigest } from '@/lib/creator-record/customer-record/source-text'
 import { evaluateIssuanceEligibility } from '@/lib/creator-record/customer-record/eligibility'
-import { governanceSnapshotFrom } from '@/lib/creator-record/customer-record/governance-state'
+import { AUTHORITY_KINDS } from '@/lib/creator-record/customer-record/authority-content'
 import * as TemplatesModule from '@/lib/creator-record/customer-pdf/templates'
 import { CUSTOMER_PDF_SECTIONS, CUSTOMER_PDF_TEMPLATE_ID, fill, templateFingerprint, wordingLockViolations, type CustomerPdfTemplates, type PdfTemplateApproval } from '@/lib/creator-record/customer-pdf/templates'
 import { buildCustomerDocument, CustomerPdfRefusal, documentModelCanonical, documentText, type Block, type CustomerDocumentInput } from '@/lib/creator-record/customer-pdf/document-model'
@@ -324,7 +324,7 @@ describe('template approval: exactly the approved, fingerprinted set, separate f
     expect(refusal(() => buildCustomerDocument(make()))).toBe(code)
   })
 
-  test('a template change never touches a prepared record: digest and issuance eligibility are unchanged', () => {
+  test('a template change never touches a prepared record: its digest is unchanged, and templates are no eligibility reference', () => {
     const rec = prepare()
     const before = rec.sha256
     const t2 = placeholderTemplates()
@@ -333,9 +333,7 @@ describe('template approval: exactly the approved, fingerprinted set, separate f
     const m = buildCustomerDocument(docInput({ templates: t2, template_approval: approvalOf(t2, { version: 2 }) }, rec))
     expect(m.identity.templates.version).toBe(2)
     expect(rec.sha256).toBe(before)
-    const sources = approvedSources()
-    const g = governanceSnapshotFrom({ issuance_date: '2026-11-02', sources, topicClaims: TOPIC_CLAIMS_FIXTURE, source_text_approvals: [textApproval(sources)] })
-    expect(evaluateIssuanceEligibility(rec.canonical, rec.sha256, g).decision).toBe('eligible')
+    expect(AUTHORITY_KINDS.some((k) => /template/.test(k))).toBe(false)
   })
 
   test('the wording lock: banned terms are caught, the two negation and provenance exceptions are not', () => {

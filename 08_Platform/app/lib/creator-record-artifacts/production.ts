@@ -25,6 +25,7 @@ export function issueDepsFor(sub: FulfillmentSubmission, renderer: CreatorRecord
       generator_version: renderer.generator_version,
       ownsGeneratorVersion: (version) => renderer.ownsGeneratorVersion(version),
       render: (recordId) => renderer.render(sub, recordId, new Date()),
+      ...(renderer.authorize ? { authorize: () => renderer.authorize!(sub, new Date()) } : {}),
     },
     newAttemptId,
     now: () => new Date(),

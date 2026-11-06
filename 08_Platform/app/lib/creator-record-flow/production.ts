@@ -12,7 +12,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import type { FlowDeps, NewPreparedRow, PreparedRow, PreparedStore } from '@/lib/creator-record/customer-flow/service'
 import { approvedCustomerRecordInputs, approvedGovernanceSnapshot, approvedPdfTemplates, CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flow/approved-inputs'
-import { renderV2ForIssuance, type BindReason, type CheckoutSubmission, type PurchaseDeps, type V2IssuanceDeps } from '@/lib/creator-record/customer-flow/purchase'
+import { authorizeV2Issuance, renderV2ForIssuance, type BindReason, type CheckoutSubmission, type PurchaseDeps, type V2IssuanceDeps } from '@/lib/creator-record/customer-flow/purchase'
 import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/config'
 import { hasPilotAccess, PILOT_ACCESS_TABLE } from './pilot-access'
 import { evidenceObjects, evidenceStore } from './evidence-production'
@@ -131,6 +131,7 @@ export function productionPurchaseDeps(): PurchaseDeps {
 export function productionV2IssuanceDeps(): V2IssuanceDeps {
   return {
     boundTo: preparedBoundTo,
+    latestVersion: (draftId) => preparedStore.latestVersion(draftId),
     governance: (date) => approvedGovernanceSnapshot(date, TOPIC_CLAIMS_FIXTURE),
     templates: () => approvedPdfTemplates(),
     // Loaded on first render only.
@@ -142,4 +143,9 @@ export function productionV2IssuanceDeps(): V2IssuanceDeps {
 /** CR-V2-MVP-M3: the v2 renderer body (registered in lib/creator-record-artifacts/renderers.ts). */
 export function renderCreatorRecordV2Pdf(sub: CheckoutSubmission, recordId: string, issuedAt: Date): Promise<Uint8Array> {
   return renderV2ForIssuance(productionV2IssuanceDeps(), sub, recordId, issuedAt)
+}
+
+/** CR-V2-MVP-ELIGIBILITY-1: the same conditions, without rendering, immediately before an artifact is marked issued. */
+export async function authorizeCreatorRecordV2Issuance(sub: CheckoutSubmission, issuedAt: Date): Promise<void> {
+  await authorizeV2Issuance(productionV2IssuanceDeps(), sub, issuedAt)
 }

@@ -34,10 +34,9 @@ import { CreatorRecordIssuanceStoppedError, rendererForFamily } from '@/lib/crea
 import { questionnaireApprovalFor } from '@/test-support/questionnaire-approval'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { APPLICABILITY_FACTS } from '@/lib/retrieval-engine/types'
-import { historicalForm } from '@/test-support/historical-record'
+import { asRenderableSchema5, withCommercialSupportUnderTest } from '@/test-support/commercial-support'
 
-/** Issuance and the customer PDF support schema 5 only: records in that format, as a row prepared then would be. */
-const buildCustomerRecord = (input: Parameters<typeof buildCurrentRecord>[0]) => historicalForm(buildCurrentRecord(input))
+const buildCustomerRecord = buildCurrentRecord
 
 jest.mock('@/lib/creator-record-flow/production', () => ({ renderCreatorRecordV2Pdf: jest.fn() }))
 
@@ -170,9 +169,10 @@ const ROW: PreparedRow = {
 }
 const issueDeps = (bundle: PublicationAuthorityBundle | null): V2IssuanceDeps => ({
   boundTo: async () => ROW,
-  governance: (d) => approvedGovernanceSnapshot(d, TOPIC_CLAIMS_FIXTURE, bundle),
+  latestVersion: async () => ROW,
+  governance: (d) => withCommercialSupportUnderTest(approvedGovernanceSnapshot(d, TOPIC_CLAIMS_FIXTURE, bundle)),
   templates: () => approvedPdfTemplates(bundle),
-  renderPdf: async (input) => new TextEncoder().encode(documentModelCanonical(buildCustomerDocument(input))),
+  renderPdf: async (input) => new TextEncoder().encode(documentModelCanonical(buildCustomerDocument(asRenderableSchema5(input)))),
 })
 const issue = (bundle: PublicationAuthorityBundle | null) =>
   renderV2ForIssuance(issueDeps(bundle), { id: SUB, user_id: 'u', tier: 'creator_record', creator_record_product: 'v2' }, 'CR-2026-33333333', new Date('2026-11-01T10:00:00Z'))
@@ -269,7 +269,7 @@ describe('end to end: prepare, checkout governance and issuance', () => {
   test('isolated test conditions: the synthetic authority prepares, is eligible and issues', async () => {
     const bundle = authorityFor(ISOLATED)
     expect(prepare(bundle).ok).toBe(true)
-    expect(evaluateIssuanceEligibility(ROW.canonical, ROW.sha256, approvedGovernanceSnapshot('2026-11-01', TOPIC_CLAIMS_FIXTURE, bundle)).decision).toBe('eligible')
+    expect(evaluateIssuanceEligibility(ROW.canonical, ROW.sha256, withCommercialSupportUnderTest(approvedGovernanceSnapshot('2026-11-01', TOPIC_CLAIMS_FIXTURE, bundle))).decision).toBe('eligible')
     expect(await refusalOf(issue(bundle))).toBe('issued')
   })
 
@@ -288,8 +288,10 @@ describe('end to end: prepare, checkout governance and issuance', () => {
   })
 
   test('no authority fails closed as indeterminate (unavailable), never as an empty-but-approved state', () => {
-    const e = evaluateIssuanceEligibility(ROW.canonical, ROW.sha256, approvedGovernanceSnapshot('2026-11-01', TOPIC_CLAIMS_FIXTURE, null))
-    expect(e).toMatchObject({ decision: 'indeterminate', cause: 'unavailable' })
+    const none_ = approvedGovernanceSnapshot('2026-11-01', TOPIC_CLAIMS_FIXTURE, null)
+    expect(none_.authorities.questionnaire_contract).toEqual({ status: 'unavailable' })
+    // A synthetic record is refused definitively; a definitive refusal outranks what could not be read.
+    expect(evaluateIssuanceEligibility(ROW.canonical, ROW.sha256, none_).decision).toBe('ineligible')
     expect(approvedPdfTemplates(null)).toEqual({ templates: null, approval: null })
     const none = approvedCustomerRecordInputs(null)
     expect(none.source_text).toBeNull()

@@ -19,6 +19,8 @@
  *     (`./renderers`) and records its own generator version. A pending row is
  *     resumed only by a renderer of the family that recorded it; otherwise
  *     nothing is rendered, stored or issued (`ArtifactFamilyMismatchError`).
+ *   - CR-V2-MVP-ELIGIBILITY-1: a renderer may supply `authorize`, run immediately before any attempt is marked issued. If it
+ *     throws, the row stays pending and the step stays incomplete.
  *
  * Pure apart from the injected ports (unit-tested with fakes).
  */
@@ -70,6 +72,8 @@ export interface IssueRenderer {
   ownsGeneratorVersion(version: string): boolean
   /** Render the PDF bytes for a record id. */
   render(recordId: string): Promise<Uint8Array>
+  /** When present, throws unless the submission may be issued now. A resumed attempt renders nothing, so this is its only check. */
+  authorize?(): Promise<void>
 }
 
 export interface IssueDeps {
@@ -155,6 +159,7 @@ async function storeAndIssue(row: ArtifactRow, bytes: Uint8Array, deps: IssueDep
 
 async function verifyAndIssue(row: ArtifactRow, stored: Uint8Array, deps: IssueDeps): Promise<IssueResult> {
   if (sha256Hex(stored) !== row.sha256) return { outcome: 'integrity_conflict', artifactId: row.id }
+  await deps.renderer.authorize?.()
   if (await deps.artifacts.markIssued(row.id, row.attempt_id, row.sha256)) {
     const issued = await deps.artifacts.find(row.submission_id)
     if (issued?.status === 'issued' && issued.attempt_id === row.attempt_id) return { outcome: 'issued', artifact: issued }

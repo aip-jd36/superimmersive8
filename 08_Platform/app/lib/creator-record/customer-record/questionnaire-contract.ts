@@ -212,7 +212,7 @@ const HEX64 = /^[0-9a-f]{64}$/
 const UNAPPROVED_MARKER = /pilot|prototype|unapproved|not a governance approval|not a creator record publication approval/i
 const text = (v: unknown): v is string => typeof v === 'string' && v.trim() !== ''
 
-function approvalRefusals(a: unknown): QuestionnaireContractRefusal[] {
+export function approvalRefusals(a: unknown): QuestionnaireContractRefusal[] {
   if (a === null || a === undefined) return [{ code: 'questionnaire_contract_missing', ref: null }]
   const malformed: QuestionnaireContractRefusal = { code: 'questionnaire_contract_malformed', ref: null }
   if (!isPlain(a) || Object.keys(a).sort().join(',') !== APPROVAL_KEYS) return [malformed]

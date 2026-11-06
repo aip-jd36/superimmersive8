@@ -20,10 +20,13 @@
  * Issuance (`renderV2ForIssuance`, the v2 renderer's body):
  *   The persisted v2 identity, the bound version (owner, review state, SHA-256) and
  *   current governance eligibility are re-checked, then the PDF is rendered from the
- *   stored record exactly as prepared. A later correction does NOT stop issuance of
- *   the version that was paid for. Any failure throws `V2IssuanceRefusal`: nothing is
+ *   stored record exactly as prepared. Any failure throws `V2IssuanceRefusal`: nothing is
  *   rendered or stored and the fulfilment step stays incomplete (retried, then the
  *   manual reconciliation queue). There is no fallback to any other renderer.
+ *   CR-V2-MVP-ELIGIBILITY-1: the bound version must still be the draft's latest. A checkout session can stay open while the
+ *   creator corrects their answers or governance changes, and the payment is accepted regardless: that payment is recorded
+ *   by the ledger, and this refusal sends it to the reconciliation queue instead of issuing a version the creator replaced.
+ *   A record already issued is never affected. `authorizeV2Issuance` is run again just before an artifact is marked issued.
  */
 
 import { evaluateIssuanceEligibility, type GovernanceSnapshot, type IssuanceEligibility } from '../customer-record/eligibility'
@@ -200,6 +203,7 @@ export const V2_ISSUANCE_REFUSALS = [
   'record_unbound',
   'binding_mismatch',
   'record_not_reviewed',
+  'record_superseded',
   'record_integrity',
   'governance_ineligible',
   'governance_indeterminate',
@@ -217,6 +221,7 @@ export class V2IssuanceRefusal extends Error {
 
 export interface V2IssuanceDeps {
   boundTo(submissionId: string): Promise<PreparedRow | null>
+  latestVersion(draftId: string): Promise<PreparedRow | null>
   governance(issuanceDate: string): GovernanceSnapshot
   templates(): { templates: unknown; approval: PdfTemplateApproval | null }
   /** Renders exactly the given record (the customer PDF builder re-verifies it and the templates). */
@@ -227,23 +232,30 @@ export interface V2IssuanceDeps {
   examinationsIntact?(userId: string, refs: readonly ExaminationRunReference[]): Promise<RunReferenceIntegrity>
 }
 
-export async function renderV2ForIssuance(deps: V2IssuanceDeps, sub: CheckoutSubmission, recordId: string, issuedAt: Date): Promise<Uint8Array> {
+/** Every condition for issuing now, on the bound version only. Throws `V2IssuanceRefusal`; returns the row it checked. */
+export async function authorizeV2Issuance(deps: V2IssuanceDeps, sub: CheckoutSubmission, issuedAt: Date): Promise<PreparedRow> {
   if (sub.creator_record_product !== 'v2' || sub.tier !== 'creator_record') throw new V2IssuanceRefusal('not_v2_submission')
   const row = await deps.boundTo(sub.id)
   if (!row) throw new V2IssuanceRefusal('record_unbound')
   if (row.submission_id !== sub.id || row.user_id !== sub.user_id) throw new V2IssuanceRefusal('binding_mismatch')
   if (row.status !== 'reviewed') throw new V2IssuanceRefusal('record_not_reviewed')
+  const latest = await deps.latestVersion(row.draft_id)
+  if (!latest || latest.id !== row.id) throw new V2IssuanceRefusal('record_superseded')
   const record = verifiedRecord(row)
   if (!record) throw new V2IssuanceRefusal('record_integrity')
   // CR-V2-DOC-1B: the PDF lists each referenced document; issue only while SI8 still holds every one intact.
   if (!(await evidenceHeld(deps.evidenceIntact?.bind(deps), row.user_id, record)).ok) throw new V2IssuanceRefusal('evidence_unavailable')
   // CR-V2-EXAM-INTEGRATION-X0: and every referenced examination run still verifies.
   if (!(await examinationsHeld(deps.examinationsIntact?.bind(deps), row.user_id, record)).ok) throw new V2IssuanceRefusal('evidence_unavailable')
-  const issuedOn = today(issuedAt)
-  const eligibility = evaluateIssuanceEligibility(row.canonical, row.sha256, deps.governance(issuedOn))
+  const eligibility = evaluateIssuanceEligibility(row.canonical, row.sha256, deps.governance(today(issuedAt)))
   if (eligibility.decision === 'invalid_record') throw new V2IssuanceRefusal('record_integrity')
   if (eligibility.decision === 'ineligible') throw new V2IssuanceRefusal('governance_ineligible')
   if (eligibility.decision !== 'eligible') throw new V2IssuanceRefusal('governance_indeterminate')
+  return row
+}
+
+export async function renderV2ForIssuance(deps: V2IssuanceDeps, sub: CheckoutSubmission, recordId: string, issuedAt: Date): Promise<Uint8Array> {
+  const row = await authorizeV2Issuance(deps, sub, issuedAt)
   const t = deps.templates()
-  return deps.renderPdf({ canonical: row.canonical, sha256: row.sha256, issued: { record_id: recordId, issued_on: issuedOn }, templates: t.templates, template_approval: t.approval })
+  return deps.renderPdf({ canonical: row.canonical, sha256: row.sha256, issued: { record_id: recordId, issued_on: today(issuedAt) }, templates: t.templates, template_approval: t.approval })
 }

@@ -27,8 +27,14 @@ import type { ObservationMapEntry, QuestionEntry } from '../contract/question-re
 import type { BuildDraftInput } from '../prototype/build-draft'
 import { canonicalJson, sha256Hex } from '../record-core/canonical'
 
-export const AUTHORITY_KINDS = ['source_text', 'question', 'observation_map_entry', 'publication_entry', 'governed_claim', 'record_schema', 'builder'] as const
+export const AUTHORITY_KINDS = ['source_text', 'questionnaire_contract', 'question', 'observation_map_entry', 'publication_entry', 'governed_claim', 'record_schema', 'builder'] as const
 export type AuthorityKind = (typeof AUTHORITY_KINDS)[number]
+
+/** Which kind of approval set a running build publishes from. A structural field, never derived from text. */
+export type PublicationAuthorityClass = 'governance' | 'synthetic_test'
+
+/** Approval text only a synthetic or fixture approval would carry. Governance mode refuses a bundle whose approvals read like this. */
+export const isSyntheticAuthorityText = (text: unknown): boolean => typeof text === 'string' && /synthetic|fixture/i.test(text)
 
 /** Kinds whose content is digested into the record. */
 export const DIGESTED_KINDS = ['question', 'observation_map_entry', 'publication_entry', 'governed_claim'] as const satisfies readonly AuthorityKind[]

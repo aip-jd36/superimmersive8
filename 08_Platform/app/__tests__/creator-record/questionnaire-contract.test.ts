@@ -514,7 +514,7 @@ describe('locks and boundaries', () => {
     expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(false)
   })
 
-  test('issuance is unchanged: no new authority kind', () => {
-    expect([...AUTHORITY_KINDS]).toEqual(['source_text', 'question', 'observation_map_entry', 'publication_entry', 'governed_claim', 'record_schema', 'builder'])
+  test('CR-V2-MVP-ELIGIBILITY-1: the contract is the one authority kind added', () => {
+    expect([...AUTHORITY_KINDS]).toEqual(['source_text', 'questionnaire_contract', 'question', 'observation_map_entry', 'publication_entry', 'governed_claim', 'record_schema', 'builder'])
   })
 })

@@ -79,6 +79,7 @@ export function approvedGovernanceSnapshot(issuanceDate: string, topicClaims: To
     sources: approvedCustomerRecordInputs(bundle).sources,
     topicClaims,
     source_text_approvals: bundle.source_text_approval === null ? [] : [bundle.source_text_approval],
+    authority_class: bundle.authority_class,
   })
 }
 

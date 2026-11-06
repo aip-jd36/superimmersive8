@@ -1,8 +1,8 @@
 /**
  * Test fixtures only (never imported by application code).
  *
- * Nothing writes schema 5 or 6 any more, but schema 5 is still the only schema issuance and the customer PDF support, and that
- * support stays under test. This produces a record in the historical format from a freshly built one, by removing exactly what
+ * Nothing writes schema 5 or 6 any more, but they stay readable and schema 5 is still the only schema the customer PDF renders,
+ * and that stays under test. This produces a record in the historical format from a freshly built one, by removing exactly what
  * schemas 7 and 8 added. `questionnaire-contract.test.ts` proves the result equals a row really prepared before schema 7 existed,
  * byte for byte, so this cannot drift from the format it stands in for.
  */

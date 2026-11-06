@@ -535,11 +535,11 @@ describe('locks: PDF and issuance stay closed for schemas 7 and 8', () => {
     if (!b.ok) throw new Error(JSON.stringify(b))
     return b
   }
-  const synthetic = () => { const i = syntheticUatInputs(); return governanceSnapshotFrom({ issuance_date: asOf, sources: i.sources, topicClaims: CLAIMS, source_text_approvals: [i.source_text!.approval!, i.source_text_examination!.approval!] }) }
+  const synthetic = () => { const i = syntheticUatInputs(); return governanceSnapshotFrom({ issuance_date: asOf, authority_class: 'synthetic_test', sources: i.sources, topicClaims: CLAIMS, source_text_approvals: [i.source_text!.approval!, i.source_text_examination!.approval!] }) }
 
-  test('issuance support is unchanged: schema 5 and its builder only', () => {
-    expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [{ id: 'si8/creator-record-v2-record', version: 5 }], builders: [{ id: 'si8/creator-record-v2-record-builder', version: 3 }] })
-    expect(AUTHORITY_KINDS).toEqual(['source_text', 'question', 'observation_map_entry', 'publication_entry', 'governed_claim', 'record_schema', 'builder'])
+  test('CR-V2-MVP-ELIGIBILITY-1: issuance supports no schema, and the contract is an authority kind', () => {
+    expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [], builders: [] })
+    expect(AUTHORITY_KINDS).toEqual(['source_text', 'questionnaire_contract', 'question', 'observation_map_entry', 'publication_entry', 'governed_claim', 'record_schema', 'builder'])
   })
 
   test.each([[7, false], [8, true]] as const)('schema %i: ineligible on its schema and its builder, whatever else is approved', (_v, examination) => {
@@ -547,7 +547,7 @@ describe('locks: PDF and issuance stay closed for schemas 7 and 8', () => {
     const e = evaluateIssuanceEligibility(b.canonical, b.sha256, synthetic())
     expect(e.decision).toBe('ineligible')
     if (e.decision !== 'ineligible') return
-    expect(e.reasons.map((r) => `${r.kind}:${r.code}`)).toEqual(expect.arrayContaining(['builder:version_not_current', 'record_schema:version_not_current']))
+    expect(e.reasons.map((r) => `${r.kind}:${r.code}`)).toEqual(expect.arrayContaining(['builder:reference_missing', 'record_schema:reference_missing']))
   })
 
   test.each([[7, false], [8, true]] as const)('schema %i: the PDF refuses it, with the shipped templates', (_v, examination) => {
@@ -569,7 +569,7 @@ describe('locks: PDF and issuance stay closed for schemas 7 and 8', () => {
     const deps: PurchaseDeps = { submissions: 'open', issuance: 'enabled', hasPilotAccess: async () => true, getPrepared: async () => row, latestVersion: async () => row, boundTo: async () => row, bind, governance: () => synthetic(), now: () => NOW }
     expect(await startPurchase(deps, OWNER, row.id)).toEqual({ ok: false, status: 409, code: 'ineligible' })
     expect(bind).not.toHaveBeenCalled()
-    await expect(renderV2ForIssuance({ boundTo: async () => ({ ...row, submission_id: 'sub' }), governance: () => synthetic(), templates: () => approvedPdfTemplates(bundle), renderPdf: async () => new Uint8Array([1]) }, { id: 'sub', user_id: OWNER, tier: 'creator_record', creator_record_product: 'v2' }, 'CR-2026-ABCD1234', NOW)).rejects.toEqual(new V2IssuanceRefusal('governance_ineligible'))
+    await expect(renderV2ForIssuance({ boundTo: async () => ({ ...row, submission_id: 'sub' }), latestVersion: async () => row, governance: () => synthetic(), templates: () => approvedPdfTemplates(bundle), renderPdf: async () => new Uint8Array([1]) }, { id: 'sub', user_id: OWNER, tier: 'creator_record', creator_record_product: 'v2' }, 'CR-2026-ABCD1234', NOW)).rejects.toEqual(new V2IssuanceRefusal('governance_ineligible'))
   })
 
   test('publication, payment and issuance switches are unchanged, and customer governance stays closed', () => {

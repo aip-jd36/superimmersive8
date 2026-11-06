@@ -47,6 +47,8 @@ export interface CreatorRecordRenderer {
   /** Whether the pre-artifact legacy generator may issue for this family (rollout 'off' or not allowlisted). */
   readonly legacy_path_permitted: boolean
   render(sub: FulfillmentSubmission, recordId: string, issuedAt: Date): Promise<Uint8Array>
+  /** CR-V2-MVP-ELIGIBILITY-1: when present, throws unless this submission may be issued now. Run on every path, including a resumed attempt. */
+  authorize?(sub: FulfillmentSubmission, issuedAt: Date): Promise<void>
 }
 
 /** Every version the v1 renderer has recorded: legacy-creator-record-pdf-v1, -v2 and -v3 (current). */
@@ -74,6 +76,9 @@ const V2_RENDERER: CreatorRecordRenderer = Object.freeze({
   render: async (sub: FulfillmentSubmission, recordId: string, issuedAt: Date) =>
     (await import('@/lib/creator-record-flow/production')).renderCreatorRecordV2Pdf(
       { id: sub.id, user_id: sub.user_id, tier: sub.tier, creator_record_product: sub.creator_record_product ?? null }, recordId, issuedAt),
+  authorize: async (sub: FulfillmentSubmission, issuedAt: Date) =>
+    (await import('@/lib/creator-record-flow/production')).authorizeCreatorRecordV2Issuance(
+      { id: sub.id, user_id: sub.user_id, tier: sub.tier, creator_record_product: sub.creator_record_product ?? null }, issuedAt),
 })
 
 const REGISTRY: ReadonlyMap<string, CreatorRecordRenderer> = new Map([[V1_RENDERER.family, V1_RENDERER], [V2_RENDERER.family, V2_RENDERER]])

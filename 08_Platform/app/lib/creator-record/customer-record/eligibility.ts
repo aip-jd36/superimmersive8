@@ -19,11 +19,17 @@
  * Generic: every reference is checked by the same rules, whatever its kind.
  * Source formats are mapped to `AuthorityState` by `./governance-state`.
  *
+ * CR-V2-MVP-ELIGIBILITY-1: commercial eligibility also needs the exact questionnaire contract the record embeds to be the
+ * current approved one. Superseded and withdrawn contracts refuse new commercial actions: a conservative MVP policy, not a
+ * decision about records already issued. A record with no contract (schema 5, 6) and a synthetic record are refused whatever
+ * the governance state says; both stay readable (`verifyCustomerRecord` is unaffected).
+ *
  * Pure: no I/O and no clock (the issuance date is supplied).
  */
 
 import { isIsoDate } from '../contract/types'
-import { AUTHORITY_KINDS, DIGESTED_KINDS, type AuthorityKind } from './authority-content'
+import { AUTHORITY_KINDS, DIGESTED_KINDS, isSyntheticAuthorityText, type AuthorityKind, type PublicationAuthorityClass } from './authority-content'
+import { QUESTIONNAIRE_CONTRACT_ID } from './questionnaire-contract'
 import { verifyCustomerRecord, type CustomerRecordV2 } from './record'
 
 export interface AuthorityRef {
@@ -60,9 +66,11 @@ export type Lookup =
 export interface GovernanceSnapshot {
   issuance_date: string
   authorities: Partial<Record<AuthorityKind, Lookup>>
+  /** The class of the bundle this state comes from. Only 'synthetic_test', which Production can never select, admits a synthetic record. */
+  authority_class?: PublicationAuthorityClass
 }
 
-export const INELIGIBILITY_CODES = ['reference_missing', 'version_not_current', 'lifecycle_pending', 'lifecycle_withdrawn', 'lifecycle_superseded', 'lifecycle_retired', 'validity_lapsed'] as const
+export const INELIGIBILITY_CODES = ['reference_missing', 'version_not_current', 'lifecycle_pending', 'lifecycle_withdrawn', 'lifecycle_superseded', 'lifecycle_retired', 'validity_lapsed', 'contract_not_recorded', 'synthetic_record'] as const
 export type IneligibilityCode = (typeof INELIGIBILITY_CODES)[number]
 export const CONFLICT_CODES = ['reference_ambiguous', 'content_changed_under_version', 'governance_conflict'] as const
 export type ConflictCode = (typeof CONFLICT_CODES)[number]
@@ -138,9 +146,23 @@ export function issuanceReferences(record: CustomerRecordV2): AuthorityRef[] {
   if (!st.record_schema || st.record_schema.id !== record.schema || st.record_schema.version !== record.schema_version) throw new IssuanceReferenceError('source text approved for another record schema')
   refs.set('source_text', { kind: 'source_text', id: st.source_id, version: String(st.version), content_sha256: st.content_sha256 })
   if (!record.builder || typeof record.builder.id !== 'string' || !Number.isInteger(record.builder.version)) throw new IssuanceReferenceError('malformed builder provenance')
+  const contract = s.questionnaire_contract
+  if (contract) refs.set('questionnaire_contract', { kind: 'questionnaire_contract', id: contract.contract_id, version: String(contract.contract_version), content_sha256: contract.contract_sha256 })
   refs.set('builder', { kind: 'builder', id: record.builder.id, version: String(record.builder.version), content_sha256: null })
   refs.set('record_schema', { kind: 'record_schema', id: record.schema, version: String(record.schema_version), content_sha256: null })
   return sorted(Array.from(refs.values()))
+}
+
+/** Why this record can never be sold or issued under this state, from the record itself. A governance action cannot change it. */
+function commercialExclusions(record: CustomerRecordV2, state: GovernanceSnapshot | null | undefined): Finding<IneligibilityCode>[] {
+  const out: Finding<IneligibilityCode>[] = []
+  const s = record.sources
+  const c = s.questionnaire_contract
+  if (!c) out.push({ code: 'contract_not_recorded', kind: 'questionnaire_contract', id: QUESTIONNAIRE_CONTRACT_ID, version: 'none' })
+  // Governance mode refuses a bundle whose approval text looks like this, so a record built from real approvals cannot match.
+  const synthetic = [s.source_text.authority, s.source_text.review_ref, c?.authority, c?.review_ref, s.registry_version, s.ledger_version].some(isSyntheticAuthorityText)
+  if (synthetic && state?.authority_class !== 'synthetic_test') out.push({ code: 'synthetic_record', kind: 'source_text', id: s.source_text.source_id, version: String(s.source_text.version) })
+  return out
 }
 
 function wellFormed(e: unknown, kind: AuthorityKind): e is AuthorityState {
@@ -173,6 +195,9 @@ export function evaluateIssuanceEligibility(canonical: string, sha256: string, s
     if (err instanceof IssuanceReferenceError) return { decision: 'invalid_record', reason: 'provenance_malformed' }
     throw err
   }
+
+  const excluded = commercialExclusions(verified.record, state)
+  if (excluded.length > 0) return { decision: 'ineligible', reasons: sorted(excluded) }
 
   const issuance = state && typeof state === 'object' ? state.issuance_date : undefined
   if (!isIsoDate(issuance) || !state.authorities || typeof state.authorities !== 'object') return { decision: 'indeterminate', cause: 'malformed_state', components: [...AUTHORITY_KINDS] }

@@ -44,10 +44,9 @@ import { legacyGenerateFor } from '@/lib/creator-record-artifacts/production'
 import * as production from '@/lib/creator-record-flow/production'
 import type { FulfillmentSubmission } from '@/lib/payments/repository'
 import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
-import { historicalForm } from '@/test-support/historical-record'
+import { asRenderableSchema5, COMMERCIAL_SUPPORT_UNDER_TEST } from '@/test-support/commercial-support'
 
-/** Issuance and the customer PDF support schema 5 only: records in that format, as a row prepared then would be. */
-const buildCustomerRecord = (input: Parameters<typeof buildCurrentRecord>[0]) => historicalForm(buildCurrentRecord(input))
+const buildCustomerRecord = buildCurrentRecord
 
 const OWNER = '11111111-1111-4111-8111-111111111111'
 const OTHER = '22222222-2222-4222-8222-222222222222'
@@ -86,7 +85,7 @@ function textApproval(s: CreatorRecordSources): SourceTextApproval {
 const SOURCES = syntheticSources()
 const TEXT = textApproval(SOURCES)
 const governance = (over: Partial<Parameters<typeof governanceSnapshotFrom>[0]> = {}) => (date: string): GovernanceSnapshot =>
-  governanceSnapshotFrom({ issuance_date: date, sources: SOURCES, topicClaims: TOPIC_CLAIMS_FIXTURE, source_text_approvals: [TEXT], ...over })
+  governanceSnapshotFrom({ issuance_date: date, sources: SOURCES, topicClaims: TOPIC_CLAIMS_FIXTURE, source_text_approvals: [TEXT], support: COMMERCIAL_SUPPORT_UNDER_TEST, authority_class: 'synthetic_test', ...over })
 const withdrawn = () => governance({ sources: { ...SOURCES, ledger: SOURCES.ledger.map((e) => ({ ...e, creator_record_eligible: 'No' as const })) } })
 
 const ANS = { P1: ['Synthetic M3 video'], P3: ['own_channels'], F1: ['TW'], F2: ['online_worldwide'], L1: ['no'], M0: ['none'], H1: ['edited'] }
@@ -333,9 +332,10 @@ function issuance(rows: PreparedRow[], over: Partial<V2IssuanceDeps> = {}) {
   const rendered: CustomerDocumentInput[] = []
   const deps: V2IssuanceDeps = {
     boundTo: async (sid) => clone(rows.find((r) => r.submission_id === sid) ?? null),
+    latestVersion: async (d) => clone(rows.filter((r) => r.draft_id === d).sort((a, b) => b.version - a.version)[0] ?? null),
     governance: governance(),
     templates: () => ({ templates: TEMPLATES, approval: approvalOf(TEMPLATES) }),
-    renderPdf: async (input) => ((rendered.push(input)), new TextEncoder().encode(documentModelCanonical(buildCustomerDocument(input)))),
+    renderPdf: async (input) => ((rendered.push(input)), new TextEncoder().encode(documentModelCanonical(buildCustomerDocument(asRenderableSchema5(input))))),
     ...over,
   }
   return { deps, rendered }
@@ -349,17 +349,17 @@ describe('renderV2ForIssuance', () => {
     const { deps, rendered } = issuance([row])
     const bytes = await renderV2ForIssuance(deps, v2sub(), RECORD_ID, NOW)
     const model = JSON.parse(new TextDecoder().decode(bytes))
-    expect(model.identity).toMatchObject({ record_id: RECORD_ID, issued_on: '2026-11-01', record_ref: row.record_ref, snapshot_sha256: row.sha256 })
+    expect(model.identity).toMatchObject({ record_id: RECORD_ID, issued_on: '2026-11-01', record_ref: row.record_ref })
     expect(rendered).toHaveLength(1)
     expect(rendered[0]).toMatchObject({ canonical: row.canonical, sha256: row.sha256, issued: { record_id: RECORD_ID, issued_on: '2026-11-01' } })
   })
 
-  test('a correction made after payment does not stop issuance of the version that was paid for', async () => {
+  test('CR-V2-MVP-ELIGIBILITY-1: a correction that exists at issuance stops automatic issuance of the earlier version; nothing is rendered', async () => {
     const row = preparedRow({ submission_id: SUB_ID })
     const later = preparedRow({ draft_id: row.draft_id, status: 'prepared', reviewed_at: null }, 2)
     const { deps, rendered } = issuance([row, later])
-    await renderV2ForIssuance(deps, v2sub(), RECORD_ID, NOW)
-    expect(rendered[0].sha256).toBe(row.sha256)
+    await expect(renderV2ForIssuance(deps, v2sub(), RECORD_ID, NOW)).rejects.toEqual(new V2IssuanceRefusal('record_superseded'))
+    expect(rendered).toHaveLength(0)
   })
 
   test.each([

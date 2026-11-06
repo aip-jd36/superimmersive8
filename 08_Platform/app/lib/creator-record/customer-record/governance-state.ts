@@ -24,10 +24,10 @@ import { isApproved, isIsoDate, type GovernanceApproval } from '../contract/type
 import type { CreatorRecordSources } from '../prototype/build-draft'
 import {
   claimContentDigest, claimRef, observationMapContentDigest, observationMapRef, publicationContentDigest, publicationRef,
-  questionContentDigest, questionRef, type AuthorityKind,
+  questionContentDigest, questionRef, type AuthorityKind, type PublicationAuthorityClass,
 } from './authority-content'
 import type { AuthorityLifecycle, AuthorityState, GovernanceSnapshot, Lookup } from './eligibility'
-import { CUSTOMER_RECORD_SCHEMA, HISTORICAL_RECORD_BUILDER, HISTORICAL_RECORD_SCHEMA_VERSION } from './record'
+import { approvalRefusals } from './questionnaire-contract'
 import { SOURCE_TEXT_CATEGORIES, type SourceTextApproval } from './source-text'
 import type { TopicClaims } from './sources'
 
@@ -41,11 +41,12 @@ export interface Identity {
 
 /**
  * The record schemas and builders this build can issue. Technical identities only.
- * CR-V2-DECL-1B-2: unchanged, so a schema 7 or 8 record is refused until issuance is separately authorized for it.
+ * CR-V2-MVP-ELIGIBILITY-1: none. Schemas 5 and 6 carry no contract and are never commercially eligible; schemas 7 and 8 are
+ * refused until issuance is separately authorized for them. Reading a record does not depend on this list.
  */
 export const CURRENT_ISSUANCE_SUPPORT: { record_schemas: readonly Identity[]; builders: readonly Identity[] } = Object.freeze({
-  record_schemas: [{ id: CUSTOMER_RECORD_SCHEMA, version: HISTORICAL_RECORD_SCHEMA_VERSION }],
-  builders: [{ id: HISTORICAL_RECORD_BUILDER.id, version: HISTORICAL_RECORD_BUILDER.version }],
+  record_schemas: [],
+  builders: [],
 })
 
 export interface CurrentGovernance {
@@ -54,6 +55,8 @@ export interface CurrentGovernance {
   topicClaims: Available<TopicClaims>
   source_text_approvals: Available<readonly SourceTextApproval[]>
   support?: typeof CURRENT_ISSUANCE_SUPPORT
+  /** The class of the bundle these sources come from, when they come from one. */
+  authority_class?: PublicationAuthorityClass
 }
 
 const UNAPPROVED_MARKER = /pilot|prototype|unapproved|not a governance approval|not a creator record publication approval/i
@@ -68,6 +71,16 @@ function approvalLifecycle(a: GovernanceApproval, governed: boolean): AuthorityL
   return isApproved(a) ? 'approved' : 'pending'
 }
 
+/** The one current contract approval. None means no record's contract is current; a superseded contract is simply not this one. */
+function questionnaireContractLookup(sources: CreatorRecordSources): Lookup {
+  const a = sources.questionnaire_approval
+  if (a === null || a === undefined) return ok([])
+  const refusals = approvalRefusals(a)
+  if (refusals.some((r) => r.code === 'questionnaire_contract_malformed')) return { status: 'malformed' }
+  const lifecycle: AuthorityLifecycle = sources.kind !== 'governed' || refusals.some((r) => r.code === 'pilot_marker') ? 'pending' : a.lifecycle
+  return ok([state('questionnaire_contract', { id: a.contract_id, version: String(a.contract_version) }, lifecycle, a.contract_sha256)])
+}
+
 export function governanceSnapshotFrom(g: CurrentGovernance): GovernanceSnapshot {
   const support = g.support ?? CURRENT_ISSUANCE_SUPPORT
   const authorities: GovernanceSnapshot['authorities'] = {
@@ -77,10 +90,11 @@ export function governanceSnapshotFrom(g: CurrentGovernance): GovernanceSnapshot
 
   // ── Question Registry and Observation Map ──
   if (isUnavailable(g.sources)) {
-    authorities.question = authorities.observation_map_entry = authorities.publication_entry = { status: 'unavailable' }
+    authorities.question = authorities.observation_map_entry = authorities.publication_entry = authorities.questionnaire_contract = { status: 'unavailable' }
   } else {
     const sources = g.sources
     const governed = sources.kind === 'governed'
+    authorities.questionnaire_contract = questionnaireContractLookup(sources)
     const loaded = loadQuestionRegistry(sources.registry_input)
     if (!loaded.ok) {
       authorities.question = authorities.observation_map_entry = { status: 'malformed' }
@@ -124,5 +138,5 @@ export function governanceSnapshotFrom(g: CurrentGovernance): GovernanceSnapshot
       }),
     )
   }
-  return { issuance_date: g.issuance_date, authorities }
+  return { issuance_date: g.issuance_date, authorities, ...(g.authority_class ? { authority_class: g.authority_class } : {}) }
 }

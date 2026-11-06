@@ -16,17 +16,18 @@ import { AUTHORITY_KINDS, DIGESTED_KINDS, type AuthorityKind } from '@/lib/creat
 import {
   evaluateIssuanceEligibility, issuanceReferences, type AuthorityState, type GovernanceSnapshot, type IssuanceEligibility,
 } from '@/lib/creator-record/customer-record/eligibility'
-import { CURRENT_ISSUANCE_SUPPORT, governanceSnapshotFrom, UNAVAILABLE, type CurrentGovernance } from '@/lib/creator-record/customer-record/governance-state'
+import { governanceSnapshotFrom, UNAVAILABLE, type CurrentGovernance } from '@/lib/creator-record/customer-record/governance-state'
 import {
-  buildCustomerRecord as buildCurrentRecord, verifyCustomerRecord, HISTORICAL_RECORD_BUILDER, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION,
-  type CustomerRecordInput, type CustomerRecordV2, HISTORICAL_RECORD_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
+  buildCustomerRecord as buildCurrentRecord, verifyCustomerRecord, CUSTOMER_RECORD_BUILDER, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION,
+  type CustomerRecordInput, type CustomerRecordV2 } from '@/lib/creator-record/customer-record/record'
 import { SOURCE_TEXT_CATEGORIES, SOURCE_TEXT_SOURCE_ID, sourceTextContent, sourceTextDigest, type SourceTextApproval } from '@/lib/creator-record/customer-record/source-text'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
-import { historicalForm } from '@/test-support/historical-record'
+import { COMMERCIAL_SUPPORT_UNDER_TEST } from '@/test-support/commercial-support'
 
-/** Issuance and the customer PDF support schema 5 only: records in that format, as a row prepared then would be. */
-const buildCustomerRecord = (input: Parameters<typeof buildCurrentRecord>[0]) => historicalForm(buildCurrentRecord(input))
+const buildCustomerRecord = buildCurrentRecord
+/** Exactly this record's schema and builder, so removing one leaves nothing of that kind. */
+const DECLARATIONS_SUPPORT = { record_schemas: COMMERCIAL_SUPPORT_UNDER_TEST.record_schemas.slice(0, 1), builders: COMMERCIAL_SUPPORT_UNDER_TEST.builders.slice(0, 1) }
 
 const RECORD = { record_id: 'PREP-CRV21CTEST', record_version: 1, captured_at: '2026-10-31T00:00:00Z' }
 const AS_OF = '2026-10-31'
@@ -71,7 +72,7 @@ function prepare(over: Partial<CustomerRecordInput> = {}) {
 }
 const governance = (over: Partial<CurrentGovernance> = {}): CurrentGovernance => {
   const sources = approvedSources()
-  return { issuance_date: ISSUE_ON, sources, topicClaims: TOPIC_CLAIMS_FIXTURE, source_text_approvals: [approvalFor(sources)], ...over }
+  return { issuance_date: ISSUE_ON, sources, topicClaims: TOPIC_CLAIMS_FIXTURE, source_text_approvals: [approvalFor(sources)], support: DECLARATIONS_SUPPORT, authority_class: 'synthetic_test', ...over }
 }
 const evaluate = (g: CurrentGovernance | GovernanceSnapshot, rec = prepare()) =>
   evaluateIssuanceEligibility(rec.canonical, rec.sha256, 'authorities' in g ? g : governanceSnapshotFrom(g))
@@ -91,8 +92,8 @@ describe('approved and valid authorities', () => {
 
   test('the record carries builder provenance and a content digest for every governed entry it uses', () => {
     const { record } = prepare()
-    expect(record.schema_version).toBe(HISTORICAL_RECORD_SCHEMA_VERSION)
-    expect(record.builder).toEqual(HISTORICAL_RECORD_BUILDER)
+    expect(record.schema_version).toBe(CUSTOMER_RECORD_SCHEMA_VERSION)
+    expect(record.builder).toEqual(CUSTOMER_RECORD_BUILDER)
     const refs = issuanceReferences(record)
     for (const k of DIGESTED_KINDS) expect(refs.some((x) => x.kind === k && /^[0-9a-f]{64}$/.test(x.content_sha256 ?? ''))).toBe(true)
     expect(record.sources.authority_digests.length).toBe(refs.filter((x) => (DIGESTED_KINDS as readonly string[]).includes(x.kind)).length)
@@ -141,7 +142,7 @@ describe('every authority kind is checked by the same rules', () => {
     expect([r.decision, codes(r)]).toEqual(['indeterminate', [`${kind}:reference_ambiguous`]])
   })
 
-  test.each([...DIGESTED_KINDS, 'source_text'] as AuthorityKind[])('%s with changed content under an unchanged version → indeterminate conflict', (kind) => {
+  test.each([...DIGESTED_KINDS, 'source_text', 'questionnaire_contract'] as AuthorityKind[])('%s with changed content under an unchanged version → indeterminate conflict', (kind) => {
     const r = evaluate(edit(kind, (e, i) => { e[i].content_sha256 = 'f'.repeat(64) }), rec)
     expect([r.decision, codes(r)]).toEqual(['indeterminate', [`${kind}:content_changed_under_version`]])
   })
@@ -260,9 +261,9 @@ describe('withdrawn, superseded, retired and pending authority in the current so
   })
 
   test('an unsupported builder or record schema blocks issuance; a supported one grants nothing else', () => {
-    const builders = [{ id: HISTORICAL_RECORD_BUILDER.id, version: HISTORICAL_RECORD_BUILDER.version + 1 }]
-    expect(codes(evaluate(governance({ support: { ...CURRENT_ISSUANCE_SUPPORT, builders } }), rec))).toEqual(['builder:version_not_current'])
-    expect(codes(evaluate(governance({ support: { ...CURRENT_ISSUANCE_SUPPORT, record_schemas: [] } }), rec))).toEqual(['record_schema:reference_missing'])
+    const builders = [{ id: CUSTOMER_RECORD_BUILDER.id, version: 99 }]
+    expect(codes(evaluate(governance({ support: { ...DECLARATIONS_SUPPORT, builders } }), rec))).toEqual(['builder:version_not_current'])
+    expect(codes(evaluate(governance({ support: { ...DECLARATIONS_SUPPORT, record_schemas: [] } }), rec))).toEqual(['record_schema:reference_missing'])
     // Supported builder and schema, but withdrawn wording: still ineligible.
     expect(codes(evaluate(governance({ source_text_approvals: [approvalFor(approvedSources(), { lifecycle: 'withdrawn' })] }), rec))).toEqual(['source_text:lifecycle_withdrawn'])
   })
@@ -289,7 +290,7 @@ describe('a malformed or corrupted prepared record is never issuable, and govern
     ['an unreferenced authority digest', resealed((r) => { r.sources.authority_digests.push({ kind: 'question', id: 'ZZ9', version: '1', content_sha256: 'a'.repeat(64) }) }), 'provenance_malformed'],
     ['a malformed authority digest', resealed((r) => { r.sources.authority_digests[0].content_sha256 = 'not-a-digest' }), 'provenance_malformed'],
     ['missing builder provenance', resealed((r) => { delete (r as Partial<CustomerRecordV2>).builder }), 'provenance_malformed'],
-    ['wording approved for another schema', resealed((r) => { r.sources.source_text.record_schema = { id: CUSTOMER_RECORD_SCHEMA, version: 2 } }), 'provenance_malformed'],
+    ['wording approved for another schema', resealed((r) => { r.sources.source_text.record_schema = { id: CUSTOMER_RECORD_SCHEMA, version: 2 } }), 'wrong_schema'],
   ])('%s → invalid_record', (_, stored, reason) => {
     expect(evaluateIssuanceEligibility(stored.canonical, stored.sha256, noReads)).toEqual({ decision: 'invalid_record', reason })
   })
@@ -302,7 +303,7 @@ describe('temporary unavailability is distinguished from definitive ineligibilit
 
   test('an unreadable source is indeterminate (retry), never eligible', () => {
     const r = evaluate(governance({ sources: UNAVAILABLE }), rec)
-    expect(r).toEqual({ decision: 'indeterminate', cause: 'unavailable', components: ['question', 'observation_map_entry', 'publication_entry'] })
+    expect(r).toEqual({ decision: 'indeterminate', cause: 'unavailable', components: ['questionnaire_contract', 'question', 'observation_map_entry', 'publication_entry'] })
     expect(evaluate(governance({ topicClaims: UNAVAILABLE, source_text_approvals: UNAVAILABLE }), rec)).toEqual({ decision: 'indeterminate', cause: 'unavailable', components: ['source_text', 'governed_claim'] })
   })
 
