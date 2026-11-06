@@ -650,7 +650,7 @@ describe('rendering boundary', () => {
     const targets = new Set(walk(ROOT).flatMap(importsOf))
     expect(Array.from(targets).sort()).toEqual([
       '../contract/compose', '../contract/types', '../customer-record/record', '../evidence-intake/vocabulary', '../integration/objectives', '../record-core/canonical', '../record-core/projection',
-      './document-model', './templates', '@react-pdf/renderer', 'react',
+      './document-model', './templates', './text-layout', '@react-pdf/renderer', 'node:path', 'react',
     ])
   })
 

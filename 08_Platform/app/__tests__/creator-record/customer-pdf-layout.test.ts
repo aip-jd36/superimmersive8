@@ -6,7 +6,7 @@
  */
 jest.mock('@react-pdf/renderer', () => ({
   Document: () => null, Page: () => null, Text: () => null, View: () => null,
-  Font: { registerHyphenationCallback: () => undefined },
+  Font: { register: () => undefined },
   StyleSheet: { create: (s: unknown) => s },
   renderToStream: async () => { throw new Error('not available in unit tests') },
 }))

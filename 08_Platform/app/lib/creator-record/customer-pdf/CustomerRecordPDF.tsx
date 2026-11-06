@@ -9,30 +9,43 @@
  * Bytes are not reproducible (the PDF library writes its own creation time and
  * file id). Integrity is carried by the record's snapshot digest, printed in the
  * document, and by the per-attempt PDF digest an issuance pipeline records.
+ *
+ * CR-V2-PDF-7B: Helvetica holds Latin only, so other characters come from a bundled fallback font, chosen character by character
+ * (`./fonts/README.md`). Every text sets `lineBreakOpportunities`, so nothing is dropped at the edge of a line. Text the fonts cannot
+ * print refuses before any layout (`text_unsupported`), so an answer is never printed wrongly. Refusing leaves the step incomplete.
  */
 
+import path from 'node:path'
 import React from 'react'
-import { Document, Font, Page, StyleSheet, Text, View, renderToStream } from '@react-pdf/renderer'
-import { buildCustomerDocument, type Block, type CustomerDocumentInput, type CustomerDocumentModel } from './document-model'
+import { Document, Font, Page, StyleSheet, Text, View, renderToStream, type TextProps } from '@react-pdf/renderer'
+import { buildCustomerDocument, CustomerPdfRefusal, documentText, type Block, type CustomerDocumentInput, type CustomerDocumentModel } from './document-model'
+import { lineBreakOpportunities, pdfText, unsupportedCharacters } from './text-layout'
 
-// Words are never split across lines (ids, digests and labels stay intact).
-Font.registerHyphenationCallback((word) => [word])
+const FALLBACK_FONT = 'SI8 Customer Record Fallback'
+Font.register({ family: FALLBACK_FONT, src: path.join(process.cwd(), 'lib', 'creator-record', 'customer-pdf', 'fonts', 'NotoSansCJKtc-Regular.otf') })
+const REGULAR = ['Helvetica', FALLBACK_FONT]
+const BOLD = ['Helvetica-Bold', FALLBACK_FONT]
+
+/** One text in the document: its characters are the record's, and it may wrap anywhere it needs to. */
+const Line = ({ text, ...props }: { text: string } & Omit<TextProps, 'children' | 'hyphenationCallback'>) => (
+  <Text {...props} hyphenationCallback={lineBreakOpportunities}>{pdfText(text)}</Text>
+)
 
 const s = StyleSheet.create({
   // No lineHeight on the page: a page-level lineHeight stops @react-pdf drawing the fixed page-number text
   // (CR-V2-2C, reproduced in isolation). Line height is set on each text style instead (on a wrapping View it
   // is applied as fixed gaps). A numeric lineHeight multiplies the text's OWN fontSize (default 18, not the page's),
   // so every style that sets lineHeight also sets fontSize.
-  page: { paddingTop: 64, paddingBottom: 56, paddingHorizontal: 48, fontSize: 9.5, fontFamily: 'Helvetica', color: '#1c1c1e' },
+  page: { paddingTop: 64, paddingBottom: 56, paddingHorizontal: 48, fontSize: 9.5, fontFamily: REGULAR, color: '#1c1c1e' },
   header: { position: 'absolute', top: 22, left: 48, right: 48, flexDirection: 'row', justifyContent: 'space-between', borderBottomWidth: 0.75, borderBottomColor: '#233f66', paddingBottom: 5 },
-  stamp: { fontSize: 7.5, fontFamily: 'Helvetica-Bold', color: '#233f66', letterSpacing: 0.4, maxWidth: 380, lineHeight: 1.3 },
+  stamp: { fontSize: 7.5, fontFamily: BOLD, color: '#233f66', letterSpacing: 0.4, maxWidth: 380, lineHeight: 1.3 },
   headerId: { fontSize: 7.5, color: '#4a4a52' },
   footerText: { position: 'absolute', bottom: 22, left: 48, right: 140, fontSize: 7, color: '#83837e' },
   pageNumber: { position: 'absolute', bottom: 22, left: 48, right: 48, textAlign: 'right', fontSize: 7, color: '#83837e' },
   section: { marginBottom: 12 },
-  heading: { fontSize: 12.5, fontFamily: 'Helvetica-Bold', color: '#182c48', marginTop: 6, marginBottom: 5 },
-  subheading: { fontSize: 10.5, fontFamily: 'Helvetica-Bold', marginTop: 7, marginBottom: 3 },
-  label: { fontFamily: 'Helvetica-Bold', marginTop: 4, marginBottom: 1, fontSize: 9.5, lineHeight: 1.35 },
+  heading: { fontSize: 12.5, fontFamily: BOLD, color: '#182c48', marginTop: 6, marginBottom: 5 },
+  subheading: { fontSize: 10.5, fontFamily: BOLD, marginTop: 7, marginBottom: 3 },
+  label: { fontFamily: BOLD, marginTop: 4, marginBottom: 1, fontSize: 9.5, lineHeight: 1.35 },
   paragraph: { marginBottom: 4, fontSize: 9.5, lineHeight: 1.35 },
   bulletRow: { flexDirection: 'row', marginBottom: 2, paddingLeft: 6 },
   bulletMark: { width: 9 },
@@ -48,25 +61,25 @@ function BlockView({ b }: { b: Block }) {
   switch (b.kind) {
     case 'heading':
       // A heading is never left alone at the foot of a page.
-      return <Text style={s.heading} minPresenceAhead={60}>{b.text}</Text>
+      return <Line style={s.heading} minPresenceAhead={60} text={b.text} />
     case 'subheading':
-      return <Text style={s.subheading} minPresenceAhead={40}>{b.text}</Text>
+      return <Line style={s.subheading} minPresenceAhead={40} text={b.text} />
     case 'label':
-      return <Text style={s.label} minPresenceAhead={20}>{b.text}</Text>
+      return <Line style={s.label} minPresenceAhead={20} text={b.text} />
     case 'paragraph':
-      return <Text style={s.paragraph}>{b.text}</Text>
+      return <Line style={s.paragraph} text={b.text} />
     case 'bullet':
       return (
         <View style={s.bulletRow} wrap={false}>
           <Text style={s.bulletMark}>•</Text>
-          <Text style={s.bulletText}>{b.text}</Text>
+          <Line style={s.bulletText} text={b.text} />
         </View>
       )
     case 'row':
       return (
         <View style={s.row} wrap={false}>
-          <Text style={s.rowLabel}>{b.label}</Text>
-          <Text style={/^[0-9a-f]{64}$/.test(b.value) ? s.rowDigest : s.rowValue}>{b.value}</Text>
+          <Line style={s.rowLabel} text={b.label} />
+          <Line style={/^[0-9a-f]{64}$/.test(b.value) ? s.rowDigest : s.rowValue} text={b.value} />
         </View>
       )
   }
@@ -108,12 +121,10 @@ export function CustomerRecordPDF({ model }: { model: CustomerDocumentModel }) {
       <Page size="A4" style={s.page}>
         <Text style={s.pageNumber} fixed render={({ pageNumber, totalPages }) => m.page_label.replace('{page}', String(pageNumber)).replace('{pages}', String(totalPages))} />
         <View style={s.header} fixed>
-          <Text style={s.stamp}>{m.stamp}</Text>
-          <Text style={s.headerId}>{m.record_id}</Text>
+          <Line style={s.stamp} text={m.stamp} />
+          <Line style={s.headerId} text={m.record_id} />
         </View>
-        <Text style={s.footerText} fixed>
-          {m.footer}
-        </Text>
+        <Line style={s.footerText} fixed text={m.footer} />
         {model.sections.map((section) => (
           <View key={section.id} style={s.section}>
             {groupHeadings(section.blocks).map((group, i) =>
@@ -134,9 +145,19 @@ export function CustomerRecordPDF({ model }: { model: CustomerDocumentModel }) {
   )
 }
 
+/** A font as the library loaded it. Its own check is what the layout consults, so this refuses exactly what would print wrongly. */
+async function glyphCheck(fontFamily: string): Promise<(codePoint: number) => boolean> {
+  await Font.load({ fontFamily })
+  const data = Font.getFont({ fontFamily }).data as unknown as { hasGlyphForCodePoint(codePoint: number): boolean }
+  return (codePoint) => data.hasGlyphForCodePoint(codePoint)
+}
+
 /** Build the model (all checks) and render it. Throws `CustomerPdfRefusal` before any rendering. */
 export async function renderCustomerRecordPdf(input: CustomerDocumentInput): Promise<{ model: CustomerDocumentModel; bytes: Uint8Array }> {
   const model = buildCustomerDocument(input)
+  const [latin, fallback] = await Promise.all([glyphCheck('Helvetica'), glyphCheck(FALLBACK_FONT)])
+  const unsupported = unsupportedCharacters(documentText(model).join('\n'), (cp) => latin(cp) || fallback(cp))
+  if (unsupported.length > 0) throw new CustomerPdfRefusal('text_unsupported', unsupported.join(', '))
   const stream = await renderToStream(<CustomerRecordPDF model={model} />)
   const chunks: Buffer[] = []
   for await (const chunk of stream) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))

@@ -2,6 +2,13 @@
 const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['@react-pdf/renderer', '@myriaddreamin/typst-ts-node-compiler'],
+    // CR-V2-PDF-7B: the customer PDF's fallback font is read at render time, so tracing cannot see it. Every route that can issue needs it.
+    outputFileTracingIncludes: Object.fromEntries([
+      '/api/webhooks/stripe',
+      '/api/internal/payment-fulfillments/sweep',
+      '/api/admin/payments/[sessionId]/reconcile',
+      '/api/admin/submissions/[id]/generate-creator-record',
+    ].map((route) => [route, ['./lib/creator-record/customer-pdf/fonts/**']])),
   },
   images: {
     remotePatterns: [
