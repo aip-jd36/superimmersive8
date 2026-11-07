@@ -39,6 +39,7 @@ import { COMPARISON_FIELDS, CREATOR_RESPONSE_CODES } from '../customer-record/ex
 import { arr, fail, int, isPlainObject, nullable, obj, oneOf, opt, ProjectionRefusal, str, WITHHELD, type P } from '../record-core/projection'
 import { EVIDENCE_CATEGORIES, EVIDENCE_MEDIA_TYPES } from '../evidence-intake/vocabulary'
 import { CONTENT_CLASSES, EXAMINATION_FAILURE_REASONS, EXAMINATION_LIMITATIONS, EXECUTOR_MODES, OBSERVATION_BASES, OBSERVATION_STATUSES, WORKFLOW_AUTHORIZATIONS } from '../examination/envelope'
+import { LIVE_LIMITATIONS } from '../live-examination/envelope'
 import { canonicalJson } from '../record-core/canonical'
 import { checkTemplates, fill, type CustomerPdfSectionId, type CustomerPdfTemplates, type PdfTemplateApproval, type TemplateRefusalCode } from './templates'
 
@@ -144,8 +145,38 @@ const projectionSpec = obj({
   projection: obj({ id: str, version: int }), run_id: str, envelope_sha256: str, execution_boundary: str,
   run_integrity: oneOf(['persisted_run_rechecked'] as const), verification: oneOf(['not_verified'] as const), envelope: envelopeSpec,
 })
-type ProjectionView = ReturnType<typeof projectionSpec>
-const examinationOf: P<'not_examined' | ProjectionView> = (v, path) => (v === 'not_examined' ? 'not_examined' : projectionSpec(v, path))
+// CR-V2-MVP-M2A: a reading made by an AI model for a customer (projection version 2, envelope version 3). Only the `live_model` shape is
+// read: a mocked reading, a failed attempt or any other origin refuses here.
+const liveObservationSpec = obj({
+  observation_id: str, field: str, qualifier: nullable(str), basis: oneOf(OBSERVATION_BASES), status: oneOf(OBSERVATION_STATUSES),
+  value: nullable(str), excerpt: nullable(str), source: obj({ document_sha256: str, location: isNull }),
+  verification: oneOf(['not_verified'] as const), origin: oneOf(['live_model_extracted'] as const),
+})
+const liveEnvelopeSpec = obj({
+  envelope: obj({ id: str, version: int }), examination_key: str, identity: oneOf(['execution_key'] as const),
+  execution_origin: oneOf(['live_model'] as const), executed_at: str,
+  document: obj({ document_id: str, sha256: str, media_type: oneOf(EVIDENCE_MEDIA_TYPES), byte_size: int }),
+  content_class: oneOf(['customer_document'] as const), workflow_authorization: oneOf(WORKFLOW_AUTHORIZATIONS),
+  profile: obj({ id: str, version: int, schema: str, prompt: str }),
+  executor: obj({ mode: oneOf(['live_model'] as const), provider: oneOf(['anthropic'] as const), model: str }),
+  outcome: obj({ status: oneOf(['examined'] as const), reason: isNull }),
+  observations: arr(liveObservationSpec),
+  limitations: arr(oneOf(LIVE_LIMITATIONS)),
+  provenance: obj({ integrity: oneOf(['sha256_size_and_type_rechecked'] as const), model_calls: int, prompt_sent: WITHHELD, input_tokens: WITHHELD, output_tokens: WITHHELD, provider_response_id: WITHHELD }),
+})
+const liveProjectionSpec = obj({
+  projection: obj({ id: str, version: int }), run_id: str, envelope_sha256: str, execution_boundary: oneOf(['customer_live_examination'] as const),
+  run_integrity: oneOf(['persisted_attempt_rechecked'] as const), verification: oneOf(['not_verified'] as const), envelope: liveEnvelopeSpec,
+})
+type ReplayProjectionView = ReturnType<typeof projectionSpec>
+type LiveProjectionView = ReturnType<typeof liveProjectionSpec>
+type ProjectionView = ReplayProjectionView | LiveProjectionView
+const examinationOf: P<'not_examined' | ProjectionView> = (v, path) => {
+  if (v === 'not_examined') return 'not_examined'
+  const version = isPlainObject(v) && isPlainObject(v.projection) ? v.projection.version : null
+  return version === 2 ? liveProjectionSpec(v, path) : projectionSpec(v, path)
+}
+const isLive = (p: ProjectionView): p is LiveProjectionView => p.envelope.envelope.version === 3
 const responseTargetOf: P<{ kind: 'observation'; run_id: string; observation_id: string } | { kind: 'comparison'; tool_index: number; document_id: string; field: (typeof COMPARISON_FIELDS)[number] }> = (v, path) =>
   isPlainObject(v) && v.kind === 'observation'
     ? obj({ kind: oneOf(['observation'] as const), run_id: str, observation_id: str })(v, path)
@@ -225,6 +256,8 @@ export function buildCustomerDocument(input: CustomerDocumentInput): CustomerDoc
   const t = check.templates
   // CR-V2-MVP-M3A: a schema 8 record prints only through templates that carry the examination wording (approved with them).
   if (examinationBearing && !t.examination) throw new CustomerPdfRefusal('templates_examination_missing')
+  // CR-V2-MVP-M2A: and a reading made by an AI model only through templates that carry its wording too.
+  if (r.documents.items.some((d) => d.examination !== 'not_examined' && isLive(d.examination)) && !t.live_examination) throw new CustomerPdfRefusal('templates_live_examination_missing')
 
   try {
     return compose(r, issued, t, check.fingerprint, input.sha256)
@@ -368,8 +401,9 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
         return
       }
       const env = e.envelope
+      const live = isLive(e) ? t.live_examination! : null
       blocks.push(row(X.status, X.status_labels[env.outcome.status], 'template'))
-      if (env.outcome.reason !== null) blocks.push(row(X.failure, X.failure_labels[env.outcome.reason], 'template'))
+      if (!isLive(e) && e.envelope.outcome.reason !== null) blocks.push(row(X.failure, X.failure_labels[e.envelope.outcome.reason], 'template'))
       blocks.push({ kind: 'label', text: X.observations_heading, from: 'template' })
       if (env.observations.length === 0) blocks.push(tpl(X.no_observations))
       for (const o of env.observations) {
@@ -387,14 +421,22 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
         blocks.push(...responseRows(responses.filter((x) => x.target.kind === 'observation' && x.target.run_id === e.run_id && x.target.observation_id === o.observation_id)))
       }
       blocks.push(...responseRows(comparisonResponses))
-      blocks.push({ kind: 'label', text: X.limitations_heading, from: 'template' }, ...env.limitations.map((l): Block => ({ kind: 'bullet', text: X.limitation_labels[l], from: 'template' })))
-      blocks.push(
-        { kind: 'label', text: X.provenance_heading, from: 'template' },
-        row(X.reference, e.envelope_sha256.slice(0, 12)),
-        row(X.method, X.method_labels[env.executor.mode], 'template'),
-        row(X.content, X.content_labels[env.content_class], 'template'),
-        row(X.profile, fill(X.profile_value, { id: env.profile.id, version: env.profile.version }), 'template'),
-      )
+      const limitationLabel = (l: string) => (isLive(e) ? live!.limitation_labels[l] : X.limitation_labels[l as (typeof EXAMINATION_LIMITATIONS)[number]])
+      blocks.push({ kind: 'label', text: X.limitations_heading, from: 'template' }, ...env.limitations.map((l): Block => ({ kind: 'bullet', text: limitationLabel(l), from: 'template' })))
+      blocks.push({ kind: 'label', text: X.provenance_heading, from: 'template' }, row(X.reference, e.envelope_sha256.slice(0, 12)))
+      if (isLive(e)) {
+        // A model reading names its provider, the exact model and when it was made. Tokens and the provider's response id stay in the record.
+        blocks.push(
+          row(X.method, live!.method, 'template'),
+          row(live!.provider, live!.provider_labels[e.envelope.executor.provider], 'template'),
+          row(live!.model, e.envelope.executor.model),
+          row(live!.executed_at, e.envelope.executed_at),
+          row(X.content, live!.content_labels[e.envelope.content_class], 'template'),
+        )
+      } else {
+        blocks.push(row(X.method, X.method_labels[e.envelope.executor.mode], 'template'), row(X.content, X.content_labels[e.envelope.content_class], 'template'))
+      }
+      blocks.push(row(X.profile, fill(X.profile_value, { id: env.profile.id, version: env.profile.version }), 'template'))
     })
     if (printed !== responses.length) throw new CustomerPdfRefusal('record_unsupported', 'creator response without its document')
     if (r.documents.items.length > 0) blocks.push(tpl(t.documents.fingerprint_note))

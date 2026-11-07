@@ -216,6 +216,7 @@ describe('lib/creator-record boundaries', () => {
       'components/creator-record/DraftRecordView.tsx',
       'components/creator-record/ExaminationReview.tsx', // CR-V2-EXAM-INTEGRATION-X3: the prepared view's type only
       'lib/creator-record-flow/admin-uat.ts', // Permanent admin-only UAT: the injected dependencies
+      'lib/creator-record-flow/customer-live-production.ts', // CR-V2-MVP-M2A: customer live examination ports (the entry point's refusal map and port types); loaded on demand only while both code locks are true
       'lib/creator-record-flow/evidence-http.ts', // CR-V2-DOC-1: evidence route helpers
       'lib/creator-record-flow/evidence-production.ts', // CR-V2-DOC-1: evidence intake ports
       'lib/creator-record-flow/examination-customer.ts', // CR-V2-EXAM-INTEGRATION-X2: creator examination wiring (one route)

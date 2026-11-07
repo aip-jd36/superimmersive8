@@ -182,7 +182,8 @@ describe('the evaluation-only schema', () => {
 
   test('is not a migration: no migration tooling can apply it, and the migration list is unchanged', () => {
     const migrations = readdirSync(path.join(ROOT, 'supabase', 'migrations')).sort()
-    expect(migrations[migrations.length - 1]).toBe('20261108000000_creator_record_v2_live_examination_foundation.sql')
+    // CR-V2-MVP-M2A: the customer live examination migration follows it; still nothing named for the evaluation.
+    expect(migrations.slice(-2)).toEqual(['20261108000000_creator_record_v2_live_examination_foundation.sql', '20261110000000_creator_record_v2_customer_live_examination.sql'])
     expect(migrations.some((m) => /live_evaluation/.test(m))).toBe(false)
     // CR-V2-DOC-LIVE-1C-B1: with its read-only verification and its guarded rollback beside it.
     expect(readdirSync(path.join(ROOT, 'supabase', 'evaluation-only')).sort()).toEqual(['20261109000000_creator_record_v2_live_evaluation.sql', 'rollback_20261109000000.sql', 'verify_live_evaluation_environment.sql'])

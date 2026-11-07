@@ -63,7 +63,7 @@ import {
 import { embeddedContractValid, QUESTIONNAIRE_VALIDATION_RULES, type EmbeddedQuestionnaireContract } from './questionnaire-contract'
 import { checkApprovedSources, type SourceRefusal, type SourceTextInput, type TopicClaims } from './sources'
 import {
-  EVIDENCE_CATEGORIES, EVIDENCE_EXAMINATION_NOT_EXAMINED, EVIDENCE_MAX_BYTES, EVIDENCE_MAX_FILE_NAME_CHARS, EVIDENCE_MAX_PER_RECORD, EVIDENCE_MAX_PER_TOOL, EVIDENCE_MEDIA_TYPES,
+  EVIDENCE_CATEGORIES, EVIDENCE_EXAMINATION_NOT_EXAMINED, EVIDENCE_STORED_MAX_BYTES, EVIDENCE_MAX_FILE_NAME_CHARS, EVIDENCE_MAX_PER_RECORD, EVIDENCE_MAX_PER_TOOL, EVIDENCE_MEDIA_TYPES,
   type EvidenceCategory, type EvidenceMediaType,
 } from '../evidence-intake/vocabulary'
 import type { ExaminationProjection } from '../examination/projection'
@@ -311,7 +311,7 @@ function documentIssues(docs: CustomerRecordInput['documents']): string[] {
       UUID.test(d.document_id) && !ids.has(d.document_id) &&
       /^[0-9a-f]{64}$/.test(d.sha256) &&
       (EVIDENCE_MEDIA_TYPES as readonly string[]).includes(d.media_type) &&
-      Number.isInteger(d.byte_size) && d.byte_size > 0 && d.byte_size <= EVIDENCE_MAX_BYTES &&
+      Number.isInteger(d.byte_size) && d.byte_size > 0 && d.byte_size <= EVIDENCE_STORED_MAX_BYTES &&
       typeof d.file_name === 'string' && d.file_name.trim() !== '' && Array.from(d.file_name).length <= EVIDENCE_MAX_FILE_NAME_CHARS &&
       (EVIDENCE_CATEGORIES as readonly string[]).includes(d.category) &&
       (d.tool_index === null || (Number.isInteger(d.tool_index) && d.tool_index >= 0))

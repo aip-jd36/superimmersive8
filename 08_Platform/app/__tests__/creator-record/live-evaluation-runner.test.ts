@@ -107,6 +107,10 @@ describe('the fixed composition', () => {
     expect(who(/['"][^'"]*live-evaluation-runner['"]/)).toEqual(['scripts/creator-record-live-evaluation.ts'])
     expect(who(/['"][^'"]*live-examination\/evaluation['"]/)).toEqual(['lib/creator-record-flow/live-evaluation-runner.ts', 'lib/creator-record-flow/live-examination-production.ts'])
     expect(who(/['"][^'"]*live-examination-production['"]/)).toEqual(['lib/creator-record-flow/live-evaluation-runner.ts'])
+    // CR-V2-MVP-M2A: the customer ports are their own module, loaded on demand by the customer route wiring only, and reach no
+    // evaluation, runner or document-access code.
+    expect(who(/['"][^'"]*customer-live-production['"]/)).toEqual(['lib/creator-record-flow/examination-customer.ts'])
+    expect(readFileSync(path.join(ROOT, 'lib/creator-record-flow/customer-live-production.ts'), 'utf8')).not.toMatch(/live-examination\/(evaluation|document-access|real-executor)|live-evaluation|live-examination-production/)
     expect(files.map(rel).filter((f) => /^(app|components)\//.test(f) && /live-evaluation|live-examination/.test(readFileSync(path.join(ROOT, f), 'utf8')))).toEqual([])
     expect(readFileSync(path.join(ROOT, '..', '..', 'vercel.json'), 'utf8')).not.toMatch(/live-evaluation|live-examination/)
   })

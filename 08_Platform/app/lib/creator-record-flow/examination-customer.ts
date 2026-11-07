@@ -6,14 +6,34 @@
  * examination persistence ports (`./examination-production`: service role; replay-only core). Nothing here reads,
  * creates or changes a UAT grant or the environment marker: the database alone decides whether an examination read
  * is permitted. Errors carry a fixed code only.
+ *
+ * CR-V2-MVP-M2A: the customer live examination is wired in ONLY while both code locks are true (`customerLiveEnabledInThisBuild`), and
+ * its modules are then loaded on demand. With either lock false — this build — the route and the projection port are exactly the
+ * replay path above, and nothing live is loaded.
  */
 import { NextResponse } from 'next/server'
 import { CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flow/approved-inputs'
 import { examinationProjectionFor, type CustomerExaminationDeps, type CustomerExaminationError } from '@/lib/creator-record/customer-flow/examination'
 import type { FlowDeps } from '@/lib/creator-record/customer-flow/service'
 import { productionExaminationDeps } from '@/lib/creator-record-flow/examination-production'
+import { CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD, LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD } from '@/lib/creator-record/live-examination/controls'
 import { hasPilotAccess } from './pilot-access'
 import { NO_STORE } from './http'
+
+/** Both code locks, read at call time. */
+export const customerLiveEnabledInThisBuild = (): boolean => LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD === true && CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD === true
+
+/** The customer live port: the reviewed production ports, the committed fixture registry and the real executor. No other composition. */
+const productionCustomerLive: NonNullable<CustomerExaminationDeps['live']> = {
+  async examine(userId, documentId) {
+    const [{ examineCustomerDocumentLive }, { customerLivePorts }, { DEFAULT_REPLAY_TABLE }] = await Promise.all([
+      import('@/lib/creator-record/live-examination/customer'),
+      import('@/lib/creator-record-flow/customer-live-production'),
+      import('@/lib/creator-record/evidence/replay'),
+    ])
+    return examineCustomerDocumentLive({ ports: customerLivePorts, isKnownSyntheticFixture: (sha256) => DEFAULT_REPLAY_TABLE.has(sha256), now: () => new Date() }, userId, documentId)
+  },
+}
 
 export function productionCustomerExaminationDeps(): CustomerExaminationDeps {
   return {
@@ -22,6 +42,7 @@ export function productionCustomerExaminationDeps(): CustomerExaminationDeps {
     adapter: productionExaminationDeps(),
     log: (event, detail) => console.warn(`[creator-record-v2/examination] ${event}`, detail),
     now: () => new Date(),
+    ...(customerLiveEnabledInThisBuild() ? { live: productionCustomerLive } : {}),
   }
 }
 
@@ -30,7 +51,16 @@ export function productionCustomerExaminationDeps(): CustomerExaminationDeps {
  * own, re-verified and projected (X0); never a grant, the marker or the status function.
  */
 export const productionExaminationProjections: NonNullable<FlowDeps['examinations']> = {
-  projectionFor: (userId, documentId) => examinationProjectionFor(productionExaminationDeps().storage, userId, documentId),
+  projectionFor: (userId, documentId) =>
+    examinationProjectionFor(
+      productionExaminationDeps().storage,
+      userId,
+      documentId,
+      undefined,
+      customerLiveEnabledInThisBuild()
+        ? { listAttempts: async (owner, id) => (await import('@/lib/creator-record-flow/customer-live-production')).listCustomerLiveAttempts(owner, id, 'receipt') }
+        : undefined,
+    ),
 }
 
 const MESSAGES: Record<CustomerExaminationError['code'] | 'invalid_request', string> = {
@@ -41,6 +71,7 @@ const MESSAGES: Record<CustomerExaminationError['code'] | 'invalid_request', str
   not_ready: 'This document is still being added. Try again in a moment.',
   not_examinable: 'This document cannot be examined.',
   examination_not_permitted: 'Document examination is not available for this document.',
+  examination_limit_reached: 'Document examination has reached its limit for now.',
   unavailable: 'Document examination is not available right now.',
 }
 

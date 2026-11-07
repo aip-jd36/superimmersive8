@@ -12,7 +12,7 @@ const MESSAGES: Record<EvidenceError['code'], string> = {
   invalid_request: 'The request could not be read.',
   consent_required: 'Please confirm the document storage notice before adding documents.',
   empty_file: 'The file is empty.',
-  file_too_large: 'The file is larger than 4 MB.',
+  file_too_large: 'The file is larger than 1 MB.',
   unsupported_format: 'Only PDF, PNG and JPEG files can be added.',
   pdf_malformed: 'This PDF could not be read.',
   pdf_encrypted: 'Password-protected or encrypted PDFs cannot be added.',

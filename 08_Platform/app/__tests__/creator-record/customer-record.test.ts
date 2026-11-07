@@ -440,6 +440,8 @@ describe('independence', () => {
       // the existing pure reconciliation and its persisted-examination adapter, and the record's own examination part.
       // No database, Storage, engine, model or SDK is reachable through any of them (see the X0 boundary tests).
       'customer-record/examination-section', 'evidence/document-observations', 'evidence/persisted-comparison', 'examination/projection',
+      // CR-V2-MVP-M2A: the bounded projection of a stored customer live attempt (pure: re-verifies the envelope; no engine or model).
+      'live-examination/projection',
     ].sort())
     // prototype/build-draft (which holds the pilot data) is reached for types only.
     for (const f of walk(ROOT)) expect(readFileSync(f, 'utf8')).not.toMatch(/^import\s(?!type\s)[^\n]*from\s+['"]\.\.\/prototype\/build-draft['"]/m)

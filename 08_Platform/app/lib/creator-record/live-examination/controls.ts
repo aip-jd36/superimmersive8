@@ -28,6 +28,13 @@ import type { EvidenceMediaType } from '../evidence-intake/vocabulary'
 import { BASE_MAX_TOKENS, RETRY_MAX_TOKENS } from '../receipt-examination/examine'
 
 export const LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: boolean = false
+
+/**
+ * CR-V2-MVP-M2A — the customer path's OWN code lock, separate on purpose: lifting the evaluation lock above (for a controlled evaluation)
+ * must never open live examination to creators. A customer live examination needs BOTH locks true, the database's customer enablement
+ * row (20261110000000), the submissions stop open and the real-document intake lock lifted. Each is a separate reviewed decision.
+ */
+export const CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: boolean = false
 export const LIVE_EVALUATION_ENV = 'CREATOR_RECORD_LIVE_EVALUATION'
 
 /**

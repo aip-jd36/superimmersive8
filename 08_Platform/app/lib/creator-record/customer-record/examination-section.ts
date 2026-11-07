@@ -14,10 +14,18 @@
  *      interface can ask the creator to re-affirm each one explicitly.
  */
 
-import { parseExaminationProjection, type ExaminationProjection, type ExaminationRunReference } from '../examination/projection'
+import { parseExaminationProjection, type ExaminationProjection as ReplayExaminationProjection, type ExaminationRunReference } from '../examination/projection'
+import { parseLiveExaminationProjection, type LiveExaminationProjection } from '../live-examination/projection'
 import { COMPARISON_WITHHELD, HISTORICAL_COMPARISON_METHOD, PERSISTED_COMPARISON_METHOD } from '../evidence/persisted-comparison'
 import type { FieldReconciliation } from '../evidence/document-observations'
 import { canonicalJson } from '../record-core/canonical'
+
+/**
+ * CR-V2-MVP-M2A: a record's examination is either kind of bounded projection: a replay run (`../examination/projection`) or a stored
+ * customer live attempt (`../live-examination/projection`). Same keys, both self-verifying, both `not_verified`.
+ */
+export type ExaminationProjection = ReplayExaminationProjection | LiveExaminationProjection
+export const parseAnyExaminationProjection = (raw: unknown): ExaminationProjection | null => parseExaminationProjection(raw) ?? parseLiveExaminationProjection(raw)
 
 export const CREATOR_RESPONSE_CODES = ['reading_incorrect', 'wrong_document', 'other_plan_applies', 'not_relevant'] as const
 export type CreatorResponseCode = (typeof CREATOR_RESPONSE_CODES)[number]
@@ -82,7 +90,7 @@ export function attachExaminations(items: readonly ExaminedInventoryItem[], exam
   examinations.forEach((x, i) => {
     const keys = x && typeof x === 'object' ? Object.keys(x).sort().join(',') : ''
     const doc = keys === 'document_id,projection' ? items.find((d) => d.document_id === x.document_id) : undefined
-    const p = doc ? parseExaminationProjection(x.projection) : null
+    const p = doc ? parseAnyExaminationProjection(x.projection) : null
     const e = p?.envelope.document
     if (!doc || !p || !e || byDocument.has(doc.document_id) || e.document_id !== doc.document_id || e.sha256 !== doc.sha256 || e.media_type !== doc.media_type || e.byte_size !== doc.byte_size) {
       issues.push(`examinations[${i}]`)

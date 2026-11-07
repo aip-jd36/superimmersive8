@@ -353,10 +353,24 @@ const EXAMINATION_PDF_TEMPLATES = {
     comparison_note: t('This record does not say whether a document matches what you told us.'),
     open_items_pointer: t('Your documents and their readings are listed in section 5.'),
   },
+  live_examination: {
+    method: t('Automated reading by an AI model'),
+    provider: t('Provider'),
+    provider_labels: { anthropic: t('Anthropic') },
+    model: t('Model'),
+    executed_at: t('Read at'),
+    content_labels: { customer_document: t('Your own uploaded document') },
+    limitation_labels: {
+      mock_test_data_not_model_output: t('Test data, not a reading of your document'), observations_not_verified: t('Readings are not checked by a person'),
+      no_location_reference: t('No page or position is given'), fields_not_established: t('Some details were not established'), single_plan_reading_does_not_exclude_others: t('One plan reading does not rule out others'),
+      multiple_plans_shown: t('More than one plan is shown'), instruction_like_text_present: t('The document contains text addressed to an AI'), not_a_billing_document: t('Not a billing document'),
+      partially_legible: t('Partly legible'), illegible: t('Illegible'),
+    },
+  },
 }
 
 /** Pinned (recomputed by the test). */
-export const SYNTHETIC_EXAMINATION_PDF_TEMPLATES_FINGERPRINT = '9346e3a0386fc34a7ab19dfbbddc20f472271e49cb8a1722c012085bada1e1ae'
+export const SYNTHETIC_EXAMINATION_PDF_TEMPLATES_FINGERPRINT = 'cbdb3ba66bc94cc98125f50772e80cbbbcd1ca4541b7bb870767a9cd16e8bff9'
 
 export const SYNTHETIC_TEST_EXAMINATION_PDF: { templates: typeof EXAMINATION_PDF_TEMPLATES; approval: PdfTemplateApproval } = Object.freeze({
   templates: EXAMINATION_PDF_TEMPLATES,

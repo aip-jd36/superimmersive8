@@ -26,6 +26,7 @@ import { arr, fail, int, isPlainObject, obj, oneOf, opt, ProjectionRefusal, str,
 import { EVIDENCE_CATEGORIES, EVIDENCE_MEDIA_TYPES } from '../evidence-intake/vocabulary'
 import { CONTENT_CLASSES, EXAMINATION_FAILURE_REASONS, EXAMINATION_LIMITATIONS, EXECUTOR_MODES, OBSERVATION_BASES, OBSERVATION_STATUSES } from '../examination/envelope'
 import { COMPARISON_FIELDS, CREATOR_RESPONSE_CODES } from '../customer-record/examination-section'
+import { LIVE_LIMITATIONS } from '../live-examination/envelope'
 
 export const CUSTOMER_PDF_TEMPLATE_ID = 'si8/creator-record-v2-pdf-templates'
 export const CUSTOMER_PDF_SECTIONS = ['about', 'project', 'tools', 'contribution', 'guidance', 'open_items', 'not_done', 'provenance'] as const
@@ -130,6 +131,15 @@ const templateSpec = obj({
     provenance_heading: str, reference: str, method: str, method_labels: exactLabels(EXECUTOR_MODES),
     content: str, content_labels: exactLabels(CONTENT_CLASSES), profile: str, profile_value: str,
     comparison_note: str, open_items_pointer: str,
+  })),
+  /**
+   * CR-V2-MVP-M2A: the wording for a reading made by an AI model (a customer live examination). Optional, so a template set approved
+   * without it is unchanged; a record holding a live reading refuses to render without it. `method` is the method row's value,
+   * `provider` and `model` label the provider and model rows, `executed_at` the time row; limitation labels cover the live codes.
+   */
+  live_examination: opt(obj({
+    method: str, provider: str, provider_labels: exactLabels(['anthropic']), model: str, executed_at: str,
+    content_labels: exactLabels(['customer_document']), limitation_labels: exactLabels(LIVE_LIMITATIONS),
   })),
   document_type_labels: exactLabels(EVIDENCE_MEDIA_TYPES),
   document_category_labels: exactLabels(EVIDENCE_CATEGORIES),

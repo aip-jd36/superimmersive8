@@ -31,7 +31,13 @@ import {
   type VerifiedRun,
 } from '../examination/persistence'
 import { RECEIPT_READING_PROFILE } from '../examination/receipt-reading'
-import { projectVerifiedRun, type ExaminationProjection } from '../examination/projection'
+import { projectVerifiedRun, type ExaminationProjection as ReplayExaminationProjection } from '../examination/projection'
+import type { CustomerLiveResult } from '../live-examination/customer'
+import { verifyLiveAttemptRow } from '../live-examination/examine'
+import { liveProjectionOfVerifiedAttempt, type CustomerLiveAttemptRow, type LiveExaminationProjection } from '../live-examination/projection'
+
+/** Either kind of bounded projection a record may carry (replay run or customer live attempt). */
+type ExaminationProjection = ReplayExaminationProjection | LiveExaminationProjection
 
 export type SubmissionsMode = 'open' | 'stopped'
 
@@ -50,6 +56,11 @@ export interface CustomerExaminationDeps {
   now?(): Date
   /** The boundaries this path may read. Defaults to the customer list; only the admin UAT wiring sets it. */
   visibleBoundaries?: readonly string[]
+  /**
+   * CR-V2-MVP-M2A: the customer live examination (`../live-examination/customer`). Supplied by the production wiring only while both
+   * code locks are true; absent, this path is the replay path exactly as before. The database still decides each step.
+   */
+  live?: { examine(userId: string, documentId: string): Promise<CustomerLiveResult> }
 }
 
 export type CustomerExaminationErrorCode =
@@ -59,9 +70,10 @@ export type CustomerExaminationErrorCode =
   | 'not_ready'
   | 'not_examinable'
   | 'examination_not_permitted'
+  | 'examination_limit_reached'
   | 'unavailable'
 
-export type CustomerExaminationError = { ok: false; status: 403 | 404 | 409 | 422 | 503; code: CustomerExaminationErrorCode }
+export type CustomerExaminationError = { ok: false; status: 403 | 404 | 409 | 422 | 429 | 503; code: CustomerExaminationErrorCode }
 
 export interface CustomerExaminationRun {
   run_id: string
@@ -111,6 +123,7 @@ export async function requestCustomerExamination(
   const doc = await owned(deps, userId, documentId)
   if (!doc.ok) return doc
   if (doc.state !== 'stored') return err(409, 'not_ready')
+  if (deps.live) return liveOutcome(deps, await deps.live.examine(userId, documentId as string))
 
   const r = await examineAndRecord(deps.adapter, {
     actor_user_id: userId,
@@ -137,6 +150,36 @@ export async function requestCustomerExamination(
       return err(503, 'unavailable')
     case 'not_recorded':
       deps.log?.('creator_record_v2_examination_not_recorded', { reason: r.reason })
+      return r.reason === 'persistence_unavailable' ? err(503, 'unavailable') : err(409, 'examination_not_permitted')
+  }
+}
+
+/** CR-V2-MVP-M2A: a live attempt's outcome as the route's fixed codes. Nothing internal is returned; the detail is logged by code only. */
+const LIMIT_REFUSALS = ['daily_limit', 'spend_limit', 'attempts_exhausted', 'in_progress']
+function liveOutcome(deps: CustomerExaminationDeps, live: CustomerLiveResult): { ok: true; run_id: string; result: 'created' | 'existing' } | CustomerExaminationError {
+  const r = live.result
+  if (r.kind !== 'examined') deps.log?.('creator_record_v2_live_examination_outcome', { kind: r.kind, code: 'code' in r ? r.code : 'reason' in r ? r.reason : null, reservation_refusal: live.reservation_refusal, settlement: live.settlement.status })
+  switch (r.kind) {
+    case 'examined':
+      return { ok: true, run_id: r.attempt_id, result: r.model_called ? 'created' : 'existing' }
+    case 'failed':
+      return r.retryable ? err(503, 'unavailable') : err(422, 'not_examinable')
+    case 'attempts_exhausted':
+    case 'not_retryable':
+      return err(422, 'not_examinable')
+    case 'disabled':
+      return err(409, 'examination_not_permitted')
+    case 'refused':
+      if (r.code === 'invalid_request' || r.code === 'not_owner' || r.code === 'document_not_found') return err(404, 'not_found')
+      if (r.code === 'document_not_stored') return err(409, 'not_ready')
+      if (r.code === 'live_budget_exhausted') return live.reservation_refusal !== null && LIMIT_REFUSALS.includes(live.reservation_refusal) ? err(429, 'examination_limit_reached') : err(409, 'examination_not_permitted')
+      if (r.code === 'live_examination_disabled' || r.code === 'profile_not_registered' || r.code === 'executor_not_permitted' || r.code === 'object_unavailable') return err(503, 'unavailable')
+      return err(422, 'not_examinable')
+    case 'not_read':
+      return r.reason === 'audit_unavailable' ? err(503, 'unavailable') : err(409, 'examination_not_permitted')
+    case 'unavailable':
+      return err(503, 'unavailable')
+    case 'not_recorded':
       return r.reason === 'persistence_unavailable' ? err(503, 'unavailable') : err(409, 'examination_not_permitted')
   }
 }
@@ -181,14 +224,34 @@ export type DocumentProjection =
  * Fail closed on anything else: a run outside the customer-visible boundaries (an operator-seeded run), more than one
  * run (which one a record should carry is not decided), or any integrity failure. Never reads a grant.
  */
-export async function examinationProjectionFor(storage: Pick<ExaminationAdapterDeps['storage'], 'listRuns'>, userId: string, documentId: string, visibleBoundaries: readonly string[] = CUSTOMER_VISIBLE_BOUNDARIES): Promise<DocumentProjection> {
+export async function examinationProjectionFor(
+  storage: Pick<ExaminationAdapterDeps['storage'], 'listRuns'>,
+  userId: string,
+  documentId: string,
+  visibleBoundaries: readonly string[] = CUSTOMER_VISIBLE_BOUNDARIES,
+  /** CR-V2-MVP-M2A: the creator's stored live attempts. Absent: replay runs only, exactly as before. */
+  live?: { listAttempts(ownerUserId: string, documentId: string): Promise<CustomerLiveAttemptRow[]> },
+): Promise<DocumentProjection> {
   let rows: PersistedRunRow[]
+  let attempts: CustomerLiveAttemptRow[] = []
   try {
     rows = await storage.listRuns(userId, documentId)
+    if (live) attempts = await live.listAttempts(userId, documentId)
   } catch {
     return { kind: 'unavailable', reason: 'storage_unavailable' }
   }
   if (rows.some((row) => !visibleBoundaries.includes(row.execution_boundary))) return { kind: 'unavailable', reason: 'boundary_not_customer_visible' }
+  // Live attempts: every stored attempt re-verified; the record carries the one reading, never a failed attempt.
+  if (attempts.length > 0) {
+    if (rows.length > 0) return { kind: 'unavailable', reason: 'multiple_runs' }
+    if (attempts.some((a) => verifyLiveAttemptRow(a, userId, documentId) !== null)) return { kind: 'unavailable', reason: 'run_integrity' }
+    const readings = attempts.filter((a) => a.outcome_status === 'examined')
+    if (readings.length === 0) return { kind: 'none' }
+    if (readings.length > 1) return { kind: 'unavailable', reason: 'multiple_runs' }
+    // Every attempt passed `verifyLiveAttemptRow` above, for this owner and document.
+    const p = liveProjectionOfVerifiedAttempt(readings[0])
+    return p.ok ? { kind: 'projection', projection: p.projection } : { kind: 'unavailable', reason: 'run_integrity' }
+  }
   if (rows.length === 0) return { kind: 'none' }
   if (rows.length > 1) return { kind: 'unavailable', reason: 'multiple_runs' }
   const p = projectVerifiedRun(rows[0], userId, documentId)

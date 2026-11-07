@@ -73,7 +73,7 @@ export function DocumentReviewPanel(p: DocumentReviewPanelProps) {
       <div role="group" aria-labelledby={`${id}-label`} className="mt-2 mb-2 rounded-md border p-3" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
         <p id={`${id}-label`} className="text-sm font-medium">Tool {n}: billing document (optional)</p>
         <p id={`${id}-help`} className="text-xs mb-2" style={{ color: MUTED }}>
-          A receipt, invoice or billing screenshot for this tool. PDF, PNG or JPEG, up to 4 MB. Synthetic test documents only.
+          A receipt, invoice or billing screenshot for this tool. PDF, PNG or JPEG, up to 1 MB. Synthetic test documents only.
           {!p.consented && ' Tick the statement under “Before you add a document” to enable this.'}
         </p>
         <input

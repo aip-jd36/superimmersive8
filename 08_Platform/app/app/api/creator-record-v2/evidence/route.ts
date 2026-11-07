@@ -2,7 +2,7 @@
  * /api/creator-record-v2/evidence   (CR-V2-DOC-1)
  *
  * GET  — the signed-in creator's stored documents (metadata only).
- * POST — add one document: multipart `file` + `consent` (the consent identifier), at most 4 MB.
+ * POST — add one document: multipart `file` + `consent` (the consent identifier), at most 1 MiB (CR-V2-MVP-M2A: the live examination's limit).
  *
  * Stopped by default: while CREATOR_RECORD_V2_SUBMISSIONS is 'stopped' (Production) both answer 503 before
  * any body is read. Invite-only. While the evidence code lock is in place only SI8's synthetic test

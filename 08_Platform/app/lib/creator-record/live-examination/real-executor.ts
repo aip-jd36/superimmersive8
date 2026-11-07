@@ -21,7 +21,7 @@ import { LIVE_EXTRACTION_API_KEY_ENV, LIVE_EXTRACTION_MODEL, LIVE_REQUEST_TIMEOU
 import type { ProviderFailureKind } from '../receipt-examination/examine.anthropic'
 import type { ReceiptModelCaller, ReceiptModelResponse } from '../receipt-examination/examine'
 import { RECEIPT_EXAMINATION_USER_TEXT } from '../receipt-examination/prompt'
-import { attemptCostBoundUsd, boundLiveInputTokens, estimatedUsd, LIVE_BOUNDS, LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD, liveEvaluationEnabled, parseLiveEvaluationAuthorization, unsafeSdkEnvironment, worstCaseAttemptUsd } from './controls'
+import { attemptCostBoundUsd, boundLiveInputTokens, CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD, estimatedUsd, INPUT_BOUND, LIVE_BOUNDS, LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD, liveEvaluationEnabled, parseLiveEvaluationAuthorization, unsafeSdkEnvironment, worstCaseAttemptUsd } from './controls'
 import { LiveModelTimeout, MAX_LIVE_ATTEMPTS, type LiveAttemptGuard, type LiveExecutor } from './examine'
 
 export class LiveExaminationDisabled extends Error {
@@ -98,16 +98,59 @@ export async function loadRealLiveExecutor(rawAuthorization: unknown, options: L
   const authorization = parseLiveEvaluationAuthorization(rawAuthorization)
   if (!authorization) throw new LiveExaminationDisabled('authorization_invalid')
   if (!liveEvaluationEnabled(env, authorization, now())) throw new LiveExaminationDisabled('authorization_not_in_force')
+  const permitted = new Set(authorization.permitted_documents.map((d) => d.sha256))
+  return buildLiveExecutor({
+    env, now, options,
+    maxAttempts: authorization.permitted_documents.length * MAX_LIVE_ATTEMPTS,
+    ceilingUsd: authorization.max_estimated_usd,
+    documentPermitted: (sha256) => permitted.has(sha256),
+    inForce: () => liveEvaluationEnabled(env, authorization, now()),
+  })
+}
+
+/**
+ * CR-V2-MVP-M2A — the executor for ONE customer live examination attempt of ONE document: the same executor, guard and request checks
+ * as the evaluation, under the customer path's own code lock as well as the shared one. One attempt; its in-memory ceiling is that
+ * attempt's cost at the largest bounded input. The durable per-document and per-creator limits are the database's (`./customer`).
+ */
+export async function loadCustomerLiveExecutor(scope: { document_sha256: string }, options: LoadRealExecutorOptions = {}): Promise<RealLiveExecutor> {
+  if (LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD !== true || CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD !== true) throw new LiveExaminationDisabled('code_lock')
+  const env = options.env ?? process.env
+  if (unsafeSdkEnvironment(env, process.env).length > 0) throw new LiveExaminationDisabled('unsafe_sdk_environment')
+  if (typeof scope?.document_sha256 !== 'string' || !/^[0-9a-f]{64}$/.test(scope.document_sha256)) throw new LiveExaminationDisabled('authorization_invalid')
+  const ceilingUsd = attemptCostBoundUsd(LIVE_EXTRACTION_MODEL, INPUT_BOUND.max_input_tokens_per_request)
+  if (ceilingUsd === null) throw new LiveExaminationDisabled('model_not_priced')
+  return buildLiveExecutor({
+    env, now: options.now ?? (() => new Date()), options,
+    maxAttempts: 1,
+    ceilingUsd,
+    documentPermitted: (sha256) => sha256 === scope.document_sha256,
+    inForce: () => true,
+  })
+}
+
+interface ExecutorCore {
+  env: Readonly<Record<string, string | undefined>>
+  now: () => Date
+  options: LoadRealExecutorOptions
+  maxAttempts: number
+  ceilingUsd: number
+  documentPermitted(sha256: string): boolean
+  inForce(): boolean
+}
+
+/** The executor itself, shared by both entry points. Each entry point checks its locks and its authority first. */
+async function buildLiveExecutor(core: ExecutorCore): Promise<RealLiveExecutor> {
+  const { env, now, options, maxAttempts } = core
   if (!env[LIVE_EXTRACTION_API_KEY_ENV]) throw new LiveExaminationDisabled('dedicated_key_missing')
   const model = LIVE_EXTRACTION_MODEL
   const attemptUsd = worstCaseAttemptUsd(model)
   if (attemptUsd === null) throw new LiveExaminationDisabled('model_not_priced')
+  const ceiling = core.ceilingUsd
 
   const adapter = await (options.loadAdapter ?? (() => import('../receipt-examination/examine.anthropic') as Promise<LiveAnthropicAdapter>))()
-  const maxAttempts = authorization.permitted_documents.length * MAX_LIVE_ATTEMPTS
   const caller = withInstanceBudget(adapter.createAnthropicReceiptCaller({ model, apiKeyEnv: LIVE_EXTRACTION_API_KEY_ENV, timeoutMs: LIVE_REQUEST_TIMEOUT_MS }), maxAttempts * LIVE_BOUNDS.max_requests_per_attempt, { used: 0 })
   const deadlineMs = options.deadlineMs ?? LIVE_REQUEST_TIMEOUT_MS + LIVE_BOUNDS.deadline_margin_ms
-  const permitted = new Set(authorization.permitted_documents.map((d) => d.sha256))
 
   let admittedInputTokens = 0
   const r: LiveRunReport = { attempts_admitted: 0, requests: 0, responses_with_usage: 0, input_tokens: 0, output_tokens: 0, total_request_ms: 0, estimated_usd: 0, reserved_usd: 0, not_end_turn: 0, parse_failures: 0, failures: {}, stopped: null }
@@ -119,15 +162,15 @@ export async function loadRealLiveExecutor(rawAuthorization: unknown, options: L
   return {
     identity: { mode: 'live_model', provider: 'anthropic', model },
     guard: {
-      documentPermitted: (sha256) => permitted.has(sha256),
+      documentPermitted: (sha256) => core.documentPermitted(sha256),
       reserveAttempt(inputTokensPerRequest) {
-        if (r.stopped !== null || !liveEvaluationEnabled(env, authorization, now())) return false
+        if (r.stopped !== null || !core.inForce() || r.attempts_admitted >= maxAttempts) return false
         // CR-V2-DOC-LIVE-1C-B1: no bound, no attempt. The reservation is the larger of the planning maximum and this input's bound.
         if (!Number.isInteger(inputTokensPerRequest) || inputTokensPerRequest < 1) return false
         const bounded = attemptCostBoundUsd(model, inputTokensPerRequest)
         if (bounded === null) return false
         const reserve = Math.max(attemptUsd, bounded)
-        if (Math.max(r.reserved_usd, r.estimated_usd) + reserve > authorization.max_estimated_usd) return false
+        if (Math.max(r.reserved_usd, r.estimated_usd) + reserve > ceiling) return false
         admittedInputTokens = inputTokensPerRequest
         r.reserved_usd += reserve
         r.attempts_admitted += 1
@@ -188,7 +231,7 @@ export async function loadRealLiveExecutor(rawAuthorization: unknown, options: L
         r.responses_with_usage += 1
       }
       r.estimated_usd = estimatedUsd(model, r.input_tokens, r.output_tokens) ?? r.estimated_usd
-      if (r.estimated_usd > authorization.max_estimated_usd && r.stopped === null) r.stopped = 'over_ceiling'
+      if (r.estimated_usd > ceiling && r.stopped === null) r.stopped = 'over_ceiling'
       if ((response as unknown as { model?: unknown }).model !== model) {
         fail('model_mismatch')
         throw new LiveProviderFailure('model_mismatch')

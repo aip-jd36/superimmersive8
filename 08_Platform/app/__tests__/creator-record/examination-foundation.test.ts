@@ -552,7 +552,9 @@ describe('CR-V2-DOC-2B examination foundation', () => {
     expect(files.filter((f) => !f.startsWith(own) && /creator-record\/examination/.test(readFileSync(f, 'utf8'))).map(rel)).toEqual(['lib/creator-record-flow/examination-production.ts'])
     // CR-V2-PROD-UAT-B: the operator CLI imports the production port; CR-V2-EXAM-INTEGRATION-X2: so does the creator
     // examination wiring (its one route is stopped by default, invite-only, and the database decides authority).
-    expect(files.filter((f) => /(from\s+|import\s*\(\s*)['"][^'"]*creator-record-flow\/examination-production['"]/.test(readFileSync(f, 'utf8'))).map(rel).sort()).toEqual(['lib/creator-record-flow/admin-uat.ts', 'lib/creator-record-flow/examination-customer.ts', 'lib/creator-record-flow/live-examination-production.ts'])
+    // CR-V2-MVP-M2A: and the customer live examination ports, which reuse its document lookup, object read and access-log table name
+    // (loaded on demand by the creator examination wiring only, while both code locks are true).
+    expect(files.filter((f) => /(from\s+|import\s*\(\s*)['"][^'"]*creator-record-flow\/examination-production['"]/.test(readFileSync(f, 'utf8'))).map(rel).sort()).toEqual(['lib/creator-record-flow/admin-uat.ts', 'lib/creator-record-flow/customer-live-production.ts', 'lib/creator-record-flow/examination-customer.ts', 'lib/creator-record-flow/live-examination-production.ts'])
     // ... and only the creator examination route and (X3) the prepare flow's production ports import that wiring.
     expect(files.filter((f) => /creator-record-flow\/examination-customer['"]/.test(readFileSync(f, 'utf8'))).map(rel).sort()).toEqual(['app/api/admin/creator-record-v2/uat/evidence/[id]/examination/route.ts', 'app/api/creator-record-v2/evidence/[id]/examination/route.ts', 'lib/creator-record-flow/admin-uat.ts', 'lib/creator-record-flow/production.ts', 'lib/creator-record-flow/route-handlers.ts'])
   })

@@ -359,7 +359,8 @@ describe('what stays closed', () => {
     // CR-V2-DOC-LIVE-1C-B1: only the fixed runner loads the production ports.
     expect(importers(/['"][^'"]*live-examination-production['"]/)).toEqual(['lib/creator-record-flow/live-evaluation-runner.ts'])
     // CR-V2-DOC-LIVE-1C-A: the one entry point builds the executor, and only the (unimported) production ports name the entry point.
-    expect(importers(/['"]\.\/real-executor['"]/)).toEqual(['lib/creator-record/live-examination/evaluation.ts'])
+    // CR-V2-MVP-M2A: and the customer entry point, through `loadCustomerLiveExecutor` (its own lock as well as the shared one).
+    expect(importers(/['"]\.\/real-executor['"]/).sort()).toEqual(['lib/creator-record/live-examination/customer.ts', 'lib/creator-record/live-examination/evaluation.ts'])
     expect(importers(/['"][^'"]*live-examination\/evaluation['"]|['"]\.\/evaluation['"]/).sort()).toEqual(['lib/creator-record-flow/live-evaluation-runner.ts', 'lib/creator-record-flow/live-examination-production.ts'])
     expect(files.map(rel).filter((f) => f.startsWith('app/') && /live-examination/.test(readFileSync(path.join(root, f), 'utf8')))).toEqual([])
     expect(files.map(rel).filter((f) => f.startsWith('components/') && /live-examination/.test(readFileSync(path.join(root, f), 'utf8')))).toEqual([])
@@ -393,13 +394,23 @@ describe('what stays closed', () => {
     }
   })
 
-  test('the database still refuses live output: the migration is unchanged, and no later one widens it', () => {
+  // CR-V2-MVP-M2A: exactly one later migration widens it, for the customer shape only: a live row always has its reservation, the
+  // 1A function still refuses live output, and every new function refuses without the customer enablement row.
+  test('the 1A migration is unchanged; only 20261110000000 widens it, and only for reserved customer attempts while enabled', () => {
     const dir = path.join(root, 'supabase', 'migrations')
     const names = readdirSync(dir).sort()
-    expect(names[names.length - 1]).toBe('20261108000000_creator_record_v2_live_examination_foundation.sql')
-    const sql = readFileSync(path.join(dir, names[names.length - 1]), 'utf8')
+    expect(names.slice(-2)).toEqual(['20261108000000_creator_record_v2_live_examination_foundation.sql', '20261110000000_creator_record_v2_customer_live_examination.sql'])
+    const sql = readFileSync(path.join(dir, names[names.length - 2]), 'utf8')
     expect(sql).toContain("execution_origin    text NOT NULL CHECK (execution_origin = 'mock_test')")
     expect(sql).toContain("RAISE EXCEPTION 'live_examination_not_authorized'")
+    const next = readFileSync(path.join(dir, names[names.length - 1]), 'utf8')
+    expect(next).toContain("execution_origin = 'live_model' AND content_class = 'customer_document' AND executor_mode = 'live_model' AND provider = 'anthropic'")
+    expect(next).toContain('reservation_id IS NOT NULL')
+    expect(next).not.toMatch(/CREATE OR REPLACE FUNCTION public\.creator_record_v2_record_live_examination/)
+    for (const f of ['reserve_customer_live_examination', 'record_customer_live_examination']) {
+      const body = next.slice(next.indexOf(`FUNCTION public.creator_record_v2_${f}`))
+      expect(body.slice(0, body.indexOf('$$;'))).toContain("RAISE EXCEPTION 'customer_live_examination_not_enabled'")
+    }
   })
 
   test('the model output contract has no conclusion to carry', () => {
