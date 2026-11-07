@@ -26,6 +26,7 @@ export const RETENTION_FUNCTIONS = {
   releaseHold: 'creator_record_v2_release_retention_hold',
   apply: 'creator_record_v2_apply_retention',
   status: 'creator_record_v2_retention_status',
+  recordSweep: 'creator_record_v2_record_retention_sweep',
 } as const
 
 function raise(op: string, error: { code?: string | null; message?: string | null } | null): never {
@@ -75,6 +76,10 @@ export const retentionPorts: RetentionPorts = {
     const { data, error } = await supabaseAdmin.rpc(RETENTION_FUNCTIONS.status)
     if (error || !data || typeof data !== 'object') raise('status', error)
     return data as RetentionStatusReport
+  },
+  async recordSweep(ok, problems) {
+    const { error } = await supabaseAdmin.rpc(RETENTION_FUNCTIONS.recordSweep, { p_ok: ok, p_problems: [...problems] })
+    if (error) raise('record_sweep', error)
   },
 }
 

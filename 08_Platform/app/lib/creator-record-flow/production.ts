@@ -17,10 +17,23 @@ import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/confi
 import { hasPilotAccess, PILOT_ACCESS_TABLE } from './pilot-access'
 import { evidenceObjects, evidenceStore } from './evidence-production'
 import { productionExaminationProjections, productionReadingsIntact } from '@/lib/creator-record-flow/examination-customer'
-import { verifyEvidenceIntact } from '@/lib/creator-record/evidence-intake/service'
+import { verifyEvidenceIntact, type EvidenceIntegrity } from '@/lib/creator-record/evidence-intake/service'
 
-/** CR-V2-DOC-1B: referenced documents still held intact (row stored, same fingerprint, bytes present and re-hashed). */
-const evidenceIntact = (userId: string, items: readonly { document_id: string; sha256: string; byte_size: number }[]) => verifyEvidenceIntact({ store: evidenceStore, objects: evidenceObjects }, userId, items)
+type EvidenceItems = readonly { document_id: string; sha256: string; byte_size: number }[]
+
+/**
+ * CR-V2-DOC-1B: referenced documents still held intact (row stored, same fingerprint, bytes present and re-hashed).
+ * CR-V2-MVP-RETENTION-M1A (8N): and the creator has not withdrawn AI-processing consent for any of them (`consent_withdrawn`):
+ * checkout and issuance pause. A lookup error is `unavailable` (fail closed). The database guards at binding and artifact issuance
+ * are the authority; this gives the application its refusal code.
+ */
+const evidenceIntact = async (userId: string, items: EvidenceItems): Promise<EvidenceIntegrity> => {
+  const held = await verifyEvidenceIntact({ store: evidenceStore, objects: evidenceObjects }, userId, items)
+  if (!held.ok || items.length === 0) return held
+  const { data, error } = await supabaseAdmin.rpc('creator_record_v2_documents_consent_withdrawn', { p_document_ids: items.map((i) => i.document_id) })
+  if (error || typeof data !== 'boolean') return { ok: false, reason: 'unavailable' }
+  return data ? { ok: false, reason: 'consent_withdrawn' } : held
+}
 
 export { hasPilotAccess, PILOT_ACCESS_TABLE }
 

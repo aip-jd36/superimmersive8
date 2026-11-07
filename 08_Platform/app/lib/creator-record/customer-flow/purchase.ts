@@ -262,6 +262,9 @@ export const V2_ISSUANCE_REFUSALS = [
   'evidence_unavailable',
   // CR-V2-MVP-M4A: no approved template set for the record's schema can render it now (missing, withdrawn, mismatched, unapproved).
   'templates_unavailable',
+  // CR-V2-MVP-RETENTION-M1A (8N): the creator withdrew AI-processing consent for a referenced document; paused until an explicit
+  // customer decision (no such workflow exists yet). The database refuses the artifact as well.
+  'consent_withdrawn',
 ] as const
 export type V2IssuanceRefusalCode = (typeof V2_ISSUANCE_REFUSALS)[number]
 
@@ -298,7 +301,8 @@ export async function authorizeV2Issuance(deps: V2IssuanceDeps, sub: CheckoutSub
   const record = verifiedRecord(row)
   if (!record) throw new V2IssuanceRefusal('record_integrity')
   // CR-V2-DOC-1B: the PDF lists each referenced document; issue only while SI8 still holds every one intact.
-  if (!(await evidenceHeld(deps.evidenceIntact?.bind(deps), row.user_id, record)).ok) throw new V2IssuanceRefusal('evidence_unavailable')
+  const held = await evidenceHeld(deps.evidenceIntact?.bind(deps), row.user_id, record)
+  if (!held.ok) throw new V2IssuanceRefusal(held.reason === 'consent_withdrawn' ? 'consent_withdrawn' : 'evidence_unavailable')
   // CR-V2-EXAM-INTEGRATION-X0: and every referenced examination run still verifies.
   if (!(await examinationsHeld(deps.examinationsIntact?.bind(deps), row.user_id, record)).ok) throw new V2IssuanceRefusal('evidence_unavailable')
   const eligibility = evaluateIssuanceEligibility(row.canonical, row.sha256, deps.governance(today(issuedAt)))

@@ -20,12 +20,13 @@ const HOLD = '99999999-2222-4333-8444-555555555555'
 const USER = 'aaaaaaaa-2222-4333-8444-555555555555'
 const REASON = 'Disputed payment under review by support'
 
-const quiet: RetentionStatusReport = { overdue_expiry: 0, removal_pending: 0, overdue_removal: 0, open_deletion_requests: 0, deletion_requests_awaiting_hold: 0, active_holds: 0, manual_resolution_open: 0 }
-const applied = { deletion_requests: { deleted: 0, already_deleted: 0, awaiting_resolution: 0 }, expired: 0, extended: 0, held: 0, issuance_stopped: 0 }
+const quiet: RetentionStatusReport = { overdue_expiry: 0, removal_pending: 0, overdue_removal: 0, open_deletion_requests: 0, deletion_requests_awaiting_hold: 0, active_holds: 0, manual_resolution_open: 0, consent_paused_orders: 0, hours_since_last_ok_sweep: 6 }
+const applied = { deletion_requests: { deleted: 0, already_deleted: 0, awaiting_resolution: 0 }, expired: 0, extended: 0, held: 0, issuance_stopped: 0, consent_paused: 0 }
 
 function harness(over: Partial<RetentionPorts> = {}, rows: EvidenceRow[] = []) {
   const calls: string[] = []
   const removed: string[] = []
+  const runs: { ok: boolean; problems: readonly string[] }[] = []
   let removeFails = false
   const retention: RetentionPorts = {
     requestDeletion: async () => ({ request_id: 'r', status: 'completed', awaiting: null, resolution: 'deleted' }),
@@ -35,6 +36,7 @@ function harness(over: Partial<RetentionPorts> = {}, rows: EvidenceRow[] = []) {
     releaseHold: async () => 'released',
     apply: async () => applied,
     status: async () => quiet,
+    recordSweep: async (ok, problems) => { runs.push({ ok, problems }) },
     ...over,
   }
   const byId = new Map(rows.map((r) => [r.id, r]))
@@ -55,7 +57,7 @@ function harness(over: Partial<RetentionPorts> = {}, rows: EvidenceRow[] = []) {
     retention, store, objects, now: () => new Date('2026-11-07T00:00:00Z'), log: (e) => { logs.push(e) },
     alert: async (subject, fields) => { alerts.push({ subject, fields }) },
   }
-  return { deps, calls, removed, alerts, logs, failRemoval: () => { removeFails = true } }
+  return { deps, calls, removed, alerts, logs, runs, failRemoval: () => { removeFails = true } }
 }
 const deletedRow = (over: Partial<EvidenceRow> = {}): EvidenceRow => ({
   id: DOC, user_id: USER, sha256: 'a'.repeat(64), media_type: 'application/pdf', byte_size: 10, file_name: 'r.pdf', storage_path: `${USER}/${DOC}`,
@@ -126,6 +128,8 @@ describe('administrative holds', () => {
     expect(called).toBe(false)
     const conflict = harness({ renewHold: async () => { throw new RetentionRefusal('deletion_request_open') } })
     expect(await applyHoldAction(conflict.deps, USER, { action: 'renew', hold_id: HOLD, reason: REASON, days: 10 })).toEqual({ ok: false, status: 409, code: 'deletion_request_open' })
+    const capped = harness({ renewHold: async () => { throw new RetentionRefusal('hold_limit_reached') } })
+    expect(await applyHoldAction(capped.deps, USER, { action: 'renew', hold_id: HOLD, reason: REASON, days: 30 })).toEqual({ ok: false, status: 409, code: 'hold_limit_reached' })
     const notAdmin = harness({ placeHold: async () => { throw new RetentionRefusal('not_authorized') } })
     expect(await applyHoldAction(notAdmin.deps, USER, { action: 'place', document_id: DOC, reason: REASON, days: 10 })).toEqual({ ok: false, status: 403, code: 'not_authorized' })
     expect(await applyHoldAction(harness().deps, USER, { action: 'release', hold_id: HOLD, reason: REASON })).toEqual({ ok: true, hold_id: HOLD, result: 'released' })
@@ -133,11 +137,29 @@ describe('administrative holds', () => {
 })
 
 describe('retention sweep', () => {
-  test('nothing to report: ok, no alert', async () => {
+  test('nothing to report: ok, no alert, and the clean run is recorded', async () => {
     const h = harness()
     const r = await runRetentionSweep(h.deps)
     expect(r).toMatchObject({ ok: true, problems: [], notices: [] })
     expect(h.alerts).toEqual([])
+    expect(h.runs).toEqual([{ ok: true, problems: [] }])
+  })
+  test('liveness: more than 24 hours since the last clean sweep fails this one; none recorded yet is not a gap', async () => {
+    const gap = harness({ status: async () => ({ ...quiet, hours_since_last_ok_sweep: 30.5 }) })
+    const r = await runRetentionSweep(gap.deps)
+    expect(r).toMatchObject({ ok: false, problems: ['sweep_gap'] })
+    expect(gap.runs).toEqual([{ ok: false, problems: ['sweep_gap'] }])
+    expect(gap.alerts[0].fields.hours_since_last_ok_sweep).toBe(30.5)
+    expect((await runRetentionSweep(harness({ status: async () => ({ ...quiet, hours_since_last_ok_sweep: null }) }).deps)).ok).toBe(true)
+  })
+  test('a run that cannot be recorded fails the sweep (the next run could not see a gap)', async () => {
+    const r = await runRetentionSweep(harness({ recordSweep: async () => { throw new Error('down') } }).deps)
+    expect(r).toMatchObject({ ok: false, problems: ['run_not_recorded'] })
+  })
+  test('orders paused for withdrawn consent alert as a decision needed', async () => {
+    const h = harness({ apply: async () => ({ ...applied, consent_paused: 1 }), status: async () => ({ ...quiet, consent_paused_orders: 1 }) })
+    expect(await runRetentionSweep(h.deps)).toMatchObject({ ok: true, notices: ['consent_paused_orders'] })
+    expect(h.alerts).toHaveLength(1)
   })
   test('a failed object removal fails the sweep and alerts (counts only)', async () => {
     const h = harness({}, [deletedRow()])

@@ -138,6 +138,7 @@ maybe('Creator Record v2 original-document retention (PostgreSQL, through 202611
     async releaseHold(h, a, reason) { try { return (await c().query('SELECT public.creator_record_v2_release_retention_hold($1, $2, $3) v', [h, a, reason])).rows[0].v } catch (e) { return refusal(e) } },
     async apply(limit) { try { return (await c().query('SELECT public.creator_record_v2_apply_retention($1) v', [limit])).rows[0].v } catch (e) { return refusal(e) } },
     async status() { return (await c().query('SELECT public.creator_record_v2_retention_status() v')).rows[0].v },
+    async recordSweep(ok, problems) { await c().query('SELECT public.creator_record_v2_record_retention_sweep($1, $2)', [ok, problems]) },
   })
   const alerts: { subject: string; fields: Record<string, string | number> }[] = []
   const deps: RetentionDeps & { alert: (s: string, f: Record<string, string | number>) => Promise<void> } = {
@@ -172,17 +173,23 @@ maybe('Creator Record v2 original-document retention (PostgreSQL, through 202611
     await svc.query(`UPDATE public.creator_record_v2_prepared SET status = 'reviewed', reviewed_at = now() WHERE id = $1`, [id])
     return id
   }
-  /** Bound and paid (the webhook's own function, synthetic session facts). Returns submission and session. */
-  async function paidOrder(owner: string, preparedId: string) {
+  /** Bound to a submission with an open checkout session (create_creator_record_v2_submission). */
+  async function bound(owner: string, preparedId: string) {
     const p = (await svc.query('SELECT sha256 FROM public.creator_record_v2_prepared WHERE id = $1', [preparedId])).rows[0]
     const b = (await svc.query('SELECT * FROM public.create_creator_record_v2_submission($1, $2, $3, $4)', [preparedId, owner, String(p.sha256).trim(), 'Creator'])).rows[0]
     const session = `cs_test_${randomUUID().replace(/-/g, '')}`
     await svc.query('UPDATE public.submissions SET stripe_checkout_session_id = $2 WHERE id = $1', [b.out_submission_id, session])
-    const r = (await svc.query('SELECT * FROM public.record_checkout_payment($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)',
-      [session, `evt_${randomUUID().replace(/-/g, '')}`, b.out_submission_id, Math.floor(Date.now() / 1000), 'complete', 'payment', 'paid', 'pi_test_ret', 'usd', 2900, 2900, 0, 0, 0])).rows[0]
-    expect(r.out_outcome).toBe('accepted')
     return { submissionId: b.out_submission_id as string, session }
   }
+  /** The payment recorded exactly as the webhook records it (record_checkout_payment, synthetic session facts; Stripe is never called). */
+  async function pay(order: { submissionId: string; session: string }) {
+    const r = (await svc.query('SELECT * FROM public.record_checkout_payment($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)',
+      [order.session, `evt_${randomUUID().replace(/-/g, '')}`, order.submissionId, Math.floor(Date.now() / 1000), 'complete', 'payment', 'paid', 'pi_test_ret', 'usd', 2900, 2900, 0, 0, 0])).rows[0]
+    expect(r.out_outcome).toBe('accepted')
+    return order
+  }
+  const paidOrder = async (owner: string, preparedId: string) => pay(await bound(owner, preparedId))
+  const claim = async (session: string) => (await svc.query('SELECT * FROM public.claim_payment_fulfillment($1, 300, 6, 604800)', [session])).rows[0]
   async function issue(submissionId: string) {
     const attempt = randomUUID()
     const pdf = new TextEncoder().encode(`%PDF-1.7 synthetic issued record ${submissionId}`)
@@ -420,26 +427,245 @@ maybe('Creator Record v2 original-document retention (PostgreSQL, through 202611
     expect((await docRow(d.id)).deletion_reason).toBe('deletion_request')
   })
 
-  test('a deletion request waits for an unfinished paid order at most 14 days, then deletes and stops automated issuance', async () => {
+  // ── 8M: payment status never delays a deletion request ──
+  test('8M: a deletion request is fulfilled at once despite a paid, unissued order, which leaves automated issuance immediately', async () => {
     const owner = await user()
     const d = await doc(owner)
     const pid = await prepared(owner, [d])
-    const { submissionId } = await paidOrder(owner, pid)
-    expect(await requestEvidenceDeletion(deps, owner, d.id)).toEqual({ ok: true, request: { status: 'open', awaiting: 'paid_order_in_progress', resolution: null } })
-    // Once the record is issued, the request completes.
-    await issue(submissionId)
-    await apply()
-    expect((await docRow(d.id)).deletion_reason).toBe('deletion_request')
+    const order = await paidOrder(owner, pid)
+    expect((await ledger(order.session)).fulfillment_status).toBe('pending')
 
-    const owner2 = await user()
-    const d2 = await doc(owner2)
-    const pid2 = await prepared(owner2, [d2])
-    const order = await paidOrder(owner2, pid2)
-    // A request made 15 days ago (inserted by the database operator; the function always stamps the current time).
-    await admin.query(`INSERT INTO public.creator_record_v2_deletion_requests (user_id, document_id, status, requested_at) VALUES ($1, $2, 'open', now() - interval '15 days')`, [owner2, d2.id])
+    expect(await requestEvidenceDeletion(deps, owner, d.id)).toEqual({ ok: true, request: { status: 'completed', awaiting: null, resolution: 'deleted' } })
+    expect((await docRow(d.id)).deletion_reason).toBe('deletion_request')
+    expect(objects.has(d.path)).toBe(false)
+    // In the same request, not at the next sweep: out of automated issuance, documented for refund / manual resolution.
+    const f = await ledger(order.session)
+    expect(f.fulfillment_status).toBe('needs_reconciliation')
+    expect(f.last_error).toMatch(/^retention_original_unavailable: .*refund or manual resolution required/)
+    expect(await claim(order.session)).toMatchObject({ out_claimed: false, out_reason: 'needs_reconciliation' })
+    // The record itself, its payment and its links are kept (independently justified records); only the original is gone.
+    expect((await admin.query('SELECT count(*)::int n FROM public.creator_record_v2_prepared_documents WHERE prepared_id = $1', [pid])).rows[0].n).toBe(1)
+    expect((await admin.query('SELECT payment_status FROM public.submissions WHERE id = $1', [order.submissionId])).rows[0].payment_status).toBe('paid')
+    // The vocabulary no longer has a payment reason to wait on.
+    await expect(admin.query(`INSERT INTO public.creator_record_v2_deletion_requests (user_id, document_id, status, awaiting) VALUES ($1, $2, 'open', 'paid_order_in_progress')`, [owner, d.id])).rejects.toThrow(/check constraint/)
+  })
+
+  test('8M: a fulfilment that was running when the original was deleted fails closed and is moved by the next sweep', async () => {
+    const owner = await user()
+    const d = await doc(owner)
+    const order = await paidOrder(owner, await prepared(owner, [d]))
+    const c = await claim(order.session)
+    expect(c.out_claimed).toBe(true)
+    await requestEvidenceDeletion(deps, owner, d.id)
+    expect((await ledger(order.session)).fulfillment_status).toBe('in_progress')  // a claimed run is never touched mid-flight
+    // The runner's own evidence check refuses issuing a record whose original is gone (verifyEvidenceIntact), and it finishes as failed.
+    expect(await verifyEvidenceIntact({ store, objects: memObjects }, owner, [{ document_id: d.id, sha256: d.sha256, byte_size: d.byte_size }])).toEqual({ ok: false, reason: 'not_stored' })
+    expect((await svc.query('SELECT public.finish_payment_fulfillment($1, $2, $3) s', [order.session, c.out_claim_token, 'creator_record_v2_issuance_refused:evidence_unavailable'])).rows[0].s).toBe('failed')
     await apply()
-    expect((await docRow(d2.id)).deletion_reason).toBe('deletion_request')
     expect((await ledger(order.session)).fulfillment_status).toBe('needs_reconciliation')
+  })
+
+  test('payment completing after the original expired: the order is moved to refund / manual resolution, never issued', async () => {
+    const owner = await user()
+    const d = await doc(owner, 91)
+    const order = await bound(owner, await prepared(owner, [d]))  // checkout opened before expiry
+    await apply()
+    expect((await docRow(d.id)).deletion_reason).toBe('retention_expired')  // no extension: nothing was paid yet
+    await pay(order)                                                    // the webhook arrives afterwards
+    expect(await verifyEvidenceIntact({ store, objects: memObjects }, owner, [{ document_id: d.id, sha256: d.sha256, byte_size: d.byte_size }])).toEqual({ ok: false, reason: 'not_stored' })
+    await apply()
+    const f = await ledger(order.session)
+    expect(f.fulfillment_status).toBe('needs_reconciliation')
+    expect(f.last_error).toMatch(/^retention_original_unavailable:/)
+  })
+
+  // ── 8N: withdrawal pauses unissued records ──
+  const withdraw = (owner: string, c: () => Client = () => svc) => withdrawEvidenceConsent({ retention: retentionPorts(c) }, owner)
+  const appCheck = async (ids: string[]) => (await svc.query('SELECT public.creator_record_v2_documents_consent_withdrawn($1) v', [ids])).rows[0].v
+  const newArtifact = async (submissionId: string) => {
+    const attempt = randomUUID()
+    return svc.query(`INSERT INTO public.creator_record_artifacts (submission_id, record_id, attempt_id, storage_path, sha256, byte_size, generator_version, uat, status) VALUES ($1, $2, $3, $4, $5, 10, $6, false, 'pending')`,
+      [submissionId, `CR2-${randomUUID().slice(0, 8)}`, attempt, `${submissionId}/${attempt}.pdf`, hex64(), V2_GENERATOR])
+  }
+
+  test('8N: withdrawal pauses preparation, checkout binding, issuance and fulfilment of unissued records; issued ones are untouched', async () => {
+    const owner = await user()
+    const d = await doc(owner)
+    const reviewedUnbound = await prepared(owner, [d])
+    const paidPid = await prepared(owner, [await doc(owner)])
+    const paidDoc = (await admin.query('SELECT document_id FROM public.creator_record_v2_prepared_documents WHERE prepared_id = $1', [paidPid])).rows[0].document_id
+    const order = await paidOrder(owner, paidPid)
+    const issuedPid = await prepared(owner, [await doc(owner)])
+    const issuedOrder = await paidOrder(owner, issuedPid)
+    await issue(issuedOrder.submissionId)
+    const examinationRows = (await admin.query('SELECT count(*)::int n FROM public.creator_record_v2_evidence_access_log l JOIN public.creator_record_v2_documents x ON x.id = l.document_id WHERE x.user_id = $1', [owner])).rows[0].n
+
+    expect(await withdraw(owner)).toMatchObject({ ok: true, result: 'created' })
+
+    // Fulfilment: moved out of automated fulfilment in the withdrawal itself, awaiting an explicit customer decision.
+    const f = await ledger(order.session)
+    expect(f.fulfillment_status).toBe('needs_reconciliation')
+    expect(f.last_error).toMatch(/^consent_withdrawn_awaiting_customer_decision: .*explicit customer decision/)
+    expect(f.reconciliation_log.at(-1)).toMatchObject({ action: 'pause_for_consent_withdrawal' })
+    expect(await claim(order.session)).toMatchObject({ out_claimed: false })
+    // Issuance: an artifact can be neither started nor (below) marked issued — also after an operator requeues the order.
+    await expect(newArtifact(order.submissionId)).rejects.toThrow('creator_record_v2_consent_withdrawn')
+    expect((await svc.query('SELECT public.reconcile_payment_fulfillment($1, $2, $3, $4) r', [order.session, 'retry_fulfillment', owner, 'operator retry after pause'])).rows[0].r).toBe('retry_scheduled')
+    await expect(newArtifact(order.submissionId)).rejects.toThrow('creator_record_v2_consent_withdrawn')
+    expect(await appCheck([paidDoc])).toBe(true)  // the application's checkout and issuance check refuses (consent_withdrawn)
+    await apply()                                  // and the sweep pauses the requeued order again
+    expect((await ledger(order.session)).fulfillment_status).toBe('needs_reconciliation')
+    // Checkout: binding the reviewed, unbound version is refused.
+    const p = (await svc.query('SELECT sha256 FROM public.creator_record_v2_prepared WHERE id = $1', [reviewedUnbound])).rows[0]
+    await expect(svc.query('SELECT * FROM public.create_creator_record_v2_submission($1, $2, $3, $4)', [reviewedUnbound, owner, String(p.sha256).trim(), 'Creator'])).rejects.toThrow('creator_record_v2_consent_withdrawn')
+    // Preparation: a new version referencing the document is not stored (its observations are not reused without a decision).
+    await expect(prepared(owner, [d])).rejects.toThrow('creator_record_v2_consent_withdrawn')
+
+    // Never restored automatically: a new upload carries its own consent, and does not un-pause the old document's records.
+    const fresh = await doc(owner)
+    expect(await appCheck([fresh.id])).toBe(false)
+    expect(await appCheck([d.id])).toBe(true)
+    await expect(prepared(owner, [d, fresh])).rejects.toThrow('creator_record_v2_consent_withdrawn')
+
+    // Issued: untouched and still delivered; historical rows kept.
+    expect((await admin.query('SELECT status FROM public.creator_record_artifacts WHERE submission_id = $1', [issuedOrder.submissionId])).rows[0].status).toBe('issued')
+    expect((await ledger(issuedOrder.session)).fulfillment_status).toBe('pending')  // has an issued artifact: never paused
+    expect((await admin.query('SELECT count(*)::int n FROM public.creator_record_v2_evidence_access_log l JOIN public.creator_record_v2_documents x ON x.id = l.document_id WHERE x.user_id = $1', [owner])).rows[0].n).toBe(examinationRows)
+    expect((await deps.retention.status()).consent_paused_orders).toBeGreaterThanOrEqual(1)
+  })
+
+  test('8N: a payment completing after the withdrawal (checkout opened before it) is paused, never issued', async () => {
+    const owner = await user()
+    const d = await doc(owner)
+    const order = await bound(owner, await prepared(owner, [d]))
+    await withdraw(owner)
+    await pay(order)
+    expect((await ledger(order.session)).fulfillment_status).toBe('pending')  // the webhook records the payment as usual
+    await expect(newArtifact(order.submissionId)).rejects.toThrow('creator_record_v2_consent_withdrawn')
+    await apply()
+    expect((await ledger(order.session)).last_error).toMatch(/^consent_withdrawn_awaiting_customer_decision:/)
+  })
+
+  test('8N concurrency: an artifact being marked issued while a withdrawal commits is refused; one that committed first stands', async () => {
+    const owner = await user()
+    const d = await doc(owner)
+    const orderA = await paidOrder(owner, await prepared(owner, [d]))
+    const orderB = await paidOrder(owner, await prepared(owner, [await doc(owner)]))
+    await newArtifact(orderA.submissionId)
+    await newArtifact(orderB.submissionId)
+    const markIssued = (c: Client, sid: string) => c.query(`UPDATE public.creator_record_artifacts SET status = 'issued', issued_at = now() WHERE submission_id = $1`, [sid])
+
+    // Withdrawal holds the creator's consent lock; issuance of A waits for it, then sees the withdrawal and is refused.
+    const w = new Client({ connectionString: URL })
+    await w.connect()
+    await w.query('SET ROLE service_role')
+    try {
+      await w.query('BEGIN')
+      await w.query('SELECT * FROM public.creator_record_v2_withdraw_consent($1)', [owner])
+      const pending = markIssued(svc2, orderA.submissionId).then(() => 'issued', (e: Error) => e.message)
+      await sleep(300)
+      await w.query('COMMIT')
+      expect(await pending).toBe('creator_record_v2_consent_withdrawn')
+    } finally { await w.end() }
+    expect((await admin.query('SELECT status FROM public.creator_record_artifacts WHERE submission_id = $1', [orderA.submissionId])).rows[0].status).toBe('pending')
+
+    // The other order: issued in a transaction that holds the lock first; the withdrawal waits and the issued record stands.
+    const owner2 = await user()
+    const order2 = await paidOrder(owner2, await prepared(owner2, [await doc(owner2)]))
+    await newArtifact(order2.submissionId)
+    const i = new Client({ connectionString: URL })
+    await i.connect()
+    await i.query('SET ROLE service_role')
+    try {
+      await i.query('BEGIN')
+      await markIssued(i, order2.submissionId)
+      const withdrawal = withdraw(owner2, () => svc2)
+      await sleep(300)
+      await i.query('COMMIT')
+      expect(await withdrawal).toMatchObject({ ok: true, result: 'created' })
+    } finally { await i.end() }
+    expect((await admin.query('SELECT status FROM public.creator_record_artifacts WHERE submission_id = $1', [order2.submissionId])).rows[0].status).toBe('issued')
+    expect(orderB.submissionId).toBeTruthy()
+  })
+
+  // ── 8O: at most 60 cumulative days of holds per original ──
+  const directHold = (c: Client, docId: string, adminId: string, start: string, end: string, released?: string) =>
+    c.query(`INSERT INTO public.creator_record_v2_retention_holds (document_id, authorized_by, reason, starts_at, expires_at, released_at, released_by, release_reason)
+      VALUES ($1, $2, $3, ${start}, ${end}, ${released ?? 'NULL'}, ${released ? '$2' : 'NULL'}, ${released ? '$3' : 'NULL'})`, [docId, adminId, REASON])
+
+  test('8O: holds and renewals count cumulatively; a different admin, release-and-recreate or overlap cannot reset the 60-day cap', async () => {
+    const owner = await user()
+    const adminA = await user(true)
+    const adminB = await user(true)
+    const d = await doc(owner)
+    // History (the database operator writes it directly; the cap applies to every writer): 25 days, then 20 days released early.
+    await directHold(admin, d.id, adminA, "now() - interval '80 days'", "now() - interval '55 days'")
+    await directHold(admin, d.id, adminB, "now() - interval '40 days'", "now() - interval '10 days'", "now() - interval '20 days'")
+    // 45 days used. A 30-day hold by another admin would make 75: refused. 15 days: exactly 60, allowed.
+    expect(await applyHoldAction(deps, adminB, { action: 'place', document_id: d.id, reason: REASON, days: 30 })).toMatchObject({ ok: false, code: 'hold_limit_reached' })
+    const ok = await applyHoldAction(deps, adminA, { action: 'place', document_id: d.id, reason: REASON, days: 15 })
+    if (!ok.ok) throw new Error(JSON.stringify(ok))
+    // Renewal adds time beyond the current hold's end: refused at the cap, by any admin.
+    expect(await applyHoldAction(deps, adminB, { action: 'renew', hold_id: ok.hold_id, reason: 'Renewal by a different admin', days: 16 })).toMatchObject({ ok: false, code: 'hold_limit_reached' })
+    // An overlapping renewal inside the existing term adds nothing and is allowed (the union is counted, not the sum).
+    expect(await applyHoldAction(deps, adminB, { action: 'renew', hold_id: ok.hold_id, reason: 'Overlapping renewal inside the term', days: 10 })).toMatchObject({ ok: true })
+    // Release and recreate: the used time stays counted.
+    for (const h of (await admin.query('SELECT id FROM public.creator_record_v2_retention_holds WHERE document_id = $1 AND released_at IS NULL AND expires_at > now()', [d.id])).rows)
+      await applyHoldAction(deps, adminA, { action: 'release', hold_id: h.id, reason: 'Released to try to reset the limit' })
+    expect(await applyHoldAction(deps, adminA, { action: 'place', document_id: d.id, reason: REASON, days: 1 })).toMatchObject({ ok: true })  // a little time was given back by the early release
+    expect(await applyHoldAction(deps, adminB, { action: 'place', document_id: randomUUID(), reason: REASON, days: 1 })).toMatchObject({ ok: false, code: 'not_found' })
+    const covered = Number((await admin.query('SELECT public.creator_record_v2_hold_covered_seconds($1, NULL, NULL) s', [d.id])).rows[0].s)
+    expect(covered).toBeLessThanOrEqual(60 * 86400)
+    // Audit history kept, immutable: every hold row with its approver and reason.
+    const rows = (await admin.query('SELECT authorized_by, reason FROM public.creator_record_v2_retention_holds WHERE document_id = $1', [d.id])).rows
+    expect(rows.length).toBe(5)
+    expect(new Set(rows.map((r) => r.authorized_by))).toEqual(new Set([adminA, adminB]))
+  })
+
+  test('8O concurrency: two holds that each fit alone but not together cannot both be written', async () => {
+    const owner = await user()
+    const adminId = await user(true)
+    const d = await doc(owner)
+    await directHold(admin, d.id, adminId, "now() - interval '70 days'", "now() - interval '40 days'")  // 30 days used
+    const c1 = new Client({ connectionString: URL })
+    const c2 = new Client({ connectionString: URL })
+    await Promise.all([c1.connect(), c2.connect()])
+    try {
+      const results = await Promise.allSettled([
+        directHold(c1, d.id, adminId, 'now()', "now() + interval '20 days'"),
+        directHold(c2, d.id, adminId, "now() + interval '21 days'", "now() + interval '41 days'"),
+      ])
+      expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1)
+      expect(String((results.find((r) => r.status === 'rejected') as PromiseRejectedResult).reason)).toContain('creator_record_v2_hold_cumulative_limit')
+    } finally { await Promise.all([c1.end(), c2.end()]) }
+    expect(Number((await admin.query('SELECT public.creator_record_v2_hold_covered_seconds($1, NULL, NULL) s', [d.id])).rows[0].s)).toBeLessThanOrEqual(60 * 86400)
+  })
+
+  // ── Scheduler liveness and migration ordering ──
+  test('liveness: every sweep is recorded (append-only), the status reports the time since the last clean one', async () => {
+    await runRetentionSweep(deps)
+    const status = await deps.retention.status()
+    expect(status.hours_since_last_ok_sweep).not.toBeNull()
+    expect(status.hours_since_last_ok_sweep!).toBeLessThan(1)
+    const last = (await admin.query('SELECT ok, problems FROM public.creator_record_v2_retention_sweep_runs ORDER BY id DESC LIMIT 1')).rows[0]
+    expect(last).toEqual({ ok: true, problems: [] })
+    await expect(svc.query("SELECT public.creator_record_v2_record_retention_sweep(false, ARRAY['Not A Code'])")).rejects.toThrow('creator_record_v2_retention_invalid')
+    await expect(svc.query('INSERT INTO public.creator_record_v2_retention_sweep_runs (ok, problems) VALUES (true, \'{}\')')).rejects.toThrow(/permission denied/)
+    await expect(admin.query('DELETE FROM public.creator_record_v2_retention_sweep_runs')).rejects.toThrow('append-only')
+  })
+
+  test('migration ordering: 20261111000000 refuses to apply before 20261110000000 (and so after 20261108000000)', async () => {
+    const c = new Client({ connectionString: URL })
+    await c.connect()
+    try {
+      await c.query('BEGIN')
+      await c.query('DROP TABLE public.creator_record_v2_customer_live_reservations CASCADE')
+      await expect(c.query(readFileSync(MIGRATIONS[MIGRATIONS.length - 1], 'utf8'))).rejects.toThrow('20261111000000 requires')
+    } finally {
+      await c.query('ROLLBACK').catch(() => undefined)
+      await c.end()
+    }
+    expect((await admin.query("SELECT to_regclass('public.creator_record_v2_customer_live_reservations') r")).rows[0].r).not.toBeNull()
   })
 
   // ── 5. Consent withdrawal ──

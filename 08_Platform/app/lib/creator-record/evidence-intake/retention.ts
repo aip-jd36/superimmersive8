@@ -7,8 +7,10 @@
  *
  * Provisional product policy (not Production authorization): originals expire 90 days after upload; an unfinished paid order extends
  * that by at most 14 days, after which automated issuance stops and a refund / manual resolution is required; physical removal within
- * 7 days of the applicable expiry; holds of at most 30 days by a named admin with explicit, audited renewal; a hold never silently
- * defeats a deletion request; consent withdrawal stops every new examination of documents uploaded under it.
+ * 7 days of the applicable expiry; holds of at most 30 days each and 60 cumulative days per original (8O), by a named admin with
+ * explicit, audited renewal; a hold never silently defeats a deletion request; payment status never delays a deletion request (8M);
+ * consent withdrawal stops every new examination of documents uploaded under it and pauses unissued records relying on them until an
+ * explicit customer decision (8N; no such workflow exists yet, so the pause holds).
  *
  * Deletion requests and consent withdrawal are deliberately NOT behind the submissions stop or the pilot invitation: a creator can
  * always ask for their own documents to be deleted, or withdraw consent. Responses carry fixed codes only (no customer wording here:
@@ -32,9 +34,10 @@ export const RETENTION_DATABASE_REFUSALS: Readonly<Record<string, RetentionRefus
   creator_record_v2_hold_conflicts_with_deletion_request: 'deletion_request_open',
   creator_record_v2_hold_already_active: 'hold_already_active',
   creator_record_v2_hold_not_renewable: 'hold_not_renewable',
+  creator_record_v2_hold_cumulative_limit: 'hold_limit_reached',
 }
 
-export type RetentionRefusalCode = 'not_found' | 'not_authorized' | 'invalid_request' | 'deletion_request_open' | 'hold_already_active' | 'hold_not_renewable'
+export type RetentionRefusalCode = 'not_found' | 'not_authorized' | 'invalid_request' | 'deletion_request_open' | 'hold_already_active' | 'hold_not_renewable' | 'hold_limit_reached'
 
 /** Thrown by a port when the database refused with a known code; any other failure is a plain error (unavailable). */
 export class RetentionRefusal extends Error {
@@ -46,7 +49,8 @@ export class RetentionRefusal extends Error {
 export interface DeletionRequestState {
   request_id: string
   status: 'open' | 'completed'
-  awaiting: 'administrative_hold' | 'paid_order_in_progress' | null
+  /** Only an administrative hold leaves a request open (8M: never payment status). */
+  awaiting: 'administrative_hold' | null
   resolution: 'deleted' | 'already_deleted' | null
 }
 
@@ -56,6 +60,7 @@ export interface RetentionApplyReport {
   extended: number
   held: number
   issuance_stopped: number
+  consent_paused: number
 }
 
 export interface RetentionStatusReport {
@@ -66,6 +71,9 @@ export interface RetentionStatusReport {
   deletion_requests_awaiting_hold: number
   active_holds: number
   manual_resolution_open: number
+  consent_paused_orders: number
+  /** Null when no clean sweep was ever recorded. */
+  hours_since_last_ok_sweep: number | null
 }
 
 export interface RetentionPorts {
@@ -76,6 +84,8 @@ export interface RetentionPorts {
   releaseHold(holdId: string, adminUserId: string, reason: string): Promise<'released' | 'not_active'>
   apply(limit: number): Promise<RetentionApplyReport>
   status(): Promise<RetentionStatusReport>
+  /** Records that a sweep ran (liveness). */
+  recordSweep(ok: boolean, problems: readonly string[]): Promise<void>
 }
 
 export interface RetentionDeps {
@@ -90,12 +100,12 @@ export type RetentionError =
   | { ok: false; status: 400; code: 'invalid_request' }
   | { ok: false; status: 403; code: 'not_authorized' }
   | { ok: false; status: 404; code: 'not_found' }
-  | { ok: false; status: 409; code: 'deletion_request_open' | 'hold_already_active' | 'hold_not_renewable' }
+  | { ok: false; status: 409; code: 'deletion_request_open' | 'hold_already_active' | 'hold_not_renewable' | 'hold_limit_reached' }
   | { ok: false; status: 503; code: 'unavailable' }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const STATUS_OF: Record<RetentionRefusalCode, RetentionError['status']> = {
-  not_found: 404, not_authorized: 403, invalid_request: 400, deletion_request_open: 409, hold_already_active: 409, hold_not_renewable: 409,
+  not_found: 404, not_authorized: 403, invalid_request: 400, deletion_request_open: 409, hold_already_active: 409, hold_not_renewable: 409, hold_limit_reached: 409,
 }
 const refused = (code: RetentionRefusalCode): RetentionError => ({ ok: false, status: STATUS_OF[code], code }) as RetentionError
 const unavailable: RetentionError = { ok: false, status: 503, code: 'unavailable' }
@@ -173,8 +183,11 @@ export async function applyHoldAction(deps: Pick<RetentionDeps, 'retention'>, ad
   }
 }
 
-export type SweepProblem = 'apply_failed' | 'cleanup_failed' | 'object_removal_failed' | 'status_unavailable' | 'overdue_expiry' | 'overdue_removal'
-export type SweepNotice = 'manual_resolution_required' | 'deletion_request_awaiting_hold'
+export type SweepProblem = 'apply_failed' | 'cleanup_failed' | 'object_removal_failed' | 'status_unavailable' | 'overdue_expiry' | 'overdue_removal' | 'sweep_gap' | 'run_not_recorded'
+export type SweepNotice = 'manual_resolution_required' | 'deletion_request_awaiting_hold' | 'consent_paused_orders'
+
+/** The sweep runs every 6 hours; more than 24 hours since the last clean run means at least three were missed or failed. */
+export const RETENTION_SWEEP_MAX_GAP_HOURS = 24
 
 export interface RetentionSweepReport {
   ok: boolean
@@ -215,10 +228,19 @@ export async function runRetentionSweep(deps: RetentionDeps & { alert(subject: s
     if (status.overdue_removal > 0) problems.push('overdue_removal')
     if (status.manual_resolution_open > 0) notices.push('manual_resolution_required')
     if (status.deletion_requests_awaiting_hold > 0) notices.push('deletion_request_awaiting_hold')
+    if (status.consent_paused_orders > 0) notices.push('consent_paused_orders')
+    if (status.hours_since_last_ok_sweep !== null && status.hours_since_last_ok_sweep > RETENTION_SWEEP_MAX_GAP_HOURS) problems.push('sweep_gap')
   } catch {
     problems.push('status_unavailable')
   }
   if (applied && applied.issuance_stopped > 0 && !notices.includes('manual_resolution_required')) notices.push('manual_resolution_required')
+  if (applied && applied.consent_paused > 0 && !notices.includes('consent_paused_orders')) notices.push('consent_paused_orders')
+  // Liveness: record this run (clean or not). A failure to record is itself a problem: the next run could not see a gap.
+  try {
+    await deps.retention.recordSweep(problems.length === 0, [...problems])
+  } catch {
+    problems.push('run_not_recorded')
+  }
 
   if (problems.length > 0 || notices.length > 0) {
     const fields: Record<string, string | number> = { problems: problems.join(', ') || 'none', notices: notices.join(', ') || 'none' }
@@ -228,6 +250,8 @@ export async function runRetentionSweep(deps: RetentionDeps & { alert(subject: s
       fields.overdue_removal = status.overdue_removal
       fields.manual_resolution_open = status.manual_resolution_open
       fields.deletion_requests_awaiting_hold = status.deletion_requests_awaiting_hold
+      fields.consent_paused_orders = status.consent_paused_orders
+      fields.hours_since_last_ok_sweep = status.hours_since_last_ok_sweep ?? 'none recorded'
     }
     await deps.alert(problems.length > 0 ? 'Creator Record retention sweep needs attention' : 'Creator Record retention decision needed', fields).catch(() => undefined)
   }

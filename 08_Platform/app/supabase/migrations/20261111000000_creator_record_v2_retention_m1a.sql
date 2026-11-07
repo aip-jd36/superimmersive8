@@ -10,12 +10,16 @@
 --     (stored_at + 104 days). When that ends the document expires anyway, automated issuance of that order is stopped
 --     (needs_reconciliation) and a refund / manual resolution is required — recorded in the ledger's reconciliation log;
 --   * an administrative hold (named admin, reason, at most 30 days, explicit audited renewal, never automatic) defers expiry and a
---     deletion request. A hold cannot be placed or renewed while a deletion request is open, so a hold never silently defeats one: the
---     request stays visibly open and completes, at the latest, when the hold ends;
---   * a deletion request is independent of the submissions stop and of the pilot invitation; it completes at once unless a hold or an
---     unfinished paid order (at most 14 days from the request) stands in the way, in which case it stays open with its reason;
+--     deletion request. At most 60 CUMULATIVE days of holds per original, however they are placed, renewed or released (8O). A hold
+--     cannot be placed or renewed while a deletion request is open, so a hold never silently defeats one: the request stays visibly
+--     open, escalated to an operator, and completes at the latest when the hold ends;
+--   * a deletion request is independent of the submissions stop, the pilot invitation and payment status (8M): it completes at once
+--     unless an administrative hold stands in the way. A paid order it makes unfulfillable leaves automated issuance immediately for
+--     documented refund / manual resolution;
 --   * consent withdrawal: no new examination read, reservation, replay run or live attempt for a document the creator uploaded at or
---     before the withdrawal, whatever authorization, reservation or retry already exists. Readings recorded before it are kept.
+--     before the withdrawal, whatever authorization, reservation or retry already exists. Unissued records relying on such a document
+--     are paused at preparation, checkout binding, issuance and fulfilment until an explicit customer decision (8N; that decision
+--     workflow does not exist yet, so the pause holds). Readings recorded before it are kept.
 --
 -- Physical removal "within 7 days" is the scheduled sweep's job (cleanup of deleted documents' objects, retried every run);
 -- creator_record_v2_retention_status() reports what is overdue so the sweep fails loudly.
@@ -126,7 +130,7 @@ CREATE TABLE public.creator_record_v2_retention_events (
   event                       text NOT NULL CHECK (event IN (
                                 'consent_withdrawn', 'deletion_requested', 'deletion_awaiting_resolution', 'deleted_on_request',
                                 'deletion_request_already_deleted', 'retention_expired', 'paid_order_extension_applied',
-                                'hold_placed', 'hold_renewed', 'hold_released', 'manual_resolution_required')),
+                                'hold_placed', 'hold_renewed', 'hold_released', 'manual_resolution_required', 'consent_paused_order')),
   user_id                     uuid REFERENCES public.users(id) ON DELETE RESTRICT,
   document_id                 uuid REFERENCES public.creator_record_v2_documents(id) ON DELETE RESTRICT,
   hold_id                     uuid,
@@ -212,7 +216,122 @@ BEGIN
   v_at := clock_timestamp();   -- after the lock: every write that could still commit before it has already done so
   INSERT INTO public.creator_record_v2_consent_withdrawals (user_id, scope, withdrawn_at) VALUES (p_user_id, 'ai_examination', v_at) RETURNING * INTO v_w;
   INSERT INTO public.creator_record_v2_retention_events (event, user_id, actor_user_id) VALUES ('consent_withdrawn', p_user_id, p_user_id);
+  -- 8N: paid, unissued orders that rely on these documents leave automated fulfilment now.
+  PERFORM public.creator_record_v2_consent_pause_orders();
   RETURN QUERY SELECT v_w.id, v_w.withdrawn_at, 'created'::text;
+END;
+$$;
+
+-- ── 3b. 8N: unissued Creator Records relying on withdrawn consent are paused ──────────────────────────
+--
+-- Using observations already made under a consent that was withdrawn is a separate permission from fresh consent for a new
+-- examination; neither is ever restored automatically, and no customer decision workflow exists yet (no approved wording). Until
+-- one does, every unissued record that references such a document is paused, fail closed:
+--   * preparation: a new prepared version cannot reference the document (the link insert is refused, so the version is not stored);
+--   * checkout: binding a reviewed version to a submission is refused;
+--   * issuance: an artifact for its submission can be neither started nor marked issued;
+--   * fulfilment: a paid order moves to the ledger's manual queue (`consent_withdrawn_awaiting_customer_decision`), so the
+--     automatic sweep never claims it again. A payment that completes later, a retry or a resumed attempt hits the issuance guard.
+-- Each guard takes the creator's consent lock SHARED (withdrawal takes it EXCLUSIVE), so a concurrent step either finished before the
+-- withdrawal or sees it. Issued records, and historical examination rows, are not touched.
+
+CREATE OR REPLACE FUNCTION public.creator_record_v2_document_consent_withdrawn(p_document_id uuid)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, pg_temp AS $$
+  SELECT EXISTS (SELECT 1 FROM public.creator_record_v2_documents d
+                   JOIN public.creator_record_v2_consent_withdrawals w ON w.user_id = d.user_id AND w.withdrawn_at >= d.created_at
+                  WHERE d.id = p_document_id)
+$$;
+
+-- For the application's checkout and issuance checks (fixed refusal codes). The guards below are the authority.
+CREATE OR REPLACE FUNCTION public.creator_record_v2_documents_consent_withdrawn(p_document_ids uuid[])
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, pg_temp AS $$
+  SELECT EXISTS (SELECT 1 FROM unnest(p_document_ids) i WHERE public.creator_record_v2_document_consent_withdrawn(i))
+$$;
+
+CREATE OR REPLACE FUNCTION public.creator_record_v2_consent_record_guard()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp AS $$
+DECLARE
+  v_prepared uuid;
+  v_user     uuid;
+BEGIN
+  IF TG_TABLE_NAME = 'creator_record_v2_prepared_documents' THEN
+    SELECT d.user_id INTO v_user FROM public.creator_record_v2_documents d WHERE d.id = NEW.document_id;
+    IF v_user IS NULL THEN
+      RETURN NEW;
+    END IF;
+    PERFORM pg_advisory_xact_lock_shared(hashtextextended('si8.cr_v2_consent:' || v_user::text, 0));
+    IF public.creator_record_v2_document_consent_withdrawn(NEW.document_id) THEN
+      RAISE EXCEPTION 'creator_record_v2_consent_withdrawn' USING ERRCODE = 'P0001';
+    END IF;
+    RETURN NEW;
+  END IF;
+
+  IF TG_TABLE_NAME = 'creator_record_v2_prepared' THEN
+    IF NOT (OLD.submission_id IS NULL AND NEW.submission_id IS NOT NULL) THEN
+      RETURN NEW;
+    END IF;
+    v_prepared := NEW.id;
+    v_user := NEW.user_id;
+  ELSE  -- creator_record_artifacts: starting an attempt, or marking it issued
+    IF TG_OP = 'UPDATE' AND NOT (NEW.status = 'issued' AND OLD.status <> 'issued') THEN
+      RETURN NEW;
+    END IF;
+    SELECT p.id, p.user_id INTO v_prepared, v_user FROM public.creator_record_v2_prepared p WHERE p.submission_id = NEW.submission_id;
+    IF v_prepared IS NULL THEN
+      RETURN NEW;   -- not a v2 record (V1 and legacy are untouched)
+    END IF;
+  END IF;
+  PERFORM pg_advisory_xact_lock_shared(hashtextextended('si8.cr_v2_consent:' || v_user::text, 0));
+  IF EXISTS (SELECT 1 FROM public.creator_record_v2_prepared_documents pd
+              WHERE pd.prepared_id = v_prepared AND public.creator_record_v2_document_consent_withdrawn(pd.document_id)) THEN
+    RAISE EXCEPTION 'creator_record_v2_consent_withdrawn' USING ERRCODE = 'P0001';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+CREATE TRIGGER creator_record_v2_prepared_documents_consent_guard
+  BEFORE INSERT ON public.creator_record_v2_prepared_documents
+  FOR EACH ROW EXECUTE FUNCTION public.creator_record_v2_consent_record_guard();
+CREATE TRIGGER creator_record_v2_prepared_consent_guard
+  BEFORE UPDATE ON public.creator_record_v2_prepared
+  FOR EACH ROW EXECUTE FUNCTION public.creator_record_v2_consent_record_guard();
+CREATE TRIGGER creator_record_artifacts_consent_guard
+  BEFORE INSERT OR UPDATE ON public.creator_record_artifacts
+  FOR EACH ROW EXECUTE FUNCTION public.creator_record_v2_consent_record_guard();
+
+-- Paid, unissued v2 orders relying on withdrawn consent: out of automated fulfilment, into the manual queue with a documented
+-- reason. A running (claimed) fulfilment is left to finish; the issuance guard refuses it and the next run moves it.
+CREATE OR REPLACE FUNCTION public.creator_record_v2_consent_pause_orders()
+RETURNS integer LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp AS $$
+DECLARE
+  v_f     public.payment_fulfillments%ROWTYPE;
+  v_count integer := 0;
+  v_note  constant text := 'consent_withdrawn_awaiting_customer_decision: the creator withdrew AI-processing consent for a document this paid Creator Record relies on; automated fulfilment paused; an explicit customer decision (continue or cancel and refund) is required';
+BEGIN
+  FOR v_f IN
+    SELECT f.* FROM public.payment_fulfillments f
+     WHERE f.outcome = 'accepted' AND f.fulfillment_status IN ('pending', 'failed')
+       AND NOT EXISTS (SELECT 1 FROM public.creator_record_artifacts a WHERE a.submission_id = f.submission_ref AND a.status = 'issued')
+       AND EXISTS (SELECT 1 FROM public.submissions s
+                     JOIN public.creator_record_v2_prepared p ON p.submission_id = s.id
+                     JOIN public.creator_record_v2_prepared_documents pd ON pd.prepared_id = p.id
+                    WHERE s.id = f.submission_ref AND s.creator_record_product = 'v2'
+                      AND public.creator_record_v2_document_consent_withdrawn(pd.document_id))
+     FOR UPDATE OF f SKIP LOCKED
+  LOOP
+    UPDATE public.payment_fulfillments
+       SET fulfillment_status = 'needs_reconciliation',
+           last_error = left(v_note || COALESCE(' | ' || last_error, ''), 1000),
+           reconciliation_log = reconciliation_log || jsonb_build_array(jsonb_build_object(
+             'at', now(), 'actor', 'system:creator_record_v2_retention', 'action', 'pause_for_consent_withdrawal', 'note', v_note,
+             'fulfillment_status', v_f.fulfillment_status, 'email_status', v_f.email_status)),
+           updated_at = now()
+     WHERE stripe_checkout_session_id = v_f.stripe_checkout_session_id;
+    INSERT INTO public.creator_record_v2_retention_events (event, stripe_checkout_session_id, detail)
+    VALUES ('consent_paused_order', v_f.stripe_checkout_session_id, 'explicit customer decision required');
+    v_count := v_count + 1;
+  END LOOP;
+  RETURN v_count;
 END;
 $$;
 
@@ -252,6 +371,38 @@ $$;
 CREATE TRIGGER creator_record_v2_retention_holds_guard
   BEFORE UPDATE OR DELETE ON public.creator_record_v2_retention_holds
   FOR EACH ROW EXECUTE FUNCTION public.creator_record_v2_retention_holds_guard();
+
+-- 8O: at most 60 cumulative days of administrative holds per original, across every hold and renewal, whoever authorized it.
+-- Counted as the total time covered by the union of all holds' terms [starts_at, released_at or expires_at] — so overlapping or
+-- successive holds, a change of administrator, or release-and-recreate can never reset or extend the total (a release only ends the
+-- covered time early). Enforced on every INSERT, whatever the writer (the database operator included), one document at a time.
+-- There is no override: retention beyond the cap needs a separately authorized exception mechanism, which does not exist.
+CREATE OR REPLACE FUNCTION public.creator_record_v2_hold_covered_seconds(p_document_id uuid, p_extra_start timestamptz, p_extra_end timestamptz)
+RETURNS numeric LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, pg_temp AS $$
+  WITH iv AS (
+    SELECT h.starts_at AS s, least(h.expires_at, coalesce(h.released_at, h.expires_at)) AS e
+      FROM public.creator_record_v2_retention_holds h WHERE h.document_id = p_document_id
+    UNION ALL
+    SELECT p_extra_start, p_extra_end WHERE p_extra_start IS NOT NULL
+  ), valid AS (SELECT s, e FROM iv WHERE e > s),
+  ordered AS (SELECT s, e, max(e) OVER (ORDER BY s, e ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) AS prev_end FROM valid),
+  grouped AS (SELECT s, e, sum(CASE WHEN prev_end IS NULL OR s > prev_end THEN 1 ELSE 0 END) OVER (ORDER BY s, e) AS g FROM ordered)
+  SELECT coalesce(sum(extract(epoch FROM (ge - gs))), 0) FROM (SELECT min(s) AS gs, max(e) AS ge FROM grouped GROUP BY g) x
+$$;
+
+CREATE OR REPLACE FUNCTION public.creator_record_v2_retention_holds_cap()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp AS $$
+BEGIN
+  PERFORM pg_advisory_xact_lock(hashtextextended('si8.cr_v2_hold_cap:' || NEW.document_id::text, 0));
+  IF public.creator_record_v2_hold_covered_seconds(NEW.document_id, NEW.starts_at, NEW.expires_at) > 60 * 86400 THEN
+    RAISE EXCEPTION 'creator_record_v2_hold_cumulative_limit' USING ERRCODE = 'P0001';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+CREATE TRIGGER creator_record_v2_retention_holds_cap
+  BEFORE INSERT ON public.creator_record_v2_retention_holds
+  FOR EACH ROW EXECUTE FUNCTION public.creator_record_v2_retention_holds_cap();
 
 CREATE OR REPLACE FUNCTION public.creator_record_v2_document_on_hold(p_document_id uuid)
 RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, pg_temp AS $$
@@ -416,7 +567,7 @@ CREATE TABLE public.creator_record_v2_deletion_requests (
   document_id   uuid NOT NULL REFERENCES public.creator_record_v2_documents(id) ON DELETE RESTRICT,
   requested_at  timestamptz NOT NULL DEFAULT clock_timestamp(),
   status        text NOT NULL CHECK (status IN ('open', 'completed')),
-  awaiting      text CHECK (awaiting IN ('administrative_hold', 'paid_order_in_progress')),
+  awaiting      text CHECK (awaiting IN ('administrative_hold')),
   resolution    text CHECK (resolution IN ('deleted', 'already_deleted')),
   resolved_at   timestamptz,
   CHECK ((status = 'completed') = (resolution IS NOT NULL)),
@@ -466,10 +617,11 @@ BEGIN
     RETURN 'already_deleted';
   END IF;
 
+  -- 8M: payment status never delays a deletion request. Only an administrative hold leaves it open, because whether a hold may
+  -- override a customer's deletion request is an authority nobody holds yet: the request stays pending with that reason and the
+  -- sweep escalates it to an operator (it completes, at the latest, when the hold ends; no hold can be placed or renewed meanwhile).
   IF public.creator_record_v2_document_on_hold(v_doc.id) THEN
     v_awaiting := 'administrative_hold';
-  ELSIF EXISTS (SELECT 1 FROM public.creator_record_v2_document_unfinished_paid_sessions(v_doc.id)) AND v_req.requested_at + interval '14 days' > now() THEN
-    v_awaiting := 'paid_order_in_progress';
   END IF;
   IF v_awaiting IS NOT NULL THEN
     IF v_req.awaiting IS DISTINCT FROM v_awaiting THEN
@@ -506,7 +658,10 @@ BEGIN
     INSERT INTO public.creator_record_v2_deletion_requests (user_id, document_id, status) VALUES (p_user_id, v_doc.id, 'open') RETURNING id INTO v_id;
     INSERT INTO public.creator_record_v2_retention_events (event, user_id, document_id, deletion_request_id, actor_user_id) VALUES ('deletion_requested', p_user_id, v_doc.id, v_id, p_user_id);
   END IF;
-  PERFORM public.creator_record_v2_resolve_deletion_request(v_id);
+  IF public.creator_record_v2_resolve_deletion_request(v_id) = 'deleted' THEN
+    -- 8M: a paid order that can no longer be fulfilled leaves automated issuance now (documented refund / manual resolution).
+    PERFORM public.creator_record_v2_retention_stop_issuance();
+  END IF;
   RETURN QUERY SELECT r.id, r.status, r.awaiting, r.resolution FROM public.creator_record_v2_deletion_requests r WHERE r.id = v_id;
 END;
 $$;
@@ -525,6 +680,7 @@ DECLARE
   v_extended  integer := 0;
   v_held      integer := 0;
   v_stopped   integer;
+  v_paused    integer;
   v_session   text;
 BEGIN
   IF p_limit IS NULL OR p_limit NOT BETWEEN 1 AND 1000 THEN
@@ -569,10 +725,38 @@ BEGIN
     v_expired := v_expired + 1;
   END LOOP;
 
-  -- 3. Paid orders that can no longer be issued automatically.
+  -- 3. Paid orders that can no longer be issued automatically (an original gone), or must wait for the customer (consent withdrawn).
   v_stopped := public.creator_record_v2_retention_stop_issuance();
+  v_paused := public.creator_record_v2_consent_pause_orders();
 
-  RETURN jsonb_build_object('deletion_requests', v_requests, 'expired', v_expired, 'extended', v_extended, 'held', v_held, 'issuance_stopped', v_stopped);
+  RETURN jsonb_build_object('deletion_requests', v_requests, 'expired', v_expired, 'extended', v_extended, 'held', v_held,
+                            'issuance_stopped', v_stopped, 'consent_paused', v_paused);
+END;
+$$;
+
+-- Liveness: every sweep records that it ran and whether it was clean, so the next run (and anyone reading the status) sees a gap.
+-- The table cannot detect a scheduler that never runs again; that needs an external monitor (reported as a dependency).
+CREATE TABLE public.creator_record_v2_retention_sweep_runs (
+  id           bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  finished_at  timestamptz NOT NULL DEFAULT clock_timestamp(),
+  ok           boolean NOT NULL,
+  problems     text[] NOT NULL CHECK (cardinality(problems) <= 20)
+);
+CREATE TRIGGER creator_record_v2_retention_sweep_runs_append_only
+  BEFORE UPDATE OR DELETE ON public.creator_record_v2_retention_sweep_runs
+  FOR EACH ROW EXECUTE FUNCTION public.creator_record_v2_examination_append_only_guard();
+
+CREATE OR REPLACE FUNCTION public.creator_record_v2_record_retention_sweep(p_ok boolean, p_problems text[])
+RETURNS bigint LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp AS $$
+DECLARE
+  v_id bigint;
+BEGIN
+  IF p_ok IS NULL OR p_problems IS NULL OR cardinality(p_problems) > 20
+     OR EXISTS (SELECT 1 FROM unnest(p_problems) x WHERE x !~ '^[a-z_]{1,40}$') THEN
+    RAISE EXCEPTION 'creator_record_v2_retention_invalid' USING ERRCODE = 'P0001';
+  END IF;
+  INSERT INTO public.creator_record_v2_retention_sweep_runs (ok, problems) VALUES (p_ok, p_problems) RETURNING id INTO v_id;
+  RETURN v_id;
 END;
 $$;
 
@@ -593,7 +777,11 @@ RETURNS jsonb LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, pg_
     'deletion_requests_awaiting_hold', (SELECT count(*) FROM public.creator_record_v2_deletion_requests r WHERE r.status = 'open' AND r.awaiting = 'administrative_hold'),
     'active_holds', (SELECT count(*) FROM public.creator_record_v2_retention_holds h WHERE h.released_at IS NULL AND h.starts_at <= now() AND h.expires_at > now()),
     'manual_resolution_open', (SELECT count(*) FROM public.payment_fulfillments f
-                                WHERE f.fulfillment_status = 'needs_reconciliation' AND f.last_error LIKE 'retention_original_unavailable:%'))
+                                WHERE f.fulfillment_status = 'needs_reconciliation' AND f.last_error LIKE 'retention_original_unavailable:%'),
+    'consent_paused_orders', (SELECT count(*) FROM public.payment_fulfillments f
+                               WHERE f.fulfillment_status = 'needs_reconciliation' AND f.last_error LIKE 'consent_withdrawn_awaiting_customer_decision:%'),
+    'hours_since_last_ok_sweep', (SELECT round((extract(epoch FROM (now() - max(r.finished_at))) / 3600)::numeric, 1)
+                                   FROM public.creator_record_v2_retention_sweep_runs r WHERE r.ok))
 $$;
 
 -- ── Privileges ────────────────────────────────────────────────────────────────────────────────────────
@@ -610,6 +798,19 @@ GRANT SELECT ON TABLE public.creator_record_v2_retention_events TO service_role;
 GRANT SELECT ON TABLE public.creator_record_v2_consent_withdrawals TO service_role;
 GRANT SELECT ON TABLE public.creator_record_v2_retention_holds TO service_role;
 GRANT SELECT ON TABLE public.creator_record_v2_deletion_requests TO service_role;
+ALTER TABLE public.creator_record_v2_retention_sweep_runs ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public.creator_record_v2_retention_sweep_runs FROM PUBLIC, anon, authenticated, service_role;
+GRANT SELECT ON TABLE public.creator_record_v2_retention_sweep_runs TO service_role;
+
+REVOKE ALL ON FUNCTION public.creator_record_v2_hold_covered_seconds(uuid, timestamptz, timestamptz) FROM PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON FUNCTION public.creator_record_v2_retention_holds_cap() FROM PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON FUNCTION public.creator_record_v2_document_consent_withdrawn(uuid) FROM PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON FUNCTION public.creator_record_v2_documents_consent_withdrawn(uuid[]) FROM PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON FUNCTION public.creator_record_v2_consent_record_guard() FROM PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON FUNCTION public.creator_record_v2_consent_pause_orders() FROM PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON FUNCTION public.creator_record_v2_record_retention_sweep(boolean, text[]) FROM PUBLIC, anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.creator_record_v2_documents_consent_withdrawn(uuid[]) TO service_role;
+GRANT EXECUTE ON FUNCTION public.creator_record_v2_record_retention_sweep(boolean, text[]) TO service_role;
 
 REVOKE ALL ON FUNCTION public.creator_record_v2_documents_guard() FROM PUBLIC, anon, authenticated, service_role;
 REVOKE ALL ON FUNCTION public.creator_record_v2_consent_examination_guard() FROM PUBLIC, anon, authenticated, service_role;

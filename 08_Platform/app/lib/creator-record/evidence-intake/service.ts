@@ -327,7 +327,8 @@ export async function cleanupEvidence(deps: Pick<EvidenceDeps, 'store' | 'object
   return { pending_removed, objects_removed, failures }
 }
 
-export type EvidenceIntegrity = { ok: true } | { ok: false; reason: 'not_stored' | 'fingerprint_mismatch' | 'object_missing' | 'object_altered' | 'unavailable' }
+/** `consent_withdrawn` (CR-V2-MVP-RETENTION-M1A, 8N): set by the production check, not by `verifyEvidenceIntact` itself. */
+export type EvidenceIntegrity = { ok: true } | { ok: false; reason: 'not_stored' | 'fingerprint_mismatch' | 'object_missing' | 'object_altered' | 'unavailable' | 'consent_withdrawn' }
 
 /**
  * CR-V2-DOC-1B: every document a prepared version references is still held intact: its row is stored, owned by

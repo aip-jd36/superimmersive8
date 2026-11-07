@@ -229,6 +229,14 @@ describe('CR-V2-DOC-1B: payment and issuance refuse a record whose documents are
     expect(await issue(row, failing)).toBe('evidence_unavailable')
   })
 
+  // CR-V2-MVP-RETENTION-M1A (8N): withdrawn AI-processing consent pauses checkout and issuance, with its own issuance refusal code.
+  test('consent withdrawn for a referenced document: checkout refuses and issuance refuses as consent_withdrawn', async () => {
+    const row = await reviewedBound([ref(1)])
+    const withdrawn = async () => ({ ok: false, reason: 'consent_withdrawn' }) as Integrity
+    expect(await checkout(row, withdrawn)).toBe('evidence_unavailable')
+    expect(await issue(row, withdrawn)).toBe('consent_withdrawn')
+  })
+
   test('without the evidence check a record with documents is neither sold nor issued; one without documents is unaffected', async () => {
     expect(await checkout(await reviewedBound([ref(1)]))).toBe('evidence_unavailable')
     expect(await issue(await reviewedBound([ref(1)]))).toBe('evidence_unavailable')
