@@ -58,8 +58,11 @@ describe('both code locks are off in this build', () => {
 })
 
 describe('reconciled limits', () => {
-  test('a new upload is never larger than a live examination reads; stored records keep their bucket limit', () => {
-    expect(EVIDENCE_MAX_BYTES).toBe(LIVE_BOUNDS.max_document_bytes)
+  // Decision 8P (CR-V2-MVP-INTEGRATION-8P): uploads keep the deployed 4 MB limit; the live examination keeps its own 1 MiB bound and
+  // refuses a larger stored document before any read, log or model call (live-examination-real-unlocked.test.ts).
+  test('uploads keep the 4 MB bucket limit; the live examination bound stays lower and separate', () => {
+    expect(EVIDENCE_MAX_BYTES).toBe(4 * 1024 * 1024)
+    expect(LIVE_BOUNDS.max_document_bytes).toBe(1024 * 1024)
     expect(EVIDENCE_STORED_MAX_BYTES).toBe(4 * 1024 * 1024)
     expect(readFileSync(path.join(APP, 'supabase/migrations/20261103000000_creator_record_v2_evidence.sql'), 'utf8')).toContain('byte_size <= 4194304')
   })

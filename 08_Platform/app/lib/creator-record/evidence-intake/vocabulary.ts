@@ -15,11 +15,12 @@ export const EVIDENCE_CATEGORIES = ['billing_receipt', 'licence', 'provider_term
 export type EvidenceCategory = (typeof EVIDENCE_CATEGORIES)[number]
 
 /**
- * Provisional limits (PM baseline, CR-V2-DOC-1).
- * CR-V2-MVP-M2A: a new upload is at most 1 MiB, the most a live examination reads (`LIVE_BOUNDS.max_document_bytes`, test-checked),
- * so nothing is accepted that could not be examined. Documents stored earlier, up to the bucket's 4 MiB, stay valid in their records.
+ * Provisional limits (PM baseline, CR-V2-DOC-1). The per-file size matches the bucket and the 4.5 MB Vercel body limit.
+ * Decision 8P (CR-V2-MVP-INTEGRATION-8P): uploads keep the deployed 4 MB limit. The live examination keeps its own, lower bound
+ * (`LIVE_BOUNDS.max_document_bytes`, 1 MiB) and refuses a larger stored document before its read is logged, its bytes are fetched
+ * or any model call or reservation is made (`document_exceeds_live_bounds`). The upload limit is never the AI-processing limit.
  */
-export const EVIDENCE_MAX_BYTES = 1024 * 1024
+export const EVIDENCE_MAX_BYTES = 4 * 1024 * 1024
 /** The largest document a stored record may inventory: the bucket and table limit (4 MiB). Records made earlier keep verifying. */
 export const EVIDENCE_STORED_MAX_BYTES = 4 * 1024 * 1024
 export const EVIDENCE_MAX_PER_TOOL = 2

@@ -48,7 +48,7 @@ describe('byte validation', () => {
 
   test.each([
     ['an empty file', new Uint8Array(), 'empty_file'],
-    ['a file over 1 MiB', cat(pdf(), new Uint8Array(EVIDENCE_MAX_BYTES)), 'file_too_large'],
+    ['a file over 4 MB', cat(pdf(), new Uint8Array(EVIDENCE_MAX_BYTES)), 'file_too_large'],
     ['a Word or zip file', cat(new Uint8Array([0x50, 0x4b, 0x03, 0x04]), enc('word/document.xml')), 'unsupported_format'],
     ['HTML that names itself a PDF', enc('<html><script>alert(1)</script></html>'), 'unsupported_format'],
     ['a PDF without an end marker', enc('%PDF-1.4\n1 0 obj << >> endobj\n'), 'pdf_malformed'],
