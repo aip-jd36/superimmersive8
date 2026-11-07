@@ -26,7 +26,7 @@ import {
   claimContentDigest, claimRef, observationMapContentDigest, observationMapRef, publicationContentDigest, publicationRef,
   questionContentDigest, questionRef, type AuthorityKind, type PublicationAuthorityClass,
 } from './authority-content'
-import type { AuthorityLifecycle, AuthorityState, GovernanceSnapshot, Lookup } from './eligibility'
+import type { AuthorityLifecycle, AuthorityState, ExaminationMethodIdentity, GovernanceSnapshot, Lookup } from './eligibility'
 import { approvalRefusals } from './questionnaire-contract'
 import { SOURCE_TEXT_CATEGORIES, type SourceTextApproval } from './source-text'
 import type { TopicClaims } from './sources'
@@ -39,14 +39,24 @@ export interface Identity {
   version: number
 }
 
+export interface IssuanceSupport {
+  record_schemas: readonly Identity[]
+  builders: readonly Identity[]
+  /** CR-V2-MVP-M4A: the model-reading methods a schema 8 record's readings may use. Absent: none. */
+  examination_methods?: readonly ExaminationMethodIdentity[]
+}
+
 /**
- * The record schemas and builders this build can issue. Technical identities only.
+ * The record schemas, builders and (CR-V2-MVP-M4A) model-reading methods this build can issue. Technical identities only.
  * CR-V2-MVP-ELIGIBILITY-1: none. Schemas 5 and 6 carry no contract and are never commercially eligible; schemas 7 and 8 are
- * refused until issuance is separately authorized for them. Reading a record does not depend on this list.
+ * refused until issuance is separately authorized for them. CR-V2-MVP-M4A: no reading method either, so a schema 8 record holding
+ * a model reading stays refused even once schema 8 is listed, until that exact method is separately authorized. Reading a record
+ * does not depend on this list.
  */
-export const CURRENT_ISSUANCE_SUPPORT: { record_schemas: readonly Identity[]; builders: readonly Identity[] } = Object.freeze({
+export const CURRENT_ISSUANCE_SUPPORT: IssuanceSupport = Object.freeze({
   record_schemas: [],
   builders: [],
+  examination_methods: [],
 })
 
 export interface CurrentGovernance {
@@ -54,7 +64,7 @@ export interface CurrentGovernance {
   sources: Available<CreatorRecordSources>
   topicClaims: Available<TopicClaims>
   source_text_approvals: Available<readonly SourceTextApproval[]>
-  support?: typeof CURRENT_ISSUANCE_SUPPORT
+  support?: IssuanceSupport
   /** The class of the bundle these sources come from, when they come from one. */
   authority_class?: PublicationAuthorityClass
 }
@@ -138,5 +148,5 @@ export function governanceSnapshotFrom(g: CurrentGovernance): GovernanceSnapshot
       }),
     )
   }
-  return { issuance_date: g.issuance_date, authorities, ...(g.authority_class ? { authority_class: g.authority_class } : {}) }
+  return { issuance_date: g.issuance_date, authorities, examination_methods: [...(support.examination_methods ?? [])], ...(g.authority_class ? { authority_class: g.authority_class } : {}) }
 }

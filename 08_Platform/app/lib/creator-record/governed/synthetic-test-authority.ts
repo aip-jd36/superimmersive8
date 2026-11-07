@@ -290,7 +290,8 @@ const PDF_TEMPLATE_APPROVAL: PdfTemplateApproval = {
 /**
  * CR-V2-MVP-M3A: placeholder templates for the examination-bearing record (schema 8), and their synthetic approval. Local tests
  * only, like everything here: every string is marked TEST, the wording lock applies unchanged, and the approval names the synthetic
- * authority. Never part of any bundle, so nothing selects them for issuance; governance mode refuses them by their text.
+ * authority. CR-V2-MVP-M4A: part of the synthetic test bundle only (`pdf_template_sets`), so schema-aware selection can be tested end to
+ * end in an isolated synthetic test; never part of the governance bundle, and governance mode refuses them by their text.
  */
 const EXAMINATION_PDF_TEMPLATES = {
   ...PDF_TEMPLATES,
@@ -397,4 +398,5 @@ export const CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY:(PublicationAuthorityBundle
   questionnaire_approval: QUESTIONNAIRE_APPROVAL,
   pdf_templates: PDF_TEMPLATES,
   pdf_template_approval: PDF_TEMPLATE_APPROVAL,
+  pdf_template_sets: [SYNTHETIC_TEST_EXAMINATION_PDF],
 })

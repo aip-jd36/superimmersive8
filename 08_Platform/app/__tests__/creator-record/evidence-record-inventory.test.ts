@@ -200,7 +200,7 @@ describe('CR-V2-DOC-1B: payment and issuance refuse a record whose documents are
       boundTo: async () => row,
       latestVersion: async () => row,
       governance: (date) => withCommercialSupportUnderTest(approvedGovernanceSnapshot(date, TOPIC_CLAIMS_FIXTURE, bundle)),
-      templates: () => approvedPdfTemplates(bundle),
+      templates: (schema) => approvedPdfTemplates(bundle, schema),
       renderPdf: async () => new Uint8Array([1]),
       ...(evidenceIntact ? { evidenceIntact } : {}),
     }, { id: SUB, user_id: USER, tier: 'creator_record', creator_record_product: 'v2' }, 'CR-2026-33333333', NOW)
@@ -209,6 +209,7 @@ describe('CR-V2-DOC-1B: payment and issuance refuse a record whose documents are
     checkV2Checkout({
       submissions: 'open', issuance: 'enabled', hasPilotAccess: async () => true, getPrepared: async () => row, latestVersion: async () => row, boundTo: async () => row,
       bind: async () => ({ submissionId: SUB, reason: 'existing' }), governance: (date) => withCommercialSupportUnderTest(approvedGovernanceSnapshot(date, TOPIC_CLAIMS_FIXTURE, bundle)), now: () => NOW,
+      templates: (schema) => approvedPdfTemplates(bundle, schema),
       ...(evidenceIntact ? { evidenceIntact } : {}),
     }, USER, { id: SUB, user_id: USER, tier: 'creator_record', creator_record_product: 'v2' }).then((r) => (r.ok ? 'ok' : r.code))
 

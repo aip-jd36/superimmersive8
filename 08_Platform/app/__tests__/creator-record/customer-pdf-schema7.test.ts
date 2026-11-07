@@ -243,7 +243,7 @@ describe('issuance consumes the PDF without weakening a safeguard', () => {
   })
 
   test('commercial gates are all still closed', () => {
-    expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [], builders: [] })
+    expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [], builders: [], examination_methods: [] })
     expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('stopped')
     expect(GOV.pdf_templates).toBeNull()

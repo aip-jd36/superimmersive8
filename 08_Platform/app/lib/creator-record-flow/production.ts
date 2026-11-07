@@ -16,7 +16,7 @@ import { authorizeV2Issuance, renderV2ForIssuance, type BindReason, type Checkou
 import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/config'
 import { hasPilotAccess, PILOT_ACCESS_TABLE } from './pilot-access'
 import { evidenceObjects, evidenceStore } from './evidence-production'
-import { productionExaminationProjections } from '@/lib/creator-record-flow/examination-customer'
+import { productionExaminationProjections, productionReadingsIntact } from '@/lib/creator-record-flow/examination-customer'
 import { verifyEvidenceIntact } from '@/lib/creator-record/evidence-intake/service'
 
 /** CR-V2-DOC-1B: referenced documents still held intact (row stored, same fingerprint, bytes present and re-hashed). */
@@ -124,6 +124,9 @@ export function productionPurchaseDeps(): PurchaseDeps {
     now: () => new Date(),
     log: (event, detail) => console.warn(event, detail),
     evidenceIntact,
+    // CR-V2-MVP-M4A: referenced readings re-checked by kind; the approved templates for the version's own schema must render it.
+    examinationsIntact: productionReadingsIntact,
+    templates: (schema) => approvedPdfTemplates(undefined, schema),
   }
 }
 
@@ -133,10 +136,12 @@ export function productionV2IssuanceDeps(): V2IssuanceDeps {
     boundTo: preparedBoundTo,
     latestVersion: (draftId) => preparedStore.latestVersion(draftId),
     governance: (date) => approvedGovernanceSnapshot(date, TOPIC_CLAIMS_FIXTURE),
-    templates: () => approvedPdfTemplates(),
+    // CR-V2-MVP-M4A: the one approved template set for the record's own schema.
+    templates: (schema) => approvedPdfTemplates(undefined, schema),
     // Loaded on first render only.
     renderPdf: async (input) => (await (await import('@/lib/creator-record/customer-pdf/CustomerRecordPDF')).renderCustomerRecordPdf(input)).bytes,
     evidenceIntact,
+    examinationsIntact: productionReadingsIntact,
   }
 }
 

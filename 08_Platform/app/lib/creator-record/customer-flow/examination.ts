@@ -31,7 +31,7 @@ import {
   type VerifiedRun,
 } from '../examination/persistence'
 import { RECEIPT_READING_PROFILE } from '../examination/receipt-reading'
-import { projectVerifiedRun, type ExaminationProjection as ReplayExaminationProjection } from '../examination/projection'
+import { projectVerifiedRun, verifyReferencedRuns, type ExaminationProjection as ReplayExaminationProjection, type ExaminationRunReference, type RunReferenceIntegrity } from '../examination/projection'
 import type { CustomerLiveResult } from '../live-examination/customer'
 import { verifyLiveAttemptRow } from '../live-examination/examine'
 import { liveProjectionOfVerifiedAttempt, type CustomerLiveAttemptRow, type LiveExaminationProjection } from '../live-examination/projection'
@@ -256,4 +256,46 @@ export async function examinationProjectionFor(
   if (rows.length > 1) return { kind: 'unavailable', reason: 'multiple_runs' }
   const p = projectVerifiedRun(rows[0], userId, documentId)
   return p.ok ? { kind: 'projection', projection: p.projection } : { kind: 'unavailable', reason: 'run_integrity' }
+}
+
+// ── CR-V2-MVP-M4A: the readings a record references, re-checked at checkout and at issuance ───────────────────────
+
+/** A reading a record references, by kind (as `../customer-flow/purchase` builds it from the verified record). */
+export type ReferencedReading = ExaminationRunReference & { kind: 'replay' | 'live'; profile_id: string }
+
+export interface ReferencedReadingPorts {
+  listRuns(ownerUserId: string, documentId: string): Promise<PersistedRunRow[]>
+  /** The creator's stored live attempts. Absent: a model reading cannot be re-checked here, so it is refused (`unavailable`). */
+  listLiveAttempts?(ownerUserId: string, documentId: string, profileId: string): Promise<CustomerLiveAttemptRow[]>
+}
+
+/**
+ * Every referenced reading still exists and still verifies exactly as the record captured it:
+ *   - a replay run: `verifyReferencedRuns` (unchanged: stamp, digest, strict parse, key, owner, document);
+ *   - a model reading: the stored attempt with that id, for this owner and document, passes `verifyLiveAttemptRow`, is still a
+ *     reserved `live_model` reading (`liveProjectionOfVerifiedAttempt`) and has exactly the captured envelope digest.
+ * Fail closed: any lookup failure is `unavailable`. Integrity only: nothing here reads or judges what a document shows.
+ */
+export async function verifyReferencedReadings(ports: ReferencedReadingPorts, ownerUserId: string, refs: readonly ReferencedReading[]): Promise<RunReferenceIntegrity> {
+  for (const ref of refs) {
+    if (ref.kind === 'replay') {
+      const r = await verifyReferencedRuns(async (runId) => (await ports.listRuns(ownerUserId, ref.document_id)).find((row) => row.id === runId) ?? null, ownerUserId, [ref])
+      if (!r.ok) return r
+      continue
+    }
+    if (ref.kind !== 'live' || !ports.listLiveAttempts) return { ok: false, reason: 'unavailable' }
+    let attempts: CustomerLiveAttemptRow[]
+    try {
+      attempts = await ports.listLiveAttempts(ownerUserId, ref.document_id, ref.profile_id)
+    } catch {
+      return { ok: false, reason: 'unavailable' }
+    }
+    const row = attempts.find((a) => a.id === ref.run_id)
+    if (!row) return { ok: false, reason: 'run_missing' }
+    if (row.document_id !== ref.document_id || row.envelope_sha256 !== ref.envelope_sha256) return { ok: false, reason: 'run_mismatch' }
+    if (verifyLiveAttemptRow(row, ownerUserId, ref.document_id) !== null) return { ok: false, reason: 'run_integrity' }
+    const p = liveProjectionOfVerifiedAttempt(row)
+    if (!p.ok || p.projection.envelope_sha256 !== ref.envelope_sha256) return { ok: false, reason: 'run_integrity' }
+  }
+  return { ok: true }
 }

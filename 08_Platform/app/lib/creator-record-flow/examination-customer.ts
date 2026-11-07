@@ -13,7 +13,7 @@
  */
 import { NextResponse } from 'next/server'
 import { CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flow/approved-inputs'
-import { examinationProjectionFor, type CustomerExaminationDeps, type CustomerExaminationError } from '@/lib/creator-record/customer-flow/examination'
+import { examinationProjectionFor, verifyReferencedReadings, type CustomerExaminationDeps, type CustomerExaminationError, type ReferencedReading } from '@/lib/creator-record/customer-flow/examination'
 import type { FlowDeps } from '@/lib/creator-record/customer-flow/service'
 import { productionExaminationDeps } from '@/lib/creator-record-flow/examination-production'
 import { CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD, LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD } from '@/lib/creator-record/live-examination/controls'
@@ -61,6 +61,25 @@ export const productionExaminationProjections: NonNullable<FlowDeps['examination
         ? { listAttempts: async (owner, id) => (await import('@/lib/creator-record-flow/customer-live-production')).listCustomerLiveAttempts(owner, id, 'receipt') }
         : undefined,
     ),
+}
+
+/**
+ * CR-V2-MVP-M4A: the purchase and issuance re-check of a record's referenced readings (`verifyReferencedReadings`). Replay runs are
+ * read through the existing examination storage port. Model readings are read through the customer live ports, loaded on demand and
+ * ONLY while both code locks are true; with either lock false (this build) a record holding a model reading is refused at checkout
+ * and at issuance (`unavailable`). Reads only: nothing is examined, reserved or sent.
+ */
+export function productionReadingsIntact(ownerUserId: string, refs: readonly ReferencedReading[]) {
+  return verifyReferencedReadings(
+    {
+      listRuns: (owner, documentId) => productionExaminationDeps().storage.listRuns(owner, documentId),
+      ...(customerLiveEnabledInThisBuild()
+        ? { listLiveAttempts: async (owner: string, id: string, profileId: string) => (await import('@/lib/creator-record-flow/customer-live-production')).listCustomerLiveAttempts(owner, id, profileId) }
+        : {}),
+    },
+    ownerUserId,
+    refs,
+  )
 }
 
 const MESSAGES: Record<CustomerExaminationError['code'] | 'invalid_request', string> = {

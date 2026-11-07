@@ -24,6 +24,12 @@
  * decision about records already issued. A record with no contract (schema 5, 6) and a synthetic record are refused whatever
  * the governance state says; both stay readable (`verifyCustomerRecord` is unaffected).
  *
+ * CR-V2-MVP-M4A: an examination-bearing record (schema 8) also needs every document reading it carries to be commercially
+ * authorized. A model reading (a customer live examination) is eligible only when its exact method — provider, model and reading
+ * profile — is on the support list the caller supplies (`examination_methods`; empty in a shipped build). A recorded-replay reading
+ * only ever reads a known synthetic test document, so it is refused like a synthetic record. Both are refusals read from the record
+ * itself: no governance action can widen them. Nothing here reads, compares or judges what a document shows.
+ *
  * Pure: no I/O and no clock (the issuance date is supplied).
  */
 
@@ -63,21 +69,41 @@ export type Lookup =
   | { status: 'unavailable' }
   | { status: 'malformed' }
 
+/**
+ * CR-V2-MVP-M4A: the identity of a document-reading method, exactly as a stored model reading records it (its envelope's executor
+ * and profile). Technical provenance only: being listed authorizes the method commercially, it says nothing about any reading.
+ */
+export interface ExaminationMethodIdentity {
+  origin: 'live_model'
+  provider: string
+  model: string
+  profile: { id: string; version: number; schema: string; prompt: string }
+}
+
 export interface GovernanceSnapshot {
   issuance_date: string
   authorities: Partial<Record<AuthorityKind, Lookup>>
   /** The class of the bundle this state comes from. Only 'synthetic_test', which Production can never select, admits a synthetic record. */
   authority_class?: PublicationAuthorityClass
+  /** CR-V2-MVP-M4A: the model-reading methods this build may sell and issue. Absent or empty: none. */
+  examination_methods?: readonly ExaminationMethodIdentity[]
 }
 
-export const INELIGIBILITY_CODES = ['reference_missing', 'version_not_current', 'lifecycle_pending', 'lifecycle_withdrawn', 'lifecycle_superseded', 'lifecycle_retired', 'validity_lapsed', 'contract_not_recorded', 'synthetic_record'] as const
+export const INELIGIBILITY_CODES = [
+  'reference_missing', 'version_not_current', 'lifecycle_pending', 'lifecycle_withdrawn', 'lifecycle_superseded', 'lifecycle_retired', 'validity_lapsed', 'contract_not_recorded', 'synthetic_record',
+  // CR-V2-MVP-M4A: a model reading whose method is not commercially supported; a recorded-replay (synthetic) reading.
+  'examination_method_not_supported', 'synthetic_examination',
+] as const
 export type IneligibilityCode = (typeof INELIGIBILITY_CODES)[number]
 export const CONFLICT_CODES = ['reference_ambiguous', 'content_changed_under_version', 'governance_conflict'] as const
 export type ConflictCode = (typeof CONFLICT_CODES)[number]
 
+/** The governed kinds, and (CR-V2-MVP-M4A) the reading method of a document examination. */
+export type FindingKind = AuthorityKind | 'examination_method'
+
 export interface Finding<C extends string> {
   code: C
-  kind: AuthorityKind
+  kind: FindingKind
   id: string
   version: string
 }
@@ -162,6 +188,46 @@ function commercialExclusions(record: CustomerRecordV2, state: GovernanceSnapsho
   // Governance mode refuses a bundle whose approval text looks like this, so a record built from real approvals cannot match.
   const synthetic = [s.source_text.authority, s.source_text.review_ref, c?.authority, c?.review_ref, s.registry_version, s.ledger_version].some(isSyntheticAuthorityText)
   if (synthetic && state?.authority_class !== 'synthetic_test') out.push({ code: 'synthetic_record', kind: 'source_text', id: s.source_text.source_id, version: String(s.source_text.version) })
+  out.push(...examinationExclusions(record, state))
+  return out
+}
+
+/** The shape of a stored model reading this check reads. The record was verified first, so every projection already parsed strictly. */
+interface StoredLiveReading {
+  execution_boundary: 'customer_live_examination'
+  envelope: { execution_origin: string; executor: { provider: string; model: string }; profile: { id: string; version: number; schema: string; prompt: string } }
+}
+const isLiveReading = (e: unknown): e is StoredLiveReading => !!e && typeof e === 'object' && (e as { execution_boundary?: unknown }).execution_boundary === 'customer_live_examination'
+
+const sameMethod = (a: ExaminationMethodIdentity, b: ExaminationMethodIdentity) =>
+  a.origin === b.origin && a.provider === b.provider && a.model === b.model &&
+  a.profile.id === b.profile.id && a.profile.version === b.profile.version && a.profile.schema === b.profile.schema && a.profile.prompt === b.profile.prompt
+
+/** The reading method of a stored model reading, from the record alone. */
+export function examinationMethodOf(reading: StoredLiveReading): ExaminationMethodIdentity {
+  const e = reading.envelope
+  return { origin: 'live_model', provider: e.executor.provider, model: e.executor.model, profile: { id: e.profile.id, version: e.profile.version, schema: e.profile.schema, prompt: e.profile.prompt } }
+}
+
+/**
+ * CR-V2-MVP-M4A: every document reading the record carries must be commercially authorized. A model reading needs its exact method on
+ * `state.examination_methods`; any other reading is a recorded replay of a known synthetic test document, admitted only by the
+ * synthetic test class (which Production never selects). Fail closed: an unreadable state supports nothing.
+ */
+function examinationExclusions(record: CustomerRecordV2, state: GovernanceSnapshot | null | undefined): Finding<IneligibilityCode>[] {
+  const out: Finding<IneligibilityCode>[] = []
+  const supported = state && typeof state === 'object' && Array.isArray(state.examination_methods) ? state.examination_methods : []
+  for (const d of record.documents.items) {
+    const e: unknown = d.examination
+    if (!e || typeof e !== 'object') continue
+    if (isLiveReading(e)) {
+      const m = examinationMethodOf(e)
+      if (e.envelope.execution_origin !== 'live_model' || !supported.some((x) => sameMethod(x, m)))
+        out.push({ code: 'examination_method_not_supported', kind: 'examination_method', id: `${m.provider}/${m.model}`, version: `${m.profile.id}@${m.profile.version}/${m.profile.schema}/${m.profile.prompt}` })
+    } else if (state?.authority_class !== 'synthetic_test') {
+      out.push({ code: 'synthetic_examination', kind: 'examination_method', id: 'fixture_replay', version: d.document_id })
+    }
+  }
   return out
 }
 

@@ -52,6 +52,11 @@ export interface PublicationAuthorityBundle {
   readonly questionnaire_approval: QuestionnaireContractApproval | null
   readonly pdf_templates: unknown
   readonly pdf_template_approval: PdfTemplateApproval | null
+  /**
+   * CR-V2-MVP-M4A: further approved template sets, one per other record schema (e.g. the examination-bearing schema 8). Issuance
+   * selects the one set whose approval names the record's own schema (`approvedPdfTemplates`); none or more than one refuses.
+   */
+  readonly pdf_template_sets?: readonly { readonly templates: unknown; readonly approval: PdfTemplateApproval }[]
 }
 
 /** The Production Supabase project (public identifier; see DEPLOYMENT.md). Synthetic authority never runs against it. */
@@ -124,6 +129,7 @@ function approvalTexts(b: PublicationAuthorityBundle): string[] {
   out.push(b.source_text_approval?.authority, b.source_text_approval?.review_ref)
   out.push(b.questionnaire_approval?.authority, b.questionnaire_approval?.review_ref)
   out.push(b.pdf_template_approval?.authority, b.pdf_template_approval?.review_ref)
+  for (const t of b.pdf_template_sets ?? []) out.push(t.approval?.authority, t.approval?.review_ref)
   return out.filter((x): x is string => typeof x === 'string')
 }
 

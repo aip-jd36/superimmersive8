@@ -53,7 +53,7 @@ describe('both code locks are off in this build', () => {
     expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(false)
     expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('stopped')
-    expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [], builders: [] })
+    expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [], builders: [], examination_methods: [] })
   })
 })
 

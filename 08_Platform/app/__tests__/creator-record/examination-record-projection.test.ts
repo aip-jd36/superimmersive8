@@ -425,7 +425,9 @@ describe('referenced runs at payment and issuance', () => {
     const row: PreparedRow = { ...v6Row(), record_schema_version: 7, canonical: r.canonical, sha256: r.sha256, record_ref: 'PREP-X0TEST', submission_id: null }
     const spy = jest.fn(async () => ({ ok: true as const }))
     const r2 = await startPurchase(purchaseDeps(row, { examinationsIntact: spy, bind: async () => ({ submissionId: null, reason: 'not_found' }) }), OWNER, row.id)
-    expect(r2).toEqual({ ok: false, status: 404, code: 'not_found' }) // reached bind: every pre-bind check passed without the run check
+    // CR-V2-MVP-M4A: reached the render check, which comes after the run check (no templates are supplied here): every earlier check,
+    // the evidence and run checks included, passed without consulting the run check.
+    expect(r2).toEqual({ ok: false, status: 503, code: 'unavailable' })
     expect(spy).not.toHaveBeenCalled()
   })
 
@@ -463,10 +465,19 @@ describe('no new reachable behaviour', () => {
     expect(await preparePrepared(deps, OWNER, { state: state(), include_examinations: true })).toEqual({ ok: false, status: 409, code: 'examination_unavailable' })
   })
 
-  test('no app, component or production-port file reaches the examination record path; no production run check is wired', () => {
+  test('no app, component or production-port file reaches the examination record path; the run check is wired once (M4A)', () => {
     const files = [...walk(path.join(APP_ROOT, 'app')), ...walk(path.join(APP_ROOT, 'components')), ...walk(path.join(APP_ROOT, 'lib', 'creator-record-flow'))]
-    const reach = files.filter((f) => /examination-section|persisted-comparison|examination\/projection|examination\/receipt-reading|examinationsIntact/.test(readFileSync(f, 'utf8'))).map(rel)
+    const reach = files.filter((f) => /examination-section|persisted-comparison|examination\/projection|examination\/receipt-reading/.test(readFileSync(f, 'utf8'))).map(rel)
     expect(reach).toEqual([])
+    // CR-V2-MVP-M4A: the purchase and issuance run check is wired in the production ports only, to the one re-check of referenced
+    // readings, whose model-reading lookup is loaded on demand and only while both live-examination code locks are true.
+    expect(files.filter((f) => /examinationsIntact/.test(readFileSync(f, 'utf8'))).map(rel)).toEqual(['lib/creator-record-flow/production.ts'])
+    const production = readFileSync(path.join(APP_ROOT, 'lib', 'creator-record-flow', 'production.ts'), 'utf8')
+    expect(production.match(/examinationsIntact: [A-Za-z]+/g)).toEqual(['examinationsIntact: productionReadingsIntact', 'examinationsIntact: productionReadingsIntact'])
+    const wiring = readFileSync(path.join(APP_ROOT, 'lib', 'creator-record-flow', 'examination-customer.ts'), 'utf8')
+    const port = wiring.slice(wiring.indexOf('export function productionReadingsIntact'), wiring.indexOf('const MESSAGES'))
+    expect(port).toMatch(/customerLiveEnabledInThisBuild\(\)\s*\n?\s*\?\s*\{ listLiveAttempts: async/)
+    expect(port).not.toMatch(/^import /m)
   })
 
   test('guidance, facts, retrieval and interpretation never import the examination record path', () => {
