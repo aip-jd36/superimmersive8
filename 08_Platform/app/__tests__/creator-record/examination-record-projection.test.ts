@@ -24,7 +24,8 @@ import { receiptObservations } from '@/lib/creator-record/examination/receipt-pr
 import { mapReceiptReading, receiptReadingOf } from '@/lib/creator-record/examination/receipt-reading'
 import { parseExaminationProjection, projectVerifiedRun, verifyReferencedRuns, type ExaminationProjection } from '@/lib/creator-record/examination/projection'
 import { validateReceiptExtraction } from '@/lib/creator-record/receipt-examination/schema'
-import { comparePersistedExamination } from '@/lib/creator-record/evidence/persisted-comparison'
+import { COMPARISON_WITHHELD, comparePersistedExamination, HISTORICAL_COMPARISON_METHOD, PERSISTED_COMPARISON_METHOD } from '@/lib/creator-record/evidence/persisted-comparison'
+import { examinationSectionsValid } from '@/lib/creator-record/customer-record/examination-section'
 import {
   buildCustomerRecord, verifyCustomerRecord, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION, CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION,
   type CustomerRecordInput, type CustomerRecordResult, type CustomerRecordV2, type CustomerRecordDocument,
@@ -258,18 +259,34 @@ describe('examination-bearing record (v6)', () => {
     if (!r.ok) expect(r.stage).toBe('input')
   })
 
-  test('comparisons are derived from this version\'s declarations and recomputed when they change', () => {
+  test('comparisons follow this version\'s declarations and make no determination, in either direction', () => {
     const pro = built(buildCustomerRecord(examined())).record
     const other = built(buildCustomerRecord(examined({ state: state('Standard') }))).record
     const c = (r: CustomerRecordV2) => (r.comparison.policy === 'derived_per_version' ? r.comparison.items : [])
     expect(c(pro)).toHaveLength(1)
     expect(c(pro)[0]).toMatchObject({ tool_index: 0, document_id: DOC_ID, run_id: RUN_ID, declared: { tool_id: 'kling', plan: 'Pro' }, verification: 'not_verified' })
     expect(c(other)[0].declared.plan).toBe('Standard')
-    expect(c(pro)[0].plan).not.toEqual(c(other)[0].plan)
-    for (const [r, plan] of [[pro, 'Pro'], [other, 'Standard']] as const) {
-      const direct = comparePersistedExamination({ tool_index: 0, document_id: DOC_ID, file_name: DOCUMENT.file_name, envelope: ENVELOPE, declared_tool_id: 'kling', declared_plan: plan })
-      expect({ provider: c(r)[0].provider, plan: c(r)[0].plan }).toEqual({ provider: direct.provider, plan: direct.plan })
+    for (const r of [pro, other]) {
+      expect(r.comparison).toMatchObject({ method: PERSISTED_COMPARISON_METHOD })
+      expect(c(r)[0].provider).toEqual(COMPARISON_WITHHELD)
+      expect(c(r)[0].plan).toEqual(COMPARISON_WITHHELD)
     }
+    // The false positive this closes: the earlier method calls this document consistent with a declaration it cannot establish alone.
+    const earlier = comparePersistedExamination({ tool_index: 0, document_id: DOC_ID, file_name: DOCUMENT.file_name, envelope: ENVELOPE, declared_tool_id: 'kling', declared_plan: 'Pro' })
+    expect(earlier.provider.result).toBe('appears_consistent')
+  })
+
+  test('a new record cannot hold a determination; an earlier record keeps the one it holds and stays readable', () => {
+    const r = built(buildCustomerRecord(examined())).record
+    const withResult = (method: unknown, result: string) => ({ ...r, comparison: { policy: 'derived_per_version', method, items: (r.comparison as { items: object[] }).items.map((i) => ({ ...i, provider: { result, reason: 'same_seller' }, plan: { result, reason: 'same_plan' } })) } })
+    const valid = (x: unknown) => examinationSectionsValid(x as Parameters<typeof examinationSectionsValid>[0])
+    expect(valid(r)).toBe(true)
+    for (const result of ['appears_consistent', 'appears_to_conflict', 'does_not_establish']) {
+      expect(valid(withResult(PERSISTED_COMPARISON_METHOD, result))).toBe(false)
+      expect(valid(withResult(HISTORICAL_COMPARISON_METHOD, result))).toBe(true)
+    }
+    expect(valid(withResult({ id: PERSISTED_COMPARISON_METHOD.id, version: 3 }, 'not_assessed'))).toBe(false)
+    expect(valid(withResult(HISTORICAL_COMPARISON_METHOD, 'verified'))).toBe(false)
   })
 
   test('a comparison is never accepted as input', () => {

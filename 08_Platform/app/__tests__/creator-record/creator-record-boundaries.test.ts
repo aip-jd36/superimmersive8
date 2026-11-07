@@ -222,6 +222,8 @@ describe('lib/creator-record boundaries', () => {
       'lib/creator-record-flow/examination-production.ts', // CR-V2-DOC-2C-C-B: examination persistence ports (operator CLI; X2: the creator examination wiring)
       'lib/creator-record-flow/examination-ui.ts', // CR-V2-EXAM-INTEGRATION-X3: browser helpers (vocabulary at runtime; types otherwise)
       'lib/creator-record-flow/http.ts',
+      'lib/creator-record-flow/live-evaluation-runner.ts', // CR-V2-DOC-LIVE-1C-B1: the fixed evaluation runner; only the operator CLI imports it (live-evaluation-runner.test.ts)
+      'lib/creator-record-flow/live-examination-production.ts', // CR-V2-DOC-LIVE-1B: storage ports for a bound live examination; nothing imports it (live-examination-real.test.ts)
       'lib/creator-record-flow/production.ts',
       'lib/creator-record-flow/questionnaire-recovery.ts', // CR-V2-DECL-1B-2: browser helper (types only)
       'lib/creator-record-flow/route-handlers.ts', // request parsing shared by the customer and admin UAT routes
@@ -381,7 +383,8 @@ describe('lib/creator-record boundaries', () => {
       .filter((f) => !f.endsWith('examine.anthropic.ts') && /examine\.anthropic'/.test(readFileSync(f, 'utf8')))
       .map((f) => path.relative(APP_ROOT, f).split(path.sep).join('/'))
       .sort()
-    expect(reachers).toEqual(['lib/creator-record/eval/run-receipt-eval.ts', 'lib/creator-record/evidence/live-caller.ts'])
+    // CR-V2-DOC-LIVE-1B adds the disabled real executor, which nothing imports (live-examination-real.test.ts).
+    expect(reachers).toEqual(['lib/creator-record/eval/run-receipt-eval.ts', 'lib/creator-record/evidence/live-caller.ts', 'lib/creator-record/live-examination/real-executor.ts'])
   })
 
   test('CR-V2-VERTICAL-SLICE-1: the authoritative sources never import the pilot and carry no pilot marker', () => {

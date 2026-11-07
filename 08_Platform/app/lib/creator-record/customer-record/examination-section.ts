@@ -4,9 +4,9 @@
  * Pure. Three parts, each kept SEPARATE from the creator's declarations (which alone drive guidance):
  *   1. EXAMINATIONS: per inventoried document, `not_examined` or one bounded projection of a persisted,
  *      integrity-checked run (`../examination/projection`). Observations stay verbatim and `not_verified`.
- *   2. COMPARISONS: derived here, never supplied. For each tool block's examined document, the existing
- *      reconciliation of THIS version's declaration against the examination. A new version recomputes them, so a
- *      comparison can never outlive the declaration it compared.
+ *   2. COMPARISONS: derived here, never supplied. For each tool block's examined document, THIS version's declaration beside
+ *      the examination it would be read against. CR-V2-DOC-LIVE-1A: no consistency determination is made, in either direction
+ *      (`COMPARISON_WITHHELD`). Records made earlier keep the results they hold.
  *   3. CREATOR RESPONSES: closed codes only (no free text), each attributed to the creator and to THIS version,
  *      each targeting an observation or comparison that exists in this record. Responses never alter an
  *      observation, a comparison or a declaration. They never carry forward: the builder reads no earlier
@@ -15,7 +15,7 @@
  */
 
 import { parseExaminationProjection, type ExaminationProjection, type ExaminationRunReference } from '../examination/projection'
-import { comparePersistedExamination, PERSISTED_COMPARISON_METHOD } from '../evidence/persisted-comparison'
+import { COMPARISON_WITHHELD, HISTORICAL_COMPARISON_METHOD, PERSISTED_COMPARISON_METHOD } from '../evidence/persisted-comparison'
 import type { FieldReconciliation } from '../evidence/document-observations'
 import { canonicalJson } from '../record-core/canonical'
 
@@ -104,8 +104,7 @@ export function deriveComparisons(
     .map((d) => {
       const p = byDocument.get(d.document_id)!
       const declared = declaredFor(d.tool_index as number)
-      const r = comparePersistedExamination({ tool_index: d.tool_index as number, document_id: d.document_id, file_name: d.file_name, envelope: p.envelope, declared_tool_id: declared.tool_id, declared_plan: declared.plan })
-      return { tool_index: d.tool_index as number, document_id: d.document_id, run_id: p.run_id, declared: { tool_id: declared.tool_id, plan: declared.plan }, provider: r.provider, plan: r.plan, verification: 'not_verified' as const }
+      return { tool_index: d.tool_index as number, document_id: d.document_id, run_id: p.run_id, declared: { tool_id: declared.tool_id, plan: declared.plan }, provider: { ...COMPARISON_WITHHELD }, plan: { ...COMPARISON_WITHHELD }, verification: 'not_verified' as const }
     })
 }
 
@@ -215,8 +214,12 @@ export function examinationSectionsValid(record: {
   const attached = attachExaminations(d.items, examinations)
   if (!attached.ok) return false
   const c = record.comparison
-  if (!c || c.policy !== 'derived_per_version' || canonicalJson(c.method ?? null) !== canonicalJson(PERSISTED_COMPARISON_METHOD) || !Array.isArray(c.items)) return false
+  const method = canonicalJson(c?.method ?? null)
+  const withheld = method === canonicalJson(PERSISTED_COMPARISON_METHOD)
+  if (!c || c.policy !== 'derived_per_version' || !(withheld || method === canonicalJson(HISTORICAL_COMPARISON_METHOD)) || !Array.isArray(c.items)) return false
   const comparisons = c.items as CustomerComparison[]
+  // Only a record under the earlier method can hold a determination.
+  if (withheld && comparisons.some((x) => canonicalJson(x?.provider ?? null) !== canonicalJson(COMPARISON_WITHHELD) || canonicalJson(x?.plan ?? null) !== canonicalJson(COMPARISON_WITHHELD))) return false
   for (const x of comparisons) {
     if (!exactKeys(x, 'declared,document_id,plan,provider,run_id,tool_index,verification') || x.verification !== 'not_verified' || !fieldOk(x.provider) || !fieldOk(x.plan)) return false
     if (!exactKeys(x.declared, 'plan,tool_id') || !(x.declared.plan === null || typeof x.declared.plan === 'string') || !(x.declared.tool_id === null || typeof x.declared.tool_id === 'string')) return false

@@ -190,7 +190,7 @@ describe('the Kling fixture: governed guidance beside the document observations'
     expect(g.conclusion).toBe('relevant_applicability_unresolved')
     expect(g.applicability_status).toBe('unresolved')
     expect(g.unresolved_requirements).toEqual([{ fact: 'tool_account_status', tool: 'kling', tool_label: 'Kling', value: 'Member Account' }])
-    expect(g.documents[0].comparison?.provider.result).toBe('appears_consistent')
+    expect(g.documents[0].comparison?.provider).toEqual({ result: 'not_assessed', reason: 'determination_withheld' })
   })
 })
 
@@ -216,7 +216,7 @@ describe('claim association', () => {
     expect(item(view, BASELINE).documents).toEqual([])
     const pika = item(view, PIKA_PRO)
     expect(pika.documents.map((d) => [d.document_id, d.tool_index])).toEqual([[DOC_ID, 1]])
-    expect(pika.documents[0].comparison?.provider.result).toBe('appears_to_conflict')
+    expect(pika.documents[0].comparison?.provider).toEqual({ result: 'not_assessed', reason: 'determination_withheld' })
     expect(pika.declared_plans).toEqual([{ tool_label: 'Pika', plan: 'Pro' }])
     // Its own requirement is met on the declaration, while BI holds the shared objective at unresolved (Kling Member).
     expect(pika.applicability_status).toBe('met')
