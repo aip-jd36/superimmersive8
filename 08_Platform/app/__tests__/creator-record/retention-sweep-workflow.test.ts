@@ -66,7 +66,8 @@ describe('retention sweep workflow: activation gate', () => {
     const dir = mkdtempSync(join(tmpdir(), 'retention-gate-'))
     try {
       const out = join(dir, 'output')
-      const env: Record<string, string> = { PATH: process.env.PATH ?? '', GITHUB_OUTPUT: out }
+      // Only these variables: nothing from the test runner's own environment can satisfy the gate.
+      const env = { PATH: process.env.PATH ?? '', GITHUB_OUTPUT: out } as Record<string, string> as NodeJS.ProcessEnv
       if (value !== undefined) env.RETENTION_SWEEP_ENABLED_VALUE = value
       const r = spawnSync('bash', ['-e', '-c', step.run!], { env, encoding: 'utf8' })
       expect(r.status).toBe(0)
