@@ -19,10 +19,11 @@
  *   - a failed object write removes the pending row; a row left pending (crash) is removed by cleanup, with
  *     its object if any; a deleted document's object is removed, and cleanup retries a failed removal.
  *
- * Deletion: only a stored document that no prepared version references can be deleted (the database
- * refuses otherwise). A referenced document is RETAINED: deleting it is a retention and deletion policy
- * decision that has not been made. Prepared and paid records keep their own fingerprint of every document
- * either way, and never read the bytes again.
+ * Deletion here (owner delete, behind the submissions stop): only a stored document that no prepared version
+ * references (the database refuses otherwise). A referenced original is removed only by the retention policy
+ * (CR-V2-MVP-RETENTION-M1A, `./retention`: 90-day expiry, a deletion request, both decided by the database).
+ * Prepared and paid records keep their own fingerprint of every document either way, and never read the bytes
+ * again; the cleanup below removes the object of every deleted document, whatever the reason.
  *
  * Evidence at payment and issuance (CR-V2-DOC-1B): `verifyEvidenceIntact` re-checks every document a version
  * references (row still stored, same owner and SHA-256, bytes present and re-hashed). Checkout and issuance

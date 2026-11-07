@@ -622,3 +622,23 @@ export async function sendPaymentLedgerAdminAlert(subject: string, fields: Recor
     console.error('Error sending payment ledger admin alert:', error)
   }
 }
+
+/**
+ * CR-V2-MVP-RETENTION-M1A — operator alert from the Creator Record retention sweep (best-effort; the sweep's own failure status is
+ * the durable signal). Counts and fixed codes only: never a document id, file name, path or customer detail.
+ */
+export async function sendCreatorRecordRetentionAdminAlert(subject: string, fields: Record<string, string | number>): Promise<void> {
+  const rows = Object.entries(fields)
+    .map(([k, v]) => `<p style="margin: 4px 0;"><strong>${escapeHtml(k)}:</strong> ${escapeHtml(String(v))}</p>`)
+    .join('')
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
+      subject: `[Creator Record retention] ${subject}`,
+      html: `<h2>Creator Record retention: ${escapeHtml(subject)}</h2>${rows}`,
+    })
+  } catch (error) {
+    console.error('Error sending Creator Record retention admin alert:', error)
+  }
+}

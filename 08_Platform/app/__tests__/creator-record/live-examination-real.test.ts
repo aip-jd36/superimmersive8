@@ -399,14 +399,18 @@ describe('what stays closed', () => {
   test('the 1A migration is unchanged; only 20261110000000 widens it, and only for reserved customer attempts while enabled', () => {
     const dir = path.join(root, 'supabase', 'migrations')
     const names = readdirSync(dir).sort()
-    expect(names.slice(-2)).toEqual(['20261108000000_creator_record_v2_live_examination_foundation.sql', '20261110000000_creator_record_v2_customer_live_examination.sql'])
+    // CR-V2-MVP-RETENTION-M1A follows them: it adds a consent guard trigger only and replaces no examination function.
+    expect(names.slice(-3)).toEqual(['20261108000000_creator_record_v2_live_examination_foundation.sql', '20261110000000_creator_record_v2_customer_live_examination.sql', '20261111000000_creator_record_v2_retention_m1a.sql'])
+    const retention = readFileSync(path.join(dir, names[names.length - 1]), 'utf8')
+    expect(retention).not.toMatch(/CREATE OR REPLACE FUNCTION public\.creator_record_v2_(record|reserve|settle)_[a-z_]*examination|DROP CONSTRAINT[^;]*live_examination_attempts/)
+    names.pop()
     const sql = readFileSync(path.join(dir, names[names.length - 2]), 'utf8')
     expect(sql).toContain("execution_origin    text NOT NULL CHECK (execution_origin = 'mock_test')")
     expect(sql).toContain("RAISE EXCEPTION 'live_examination_not_authorized'")
     const next = readFileSync(path.join(dir, names[names.length - 1]), 'utf8')
     expect(next).toContain("execution_origin = 'live_model' AND content_class = 'customer_document' AND executor_mode = 'live_model' AND provider = 'anthropic'")
     expect(next).toContain('reservation_id IS NOT NULL')
-    expect(next).not.toMatch(/CREATE OR REPLACE FUNCTION public\.creator_record_v2_record_live_examination/)
+    expect(next).not.toMatch(/CREATE OR REPLACE FUNCTION public\.creator_record_v2_record_live_examination\b/)
     for (const f of ['reserve_customer_live_examination', 'record_customer_live_examination']) {
       const body = next.slice(next.indexOf(`FUNCTION public.creator_record_v2_${f}`))
       expect(body.slice(0, body.indexOf('$$;'))).toContain("RAISE EXCEPTION 'customer_live_examination_not_enabled'")

@@ -43,6 +43,9 @@ export const CUSTOMER_LIVE_DATABASE_REFUSALS: Readonly<Record<string, string>> =
   customer_live_document_mismatch: 'document_mismatch',
   customer_live_conflict: 'conflict',
   customer_live_settlement_invalid: 'settlement_invalid',
+  // CR-V2-MVP-RETENTION-M1A (20261111000000): the creator withdrew consent for documents uploaded under it. Refused at the read, the
+  // reservation and the recorded attempt alike, so no stale authorization, retry or re-examination gets past it.
+  creator_record_v2_consent_withdrawn: 'consent_withdrawn',
 }
 
 export interface CustomerLivePorts {

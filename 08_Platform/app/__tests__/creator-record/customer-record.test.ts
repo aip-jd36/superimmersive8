@@ -488,7 +488,9 @@ describe('independence', () => {
     const issuance = files.map(rel).filter((f) => !f.startsWith(ADMIN_UAT) && /^lib\/(payments|creator-record-artifacts)\/|^app\/api\/(webhooks|checkout|admin)\//.test(f))
     expect(issuance.length).toBeGreaterThan(0)
     const reach = (f: string) => Array.from(new Set(readFileSync(path.join(APP_ROOT, f), 'utf8').match(/@\/lib\/(creator-record\/customer-[a-z-]+\/[a-z-]+|creator-record-flow\/[a-z-]+)/g) ?? [])).sort()
+    // CR-V2-MVP-RETENTION-M1A: the admin retention-holds route reaches retention helpers only, never purchase or issuance.
     expect(issuance.filter((f) => reach(f).length > 0).map((f) => [f, reach(f)])).toEqual([
+      ['app/api/admin/creator-record-v2/retention/holds/route.ts', ['@/lib/creator-record-flow/evidence-http', '@/lib/creator-record-flow/http', '@/lib/creator-record-flow/retention-http', '@/lib/creator-record-flow/retention-production']],
       ['app/api/checkout/create-session/route.ts', ['@/lib/creator-record-flow/http', '@/lib/creator-record-flow/production', '@/lib/creator-record-flow/wording', '@/lib/creator-record/customer-flow/purchase']],
       ['lib/creator-record-artifacts/renderers.ts', ['@/lib/creator-record-flow/production']],
     ])

@@ -1,0 +1,42 @@
+name: SI8 Creator Record Retention Sweep
+
+# CR-V2-MVP-RETENTION-M1A — scheduled Creator Record v2 original-document retention: deletion requests, 90-day expiry (with the
+# bounded paid-order extension and administrative holds), object removal (retried every run) and overdue detection. All decisions
+# are made by the database (20261111000000). A non-2xx response fails this job (GitHub notifies on failed scheduled runs).
+#
+# Every 6 hours, so a failed object removal is retried many times inside the 7-day removal window. GitHub scheduled runs are
+# best-effort (they can be delayed, and are disabled after long repository inactivity): the database's retention status reports
+# anything overdue on the next run that does execute.
+#
+# Requires repository secret CREATOR_RECORD_RETENTION_SWEEP_SECRET (>= 32 chars), identical to the environment variable of the same
+# name on the Vercel production project. Until both exist (and 20261111000000 is applied) the endpoint refuses and this job fails.
+
+on:
+  schedule:
+    - cron: '41 */6 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: creator-record-retention-sweep
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Run Creator Record retention sweep
+        env:
+          CREATOR_RECORD_RETENTION_SWEEP_SECRET: ${{ secrets.CREATOR_RECORD_RETENTION_SWEEP_SECRET }}
+        run: |
+          if [ -z "$CREATOR_RECORD_RETENTION_SWEEP_SECRET" ]; then
+            echo "::error::CREATOR_RECORD_RETENTION_SWEEP_SECRET is not configured"
+            exit 1
+          fi
+          curl --silent --show-error --fail-with-body --max-time 120 \
+            -X POST \
+            -H "Authorization: Bearer ${CREATOR_RECORD_RETENTION_SWEEP_SECRET}" \
+            https://app.superimmersive8.com/api/internal/creator-record-v2/retention/sweep

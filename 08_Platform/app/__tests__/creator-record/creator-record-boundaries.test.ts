@@ -191,12 +191,16 @@ describe('lib/creator-record boundaries', () => {
       'app/admin/creator-record-v2/uat/page.tsx', // permanent admin-only UAT: the page and its thin routes
       'app/api/admin/creator-record-v2/draft/route.ts',
       'app/api/admin/creator-record-v2/examine/route.ts',
+      'app/api/admin/creator-record-v2/retention/holds/route.ts', // CR-V2-MVP-RETENTION-M1A: named-admin retention holds (the database re-checks the admin)
       'app/api/admin/creator-record-v2/uat/evidence/[id]/examination/route.ts',
       'app/api/admin/creator-record-v2/uat/evidence/route.ts',
       'app/api/admin/creator-record-v2/uat/prepared/[id]/review/route.ts',
       'app/api/admin/creator-record-v2/uat/prepared/[id]/route.ts',
       // CR-V2-MVP-M3: checkout runs the v2 preconditions; the purchase route binds a reviewed version.
       'app/api/checkout/create-session/route.ts',
+      // CR-V2-MVP-RETENTION-M1A: consent withdrawal and deletion requests (deliberately NOT behind the submissions stop or the invitation).
+      'app/api/creator-record-v2/consent-withdrawal/route.ts',
+      'app/api/creator-record-v2/evidence/[id]/deletion-request/route.ts',
       // CR-V2-DOC-1: evidence intake routes (stopped by default, invite-only, synthetic-only code lock).
       // CR-V2-EXAM-INTEGRATION-X2: creator examination of an own document (stopped by default, invite-only; the database decides authority).
       'app/api/creator-record-v2/evidence/[id]/examination/route.ts',
@@ -206,6 +210,7 @@ describe('lib/creator-record boundaries', () => {
       'app/api/creator-record-v2/prepared/[id]/purchase/route.ts',
       'app/api/creator-record-v2/prepared/[id]/review/route.ts',
       'app/api/creator-record-v2/prepared/[id]/route.ts',
+      'app/api/internal/creator-record-v2/retention/sweep/route.ts', // CR-V2-MVP-RETENTION-M1A: the scheduled retention sweep (own secret, fails closed)
       'app/api/uat/creator-record-v2/draft/route.ts',
       'app/creator-record/CreatorRecordV2Client.tsx',
       'app/creator-record/page.tsx',
@@ -227,6 +232,8 @@ describe('lib/creator-record boundaries', () => {
       'lib/creator-record-flow/live-examination-production.ts', // CR-V2-DOC-LIVE-1B: storage ports for a bound live examination; nothing imports it (live-examination-real.test.ts)
       'lib/creator-record-flow/production.ts',
       'lib/creator-record-flow/questionnaire-recovery.ts', // CR-V2-DECL-1B-2: browser helper (types only)
+      'lib/creator-record-flow/retention-http.ts', // CR-V2-MVP-RETENTION-M1A: retention route helpers (fixed codes)
+      'lib/creator-record-flow/retention-production.ts', // CR-V2-MVP-RETENTION-M1A: retention ports (database functions of 20261111000000)
       'lib/creator-record-flow/route-handlers.ts', // request parsing shared by the customer and admin UAT routes
     ])
   })
