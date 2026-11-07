@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatDate } from '@/lib/utils'
 import { deliveryPathFor } from '@/lib/creator-record-artifacts/config'
-import { v2DashboardState, v2DashboardView } from '@/lib/creator-record-flow/dashboard'
+import { v2DashboardState, v2DashboardView, v2FulfilmentView } from '@/lib/creator-record-flow/dashboard'
 import { V2_DASHBOARD } from '@/lib/creator-record-flow/wording'
 import {
   ArrowLeft, CheckCircle, Clock, XCircle, FileText,
@@ -131,7 +131,29 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
   // columns hold neutral placeholders; the record itself is the PDF. "Ready" requires an issued artifact.
   if ((submission as any).creator_record_product === 'v2') {
     const artifact = artifactError ? 'unknown' : !artifactRow ? 'none' : issuedArtifact ? 'issued' : 'pending'
-    const v2 = v2DashboardView(v2DashboardState({ payment_status: submission.payment_status ?? null, artifact }))
+    // CR-V2-MVP-LAUNCH-FOUNDATION-1: whether a paid order is waiting for a person, and whether an unpaid one is paused by
+    // withdrawn AI-examination permission. Shown only as a neutral state; no ledger detail reaches the page.
+    const { data: fulfilmentRow, error: fulfilmentError } = await supabaseAdmin
+      .from('payment_fulfillments')
+      .select('fulfillment_status')
+      .eq('submission_ref', params.id)
+      .eq('outcome', 'accepted')
+      .maybeSingle()
+    let paused: boolean | 'unknown' = false
+    if (submission.payment_status !== 'paid' && submission.payment_status !== 'refunded') {
+      const { data: boundRow, error: boundError } = await supabaseAdmin.from('creator_record_v2_prepared').select('id').eq('submission_id', params.id).maybeSingle()
+      if (boundError) paused = 'unknown'
+      else if (boundRow) {
+        const { data: pausedFlag, error: pausedError } = await supabaseAdmin.rpc('creator_record_v2_prepared_consent_paused', { p_prepared_id: (boundRow as { id: string }).id })
+        paused = pausedError || typeof pausedFlag !== 'boolean' ? 'unknown' : pausedFlag
+      }
+    }
+    const v2 = v2DashboardView(v2DashboardState({
+      payment_status: submission.payment_status ?? null,
+      artifact,
+      fulfilment: v2FulfilmentView(fulfilmentRow as { fulfillment_status: string | null } | null, !!fulfilmentError),
+      paused,
+    }))
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 mb-6">

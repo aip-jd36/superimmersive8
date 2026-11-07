@@ -9,6 +9,7 @@
  */
 import { useCallback, useEffect, useState } from 'react'
 import { EXAM_TEXT, EVIDENCE_CATEGORIES, EVIDENCE_CATEGORY_DEFAULT, examineStateFrom, type Attachment, type ExamineState } from '@/lib/creator-record-flow/examination-ui'
+import { LEGAL_PATHS } from '@/lib/legal/paths'
 
 const INK = '#1a1918'
 const MUTED = '#6b6560'
@@ -30,6 +31,11 @@ export interface EvidencePanelProps {
   initialDocuments?: EvidenceDocument[]
   /** The admin UAT page's own API routes. Defaults to the customer routes. */
   apiBase?: string
+  /**
+   * CR-V2-MVP-LAUNCH-FOUNDATION-1 (Decision 8Q): present only when the server offers live AI examination. Then a separate,
+   * explicit permission is required (and sent) for each examination; storing a document never implies it.
+   */
+  aiPermissionVersion?: string
 }
 
 export function EvidencePanel(props: EvidencePanelProps) {
@@ -42,6 +48,8 @@ export function EvidencePanel(props: EvidencePanelProps) {
   const [consent, setConsent] = useState(false)
   const [file, setFile] = useState<File | null>(null)
   const [examine, setExamine] = useState<Record<string, ExamineState>>({})
+  const [aiPermitted, setAiPermitted] = useState(false)
+  const aiRequired = typeof props.aiPermissionVersion === 'string'
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -79,9 +87,13 @@ export function EvidencePanel(props: EvidencePanelProps) {
   }
 
   async function runExamination(id: string) {
+    if (aiRequired && !aiPermitted) return
     setExamine((s) => ({ ...s, [id]: { kind: 'working' } }))
     try {
-      const res = await fetch(`${apiBase}/evidence/${id}/examination`, { method: 'POST' })
+      const init: RequestInit = aiRequired
+        ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ai_permission: props.aiPermissionVersion }) }
+        : { method: 'POST' }
+      const res = await fetch(`${apiBase}/evidence/${id}/examination`, init)
       const json = await res.json().catch(() => ({}))
       setExamine((s) => ({ ...s, [id]: examineStateFrom(res.status, json) }))
     } catch {
@@ -116,6 +128,16 @@ export function EvidencePanel(props: EvidencePanelProps) {
           {uploading ? EXAM_TEXT.uploading : EXAM_TEXT.upload}
         </button>
         {uploadError && <p className="text-sm font-medium" style={{ color: '#b42318' }} role="alert">{uploadError}</p>}
+        {aiRequired && (
+          <label className="flex items-start gap-2 text-sm pt-2" style={{ color: MUTED }} data-ai-permission>
+            <input type="checkbox" checked={aiPermitted} onChange={(e) => setAiPermitted(e.target.checked)} />
+            <span>{EXAM_TEXT.ai_permission_label}</span>
+          </label>
+        )}
+        <p className="text-xs" style={{ color: MUTED }}>
+          {EXAM_TEXT.legal_links_intro} <a className="underline" href={LEGAL_PATHS.privacy} target="_blank" rel="noopener noreferrer">{EXAM_TEXT.privacy_link}</a> and{' '}
+          <a className="underline" href={LEGAL_PATHS.terms} target="_blank" rel="noopener noreferrer">{EXAM_TEXT.terms_link}</a>.
+        </p>
       </div>
 
       {loading && <p className="text-sm" style={{ color: MUTED }} role="status">Loading documents…</p>}
@@ -150,7 +172,7 @@ export function EvidencePanel(props: EvidencePanelProps) {
                     </select>
                   </label>
                 )}
-                <button type="button" className="rounded-md border px-3 py-1 text-sm bg-white disabled:opacity-50" onClick={() => void runExamination(d.id)} disabled={ex.kind === 'working' || ex.kind === 'done'}>
+                <button type="button" className="rounded-md border px-3 py-1 text-sm bg-white disabled:opacity-50" onClick={() => void runExamination(d.id)} disabled={ex.kind === 'working' || ex.kind === 'done' || (aiRequired && !aiPermitted)}>
                   {ex.kind === 'working' ? EXAM_TEXT.examining : EXAM_TEXT.examine}
                 </button>
               </div>

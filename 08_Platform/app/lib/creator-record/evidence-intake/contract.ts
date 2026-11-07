@@ -34,6 +34,14 @@ export const EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED: boolean = false
  */
 export const EVIDENCE_CONSENT_DRAFT_VERSION = 'DRAFT-UNAPPROVED-cr-v2-evidence-storage-consent-0'
 
+/**
+ * CR-V2-MVP-LAUNCH-FOUNDATION-1 (Decision 8Q): DRAFT identifier of the separate permission for AI examination of one document.
+ * Distinct from the storage consent above: storing a document never implies permission to send it to an AI model provider. The
+ * customer grants it per document, explicitly, before a live examination; the database records it and refuses any live
+ * examination without it (20261112000000). NOT approved wording; replaced by the approved version before customers see it.
+ */
+export const AI_EXAMINATION_PERMISSION_DRAFT_VERSION = 'DRAFT-UNAPPROVED-cr-v2-ai-examination-permission-0'
+
 /** Request bodies: one file plus a small form overhead. */
 export const EVIDENCE_MAX_REQUEST_BYTES = EVIDENCE_MAX_BYTES + 64 * 1024
 /** Provisional bound on a creator's live (stored or in-flight) documents, to limit storage abuse. */

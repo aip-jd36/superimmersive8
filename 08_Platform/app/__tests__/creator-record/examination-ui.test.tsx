@@ -164,7 +164,9 @@ describe('client and page boundaries', () => {
     expect(page.indexOf('deps.hasPilotAccess(userId)')).toBeGreaterThan(page.indexOf("if (deps.submissions !== 'open') return <Unavailable"))
     expect(page).not.toMatch(/syntheticUat|synthetic-uat/)
     expect(page).toContain('CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION }).ok')
-    expect(page).toContain('...(examinationOffered ? { examination: { consentVersion: EVIDENCE_CONSENT_DRAFT_VERSION } } : {})')
+    // CR-V2-MVP-LAUNCH-FOUNDATION-1 (8Q): the separate AI permission is added only when a live examination is offered.
+    expect(page).toContain('? { examination: { consentVersion: EVIDENCE_CONSENT_DRAFT_VERSION, ...(customerLiveOffered() ? { aiPermissionVersion: AI_EXAMINATION_PERMISSION_DRAFT_VERSION } : {}) } }')
+    expect(page).toMatch(/\.\.\.\(examinationOffered\s*\n?\s*\?/)
   })
 
   test('an examination-bearing version never offers payment', () => {
@@ -177,7 +179,10 @@ describe('client and page boundaries', () => {
       expect(src).not.toMatch(/localStorage|sessionStorage|indexedDB/)
       expect(src.replace(/\/\*[\s\S]*?\*\//g, '')).not.toMatch(/uat_grant|nonce|service_role|SUPABASE|envelope_canonical/)
     }
-    expect(panel).toContain("fetch(`${apiBase}/evidence/${id}/examination`, { method: 'POST' })")
+    // CR-V2-MVP-LAUNCH-FOUNDATION-1 (8Q): an empty POST, or — only when live examination is offered — the permission alone.
+    expect(panel).toContain("fetch(`${apiBase}/evidence/${id}/examination`, init)")
+    expect(panel).toContain(": { method: 'POST' }")
+    expect(panel).toContain('body: JSON.stringify({ ai_permission: props.aiPermissionVersion })')
     expect(panel).toContain("props.apiBase ?? '/api/creator-record-v2'")
     expect(panel).toContain("fetch(`${apiBase}/evidence`, { method: 'POST', body: form })")
   })

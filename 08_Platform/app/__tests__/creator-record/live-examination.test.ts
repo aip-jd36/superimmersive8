@@ -414,6 +414,8 @@ describe('boundaries', () => {
     const m2a = [
       ['lib', 'creator-record-flow', 'examination-customer.ts'], ['lib', 'creator-record-flow', 'customer-live-production.ts'], ['lib', 'creator-record', 'customer-flow', 'examination.ts'],
       ['lib', 'creator-record', 'customer-record', 'examination-section.ts'], ['lib', 'creator-record', 'customer-pdf', 'document-model.ts'], ['lib', 'creator-record', 'customer-pdf', 'templates.ts'],
+      // CR-V2-MVP-LAUNCH-FOUNDATION-1: whether a new live examination may be offered (the two lock constants from `controls` only).
+      ['lib', 'creator-record-flow', 'live-offer.ts'],
     ].map((p) => path.join(process.cwd(), ...p))
     const outside = files.filter((f) => !f.startsWith(own)).filter((f) => /live-examination|mock-live-executor/.test(readFileSync(f, 'utf8')))
     expect(outside.sort()).toEqual([runner, ports, synthetic, ...m2a].sort())

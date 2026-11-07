@@ -10,7 +10,7 @@ import { checkEvidenceGate, uploadEvidence, type EvidenceDeps } from '@/lib/crea
 import { MAX_BODY_BYTES } from '@/lib/creator-record/prototype/parse-form-state'
 import { readLimitedText } from '@/lib/creator-record/public-uat/read-limited'
 import { evidenceError, invalidRequest, readLimitedBytes } from '@/lib/creator-record-flow/evidence-http'
-import { emptyRequestBody, examinationError } from '@/lib/creator-record-flow/examination-customer'
+import { examinationError, examinationRequestBody } from '@/lib/creator-record-flow/examination-customer'
 import { NO_STORE, respond } from '@/lib/creator-record-flow/http'
 
 /** A size-limited JSON body, then the prepare flow. */
@@ -57,11 +57,15 @@ export async function handleEvidenceUpload(request: Request, userId: string, dep
   return r.ok ? NextResponse.json({ document: r.document, deduplicated: r.deduplicated }, { status: r.deduplicated ? 200 : 201, headers: NO_STORE }) : evidenceError(r)
 }
 
-/** The gate first, an empty body only, then one examination of the user's own document. */
+/**
+ * The gate first, then a body that is empty or carries only the creator's AI-examination permission (Decision 8Q), then one
+ * examination of the user's own document.
+ */
 export async function handleExaminationRequest(request: Request, userId: string, documentId: string, deps: CustomerExaminationDeps): Promise<NextResponse> {
   const gated = await checkCustomerExaminationGate(deps, userId)
   if (gated) return examinationError(gated)
-  if (!(await emptyRequestBody(request))) return examinationError({ status: 400, code: 'invalid_request' })
-  const r = await requestCustomerExamination(deps, userId, documentId)
+  const body = await examinationRequestBody(request)
+  if (!body.ok) return examinationError({ status: 400, code: 'invalid_request' })
+  const r = await requestCustomerExamination(deps, userId, documentId, { aiPermission: body.aiPermission })
   return r.ok ? NextResponse.json({ examination: { run_id: r.run_id, result: r.result } }, { status: 200, headers: NO_STORE }) : examinationError(r)
 }

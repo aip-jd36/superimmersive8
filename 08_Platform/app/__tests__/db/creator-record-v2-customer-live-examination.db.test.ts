@@ -296,12 +296,18 @@ maybe('customer live examination (PostgreSQL, 20261110000000)', () => {
       submissions: 'open', hasPilotAccess: async () => true,
       adapter: { storage: { getDocument: ports.getDocument, logExaminationRead: async () => { throw new Error('replay path must not run') }, readObject: ports.readObject, recordExamination: async () => { throw new Error('no') }, listRuns: async () => [] }, core: {} } as never,
       live: { examine: (u, d) => examine(u, d, fake) },
+      // CR-V2-MVP-LAUNCH-FOUNDATION-1 (8Q): the live path requires the creator's AI-examination permission. This file applies
+      // migrations through 20261110 only, so the grant is a stand-in here; it is enforced on PostgreSQL in the 8Q suite.
+      aiPermission: { version: 'test-permission', grant: async () => 'granted' },
     })
-    expect(await requestCustomerExamination(deps(), owner, a.id)).toMatchObject({ ok: true, result: 'created' })
-    expect(await requestCustomerExamination(deps(), owner, a.id)).toMatchObject({ ok: true, result: 'existing' })
-    expect(await requestCustomerExamination(deps(), owner, b.id)).toEqual({ ok: false, status: 429, code: 'examination_limit_reached' })
+    const permit = { aiPermission: 'test-permission' }
+    expect(await requestCustomerExamination(deps(), owner, a.id, permit)).toMatchObject({ ok: true, result: 'created' })
+    expect(await requestCustomerExamination(deps(), owner, a.id, permit)).toMatchObject({ ok: true, result: 'existing' })
+    expect(await requestCustomerExamination(deps(), owner, b.id, permit)).toEqual({ ok: false, status: 429, code: 'examination_limit_reached' })
     const stranger = await user()
-    expect(await requestCustomerExamination(deps(), stranger, a.id)).toEqual({ ok: false, status: 404, code: 'not_found' })
+    expect(await requestCustomerExamination(deps(), stranger, a.id, permit)).toEqual({ ok: false, status: 404, code: 'not_found' })
+    // Without the permission, the live path refuses before anything is read.
+    expect(await requestCustomerExamination(deps(), owner, b.id)).toEqual({ ok: false, status: 400, code: 'ai_permission_required' })
   })
 
   test('a known synthetic fixture, another creator\'s document and a deleted document are never read', async () => {

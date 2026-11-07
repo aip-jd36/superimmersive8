@@ -54,7 +54,8 @@ describe('private delivery of a v2 artifact (unchanged delivery path)', () => {
 
 describe('draft customer wording (PRD wording lock)', () => {
   const strings = (v: unknown): string[] => (typeof v === 'string' ? [v] : v && typeof v === 'object' ? Object.values(v).flatMap(strings) : [])
-  const all = [wording.V2_CHECKOUT_COPY, wording.V2_READY_EMAIL, wording.V2_DASHBOARD, wording.V2_REVIEW_PAGE].flatMap(strings)
+  // CR-V2-MVP-LAUNCH-FOUNDATION-1: the withdrawal control's wording is held to the same lock.
+  const all = [wording.V2_CHECKOUT_COPY, wording.V2_READY_EMAIL, wording.V2_DASHBOARD, wording.V2_REVIEW_PAGE, wording.V2_CONSENT].flatMap(strings)
   // Same lock as the customer PDF templates: only negated "clearance" is allowed.
   const BANNED = /\b(cleared|clearance|compliant|certified|certification|verified|verification|approved|guarantee[sd]?)\b|licensed to|permitted to|safe to|reviewed by|review date|last reviewed/i
   const ALLOWED = [/\bnot (a |an )?(legal advice, a |commercial )?clearance\b/gi, /\bnot legal advice, a (commercial )?clearance\b/gi, /\bhuman-reviewed SI8 (Commercial Assurance )?[Aa]ssessment\b/g]
@@ -107,7 +108,7 @@ describe('dashboard state', () => {
   })
 
   test('only "ready" offers a download; nothing says approved', () => {
-    for (const s of ['awaiting_payment', 'preparing', 'ready', 'refunded', 'unavailable'] as const) {
+    for (const s of ['awaiting_payment', 'preparing', 'ready', 'refunded', 'unavailable', 'support_required', 'paused'] as const) {
       const v = v2DashboardView(s)
       expect(v.download).toBe(s === 'ready')
       expect(`${v.badge} ${v.message}`).not.toMatch(/approved/i)

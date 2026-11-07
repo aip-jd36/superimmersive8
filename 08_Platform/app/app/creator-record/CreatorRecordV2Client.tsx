@@ -50,7 +50,7 @@ interface Props {
   /** CR-V2-MVP-M3: whether v2 issuance is enabled (display only; the server decides). */
   paymentOpen: boolean
   /** CR-V2-EXAM-INTEGRATION-X3: offered only when the page says so (display only; the server decides). */
-  examination?: { consentVersion: string }
+  examination?: { consentVersion: string; /** CR-V2-MVP-LAUNCH-FOUNDATION-1 (8Q): set only when live AI examination is offered. */ aiPermissionVersion?: string }
   /** This session is on synthetic inputs (display only; the server decides). */
   syntheticUat?: boolean
   /** The admin UAT page's own API routes. Defaults to the customer routes. */
@@ -365,6 +365,7 @@ export function CreatorRecordV2Client(props: Props) {
       {props.examination && (
         <EvidencePanel
           consentVersion={props.examination.consentVersion}
+          {...(props.examination.aiPermissionVersion ? { aiPermissionVersion: props.examination.aiPermissionVersion } : {})}
           apiBase={apiBase}
           maxTools={props.maxTools}
           attachments={attachments}

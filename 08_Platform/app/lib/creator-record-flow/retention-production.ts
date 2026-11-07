@@ -27,6 +27,7 @@ export const RETENTION_FUNCTIONS = {
   apply: 'creator_record_v2_apply_retention',
   status: 'creator_record_v2_retention_status',
   recordSweep: 'creator_record_v2_record_retention_sweep',
+  consentState: 'creator_record_v2_consent_state',
 } as const
 
 function raise(op: string, error: { code?: string | null; message?: string | null } | null): never {
@@ -80,6 +81,13 @@ export const retentionPorts: RetentionPorts = {
   async recordSweep(ok, problems) {
     const { error } = await supabaseAdmin.rpc(RETENTION_FUNCTIONS.recordSweep, { p_ok: ok, p_problems: [...problems] })
     if (error) raise('record_sweep', error)
+  },
+  async consentState(userId) {
+    const { data, error } = await supabaseAdmin.rpc(RETENTION_FUNCTIONS.consentState, { p_user_id: userId })
+    if (error) raise('consent_state', error)
+    const row = firstRow<{ withdrawn: boolean; withdrawn_at: string | null }>(data)
+    if (!row || typeof row.withdrawn !== 'boolean') raise('consent_state', null)
+    return { withdrawn: row.withdrawn, withdrawn_at: row.withdrawn_at ?? null }
   },
 }
 

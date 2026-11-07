@@ -13,15 +13,37 @@
  */
 import { NextResponse } from 'next/server'
 import { CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flow/approved-inputs'
-import { examinationProjectionFor, verifyReferencedReadings, type CustomerExaminationDeps, type CustomerExaminationError, type ReferencedReading } from '@/lib/creator-record/customer-flow/examination'
+import { AiPermissionRefusal, examinationProjectionFor, verifyReferencedReadings, type AiPermissionRefusalCode, type CustomerExaminationDeps, type CustomerExaminationError, type ReferencedReading } from '@/lib/creator-record/customer-flow/examination'
 import type { FlowDeps } from '@/lib/creator-record/customer-flow/service'
 import { productionExaminationDeps } from '@/lib/creator-record-flow/examination-production'
-import { CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD, LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD } from '@/lib/creator-record/live-examination/controls'
+import { AI_EXAMINATION_PERMISSION_DRAFT_VERSION } from '@/lib/creator-record/evidence-intake/contract'
+import { supabaseAdmin } from '@/lib/supabase/admin'
+import { customerLiveEnabledInThisBuild, customerLiveOffered } from './live-offer'
 import { hasPilotAccess } from './pilot-access'
 import { NO_STORE } from './http'
 
-/** Both code locks, read at call time. */
-export const customerLiveEnabledInThisBuild = (): boolean => LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD === true && CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD === true
+// Both code locks (`customerLiveEnabledInThisBuild`), and the offer of a NEW live examination (`customerLiveOffered`: the locks
+// AND the approved privacy notice and terms) — CR-V2-MVP-LAUNCH-FOUNDATION-1, `./live-offer`.
+export { customerLiveEnabledInThisBuild, customerLiveOffered }
+
+/** The fixed refusals of `creator_record_v2_grant_ai_examination_permission` (20261112000000). */
+const AI_PERMISSION_REFUSALS: Readonly<Record<string, AiPermissionRefusalCode>> = {
+  creator_record_v2_ai_permission_withdrawn: 'withdrawn',
+  creator_record_v2_retention_not_found: 'not_found',
+  creator_record_v2_ai_permission_invalid: 'invalid',
+}
+
+/** Decision 8Q: the owner's explicit, versioned permission for one document, recorded in the database before a live examination. */
+const productionAiPermission: NonNullable<CustomerExaminationDeps['aiPermission']> = {
+  version: AI_EXAMINATION_PERMISSION_DRAFT_VERSION,
+  async grant(userId, documentId, version) {
+    const { data, error } = await supabaseAdmin.rpc('creator_record_v2_grant_ai_examination_permission', { p_user_id: userId, p_document_id: documentId, p_permission_version: version })
+    const known = error && error.code === 'P0001' && typeof error.message === 'string' ? AI_PERMISSION_REFUSALS[error.message] : undefined
+    if (known) throw new AiPermissionRefusal(known)
+    if (error || (data !== 'granted' && data !== 'existing')) throw new Error('creator_record_ai_permission_unavailable')
+    return data as 'granted' | 'existing'
+  },
+}
 
 /** The customer live port: the reviewed production ports, the committed fixture registry and the real executor. No other composition. */
 const productionCustomerLive: NonNullable<CustomerExaminationDeps['live']> = {
@@ -42,7 +64,7 @@ export function productionCustomerExaminationDeps(): CustomerExaminationDeps {
     adapter: productionExaminationDeps(),
     log: (event, detail) => console.warn(`[creator-record-v2/examination] ${event}`, detail),
     now: () => new Date(),
-    ...(customerLiveEnabledInThisBuild() ? { live: productionCustomerLive } : {}),
+    ...(customerLiveOffered() ? { live: productionCustomerLive, aiPermission: productionAiPermission } : {}),
   }
 }
 
@@ -92,6 +114,8 @@ const MESSAGES: Record<CustomerExaminationError['code'] | 'invalid_request', str
   examination_not_permitted: 'Document examination is not available for this document.',
   examination_limit_reached: 'Document examination has reached its limit for now.',
   unavailable: 'Document examination is not available right now.',
+  // CR-V2-MVP-LAUNCH-FOUNDATION-1 (8Q). DRAFT wording, not approved.
+  ai_permission_required: 'Confirm that SI8 may send this document to an AI model provider to be read before examining it.',
 }
 
 export function examinationError(e: CustomerExaminationError | { status: 400; code: 'invalid_request' }): NextResponse {
@@ -103,7 +127,17 @@ export function examinationError(e: CustomerExaminationError | { status: 400; co
  * `{}`: any field — a grant, nonce, envelope, profile or credential — is refused, never read.
  */
 export async function emptyRequestBody(request: Request, limit = 64): Promise<boolean> {
-  if (!request.body) return true
+  const r = await examinationRequestBody(request, limit)
+  return r.ok && r.aiPermission === null
+}
+
+/**
+ * CR-V2-MVP-LAUNCH-FOUNDATION-1 (Decision 8Q): the body is empty, `{}`, or exactly `{ "ai_permission": "<version>" }` — the
+ * creator's explicit permission for AI examination of this one document. Nothing else is accepted or read: no grant, nonce,
+ * envelope, profile or credential. The version is checked by the examination service against the current permission version.
+ */
+export async function examinationRequestBody(request: Request, limit = 256): Promise<{ ok: true; aiPermission: string | null } | { ok: false }> {
+  if (!request.body) return { ok: true, aiPermission: null }
   const reader = request.body.getReader()
   const chunks: Uint8Array[] = []
   let total = 0
@@ -113,16 +147,21 @@ export async function emptyRequestBody(request: Request, limit = 64): Promise<bo
     total += value.byteLength
     if (total > limit) {
       await reader.cancel().catch(() => undefined)
-      return false
+      return { ok: false }
     }
     chunks.push(value)
   }
   const text = Buffer.concat(chunks).toString('utf8').trim()
-  if (text === '') return true
+  if (text === '') return { ok: true, aiPermission: null }
   try {
     const v = JSON.parse(text)
-    return v !== null && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length === 0
+    if (v === null || typeof v !== 'object' || Array.isArray(v)) return { ok: false }
+    const keys = Object.keys(v)
+    if (keys.length === 0) return { ok: true, aiPermission: null }
+    if (keys.length === 1 && keys[0] === 'ai_permission' && typeof v.ai_permission === 'string' && v.ai_permission.length >= 1 && v.ai_permission.length <= 120)
+      return { ok: true, aiPermission: v.ai_permission }
+    return { ok: false }
   } catch {
-    return false
+    return { ok: false }
   }
 }

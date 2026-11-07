@@ -18,7 +18,8 @@ import { redirect } from 'next/navigation'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { checkApprovedSources } from '@/lib/creator-record/customer-record/sources'
 import { CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION, CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
-import { EVIDENCE_CONSENT_DRAFT_VERSION } from '@/lib/creator-record/evidence-intake/contract'
+import { AI_EXAMINATION_PERMISSION_DRAFT_VERSION, EVIDENCE_CONSENT_DRAFT_VERSION } from '@/lib/creator-record/evidence-intake/contract'
+import { customerLiveOffered } from '@/lib/creator-record-flow/live-offer'
 import { productionFlowDeps } from '@/lib/creator-record-flow/production'
 import { sessionUserId } from '@/lib/creator-record-flow/http'
 import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/config'
@@ -63,7 +64,9 @@ export default async function CreatorRecordPage() {
         maxTools={inputs.sources.max_tools}
         questionnaireContractSha256={check.approved.questionnaire_contract.contract_sha256}
         paymentOpen={CREATOR_RECORD_V2_ISSUANCE === 'enabled'}
-        {...(examinationOffered ? { examination: { consentVersion: EVIDENCE_CONSENT_DRAFT_VERSION } } : {})}
+        {...(examinationOffered
+          ? { examination: { consentVersion: EVIDENCE_CONSENT_DRAFT_VERSION, ...(customerLiveOffered() ? { aiPermissionVersion: AI_EXAMINATION_PERMISSION_DRAFT_VERSION } : {}) } }
+          : {})}
       />
     </main>
   )

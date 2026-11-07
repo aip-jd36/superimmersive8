@@ -214,6 +214,7 @@ describe('lib/creator-record boundaries', () => {
       'app/api/uat/creator-record-v2/draft/route.ts',
       'app/creator-record/CreatorRecordV2Client.tsx',
       'app/creator-record/page.tsx',
+      'app/dashboard/page.tsx', // CR-V2-MVP-LAUNCH-FOUNDATION-1: the AI-examination permission withdrawal control (v2 creators only)
       'app/uat/creator-record-v2/PublicUatClient.tsx',
       'app/uat/creator-record-v2/page.tsx',
       'components/creator-record/CreatorRecordQuestionnaire.tsx',
@@ -230,6 +231,7 @@ describe('lib/creator-record boundaries', () => {
       'lib/creator-record-flow/http.ts',
       'lib/creator-record-flow/live-evaluation-runner.ts', // CR-V2-DOC-LIVE-1C-B1: the fixed evaluation runner; only the operator CLI imports it (live-evaluation-runner.test.ts)
       'lib/creator-record-flow/live-examination-production.ts', // CR-V2-DOC-LIVE-1B: storage ports for a bound live examination; nothing imports it (live-examination-real.test.ts)
+      'lib/creator-record-flow/live-offer.ts', // CR-V2-MVP-LAUNCH-FOUNDATION-1: whether a new live examination may be offered (the locks and the approved legal documents only)
       'lib/creator-record-flow/production.ts',
       'lib/creator-record-flow/questionnaire-recovery.ts', // CR-V2-DECL-1B-2: browser helper (types only)
       'lib/creator-record-flow/retention-http.ts', // CR-V2-MVP-RETENTION-M1A: retention route helpers (fixed codes)

@@ -46,6 +46,8 @@ export const CUSTOMER_LIVE_DATABASE_REFUSALS: Readonly<Record<string, string>> =
   // CR-V2-MVP-RETENTION-M1A (20261111000000): the creator withdrew consent for documents uploaded under it. Refused at the read, the
   // reservation and the recorded attempt alike, so no stale authorization, retry or re-examination gets past it.
   creator_record_v2_consent_withdrawn: 'consent_withdrawn',
+  // CR-V2-MVP-LAUNCH-FOUNDATION-1 (20261112000000, Decision 8Q): no recorded AI-examination permission for this document.
+  creator_record_v2_ai_permission_required: 'ai_permission_required',
 }
 
 export interface CustomerLivePorts {

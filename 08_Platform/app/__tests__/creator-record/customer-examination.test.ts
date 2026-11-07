@@ -211,8 +211,10 @@ describe('route: no client authority, stopped in Production, replay only', () =>
     const src = read('app/api/creator-record-v2/evidence/[id]/examination/route.ts').replace(/\/\*[\s\S]*?\*\//g, '')
     expect(src).not.toMatch(/request\.(json|formData|text|headers)|searchParams|uat_grant|nonce|envelope_canonical|service_role|SUPABASE/i)
     const handler = read('lib/creator-record-flow/route-handlers.ts')
-    expect(handler.indexOf('checkCustomerExaminationGate(deps, userId)')).toBeLessThan(handler.indexOf('emptyRequestBody(request)'))
-    expect(handler).toMatch(/requestCustomerExamination\(deps, userId, documentId\)/)
+    // CR-V2-MVP-LAUNCH-FOUNDATION-1 (8Q): the body may carry only the creator's AI-examination permission; nothing else is read.
+    expect(handler.indexOf('checkCustomerExaminationGate(deps, userId)')).toBeGreaterThan(-1)
+    expect(handler.indexOf('checkCustomerExaminationGate(deps, userId)')).toBeLessThan(handler.indexOf('examinationRequestBody(request)'))
+    expect(handler).toMatch(/requestCustomerExamination\(deps, userId, documentId, \{ aiPermission: body\.aiPermission \}\)/)
     expect(src).toMatch(/handleExaminationRequest\(request, userId, params\.id, productionCustomerExaminationDeps\(\)\)/)
     expect(src).toMatch(/customerExaminationHistory\(productionCustomerExaminationDeps\(\), userId, params\.id\)/)
     // Neither the service nor its wiring touches a grant, the marker or the status function.

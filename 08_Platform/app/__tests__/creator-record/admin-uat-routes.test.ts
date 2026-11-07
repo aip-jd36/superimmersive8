@@ -12,6 +12,8 @@ jest.mock('@/lib/creator-record-flow/evidence-production', () => ({ productionEv
 jest.mock('@/lib/creator-record-flow/examination-customer', () => ({
   productionCustomerExaminationDeps: () => ({}),
   emptyRequestBody: async () => true,
+  // CR-V2-MVP-LAUNCH-FOUNDATION-1: the shared handler now reads the body through this (empty → no AI permission).
+  examinationRequestBody: async () => ({ ok: true, aiPermission: null }),
   examinationError: (e: { status: number }) => new Response(null, { status: e.status }),
 }))
 jest.mock('@/lib/creator-record-flow/examination-production', () => ({ productionExaminationDeps: () => ({ storage: {} }) }))

@@ -61,6 +61,22 @@ export interface CustomerExaminationDeps {
    * code locks are true; absent, this path is the replay path exactly as before. The database still decides each step.
    */
   live?: { examine(userId: string, documentId: string): Promise<CustomerLiveResult> }
+  /**
+   * CR-V2-MVP-LAUNCH-FOUNDATION-1 (Decision 8Q): the creator's separate permission for AI examination, recorded for the one document
+   * before any live examination (`creator_record_v2_grant_ai_examination_permission`). Required whenever `live` is present: a live
+   * examination without it is refused here and, independently, by the database. `grant` throws `AiPermissionRefusal` for a fixed
+   * refusal and any other error when unavailable.
+   */
+  aiPermission?: { version: string; grant(userId: string, documentId: string, version: string): Promise<'granted' | 'existing'> }
+}
+
+export type AiPermissionRefusalCode = 'withdrawn' | 'not_found' | 'invalid'
+
+/** The database refused to record an AI-examination permission. */
+export class AiPermissionRefusal extends Error {
+  constructor(readonly code: AiPermissionRefusalCode) {
+    super(`creator_record_ai_permission_${code}`)
+  }
 }
 
 export type CustomerExaminationErrorCode =
@@ -72,8 +88,9 @@ export type CustomerExaminationErrorCode =
   | 'examination_not_permitted'
   | 'examination_limit_reached'
   | 'unavailable'
+  | 'ai_permission_required'
 
-export type CustomerExaminationError = { ok: false; status: 403 | 404 | 409 | 422 | 429 | 503; code: CustomerExaminationErrorCode }
+export type CustomerExaminationError = { ok: false; status: 400 | 403 | 404 | 409 | 422 | 429 | 503; code: CustomerExaminationErrorCode }
 
 export interface CustomerExaminationRun {
   run_id: string
@@ -117,13 +134,29 @@ export async function requestCustomerExamination(
   deps: CustomerExaminationDeps,
   userId: string,
   documentId: unknown,
+  options: { aiPermission?: string | null } = {},
 ): Promise<{ ok: true; run_id: string; result: 'created' | 'existing' } | CustomerExaminationError> {
   const gated = await gate(deps, userId)
   if (gated) return gated
   const doc = await owned(deps, userId, documentId)
   if (!doc.ok) return doc
   if (doc.state !== 'stored') return err(409, 'not_ready')
-  if (deps.live) return liveOutcome(deps, await deps.live.examine(userId, documentId as string))
+  if (deps.live) {
+    // Decision 8Q: no AI examination without the creator's explicit permission for THIS document, recorded first. A withdrawal
+    // covering the document makes the grant impossible (the database refuses it), so a withdrawn permission is never re-granted.
+    if (!deps.aiPermission) return err(503, 'unavailable')
+    if (options.aiPermission !== deps.aiPermission.version) return err(400, 'ai_permission_required')
+    try {
+      await deps.aiPermission.grant(userId, documentId as string, options.aiPermission)
+    } catch (e) {
+      if (!(e instanceof AiPermissionRefusal)) return err(503, 'unavailable')
+      deps.log?.('creator_record_v2_ai_permission_refused', { code: e.code })
+      if (e.code === 'withdrawn') return err(409, 'examination_not_permitted')
+      if (e.code === 'not_found') return err(404, 'not_found')
+      return err(400, 'ai_permission_required')
+    }
+    return liveOutcome(deps, await deps.live.examine(userId, documentId as string))
+  }
 
   const r = await examineAndRecord(deps.adapter, {
     actor_user_id: userId,

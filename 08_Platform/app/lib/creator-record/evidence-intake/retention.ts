@@ -79,6 +79,8 @@ export interface RetentionStatusReport {
 export interface RetentionPorts {
   requestDeletion(userId: string, documentId: string): Promise<DeletionRequestState>
   withdrawConsent(userId: string): Promise<{ withdrawal_id: number; withdrawn_at: string; result: 'created' | 'existing' }>
+  /** CR-V2-MVP-LAUNCH-FOUNDATION-1: the creator's own latest withdrawal, if any (read-only; `creator_record_v2_consent_state`). */
+  consentState?(userId: string): Promise<{ withdrawn: boolean; withdrawn_at: string | null }>
   placeHold(documentId: string, adminUserId: string, reason: string, days: number): Promise<string>
   renewHold(holdId: string, adminUserId: string, reason: string, days: number): Promise<string>
   releaseHold(holdId: string, adminUserId: string, reason: string): Promise<'released' | 'not_active'>
@@ -146,6 +148,17 @@ export async function withdrawEvidenceConsent(deps: Pick<RetentionDeps, 'retenti
     return { ok: true, result: w.result, withdrawn_at: w.withdrawn_at }
   } catch (e) {
     return failure(e)
+  }
+}
+
+/** The creator's own consent state, for their dashboard. Unavailable (fail closed) when it cannot be read. */
+export async function readConsentState(deps: Pick<RetentionDeps, 'retention'>, userId: string): Promise<{ ok: true; withdrawn: boolean; withdrawn_at: string | null } | RetentionError> {
+  if (!deps.retention.consentState) return unavailable
+  try {
+    const s = await deps.retention.consentState(userId)
+    return { ok: true, withdrawn: s.withdrawn, withdrawn_at: s.withdrawn_at }
+  } catch {
+    return unavailable
   }
 }
 

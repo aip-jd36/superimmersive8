@@ -54,6 +54,11 @@ export const EXAM_TEXT = {
   guidance_not_established_label: 'Not established by this record',
   guidance_open_dependency: (label: string) => `Open: ${label}`,
   payment_blocked: 'This version includes examination findings, so it cannot be paid for or issued. Prepare a version without them to continue.',
+  // CR-V2-MVP-LAUNCH-FOUNDATION-1 (Decision 8Q): separate from the storage consent above. DRAFT, not approved.
+  ai_permission_label: 'I permit SI8 to send the document I examine to an AI model provider, to be read for this record. Storing a document does not give this permission. I can withdraw it at any time from my dashboard.',
+  legal_links_intro: 'Read the',
+  privacy_link: 'privacy notice',
+  terms_link: 'terms',
 } as const
 
 /** CR-V2-UAT-PROD-MIN-1: shown on every page of the identity-scoped synthetic UAT (draft; display only). */

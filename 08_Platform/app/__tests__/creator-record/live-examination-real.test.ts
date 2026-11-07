@@ -400,7 +400,11 @@ describe('what stays closed', () => {
     const dir = path.join(root, 'supabase', 'migrations')
     const names = readdirSync(dir).sort()
     // CR-V2-MVP-RETENTION-M1A follows them: it adds a consent guard trigger only and replaces no examination function.
-    expect(names.slice(-3)).toEqual(['20261108000000_creator_record_v2_live_examination_foundation.sql', '20261110000000_creator_record_v2_customer_live_examination.sql', '20261111000000_creator_record_v2_retention_m1a.sql'])
+    expect(names.slice(-4)).toEqual(['20261108000000_creator_record_v2_live_examination_foundation.sql', '20261110000000_creator_record_v2_customer_live_examination.sql', '20261111000000_creator_record_v2_retention_m1a.sql', '20261112000000_creator_record_v2_ai_examination_permission.sql'])
+    // CR-V2-MVP-LAUNCH-FOUNDATION-1 (20261112): adds a permission guard trigger only and replaces no examination function.
+    const permission = readFileSync(path.join(dir, names[names.length - 1]), 'utf8')
+    expect(permission).not.toMatch(/CREATE OR REPLACE FUNCTION public.creator_record_v2_(record|reserve|settle)_[a-z_]*examination|DROP CONSTRAINT[^;]*live_examination_attempts/)
+    names.pop()
     const retention = readFileSync(path.join(dir, names[names.length - 1]), 'utf8')
     expect(retention).not.toMatch(/CREATE OR REPLACE FUNCTION public\.creator_record_v2_(record|reserve|settle)_[a-z_]*examination|DROP CONSTRAINT[^;]*live_examination_attempts/)
     names.pop()

@@ -15,6 +15,7 @@ import { DEFAULT_REPLAY_TABLE } from '@/lib/creator-record/evidence/replay'
 import { CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flow/approved-inputs'
 import { EVIDENCE_BUCKET, EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED } from '@/lib/creator-record/evidence-intake/contract'
 import type { EvidenceDeps, EvidenceObjects, EvidenceRow, EvidenceStore, NewEvidenceRow } from '@/lib/creator-record/evidence-intake/service'
+import { legalPoliciesApproved } from '@/lib/legal/policies'
 import { hasPilotAccess } from './pilot-access'
 
 export const EVIDENCE_TABLE = 'creator_record_v2_documents'
@@ -120,7 +121,8 @@ export function productionEvidenceDeps(): EvidenceDeps {
   return {
     submissions: CREATOR_RECORD_V2_SUBMISSIONS,
     hasPilotAccess,
-    realDocumentsPermitted: EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED,
+    // CR-V2-MVP-LAUNCH-FOUNDATION-1: real documents also need the approved privacy notice and terms (fail closed while absent).
+    realDocumentsPermitted: EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED && legalPoliciesApproved(),
     isSyntheticTestDocument: (sha256) => DEFAULT_REPLAY_TABLE.has(sha256),
     store: evidenceStore,
     objects: evidenceObjects,

@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { formatDate, formatCurrency } from '@/lib/utils'
 import { v2ListBadge } from '@/lib/creator-record-flow/dashboard'
+import { consentControlState } from '@/lib/creator-record-flow/consent-dashboard'
+import { ConsentWithdrawalControl } from '@/components/creator-record/ConsentWithdrawalControl'
 import { CREATOR_RECORD_V1_NEW_SALES } from '@/lib/submissions/build-intake-insert'
 
 // CR-V2-CUTOVER-1: new Creator Records start at the v2 entry point; /record (v1) only while v1 sales are open.
@@ -91,6 +93,8 @@ export default async function DashboardPage() {
   const approvedCount = submissions.filter((s) => s.status === 'approved').length
   // CATALOG DISABLED: const catalogCount = optIns?.length || 0
   const totalEarnings = deals?.reduce((sum, deal) => sum + (deal.creator_payout || 0), 0) || 0
+  // CR-V2-MVP-LAUNCH-FOUNDATION-1: Creator Record v2 creators only (anyone else sees no change).
+  const consentControl = await consentControlState(user.id)
 
   const getStatusBadge = (status: string) => {
     const styles = {
@@ -120,6 +124,8 @@ export default async function DashboardPage() {
           </Button>
         )}
       </div>
+
+      {consentControl.show && <ConsentWithdrawalControl initialWithdrawnAt={consentControl.withdrawnAt} />}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
