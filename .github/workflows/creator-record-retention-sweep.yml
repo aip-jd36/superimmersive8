@@ -10,6 +10,12 @@ name: SI8 Creator Record Retention Sweep
 #
 # Requires repository secret CREATOR_RECORD_RETENTION_SWEEP_SECRET (>= 32 chars), identical to the environment variable of the same
 # name on the Vercel production project. Until both exist (and 20261111000000 is applied) the endpoint refuses and this job fails.
+#
+# ACTIVATION GATE (CR-V2-MVP-INTEGRATION-PREFLIGHT-1): disabled by default. The sweep runs only when the repository variable
+# CREATOR_RECORD_RETENTION_SWEEP_ENABLED is exactly `true` (lower case, nothing else). Missing, empty, `false`, `TRUE`, ` true` or any
+# other value skips it. The comparison is made in the shell by the `gate` job, which references no secret: GitHub expression
+# equality is case-insensitive, so it is not used for the decision. The `sweep` job is the only place the secret appears, and it is
+# skipped unless the gate's output is exactly `true`. Scheduled and manual (workflow_dispatch) runs go through the same gate.
 
 on:
   schedule:
@@ -24,7 +30,27 @@ permissions:
   contents: read
 
 jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      enabled: ${{ steps.decide.outputs.enabled }}
+    steps:
+      - name: Check the activation variable
+        id: decide
+        env:
+          RETENTION_SWEEP_ENABLED_VALUE: ${{ vars.CREATOR_RECORD_RETENTION_SWEEP_ENABLED }}
+        run: |
+          if [ "${RETENTION_SWEEP_ENABLED_VALUE}" = "true" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Creator Record retention sweep is disabled (CREATOR_RECORD_RETENTION_SWEEP_ENABLED is not exactly 'true'); skipping."
+          fi
+
   sweep:
+    needs: gate
+    if: needs.gate.outputs.enabled == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
