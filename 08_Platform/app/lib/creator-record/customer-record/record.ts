@@ -63,7 +63,7 @@ import {
 import { embeddedContractValid, QUESTIONNAIRE_VALIDATION_RULES, type EmbeddedQuestionnaireContract } from './questionnaire-contract'
 import { checkApprovedSources, type SourceRefusal, type SourceTextInput, type TopicClaims } from './sources'
 import {
-  EVIDENCE_CATEGORIES, EVIDENCE_EXAMINATION_NOT_EXAMINED, EVIDENCE_MAX_BYTES, EVIDENCE_MAX_FILE_NAME_CHARS, EVIDENCE_MAX_PER_RECORD, EVIDENCE_MAX_PER_TOOL, EVIDENCE_MEDIA_TYPES,
+  EVIDENCE_CATEGORIES, EVIDENCE_EXAMINATION_NOT_EXAMINED, EVIDENCE_STORED_MAX_BYTES, EVIDENCE_MAX_FILE_NAME_CHARS, EVIDENCE_MAX_PER_RECORD, EVIDENCE_MAX_PER_TOOL, EVIDENCE_MEDIA_TYPES,
   type EvidenceCategory, type EvidenceMediaType,
 } from '../evidence-intake/vocabulary'
 import type { ExaminationProjection } from '../examination/projection'
@@ -105,7 +105,7 @@ export const HISTORICAL_RECORD_BUILDER = { id: 'si8/creator-record-v2-record-bui
 /** The content contract: what may appear in the record (no generated prose). Bump with any content change. */
 export const CUSTOMER_RECORD_CONTENT = { id: 'si8/creator-record-v2-record-content', version: 4, generated_text: 'none' } as const
 /** CR-V2-EXAM-INTEGRATION-X0: the builder and content identities of an examination-bearing record. */
-export const CUSTOMER_RECORD_EXAMINATION_BUILDER = { id: 'si8/creator-record-v2-record-builder', version: 6 } as const
+export const CUSTOMER_RECORD_EXAMINATION_BUILDER = { id: 'si8/creator-record-v2-record-builder', version: 7 } as const
 export const CUSTOMER_RECORD_EXAMINATION_CONTENT = { id: 'si8/creator-record-v2-record-content', version: 5, generated_text: 'none' } as const
 /** Issued Creator Record ids (CR-YYYY-8 hex): assigned at issuance, never part of a prepared record. */
 const ISSUED_RECORD_ID = /^CR-\d{4}-[0-9A-F]{8}$/i
@@ -311,7 +311,7 @@ function documentIssues(docs: CustomerRecordInput['documents']): string[] {
       UUID.test(d.document_id) && !ids.has(d.document_id) &&
       /^[0-9a-f]{64}$/.test(d.sha256) &&
       (EVIDENCE_MEDIA_TYPES as readonly string[]).includes(d.media_type) &&
-      Number.isInteger(d.byte_size) && d.byte_size > 0 && d.byte_size <= EVIDENCE_MAX_BYTES &&
+      Number.isInteger(d.byte_size) && d.byte_size > 0 && d.byte_size <= EVIDENCE_STORED_MAX_BYTES &&
       typeof d.file_name === 'string' && d.file_name.trim() !== '' && Array.from(d.file_name).length <= EVIDENCE_MAX_FILE_NAME_CHARS &&
       (EVIDENCE_CATEGORIES as readonly string[]).includes(d.category) &&
       (d.tool_index === null || (Number.isInteger(d.tool_index) && d.tool_index >= 0))

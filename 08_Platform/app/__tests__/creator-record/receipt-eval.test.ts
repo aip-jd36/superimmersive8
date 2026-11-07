@@ -22,7 +22,9 @@ import {
   type ResolvedFixture,
 } from '@/lib/creator-record/eval/fixtures'
 import { scoreObservation, summarize, type RunObservation } from '@/lib/creator-record/eval/score'
-import { assertLiveAllowed, parseArgs, runReceiptEval, type EvalDeps } from '@/lib/creator-record/eval/run-receipt-eval'
+import { assertLiveAllowed, liveBoundFor, parseArgs, runReceiptEval, type EvalDeps } from '@/lib/creator-record/eval/run-receipt-eval'
+import { LIVE_EXTRACTION_MODEL } from '@/lib/creator-record/evidence/live-caller'
+import { syntheticPdf, syntheticTextPdf } from '@/test-support/synthetic-pdf'
 import { applyTruthCorrections, loadTruthCorrections, type TruthCorrections } from '@/lib/creator-record/eval/truth-corrections'
 
 const spec = loadFixtureSpec()
@@ -223,35 +225,56 @@ describe('evaluation runner: no model calls without explicit opt-in', () => {
   })
 
   const PRICING = { input_usd_per_mtok: 2, output_usd_per_mtok: 10 }
-  const LIVE_OK = { confirmPaidCalls: true, maxCalls: 10, maxUsd: 2, pricing: PRICING }
+  const LIVE_OK = { confirmPaidCalls: true, maxCalls: 10, maxUsd: 2, pricing: PRICING, model: LIVE_EXTRACTION_MODEL }
+  const KEY_ENV = { CREATOR_RECORD_EXTRACTION_API_KEY: 'test-not-a-key' }
+  const NO_PROCESS_ENV = {}
+  const liveCaller = (call: ReceiptModelCaller, classifyFailure: (err: unknown) => any = () => 'unknown') => ({ call, classifyFailure })
+  const live = (over: object, d: EvalDeps, env: Record<string, string> = KEY_ENV) => runReceiptEval({ ...base(), mode: 'live', ...LIVE_OK, ...over }, d, env)
+  /** A well-formed response from the pinned model. */
+  const ok = (over: object = {}) => ({ id: 'msg_test', model: LIVE_EXTRACTION_MODEL, stop_reason: 'end_turn', content: [{ type: 'text' }], usage: { input_tokens: 1000, output_tokens: 300 }, parsed_output: null, ...over })
 
-  test.each([
-    ['without --confirm-paid-calls', { ...LIVE_OK, confirmPaidCalls: false }, { ANTHROPIC_API_KEY: 'x' }],
-    ['without --max-calls', { ...LIVE_OK, maxCalls: null }, { ANTHROPIC_API_KEY: 'x' }],
-    ['without --max-usd', { ...LIVE_OK, maxUsd: null }, { ANTHROPIC_API_KEY: 'x' }],
-    ['without pricing', { ...LIVE_OK, pricing: null }, { ANTHROPIC_API_KEY: 'x' }],
-    ['without an API key', LIVE_OK, {}],
+  test.each<[string, Record<string, unknown>, Record<string, string>]>([
+    ['without --confirm-paid-calls', { ...LIVE_OK, confirmPaidCalls: false }, KEY_ENV],
+    ['without --max-calls', { ...LIVE_OK, maxCalls: null }, KEY_ENV],
+    ['without --max-usd', { ...LIVE_OK, maxUsd: null }, KEY_ENV],
+    ['without pricing', { ...LIVE_OK, pricing: null }, KEY_ENV],
+    ['without --model', { ...LIVE_OK, model: null }, KEY_ENV],
+    ['with a model other than the live pin', { ...LIVE_OK, model: 'claude-other-model' }, KEY_ENV],
+    ['while CREATOR_RECORD_RECEIPT_MODEL names another model', LIVE_OK, { ...KEY_ENV, CREATOR_RECORD_RECEIPT_MODEL: 'claude-other-model' }],
+    ['without the dedicated key', LIVE_OK, {}],
+    ['with only the shared ANTHROPIC_API_KEY', LIVE_OK, { ANTHROPIC_API_KEY: 'x' }],
+    ['when the dedicated key is the shared key', LIVE_OK, { CREATOR_RECORD_EXTRACTION_API_KEY: 'same', ANTHROPIC_API_KEY: 'same' }],
+    ...['ANTHROPIC_BASE_URL', 'ANTHROPIC_LOG', 'ANTHROPIC_AUTH_TOKEN', 'ANTHROPIC_PROFILE', 'ANTHROPIC_CUSTOM_HEADERS'].map((v): [string, Record<string, unknown>, Record<string, string>] => [`while ${v} is set`, LIVE_OK, { ...KEY_ENV, [v]: 'x' }]),
   ])('live mode refuses %s before any caller is constructed', async (_l, over, env) => {
     const d = deps()
     await expect(runReceiptEval({ ...base(), mode: 'live', ...over }, d, env)).rejects.toThrow(/live mode requires/)
     expect(d.createLiveCaller).not.toHaveBeenCalled()
   })
 
-  test('live mode with every guard satisfied uses the injected caller and respects --max-calls', async () => {
+  test('an unsafe SDK variable in the real process environment refuses too, whatever env is passed', () => {
+    expect(() => assertLiveAllowed({ ...base(), mode: 'live', ...LIVE_OK }, KEY_ENV, { ANTHROPIC_BASE_URL: 'https://example.test' })).toThrow(/ANTHROPIC_BASE_URL/)
+    expect(() => assertLiveAllowed({ ...base(), mode: 'live', ...LIVE_OK }, KEY_ENV, NO_PROCESS_ENV)).not.toThrow()
+    expect(() => assertLiveAllowed({ ...base(), mode: 'live', ...LIVE_OK }, { ...KEY_ENV, CREATOR_RECORD_RECEIPT_MODEL: LIVE_EXTRACTION_MODEL }, NO_PROCESS_ENV)).not.toThrow()
+  })
+
+  test('live mode with every guard satisfied uses the injected caller with the pinned model and respects --max-calls', async () => {
     const calls: number[] = []
     const fake: ReceiptModelCaller = async () => {
       calls.push(1)
       throw new Error('network disabled in test')
     }
     const d = deps()
-    d.createLiveCaller.mockResolvedValue(fake)
-    const report = await runReceiptEval({ ...base(), mode: 'live', ...LIVE_OK, maxCalls: 2 }, d, { ANTHROPIC_API_KEY: 'test-not-a-key' })
+    d.createLiveCaller.mockResolvedValue(liveCaller(fake))
+    const report = await live({ maxCalls: 2 }, d)
     expect(d.createLiveCaller).toHaveBeenCalledTimes(1)
+    expect(d.createLiveCaller).toHaveBeenCalledWith(LIVE_EXTRACTION_MODEL)
+    expect(report.model).toBe(LIVE_EXTRACTION_MODEL)
     expect(calls).toHaveLength(1)
     expect(report.api_requests_made).toBe(1)
     expect(report.spend).toMatchObject({ succeeded_calls: 0, failed_calls: 1, accounted_usd: 0 })
     expect(report.spend.conservative_usd).toBeGreaterThan(0) // a thrown call is charged its worst case
     expect(report.stopped_early).toMatch(/max-calls/)
+    expect(report.requests).toEqual([expect.objectContaining({ request_index: 1, attempt: 1, outcome: 'provider_error', error_kind: 'unknown', response_model: null, input_tokens: null })])
     expect(JSON.stringify(report)).not.toContain('test-not-a-key')
   })
 
@@ -260,29 +283,142 @@ describe('evaluation runner: no model calls without explicit opt-in', () => {
       throw new Error('must not be called')
     })
     const d = deps()
-    d.createLiveCaller.mockResolvedValue(fake)
-    const report = await runReceiptEval({ ...base(), mode: 'live', ...LIVE_OK, maxUsd: 0.0001 }, d, { ANTHROPIC_API_KEY: 'test-not-a-key' })
+    d.createLiveCaller.mockResolvedValue(liveCaller(fake))
+    const report = await live({ maxUsd: 0.0001 }, d)
     expect(fake).not.toHaveBeenCalled()
     expect(report.api_requests_made).toBe(0)
     expect(report.stopped_early).toMatch(/max-usd/)
   })
 
-  test('live spend is accounted from actual usage; retries are counted', async () => {
+  test('live spend is accounted from actual usage; retries are counted and each request is recorded', async () => {
     let n = 0
     const fake: ReceiptModelCaller = async () => {
       n += 1
       // First call per document has no structured output -> one retry.
-      return n % 2 === 1
-        ? { id: 'm', stop_reason: 'max_tokens', content: [{ type: 'text' }], usage: { input_tokens: 1000, output_tokens: 100 }, parsed_output: null }
-        : { id: 'm', stop_reason: 'end_turn', content: [{ type: 'text' }], usage: { input_tokens: 1000, output_tokens: 300 }, parsed_output: null }
+      return n % 2 === 1 ? ok({ stop_reason: 'max_tokens', usage: { input_tokens: 1000, output_tokens: 100 } }) : ok()
     }
     const d = deps()
-    d.createLiveCaller.mockResolvedValue(fake)
-    const report = await runReceiptEval({ ...base(), mode: 'live', ...LIVE_OK }, d, { ANTHROPIC_API_KEY: 'test-not-a-key' })
+    d.createLiveCaller.mockResolvedValue(liveCaller(fake))
+    const report = await live({}, d)
     expect(report.api_requests_made).toBe(4)
     expect(report.spend).toMatchObject({ succeeded_calls: 4, failed_calls: 0, retry_calls: 2, accounted_input_tokens: 4000, accounted_output_tokens: 800 })
     expect(report.spend.accounted_usd).toBeCloseTo((4000 * 2 + 800 * 10) / 1e6, 10)
     expect(report.spend.conservative_usd).toBeCloseTo(report.spend.accounted_usd!, 10)
+    expect(report.stopped_early).toBeNull()
+    expect(report.requests.map((r) => [r.request_index, r.fixture_id, r.attempt, r.max_tokens, r.stop_reason, r.outcome])).toEqual([
+      [1, ids[0], 1, 1024, 'max_tokens', 'no_parsed_output'],
+      [2, ids[0], 2, 2048, 'end_turn', 'no_parsed_output'],
+      [3, ids[1], 1, 1024, 'max_tokens', 'no_parsed_output'],
+      [4, ids[1], 2, 2048, 'end_turn', 'no_parsed_output'],
+    ])
+    for (const r of report.requests) {
+      expect(r).toMatchObject({ requested_model: LIVE_EXTRACTION_MODEL, response_model: LIVE_EXTRACTION_MODEL, error_kind: null })
+      expect(r.input_tokens).toBe(1000)
+      expect(r.latency_ms).toBeGreaterThanOrEqual(0)
+    }
+    // Metadata only: the record carries no field beyond the contract.
+    expect(Object.keys(report.requests[0]).sort()).toEqual(['attempt', 'error_kind', 'fixture_id', 'input_tokens', 'latency_ms', 'live_bound_input_tokens', 'max_tokens', 'outcome', 'output_tokens', 'repeat', 'request_index', 'requested_model', 'response_model', 'stop_reason'])
+  })
+
+  test('a reading is accepted only from an end_turn response', async () => {
+    const d = deps()
+    d.createLiveCaller.mockResolvedValue(liveCaller(async (req) => ok({ stop_reason: 'max_tokens', parsed_output: { anything: true }, usage: { input_tokens: 10, output_tokens: req.maxTokens } })))
+    const report = await live({}, d)
+    expect(report.requests.every((r) => r.outcome === 'no_parsed_output')).toBe(true)
+    expect(report.per_document.every((p) => p.extraction === null)).toBe(true)
+  })
+
+  test.each([
+    ['the response names another model', () => ok({ model: `${LIVE_EXTRACTION_MODEL}-20990101` }), 'model_mismatch', /another model/],
+    ['the response names no model', () => ok({ model: undefined }), 'model_mismatch', /another model/],
+    ['the stop reason is a refusal', () => ok({ stop_reason: 'refusal' }), 'incompatible_stop_reason', /stop reason/],
+    ['the stop reason is missing', () => ok({ stop_reason: null }), 'incompatible_stop_reason', /stop reason/],
+    ['the response is malformed', () => ({ id: 42 }), 'unexpected_response', /unexpected response/],
+  ])('the run stops before any further request when %s', async (_l, response, outcome, why) => {
+    const fake = jest.fn(async () => response() as never)
+    const d = deps()
+    d.createLiveCaller.mockResolvedValue(liveCaller(fake))
+    const report = await live({}, d)
+    expect(fake).toHaveBeenCalledTimes(1) // not the retry, not the next document
+    expect(report.requests).toHaveLength(1)
+    expect(report.requests[0].outcome).toBe(outcome)
+    expect(report.stopped_early).toMatch(why)
+  })
+
+  test.each(['auth', 'rejected'])('a provider %s failure stops the run before any further request', async (kind) => {
+    const fake = jest.fn(async () => {
+      throw new Error('provider said no')
+    })
+    const d = deps()
+    d.createLiveCaller.mockResolvedValue(liveCaller(fake, () => kind))
+    const report = await live({}, d)
+    expect(fake).toHaveBeenCalledTimes(1)
+    expect(report.requests).toEqual([expect.objectContaining({ outcome: 'provider_error', error_kind: kind })])
+    expect(report.stopped_early).toMatch(new RegExp(kind))
+  })
+
+  test('a transient provider failure is recorded and does not stop the run; --max-calls still bounds it', async () => {
+    const fake = jest.fn(async () => {
+      throw new Error('overloaded')
+    })
+    const d = deps()
+    d.createLiveCaller.mockResolvedValue(liveCaller(fake, () => 'overloaded'))
+    const report = await live({ maxCalls: 2 }, d)
+    expect(fake).toHaveBeenCalledTimes(1) // a provider error is not retried; the next document would pass --max-calls
+    expect(report.requests[0]).toMatchObject({ outcome: 'provider_error', error_kind: 'overloaded' })
+    expect(report.stopped_early).toMatch(/max-calls/)
+  })
+
+  test('a response without usable token counts is charged its worst case, never zero', async () => {
+    const d = deps()
+    d.createLiveCaller.mockResolvedValue(liveCaller(async () => ok({ usage: undefined, parsed_output: null })))
+    const report = await live({}, d)
+    expect(report.requests[0]).toMatchObject({ input_tokens: null, output_tokens: null })
+    expect(report.spend.accounted_usd).toBe(0)
+    expect(report.spend.conservative_usd).toBeGreaterThan(0)
+  })
+
+  test('a structured-output parse failure is recorded and gets the engine retry, not a stop', async () => {
+    let n = 0
+    const fake = jest.fn(async () => {
+      n += 1
+      if (n % 2 === 1) {
+        throw new Error('Failed to parse structured output: synthetic test')
+      }
+      return ok()
+    })
+    const d = deps()
+    d.createLiveCaller.mockResolvedValue(liveCaller(fake))
+    const report = await live({}, d)
+    expect(report.requests[0]).toMatchObject({ attempt: 1, outcome: 'parse_failure', error_kind: null })
+    expect(report.requests[1]).toMatchObject({ attempt: 2, max_tokens: 2048, outcome: 'no_parsed_output' })
+    expect(report.stopped_early).toBeNull()
+  })
+
+  test('the pricing is compared with the live price table, and is not required to match', async () => {
+    const d = deps()
+    d.createLiveCaller.mockResolvedValue(liveCaller(async () => ok()))
+    expect((await live({}, d)).pricing_matches_live_table).toBe(true)
+    expect((await live({ pricing: { input_usd_per_mtok: 3, output_usd_per_mtok: 15 } }, d)).pricing_matches_live_table).toBe(false)
+    expect((await runReceiptEval(base(), deps(), {})).pricing_matches_live_table).toBeNull()
+  })
+
+  test('every mode reports the live input bound for each selected fixture; dry-run makes no request', async () => {
+    const d = deps()
+    const report = await runReceiptEval(base(), d, {})
+    expect(report.requests).toEqual([])
+    expect(report.live_input_bound.map((b) => b.fixture_id)).toEqual(ids)
+    for (const b of report.live_input_bound) expect(b.admitted ? b.input_tokens! > 0 && b.refusal === null : b.input_tokens === null && b.refusal !== null).toBe(true)
+  })
+
+  test('liveBoundFor applies the live checks: size, pages, media type and the input bound', () => {
+    const text = syntheticTextPdf('Receipt')
+    const admitted = liveBoundFor('a', 'application/pdf', text)
+    expect(admitted).toMatchObject({ admitted: true, refusal: null, pdf_pages: 1 })
+    expect(admitted.input_tokens).toBeGreaterThan(0)
+    expect(liveBoundFor('b', 'application/pdf', syntheticPdf(6))).toMatchObject({ admitted: false, refusal: 'too_many_pages', pdf_pages: 6 })
+    expect(liveBoundFor('c', 'image/gif', new Uint8Array([1]))).toMatchObject({ admitted: false, refusal: 'unsupported_media_type' })
+    expect(liveBoundFor('d', 'application/pdf', new Uint8Array(1_048_577))).toMatchObject({ admitted: false, refusal: 'file_too_large' })
   })
 
   test('assertLiveAllowed is a no-op outside live mode', () => {

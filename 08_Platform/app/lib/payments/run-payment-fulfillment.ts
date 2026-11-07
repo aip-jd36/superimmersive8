@@ -53,6 +53,9 @@ export const CLAIM_REASONS_REQUIRING_ALERT: ReadonlySet<string> = new Set([
   'email_outcome_unknown', 'attempts_exhausted', 'retry_window_expired',
 ])
 
+/** The message prefix of a Creator Record v2 issuance refusal (`V2IssuanceRefusal`). Matched as text: this module imports no product code. */
+export const V2_ISSUANCE_REFUSED = 'creator_record_v2_issuance_refused:'
+
 const CERTIFIED_TIERS = new Set(['certified', 'si8_certified'])
 const AWAITING_REVIEW = new Set(['pending', 'under_review'])
 
@@ -98,6 +101,11 @@ export async function runPaymentFulfillment(sessionId: string, deps: Fulfillment
           pdfStatus = 'completed'
         } else {
           lastError = lastError ?? 'pdf_generation_failed'
+          // CR-V2-MVP-M4A: a paid record the issuance checks refused. The payment stays recorded and the step incomplete (retried,
+          // then the manual queue); an operator is told now, on every refused attempt, so a paying customer is never left silently.
+          if (lastError.includes(V2_ISSUANCE_REFUSED)) {
+            await deps.alert('Paid Creator Record could not be issued', { session: sessionId, submission: sub.id, reason: lastError })
+          }
         }
       }
     }

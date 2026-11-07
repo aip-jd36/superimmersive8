@@ -83,8 +83,21 @@ export function approvedGovernanceSnapshot(issuanceDate: string, topicClaims: To
   })
 }
 
-/** CR-V2-MVP-M3 — the approved customer PDF templates and their approval (both null until M0, or with no bundle). */
-export function approvedPdfTemplates(bundle: PublicationAuthorityBundle | null = currentPublicationAuthority()): { templates: unknown; approval: PdfTemplateApproval | null } {
+/**
+ * CR-V2-MVP-M3 — the approved customer PDF templates and their approval (both null until M0, or with no bundle).
+ *
+ * CR-V2-MVP-M4A: with `recordSchema`, the ONE approved set for that record schema: the bundle's main set or one of its
+ * `pdf_template_sets`, chosen by the schema its approval names. None, or more than one, gives no templates (rendering refuses). The
+ * chosen set is then checked in full by the renderer (`checkTemplates`: fingerprint, lifecycle, identity, schema, wording lock).
+ * Without `recordSchema`, the main set, exactly as before.
+ */
+export function approvedPdfTemplates(
+  bundle: PublicationAuthorityBundle | null = currentPublicationAuthority(),
+  recordSchema?: { id: string; version: number },
+): { templates: unknown; approval: PdfTemplateApproval | null } {
   if (!bundle) return { templates: null, approval: null }
-  return { templates: bundle.pdf_templates, approval: bundle.pdf_template_approval }
+  if (!recordSchema) return { templates: bundle.pdf_templates, approval: bundle.pdf_template_approval }
+  const sets = [{ templates: bundle.pdf_templates, approval: bundle.pdf_template_approval }, ...(bundle.pdf_template_sets ?? [])]
+  const matching = sets.filter((t) => t.approval !== null && t.approval.record_schema?.id === recordSchema.id && t.approval.record_schema?.version === recordSchema.version)
+  return matching.length === 1 ? { templates: matching[0].templates, approval: matching[0].approval } : { templates: null, approval: null }
 }

@@ -22,12 +22,22 @@ import { CREATOR_RECORD_CONCLUSIONS } from '../contract/compose'
 import { isIsoDate } from '../contract/types'
 import { CREATOR_RECORD_OBJECTIVE_TOPICS } from '../integration/objectives'
 import { canonicalJson, sha256Hex } from '../record-core/canonical'
-import { arr, fail, int, isPlainObject, obj, oneOf, ProjectionRefusal, str, type P } from '../record-core/projection'
+import { arr, fail, int, isPlainObject, obj, oneOf, opt, ProjectionRefusal, str, type P } from '../record-core/projection'
 import { EVIDENCE_CATEGORIES, EVIDENCE_MEDIA_TYPES } from '../evidence-intake/vocabulary'
+import { CONTENT_CLASSES, EXAMINATION_FAILURE_REASONS, EXAMINATION_LIMITATIONS, EXECUTOR_MODES, OBSERVATION_BASES, OBSERVATION_STATUSES } from '../examination/envelope'
+import { COMPARISON_FIELDS, CREATOR_RESPONSE_CODES } from '../customer-record/examination-section'
+import { LIVE_LIMITATIONS } from '../live-examination/envelope'
 
 export const CUSTOMER_PDF_TEMPLATE_ID = 'si8/creator-record-v2-pdf-templates'
 export const CUSTOMER_PDF_SECTIONS = ['about', 'project', 'tools', 'contribution', 'guidance', 'open_items', 'not_done', 'provenance'] as const
-export type CustomerPdfSectionId = (typeof CUSTOMER_PDF_SECTIONS)[number]
+/**
+ * CR-V2-MVP-M3A: an examination-bearing record (schema 8) adds one section, `documents`, after the creator's own declarations and
+ * before guidance, so what a document appears to show is never printed among what the creator told SI8.
+ */
+export const CUSTOMER_PDF_EXAMINATION_SECTIONS = ['about', 'project', 'tools', 'contribution', 'documents', 'guidance', 'open_items', 'not_done', 'provenance'] as const
+export type CustomerPdfSectionId = (typeof CUSTOMER_PDF_EXAMINATION_SECTIONS)[number]
+/** The examination states a document can be in. `not_examined` is the record's own value; the other two are the envelope's outcome. */
+export const DOCUMENT_EXAMINATION_STATES = ['not_examined', 'examined', 'could_not_examine'] as const
 /** Sections a single (not per-tool) question may be printed in. Per-tool answers are always printed under Tools. */
 export const QUESTION_SECTIONS = ['project', 'contribution'] as const
 
@@ -98,6 +108,39 @@ const templateSpec = obj({
     intro: str, item_label: str, type: str, category: str, tool: str, tool_value: str, size: str, size_value: str,
     fingerprint: str, fingerprint_note: str, examination: str, not_examined: str,
   }),
+  /**
+   * CR-V2-MVP-M3A: the examination-bearing record (schema 8). Optional in the contract, so a schema 7 template set and its
+   * fingerprint are unchanged; a schema 8 record refuses to render without it. Every observation is printed with its basis and
+   * reading status, under `intro` and `limitations_heading`, which must say what an observation is not. Observation fields,
+   * qualifiers and examiner classification values are closed per profile: an unlabelled one refuses. `document_heading` fills `{n}`,
+   * `comparison_response` `{field}` and `profile_value` `{id}` and `{version}`. `comparison_note` states that this PDF does not say
+   * whether a document matches the creator's declarations; `open_items_pointer` replaces the open-items document inventory.
+   */
+  examination: opt(obj({
+    heading: str, intro: arr(str), document_heading: str,
+    status: str, status_labels: exactLabels(DOCUMENT_EXAMINATION_STATES),
+    failure: str, failure_labels: exactLabels(EXAMINATION_FAILURE_REASONS),
+    observations_heading: str, no_observations: str,
+    field_labels: mapOf(str), qualifier: str, qualifier_labels: mapOf(str), classification_labels: mapOf(mapOf(str)),
+    basis: str, basis_labels: exactLabels(OBSERVATION_BASES),
+    reading: str, reading_labels: exactLabels(OBSERVATION_STATUSES),
+    value: str, excerpt: str,
+    your_response: str, response_labels: exactLabels(CREATOR_RESPONSE_CODES),
+    comparison_response: str, comparison_field_labels: exactLabels(COMPARISON_FIELDS),
+    limitations_heading: str, limitation_labels: exactLabels(EXAMINATION_LIMITATIONS),
+    provenance_heading: str, reference: str, method: str, method_labels: exactLabels(EXECUTOR_MODES),
+    content: str, content_labels: exactLabels(CONTENT_CLASSES), profile: str, profile_value: str,
+    comparison_note: str, open_items_pointer: str,
+  })),
+  /**
+   * CR-V2-MVP-M2A: the wording for a reading made by an AI model (a customer live examination). Optional, so a template set approved
+   * without it is unchanged; a record holding a live reading refuses to render without it. `method` is the method row's value,
+   * `provider` and `model` label the provider and model rows, `executed_at` the time row; limitation labels cover the live codes.
+   */
+  live_examination: opt(obj({
+    method: str, provider: str, provider_labels: exactLabels(['anthropic']), model: str, executed_at: str,
+    content_labels: exactLabels(['customer_document']), limitation_labels: exactLabels(LIVE_LIMITATIONS),
+  })),
   document_type_labels: exactLabels(EVIDENCE_MEDIA_TYPES),
   document_category_labels: exactLabels(EVIDENCE_CATEGORIES),
   question_sections: mapOf(oneOf(QUESTION_SECTIONS)),

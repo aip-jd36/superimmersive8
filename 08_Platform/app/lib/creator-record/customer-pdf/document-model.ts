@@ -20,8 +20,12 @@
  *   - CR-V2-DOC-1: documents are printed as an inventory (fingerprint, type, size, the creator's own
  *     description) and always as not examined; any other document state refuses.
  *
- *   - CR-V2-PDF-7: schema 7 only. Issued PDFs are stored bytes and are never re-rendered, so narrowing this affects no historical
- *     artifact; schemas 5 and 6 are never commercially eligible, and schema 8 is not supported yet. Each refuses here by name. Every
+ *   - CR-V2-MVP-M3A: schema 8 (examination-bearing) also renders, with one more section, `documents`: each document's inventory
+ *     entry, its examination state, its observations verbatim with their basis and reading status, the creator's own closed-code
+ *     responses, the examination's limitations and provenance. Observations are never declarations, never facts and never guidance
+ *     inputs; they are printed apart from both. The record's derived comparisons are NOT printed (no consistency conclusion).
+ *   - CR-V2-PDF-7: schema 7 (and, since M3A, 8) only. Issued PDFs are stored bytes and are never re-rendered, so narrowing this affects no historical
+ *     artifact; schemas 5 and 6 are never commercially eligible. Each refuses here by name. Every
  *     answer must be what the record's own embedded contract allows. The PDF names the contract by id, version and a short
  *     reference; the full digest stays in the record, which the printed snapshot digest fixes. Approval text is never printed.
  *
@@ -30,9 +34,12 @@
 
 import { CREATOR_RECORD_CONCLUSIONS } from '../contract/compose'
 import { isIsoDate } from '../contract/types'
-import { CUSTOMER_RECORD_SCHEMA_VERSION, declarationIncompatibilities, isUncertainValue, verifyCustomerRecord, type CustomerRecordV2 } from '../customer-record/record'
-import { arr, int, nullable, obj, oneOf, opt, ProjectionRefusal, str, WITHHELD } from '../record-core/projection'
+import { CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION, CUSTOMER_RECORD_SCHEMA_VERSION, declarationIncompatibilities, isUncertainValue, verifyCustomerRecord, type CustomerRecordV2 } from '../customer-record/record'
+import { COMPARISON_FIELDS, CREATOR_RESPONSE_CODES } from '../customer-record/examination-section'
+import { arr, fail, int, isPlainObject, nullable, obj, oneOf, opt, ProjectionRefusal, str, WITHHELD, type P } from '../record-core/projection'
 import { EVIDENCE_CATEGORIES, EVIDENCE_MEDIA_TYPES } from '../evidence-intake/vocabulary'
+import { CONTENT_CLASSES, EXAMINATION_FAILURE_REASONS, EXAMINATION_LIMITATIONS, EXECUTOR_MODES, OBSERVATION_BASES, OBSERVATION_STATUSES, WORKFLOW_AUTHORIZATIONS } from '../examination/envelope'
+import { LIVE_LIMITATIONS } from '../live-examination/envelope'
 import { canonicalJson } from '../record-core/canonical'
 import { checkTemplates, fill, type CustomerPdfSectionId, type CustomerPdfTemplates, type PdfTemplateApproval, type TemplateRefusalCode } from './templates'
 
@@ -113,7 +120,70 @@ const guidanceItem = obj({
     publication: obj({ entry_id: str, version: int, approver: str, decision_date: str, refresh_by: str }),
   }),
 })
-const recordSpec = obj({
+// ── CR-V2-MVP-M3A: an examination-bearing record (schema 8), read through the same kind of exact-key projection ──
+// The envelope is read field by field, so a shape the renderer does not know (a live-model origin, a location, a new limitation)
+// refuses instead of printing. `verifyCustomerRecord` has already re-verified every projection, its digest and its document.
+const isNull: P<null> = (v, path) => (v === null ? null : fail(path, 'expected null'))
+const isFalse: P<false> = (v, path) => (v === false ? false : fail(path, 'expected false'))
+const observationSpec = obj({
+  observation_id: str, field: str, qualifier: nullable(str), basis: oneOf(OBSERVATION_BASES), status: oneOf(OBSERVATION_STATUSES),
+  value: nullable(str), excerpt: nullable(str), source: obj({ document_sha256: str, location: isNull }),
+  verification: oneOf(['not_verified'] as const), origin: oneOf(['fixture_replay_recorded'] as const),
+})
+const envelopeSpec = obj({
+  envelope: obj({ id: str, version: int }), examination_key: str, identity: oneOf(['deterministic_replay_key'] as const),
+  document: obj({ document_id: str, sha256: str, media_type: oneOf(EVIDENCE_MEDIA_TYPES), byte_size: int }),
+  content_class: oneOf(CONTENT_CLASSES), workflow_authorization: oneOf(WORKFLOW_AUTHORIZATIONS),
+  profile: obj({ id: str, version: int, schema: str, prompt: str }),
+  executor: obj({ mode: oneOf(EXECUTOR_MODES), replay_set: str, recording_sha256: str }),
+  outcome: obj({ status: oneOf(['examined', 'could_not_examine'] as const), reason: nullable(oneOf(EXAMINATION_FAILURE_REASONS)) }),
+  observations: arr(observationSpec),
+  limitations: arr(oneOf(EXAMINATION_LIMITATIONS)),
+  provenance: obj({ integrity: oneOf(['sha256_size_and_type_rechecked'] as const), replay_fixture_id: str, engine_attempts: int, model_calls: int, prompt_sent: isFalse }),
+})
+const projectionSpec = obj({
+  projection: obj({ id: str, version: int }), run_id: str, envelope_sha256: str, execution_boundary: str,
+  run_integrity: oneOf(['persisted_run_rechecked'] as const), verification: oneOf(['not_verified'] as const), envelope: envelopeSpec,
+})
+// CR-V2-MVP-M2A: a reading made by an AI model for a customer (projection version 2, envelope version 3). Only the `live_model` shape is
+// read: a mocked reading, a failed attempt or any other origin refuses here.
+const liveObservationSpec = obj({
+  observation_id: str, field: str, qualifier: nullable(str), basis: oneOf(OBSERVATION_BASES), status: oneOf(OBSERVATION_STATUSES),
+  value: nullable(str), excerpt: nullable(str), source: obj({ document_sha256: str, location: isNull }),
+  verification: oneOf(['not_verified'] as const), origin: oneOf(['live_model_extracted'] as const),
+})
+const liveEnvelopeSpec = obj({
+  envelope: obj({ id: str, version: int }), examination_key: str, identity: oneOf(['execution_key'] as const),
+  execution_origin: oneOf(['live_model'] as const), executed_at: str,
+  document: obj({ document_id: str, sha256: str, media_type: oneOf(EVIDENCE_MEDIA_TYPES), byte_size: int }),
+  content_class: oneOf(['customer_document'] as const), workflow_authorization: oneOf(WORKFLOW_AUTHORIZATIONS),
+  profile: obj({ id: str, version: int, schema: str, prompt: str }),
+  executor: obj({ mode: oneOf(['live_model'] as const), provider: oneOf(['anthropic'] as const), model: str }),
+  outcome: obj({ status: oneOf(['examined'] as const), reason: isNull }),
+  observations: arr(liveObservationSpec),
+  limitations: arr(oneOf(LIVE_LIMITATIONS)),
+  provenance: obj({ integrity: oneOf(['sha256_size_and_type_rechecked'] as const), model_calls: int, prompt_sent: WITHHELD, input_tokens: WITHHELD, output_tokens: WITHHELD, provider_response_id: WITHHELD }),
+})
+const liveProjectionSpec = obj({
+  projection: obj({ id: str, version: int }), run_id: str, envelope_sha256: str, execution_boundary: oneOf(['customer_live_examination'] as const),
+  run_integrity: oneOf(['persisted_attempt_rechecked'] as const), verification: oneOf(['not_verified'] as const), envelope: liveEnvelopeSpec,
+})
+type ReplayProjectionView = ReturnType<typeof projectionSpec>
+type LiveProjectionView = ReturnType<typeof liveProjectionSpec>
+type ProjectionView = ReplayProjectionView | LiveProjectionView
+const examinationOf: P<'not_examined' | ProjectionView> = (v, path) => {
+  if (v === 'not_examined') return 'not_examined'
+  const version = isPlainObject(v) && isPlainObject(v.projection) ? v.projection.version : null
+  return version === 2 ? liveProjectionSpec(v, path) : projectionSpec(v, path)
+}
+const isLive = (p: ProjectionView): p is LiveProjectionView => p.envelope.envelope.version === 3
+const responseTargetOf: P<{ kind: 'observation'; run_id: string; observation_id: string } | { kind: 'comparison'; tool_index: number; document_id: string; field: (typeof COMPARISON_FIELDS)[number] }> = (v, path) =>
+  isPlainObject(v) && v.kind === 'observation'
+    ? obj({ kind: oneOf(['observation'] as const), run_id: str, observation_id: str })(v, path)
+    : obj({ kind: oneOf(['comparison'] as const), tool_index: int, document_id: str, field: oneOf(COMPARISON_FIELDS) })(v, path)
+const documentFields = { document_id: str, sha256: str, media_type: oneOf(EVIDENCE_MEDIA_TYPES), byte_size: int, file_name: str, category: oneOf(EVIDENCE_CATEGORIES), tool_index: nullable(int) }
+
+const commonFields = {
   schema: str,
   schema_version: int,
   status: oneOf(['prepared_not_issued'] as const),
@@ -132,26 +202,42 @@ const recordSpec = obj({
     questionnaire_contract: obj({ contract_id: str, contract_version: int, contract_sha256: str, authority: WITHHELD, decision_date: WITHHELD, review_ref: WITHHELD, body: WITHHELD, wording: WITHHELD }),
   }),
   declarations: obj({ answers: arr(answer), observations: arr(observation), acknowledgements: arr(obj({ id: str, text: str })) }),
-  documents: obj({
-    policy: oneOf(['inventory_only'] as const),
-    items: arr(obj({
-      document_id: str, sha256: str, media_type: oneOf(EVIDENCE_MEDIA_TYPES), byte_size: int, file_name: str,
-      category: oneOf(EVIDENCE_CATEGORIES), tool_index: nullable(int), examination: oneOf(['not_examined'] as const),
-    })),
-  }),
-  comparison: obj({ policy: oneOf(['disabled'] as const) }),
   guidance: obj({ items: arr(guidanceItem) }),
+} as const
+const recordSpec = obj({
+  ...commonFields,
+  documents: obj({ policy: oneOf(['inventory_only'] as const), items: arr(obj({ ...documentFields, examination: oneOf(['not_examined'] as const) })) }),
+  comparison: obj({ policy: oneOf(['disabled'] as const) }),
 })
-type RecordView = ReturnType<typeof recordSpec>
+/**
+ * CR-V2-MVP-M3A: schema 8. The derived comparisons stay in the record (the snapshot digest covers them) but are not read: they are
+ * labelled provisional descriptions ("appears consistent", "appears to conflict"), and this PDF states no consistency conclusion.
+ * Whether a customer PDF may ever show them is a separate decision.
+ */
+const examinationRecordSpec = obj({
+  ...commonFields,
+  documents: obj({ policy: oneOf(['inventory_with_examination'] as const), items: arr(obj({ ...documentFields, examination: examinationOf })) }),
+  comparison: obj({ policy: oneOf(['derived_per_version'] as const), method: WITHHELD, items: WITHHELD }),
+  creator_responses: obj({
+    policy: oneOf(['closed_codes_this_version_only'] as const),
+    items: arr(obj({ target: responseTargetOf, code: oneOf(CREATOR_RESPONSE_CODES), responded_by: oneOf(['creator'] as const), given_in_version: int })),
+  }),
+})
+type RecordView = Omit<ReturnType<typeof recordSpec>, 'documents' | 'comparison'> & {
+  documents: { policy: 'inventory_only' | 'inventory_with_examination'; items: (ReturnType<typeof examinationRecordSpec>['documents']['items'][number])[] }
+  creator_responses?: ReturnType<typeof examinationRecordSpec>['creator_responses']
+}
 
 export function buildCustomerDocument(input: CustomerDocumentInput): CustomerDocumentModel {
   // 1. The record first: nothing is read from a record that does not verify.
   const verified = verifyCustomerRecord(input.canonical, input.sha256)
   if (!verified.ok) throw new CustomerPdfRefusal('record_invalid', verified.reason)
-  if (verified.record.schema_version !== CUSTOMER_RECORD_SCHEMA_VERSION) throw new CustomerPdfRefusal('record_schema_unsupported', String(verified.record.schema_version))
+  const version = verified.record.schema_version
+  if (version !== CUSTOMER_RECORD_SCHEMA_VERSION && version !== CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION) throw new CustomerPdfRefusal('record_schema_unsupported', String(version))
+  const examinationBearing = version === CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION
   let r: RecordView
   try {
-    r = recordSpec(verified.record as unknown, 'record')
+    r = (examinationBearing ? examinationRecordSpec : recordSpec)(verified.record as unknown, 'record') as RecordView
   } catch (err) {
     if (err instanceof ProjectionRefusal) throw new CustomerPdfRefusal('record_unsupported', `${err.path}: ${err.reason}`)
     throw err
@@ -168,6 +254,10 @@ export function buildCustomerDocument(input: CustomerDocumentInput): CustomerDoc
   const check = checkTemplates(input.templates, input.template_approval, { id: r.schema, version: r.schema_version })
   if (!check.ok) throw new CustomerPdfRefusal(`templates_${check.refusals[0].code}` as `templates_${TemplateRefusalCode}`, check.refusals.map((x) => (x.ref ? `${x.code}:${x.ref}` : x.code)).join(', '))
   const t = check.templates
+  // CR-V2-MVP-M3A: a schema 8 record prints only through templates that carry the examination wording (approved with them).
+  if (examinationBearing && !t.examination) throw new CustomerPdfRefusal('templates_examination_missing')
+  // CR-V2-MVP-M2A: and a reading made by an AI model only through templates that carry its wording too.
+  if (r.documents.items.some((d) => d.examination !== 'not_examined' && isLive(d.examination)) && !t.live_examination) throw new CustomerPdfRefusal('templates_live_examination_missing')
 
   try {
     return compose(r, issued, t, check.fingerprint, input.sha256)
@@ -184,6 +274,7 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
   const row = (label: string, value: string, value_from: TextOrigin = 'record'): Block => ({ kind: 'row', label, label_from: 'template', value, value_from })
   const count = (p: { one: string; other: string }, n: number) => fill(n === 1 ? p.one : p.other, { n })
   const S = t.sections
+  const examinationBearing = r.documents.policy === 'inventory_with_examination'
 
   // Answers: values printed verbatim with their approved labels; "Not sure" from the template when the record has no label for it.
   const valueBlocks = (a: RecordView['declarations']['answers'][number]): Block[] =>
@@ -272,6 +363,87 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
     return m ? fill(S.guidance.subject_with_tool, { topic: t.topic_labels[topic], n: Number(m[1]) }) : t.topic_labels[topic]
   }
 
+  // CR-V2-DOC-1: one document's inventory entry, exactly as before (the examination row is added by the caller).
+  const inventoryRows = (d: RecordView['documents']['items'][number], i: number): Block[] => [
+    { kind: 'row', label: fill(t.documents.item_label, { n: i + 1 }), label_from: 'template', value: d.file_name, value_from: 'record' },
+    { kind: 'row', label: t.documents.type, label_from: 'template', value: t.document_type_labels[d.media_type], value_from: 'template' },
+    { kind: 'row', label: t.documents.category, label_from: 'template', value: t.document_category_labels[d.category], value_from: 'template' },
+    ...(d.tool_index === null ? [] : [{ kind: 'row', label: t.documents.tool, label_from: 'template', value: fill(t.documents.tool_value, { n: d.tool_index + 1 }), value_from: 'template' } as Block]),
+    { kind: 'row', label: t.documents.size, label_from: 'template', value: fill(t.documents.size_value, { bytes: d.byte_size }), value_from: 'template' },
+    { kind: 'row', label: t.documents.fingerprint, label_from: 'template', value: d.sha256, value_from: 'record' },
+  ]
+
+  // CR-V2-MVP-M3A: what each document appears to show, printed apart from the declarations and from guidance. Every code is mapped
+  // to an approved label (an unlabelled field, qualifier or classification refuses); values and excerpts are the examination's own,
+  // verbatim. Every creator response is printed exactly once, under the document it concerns, or the record refuses.
+  const documentsSection = (): CustomerDocumentSection => {
+    const X = t.examination!
+    const labelled = (labels: Record<string, string>, key: string, code: string): string => {
+      if (!Object.prototype.hasOwnProperty.call(labels, key)) throw new CustomerPdfRefusal(code, key)
+      return labels[key]
+    }
+    const responses = r.creator_responses?.items ?? []
+    let printed = 0
+    const blocks: Block[] = [heading(X.heading), ...X.intro.map(tpl)]
+    if (r.documents.items.length === 0) blocks.push(tpl(S.open_items.documents_not_provided))
+    r.documents.items.forEach((d, i) => {
+      blocks.push({ kind: 'subheading', text: fill(X.document_heading, { n: i + 1 }), from: 'template' }, ...inventoryRows(d, i))
+      const e = d.examination
+      const comparisonResponses = responses.filter((x) => x.target.kind === 'comparison' && x.target.document_id === d.document_id)
+      const responseRows = (list: typeof responses): Block[] =>
+        list.map((x): Block => {
+          printed += 1
+          const label = x.target.kind === 'comparison' ? fill(X.comparison_response, { field: X.comparison_field_labels[x.target.field] }) : X.your_response
+          return row(label, X.response_labels[x.code], 'template')
+        })
+      if (e === 'not_examined') {
+        blocks.push(row(X.status, X.status_labels.not_examined, 'template'), ...responseRows(comparisonResponses))
+        return
+      }
+      const env = e.envelope
+      const live = isLive(e) ? t.live_examination! : null
+      blocks.push(row(X.status, X.status_labels[env.outcome.status], 'template'))
+      if (!isLive(e) && e.envelope.outcome.reason !== null) blocks.push(row(X.failure, X.failure_labels[e.envelope.outcome.reason], 'template'))
+      blocks.push({ kind: 'label', text: X.observations_heading, from: 'template' })
+      if (env.observations.length === 0) blocks.push(tpl(X.no_observations))
+      for (const o of env.observations) {
+        const field = labelled(X.field_labels, o.field, 'observation_field_unlabelled')
+        // A value is printed only where the examination reports it present; otherwise the reading status is printed instead.
+        const value: [string, TextOrigin] = o.status !== 'present' || o.value === null
+          ? [X.reading_labels[o.status], 'template']
+          : o.basis === 'examiner_classification'
+            ? [labelled(Object.prototype.hasOwnProperty.call(X.classification_labels, o.field) ? X.classification_labels[o.field] : {}, o.value, 'classification_unlabelled'), 'template']
+            : [o.value, 'record']
+        blocks.push({ kind: 'row', label: field, label_from: 'template', value: value[0], value_from: value[1] })
+        if (o.qualifier !== null) blocks.push(row(X.qualifier, labelled(X.qualifier_labels, o.qualifier, 'observation_qualifier_unlabelled'), 'template'))
+        blocks.push(row(X.basis, X.basis_labels[o.basis], 'template'))
+        if (o.excerpt !== null) blocks.push(row(X.excerpt, o.excerpt))
+        blocks.push(...responseRows(responses.filter((x) => x.target.kind === 'observation' && x.target.run_id === e.run_id && x.target.observation_id === o.observation_id)))
+      }
+      blocks.push(...responseRows(comparisonResponses))
+      const limitationLabel = (l: string) => (isLive(e) ? live!.limitation_labels[l] : X.limitation_labels[l as (typeof EXAMINATION_LIMITATIONS)[number]])
+      blocks.push({ kind: 'label', text: X.limitations_heading, from: 'template' }, ...env.limitations.map((l): Block => ({ kind: 'bullet', text: limitationLabel(l), from: 'template' })))
+      blocks.push({ kind: 'label', text: X.provenance_heading, from: 'template' }, row(X.reference, e.envelope_sha256.slice(0, 12)))
+      if (isLive(e)) {
+        // A model reading names its provider, the exact model and when it was made. Tokens and the provider's response id stay in the record.
+        blocks.push(
+          row(X.method, live!.method, 'template'),
+          row(live!.provider, live!.provider_labels[e.envelope.executor.provider], 'template'),
+          row(live!.model, e.envelope.executor.model),
+          row(live!.executed_at, e.envelope.executed_at),
+          row(X.content, live!.content_labels[e.envelope.content_class], 'template'),
+        )
+      } else {
+        blocks.push(row(X.method, X.method_labels[e.envelope.executor.mode], 'template'), row(X.content, X.content_labels[e.envelope.content_class], 'template'))
+      }
+      blocks.push(row(X.profile, fill(X.profile_value, { id: env.profile.id, version: env.profile.version }), 'template'))
+    })
+    if (printed !== responses.length) throw new CustomerPdfRefusal('record_unsupported', 'creator response without its document')
+    if (r.documents.items.length > 0) blocks.push(tpl(t.documents.fingerprint_note))
+    blocks.push(tpl(X.comparison_note))
+    return { id: 'documents', blocks }
+  }
+
   const sections: CustomerDocumentSection[] = [
     {
       id: 'about',
@@ -298,6 +470,7 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
       ],
     },
     { id: 'contribution', blocks: [heading(S.contribution.heading), tpl(S.contribution.intro), ...(inSection('contribution').length > 0 ? inSection('contribution').flatMap(answerBlocks) : [tpl(S.contribution.empty)])] },
+    ...(examinationBearing ? [documentsSection()] : []),
     {
       id: 'guidance',
       blocks: [
@@ -369,21 +542,18 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
         ...(unspecified.length > 0 ? [{ kind: 'subheading', text: S.open_items.unspecified_heading, from: 'template' } as Block, ...unspecified.map((i): Block => ({ kind: 'bullet', text: ref(i), from: 'template' }))] : []),
         ...(notSure.length > 0 ? [{ kind: 'subheading', text: S.open_items.not_sure_heading, from: 'template' } as Block, ...notSure.map((a): Block => ({ kind: 'bullet', text: a.question, from: 'record' }))] : []),
         { kind: 'subheading', text: S.open_items.documents_heading, from: 'template' },
-        ...(r.documents.items.length === 0
-          ? [tpl(S.open_items.documents_not_provided)]
-          : [
-              tpl(t.documents.intro),
-              ...r.documents.items.flatMap((d, i): Block[] => [
-                { kind: 'row', label: fill(t.documents.item_label, { n: i + 1 }), label_from: 'template', value: d.file_name, value_from: 'record' },
-                { kind: 'row', label: t.documents.type, label_from: 'template', value: t.document_type_labels[d.media_type], value_from: 'template' },
-                { kind: 'row', label: t.documents.category, label_from: 'template', value: t.document_category_labels[d.category], value_from: 'template' },
-                ...(d.tool_index === null ? [] : [{ kind: 'row', label: t.documents.tool, label_from: 'template', value: fill(t.documents.tool_value, { n: d.tool_index + 1 }), value_from: 'template' } as Block]),
-                { kind: 'row', label: t.documents.size, label_from: 'template', value: fill(t.documents.size_value, { bytes: d.byte_size }), value_from: 'template' },
-                { kind: 'row', label: t.documents.fingerprint, label_from: 'template', value: d.sha256, value_from: 'record' },
-                { kind: 'row', label: t.documents.examination, label_from: 'template', value: t.documents.not_examined, value_from: 'template' },
+        ...(examinationBearing
+          ? [tpl(t.examination!.open_items_pointer)]
+          : r.documents.items.length === 0
+            ? [tpl(S.open_items.documents_not_provided)]
+            : [
+                tpl(t.documents.intro),
+                ...r.documents.items.flatMap((d, i): Block[] => [
+                  ...inventoryRows(d, i),
+                  { kind: 'row', label: t.documents.examination, label_from: 'template', value: t.documents.not_examined, value_from: 'template' },
+                ]),
+                tpl(t.documents.fingerprint_note),
               ]),
-              tpl(t.documents.fingerprint_note),
-            ]),
         { kind: 'subheading', text: S.open_items.limitations_heading, from: 'template' },
         ...S.open_items.limitations.map((l): Block => ({ kind: 'bullet', text: l, from: 'template' })),
       ],

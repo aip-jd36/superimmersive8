@@ -7,6 +7,7 @@
  * byte for byte, so this cannot drift from the format it stands in for.
  */
 import { canonicalJson, sha256Hex } from '@/lib/creator-record/record-core/canonical'
+import { HISTORICAL_COMPARISON_METHOD } from '@/lib/creator-record/evidence/persisted-comparison'
 import { CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION, HISTORICAL_EXAMINATION_SCHEMA_VERSION, HISTORICAL_RECORD_BUILDER, HISTORICAL_RECORD_SCHEMA_VERSION, type CustomerRecordResult, type CustomerRecordV2 } from '@/lib/creator-record/customer-record/record'
 
 const HISTORICAL_V6_BUILDER = { id: HISTORICAL_RECORD_BUILDER.id, version: 4 }
@@ -28,6 +29,7 @@ export function historicalForm<R extends CustomerRecordResult>(built: R): R {
   r.schema_version = examination ? HISTORICAL_EXAMINATION_SCHEMA_VERSION : HISTORICAL_RECORD_SCHEMA_VERSION
   r.builder = examination ? HISTORICAL_V6_BUILDER : { ...HISTORICAL_RECORD_BUILDER }
   r.content = examination ? HISTORICAL_V6_CONTENT : HISTORICAL_V5_CONTENT
+  if (r.comparison.policy === 'derived_per_version') r.comparison.method = HISTORICAL_COMPARISON_METHOD as never
   r.sources.source_text.record_schema = { ...r.sources.source_text.record_schema, version: r.schema_version }
   const canonical = canonicalJson(r)
   return { ...built, record: r, canonical, sha256: sha256Hex(canonical) }

@@ -39,6 +39,7 @@ import { runPaymentFulfillment, type FulfillmentDeps } from '@/lib/payments/run-
 import type { FulfillmentSubmission } from '@/lib/payments/repository'
 import { TOPIC_CLAIMS_FIXTURE as CLAIMS } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { COMMERCIAL_SUPPORT_UNDER_TEST as SUPPORT } from '@/test-support/commercial-support'
+import { CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY } from '@/lib/creator-record/governed/synthetic-test-authority'
 import { questionnaireApprovalFor } from '@/test-support/questionnaire-approval'
 
 const NOW = new Date('2026-11-06T09:00:00.000Z')
@@ -66,6 +67,7 @@ const BOUND = { ...ROW, submission_id: SUB_ID }
 const state = (over: Partial<CurrentGovernance> = {}) => governanceSnapshotFrom({ issuance_date: AS_OF, sources: SYN.sources, topicClaims: CLAIMS, source_text_approvals: [SYN.source_text!.approval!], support: SUPPORT, authority_class: 'synthetic_test', ...over })
 const withContract = (approval: Sources['questionnaire_approval']): Sources => ({ ...SYN.sources, questionnaire_approval: approval })
 const APPROVAL = SYN.sources.questionnaire_approval!
+const SYN_TEMPLATES = (schema: { id: string; version: number }) => approvedPdfTemplates(CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY, schema)
 
 function purchaseDeps(governance: () => ReturnType<typeof state>, rows: PreparedRow[] = [ROW]) {
   const bind = jest.fn(async () => ({ submissionId: SUB_ID, reason: 'created' as const }))
@@ -75,6 +77,8 @@ function purchaseDeps(governance: () => ReturnType<typeof state>, rows: Prepared
     latestVersion: async (d) => [...rows].filter((r) => r.draft_id === d).sort((a, b) => b.version - a.version)[0] ?? null,
     boundTo: async () => ({ ...rows[0], submission_id: SUB_ID }),
     bind, governance, now: () => NOW,
+    // CR-V2-MVP-M4A: the synthetic bundle's approved templates for the version's own schema.
+    templates: SYN_TEMPLATES,
   }
   return { deps, bind }
 }
@@ -83,7 +87,7 @@ function issuanceDeps(governance: () => ReturnType<typeof state>, rows: Prepared
   const deps: V2IssuanceDeps = {
     boundTo: async () => rows[0],
     latestVersion: async (d) => [...rows].filter((r) => r.draft_id === d).sort((a, b) => b.version - a.version)[0] ?? null,
-    governance, templates: () => ({ templates: null, approval: null }), renderPdf: render,
+    governance, templates: SYN_TEMPLATES, renderPdf: render,
   }
   return { deps, render }
 }
@@ -254,7 +258,7 @@ describe('schemas 7 and 8 are not enabled by any of this', () => {
     const shipped = () => governanceSnapshotFrom({ issuance_date: AS_OF, sources: inputs.sources, topicClaims: CLAIMS, source_text_approvals: [inputs.source_text!.approval!], authority_class: 'governance' })
     expect(reasons(evaluateIssuanceEligibility(row.canonical, row.sha256, shipped()))).toEqual(['builder:reference_missing', 'record_schema:reference_missing'])
     await refusedEverywhere(shipped, row, 'ineligible', 'governance_ineligible')
-    expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [], builders: [] })
+    expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [], builders: [], examination_methods: [] })
   })
 })
 

@@ -24,7 +24,8 @@ import { receiptObservations } from '@/lib/creator-record/examination/receipt-pr
 import { mapReceiptReading, receiptReadingOf } from '@/lib/creator-record/examination/receipt-reading'
 import { parseExaminationProjection, projectVerifiedRun, verifyReferencedRuns, type ExaminationProjection } from '@/lib/creator-record/examination/projection'
 import { validateReceiptExtraction } from '@/lib/creator-record/receipt-examination/schema'
-import { comparePersistedExamination } from '@/lib/creator-record/evidence/persisted-comparison'
+import { COMPARISON_WITHHELD, comparePersistedExamination, HISTORICAL_COMPARISON_METHOD, PERSISTED_COMPARISON_METHOD } from '@/lib/creator-record/evidence/persisted-comparison'
+import { examinationSectionsValid } from '@/lib/creator-record/customer-record/examination-section'
 import {
   buildCustomerRecord, verifyCustomerRecord, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION, CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION,
   type CustomerRecordInput, type CustomerRecordResult, type CustomerRecordV2, type CustomerRecordDocument,
@@ -258,18 +259,34 @@ describe('examination-bearing record (v6)', () => {
     if (!r.ok) expect(r.stage).toBe('input')
   })
 
-  test('comparisons are derived from this version\'s declarations and recomputed when they change', () => {
+  test('comparisons follow this version\'s declarations and make no determination, in either direction', () => {
     const pro = built(buildCustomerRecord(examined())).record
     const other = built(buildCustomerRecord(examined({ state: state('Standard') }))).record
     const c = (r: CustomerRecordV2) => (r.comparison.policy === 'derived_per_version' ? r.comparison.items : [])
     expect(c(pro)).toHaveLength(1)
     expect(c(pro)[0]).toMatchObject({ tool_index: 0, document_id: DOC_ID, run_id: RUN_ID, declared: { tool_id: 'kling', plan: 'Pro' }, verification: 'not_verified' })
     expect(c(other)[0].declared.plan).toBe('Standard')
-    expect(c(pro)[0].plan).not.toEqual(c(other)[0].plan)
-    for (const [r, plan] of [[pro, 'Pro'], [other, 'Standard']] as const) {
-      const direct = comparePersistedExamination({ tool_index: 0, document_id: DOC_ID, file_name: DOCUMENT.file_name, envelope: ENVELOPE, declared_tool_id: 'kling', declared_plan: plan })
-      expect({ provider: c(r)[0].provider, plan: c(r)[0].plan }).toEqual({ provider: direct.provider, plan: direct.plan })
+    for (const r of [pro, other]) {
+      expect(r.comparison).toMatchObject({ method: PERSISTED_COMPARISON_METHOD })
+      expect(c(r)[0].provider).toEqual(COMPARISON_WITHHELD)
+      expect(c(r)[0].plan).toEqual(COMPARISON_WITHHELD)
     }
+    // The false positive this closes: the earlier method calls this document consistent with a declaration it cannot establish alone.
+    const earlier = comparePersistedExamination({ tool_index: 0, document_id: DOC_ID, file_name: DOCUMENT.file_name, envelope: ENVELOPE, declared_tool_id: 'kling', declared_plan: 'Pro' })
+    expect(earlier.provider.result).toBe('appears_consistent')
+  })
+
+  test('a new record cannot hold a determination; an earlier record keeps the one it holds and stays readable', () => {
+    const r = built(buildCustomerRecord(examined())).record
+    const withResult = (method: unknown, result: string) => ({ ...r, comparison: { policy: 'derived_per_version', method, items: (r.comparison as { items: object[] }).items.map((i) => ({ ...i, provider: { result, reason: 'same_seller' }, plan: { result, reason: 'same_plan' } })) } })
+    const valid = (x: unknown) => examinationSectionsValid(x as Parameters<typeof examinationSectionsValid>[0])
+    expect(valid(r)).toBe(true)
+    for (const result of ['appears_consistent', 'appears_to_conflict', 'does_not_establish']) {
+      expect(valid(withResult(PERSISTED_COMPARISON_METHOD, result))).toBe(false)
+      expect(valid(withResult(HISTORICAL_COMPARISON_METHOD, result))).toBe(true)
+    }
+    expect(valid(withResult({ id: PERSISTED_COMPARISON_METHOD.id, version: 3 }, 'not_assessed'))).toBe(false)
+    expect(valid(withResult(HISTORICAL_COMPARISON_METHOD, 'verified'))).toBe(false)
   })
 
   test('a comparison is never accepted as input', () => {
@@ -408,7 +425,9 @@ describe('referenced runs at payment and issuance', () => {
     const row: PreparedRow = { ...v6Row(), record_schema_version: 7, canonical: r.canonical, sha256: r.sha256, record_ref: 'PREP-X0TEST', submission_id: null }
     const spy = jest.fn(async () => ({ ok: true as const }))
     const r2 = await startPurchase(purchaseDeps(row, { examinationsIntact: spy, bind: async () => ({ submissionId: null, reason: 'not_found' }) }), OWNER, row.id)
-    expect(r2).toEqual({ ok: false, status: 404, code: 'not_found' }) // reached bind: every pre-bind check passed without the run check
+    // CR-V2-MVP-M4A: reached the render check, which comes after the run check (no templates are supplied here): every earlier check,
+    // the evidence and run checks included, passed without consulting the run check.
+    expect(r2).toEqual({ ok: false, status: 503, code: 'unavailable' })
     expect(spy).not.toHaveBeenCalled()
   })
 
@@ -446,10 +465,19 @@ describe('no new reachable behaviour', () => {
     expect(await preparePrepared(deps, OWNER, { state: state(), include_examinations: true })).toEqual({ ok: false, status: 409, code: 'examination_unavailable' })
   })
 
-  test('no app, component or production-port file reaches the examination record path; no production run check is wired', () => {
+  test('no app, component or production-port file reaches the examination record path; the run check is wired once (M4A)', () => {
     const files = [...walk(path.join(APP_ROOT, 'app')), ...walk(path.join(APP_ROOT, 'components')), ...walk(path.join(APP_ROOT, 'lib', 'creator-record-flow'))]
-    const reach = files.filter((f) => /examination-section|persisted-comparison|examination\/projection|examination\/receipt-reading|examinationsIntact/.test(readFileSync(f, 'utf8'))).map(rel)
+    const reach = files.filter((f) => /examination-section|persisted-comparison|examination\/projection|examination\/receipt-reading/.test(readFileSync(f, 'utf8'))).map(rel)
     expect(reach).toEqual([])
+    // CR-V2-MVP-M4A: the purchase and issuance run check is wired in the production ports only, to the one re-check of referenced
+    // readings, whose model-reading lookup is loaded on demand and only while both live-examination code locks are true.
+    expect(files.filter((f) => /examinationsIntact/.test(readFileSync(f, 'utf8'))).map(rel)).toEqual(['lib/creator-record-flow/production.ts'])
+    const production = readFileSync(path.join(APP_ROOT, 'lib', 'creator-record-flow', 'production.ts'), 'utf8')
+    expect(production.match(/examinationsIntact: [A-Za-z]+/g)).toEqual(['examinationsIntact: productionReadingsIntact', 'examinationsIntact: productionReadingsIntact'])
+    const wiring = readFileSync(path.join(APP_ROOT, 'lib', 'creator-record-flow', 'examination-customer.ts'), 'utf8')
+    const port = wiring.slice(wiring.indexOf('export function productionReadingsIntact'), wiring.indexOf('const MESSAGES'))
+    expect(port).toMatch(/customerLiveEnabledInThisBuild\(\)\s*\n?\s*\?\s*\{ listLiveAttempts: async/)
+    expect(port).not.toMatch(/^import /m)
   })
 
   test('guidance, facts, retrieval and interpretation never import the examination record path', () => {

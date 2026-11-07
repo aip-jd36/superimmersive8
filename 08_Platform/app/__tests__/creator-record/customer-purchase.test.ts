@@ -140,6 +140,8 @@ function world(over: Partial<PurchaseDeps> = {}) {
     bind,
     governance: governance(),
     now: () => NOW,
+    // CR-V2-MVP-M4A: the approved templates for the version's schema (placeholders, below); checkout refuses without them.
+    templates: () => ({ templates: TEMPLATES, approval: approvalOf(TEMPLATES) }),
     ...over,
   }
   return { deps, rows, subs, calls, add }
@@ -382,10 +384,15 @@ describe('renderV2ForIssuance', () => {
     expect(rendered).toHaveLength(0)
   })
 
-  test('without approved PDF templates (production: none until M0) the PDF builder refuses', async () => {
+  test('without approved PDF templates (production: none until M0) issuance refuses before anything is rendered', async () => {
     expect(approvedPdfTemplates()).toEqual({ templates: null, approval: null })
-    const { deps } = issuance([preparedRow({ submission_id: SUB_ID })], { templates: approvedPdfTemplates })
-    await expect(renderV2ForIssuance(deps, v2sub(), RECORD_ID, NOW)).rejects.toBeInstanceOf(CustomerPdfRefusal)
+    // CR-V2-MVP-M4A: the render check is part of the issuance authorization, so the refusal is typed and nothing reaches the PDF step.
+    const { deps, rendered } = issuance([preparedRow({ submission_id: SUB_ID })], { templates: (schema) => approvedPdfTemplates(undefined, schema) })
+    await expect(renderV2ForIssuance(deps, v2sub(), RECORD_ID, NOW)).rejects.toEqual(new V2IssuanceRefusal('templates_unavailable'))
+    expect(rendered).toHaveLength(0)
+    // The PDF builder itself still refuses them, as before.
+    const row = preparedRow({ submission_id: SUB_ID })
+    expect(() => buildCustomerDocument({ canonical: row.canonical, sha256: row.sha256, issued: { record_id: RECORD_ID, issued_on: '2026-11-01' }, templates: null, template_approval: null })).toThrow(CustomerPdfRefusal)
   })
 })
 

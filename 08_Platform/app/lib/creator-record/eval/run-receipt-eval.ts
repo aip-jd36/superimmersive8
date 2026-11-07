@@ -10,23 +10,34 @@
  *                    returns the ground truth. Exercises scoring; no network.
  *   --mode live      REAL, PAID Anthropic calls. Requires ALL of:
  *                      --confirm-paid-calls
- *                      --max-calls N     (hard ceiling on API requests)
- *                      --max-usd X       (hard ceiling on conservatively-accounted spend;
- *                                         needs --input/--output-usd-per-mtok)
- *                      ANTHROPIC_API_KEY in the process environment
+ *                      --max-calls N     (hard limit on API requests, retries included)
+ *                      --max-usd X       (PREDICTIVE, not a hard cap: checked before each document
+ *                                         against its worst case; actual usage is only known after
+ *                                         the response. Needs --input/--output-usd-per-mtok)
+ *                      --model ID        exactly the live pin (CR-V2-DOC-LIVE-1C-B2B)
+ *                      CREATOR_RECORD_EXTRACTION_API_KEY, the dedicated key, in the process environment
+ *                    An external workspace spending limit is required before any paid run; nothing here replaces it.
  *
  * Other options:
  *   --subset first-paid | all | id1,id2   (default: first-paid)
  *   --repeats N                           (default 1; 2 measures run-to-run agreement)
  *   --input-usd-per-mtok X --output-usd-per-mtok Y
  *                                         explicit pricing for cost figures; omitted = no cost computed
- *   --model ID                            live only; else CREATOR_RECORD_RECEIPT_MODEL or the adapter default
+ *   --model ID                            live only, and required: must equal the live pin. CREATOR_RECORD_RECEIPT_MODEL is
+ *                                         never inherited, and live mode refuses while it names another model
  *   --fixtures-dir DIR                    generated fixtures (default eval/fixtures/generated)
  *   --out FILE                            JSON report path (default: OS temp directory)
  *   --truth-corrections FILE|default      ALSO score under versioned additive truth corrections;
  *                                         reported separately in `corrected`, never replacing `summary`
  *
  * The API key is never read by this file, logged or written to the report.
+ *
+ * CR-V2-DOC-LIVE-1C-B2B — synthetic compatibility workflow. Live mode now matches the live examination's provider settings: the pinned
+ * model passed explicitly, the dedicated key, the 25-second request timeout, and no unsafe SDK environment variable. Every provider
+ * request is recorded in `requests` (metadata only: models, stop reason, tokens, latency, outcome). The run stops before any further
+ * request on an authentication failure, a rejected request, a response naming another model, a stop reason other than `end_turn` or
+ * `max_tokens`, or a malformed response; a reading is accepted only from an `end_turn` response. Each fixture's live input bound is
+ * computed offline in every mode (`live_input_bound`). None of this unlocks or reaches the live examination runner.
  */
 
 import { writeFileSync } from 'node:fs'
@@ -56,10 +67,16 @@ import {
   type ResolvedFixture,
 } from './fixtures'
 import { applyTruthCorrections, DEFAULT_TRUTH_CORRECTIONS_PATH, loadTruthCorrections } from './truth-corrections'
+import { isStructuredOutputParseFailure } from '@/lib/interview-engine/anthropic-structured-output-retry'
+import { LIVE_EXTRACTION_API_KEY_ENV, LIVE_EXTRACTION_MODEL, LIVE_REQUEST_TIMEOUT_MS } from '../evidence/live-caller'
+import { countPdfPages } from '../evidence/pdf-text-layer'
+import { boundLiveInputTokens, LIVE_BOUNDS, LIVE_MODEL_PRICES, unsafeSdkEnvironment } from '../live-examination/controls'
+/** The adapter's fixed failure kinds (`classifyAnthropicFailure`). Not imported: this file reaches the adapter only dynamically. */
+type ProviderFailureKind = 'timeout' | 'rate_limited' | 'overloaded' | 'server_error' | 'auth' | 'rejected' | 'connection' | 'unknown'
 import { SCORING_VERSION, scoreObservation, summarize, type EvalSummary, type Pricing, type RunObservation } from './score'
 
 export type EvalMode = 'dry-run' | 'mock' | 'live'
-/** Only ANTHROPIC_API_KEY (presence) and CREATOR_RECORD_RECEIPT_MODEL are consulted. */
+/** Only the dedicated key's presence, CREATOR_RECORD_RECEIPT_MODEL and the unsafe SDK variables are consulted. */
 export type EnvLike = Readonly<Record<string, string | undefined>>
 
 export interface EvalOptions {
@@ -76,18 +93,76 @@ export interface EvalOptions {
   truthCorrections: string | null
 }
 
+export interface LiveCaller {
+  call: ReceiptModelCaller
+  /** Fixed failure kind of a thrown provider error, decided by the SDK's own error classes. */
+  classifyFailure: (err: unknown) => ProviderFailureKind
+}
+
 export interface EvalDeps {
   /** Constructs the real caller. Only ever invoked in live mode, after every guard passes. */
-  createLiveCaller: (model: string | null) => Promise<ReceiptModelCaller>
+  createLiveCaller: (model: string) => Promise<LiveCaller>
   log: (line: string) => void
 }
 
 export const defaultEvalDeps: EvalDeps = {
   createLiveCaller: async (model) => {
     const mod = await import('../receipt-examination/examine.anthropic')
-    return mod.createAnthropicReceiptCaller(model ? { model } : undefined)
+    return {
+      call: mod.createAnthropicReceiptCaller({ model, apiKeyEnv: LIVE_EXTRACTION_API_KEY_ENV, timeoutMs: LIVE_REQUEST_TIMEOUT_MS }),
+      classifyFailure: mod.classifyAnthropicFailure,
+    }
   },
   log: (line) => console.log(line),
+}
+
+/** Failures that do not get better by trying again: the run stops before its next request. */
+const RUN_STOPPING_FAILURES: readonly ProviderFailureKind[] = ['auth', 'rejected']
+/** `end_turn` carries a reading; `max_tokens` carries none and gets the engine's one recovery retry. Anything else stops the run. */
+const COMPATIBLE_STOP_REASONS: readonly string[] = ['end_turn', 'max_tokens']
+
+/** One provider request. Metadata only: no prompt, document, model text or key. */
+export interface RequestRecord {
+  request_index: number
+  fixture_id: string
+  repeat: number
+  /** 1 = the first request for the document, 2 = the engine's recovery retry. */
+  attempt: number
+  max_tokens: number
+  requested_model: string
+  /** As the response names it. Null when no response arrived. */
+  response_model: string | null
+  stop_reason: string | null
+  /** Null when no response arrived, or it reported no usable count. */
+  input_tokens: number | null
+  output_tokens: number | null
+  latency_ms: number
+  outcome: 'parsed' | 'no_parsed_output' | 'parse_failure' | 'provider_error' | 'model_mismatch' | 'incompatible_stop_reason' | 'unexpected_response'
+  error_kind: ProviderFailureKind | null
+  /** The live examination's pre-call bound for this document, or null when the live bound refuses it. */
+  live_bound_input_tokens: number | null
+}
+
+/** What the live examination's pre-call checks would say about a fixture. Computed offline. */
+export interface LiveBoundRecord {
+  fixture_id: string
+  media_type: string
+  bytes: number
+  pdf_pages: number | null
+  admitted: boolean
+  input_tokens: number | null
+  refusal: string | null
+}
+
+export function liveBoundFor(id: string, media: string, bytes: Uint8Array): LiveBoundRecord {
+  const pdf = media === 'application/pdf'
+  const pages = pdf ? countPdfPages(bytes) : null
+  const base = { fixture_id: id, media_type: media, bytes: bytes.length, pdf_pages: pages }
+  if (media !== 'application/pdf' && media !== 'image/png' && media !== 'image/jpeg') return { ...base, admitted: false, input_tokens: null, refusal: 'unsupported_media_type' }
+  if (bytes.length > LIVE_BOUNDS.max_document_bytes) return { ...base, admitted: false, input_tokens: null, refusal: 'file_too_large' }
+  if (pdf && pages !== null && pages > LIVE_BOUNDS.max_pdf_pages) return { ...base, admitted: false, input_tokens: null, refusal: 'too_many_pages' }
+  const b = boundLiveInputTokens(bytes, media)
+  return b.ok ? { ...base, admitted: true, input_tokens: b.input_tokens, refusal: null } : { ...base, admitted: false, input_tokens: null, refusal: b.reason }
 }
 
 export function parseArgs(argv: string[]): EvalOptions {
@@ -122,14 +197,31 @@ export function parseArgs(argv: string[]): EvalOptions {
   }
 }
 
-/** Throws unless every live-mode guard is satisfied. Pure. */
-export function assertLiveAllowed(opts: EvalOptions, env: EnvLike): void {
+/**
+ * Throws unless every live-mode guard is satisfied. Pure. The SDK reads the real process environment itself, whatever `env` is passed,
+ * so both are checked for unsafe variables.
+ */
+export function assertLiveAllowed(opts: EvalOptions, env: EnvLike, processEnv: EnvLike = process.env): void {
   if (opts.mode !== 'live') return
   if (!opts.confirmPaidCalls) throw new Error('live mode requires --confirm-paid-calls')
   if (opts.maxCalls === null || opts.maxCalls < 1) throw new Error('live mode requires --max-calls N (N >= 1)')
   if (opts.maxUsd === null || opts.maxUsd <= 0) throw new Error('live mode requires --max-usd X (X > 0)')
   if (!opts.pricing) throw new Error('live mode requires --input-usd-per-mtok and --output-usd-per-mtok (needed for --max-usd)')
-  if (!env.ANTHROPIC_API_KEY) throw new Error('live mode requires ANTHROPIC_API_KEY in the process environment')
+  if (opts.model !== LIVE_EXTRACTION_MODEL) throw new Error(`live mode requires --model ${LIVE_EXTRACTION_MODEL}, the live pin`)
+  const inherited = env.CREATOR_RECORD_RECEIPT_MODEL
+  if (inherited !== undefined && inherited !== '' && inherited !== opts.model) throw new Error('live mode requires CREATOR_RECORD_RECEIPT_MODEL to be unset or to equal --model')
+  const unsafe = unsafeSdkEnvironment(env, processEnv)
+  if (unsafe.length > 0) throw new Error(`live mode requires these SDK variables to be unset: ${unsafe.join(', ')}`)
+  const key = env[LIVE_EXTRACTION_API_KEY_ENV]
+  if (!key) throw new Error(`live mode requires the dedicated key ${LIVE_EXTRACTION_API_KEY_ENV} in the process environment`)
+  if (key === env.ANTHROPIC_API_KEY) throw new Error(`live mode requires ${LIVE_EXTRACTION_API_KEY_ENV} to differ from ANTHROPIC_API_KEY (a dedicated key)`)
+}
+
+/** Whether the command-line pricing equals the live examination's cached price table for the model. Null outside live mode. */
+function pricingMatchesLiveTable(opts: EvalOptions): boolean | null {
+  if (opts.mode !== 'live' || !opts.pricing || !opts.model) return null
+  const p = LIVE_MODEL_PRICES[opts.model]
+  return !!p && p.input === opts.pricing.input_usd_per_mtok && p.output === opts.pricing.output_usd_per_mtok
 }
 
 // ---------------------------------------------------------------- estimates
@@ -217,6 +309,12 @@ export interface EvalReport {
     max_usd: number | null
   }
   stopped_early: string | null
+  /** CR-V2-DOC-LIVE-1C-B2B. Live mode: one entry per provider request, in order. Empty in dry-run and mock modes. */
+  requests: RequestRecord[]
+  /** CR-V2-DOC-LIVE-1C-B2B. Every selected fixture, every mode: the live examination's pre-call checks, computed offline. */
+  live_input_bound: LiveBoundRecord[]
+  /** Live mode: whether the command-line pricing equals the live examination's cached price table. */
+  pricing_matches_live_table: boolean | null
   /** Scores plus the raw model extraction (untrusted document-derived strings, kept for manual review). */
   per_document: Array<ReturnType<typeof scoreObservation> & { extraction: unknown }>
   /** Scores under the ORIGINAL ground truth. */
@@ -239,10 +337,12 @@ export async function runReceiptEval(opts: EvalOptions, deps: EvalDeps = default
   if (!manifest) throw new Error(`no manifest in ${opts.fixturesDir}: run generate_receipt_fixtures.py first`)
   if (manifest.spec_sha256 !== specSha256()) throw new Error('generated fixtures are stale: the spec changed since generation; regenerate them')
   const entries = new Map(manifest.documents.map((e) => [e.id, e]))
+  const bounds = new Map<string, LiveBoundRecord>()
   for (const f of fixtures) {
     const e = entries.get(f.id)
     if (!e) throw new Error(`fixture ${f.id} missing from manifest`)
-    readFixtureBytes(opts.fixturesDir, e) // hash check for every selected document, all modes
+    const bytes = readFixtureBytes(opts.fixturesDir, e) // hash check for every selected document, all modes
+    bounds.set(f.id, liveBoundFor(f.id, e.media_type, bytes))
   }
 
   const estIn = fixtures.reduce((a, f) => a + estimateInputTokens(entries.get(f.id)!), 0) * opts.repeats
@@ -260,7 +360,7 @@ export async function runReceiptEval(opts: EvalOptions, deps: EvalDeps = default
     subset: fixtures.map((f) => f.id),
     repeats: opts.repeats,
     pricing: opts.pricing,
-    model: opts.mode === 'live' ? opts.model ?? env.CREATOR_RECORD_RECEIPT_MODEL ?? 'adapter default' : null,
+    model: opts.mode === 'live' ? opts.model : null,
     manifest: {
       generator_version: manifest.generator_version,
       spec_sha256: manifest.spec_sha256,
@@ -286,6 +386,9 @@ export async function runReceiptEval(opts: EvalOptions, deps: EvalDeps = default
       max_usd: opts.maxUsd,
     },
     stopped_early: null,
+    requests: [],
+    live_input_bound: fixtures.map((f) => bounds.get(f.id)!),
+    pricing_matches_live_table: pricingMatchesLiveTable(opts),
     per_document: [],
     summary: null,
     corrected: null,
@@ -295,14 +398,20 @@ export async function runReceiptEval(opts: EvalOptions, deps: EvalDeps = default
     deps.log(`[dry-run] ${fixtures.length} documents x ${opts.repeats} repeat(s); no model calls made.`)
     deps.log(`[dry-run] worst-case API requests (one retry each): ${report.plan.max_api_requests}`)
     deps.log(`[dry-run] ESTIMATED tokens: input ~${estIn}, output ~${estOut}` + (report.plan.estimated_cost_usd === null ? ' (no pricing supplied)' : `, ESTIMATED cost ~$${report.plan.estimated_cost_usd.toFixed(4)}`))
+    const admitted = report.live_input_bound.filter((b) => b.admitted).length
+    deps.log(`[dry-run] live input bound: ${admitted} of ${fixtures.length} admitted, ${fixtures.length - admitted} refused`)
     return finish(report, opts, deps)
   }
 
-  const live = opts.mode === 'live' ? await deps.createLiveCaller(opts.model) : null
+  const requestedModel = opts.model ?? ''
+  const live = opts.mode === 'live' ? await deps.createLiveCaller(requestedModel) : null
   const observations: RunObservation[] = []
   for (let repeat = 1; repeat <= opts.repeats && !report.stopped_early; repeat++) {
     for (const f of fixtures) {
-      const estIn1 = estimateInputTokens(entries.get(f.id)!) * INPUT_ESTIMATE_SAFETY_FACTOR
+      if (report.stopped_early) break
+      const bound = bounds.get(f.id)!
+      // The worst case for the spend guard: the larger of the rough estimate (with its safety factor) and the live bound.
+      const estIn1 = Math.max(estimateInputTokens(entries.get(f.id)!) * INPUT_ESTIMATE_SAFETY_FACTOR, bound.input_tokens ?? 0)
       if (live && opts.maxCalls !== null && report.api_requests_made + 2 > opts.maxCalls) {
         report.stopped_early = `--max-calls ${opts.maxCalls} would be exceeded`
         break
@@ -314,30 +423,93 @@ export async function runReceiptEval(opts: EvalOptions, deps: EvalDeps = default
           break
         }
       }
-      const base = live ?? createOracleCaller(f)
+      const oracle = createOracleCaller(f)
+      let attempt = 0
+      const stop = (why: string) => {
+        if (!report.stopped_early) report.stopped_early = why
+      }
       const counted: ReceiptModelCaller = async (req) => {
-        if (!live) return base(req)
+        if (!live) return oracle(req)
+        // Nothing more reaches the provider once the run has stopped, including this document's retry.
+        if (report.stopped_early) throw new Error('run stopped')
+        attempt += 1
         report.api_requests_made += 1
         if (req.maxTokens === RETRY_MAX_TOKENS) report.spend.retry_calls += 1
+        const rec: RequestRecord = {
+          request_index: report.api_requests_made,
+          fixture_id: f.id,
+          repeat,
+          attempt,
+          max_tokens: req.maxTokens,
+          requested_model: requestedModel,
+          response_model: null,
+          stop_reason: null,
+          input_tokens: null,
+          output_tokens: null,
+          latency_ms: 0,
+          outcome: 'provider_error',
+          error_kind: null,
+          live_bound_input_tokens: bound.input_tokens,
+        }
+        report.requests.push(rec)
+        const started = Date.now()
+        let res: ReceiptModelResponse
         try {
-          const res = await base(req)
-          const tin = res.usage?.input_tokens ?? 0
-          const tout = res.usage?.output_tokens ?? 0
-          report.spend.succeeded_calls += 1
-          report.spend.accounted_input_tokens += tin
-          report.spend.accounted_output_tokens += tout
-          if (opts.pricing) {
-            const usd = (tin * opts.pricing.input_usd_per_mtok + tout * opts.pricing.output_usd_per_mtok) / 1_000_000
-            report.spend.accounted_usd! += usd
-            report.spend.conservative_usd! += usd
-          }
-          return res
+          res = await live.call(req)
         } catch (err) {
+          rec.latency_ms = Date.now() - started
           // Usage is unknown for a call that threw; charge its worst case.
           report.spend.failed_calls += 1
           if (opts.pricing) report.spend.conservative_usd! += worstCaseUsd(estIn1, req.maxTokens, opts.pricing)
+          if (isStructuredOutputParseFailure(err)) {
+            rec.outcome = 'parse_failure' // the engine's one recovery retry depends on seeing this error unchanged
+          } else {
+            rec.error_kind = live.classifyFailure(err)
+            if (RUN_STOPPING_FAILURES.includes(rec.error_kind)) stop(`provider ${rec.error_kind} failure: no further requests`)
+          }
           throw err
         }
+        rec.latency_ms = Date.now() - started
+        if (typeof res !== 'object' || res === null || typeof res.id !== 'string' || !Array.isArray(res.content)) {
+          rec.outcome = 'unexpected_response'
+          report.spend.failed_calls += 1
+          if (opts.pricing) report.spend.conservative_usd! += worstCaseUsd(estIn1, req.maxTokens, opts.pricing)
+          stop('unexpected response shape: no further requests')
+          throw new Error('unexpected response shape')
+        }
+        const usage = res.usage as { input_tokens?: unknown; output_tokens?: unknown } | undefined
+        const known = (n: unknown): n is number => typeof n === 'number' && Number.isInteger(n) && n >= 0
+        rec.input_tokens = known(usage?.input_tokens) ? (usage!.input_tokens as number) : null
+        rec.output_tokens = known(usage?.output_tokens) ? (usage!.output_tokens as number) : null
+        const responseModel = (res as unknown as { model?: unknown }).model
+        rec.response_model = typeof responseModel === 'string' ? responseModel : null
+        rec.stop_reason = typeof res.stop_reason === 'string' ? res.stop_reason : null
+        report.spend.succeeded_calls += 1
+        report.spend.accounted_input_tokens += rec.input_tokens ?? 0
+        report.spend.accounted_output_tokens += rec.output_tokens ?? 0
+        if (opts.pricing) {
+          const usd = ((rec.input_tokens ?? 0) * opts.pricing.input_usd_per_mtok + (rec.output_tokens ?? 0) * opts.pricing.output_usd_per_mtok) / 1_000_000
+          report.spend.accounted_usd! += usd
+          // A response without a usable count is charged its worst case, never zero.
+          report.spend.conservative_usd! += rec.input_tokens === null || rec.output_tokens === null ? Math.max(usd, worstCaseUsd(estIn1, req.maxTokens, opts.pricing)) : usd
+        }
+        if (rec.response_model !== requestedModel) {
+          rec.outcome = 'model_mismatch'
+          stop('the response named another model: no further requests')
+          throw new Error('model mismatch')
+        }
+        if (rec.stop_reason === null || !COMPATIBLE_STOP_REASONS.includes(rec.stop_reason)) {
+          rec.outcome = 'incompatible_stop_reason'
+          stop('incompatible stop reason: no further requests')
+          throw new Error('incompatible stop reason')
+        }
+        // As the live executor does: only an end_turn response can carry a reading.
+        if (rec.stop_reason !== 'end_turn') {
+          rec.outcome = 'no_parsed_output'
+          return { ...res, parsed_output: null }
+        }
+        rec.outcome = res.parsed_output == null ? 'no_parsed_output' : 'parsed'
+        return res
       }
       const bytes = readFixtureBytes(opts.fixturesDir, entries.get(f.id)!)
       const outcome: ExaminationOutcome = await examineReceiptDocument(bytes, { callModel: counted })

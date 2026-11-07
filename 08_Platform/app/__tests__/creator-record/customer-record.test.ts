@@ -440,6 +440,8 @@ describe('independence', () => {
       // the existing pure reconciliation and its persisted-examination adapter, and the record's own examination part.
       // No database, Storage, engine, model or SDK is reachable through any of them (see the X0 boundary tests).
       'customer-record/examination-section', 'evidence/document-observations', 'evidence/persisted-comparison', 'examination/projection',
+      // CR-V2-MVP-M2A: the bounded projection of a stored customer live attempt (pure: re-verifies the envelope; no engine or model).
+      'live-examination/projection',
     ].sort())
     // prototype/build-draft (which holds the pilot data) is reached for types only.
     for (const f of walk(ROOT)) expect(readFileSync(f, 'utf8')).not.toMatch(/^import\s(?!type\s)[^\n]*from\s+['"]\.\.\/prototype\/build-draft['"]/m)
@@ -468,6 +470,7 @@ describe('independence', () => {
       'lib/creator-record/customer-flow/purchase.ts',
       'lib/creator-record/customer-flow/service.ts',
       'lib/creator-record/customer-pdf/document-model.ts',
+      'lib/creator-record/customer-pdf/templates.ts', // CR-V2-MVP-M3A: the creator response and comparison field codes (schema 8 template labels)
       'lib/creator-record/governed/publication-authority.ts',
       'lib/creator-record/governed/sources.ts',
       'lib/creator-record/governed/synthetic-test-authority.ts', // CR-V2-MVP-M4C: type-only (the synthetic test bundle)
@@ -485,7 +488,9 @@ describe('independence', () => {
     const issuance = files.map(rel).filter((f) => !f.startsWith(ADMIN_UAT) && /^lib\/(payments|creator-record-artifacts)\/|^app\/api\/(webhooks|checkout|admin)\//.test(f))
     expect(issuance.length).toBeGreaterThan(0)
     const reach = (f: string) => Array.from(new Set(readFileSync(path.join(APP_ROOT, f), 'utf8').match(/@\/lib\/(creator-record\/customer-[a-z-]+\/[a-z-]+|creator-record-flow\/[a-z-]+)/g) ?? [])).sort()
+    // CR-V2-MVP-RETENTION-M1A: the admin retention-holds route reaches retention helpers only, never purchase or issuance.
     expect(issuance.filter((f) => reach(f).length > 0).map((f) => [f, reach(f)])).toEqual([
+      ['app/api/admin/creator-record-v2/retention/holds/route.ts', ['@/lib/creator-record-flow/evidence-http', '@/lib/creator-record-flow/http', '@/lib/creator-record-flow/retention-http', '@/lib/creator-record-flow/retention-production']],
       ['app/api/checkout/create-session/route.ts', ['@/lib/creator-record-flow/http', '@/lib/creator-record-flow/production', '@/lib/creator-record-flow/wording', '@/lib/creator-record/customer-flow/purchase']],
       ['lib/creator-record-artifacts/renderers.ts', ['@/lib/creator-record-flow/production']],
     ])

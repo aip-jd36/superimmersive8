@@ -402,7 +402,8 @@ describe('DOC-1 boundary: no examination, model, retrieval or interpretation cod
     const path = jest.requireActual<typeof import('path')>('path')
     const dir = path.join(__dirname, '..', '..', 'lib', 'creator-record', 'evidence-intake')
     const imports = readdirSync(dir).flatMap((f: string) => Array.from(readFileSync(path.join(dir, f), 'utf8').matchAll(/^import\b[^;]*?\sfrom\s+'([^']+)'/gm)).map((m) => (m as RegExpMatchArray)[1]))
-    expect(Array.from(new Set(imports)).sort()).toEqual(['./contract', './vocabulary', 'node:crypto'])
+    // CR-V2-MVP-RETENTION-M1A: ./retention reuses ./service's cleanup (still only each other).
+    expect(Array.from(new Set(imports)).sort()).toEqual(['./contract', './service', './vocabulary', 'node:crypto'])
   })
 })
 

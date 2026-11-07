@@ -18,6 +18,9 @@ import { RECEIPT_EXTRACTION_SCHEMA } from './schema'
 import type { ReceiptModelCaller, ReceiptModelResponse } from './examine'
 
 export const DEFAULT_RECEIPT_MODEL = 'claude-sonnet-5'
+/** The only endpoint. Set explicitly, so ANTHROPIC_BASE_URL cannot redirect a request. */
+export const ANTHROPIC_API_BASE_URL = 'https://api.anthropic.com'
+const SILENT_LOGGER = { debug: () => undefined, info: () => undefined, warn: () => undefined, error: () => undefined }
 
 export interface AnthropicReceiptCallerOptions {
   model?: string
@@ -32,6 +35,19 @@ export interface AnthropicReceiptCallerOptions {
   apiKeyEnv?: string
 }
 
+/** CR-V2-DOC-LIVE-1B. A fixed kind for a thrown provider error, decided by the SDK's own error classes. Carries no message or content. */
+export type ProviderFailureKind = 'timeout' | 'rate_limited' | 'overloaded' | 'server_error' | 'auth' | 'rejected' | 'connection' | 'unknown'
+
+export function classifyAnthropicFailure(err: unknown): ProviderFailureKind {
+  if (err instanceof Anthropic.APIConnectionTimeoutError) return 'timeout' // before its parent, APIConnectionError
+  if (err instanceof Anthropic.RateLimitError) return 'rate_limited'
+  if (err instanceof Anthropic.AuthenticationError || err instanceof Anthropic.PermissionDeniedError) return 'auth'
+  if (err instanceof Anthropic.BadRequestError || err instanceof Anthropic.NotFoundError || err instanceof Anthropic.UnprocessableEntityError || err instanceof Anthropic.ConflictError) return 'rejected'
+  if (err instanceof Anthropic.InternalServerError) return err.status === 529 ? 'overloaded' : 'server_error'
+  if (err instanceof Anthropic.APIConnectionError) return 'connection'
+  return 'unknown'
+}
+
 export function resolveReceiptModel(options?: AnthropicReceiptCallerOptions): string {
   return options?.model ?? process.env.CREATOR_RECORD_RECEIPT_MODEL ?? DEFAULT_RECEIPT_MODEL
 }
@@ -42,8 +58,19 @@ export function createAnthropicReceiptCaller(options?: AnthropicReceiptCallerOpt
   if (!apiKey) {
     throw new Error(`${keyEnv} is not set in this process environment. Live receipt examination cannot run.`)
   }
+  // CR-V2-DOC-LIVE-1C-A. The SDK also reads its own environment variables. Each one that could redirect a request, log its content or
+  // add a credential is fixed here. ANTHROPIC_CUSTOM_HEADERS has no option that turns it off, so its presence refuses.
+  if (process.env.ANTHROPIC_CUSTOM_HEADERS) throw new Error('ANTHROPIC_CUSTOM_HEADERS is set. Live receipt examination cannot run.')
   const model = resolveReceiptModel(options)
-  const client = new Anthropic({ apiKey, timeout: options?.timeoutMs ?? 55_000, maxRetries: 0 })
+  const client = new Anthropic({
+    apiKey,
+    authToken: null,
+    baseURL: ANTHROPIC_API_BASE_URL,
+    logLevel: 'off',
+    logger: SILENT_LOGGER,
+    timeout: options?.timeoutMs ?? 55_000,
+    maxRetries: 0,
+  })
 
   return async ({ content, maxTokens }) => {
     const response = await client.messages.parse({

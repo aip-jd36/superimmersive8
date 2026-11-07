@@ -18,8 +18,16 @@ import { resolveSellerIdentity } from '../integration/seller-identity'
 import { reconcileToolEvidence, type EvidenceReconciliation, type ExaminedDocument } from './document-observations'
 import { notRun } from './plan-cross-check'
 
-/** The comparison method a record names (the existing reconciliation over the recovered receipt reading). */
-export const PERSISTED_COMPARISON_METHOD = { id: 'si8/creator-record-v2-evidence-reconciliation', version: 1 } as const
+/**
+ * The comparison method a new record names. CR-V2-DOC-LIVE-1A: version 2 makes no determination, positive or negative. A declaration
+ * and an observation are shown separately. `comparePersistedExamination` below could record "appears consistent" without the plan
+ * cross-check that known omissions need (it passes `notRun`), and a model that omits a plan looks exactly like a document with one.
+ */
+export const PERSISTED_COMPARISON_METHOD = { id: 'si8/creator-record-v2-evidence-reconciliation', version: 2 } as const
+/** What records made before version 2 name. They stay readable exactly as stored. */
+export const HISTORICAL_COMPARISON_METHOD = { id: 'si8/creator-record-v2-evidence-reconciliation', version: 1 } as const
+/** The only result version 2 records. */
+export const COMPARISON_WITHHELD = { result: 'not_assessed', reason: 'determination_withheld' } as const
 
 export interface PersistedComparisonInput {
   tool_index: number

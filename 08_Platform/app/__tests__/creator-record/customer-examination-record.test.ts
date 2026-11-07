@@ -271,7 +271,7 @@ describe('creator responses: closed codes, this version only, never carried sile
     expect(v4.examination!.responses.every((r) => r.given_in_version === 4)).toBe(true)
   })
 
-  test('changing the declaration recomputes the comparison and drops the comparison response from the candidates', async () => {
+  test('changing the declaration replaces the comparison and drops the comparison response from the candidates', async () => {
     const w = world()
     const v1 = viewOf(await prepare(w.deps, { include_examinations: true }))
     const obs = v1.examination!.documents[0].observations[0]
@@ -281,7 +281,7 @@ describe('creator responses: closed codes, this version only, never carried sile
     ] }))
     const v3 = viewOf(await preparePrepared(w.deps, OWNER, { state: state('Standard'), documents: REF, draft_id: v2.draft_id, include_examinations: true }))
     expect(v3.examination!.comparisons[0].declared.plan).toBe('Standard')
-    expect(v3.examination!.comparisons[0].plan).not.toEqual(v2.examination!.comparisons[0].plan)
+    expect(v3.examination!.comparisons[0].plan).toEqual({ result: 'not_assessed', reason: 'determination_withheld' })
     expect(v3.carry_forward_candidates).toEqual([{ target: { kind: 'observation', run_id: RUN_ID, observation_id: obs.observation_id }, code: 'reading_incorrect' }])
   })
 

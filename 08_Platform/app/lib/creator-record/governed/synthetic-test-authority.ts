@@ -287,7 +287,104 @@ const PDF_TEMPLATE_APPROVAL: PdfTemplateApproval = {
   review_ref: 'SYN-PDF-7-TEMPLATE-1',
 }
 
-export const CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY: (PublicationAuthorityBundle & { readonly authority_class: 'synthetic_test' }) | null = Object.freeze({
+/**
+ * CR-V2-MVP-M3A: placeholder templates for the examination-bearing record (schema 8), and their synthetic approval. Local tests
+ * only, like everything here: every string is marked TEST, the wording lock applies unchanged, and the approval names the synthetic
+ * authority. CR-V2-MVP-M4A: part of the synthetic test bundle only (`pdf_template_sets`), so schema-aware selection can be tested end to
+ * end in an isolated synthetic test; never part of the governance bundle, and governance mode refuses them by their text.
+ */
+const EXAMINATION_PDF_TEMPLATES = {
+  ...PDF_TEMPLATES,
+  version: 3,
+  record_schema: { id: RECORD_SCHEMA.id, version: 8 },
+  sections: {
+    ...PDF_TEMPLATES.sections,
+    guidance: { ...PDF_TEMPLATES.sections.guidance, heading: t('6. Placeholder items') },
+    open_items: { ...PDF_TEMPLATES.sections.open_items, heading: t('7. Open items') },
+    not_done: { ...PDF_TEMPLATES.sections.not_done, heading: t('8. Not done') },
+    provenance: { ...PDF_TEMPLATES.sections.provenance, heading: t('9. Provenance') },
+  },
+  examination: {
+    heading: t('5. Documents and what was read from them'),
+    intro: [t('What each document appears to show, as read by an automated examination. A reading is not something you told us, and it is not checked by a person.'), t('Readings do not change any item in the next section.')],
+    document_heading: t('Document {n}'),
+    status: t('Examination'),
+    status_labels: { not_examined: t('Not examined'), examined: t('Examined'), could_not_examine: t('Could not be examined') },
+    failure: t('Reason'),
+    failure_labels: { unsupported_format: t('Unsupported format'), file_too_large: t('File too large'), empty_file: t('Empty file'), model_error: t('Examination error'), structured_output_missing: t('No reading returned'), schema_invalid: t('Reading not usable') },
+    observations_heading: t('Readings'),
+    no_observations: t('No readings.'),
+    field_labels: {
+      document_type: t('Kind of document'), readability: t('Legibility'), multiple_plans_shown: t('More than one plan shown'), instruction_like_text_present: t('Text addressed to an AI'),
+      issuer_name: t('Issuer'), product_or_plan_name: t('Product or plan'), transaction_date: t('Transaction date'), service_period_start: t('Service period start'), service_period_end: t('Service period end'), plan_candidate: t('Plan name shown'),
+    },
+    qualifier: t('Where shown'),
+    qualifier_labels: { heading_or_title: t('Heading or title'), current_plan_label: t('Current plan label'), charge_line: t('Charge line'), account_detail: t('Account detail'), other: t('Elsewhere') },
+    classification_labels: {
+      document_type: { receipt: t('Receipt'), invoice: t('Invoice'), subscription_confirmation: t('Subscription confirmation'), billing_screenshot: t('Billing screenshot'), not_a_billing_document: t('Not a billing document'), unknown: t('Unknown') },
+      readability: { legible: t('Legible'), partially_legible: t('Partly legible'), illegible: t('Illegible') },
+      multiple_plans_shown: { true: t('Yes'), false: t('No') },
+      instruction_like_text_present: { true: t('Yes'), false: t('No') },
+    },
+    basis: t('Basis'),
+    basis_labels: { printed_text: t('Printed on the document'), examiner_classification: t('The examination\'s own description') },
+    reading: t('Reading'),
+    reading_labels: { present: t('Shown'), not_shown: t('Not shown'), unreadable: t('Unreadable'), ambiguous: t('Ambiguous') },
+    value: t('Value'),
+    excerpt: t('Excerpt'),
+    your_response: t('Your response'),
+    response_labels: { reading_incorrect: t('You said this reading is incorrect'), wrong_document: t('You said this is the wrong document'), other_plan_applies: t('You said another plan applies'), not_relevant: t('You said this is not relevant') },
+    comparison_response: t('Your response about the {field}'),
+    comparison_field_labels: { provider: t('provider'), plan: t('plan') },
+    limitations_heading: t('Limitations of this examination'),
+    limitation_labels: {
+      recorded_test_data_not_model_output: t('Recorded test data, not an examination of your document'), observations_not_verified: t('Readings are not checked by a person'),
+      no_location_reference: t('No page or position is given'), fields_not_established: t('Some details were not established'), single_plan_reading_does_not_exclude_others: t('One plan reading does not rule out others'),
+      multiple_plans_shown: t('More than one plan is shown'), instruction_like_text_present: t('The document contains text addressed to an AI'), not_a_billing_document: t('Not a billing document'),
+      partially_legible: t('Partly legible'), illegible: t('Illegible'),
+    },
+    provenance_heading: t('Examination source'),
+    reference: t('Examination reference'),
+    method: t('Method'),
+    method_labels: { fixture_replay: t('Recorded test data replay') },
+    content: t('Content'),
+    content_labels: { known_synthetic_fixture: t('A known SI8 synthetic test document') },
+    profile: t('Reading profile'),
+    profile_value: t('{id} version {version}'),
+    comparison_note: t('This record does not say whether a document matches what you told us.'),
+    open_items_pointer: t('Your documents and their readings are listed in section 5.'),
+  },
+  live_examination: {
+    method: t('Automated reading by an AI model'),
+    provider: t('Provider'),
+    provider_labels: { anthropic: t('Anthropic') },
+    model: t('Model'),
+    executed_at: t('Read at'),
+    content_labels: { customer_document: t('Your own uploaded document') },
+    limitation_labels: {
+      mock_test_data_not_model_output: t('Test data, not a reading of your document'), observations_not_verified: t('Readings are not checked by a person'),
+      no_location_reference: t('No page or position is given'), fields_not_established: t('Some details were not established'), single_plan_reading_does_not_exclude_others: t('One plan reading does not rule out others'),
+      multiple_plans_shown: t('More than one plan is shown'), instruction_like_text_present: t('The document contains text addressed to an AI'), not_a_billing_document: t('Not a billing document'),
+      partially_legible: t('Partly legible'), illegible: t('Illegible'),
+    },
+  },
+}
+
+/** Pinned (recomputed by the test). */
+export const SYNTHETIC_EXAMINATION_PDF_TEMPLATES_FINGERPRINT = 'cbdb3ba66bc94cc98125f50772e80cbbbcd1ca4541b7bb870767a9cd16e8bff9'
+
+export const SYNTHETIC_TEST_EXAMINATION_PDF: { templates: typeof EXAMINATION_PDF_TEMPLATES; approval: PdfTemplateApproval } = Object.freeze({
+  templates: EXAMINATION_PDF_TEMPLATES,
+  approval: Object.freeze({
+    ...PDF_TEMPLATE_APPROVAL,
+    version: 3,
+    fingerprint: SYNTHETIC_EXAMINATION_PDF_TEMPLATES_FINGERPRINT,
+    record_schema: { id: RECORD_SCHEMA.id, version: 8 },
+    review_ref: 'SYN-M3A-TEMPLATE-V8-1',
+  }),
+})
+
+export const CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY:(PublicationAuthorityBundle & { readonly authority_class: 'synthetic_test' }) | null = Object.freeze({
   authority_class: 'synthetic_test' as const,
   registry_input: { questions: QUESTIONS, observation_map: OBSERVATION_MAP, prohibited_dependency_targets: PROHIBITED_DEPENDENCY_TARGETS, semantic_mappings: SEMANTIC_MAPPINGS },
   publication_ledger: LEDGER,
@@ -301,4 +398,5 @@ export const CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY: (PublicationAuthorityBundl
   questionnaire_approval: QUESTIONNAIRE_APPROVAL,
   pdf_templates: PDF_TEMPLATES,
   pdf_template_approval: PDF_TEMPLATE_APPROVAL,
+  pdf_template_sets: [SYNTHETIC_TEST_EXAMINATION_PDF],
 })

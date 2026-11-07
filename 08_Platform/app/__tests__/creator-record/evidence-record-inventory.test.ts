@@ -200,7 +200,7 @@ describe('CR-V2-DOC-1B: payment and issuance refuse a record whose documents are
       boundTo: async () => row,
       latestVersion: async () => row,
       governance: (date) => withCommercialSupportUnderTest(approvedGovernanceSnapshot(date, TOPIC_CLAIMS_FIXTURE, bundle)),
-      templates: () => approvedPdfTemplates(bundle),
+      templates: (schema) => approvedPdfTemplates(bundle, schema),
       renderPdf: async () => new Uint8Array([1]),
       ...(evidenceIntact ? { evidenceIntact } : {}),
     }, { id: SUB, user_id: USER, tier: 'creator_record', creator_record_product: 'v2' }, 'CR-2026-33333333', NOW)
@@ -209,6 +209,7 @@ describe('CR-V2-DOC-1B: payment and issuance refuse a record whose documents are
     checkV2Checkout({
       submissions: 'open', issuance: 'enabled', hasPilotAccess: async () => true, getPrepared: async () => row, latestVersion: async () => row, boundTo: async () => row,
       bind: async () => ({ submissionId: SUB, reason: 'existing' }), governance: (date) => withCommercialSupportUnderTest(approvedGovernanceSnapshot(date, TOPIC_CLAIMS_FIXTURE, bundle)), now: () => NOW,
+      templates: (schema) => approvedPdfTemplates(bundle, schema),
       ...(evidenceIntact ? { evidenceIntact } : {}),
     }, USER, { id: SUB, user_id: USER, tier: 'creator_record', creator_record_product: 'v2' }).then((r) => (r.ok ? 'ok' : r.code))
 
@@ -226,6 +227,14 @@ describe('CR-V2-DOC-1B: payment and issuance refuse a record whose documents are
     const failing = async () => ({ ok: false, reason }) as Integrity
     expect(await checkout(row, failing)).toBe('evidence_unavailable')
     expect(await issue(row, failing)).toBe('evidence_unavailable')
+  })
+
+  // CR-V2-MVP-RETENTION-M1A (8N): withdrawn AI-processing consent pauses checkout and issuance, with its own issuance refusal code.
+  test('consent withdrawn for a referenced document: checkout refuses and issuance refuses as consent_withdrawn', async () => {
+    const row = await reviewedBound([ref(1)])
+    const withdrawn = async () => ({ ok: false, reason: 'consent_withdrawn' }) as Integrity
+    expect(await checkout(row, withdrawn)).toBe('evidence_unavailable')
+    expect(await issue(row, withdrawn)).toBe('consent_withdrawn')
   })
 
   test('without the evidence check a record with documents is neither sold nor issued; one without documents is unaffected', async () => {

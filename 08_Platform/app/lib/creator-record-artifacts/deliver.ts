@@ -5,6 +5,7 @@
  * Access contract (CR-ARTIFACT-1A §4):
  *   anonymous                      → 401
  *   owner or admin, issued         → 200 PDF (bytes re-verified against the recorded SHA-256), private, no-store
+ *   owner, v2 issued > 12 months   → 410 {"code":"access_expired"} (CR-V2-MVP-RETENTION-M1A; admin unchanged)
  *   owner or admin, pending        → 409 {"status":"processing"}
  *   owner or admin, legacy only    → 200 PDF streamed server-side from the legacy bucket, private, no-store
  *                                    (CR-LEGACY-DOCUMENT-SECURITY-1C: never a redirect or a storage URL)
@@ -34,6 +35,32 @@ export interface DeliveryPorts {
   /** Read-only, bound to the legacy bucket: null ONLY when the object definitely does not exist. */
   getLegacyObject(path: string): Promise<Uint8Array | null>
   log(event: { outcome: string; role: 'anonymous' | 'owner' | 'admin' | 'other' }): void
+  /** The clock for the customer access period (CR-V2-MVP-RETENTION-M1A). Default: the system clock. */
+  now?(): Date
+}
+
+/**
+ * CR-V2-MVP-RETENTION-M1A — a Creator Record v2 PDF is downloadable by its OWNER for 12 calendar months after issuance (provisional
+ * product policy). Admin access is unchanged, and so is the stored record (internal retention is a separate policy): this is an
+ * access rule only. V1 and legacy records are untouched (no access period was ever stated for them). The v2 generator version
+ * identifies a v2 artifact: the database allows it on v2 submissions only (20261102000000).
+ */
+export const CUSTOMER_PDF_ACCESS_MONTHS = 12
+const V2_GENERATOR_RE = /^creator-record-v2-pdf-v[1-9][0-9]*$/
+
+export function customerAccessEnds(issuedAt: string): Date | null {
+  const t = Date.parse(issuedAt)
+  if (!Number.isFinite(t)) return null
+  const end = new Date(t)
+  end.setUTCMonth(end.getUTCMonth() + CUSTOMER_PDF_ACCESS_MONTHS)
+  return end
+}
+
+/** True when an owner may no longer download this artifact. Fails closed: an unreadable issuance time ends access. */
+export function customerAccessExpired(artifact: Pick<ArtifactRow, 'generator_version' | 'issued_at'>, now: Date): boolean {
+  if (!V2_GENERATOR_RE.test(artifact.generator_version)) return false
+  const end = artifact.issued_at ? customerAccessEnds(artifact.issued_at) : null
+  return end === null || now.getTime() >= end.getTime()
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -116,6 +143,10 @@ async function deliver(submissionId: string, ports: DeliveryPorts): Promise<Resp
     return json({ status: 'processing' }, 409)
   }
   if (artifact?.status === 'issued') {
+    if (role === 'owner' && customerAccessExpired(artifact, ports.now ? ports.now() : new Date())) {
+      ports.log({ outcome: 'access_expired', role })
+      return json({ code: 'access_expired' }, 410)
+    }
     const bytes = await ports.getObject(artifact.storage_path)
     if (!bytes || sha256Hex(bytes) !== artifact.sha256) {
       ports.log({ outcome: 'integrity_failure', role })

@@ -638,9 +638,18 @@ describe('rendering boundary', () => {
     const files = [...walk(path.join(APP_ROOT, 'app')), ...walk(path.join(APP_ROOT, 'components')), ...walk(path.join(APP_ROOT, 'lib'))].filter((f) => !f.startsWith(ROOT))
     const rel = (f: string) => path.relative(APP_ROOT, f).split(path.sep).join('/')
     // CR-V2-MVP-M4B: the publication authority bundle shape (type-only).
-    const TYPE_ONLY = ['lib/creator-record/customer-flow/approved-inputs.ts', 'lib/creator-record/customer-flow/purchase.ts', 'lib/creator-record/governed/publication-authority.ts', 'lib/creator-record/governed/sources.ts', 'lib/creator-record/governed/synthetic-test-authority.ts']
-    expect(files.filter((f) => importsOf(f).some((i) => i.includes('customer-pdf'))).map(rel).sort()).toEqual(TYPE_ONLY)
+    const TYPE_ONLY = ['lib/creator-record/customer-flow/approved-inputs.ts', 'lib/creator-record/governed/publication-authority.ts', 'lib/creator-record/governed/sources.ts', 'lib/creator-record/governed/synthetic-test-authority.ts']
+    // CR-V2-MVP-M4A: the issuance rules build (and discard) the pure document model, to refuse before checkout and before issuance a
+    // version the approved templates for its schema could not render. They never import the renderer (react-pdf) or the templates.
+    const DOCUMENT_MODEL_ONLY = ['lib/creator-record/customer-flow/purchase.ts']
+    expect(files.filter((f) => importsOf(f).some((i) => i.includes('customer-pdf'))).map(rel).sort()).toEqual([...TYPE_ONLY, ...DOCUMENT_MODEL_ONLY].sort())
     for (const f of TYPE_ONLY) expect(readFileSync(path.join(APP_ROOT, f), 'utf8')).not.toMatch(/^\s*import\s+(?!type\b)[^\n]*customer-pdf/m)
+    for (const f of DOCUMENT_MODEL_ONLY) {
+      const src = readFileSync(path.join(APP_ROOT, f), 'utf8')
+      expect(importsOf(path.join(APP_ROOT, f)).filter((i) => i.includes('customer-pdf')).sort()).toEqual(['../customer-pdf/document-model', '../customer-pdf/templates'])
+      expect(src).not.toMatch(/^\s*import\s+(?!type\b)[^\n]*customer-pdf\/(templates|CustomerRecordPDF|text-layout)/m)
+      expect(src).not.toMatch(/import\(['"][^'"]*customer-pdf/)
+    }
     // The renderer (react-pdf) is loaded lazily, by the production v2 issuance port only.
     const lazy = files.filter((f) => /import\(['"][^'"]*customer-pdf\/CustomerRecordPDF['"]\)/.test(readFileSync(f, 'utf8'))).map(rel)
     expect(lazy).toEqual(['lib/creator-record-flow/production.ts'])
@@ -649,7 +658,8 @@ describe('rendering boundary', () => {
   test('it reads only the verified record and the template contract: no database, Storage, payment, governance or v1 PDF code', () => {
     const targets = new Set(walk(ROOT).flatMap(importsOf))
     expect(Array.from(targets).sort()).toEqual([
-      '../contract/compose', '../contract/types', '../customer-record/record', '../evidence-intake/vocabulary', '../integration/objectives', '../record-core/canonical', '../record-core/projection',
+      // CR-V2-MVP-M3A: the examination envelope's closed codes and the response codes (schema 8), read-only vocabularies.
+      '../contract/compose', '../contract/types', '../customer-record/examination-section', '../customer-record/record', '../evidence-intake/vocabulary', '../examination/envelope', '../integration/objectives', '../live-examination/envelope', '../record-core/canonical', '../record-core/projection',
       './document-model', './templates', './text-layout', '@react-pdf/renderer', 'node:path', 'react',
     ])
   })
