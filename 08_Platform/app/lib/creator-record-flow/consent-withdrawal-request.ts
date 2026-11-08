@@ -14,7 +14,15 @@ export const CONSENT_WITHDRAWAL_PATH = '/api/creator-record-v2/consent-withdrawa
 export const CONSENT_WITHDRAWAL_TIMEOUT_MS = 15_000
 
 /** The dashboard's server-rendered starting state for the control (`consent-dashboard.ts`). */
-export type ConsentControlInitial = { state: 'active' } | { state: 'withdrawn'; withdrawnAt: string } | { state: 'unknown' }
+export type ConsentControlInitial =
+  | { state: 'active' }
+  | { state: 'withdrawn'; withdrawnAt: string }
+  /** Status unreadable; the online withdrawal is confirmed to exist, so it is still offered. */
+  | { state: 'unknown' }
+  /** The online withdrawal is confirmed not to exist yet: support only. */
+  | { state: 'unavailable' }
+  /** Neither the status nor the online withdrawal could be established: support only, nothing promised. */
+  | { state: 'unconfirmed' }
 
 export type WithdrawalOutcome = { kind: 'withdrawn'; withdrawnAt: string } | { kind: 'signed_out' } | { kind: 'uncertain' }
 

@@ -5,10 +5,13 @@
  * sees an unchanged dashboard. Read-only, service role, the session user only.
  *
  * CR-V2-MVP-LAUNCH-FOUNDATION-1-CORRECTIONS-1: a state that cannot be read (an error, a timeout, an unexpected response) no longer
- * removes the creator's ability to withdraw. A creator with a Creator Record v2 submission or document then sees the control in an
- * `unknown` state: it says the status cannot be shown and still offers the existing, idempotent withdrawal. This is display only;
- * it never authorizes anything (AI examination is decided by the database, which refuses it without a recorded permission and
- * after a withdrawal). Only when there is no sign of Creator Record v2 use at all does an unreadable state hide the control.
+ * silently removes the control from a creator with a Creator Record v2 submission or document. What the control then offers depends
+ * on whether the online withdrawal can work, established by a head-only count of the creator's own rows in the withdrawal ledger
+ * (`creator_record_v2_consent_withdrawals`, created in the same migration as the withdrawal function, 20261111000000):
+ *   - ledger readable           → `unknown`:     the status cannot be shown, the same idempotent withdrawal is still offered;
+ *   - ledger confirmed missing  → `unavailable`: support only (no button), because the online withdrawal cannot work;
+ *   - ledger not established    → `unconfirmed`: support only (no button); online withdrawal is not promised.
+ * Display only: this never authorizes anything (AI examination is decided by the database).
  */
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import type { ConsentControlInitial } from './consent-withdrawal-request'
@@ -18,6 +21,9 @@ export type ConsentControlState = { show: false } | { show: true; initial: Conse
 
 /** How long the dashboard waits for each read before treating it as unreadable. */
 export const CONSENT_READ_TIMEOUT_MS = 4_000
+
+/** PostgREST / PostgreSQL codes meaning the function or table does not exist (a migration is not applied), not a transient fault. */
+const MISSING_OBJECT_CODES: ReadonlySet<string> = new Set(['PGRST202', '42883', 'PGRST205', '42P01'])
 
 type Db = Pick<typeof supabaseAdmin, 'rpc' | 'from'>
 
@@ -32,6 +38,9 @@ async function bounded<T>(work: PromiseLike<T>, ms: number): Promise<T | typeof 
   }
 }
 
+const isMissingObject = (error: unknown): boolean =>
+  !!error && typeof error === 'object' && typeof (error as { code?: unknown }).code === 'string' && MISSING_OBJECT_CODES.has((error as { code: string }).code)
+
 /** The session user's own withdrawal state: known (withdrawn or not), or unreadable. */
 async function readState(db: Db, userId: string, ms: number): Promise<{ withdrawn: false } | { withdrawn: true; at: string } | null> {
   try {
@@ -44,6 +53,21 @@ async function readState(db: Db, userId: string, ms: number): Promise<{ withdraw
     return typeof row.withdrawn_at === 'string' && !Number.isNaN(Date.parse(row.withdrawn_at)) ? { withdrawn: true, at: row.withdrawn_at } : null
   } catch {
     return null
+  }
+}
+
+/** Whether the online withdrawal exists: the ledger is readable (present), confirmed missing (absent), or not established. */
+async function withdrawalCapability(db: Db, userId: string, ms: number): Promise<'present' | 'absent' | 'unknown'> {
+  try {
+    const r = await bounded(
+      db.from('creator_record_v2_consent_withdrawals').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+      ms,
+    )
+    if (r === TIMEOUT) return 'unknown'
+    if (r.error) return isMissingObject(r.error) ? 'absent' : 'unknown'
+    return typeof r.count === 'number' ? 'present' : 'unknown'
+  } catch {
+    return 'unknown'
   }
 }
 
@@ -67,7 +91,6 @@ export async function consentControlState(
 ): Promise<ConsentControlState> {
   const db = options.db ?? supabaseAdmin
   const ms = options.timeoutMs ?? CONSENT_READ_TIMEOUT_MS
-  const unknown: ConsentControlState = { show: true, initial: { state: 'unknown' } }
   const state = await readState(db, userId, ms)
   if (state && state.withdrawn) return { show: true, initial: { state: 'withdrawn', withdrawnAt: state.at } }
   const docs = await hasOwnDocuments(db, userId, ms)
@@ -76,6 +99,9 @@ export async function consentControlState(
     if (docs === true || (docs === null && options.hasV2Submission)) return { show: true, initial: { state: 'active' } }
     return { show: false }
   }
-  // Unreadable state: keep the withdrawal available to any sign of Creator Record v2 use.
-  return options.hasV2Submission || docs === true ? unknown : { show: false }
+  // Unreadable state. No sign of Creator Record v2 use: unchanged dashboard.
+  if (!options.hasV2Submission && docs !== true) return { show: false }
+  const capability = await withdrawalCapability(db, userId, ms)
+  if (capability === 'present') return { show: true, initial: { state: 'unknown' } }
+  return { show: true, initial: { state: capability === 'absent' ? 'unavailable' : 'unconfirmed' } }
 }

@@ -59,6 +59,9 @@ export const V2_CONSENT = {
   signed_out: 'You are signed out, so your withdrawal was not recorded. Sign in again, then withdraw.',
   // Shown when the current state cannot be read: the withdrawal stays available (the request is idempotent).
   unknown: 'Your AI examination permission status cannot be shown right now. You can still withdraw permission here; if you have already withdrawn, withdrawing again changes nothing. You can also email jd@superimmersive8.com.',
+  // Support only: no online withdrawal is offered or promised.
+  unavailable: 'Withdrawing AI examination permission is not available online yet. To withdraw, email jd@superimmersive8.com.',
+  unconfirmed: 'Your AI examination permission status cannot be shown right now. To withdraw, email jd@superimmersive8.com, or try again later.',
 } as const
 
 export const V2_REVIEW_PAGE = {

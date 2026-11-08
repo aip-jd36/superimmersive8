@@ -9,7 +9,8 @@
  *
  * CR-V2-MVP-LAUNCH-FOUNDATION-1-CORRECTIONS-1: when the server could not read the current state (`unknown`), the control says so
  * and still offers the same idempotent withdrawal. A failed or timed-out request is reported as unconfirmed, never as "nothing
- * changed"; only the server's confirmation shows the withdrawn state.
+ * changed"; only the server's confirmation shows the withdrawn state. When the online withdrawal is confirmed missing
+ * (`unavailable`) or cannot be confirmed (`unconfirmed`), only the support contact is shown: no button, nothing promised.
  */
 import { useState } from 'react'
 import { V2_CONSENT } from '@/lib/creator-record-flow/wording'
@@ -45,6 +46,11 @@ export function ConsentWithdrawalControl(props: ConsentWithdrawalControlProps) {
           <p className="text-sm text-gray-800">{V2_CONSENT.withdrawn}</p>
           <p className="text-xs text-gray-500 mt-1">{V2_CONSENT.withdrawn_on} {when(withdrawnAt)}</p>
         </div>
+      ) : props.initial.state === 'unavailable' || props.initial.state === 'unconfirmed' ? (
+        // Support only: the online withdrawal is not offered when it is known not to work, or cannot be confirmed to.
+        <p className="text-sm text-gray-700" role="status" data-consent-support-only={props.initial.state}>
+          {props.initial.state === 'unavailable' ? V2_CONSENT.unavailable : V2_CONSENT.unconfirmed}
+        </p>
       ) : (
         <div>
           {props.initial.state === 'unknown' ? (

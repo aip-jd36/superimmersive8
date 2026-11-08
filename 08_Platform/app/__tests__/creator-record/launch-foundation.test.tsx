@@ -180,17 +180,25 @@ describe('the withdrawal control', () => {
 // ── CORRECTIONS-1: the withdrawal stays available when the state cannot be read ──
 type DbResult = { data?: unknown; error?: unknown; count?: unknown }
 type Behaviour = DbResult | 'throw' | 'hang'
-function fakeDb(state: Behaviour, docs: Behaviour) {
+const LEDGER_PRESENT = { count: 0, error: null }
+function fakeDb(state: Behaviour, docs: Behaviour, ledger: Behaviour = LEDGER_PRESENT) {
   const calls: string[] = []
   const settle = (b: Behaviour): PromiseLike<DbResult> => {
     if (b === 'throw') return Promise.reject(new Error('db down'))
     if (b === 'hang') return new Promise(() => undefined)
     return Promise.resolve(b)
   }
-  const chain = { select: () => chain, eq: () => chain, then: (ok: (v: DbResult) => unknown, bad?: (e: unknown) => unknown) => settle(docs).then(ok, bad) }
+  const chainFor = (b: Behaviour, t: string) => {
+    const chain = {
+      select: (cols: string, opts: unknown) => { calls.push(`select:${t}:${cols}:${JSON.stringify(opts)}`); return chain },
+      eq: (c: string, v: unknown) => { calls.push(`eq:${t}:${c}=${String(v)}`); return chain },
+      then: (ok: (v: DbResult) => unknown, bad?: (e: unknown) => unknown) => settle(b).then(ok, bad),
+    }
+    return chain
+  }
   const db = {
     rpc: (fn: string, args: unknown) => { calls.push(`rpc:${fn}:${JSON.stringify(args)}`); return settle(state) },
-    from: (t: string) => { calls.push(`from:${t}`); return chain },
+    from: (t: string) => { calls.push(`from:${t}`); return chainFor(t === 'creator_record_v2_consent_withdrawals' ? ledger : docs, t) },
   }
   return { db: db as never, calls }
 }
@@ -223,12 +231,12 @@ describe('consentControlState: read failures never remove the withdrawal from a 
     ['not withdrawn, documents unreadable, v2 submission', NOT_WITHDRAWN, DOCS_ERROR, true, { show: true, initial: { state: 'active' } }],
     ['not withdrawn, documents unreadable, no v2 submission', NOT_WITHDRAWN, DOCS_ERROR, false, { show: false }],
     ['not withdrawn, malformed count, v2 submission', NOT_WITHDRAWN, { count: 'many', error: null }, true, { show: true, initial: { state: 'active' } }],
-  ])('%s', async (_label, state, docs, hasV2Submission, expected) => {
+  ])('%s (withdrawal ledger readable)', async (_label, state, docs, hasV2Submission, expected) => {
     const { db } = fakeDb(state, docs)
     expect(await consentControlState(OWNER, { hasV2Submission, db })).toEqual(expected)
   })
 
-  test('a read that does not answer in time is treated as unreadable (timeout → unknown, never hangs the dashboard)', async () => {
+  test('a read that does not answer in time is treated as unreadable (never hangs the dashboard)', async () => {
     const { db } = fakeDb('hang', 'hang')
     const started = Date.now()
     expect(await consentControlState(OWNER, { hasV2Submission: true, db, timeoutMs: 20 })).toEqual({ show: true, initial: { state: 'unknown' } })
@@ -237,10 +245,74 @@ describe('consentControlState: read failures never remove the withdrawal from a 
     expect(await consentControlState(OWNER, { hasV2Submission: false, db: v1.db, timeoutMs: 20 })).toEqual({ show: false })
   })
 
-  test('reads only the session user’s own state and documents', async () => {
+  test('reads only the session user’s own state and documents (no capability probe when the state is known)', async () => {
     const { db, calls } = fakeDb(NOT_WITHDRAWN, HAS_DOCS)
     await consentControlState(OWNER, { hasV2Submission: false, db })
-    expect(calls).toEqual([`rpc:creator_record_v2_consent_state:${JSON.stringify({ p_user_id: OWNER })}`, 'from:creator_record_v2_documents'])
+    expect(calls.filter((c) => c.startsWith('rpc:') || c.startsWith('from:'))).toEqual([`rpc:creator_record_v2_consent_state:${JSON.stringify({ p_user_id: OWNER })}`, 'from:creator_record_v2_documents'])
+  })
+})
+
+describe('consentControlState: whether the online withdrawal can work decides what an unreadable state offers', () => {
+  const MISSING_FN = { data: null, error: { code: 'PGRST202', message: 'Could not find the function public.creator_record_v2_consent_state(p_user_id) in the schema cache' } }
+  const TRANSIENT = { data: null, error: { code: '57014', message: 'canceling statement due to statement timeout' } }
+  const run = (state: Behaviour, ledger: Behaviour, hasV2Submission = true, docs: Behaviour = DOCS_ERROR) =>
+    consentControlState(OWNER, { hasV2Submission, db: fakeDb(state, docs, ledger).db, timeoutMs: 20 })
+
+  test.each<[string, Behaviour]>([
+    ['PostgREST: table not in schema cache (PGRST205)', { count: null, error: { code: 'PGRST205', message: 'Could not find the table' } }],
+    ['PostgreSQL: undefined table (42P01)', { count: null, error: { code: '42P01', message: 'relation does not exist' } }],
+  ])('withdrawal backend confirmed missing — %s → support-only "unavailable"', async (_l, ledger) => {
+    expect(await run(MISSING_FN, ledger)).toEqual({ show: true, initial: { state: 'unavailable' } })
+    expect(await run({ data: null, error: { code: '42883', message: 'function does not exist' } }, ledger)).toEqual({ show: true, initial: { state: 'unavailable' } })
+  })
+
+  test('20261111 present but 20261112 missing (status function missing, ledger readable) → withdrawal still offered', async () => {
+    expect(await run(MISSING_FN, LEDGER_PRESENT)).toEqual({ show: true, initial: { state: 'unknown' } })
+  })
+
+  test('transient status failure with the backend present → the usable withdrawal fallback is kept', async () => {
+    expect(await run(TRANSIENT, LEDGER_PRESENT)).toEqual({ show: true, initial: { state: 'unknown' } })
+    expect(await run('throw', { count: 3, error: null })).toEqual({ show: true, initial: { state: 'unknown' } })
+  })
+
+  test.each<[string, Behaviour]>([
+    ['the probe fails transiently', { count: null, error: { code: '57014', message: 'timeout' } }],
+    ['the probe has no code', { count: null, error: { message: 'fetch failed' } }],
+    ['the probe throws', 'throw'],
+    ['the probe does not answer in time', 'hang'],
+    ['the probe returns no count', { count: null, error: null }],
+    ['a permission error (not a missing object)', { count: null, error: { code: '42501', message: 'permission denied' } }],
+  ])('capability cannot be established (%s) → support-only "unconfirmed", online withdrawal not promised', async (_l, ledger) => {
+    expect(await run(TRANSIENT, ledger)).toEqual({ show: true, initial: { state: 'unconfirmed' } })
+  })
+
+  test('no sign of v2 use: no probe and no control, whatever the backend', async () => {
+    const { db, calls } = fakeDb(MISSING_FN, NO_DOCS, { count: null, error: { code: '42P01', message: 'x' } })
+    expect(await consentControlState(OWNER, { hasV2Submission: false, db })).toEqual({ show: false })
+    expect(calls).not.toContain('from:creator_record_v2_consent_withdrawals')
+  })
+
+  test('the probe is a head-only count of the session user’s own ledger rows (no row content read)', async () => {
+    const { db, calls } = fakeDb(TRANSIENT, DOCS_ERROR)
+    await consentControlState(OWNER, { hasV2Submission: true, db })
+    expect(calls).toContain(`select:creator_record_v2_consent_withdrawals:id:${JSON.stringify({ count: 'exact', head: true })}`)
+    expect(calls).toContain(`eq:creator_record_v2_consent_withdrawals:user_id=${OWNER}`)
+  })
+
+  test.each(['unavailable', 'unconfirmed'] as const)('rendering %s: support contact only, no button, no promise of online withdrawal', (state) => {
+    const html = renderToStaticMarkup(<ConsentWithdrawalControl initial={{ state }} />)
+    expect(html).toContain(`data-consent-support-only="${state}"`)
+    expect(html).toContain('jd@superimmersive8.com')
+    expect(html).not.toMatch(/<button/)
+    expect(html).not.toContain(V2_CONSENT.withdraw)
+    expect(html).not.toMatch(/You can still withdraw|withdraw permission here/i)
+    expect(html).not.toContain('data-consent-withdrawn')
+  })
+
+  test('rendering unknown (backend present): the withdrawal button is still offered', () => {
+    const html = renderToStaticMarkup(<ConsentWithdrawalControl initial={{ state: 'unknown' }} />)
+    expect(html).toContain(V2_CONSENT.withdraw)
+    expect(html).not.toContain('data-consent-support-only')
   })
 
   test('the unknown state still offers the same two-step withdrawal, and says the status cannot be shown', () => {
