@@ -305,4 +305,64 @@ maybe('Decision 8Q: AI-examination permission (PostgreSQL, through 2026111200000
       await c.end()
     }
   })
+
+  // CR-V2-MVP-LAUNCH-FOUNDATION-1-CORRECTIONS-1, Check 1: the dashboard's capability probe. Production runs it with the
+  // service-role client (`supabaseAdmin`), never as the customer; PostgREST's GET `select=id&user_id=eq.<u>&limit=1` is this SQL.
+  describe('the withdrawal capability probe (service role; customers cannot read the ledger)', () => {
+    const PROBE = 'SELECT id FROM public.creator_record_v2_consent_withdrawals WHERE user_id = $1 LIMIT 1'
+
+    test('service role: an empty result for a creator with no withdrawal, one id after the withdrawal, and the withdrawal itself runs', async () => {
+      const owner = await user()
+      await doc(owner)
+      expect((await svc.query(PROBE, [owner])).rows).toEqual([])
+      const w = await withdraw(svc, owner)
+      expect(w.rows).toHaveLength(1)
+      const after = (await svc.query(PROBE, [owner])).rows
+      expect(after).toHaveLength(1)
+      expect(Object.keys(after[0])).toEqual(['id'])
+      expect((await svc.query(PROBE, [randomUUID()])).rows).toEqual([]) // another user's probe sees nothing of this creator
+    })
+
+    test.each(['authenticated', 'anon'])('%s (a customer’s own database identity) cannot read the ledger or run the withdrawal', async (role) => {
+      const owner = await user()
+      const c = new Client({ connectionString: URL })
+      await c.connect()
+      try {
+        await c.query(`SET ROLE ${role}`)
+        await expect(c.query(PROBE, [owner])).rejects.toMatchObject({ code: '42501' })
+        await expect(c.query('SELECT * FROM public.creator_record_v2_withdraw_consent($1)', [owner])).rejects.toMatchObject({ code: '42501' })
+      } finally {
+        await c.end()
+      }
+    })
+
+    test('the ledger and the withdrawal function are installed together: without 20261111 the probe fails as a missing table (42P01)', async () => {
+      const c = new Client({ connectionString: URL })
+      await c.connect()
+      try {
+        await c.query('BEGIN')
+        await c.query('DROP FUNCTION public.creator_record_v2_withdraw_consent(uuid)')
+        await c.query('DROP TABLE public.creator_record_v2_consent_withdrawals CASCADE')
+        await c.query('SET LOCAL ROLE service_role')
+        await expect(c.query(PROBE, [randomUUID()])).rejects.toMatchObject({ code: '42P01' })
+      } finally {
+        await c.query('ROLLBACK').catch(() => undefined)
+        await c.end()
+      }
+      // And with 20261111 in place, the probe's table and the withdrawal function exist side by side, with the grants it relies on.
+      const r = await admin.query(`SELECT has_table_privilege('service_role', 'public.creator_record_v2_consent_withdrawals', 'SELECT') sel,
+        has_function_privilege('service_role', 'public.creator_record_v2_withdraw_consent(uuid)', 'EXECUTE') exe,
+        has_table_privilege('authenticated', 'public.creator_record_v2_consent_withdrawals', 'SELECT') cust_sel,
+        (SELECT relrowsecurity FROM pg_class WHERE oid = 'public.creator_record_v2_consent_withdrawals'::regclass) rls,
+        (SELECT count(*)::int FROM pg_policies WHERE tablename = 'creator_record_v2_consent_withdrawals') policies`)
+      expect(r.rows[0]).toEqual({ sel: true, exe: true, cust_sel: false, rls: true, policies: 0 })
+    })
+
+    test('20261111 is one transaction: it contains no transaction control, so the ledger never exists without the function', () => {
+      const sql = readFileSync(MIGRATIONS.find((m) => m.includes('20261111000000'))!, 'utf8')
+      expect(sql).not.toMatch(/^\s*(COMMIT|ROLLBACK|START TRANSACTION|BEGIN\s+(TRANSACTION|WORK))\s*;/im)
+      expect(sql.indexOf('CREATE TABLE public.creator_record_v2_consent_withdrawals')).toBeGreaterThan(-1)
+      expect(sql).toMatch(/GRANT EXECUTE ON FUNCTION public\.creator_record_v2_withdraw_consent\(uuid\) TO service_role/)
+    })
+  })
 })

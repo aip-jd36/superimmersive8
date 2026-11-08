@@ -180,7 +180,8 @@ describe('the withdrawal control', () => {
 // ── CORRECTIONS-1: the withdrawal stays available when the state cannot be read ──
 type DbResult = { data?: unknown; error?: unknown; count?: unknown }
 type Behaviour = DbResult | 'throw' | 'hang'
-const LEDGER_PRESENT = { count: 0, error: null }
+const LEDGER_PRESENT = { data: [], error: null }
+const LEDGER_WITH_RECORD = { data: [{ id: 7 }], error: null }
 function fakeDb(state: Behaviour, docs: Behaviour, ledger: Behaviour = LEDGER_PRESENT) {
   const calls: string[] = []
   const settle = (b: Behaviour): PromiseLike<DbResult> => {
@@ -192,6 +193,7 @@ function fakeDb(state: Behaviour, docs: Behaviour, ledger: Behaviour = LEDGER_PR
     const chain = {
       select: (cols: string, opts: unknown) => { calls.push(`select:${t}:${cols}:${JSON.stringify(opts)}`); return chain },
       eq: (c: string, v: unknown) => { calls.push(`eq:${t}:${c}=${String(v)}`); return chain },
+      limit: (n: number) => { calls.push(`limit:${t}:${n}`); return chain },
       then: (ok: (v: DbResult) => unknown, bad?: (e: unknown) => unknown) => settle(b).then(ok, bad),
     }
     return chain
@@ -221,12 +223,12 @@ describe('consentControlState: read failures never remove the withdrawal from a 
     ['state RPC error, no submission but documents', { data: null, error: { message: 'x' } }, HAS_DOCS, false, { show: true, initial: { state: 'unknown' } }],
     ['state RPC error, no sign of v2 use (V1 customer)', { data: null, error: { message: 'x' } }, NO_DOCS, false, { show: false }],
     // Unexpected or malformed responses.
-    ['empty result', { data: [], error: null }, NO_DOCS, true, { show: true, initial: { state: 'unknown' } }],
-    ['null data', { data: null, error: null }, NO_DOCS, true, { show: true, initial: { state: 'unknown' } }],
-    ['withdrawn is not a boolean', { data: [{ withdrawn: 'yes', withdrawn_at: WITHDRAWN_AT }], error: null }, NO_DOCS, true, { show: true, initial: { state: 'unknown' } }],
+    ['empty result', { data: [], error: null }, HAS_DOCS, true, { show: true, initial: { state: 'unknown' } }],
+    ['null data', { data: null, error: null }, HAS_DOCS, true, { show: true, initial: { state: 'unknown' } }],
+    ['withdrawn is not a boolean', { data: [{ withdrawn: 'yes', withdrawn_at: WITHDRAWN_AT }], error: null }, HAS_DOCS, true, { show: true, initial: { state: 'unknown' } }],
     ['withdrawn without a time (never shown as "not withdrawn")', { data: [{ withdrawn: true, withdrawn_at: null }], error: null }, HAS_DOCS, false, { show: true, initial: { state: 'unknown' } }],
-    ['withdrawn with an unparseable time', { data: [{ withdrawn: true, withdrawn_at: 'soon' }], error: null }, NO_DOCS, true, { show: true, initial: { state: 'unknown' } }],
-    ['a scalar instead of a row', { data: 'ok', error: null }, NO_DOCS, true, { show: true, initial: { state: 'unknown' } }],
+    ['withdrawn with an unparseable time', { data: [{ withdrawn: true, withdrawn_at: 'soon' }], error: null }, HAS_DOCS, true, { show: true, initial: { state: 'unknown' } }],
+    ['a scalar instead of a row', { data: 'ok', error: null }, HAS_DOCS, true, { show: true, initial: { state: 'unknown' } }],
     // The document read fails after a known "not withdrawn".
     ['not withdrawn, documents unreadable, v2 submission', NOT_WITHDRAWN, DOCS_ERROR, true, { show: true, initial: { state: 'active' } }],
     ['not withdrawn, documents unreadable, no v2 submission', NOT_WITHDRAWN, DOCS_ERROR, false, { show: false }],
@@ -272,7 +274,7 @@ describe('consentControlState: whether the online withdrawal can work decides wh
 
   test('transient status failure with the backend present → the usable withdrawal fallback is kept', async () => {
     expect(await run(TRANSIENT, LEDGER_PRESENT)).toEqual({ show: true, initial: { state: 'unknown' } })
-    expect(await run('throw', { count: 3, error: null })).toEqual({ show: true, initial: { state: 'unknown' } })
+    expect(await run('throw', LEDGER_WITH_RECORD)).toEqual({ show: true, initial: { state: 'unknown' } })
   })
 
   test.each<[string, Behaviour]>([
@@ -280,7 +282,8 @@ describe('consentControlState: whether the online withdrawal can work decides wh
     ['the probe has no code', { count: null, error: { message: 'fetch failed' } }],
     ['the probe throws', 'throw'],
     ['the probe does not answer in time', 'hang'],
-    ['the probe returns no count', { count: null, error: null }],
+    ['the probe returns no row array', { data: null, error: null }],
+    ['the probe answers like a HEAD 404 (no error, no data, status 204)', { data: null, error: null, count: null }],
     ['a permission error (not a missing object)', { count: null, error: { code: '42501', message: 'permission denied' } }],
   ])('capability cannot be established (%s) → support-only "unconfirmed", online withdrawal not promised', async (_l, ledger) => {
     expect(await run(TRANSIENT, ledger)).toEqual({ show: true, initial: { state: 'unconfirmed' } })
@@ -292,11 +295,84 @@ describe('consentControlState: whether the online withdrawal can work decides wh
     expect(calls).not.toContain('from:creator_record_v2_consent_withdrawals')
   })
 
-  test('the probe is a head-only count of the session user’s own ledger rows (no row content read)', async () => {
+  test('the probe reads at most one id of the session user’s own ledger rows (a GET, never a head-only count)', async () => {
     const { db, calls } = fakeDb(TRANSIENT, DOCS_ERROR)
     await consentControlState(OWNER, { hasV2Submission: true, db })
-    expect(calls).toContain(`select:creator_record_v2_consent_withdrawals:id:${JSON.stringify({ count: 'exact', head: true })}`)
+    expect(calls).toContain('select:creator_record_v2_consent_withdrawals:id:undefined')
     expect(calls).toContain(`eq:creator_record_v2_consent_withdrawals:user_id=${OWNER}`)
+    expect(calls).toContain('limit:creator_record_v2_consent_withdrawals:1')
+    expect(src('lib/creator-record-flow/consent-dashboard.ts')).not.toMatch(/head: true\s*\}\)\.eq\('user_id', userId\)\s*,|consent_withdrawals'\)\.select\('id', \{ count/)
+  })
+})
+
+describe('Check 2: the notice concerns only creators with documents or a withdrawal record', () => {
+  const run = (hasV2Submission: boolean, docs: Behaviour, ledger: Behaviour) =>
+    consentControlState(OWNER, { hasV2Submission, db: fakeDb({ data: null, error: { code: 'PGRST202', message: 'x' } }, docs, ledger).db, timeoutMs: 20 })
+  const LEDGER_MISSING = { data: null, error: { code: 'PGRST205', message: 'Could not find the table' } }
+
+  test('an empty V2 questionnaire alone (no documents, no withdrawal record) shows nothing, backend present or missing', async () => {
+    expect(await run(true, NO_DOCS, LEDGER_PRESENT)).toEqual({ show: false })
+    expect(await run(true, NO_DOCS, LEDGER_MISSING)).toEqual({ show: false })
+    expect(await run(true, NO_DOCS, 'hang')).toEqual({ show: false })
+  })
+  test('documents → shown (support-only when the backend is missing)', async () => {
+    expect(await run(false, HAS_DOCS, LEDGER_MISSING)).toEqual({ show: true, initial: { state: 'unavailable' } })
+    expect(await run(true, HAS_DOCS, LEDGER_PRESENT)).toEqual({ show: true, initial: { state: 'unknown' } })
+  })
+  test('a withdrawal record without documents → shown with the withdrawal still offered', async () => {
+    expect(await run(true, NO_DOCS, LEDGER_WITH_RECORD)).toEqual({ show: true, initial: { state: 'unknown' } })
+    expect(await run(false, DOCS_ERROR, LEDGER_WITH_RECORD)).toEqual({ show: true, initial: { state: 'unknown' } })
+  })
+  test('documents genuinely unreadable: a v2 submission keeps it shown (fail closed); without one, nothing', async () => {
+    expect(await run(true, DOCS_ERROR, LEDGER_MISSING)).toEqual({ show: true, initial: { state: 'unavailable' } })
+    expect(await run(true, 'throw', 'hang')).toEqual({ show: true, initial: { state: 'unconfirmed' } })
+    expect(await run(false, DOCS_ERROR, LEDGER_PRESENT)).toEqual({ show: false })
+  })
+  test('V1 customer (no v2 submission, no documents): unchanged dashboard and no ledger read', async () => {
+    const { db, calls } = fakeDb({ data: null, error: { code: 'PGRST202', message: 'x' } }, NO_DOCS, LEDGER_WITH_RECORD)
+    expect(await consentControlState(OWNER, { hasV2Submission: false, db })).toEqual({ show: false })
+    expect(calls).not.toContain('from:creator_record_v2_consent_withdrawals')
+  })
+})
+
+describe('Check 1: the capability probe against the real postgrest-js client', () => {
+  // A minimal fetch that answers like PostgREST: a missing table is 404 with a JSON error body, except on HEAD (no body).
+  type Answer = 'present-empty' | 'present-record' | 'missing'
+  const fakeFetch = (answer: Answer, seen: string[]) => async (input: RequestInfo | URL, init?: RequestInit) => {
+    const method = init?.method ?? 'GET'
+    seen.push(`${method} ${String(input)}`)
+    const missing = answer === 'missing'
+    const body = method === 'HEAD' ? '' : missing ? JSON.stringify({ code: 'PGRST205', details: null, hint: null, message: "Could not find the table 'public.creator_record_v2_consent_withdrawals' in the schema cache" }) : answer === 'present-record' ? '[{"id":7}]' : '[]'
+    const status = missing ? 404 : 200
+    const headers = new Map<string, string>([['content-type', 'application/json'], ['content-range', missing ? '' : answer === 'present-record' ? '0-0/1' : '*/0']])
+    return { ok: status < 300, status, statusText: missing ? 'Not Found' : 'OK', headers: { get: (k: string) => headers.get(k.toLowerCase()) ?? null }, text: async () => body } as unknown as Response
+  }
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { PostgrestClient } = require('@supabase/postgrest-js') as typeof import('@supabase/postgrest-js')
+  const client = (answer: Answer, seen: string[]) => new PostgrestClient('http://postgrest.invalid', { fetch: fakeFetch(answer, seen) as typeof fetch })
+  const stateFails = { rpc: async () => ({ data: null, error: { code: 'PGRST202', message: 'x' } }) }
+  const dbWith = (answer: Answer, seen: string[]) => {
+    const c = client(answer, seen)
+    return { rpc: stateFails.rpc, from: (t: string) => (t === 'creator_record_v2_documents' ? { select: () => ({ eq: () => ({ eq: () => Promise.resolve({ count: 1, error: null }) }) }) } : c.from(t)) } as never
+  }
+
+  test('why not HEAD: postgrest-js reports a HEAD 404 for a missing table as no error and no count (indistinguishable)', async () => {
+    const r = await client('missing', []).from('creator_record_v2_consent_withdrawals').select('id', { count: 'exact', head: true }).eq('user_id', OWNER)
+    expect(r.error).toBeNull()
+    expect(r.count).toBeNull()
+    expect(r.status).toBe(204)
+  })
+  test('missing table → GET carries the PGRST205 code → support-only "unavailable"', async () => {
+    const seen: string[] = []
+    expect(await consentControlState(OWNER, { hasV2Submission: true, db: dbWith('missing', seen) })).toEqual({ show: true, initial: { state: 'unavailable' } })
+    expect(seen).toHaveLength(1)
+    expect(seen[0]).toMatch(/^GET http:\/\/postgrest\.invalid\/creator_record_v2_consent_withdrawals\?select=id&user_id=eq\.aaaaaaaa-2222-4333-8444-555555555555&limit=1$/)
+  })
+  test('present and EMPTY ledger is told apart from a missing one → withdrawal offered', async () => {
+    expect(await consentControlState(OWNER, { hasV2Submission: true, db: dbWith('present-empty', []) })).toEqual({ show: true, initial: { state: 'unknown' } })
+  })
+  test('present with a record → withdrawal offered', async () => {
+    expect(await consentControlState(OWNER, { hasV2Submission: true, db: dbWith('present-record', []) })).toEqual({ show: true, initial: { state: 'unknown' } })
   })
 
   test.each(['unavailable', 'unconfirmed'] as const)('rendering %s: support contact only, no button, no promise of online withdrawal', (state) => {

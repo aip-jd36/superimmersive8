@@ -5,9 +5,10 @@
  * sees an unchanged dashboard. Read-only, service role, the session user only.
  *
  * CR-V2-MVP-LAUNCH-FOUNDATION-1-CORRECTIONS-1: a state that cannot be read (an error, a timeout, an unexpected response) no longer
- * silently removes the control from a creator with a Creator Record v2 submission or document. What the control then offers depends
- * on whether the online withdrawal can work, established by a head-only count of the creator's own rows in the withdrawal ledger
- * (`creator_record_v2_consent_withdrawals`, created in the same migration as the withdrawal function, 20261111000000):
+ * silently removes the control from a creator it concerns: one with Creator Record v2 documents or a withdrawal record (or a v2
+ * submission when the documents cannot be read). What the control then offers depends on whether the online withdrawal can work,
+ * established by reading at most one id of the creator's own rows in the withdrawal ledger (`creator_record_v2_consent_withdrawals`,
+ * created in the same single-transaction migration as the withdrawal function and its grant, 20261111000000):
  *   - ledger readable           → `unknown`:     the status cannot be shown, the same idempotent withdrawal is still offered;
  *   - ledger confirmed missing  → `unavailable`: support only (no button), because the online withdrawal cannot work;
  *   - ledger not established    → `unconfirmed`: support only (no button); online withdrawal is not promised.
@@ -56,18 +57,24 @@ async function readState(db: Db, userId: string, ms: number): Promise<{ withdraw
   }
 }
 
-/** Whether the online withdrawal exists: the ledger is readable (present), confirmed missing (absent), or not established. */
-async function withdrawalCapability(db: Db, userId: string, ms: number): Promise<'present' | 'absent' | 'unknown'> {
+type Capability = { kind: 'present'; hasRecord: boolean } | { kind: 'absent' } | { kind: 'unknown' }
+
+/**
+ * Whether the online withdrawal exists: the ledger is readable (present — and whether this user has a withdrawal record),
+ * confirmed missing (absent), or not established (unknown).
+ *
+ * A GET of at most one id of the user's own rows, NOT a head-only count: a HEAD response has no body, and postgrest-js turns a
+ * HEAD 404 for a missing table into `{ error: null, count: null, status: 204 }`, which could never be told apart from other
+ * failures. The id stays on the server; nothing from the ledger reaches the page. Service role (the ledger is service-role-only).
+ */
+async function withdrawalCapability(db: Db, userId: string, ms: number): Promise<Capability> {
   try {
-    const r = await bounded(
-      db.from('creator_record_v2_consent_withdrawals').select('id', { count: 'exact', head: true }).eq('user_id', userId),
-      ms,
-    )
-    if (r === TIMEOUT) return 'unknown'
-    if (r.error) return isMissingObject(r.error) ? 'absent' : 'unknown'
-    return typeof r.count === 'number' ? 'present' : 'unknown'
+    const r = await bounded(db.from('creator_record_v2_consent_withdrawals').select('id').eq('user_id', userId).limit(1), ms)
+    if (r === TIMEOUT) return { kind: 'unknown' }
+    if (r.error) return isMissingObject(r.error) ? { kind: 'absent' } : { kind: 'unknown' }
+    return Array.isArray(r.data) ? { kind: 'present', hasRecord: r.data.length > 0 } : { kind: 'unknown' }
   } catch {
-    return 'unknown'
+    return { kind: 'unknown' }
   }
 }
 
@@ -99,9 +106,12 @@ export async function consentControlState(
     if (docs === true || (docs === null && options.hasV2Submission)) return { show: true, initial: { state: 'active' } }
     return { show: false }
   }
-  // Unreadable state. No sign of Creator Record v2 use: unchanged dashboard.
-  if (!options.hasV2Submission && docs !== true) return { show: false }
+  // Unreadable state. Relevant only to a creator with documents it would cover, or with a withdrawal record. A v2 submission alone
+  // (for example an empty questionnaire) is not enough; it stands in only when the documents are genuinely unreadable (fail closed).
+  if (!options.hasV2Submission && docs === false) return { show: false } // every V1 customer: unchanged, no further read
+  const relevant = docs === true || (docs === null && options.hasV2Submission)
   const capability = await withdrawalCapability(db, userId, ms)
-  if (capability === 'present') return { show: true, initial: { state: 'unknown' } }
-  return { show: true, initial: { state: capability === 'absent' ? 'unavailable' : 'unconfirmed' } }
+  if (!relevant && !(capability.kind === 'present' && capability.hasRecord)) return { show: false }
+  if (capability.kind === 'present') return { show: true, initial: { state: 'unknown' } }
+  return { show: true, initial: { state: capability.kind === 'absent' ? 'unavailable' : 'unconfirmed' } }
 }
