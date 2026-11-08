@@ -23,7 +23,8 @@ import { CUSTOMER_LIVE_DATABASE_REFUSALS, examineCustomerDocumentLive, type Cust
 import { LivePortError } from '@/lib/creator-record/live-examination/examine'
 import type { LiveAnthropicAdapter } from '@/lib/creator-record/live-examination/real-executor'
 import { AiPermissionRefusal, requestCustomerExamination, type CustomerExaminationDeps } from '@/lib/creator-record/customer-flow/examination'
-import { AI_EXAMINATION_PERMISSION_DRAFT_VERSION, boundAuthorizationVersion } from '@/lib/creator-record/evidence-intake/contract'
+import { AI_EXAMINATION_PERMISSION_DRAFT_VERSION, boundAuthorizationVersion, EVIDENCE_CONSENT_DRAFT_VERSION } from '@/lib/creator-record/evidence-intake/contract'
+import { uploadEvidence, type EvidenceDeps, type NewEvidenceRow } from '@/lib/creator-record/evidence-intake/service'
 import { REPLAY_FIXTURES } from '@/lib/creator-record/evidence/replay-fixtures.data'
 import { syntheticTextPdf } from '@/test-support/synthetic-pdf'
 
@@ -478,6 +479,87 @@ maybe('Decision 8Q: AI-examination permission (PostgreSQL, through 2026111200000
         } finally { await c.end() }
       }
       expect(await current()).toEqual([VERSION])
+    })
+  })
+
+  // ── CR-V2-SCHEMA8-PATH-1-DEDUP-CORRECTION: identical bytes under a changed storage consent (real uniqueness + immutability) ──
+  describe('evidence upload deduplication and storage consent', () => {
+    const OLD_CONSENT = boundAuthorizationVersion(EVIDENCE_CONSENT_DRAFT_VERSION, { privacy: 'privacy-test-1', terms: 'terms-test-1' }) as string
+    const NEW_CONSENT = boundAuthorizationVersion(EVIDENCE_CONSENT_DRAFT_VERSION, { privacy: 'privacy-test-2', terms: 'terms-test-1' }) as string
+    const COLS = 'id, user_id, sha256, media_type, byte_size, file_name, storage_path, consent_version, state, created_at, stored_at'
+    const trimRow = (r: Record<string, unknown> | undefined) => (r ? { ...r, sha256: String(r.sha256).trim(), created_at: iso(r.created_at), stored_at: iso(r.stored_at) } : null)
+    // The production store's contract (lib/creator-record-flow/evidence-production.ts) over the same table: a unique violation
+    // on the creator's live fingerprint returns the existing live row.
+    const store = {
+      countLive: async (u: string) => (await svc.query("SELECT count(*)::int n FROM public.creator_record_v2_documents WHERE user_id = $1 AND state IN ('pending', 'stored')", [u])).rows[0].n,
+      listStored: async (u: string) => (await svc.query(`SELECT ${COLS} FROM public.creator_record_v2_documents WHERE user_id = $1 AND state = 'stored'`, [u])).rows.map(trimRow),
+      async insertPending(row: NewEvidenceRow) {
+        try {
+          const r = await svc.query(`INSERT INTO public.creator_record_v2_documents (id, user_id, sha256, media_type, byte_size, file_name, storage_path, consent_version, state) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending') RETURNING ${COLS}`,
+            [row.id, row.user_id, row.sha256, row.media_type, row.byte_size, row.file_name, row.storage_path, row.consent_version])
+          return { inserted: true, row: trimRow(r.rows[0]) }
+        } catch (e) {
+          if ((e as { code?: string }).code !== '23505') throw e
+          const ex = (await svc.query(`SELECT ${COLS} FROM public.creator_record_v2_documents WHERE user_id = $1 AND sha256 = $2 AND state <> 'deleted'`, [row.user_id, row.sha256])).rows[0]
+          return { inserted: false, existing: trimRow(ex) }
+        }
+      },
+      markStored: async (id: string, u: string, at: Date) => trimRow((await svc.query(`UPDATE public.creator_record_v2_documents SET state = 'stored', stored_at = $3 WHERE id = $1 AND user_id = $2 AND state = 'pending' RETURNING ${COLS}`, [id, u, at])).rows[0]),
+      removePending: async (id: string) => (await svc.query("DELETE FROM public.creator_record_v2_documents WHERE id = $1 AND state = 'pending'", [id])).rowCount === 1,
+    }
+    const evidence = (consentVersion: string): EvidenceDeps => ({
+      submissions: 'open', hasPilotAccess: async () => true, realDocumentsPermitted: true, isSyntheticTestDocument: () => false,
+      store: store as unknown as EvidenceDeps['store'], objects: { put: async () => undefined, remove: async () => undefined } as unknown as EvidenceDeps['objects'],
+      newId: () => randomUUID(), now: () => new Date(), consentVersion,
+    })
+    const docs = async (owner: string) => (await admin.query('SELECT id, consent_version, created_at, state FROM public.creator_record_v2_documents WHERE user_id = $1 ORDER BY created_at', [owner])).rows
+    const permissions = async (documentId: string) => (await admin.query('SELECT permission_version, granted_at FROM public.creator_record_v2_ai_examination_permissions WHERE document_id = $1 ORDER BY granted_at', [documentId])).rows
+    const withdrawn = async (documentId: string) => (await admin.query('SELECT public.creator_record_v2_document_consent_withdrawn($1) w', [documentId])).rows[0].w as boolean
+
+    test('identical bytes after the consent changed: 409 consent_outdated; the stored document, its consent and its permission are untouched', async () => {
+      const owner = await user()
+      const bytes = syntheticTextPdf(`dedup consent ${randomUUID()}`)
+      const first = await uploadEvidence(evidence(OLD_CONSENT), owner, { bytes, file_name: 'receipt.pdf', consent: OLD_CONSENT })
+      expect(first).toMatchObject({ ok: true, deduplicated: false })
+      const id = (first as { document: { id: string } }).document.id
+      expect(await grant(svc, owner, id, VERSION)).toBe('granted')
+      const before = { docs: await docs(owner), perms: await permissions(id) }
+
+      // The stale consent is refused outright; the current consent meets the earlier document and is refused, not substituted.
+      expect(await uploadEvidence(evidence(NEW_CONSENT), owner, { bytes, file_name: 'receipt.pdf', consent: OLD_CONSENT })).toEqual({ ok: false, status: 400, code: 'consent_required' })
+      expect(await uploadEvidence(evidence(NEW_CONSENT), owner, { bytes, file_name: 'receipt.pdf', consent: NEW_CONSENT })).toEqual({ ok: false, status: 409, code: 'consent_outdated' })
+
+      expect(await docs(owner)).toEqual(before.docs)
+      expect(before.docs).toHaveLength(1)
+      expect(before.docs[0].consent_version).toBe(OLD_CONSENT)
+      expect(await permissions(id)).toEqual(before.perms)
+      await expect(admin.query('UPDATE public.creator_record_v2_documents SET consent_version = $2 WHERE id = $1', [id, NEW_CONSENT])).rejects.toThrow('immutable')
+    })
+
+    test('control: identical bytes under the same consent still deduplicate to the same document', async () => {
+      const owner = await user()
+      const bytes = syntheticTextPdf(`dedup control ${randomUUID()}`)
+      const first = await uploadEvidence(evidence(NEW_CONSENT), owner, { bytes, file_name: 'receipt.pdf', consent: NEW_CONSENT })
+      const again = await uploadEvidence(evidence(NEW_CONSENT), owner, { bytes, file_name: 'receipt.pdf', consent: NEW_CONSENT })
+      expect(again).toEqual({ ok: true, document: (first as { document: unknown }).document, deduplicated: true })
+      expect(await docs(owner)).toHaveLength(1)
+    })
+
+    test('withdrawal stays as it was: a refused or deduplicated re-upload changes no withdrawal and grants nothing', async () => {
+      const owner = await user()
+      const bytes = syntheticTextPdf(`dedup withdrawal ${randomUUID()}`)
+      const first = await uploadEvidence(evidence(OLD_CONSENT), owner, { bytes, file_name: 'receipt.pdf', consent: OLD_CONSENT })
+      const id = (first as { document: { id: string } }).document.id
+      await withdraw(svc, owner)
+      const withdrawals = async () => (await admin.query('SELECT count(*)::int n FROM public.creator_record_v2_consent_withdrawals WHERE user_id = $1', [owner])).rows[0].n
+      const count = await withdrawals()
+      expect(await withdrawn(id)).toBe(true)
+      expect(await uploadEvidence(evidence(NEW_CONSENT), owner, { bytes, file_name: 'receipt.pdf', consent: NEW_CONSENT })).toEqual({ ok: false, status: 409, code: 'consent_outdated' })
+      expect(await uploadEvidence(evidence(OLD_CONSENT), owner, { bytes, file_name: 'receipt.pdf', consent: OLD_CONSENT })).toMatchObject({ ok: true, deduplicated: true, document: { id } })
+      expect(await withdrawals()).toBe(count)
+      expect(await withdrawn(id)).toBe(true)
+      expect(await permissions(id)).toEqual([])
+      await expect(grant(svc, owner, id, VERSION)).rejects.toThrow('creator_record_v2_ai_permission_withdrawn')
     })
   })
 })

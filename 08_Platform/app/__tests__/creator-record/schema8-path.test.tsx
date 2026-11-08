@@ -17,8 +17,9 @@ import { checkApprovedSources, type SourceRefusal } from '@/lib/creator-record/c
 import { CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
 import { CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY } from '@/lib/creator-record/governed/synthetic-test-authority'
 import { violatesCustomerWordingLock, violatesDependencyLabelLock } from '@/lib/creator-record/contract/wording-lock'
-import { AI_EXAMINATION_PERMISSION_DRAFT_VERSION, AUTHORIZATION_VERSION_PATTERN, boundAuthorizationVersion, EVIDENCE_CONSENT_DRAFT_VERSION } from '@/lib/creator-record/evidence-intake/contract'
-import { uploadEvidence, type EvidenceDeps } from '@/lib/creator-record/evidence-intake/service'
+import { AI_EXAMINATION_PERMISSION_DRAFT_VERSION, AUTHORIZATION_VERSION_PATTERN, boundAuthorizationVersion, EVIDENCE_CONSENT_DRAFT_VERSION, sha256Bytes } from '@/lib/creator-record/evidence-intake/contract'
+import { syntheticTextPdf } from '@/test-support/synthetic-pdf'
+import { uploadEvidence, type EvidenceDeps, type EvidenceRow } from '@/lib/creator-record/evidence-intake/service'
 import { aiExaminationPermissionVersion, CONSENT_VERSION_UNBINDABLE, evidenceConsentVersion } from '@/lib/creator-record-flow/authorization-versions'
 import { approvedPolicyVersions, legalPoliciesApproved, type ApprovedLegalDocument } from '@/lib/legal/policies'
 import { EXAM_LIVE_TEXT, EXAM_TEXT, examText } from '@/lib/creator-record-flow/examination-ui'
@@ -236,5 +237,68 @@ describe('E3: live examination wording is separate from the synthetic replay wor
     const client = src('app/creator-record/CreatorRecordV2Client.tsx')
     expect(client).toContain("textMode={props.examination?.aiPermissionVersion ? 'live' : 'replay'}")
     for (const literal of ['>Check your declarations<', '>Your answers<', '>What you acknowledged<', '>Correct my answers<', "'Confirm these declarations'", 'Nothing was changed']) expect(client).not.toContain(literal)
+  })
+})
+
+// ── CR-V2-SCHEMA8-PATH-1-DEDUP-CORRECTION ──
+describe('deduplication never reports a document stored under another consent as covered by the current one', () => {
+  const PDF = syntheticTextPdf('dedup consent regression')
+  const SHA = sha256Bytes(PDF)
+  const CURRENT = evidenceConsentVersion({ privacy: 'privacy-2', terms: 'terms-1' })
+  const EARLIER = evidenceConsentVersion({ privacy: 'privacy-1', terms: 'terms-1' })
+  const held = (consent_version: string): EvidenceRow => Object.freeze({
+    id: '99999999-2222-4333-8444-555555555555', user_id: OWNER, sha256: SHA, media_type: 'application/pdf', byte_size: PDF.length, file_name: 'receipt.pdf',
+    storage_path: `${OWNER}/99999999-2222-4333-8444-555555555555`, consent_version, state: 'stored', created_at: '2026-11-01T00:00:00.000Z', stored_at: '2026-11-01T00:00:01.000Z',
+    deleted_at: null, object_removed_at: null,
+  }) as unknown as EvidenceRow
+  type Branch = 'at_limit' | 'quota_exceeded' | 'unique_violation'
+  function deps(branch: Branch, row: EvidenceRow) {
+    const writes: string[] = []
+    const store = {
+      countLive: async () => (branch === 'at_limit' ? 24 : 0),
+      listStored: async () => [row],
+      insertPending: async () => { writes.push('insertPending'); return branch === 'quota_exceeded' ? { inserted: false, existing: null, quota_exceeded: true } : { inserted: false, existing: row } },
+      markStored: async () => { writes.push('markStored'); return null },
+      removePending: async () => { writes.push('removePending'); return true },
+    }
+    const objects = { put: async () => { writes.push('put') }, remove: async () => { writes.push('remove') } }
+    const d: EvidenceDeps = {
+      submissions: 'open', hasPilotAccess: async () => true, realDocumentsPermitted: true, isSyntheticTestDocument: () => false,
+      store: store as unknown as EvidenceDeps['store'], objects: objects as unknown as EvidenceDeps['objects'],
+      newId: () => '11111111-2222-4333-8444-555555555555', now: () => new Date('2026-11-08T00:00:00Z'), consentVersion: CURRENT,
+    }
+    return { d, writes }
+  }
+  const upload = (d: EvidenceDeps) => uploadEvidence(d, OWNER, { bytes: PDF, file_name: 'receipt.pdf', consent: CURRENT })
+  // Only the attempted pending insert itself may happen on the insert branches (that is how the collision is found).
+  const expectedWrites: Record<Branch, string[]> = { at_limit: [], quota_exceeded: ['insertPending'], unique_violation: ['insertPending'] }
+
+  test.each<Branch>(['at_limit', 'quota_exceeded', 'unique_violation'])('%s: a document held under an earlier consent → 409 consent_outdated, nothing written or changed', async (branch) => {
+    const row = held(EARLIER)
+    const { d, writes } = deps(branch, row)
+    expect(await upload(d)).toEqual({ ok: false, status: 409, code: 'consent_outdated' })
+    expect(writes).toEqual(expectedWrites[branch])
+    expect(row.consent_version).toBe(EARLIER)
+  })
+
+  test.each<Branch>(['at_limit', 'quota_exceeded', 'unique_violation'])('%s: the same consent → the unchanged deduplicated result (control)', async (branch) => {
+    const row = held(CURRENT)
+    const { d, writes } = deps(branch, row)
+    const r = await upload(d)
+    expect(r).toMatchObject({ ok: true, deduplicated: true, document: { id: row.id, sha256: SHA } })
+    expect(writes).toEqual(expectedWrites[branch])
+  })
+
+  test('a stored row with no recorded consent is never treated as covered (fail closed)', async () => {
+    const row = { ...held(CURRENT), consent_version: null } as unknown as EvidenceRow
+    expect(await upload(deps('unique_violation', row).d)).toEqual({ ok: false, status: 409, code: 'consent_outdated' })
+  })
+
+  test('the customer message is a draft that directs to support and promises no deletion or re-upload', () => {
+    const http = src('lib/creator-record-flow/evidence-http.ts')
+    const line = http.split('\n').find((l) => l.includes('consent_outdated:')) ?? ''
+    expect(line).toMatch(/jd@superimmersive8\.com/)
+    expect(line).not.toMatch(/delet|re-?upload|add it again/i)
+    expect(http).toMatch(/DEDUP-CORRECTION\. DRAFT wording, not approved\./)
   })
 })

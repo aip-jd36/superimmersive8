@@ -138,7 +138,7 @@ export type EvidenceError =
   | { ok: false; status: 400; code: 'invalid_request' | 'consent_required' | EvidenceRefusal }
   | { ok: false; status: 403; code: 'not_invited' | 'synthetic_documents_only' }
   | { ok: false; status: 404; code: 'not_found' }
-  | { ok: false; status: 409; code: 'upload_in_progress' | 'too_many_documents' | 'document_retained' }
+  | { ok: false; status: 409; code: 'upload_in_progress' | 'too_many_documents' | 'document_retained' | 'consent_outdated' }
   | { ok: false; status: 410; code: 'object_missing' }
   | { ok: false; status: 500; code: 'integrity_failure' | 'storage_failed' }
   | { ok: false; status: 503; code: 'submissions_stopped' | 'audit_unavailable' }
@@ -164,7 +164,19 @@ export interface UploadInput {
   consent: unknown
 }
 
-/** Store one document. Idempotent per creator and content: the same bytes return the same document. */
+/**
+ * CR-V2-SCHEMA8-PATH-1-DEDUP-CORRECTION: the answer for identical bytes the creator already holds. Only a document stored under the
+ * SAME storage-consent identifier is returned as the deduplicated result. One stored under a different identifier (an earlier consent
+ * wording or earlier privacy notice or terms) is refused `consent_outdated`: the current consent is never reported as covering it.
+ * Nothing is changed: the stored document, its recorded consent (immutable), any AI-examination permission and any withdrawal stay
+ * exactly as they are, and no new document is created.
+ */
+function heldResult(held: EvidenceRow, consentVersion: string): { ok: true; document: EvidenceView; deduplicated: true } | EvidenceError {
+  if (held.consent_version !== consentVersion) return err({ status: 409, code: 'consent_outdated' })
+  return { ok: true, document: viewOf(held), deduplicated: true }
+}
+
+/** Store one document. Idempotent per creator and content: the same bytes return the same document (under the same consent). */
 export async function uploadEvidence(deps: EvidenceDeps, userId: string, input: UploadInput): Promise<{ ok: true; document: EvidenceView; deduplicated: boolean } | EvidenceError> {
   const gated = await gate(deps, userId)
   if (gated) return gated
@@ -181,7 +193,7 @@ export async function uploadEvidence(deps: EvidenceDeps, userId: string, input: 
   if ((await deps.store.countLive(userId)) >= EVIDENCE_MAX_LIVE_PER_CREATOR) {
     // A re-upload of a document already held is still answered (deduplicated), even at the limit.
     const held = (await deps.store.listStored(userId)).find((r) => r.sha256 === v.sha256)
-    if (held) return { ok: true, document: viewOf(held), deduplicated: true }
+    if (held) return heldResult(held, consentVersion)
     return err({ status: 409, code: 'too_many_documents' })
   }
 
@@ -199,12 +211,12 @@ export async function uploadEvidence(deps: EvidenceDeps, userId: string, input: 
   const claim = await deps.store.insertPending(row)
   if (!claim.inserted && claim.quota_exceeded) {
     const held = (await deps.store.listStored(userId)).find((r) => r.sha256 === v.sha256)
-    if (held) return { ok: true, document: viewOf(held), deduplicated: true }
+    if (held) return heldResult(held, consentVersion)
     return err({ status: 409, code: 'too_many_documents' })
   }
   if (!claim.inserted) {
     const existing = claim.existing
-    if (existing && existing.state === 'stored' && existing.user_id === userId) return { ok: true, document: viewOf(existing), deduplicated: true }
+    if (existing && existing.state === 'stored' && existing.user_id === userId) return heldResult(existing, consentVersion)
     return err({ status: 409, code: 'upload_in_progress' })
   }
 

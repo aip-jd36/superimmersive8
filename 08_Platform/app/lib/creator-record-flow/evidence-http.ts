@@ -25,6 +25,8 @@ const MESSAGES: Record<EvidenceError['code'], string> = {
   upload_in_progress: 'This file is still being added. Try again in a moment.',
   too_many_documents: 'You have reached the maximum number of documents.',
   document_retained: 'This document is part of a prepared record and is kept.',
+  // CR-V2-SCHEMA8-PATH-1-DEDUP-CORRECTION. DRAFT wording, not approved.
+  consent_outdated: 'You added this file earlier under a previous version of our storage notice, privacy notice or terms, so it cannot be reused under the current ones. Email jd@superimmersive8.com for help.',
   object_missing: 'This document is no longer available.',
   integrity_failure: 'This document could not be verified. Nothing was changed.',
   storage_failed: 'The document could not be stored. Nothing was kept.',
