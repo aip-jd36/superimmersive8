@@ -54,7 +54,11 @@ export const V2_CONSENT = {
   working: 'Withdrawing…',
   withdrawn: 'You withdrew permission for AI examination. No AI model reads the documents you added before then, and records that use them are paused. Email jd@superimmersive8.com about any paid order.',
   withdrawn_on: 'Withdrawn on',
-  failed: 'Your request could not be completed. Nothing was changed. Please try again.',
+  // CR-V2-MVP-LAUNCH-FOUNDATION-1-CORRECTIONS-1: the outcome of a failed or timed-out request is not known, so it is never stated.
+  failed: 'We could not confirm whether your withdrawal was recorded. You can try again: withdrawing more than once has the same effect as withdrawing once. If this keeps happening, email jd@superimmersive8.com.',
+  signed_out: 'You are signed out, so your withdrawal was not recorded. Sign in again, then withdraw.',
+  // Shown when the current state cannot be read: the withdrawal stays available (the request is idempotent).
+  unknown: 'Your AI examination permission status cannot be shown right now. You can still withdraw permission here; if you have already withdrawn, withdrawing again changes nothing. You can also email jd@superimmersive8.com.',
 } as const
 
 export const V2_REVIEW_PAGE = {

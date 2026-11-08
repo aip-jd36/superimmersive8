@@ -20,6 +20,8 @@ import { LegalDocumentPage } from '@/components/legal/LegalDocumentPage'
 import { ConsentWithdrawalControl } from '@/components/creator-record/ConsentWithdrawalControl'
 import { EvidencePanel } from '@/components/creator-record/EvidencePanel'
 import { readConsentState } from '@/lib/creator-record/evidence-intake/retention'
+import { consentControlState } from '@/lib/creator-record-flow/consent-dashboard'
+import { requestConsentWithdrawal } from '@/lib/creator-record-flow/consent-withdrawal-request'
 import { AI_EXAMINATION_PERMISSION_DRAFT_VERSION, EVIDENCE_CONSENT_DRAFT_VERSION } from '@/lib/creator-record/evidence-intake/contract'
 
 const APP = path.join(__dirname, '..', '..')
@@ -134,13 +136,14 @@ describe('the browser asks separately for AI permission, only when live examinat
 // ── 8N: withdrawal control ──
 describe('the withdrawal control', () => {
   test('before: explains the effect and offers a two-step withdrawal', () => {
-    const html = renderToStaticMarkup(<ConsentWithdrawalControl initialWithdrawnAt={null} />)
+    const html = renderToStaticMarkup(<ConsentWithdrawalControl initial={{ state: 'active' }} />)
     expect(html).toContain(V2_CONSENT.withdraw)
     expect(html).toContain('data-consent-control')
     expect(html).not.toContain('data-consent-withdrawn')
+    expect(html).not.toContain('data-consent-unknown')
   })
   test('after: shows the withdrawn, paused state and offers no way to re-grant', () => {
-    const html = renderToStaticMarkup(<ConsentWithdrawalControl initialWithdrawnAt="2026-11-08T10:00:00.000Z" />)
+    const html = renderToStaticMarkup(<ConsentWithdrawalControl initial={{ state: 'withdrawn', withdrawnAt: '2026-11-08T10:00:00.000Z' }} />)
     expect(html).toContain('data-consent-withdrawn')
     expect(html).toMatch(/paused/)
     expect(html).not.toContain(V2_CONSENT.withdraw)
@@ -148,8 +151,11 @@ describe('the withdrawal control', () => {
   })
   test('uses the existing route with an explicit confirmation body', () => {
     const c = src('components/creator-record/ConsentWithdrawalControl.tsx')
-    expect(c).toMatch(/fetch\('\/api\/creator-record-v2\/consent-withdrawal'/)
-    expect(c).toMatch(/JSON\.stringify\(\{ confirm: true \}\)/)
+    expect(c).toMatch(/requestConsentWithdrawal\(/)
+    const r = src('lib/creator-record-flow/consent-withdrawal-request.ts')
+    expect(r).toMatch(/CONSENT_WITHDRAWAL_PATH = '\/api\/creator-record-v2\/consent-withdrawal'/)
+    expect(r).toMatch(/JSON\.stringify\(\{ confirm: true \}\)/)
+    expect(r).not.toMatch(/@\/lib\/supabase|server-only/)
   })
   test('the consent-state read fails closed', async () => {
     expect(await readConsentState({ retention: {} as never }, OWNER)).toEqual({ ok: false, status: 503, code: 'unavailable' })
@@ -163,11 +169,149 @@ describe('the withdrawal control', () => {
     expect(r).toMatch(/isConfirmation\(await readJsonBody\(req\)\)/)
     expect(r).not.toMatch(/CREATOR_RECORD_V2_SUBMISSIONS|hasPilotAccess|checkEvidenceGate/)
   })
-  test('the dashboard shows it to Creator Record v2 creators only, and hides it when the state cannot be read', () => {
-    expect(src('app/dashboard/page.tsx')).toMatch(/\{consentControl\.show && <ConsentWithdrawalControl initialWithdrawnAt=\{consentControl\.withdrawnAt\} \/>\}/)
+  test('the dashboard renders the control from the helper and tells it whether the creator has a v2 submission', () => {
+    const page = src('app/dashboard/page.tsx')
+    expect(page).toMatch(/\{consentControl\.show && <ConsentWithdrawalControl initial=\{consentControl\.initial\} \/>\}/)
+    expect(page).toMatch(/consentControlState\(user\.id, \{ hasV2Submission: submissions\.some\(\(s\) => s\.creator_record_product === 'v2'\) \}\)/)
+    expect(src('lib/creator-record-flow/consent-dashboard.ts')).toMatch(/\.eq\('origin', 'owner_upload'\)/)
+  })
+})
+
+// ── CORRECTIONS-1: the withdrawal stays available when the state cannot be read ──
+type DbResult = { data?: unknown; error?: unknown; count?: unknown }
+type Behaviour = DbResult | 'throw' | 'hang'
+function fakeDb(state: Behaviour, docs: Behaviour) {
+  const calls: string[] = []
+  const settle = (b: Behaviour): PromiseLike<DbResult> => {
+    if (b === 'throw') return Promise.reject(new Error('db down'))
+    if (b === 'hang') return new Promise(() => undefined)
+    return Promise.resolve(b)
+  }
+  const chain = { select: () => chain, eq: () => chain, then: (ok: (v: DbResult) => unknown, bad?: (e: unknown) => unknown) => settle(docs).then(ok, bad) }
+  const db = {
+    rpc: (fn: string, args: unknown) => { calls.push(`rpc:${fn}:${JSON.stringify(args)}`); return settle(state) },
+    from: (t: string) => { calls.push(`from:${t}`); return chain },
+  }
+  return { db: db as never, calls }
+}
+const WITHDRAWN_AT = '2026-11-08T10:00:00.000Z'
+const NOT_WITHDRAWN = { data: [{ withdrawn: false, withdrawn_at: null }], error: null }
+const WITHDRAWN = { data: [{ withdrawn: true, withdrawn_at: WITHDRAWN_AT }], error: null }
+const HAS_DOCS = { count: 2, error: null }
+const NO_DOCS = { count: 0, error: null }
+const DOCS_ERROR = { count: null, error: { message: 'x' } }
+
+describe('consentControlState: read failures never remove the withdrawal from a v2 creator', () => {
+  test.each<[string, Behaviour, Behaviour, boolean, unknown]>([
+    // Known states (unchanged behaviour).
+    ['not withdrawn, with documents', NOT_WITHDRAWN, HAS_DOCS, false, { show: true, initial: { state: 'active' } }],
+    ['not withdrawn, no documents, no v2 submission (V1 customer)', NOT_WITHDRAWN, NO_DOCS, false, { show: false }],
+    ['withdrawn', WITHDRAWN, NO_DOCS, false, { show: true, initial: { state: 'withdrawn', withdrawnAt: WITHDRAWN_AT } }],
+    // The state read fails.
+    ['state RPC error, v2 submission', { data: null, error: { code: '42883', message: 'function does not exist' } }, DOCS_ERROR, true, { show: true, initial: { state: 'unknown' } }],
+    ['state RPC throws, v2 submission', 'throw', 'throw', true, { show: true, initial: { state: 'unknown' } }],
+    ['state RPC error, no submission but documents', { data: null, error: { message: 'x' } }, HAS_DOCS, false, { show: true, initial: { state: 'unknown' } }],
+    ['state RPC error, no sign of v2 use (V1 customer)', { data: null, error: { message: 'x' } }, NO_DOCS, false, { show: false }],
+    // Unexpected or malformed responses.
+    ['empty result', { data: [], error: null }, NO_DOCS, true, { show: true, initial: { state: 'unknown' } }],
+    ['null data', { data: null, error: null }, NO_DOCS, true, { show: true, initial: { state: 'unknown' } }],
+    ['withdrawn is not a boolean', { data: [{ withdrawn: 'yes', withdrawn_at: WITHDRAWN_AT }], error: null }, NO_DOCS, true, { show: true, initial: { state: 'unknown' } }],
+    ['withdrawn without a time (never shown as "not withdrawn")', { data: [{ withdrawn: true, withdrawn_at: null }], error: null }, HAS_DOCS, false, { show: true, initial: { state: 'unknown' } }],
+    ['withdrawn with an unparseable time', { data: [{ withdrawn: true, withdrawn_at: 'soon' }], error: null }, NO_DOCS, true, { show: true, initial: { state: 'unknown' } }],
+    ['a scalar instead of a row', { data: 'ok', error: null }, NO_DOCS, true, { show: true, initial: { state: 'unknown' } }],
+    // The document read fails after a known "not withdrawn".
+    ['not withdrawn, documents unreadable, v2 submission', NOT_WITHDRAWN, DOCS_ERROR, true, { show: true, initial: { state: 'active' } }],
+    ['not withdrawn, documents unreadable, no v2 submission', NOT_WITHDRAWN, DOCS_ERROR, false, { show: false }],
+    ['not withdrawn, malformed count, v2 submission', NOT_WITHDRAWN, { count: 'many', error: null }, true, { show: true, initial: { state: 'active' } }],
+  ])('%s', async (_label, state, docs, hasV2Submission, expected) => {
+    const { db } = fakeDb(state, docs)
+    expect(await consentControlState(OWNER, { hasV2Submission, db })).toEqual(expected)
+  })
+
+  test('a read that does not answer in time is treated as unreadable (timeout → unknown, never hangs the dashboard)', async () => {
+    const { db } = fakeDb('hang', 'hang')
+    const started = Date.now()
+    expect(await consentControlState(OWNER, { hasV2Submission: true, db, timeoutMs: 20 })).toEqual({ show: true, initial: { state: 'unknown' } })
+    expect(Date.now() - started).toBeLessThan(2_000)
+    const v1 = fakeDb('hang', 'hang')
+    expect(await consentControlState(OWNER, { hasV2Submission: false, db: v1.db, timeoutMs: 20 })).toEqual({ show: false })
+  })
+
+  test('reads only the session user’s own state and documents', async () => {
+    const { db, calls } = fakeDb(NOT_WITHDRAWN, HAS_DOCS)
+    await consentControlState(OWNER, { hasV2Submission: false, db })
+    expect(calls).toEqual([`rpc:creator_record_v2_consent_state:${JSON.stringify({ p_user_id: OWNER })}`, 'from:creator_record_v2_documents'])
+  })
+
+  test('the unknown state still offers the same two-step withdrawal, and says the status cannot be shown', () => {
+    const html = renderToStaticMarkup(<ConsentWithdrawalControl initial={{ state: 'unknown' }} />)
+    expect(html).toContain('data-consent-unknown')
+    expect(html).toContain(V2_CONSENT.unknown)
+    expect(html).toContain(V2_CONSENT.withdraw)
+    expect(html).not.toContain('data-consent-withdrawn')
+    expect(html).not.toContain(V2_CONSENT.active)
+  })
+
+  test('display only: the dashboard helper authorizes nothing and is not used by any examination path', () => {
     const helper = src('lib/creator-record-flow/consent-dashboard.ts')
-    expect(helper).toMatch(/\.eq\('origin', 'owner_upload'\)/)
-    expect(helper).toMatch(/catch \{\s*return \{ show: false \}/)
+    expect(helper).not.toMatch(/grant_ai_examination_permission|examin(e|ation)\(|\.insert\(|\.update\(|\.delete\(|\.upsert\(/)
+    for (const f of ['lib/creator-record-flow/examination-customer.ts', 'lib/creator-record/customer-flow/examination.ts', 'lib/creator-record-flow/route-handlers.ts'])
+      expect(src(f)).not.toMatch(/consent-dashboard|consentControlState/)
+  })
+})
+
+describe('requestConsentWithdrawal: the outcome is reported only as far as it is known', () => {
+  type Res = { ok: boolean; status: number; json: () => Promise<unknown> }
+  const res = (status: number, body: unknown, jsonThrows = false): Res => ({ ok: status >= 200 && status < 300, status, json: async () => { if (jsonThrows) throw new Error('bad json'); return body } })
+  const recorder = (r: Res | 'throw' | 'hang') => {
+    const seen: { input: string; init: RequestInit }[] = []
+    const f = async (input: string, init: RequestInit) => {
+      seen.push({ input, init })
+      if (r === 'throw') throw new TypeError('Failed to fetch')
+      if (r === 'hang') return new Promise<Res>(() => undefined)
+      return r
+    }
+    return { f, seen }
+  }
+
+  test('confirmed: the server returned the withdrawal time; the same idempotent POST and body as before', async () => {
+    const { f, seen } = recorder(res(200, { consent_withdrawal: { result: 'created', withdrawn_at: WITHDRAWN_AT } }))
+    expect(await requestConsentWithdrawal(f)).toEqual({ kind: 'withdrawn', withdrawnAt: WITHDRAWN_AT })
+    expect(seen).toHaveLength(1)
+    expect(seen[0].input).toBe('/api/creator-record-v2/consent-withdrawal')
+    expect(seen[0].init.method).toBe('POST')
+    expect(seen[0].init.body).toBe(JSON.stringify({ confirm: true }))
+  })
+  test('a repeat withdrawal ("existing") is confirmed the same way', async () => {
+    const { f } = recorder(res(200, { consent_withdrawal: { result: 'existing', withdrawn_at: WITHDRAWN_AT } }))
+    expect(await requestConsentWithdrawal(f)).toEqual({ kind: 'withdrawn', withdrawnAt: WITHDRAWN_AT })
+  })
+  test('401: refused before anything was done → signed out', async () => {
+    expect(await requestConsentWithdrawal(recorder(res(401, { error: 'Unauthorized' })).f)).toEqual({ kind: 'signed_out' })
+  })
+  test.each<[string, Res | 'throw']>([
+    ['a server error', res(500, { error: 'internal' })],
+    ['unavailable', res(503, { code: 'unavailable' })],
+    ['a bad request', res(400, { code: 'invalid_request' })],
+    ['a network error', 'throw'],
+    ['200 with an unreadable body', res(200, null, true)],
+    ['200 without a withdrawal time', res(200, { consent_withdrawal: { result: 'created' } })],
+    ['200 with an unparseable time', res(200, { consent_withdrawal: { withdrawn_at: 'later' } })],
+    ['200 with an unexpected body', res(200, { ok: true })],
+  ])('%s → uncertain (never "withdrawn", never "nothing changed")', async (_l, r) => {
+    expect(await requestConsentWithdrawal(recorder(r).f)).toEqual({ kind: 'uncertain' })
+  })
+  test('a request that does not answer in time is aborted and reported as uncertain', async () => {
+    const { f, seen } = recorder('hang')
+    expect(await requestConsentWithdrawal(f, 20)).toEqual({ kind: 'uncertain' })
+    expect((seen[0].init.signal as AbortSignal | undefined)?.aborted).toBe(true)
+  })
+  test('the wording for an uncertain outcome says it could not be confirmed and that trying again is harmless', () => {
+    expect(V2_CONSENT.failed).toMatch(/could not confirm whether your withdrawal was recorded/i)
+    expect(V2_CONSENT.failed).toMatch(/try again/i)
+    expect(V2_CONSENT.failed).toMatch(/same effect as withdrawing once/i)
+    for (const s of Object.values(V2_CONSENT)) expect(s).not.toMatch(/nothing was changed/i)
+    expect(src('components/creator-record/ConsentWithdrawalControl.tsx')).toMatch(/outcome\.kind === 'signed_out' \? V2_CONSENT\.signed_out : V2_CONSENT\.failed/)
   })
 })
 

@@ -94,7 +94,8 @@ export default async function DashboardPage() {
   // CATALOG DISABLED: const catalogCount = optIns?.length || 0
   const totalEarnings = deals?.reduce((sum, deal) => sum + (deal.creator_payout || 0), 0) || 0
   // CR-V2-MVP-LAUNCH-FOUNDATION-1: Creator Record v2 creators only (anyone else sees no change).
-  const consentControl = await consentControlState(user.id)
+  // CORRECTIONS-1: a v2 submission keeps the withdrawal available even when the consent state cannot be read.
+  const consentControl = await consentControlState(user.id, { hasV2Submission: submissions.some((s) => s.creator_record_product === 'v2') })
 
   const getStatusBadge = (status: string) => {
     const styles = {
@@ -125,7 +126,7 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      {consentControl.show && <ConsentWithdrawalControl initialWithdrawnAt={consentControl.withdrawnAt} />}
+      {consentControl.show && <ConsentWithdrawalControl initial={consentControl.initial} />}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">

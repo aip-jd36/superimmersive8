@@ -6,19 +6,24 @@
  * Uses the existing route (`POST /api/creator-record-v2/consent-withdrawal`, `{ "confirm": true }`). Two explicit steps; the
  * server decides and records everything (the database pauses affected records and paid orders in the same transaction). After a
  * withdrawal there is no way back here: no re-grant, no continuation (8R is not implemented). Wording: DRAFT (`wording.ts`).
+ *
+ * CR-V2-MVP-LAUNCH-FOUNDATION-1-CORRECTIONS-1: when the server could not read the current state (`unknown`), the control says so
+ * and still offers the same idempotent withdrawal. A failed or timed-out request is reported as unconfirmed, never as "nothing
+ * changed"; only the server's confirmation shows the withdrawn state.
  */
 import { useState } from 'react'
 import { V2_CONSENT } from '@/lib/creator-record-flow/wording'
+import { requestConsentWithdrawal, type ConsentControlInitial } from '@/lib/creator-record-flow/consent-withdrawal-request'
 
 export interface ConsentWithdrawalControlProps {
-  /** The server-rendered state: null = permission not withdrawn. */
-  initialWithdrawnAt: string | null
+  /** The server-rendered state. */
+  initial: ConsentControlInitial
 }
 
 type Step = 'idle' | 'confirming' | 'working'
 
 export function ConsentWithdrawalControl(props: ConsentWithdrawalControlProps) {
-  const [withdrawnAt, setWithdrawnAt] = useState<string | null>(props.initialWithdrawnAt)
+  const [withdrawnAt, setWithdrawnAt] = useState<string | null>(props.initial.state === 'withdrawn' ? props.initial.withdrawnAt : null)
   const [step, setStep] = useState<Step>('idle')
   const [error, setError] = useState<string | null>(null)
   const when = (iso: string) => new Date(iso).toLocaleString()
@@ -26,21 +31,10 @@ export function ConsentWithdrawalControl(props: ConsentWithdrawalControlProps) {
   async function withdraw() {
     setStep('working')
     setError(null)
-    try {
-      const res = await fetch('/api/creator-record-v2/consent-withdrawal', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ confirm: true }),
-      })
-      const json = await res.json().catch(() => ({}))
-      const at = (json as { consent_withdrawal?: { withdrawn_at?: unknown } }).consent_withdrawal?.withdrawn_at
-      if (res.ok && typeof at === 'string') setWithdrawnAt(at)
-      else setError(V2_CONSENT.failed)
-    } catch {
-      setError(V2_CONSENT.failed)
-    } finally {
-      setStep('idle')
-    }
+    const outcome = await requestConsentWithdrawal((input, init) => fetch(input, init))
+    if (outcome.kind === 'withdrawn') setWithdrawnAt(outcome.withdrawnAt)
+    else setError(outcome.kind === 'signed_out' ? V2_CONSENT.signed_out : V2_CONSENT.failed)
+    setStep('idle')
   }
 
   return (
@@ -53,7 +47,11 @@ export function ConsentWithdrawalControl(props: ConsentWithdrawalControlProps) {
         </div>
       ) : (
         <div>
-          <p className="text-sm text-gray-700 mb-3">{V2_CONSENT.active}</p>
+          {props.initial.state === 'unknown' ? (
+            <p className="text-sm text-gray-700 mb-3" data-consent-unknown>{V2_CONSENT.unknown}</p>
+          ) : (
+            <p className="text-sm text-gray-700 mb-3">{V2_CONSENT.active}</p>
+          )}
           {step === 'idle' && (
             <button type="button" className="rounded-md border px-3 py-1.5 text-sm font-medium bg-white" onClick={() => setStep('confirming')}>
               {V2_CONSENT.withdraw}
