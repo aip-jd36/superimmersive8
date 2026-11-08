@@ -19,6 +19,7 @@ import { deliverCreatorRecordPdf, type DeliveryPorts } from '@/lib/creator-recor
 import { sha256Hex, type ArtifactRow } from '@/lib/creator-record-artifacts/issue'
 import { CREATOR_RECORD_V2_GENERATOR_VERSION } from '@/lib/creator-record-artifacts/renderers'
 import * as wording from '@/lib/creator-record-flow/wording'
+import { EXAM_LIVE_TEXT } from '@/lib/creator-record-flow/examination-ui'
 import { v2DashboardState, v2DashboardView, v2ListBadge } from '@/lib/creator-record-flow/dashboard'
 import { POST as purchase } from '@/app/api/creator-record-v2/prepared/[id]/purchase/route'
 
@@ -55,7 +56,7 @@ describe('private delivery of a v2 artifact (unchanged delivery path)', () => {
 describe('draft customer wording (PRD wording lock)', () => {
   const strings = (v: unknown): string[] => (typeof v === 'string' ? [v] : v && typeof v === 'object' ? Object.values(v).flatMap(strings) : [])
   // CR-V2-MVP-LAUNCH-FOUNDATION-1: the withdrawal control's wording is held to the same lock.
-  const all = [wording.V2_CHECKOUT_COPY, wording.V2_READY_EMAIL, wording.V2_DASHBOARD, wording.V2_REVIEW_PAGE, wording.V2_CONSENT].flatMap(strings)
+  const all = [wording.V2_CHECKOUT_COPY, wording.V2_READY_EMAIL, wording.V2_DASHBOARD, wording.V2_REVIEW_PAGE, wording.V2_CONSENT, EXAM_LIVE_TEXT].flatMap(strings)  // CR-V2-SCHEMA8-PATH-1 (E3): the live examination wording too
   // Same lock as the customer PDF templates: only negated "clearance" is allowed.
   const BANNED = /\b(cleared|clearance|compliant|certified|certification|verified|verification|approved|guarantee[sd]?)\b|licensed to|permitted to|safe to|reviewed by|review date|last reviewed/i
   const ALLOWED = [/\bnot (a |an )?(legal advice, a |commercial )?clearance\b/gi, /\bnot legal advice, a (commercial )?clearance\b/gi, /\bhuman-reviewed SI8 (Commercial Assurance )?[Aa]ssessment\b/g]

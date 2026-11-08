@@ -26,6 +26,7 @@ function view(over: Partial<PreparedView> = {}): PreparedView {
     declarations: { answers: [{ q_id: 'T3', tool_index: 0, question: 'Plan?', answer: 'Pro' }], acknowledgements: [] },
     documents: [{ document_id: DOC, file_name: 'synthetic-receipt.png', media_type: 'image/png', byte_size: 10, sha256: 'a'.repeat(64), category: 'billing_receipt', tool_index: 0 }],
     guidance_items: 0,
+    purchasable: false,
     examination: {
       documents: [{
         document_id: DOC, run_id: RUN, verification: 'not_verified', outcome: { status: 'examined', reason: null },
@@ -165,12 +166,19 @@ describe('client and page boundaries', () => {
     expect(page).not.toMatch(/syntheticUat|synthetic-uat/)
     expect(page).toContain('CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION }).ok')
     // CR-V2-MVP-LAUNCH-FOUNDATION-1 (8Q): the separate AI permission is added only when a live examination is offered.
-    expect(page).toContain('? { examination: { consentVersion: EVIDENCE_CONSENT_DRAFT_VERSION, ...(customerLiveOffered() ? { aiPermissionVersion: AI_EXAMINATION_PERMISSION_DRAFT_VERSION } : {}) } }')
+    // CR-V2-SCHEMA8-PATH-1 (E7): the identifiers are the current ones, bound to the approved privacy notice and terms.
+    expect(page).toContain('? { examination: { consentVersion: evidenceConsentVersion(), ...(aiPermissionVersion ? { aiPermissionVersion } : {}) } }')
+    expect(page).toContain('const aiPermissionVersion = customerLiveOffered() ? aiExaminationPermissionVersion() : null')
     expect(page).toMatch(/\.\.\.\(examinationOffered\s*\n?\s*\?/)
   })
 
-  test('an examination-bearing version never offers payment', () => {
-    expect(client).toContain('{reviewed && props.paymentOpen && !view.examination && (')
+  // CR-V2-SCHEMA8-PATH-1 (E2): replaces "an examination-bearing version never offers payment". Payment is offered for either
+  // schema only when the server computed the version purchasable now; otherwise a not-purchasable notice, never the button.
+  test('payment is offered only for a version the server computed purchasable, for either schema', () => {
+    expect(client).toContain('{reviewed && props.paymentOpen && view.purchasable && (')
+    expect(client).toContain('{reviewed && props.paymentOpen && !view.purchasable && (')
+    expect(client).not.toContain('!view.examination && (')
+    expect(client).not.toContain('EXAM_TEXT.payment_blocked')
   })
 
   test('responses are recorded by the server (a new version), never kept as if recorded in the browser; nothing privileged is sent', () => {

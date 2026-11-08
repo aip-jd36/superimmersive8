@@ -391,7 +391,7 @@ describe('referenced runs at payment and issuance', () => {
     }
   }
   const purchaseDeps = (row: PreparedRow, over: Partial<PurchaseDeps> = {}): PurchaseDeps => ({
-    submissions: 'open', issuance: 'enabled', hasPilotAccess: async () => true,
+    submissions: 'open', issuance: 'enabled', hasPilotAccess: async () => true, legalPoliciesApproved: () => true,
     getPrepared: async () => clone(row), latestVersion: async () => clone(row), boundTo: async () => clone(row),
     bind: async () => { throw new Error('must not bind') },
     governance: (d) => governanceSnapshotFrom({ issuance_date: d, sources: SOURCES, topicClaims: TOPIC_CLAIMS_FIXTURE, source_text_approvals: [TEXT_V6], support: COMMERCIAL_SUPPORT_UNDER_TEST, authority_class: 'synthetic_test' }),

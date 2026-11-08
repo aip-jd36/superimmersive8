@@ -116,6 +116,13 @@ export interface EvidenceDeps {
    * fixed window; the pilot invitation is still required). Absent or inert = none. The synthetic-only lock is unchanged.
    */
   syntheticUat?: { admits(userId: string, now: Date): boolean }
+  /**
+   * CR-V2-SCHEMA8-PATH-1 (E7): the storage-consent identifier an upload must carry now, bound to the approved privacy notice and
+   * terms (`lib/creator-record-flow/authorization-versions.ts`). The upload accepts only this and records it with the document.
+   * Absent: the draft identifier, which only ever admits SI8's synthetic test documents — real documents need
+   * `realDocumentsPermitted`, and every wiring that can set it also supplies this.
+   */
+  consentVersion?: string
 }
 
 export interface EvidenceView {
@@ -161,7 +168,11 @@ export interface UploadInput {
 export async function uploadEvidence(deps: EvidenceDeps, userId: string, input: UploadInput): Promise<{ ok: true; document: EvidenceView; deduplicated: boolean } | EvidenceError> {
   const gated = await gate(deps, userId)
   if (gated) return gated
-  if (input.consent !== EVIDENCE_CONSENT_DRAFT_VERSION) return err({ status: 400, code: 'consent_required' })
+  // CR-V2-SCHEMA8-PATH-1 (E7): only the current identifier (wording + approved policy versions) is accepted, and it is recorded.
+  const consentVersion = deps.consentVersion ?? EVIDENCE_CONSENT_DRAFT_VERSION
+  // A real document is never stored under the unbound draft identifier (fail closed even if a wiring omitted it).
+  if (deps.realDocumentsPermitted && consentVersion === EVIDENCE_CONSENT_DRAFT_VERSION) return err({ status: 400, code: 'consent_required' })
+  if (input.consent !== consentVersion) return err({ status: 400, code: 'consent_required' })
 
   const v = validateEvidenceBytes(input.bytes)
   if (!v.ok) return err({ status: 400, code: v.code })
@@ -183,7 +194,7 @@ export async function uploadEvidence(deps: EvidenceDeps, userId: string, input: 
     byte_size: v.byte_size,
     file_name: sanitizeEvidenceFileName(input.file_name),
     storage_path: `${userId}/${id}`,
-    consent_version: EVIDENCE_CONSENT_DRAFT_VERSION,
+    consent_version: consentVersion,
   }
   const claim = await deps.store.insertPending(row)
   if (!claim.inserted && claim.quota_exceeded) {

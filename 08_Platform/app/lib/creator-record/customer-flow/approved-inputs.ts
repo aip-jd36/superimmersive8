@@ -45,6 +45,7 @@ const NO_AUTHORITY_INPUTS: ApprovedInputs = Object.freeze({
     questionnaire_approval: null,
   },
   source_text: null,
+  source_text_examination: null,
 }) as ApprovedInputs
 
 export function approvedCustomerRecordInputs(bundle: PublicationAuthorityBundle | null = currentPublicationAuthority()): ApprovedInputs {
@@ -63,7 +64,16 @@ export function approvedCustomerRecordInputs(bundle: PublicationAuthorityBundle 
       questionnaire_approval: bundle.questionnaire_approval,
     },
     source_text: bundle.source_text_approval === null ? null : { approval: bundle.source_text_approval, acknowledgements: bundle.acknowledgements },
+    // CR-V2-SCHEMA8-PATH-1: the schema 8 approval of the same wording, from the same bundle (null when none).
+    source_text_examination: examinationApprovalOf(bundle) === null ? null : { approval: examinationApprovalOf(bundle), acknowledgements: bundle.acknowledgements },
   }
+}
+
+const examinationApprovalOf = (bundle: PublicationAuthorityBundle) => bundle.source_text_examination_approval ?? null
+
+/** Every Source Text Approval the bundle carries (one per record schema it publishes), for the issuance snapshot. */
+function sourceTextApprovalsOf(bundle: PublicationAuthorityBundle) {
+  return [bundle.source_text_approval, examinationApprovalOf(bundle)].filter((a): a is NonNullable<typeof a> => a !== null)
 }
 
 /**
@@ -78,7 +88,7 @@ export function approvedGovernanceSnapshot(issuanceDate: string, topicClaims: To
     issuance_date: issuanceDate,
     sources: approvedCustomerRecordInputs(bundle).sources,
     topicClaims,
-    source_text_approvals: bundle.source_text_approval === null ? [] : [bundle.source_text_approval],
+    source_text_approvals: sourceTextApprovalsOf(bundle),
     authority_class: bundle.authority_class,
   })
 }

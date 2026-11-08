@@ -286,3 +286,35 @@ describe('prepared records', () => {
     expect(await reviewPrepared(racing, OWNER, v.id)).toEqual({ ok: false, status: 409, code: 'conflict' })
   })
 })
+
+// ── CR-V2-SCHEMA8-PATH-1 (E2): the view says whether the page may offer payment; the server decides at payment ──
+describe('E2: purchasable on the prepared view', () => {
+  test('never for an unreviewed version, whatever the port says; the port is not asked', async () => {
+    const asked: string[] = []
+    const d = deps({ purchaseOfferable: (row) => { asked.push(row.id); return true } })
+    const v = okView(await preparePrepared(d, OWNER, { state: state() }))
+    expect(v.status).toBe('prepared')
+    expect(v.purchasable).toBe(false)
+    expect(asked).toEqual([])
+  })
+
+  test('for a reviewed version: exactly what the port answers for the stored row (prepare, review and read alike)', async () => {
+    const asked: PreparedRow[] = []
+    let answer = true
+    const d = deps({ purchaseOfferable: (row) => { asked.push(row); return answer } })
+    const v = okView(await preparePrepared(d, OWNER, { state: state() }))
+    const reviewed = okView(await reviewPrepared(d, OWNER, v.id))
+    expect(reviewed.purchasable).toBe(true)
+    expect(asked.map((r) => [r.id, r.status])).toEqual([[v.id, 'reviewed']])
+    answer = false
+    expect(okView(await getPrepared(d, OWNER, v.id)).purchasable).toBe(false)
+  })
+
+  test('absent, throwing or non-boolean port: not purchasable (fail closed)', async () => {
+    for (const port of [undefined, () => { throw new Error('x') }, () => 'yes' as unknown as boolean]) {
+      const d = deps(port ? { purchaseOfferable: port } : {})
+      const v = okView(await preparePrepared(d, OWNER, { state: state() }))
+      expect(okView(await reviewPrepared(d, OWNER, v.id)).purchasable).toBe(false)
+    }
+  })
+})

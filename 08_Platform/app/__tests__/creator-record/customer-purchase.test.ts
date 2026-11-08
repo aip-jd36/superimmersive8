@@ -134,6 +134,8 @@ function world(over: Partial<PurchaseDeps> = {}) {
     submissions: 'open',
     issuance: 'enabled',
     hasPilotAccess: async (u) => u === OWNER || u === OTHER,
+    // CR-V2-SCHEMA8-PATH-1 (E4): both legal policies published (refusal tested separately).
+    legalPoliciesApproved: () => true,
     getPrepared: async (id) => (rows.has(id) ? clone(rows.get(id) as PreparedRow) : null),
     latestVersion: async (d) => (latest(d) ? clone(latest(d) as PreparedRow) : null),
     boundTo: async (sid) => clone(Array.from(rows.values()).find((r) => r.submission_id === sid) ?? null),

@@ -12,7 +12,8 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import type { FlowDeps, NewPreparedRow, PreparedRow, PreparedStore } from '@/lib/creator-record/customer-flow/service'
 import { approvedCustomerRecordInputs, approvedGovernanceSnapshot, approvedPdfTemplates, CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flow/approved-inputs'
-import { authorizeV2Issuance, renderV2ForIssuance, type BindReason, type CheckoutSubmission, type PurchaseDeps, type V2IssuanceDeps } from '@/lib/creator-record/customer-flow/purchase'
+import { legalPoliciesApproved } from '@/lib/legal/policies'
+import { authorizeV2Issuance, purchaseOfferable, renderV2ForIssuance, type BindReason, type CheckoutSubmission, type PurchaseDeps, type V2IssuanceDeps } from '@/lib/creator-record/customer-flow/purchase'
 import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/config'
 import { hasPilotAccess, PILOT_ACCESS_TABLE } from './pilot-access'
 import { evidenceObjects, evidenceStore } from './evidence-production'
@@ -120,6 +121,8 @@ export function productionFlowDeps(): FlowDeps {
     evidence: evidenceStore,
     // CR-V2-EXAM-INTEGRATION-X3: the persisted, re-verified projection of an owned document's run (only when asked).
     examinations: productionExaminationProjections,
+    // CR-V2-SCHEMA8-PATH-1 (E2): whether the page may offer payment; the same pure conditions the purchase steps check (display only).
+    purchaseOfferable: (row) => purchaseOfferable(productionPurchaseDeps(), row),
   }
 }
 
@@ -140,6 +143,8 @@ export function productionPurchaseDeps(): PurchaseDeps {
     // CR-V2-MVP-M4A: referenced readings re-checked by kind; the approved templates for the version's own schema must render it.
     examinationsIntact: productionReadingsIntact,
     templates: (schema) => approvedPdfTemplates(undefined, schema),
+    // CR-V2-SCHEMA8-PATH-1 (E4): nothing is sold until the approved privacy notice and terms are published.
+    legalPoliciesApproved: () => legalPoliciesApproved(),
   }
 }
 

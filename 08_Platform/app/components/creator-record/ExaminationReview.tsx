@@ -10,7 +10,7 @@
 import { useState } from 'react'
 import type { PreparedView } from '@/lib/creator-record/customer-flow/service'
 import {
-  COMPARISON_LABELS, EXAM_TEXT, OBSERVATION_STATUS_LABELS, RESPONSE_LABELS, chosenResponses, limitationText, targetKey,
+  COMPARISON_LABELS, examText, OBSERVATION_STATUS_LABELS, RESPONSE_LABELS, chosenResponses, limitationText, targetKey, type ExaminationTextMode,
   type ResponseInput, type ResponseTarget,
 } from '@/lib/creator-record-flow/examination-ui'
 import { T } from '@/lib/creator-record/presentation/templates'
@@ -24,6 +24,8 @@ export interface ExaminationReviewProps {
   busy: boolean
   /** Prepare a new version with these responses (the server validates and records them). */
   onRespond: (responses: ResponseInput[]) => void
+  /** CR-V2-SCHEMA8-PATH-1 (E3): 'live' when the page offers a live AI examination; default: the synthetic replay wording. */
+  textMode?: ExaminationTextMode
 }
 
 const fieldLabel = (field: string) => field.replace(/_/g, ' ')
@@ -36,7 +38,8 @@ function unresolvedText(r: UnresolvedRequirement): string {
   return T.not_established_other
 }
 
-export function ExaminationReview({ view, busy, onRespond }: ExaminationReviewProps) {
+export function ExaminationReview({ view, busy, onRespond, textMode }: ExaminationReviewProps) {
+  const EXAM_TEXT = examText(textMode ?? 'replay')
   const e = view.examination
   const [choice, setChoice] = useState<Record<string, string>>({})
   const [reaffirm, setReaffirm] = useState<Record<string, boolean>>({})

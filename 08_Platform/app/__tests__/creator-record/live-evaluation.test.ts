@@ -184,7 +184,7 @@ describe('the evaluation-only schema', () => {
     const migrations = readdirSync(path.join(ROOT, 'supabase', 'migrations')).sort()
     // CR-V2-MVP-M2A: the customer live examination migration follows it; still nothing named for the evaluation.
     // CR-V2-MVP-RETENTION-M1A: the retention migration follows them.
-    expect(migrations.slice(-4)).toEqual(['20261108000000_creator_record_v2_live_examination_foundation.sql', '20261110000000_creator_record_v2_customer_live_examination.sql', '20261111000000_creator_record_v2_retention_m1a.sql', '20261112000000_creator_record_v2_ai_examination_permission.sql'])  // CR-V2-MVP-LAUNCH-FOUNDATION-1: the AI-examination permission migration follows
+    expect(migrations.slice(-5)).toEqual(['20261108000000_creator_record_v2_live_examination_foundation.sql', '20261110000000_creator_record_v2_customer_live_examination.sql', '20261111000000_creator_record_v2_retention_m1a.sql', '20261112000000_creator_record_v2_ai_examination_permission.sql', '20261113000000_creator_record_v2_ai_permission_current_version.sql'])  // CR-V2-MVP-LAUNCH-FOUNDATION-1: the AI-examination permission migration follows
     expect(migrations.some((m) => /live_evaluation/.test(m))).toBe(false)
     // CR-V2-DOC-LIVE-1C-B1: with its read-only verification and its guarded rollback beside it.
     expect(readdirSync(path.join(ROOT, 'supabase', 'evaluation-only')).sort()).toEqual(['20261109000000_creator_record_v2_live_evaluation.sql', 'rollback_20261109000000.sql', 'verify_live_evaluation_environment.sql'])

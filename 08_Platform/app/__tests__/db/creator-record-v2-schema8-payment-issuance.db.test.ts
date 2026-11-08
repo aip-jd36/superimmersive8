@@ -207,7 +207,7 @@ maybe('schema 8 payment and issuance (PostgreSQL, through 20261110000000)', () =
   })
   const templates = (schema: { id: string; version: number }) => approvedPdfTemplates(SYN_AUTH, schema)
   const purchaseDeps = (methods: unknown[]): PurchaseDeps => ({
-    submissions: 'open', issuance: 'enabled', hasPilotAccess: async () => true, getPrepared, latestVersion, boundTo,
+    submissions: 'open', issuance: 'enabled', hasPilotAccess: async () => true, legalPoliciesApproved: () => true, getPrepared, latestVersion, boundTo,
     bind: async (p) => {
       const r = (await svc.query('SELECT * FROM public.create_creator_record_v2_submission($1, $2, $3, $4)', [p.preparedId, p.userId, p.sha256, 'Creator'])).rows[0]
       return { submissionId: r.out_submission_id, reason: r.out_reason }

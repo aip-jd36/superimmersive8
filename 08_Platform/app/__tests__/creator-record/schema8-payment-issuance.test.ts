@@ -159,7 +159,7 @@ function purchaseDeps(o: { governance?: Governance; rows?: PreparedRow[]; over?:
   const rows = o.rows ?? [ROW]
   const bind = jest.fn(async () => ({ submissionId: SUB_ID, reason: 'created' as const }))
   const deps: PurchaseDeps = {
-    submissions: 'open', issuance: 'enabled', hasPilotAccess: async () => true,
+    submissions: 'open', issuance: 'enabled', hasPilotAccess: async () => true, legalPoliciesApproved: () => true,
     getPrepared: async (id) => clone(rows.find((r) => r.id === id) ?? null),
     latestVersion: async (d) => clone([...rows].filter((r) => r.draft_id === d).sort((a, b) => b.version - a.version)[0] ?? null),
     boundTo: async () => clone({ ...rows[0], submission_id: SUB_ID }),

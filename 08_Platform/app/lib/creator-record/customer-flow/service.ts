@@ -116,6 +116,11 @@ export interface FlowDeps {
   examinations?: { projectionFor(userId: string, documentId: string): Promise<DocumentProjection> }
   /** Supplied only by the admin UAT wiring. Absent = no synthetic path. */
   syntheticUat?: SyntheticUatPorts
+  /**
+   * CR-V2-SCHEMA8-PATH-1 (E2): whether the page may offer payment for a version (`purchaseOfferable`). Display only; the purchase
+   * steps decide. Absent → never offered.
+   */
+  purchaseOfferable?(row: PreparedRow): boolean
 }
 
 export interface PreparedView {
@@ -138,6 +143,11 @@ export interface PreparedView {
   /** CR-V2-DOC-1: the documents this version references, exactly as recorded (inventory only, not examined). */
   documents: { document_id: string; file_name: string; media_type: string; byte_size: number; sha256: string; category: string; tool_index: number | null }[]
   guidance_items: number
+  /**
+   * CR-V2-SCHEMA8-PATH-1 (E2): the page may offer payment for this version (either schema). Display only: the server re-checks
+   * everything when the creator pays. False unless the version is reviewed and every pure purchase condition holds now.
+   */
+  purchasable: boolean
   /**
    * CR-V2-EXAM-INTEGRATION-X3: present only on an examination-bearing version (record schema 6 or 8), exactly as recorded:
    * each examined document's unverified observations and limitations, the comparisons derived from THIS version's
@@ -204,7 +214,17 @@ async function syntheticClosed(deps: FlowDeps, userId: string, record: CustomerR
   return isSyntheticRecordAuthority(own) ? null : err({ status: 404, code: 'not_found' })
 }
 
-function viewOf(row: PreparedRow, record: CustomerRecordV2): PreparedView {
+/** E2: offered only for a reviewed version, only when the port says so; any error is "not offered". */
+function offerable(deps: Pick<FlowDeps, 'purchaseOfferable'>, row: PreparedRow): boolean {
+  if (row.status !== 'reviewed' || typeof deps.purchaseOfferable !== 'function') return false
+  try {
+    return deps.purchaseOfferable(row) === true
+  } catch {
+    return false
+  }
+}
+
+function viewOf(deps: Pick<FlowDeps, 'purchaseOfferable'>, row: PreparedRow, record: CustomerRecordV2): PreparedView {
   const contract = record.sources.questionnaire_contract
   return {
     id: row.id,
@@ -222,6 +242,7 @@ function viewOf(row: PreparedRow, record: CustomerRecordV2): PreparedView {
     },
     documents: record.documents.items.map((d) => ({ document_id: d.document_id, file_name: d.file_name, media_type: d.media_type, byte_size: d.byte_size, sha256: d.sha256, category: d.category, tool_index: d.tool_index })),
     guidance_items: record.guidance.items.length,
+    purchasable: offerable(deps, row),
     ...(isExaminationBearing(record) ? { examination: examinationViewOf(record) } : {}),
   }
 }
@@ -419,7 +440,7 @@ export async function preparePrepared(deps: FlowDeps, userId: string, body: unkn
   // CR-V2-DECL-1B-2: only between versions of one contract. Nothing from a schema 5 or 6 version is offered.
   const sameContract = !!prior?.sources.questionnaire_contract && prior.sources.questionnaire_contract.contract_sha256 === record.sources.questionnaire_contract?.contract_sha256
   const candidates = prior && sameContract && isExaminationBearing(prior) && isExaminationBearing(record) ? carryForwardCandidates(prior, record) : []
-  return { ok: true, view: { ...viewOf(row, record), ...(candidates.length > 0 ? { carry_forward_candidates: candidates } : {}) } }
+  return { ok: true, view: { ...viewOf(deps, row, record), ...(candidates.length > 0 ? { carry_forward_candidates: candidates } : {}) } }
 }
 
 /** The owner's view of one prepared version. */
@@ -428,7 +449,7 @@ export async function getPrepared(deps: FlowDeps, userId: string, id: unknown): 
   if ('ok' in r) return r
   const closed = await syntheticClosed(deps, userId, r.record)
   if (closed) return closed
-  return { ok: true, view: viewOf(r.row, r.record) }
+  return { ok: true, view: viewOf(deps, r.row, r.record) }
 }
 
 /** Freeze the draft's latest version as reviewed. Idempotent for an already reviewed version. */
@@ -439,7 +460,7 @@ export async function reviewPrepared(deps: FlowDeps, userId: string, id: unknown
   if ('ok' in r) return r
   const closed = await syntheticClosed(deps, userId, r.record)
   if (closed) return closed
-  if (r.row.status === 'reviewed') return { ok: true, view: viewOf(r.row, r.record) }
+  if (r.row.status === 'reviewed') return { ok: true, view: viewOf(deps, r.row, r.record) }
 
   const latest = await deps.store.latestVersion(r.row.draft_id)
   if (!latest || latest.id !== r.row.id) return err({ status: 409, code: 'superseded' })
@@ -448,5 +469,5 @@ export async function reviewPrepared(deps: FlowDeps, userId: string, id: unknown
   if (!updated) return err({ status: 409, code: 'conflict' })
   const record = verifiedRecord(updated)
   if (!record || updated.sha256 !== r.row.sha256) return err({ status: 500, code: 'integrity_failure' })
-  return { ok: true, view: viewOf(updated, record) }
+  return { ok: true, view: viewOf(deps, updated, record) }
 }

@@ -429,6 +429,8 @@ describe('independence', () => {
     const targets = new Set(walk(ROOT).flatMap((f) => importsOf(f).map((i) => (i.startsWith('.') ? path.relative(path.join(APP_ROOT, 'lib', 'creator-record'), path.resolve(path.dirname(f), i)).split(path.sep).join('/') : i))))
     expect(Array.from(targets).sort()).toEqual([
       'contract/compose', 'contract/provenance', 'contract/publication-ledger', 'contract/question-registry', 'contract/types',
+      // CR-V2-SCHEMA8-PATH-1 (E5): the shared customer wording lock (pure, no imports).
+      'contract/wording-lock',
       // CR-V2-1C: the authority digests and the eligibility check are part of the module.
       'customer-record/authority-content', 'customer-record/eligibility', 'customer-record/record',
       'customer-record/questionnaire-contract', 'prototype/questionnaire-structure',
@@ -510,7 +512,7 @@ describe('Source Text Approval: approval is bound to exact, immutable wording', 
     ['an option label', (s: any) => { s.presentation.P3 = { ...s.presentation.P3, option_labels: { ...s.presentation.P3.option_labels, own_channels: 'Own channels (edited)' } } }],
     ['a dependency label', (s: any) => { const k = Object.keys(s.dependency_labels)[0]; s.dependency_labels = { ...s.dependency_labels, [k]: 'Edited label' } }],
     ['a caveat', (s: any) => { const k = Object.keys(s.caveats)[0]; s.caveats = { ...s.caveats, [k]: 'Edited caveat.' } }],
-    ['an added caveat', (s: any) => { s.caveats = { ...s.caveats, 'new-caveat': 'A caveat nobody approved.' } }],
+    ['an added caveat', (s: any) => { s.caveats = { ...s.caveats, 'new-caveat': 'A caveat nobody signed off.' } }],
   ])('changing %s without a new approval is refused', (_, mutate) => {
     const s = clone(base)
     mutate(s)
@@ -589,9 +591,17 @@ describe('Source Text Approval: approval is bound to exact, immutable wording', 
   test('approved wording that asserts a stronger conclusion changes no conclusion, explanation or eligibility', () => {
     const control = built(buildCustomerRecord(input({ state: state('not_sure') }))).record
     expect(control.guidance.items.some((i) => i.conclusion === 'relevant_applicability_unresolved')).toBe(true)
+    // CR-V2-SCHEMA8-PATH-1 (E5): wording that uses the locked words is now refused outright, even when "approved" ...
+    const banned = clone(base)
+    banned.caveats = Object.fromEntries(Object.keys(banned.caveats).map((k) => [k, 'Your use is cleared and fully licensed for commercial use.']))
+    banned.dependency_labels = Object.fromEntries(Object.keys(banned.dependency_labels).map((k) => [k, 'Confirmed: no further evidence needed']))
+    const refused = buildCustomerRecord(input({ sources: withQuestionnaireApproval(banned), state: state('not_sure') }))
+    expect(refused.ok).toBe(false)
+    expect(refusalCodes(refused)).toEqual(['customer_wording_lock'])
+    // ... and strong wording the lock cannot catch still changes no conclusion, explanation or eligibility (the invariant).
     const s = clone(base)
-    s.caveats = Object.fromEntries(Object.keys(s.caveats).map((k) => [k, 'Your use is cleared and fully licensed for commercial use.']))
-    s.dependency_labels = Object.fromEntries(Object.keys(s.dependency_labels).map((k) => [k, 'Confirmed: no further evidence needed']))
+    s.caveats = Object.fromEntries(Object.keys(s.caveats).map((k) => [k, 'Your use is fully covered for every commercial use.']))
+    s.dependency_labels = Object.fromEntries(Object.keys(s.dependency_labels).map((k) => [k, 'No further evidence needed']))
     const { record } = built(buildCustomerRecord(input({ sources: withQuestionnaireApproval(s), state: state('not_sure') })))
     const strip = (r: CustomerRecordV2) => r.guidance.items.map((i) => [i.claim_id, i.conclusion, i.explanation, i.applicability, i.provenance])
     expect(strip(record)).toEqual(strip(control))

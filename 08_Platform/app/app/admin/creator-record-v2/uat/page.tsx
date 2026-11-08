@@ -11,7 +11,7 @@ import { getPrepared, type PreparedView } from '@/lib/creator-record/customer-fl
 import { syntheticUatInputs } from '@/lib/creator-record/customer-flow/synthetic-uat'
 import { checkApprovedSources } from '@/lib/creator-record/customer-record/sources'
 import { CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION, CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
-import { EVIDENCE_CONSENT_DRAFT_VERSION } from '@/lib/creator-record/evidence-intake/contract'
+import { evidenceConsentVersion } from '@/lib/creator-record-flow/authorization-versions'
 import { ADMIN_UAT_API_BASE, adminUatFlowDeps, adminUatVersions } from '@/lib/creator-record-flow/admin-uat'
 import { checkReviewerContextAccess } from '@/lib/reviewer-context/auth'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
@@ -79,7 +79,7 @@ export default async function AdminCreatorRecordUatPage({ searchParams }: { sear
         syntheticUat
         apiBase={ADMIN_UAT_API_BASE}
         initialView={initialView}
-        examination={{ consentVersion: EVIDENCE_CONSENT_DRAFT_VERSION }}
+        examination={{ consentVersion: evidenceConsentVersion() }}
       />
     </div>
   )

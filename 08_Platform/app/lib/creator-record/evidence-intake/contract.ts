@@ -42,6 +42,21 @@ export const EVIDENCE_CONSENT_DRAFT_VERSION = 'DRAFT-UNAPPROVED-cr-v2-evidence-s
  */
 export const AI_EXAMINATION_PERMISSION_DRAFT_VERSION = 'DRAFT-UNAPPROVED-cr-v2-ai-examination-permission-0'
 
+/**
+ * CR-V2-SCHEMA8-PATH-1 (E7) — the identifiers a creator actually agrees to: the consent or permission wording version AND the
+ * approved privacy notice and terms versions it relies on, `<wording>__<privacy>__<terms>`. A change to any of the three is a
+ * different identifier, so an authorization given under an earlier version is never silently reused. Pure: the caller supplies
+ * the approved policy versions (`lib/creator-record-flow/authorization-versions.ts`). Fits the permission column's format
+ * (letters, digits, `.`, `_`, `-`; at most 120). No policies, or anything that would not fit: null (fail closed).
+ */
+export const AUTHORIZATION_VERSION_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,119}$/
+
+export function boundAuthorizationVersion(wording: string, policies: { privacy: string; terms: string } | null): string | null {
+  if (!policies) return null
+  const v = `${wording}__${policies.privacy}__${policies.terms}`
+  return AUTHORIZATION_VERSION_PATTERN.test(v) ? v : null
+}
+
 /** Request bodies: one file plus a small form overhead. */
 export const EVIDENCE_MAX_REQUEST_BYTES = EVIDENCE_MAX_BYTES + 64 * 1024
 /** Provisional bound on a creator's live (stored or in-flight) documents, to limit storage abuse. */

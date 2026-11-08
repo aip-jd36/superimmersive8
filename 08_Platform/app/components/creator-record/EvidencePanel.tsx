@@ -8,7 +8,7 @@
  * credential is ever sent or shown. Wording: DRAFT, not approved (see examination-ui.ts).
  */
 import { useCallback, useEffect, useState } from 'react'
-import { EXAM_TEXT, EVIDENCE_CATEGORIES, EVIDENCE_CATEGORY_DEFAULT, examineStateFrom, type Attachment, type ExamineState } from '@/lib/creator-record-flow/examination-ui'
+import { examText, EVIDENCE_CATEGORIES, EVIDENCE_CATEGORY_DEFAULT, examineStateFrom, type Attachment, type ExamineState } from '@/lib/creator-record-flow/examination-ui'
 import { LEGAL_PATHS } from '@/lib/legal/paths'
 
 const INK = '#1a1918'
@@ -50,6 +50,8 @@ export function EvidencePanel(props: EvidencePanelProps) {
   const [examine, setExamine] = useState<Record<string, ExamineState>>({})
   const [aiPermitted, setAiPermitted] = useState(false)
   const aiRequired = typeof props.aiPermissionVersion === 'string'
+  // CR-V2-SCHEMA8-PATH-1 (E3): the live wording only when a live AI examination is offered; otherwise the synthetic replay wording.
+  const EXAM_TEXT = examText(aiRequired ? 'live' : 'replay')
 
   const load = useCallback(async () => {
     setLoading(true)

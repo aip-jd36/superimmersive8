@@ -207,7 +207,7 @@ describe('CR-V2-DOC-1B: payment and issuance refuse a record whose documents are
       .then(() => 'issued').catch((e) => (e instanceof V2IssuanceRefusal ? e.code : String(e)))
   const checkout = (row: PreparedRow, evidenceIntact?: (u: string, items: readonly { document_id: string }[]) => Promise<Integrity>) =>
     checkV2Checkout({
-      submissions: 'open', issuance: 'enabled', hasPilotAccess: async () => true, getPrepared: async () => row, latestVersion: async () => row, boundTo: async () => row,
+      submissions: 'open', issuance: 'enabled', hasPilotAccess: async () => true, legalPoliciesApproved: () => true, getPrepared: async () => row, latestVersion: async () => row, boundTo: async () => row,
       bind: async () => ({ submissionId: SUB, reason: 'existing' }), governance: (date) => withCommercialSupportUnderTest(approvedGovernanceSnapshot(date, TOPIC_CLAIMS_FIXTURE, bundle)), now: () => NOW,
       templates: (schema) => approvedPdfTemplates(bundle, schema),
       ...(evidenceIntact ? { evidenceIntact } : {}),

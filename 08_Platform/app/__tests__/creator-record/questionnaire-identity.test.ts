@@ -568,7 +568,7 @@ describe('locks: PDF and issuance stay closed for schemas 7 and 8', () => {
     const b = current(false)
     const row: PreparedRow = { id: '00000001-aaaa-4aaa-8aaa-aaaaaaaaaaaa', user_id: OWNER, draft_id: '00000002-aaaa-4aaa-8aaa-aaaaaaaaaaaa', version: 1, record_ref: 'PREP-00000001-aaaa-4aaa-8aaa-aaaaaaaaaaaa', record_schema: b.record.schema, record_schema_version: 7, canonical: b.canonical, sha256: b.sha256, form_state: STATE as any, status: 'reviewed', created_at: NOW.toISOString(), reviewed_at: NOW.toISOString(), submission_id: null }
     const bind = jest.fn(async () => ({ submissionId: null, reason: 'not_found' as const }))
-    const deps: PurchaseDeps = { submissions: 'open', issuance: 'enabled', hasPilotAccess: async () => true, getPrepared: async () => row, latestVersion: async () => row, boundTo: async () => row, bind, governance: () => synthetic(), now: () => NOW }
+    const deps: PurchaseDeps = { submissions: 'open', issuance: 'enabled', hasPilotAccess: async () => true, legalPoliciesApproved: () => true, getPrepared: async () => row, latestVersion: async () => row, boundTo: async () => row, bind, governance: () => synthetic(), now: () => NOW }
     expect(await startPurchase(deps, OWNER, row.id)).toEqual({ ok: false, status: 409, code: 'ineligible' })
     expect(bind).not.toHaveBeenCalled()
     await expect(renderV2ForIssuance({ boundTo: async () => ({ ...row, submission_id: 'sub' }), latestVersion: async () => row, governance: () => synthetic(), templates: () => approvedPdfTemplates(bundle), renderPdf: async () => new Uint8Array([1]) }, { id: 'sub', user_id: OWNER, tier: 'creator_record', creator_record_product: 'v2' }, 'CR-2026-ABCD1234', NOW)).rejects.toEqual(new V2IssuanceRefusal('governance_ineligible'))

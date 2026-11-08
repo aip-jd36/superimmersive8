@@ -10,6 +10,8 @@
  * CR-V2-MVP-M3: once confirmed, "Continue to payment" asks the server to create (or
  * return) the submission for that version, then opens the existing checkout. The
  * server re-checks every condition at both steps; `paymentOpen` only hides the button.
+ * CR-V2-SCHEMA8-PATH-1 (E2): the button also needs the version's own `purchasable` (server-computed, display only), for a
+ * record with or without readings alike.
  *
  * CR-V2-EXAM-INTEGRATION-X3: only when the page offers examination (`examination`), the creator can add synthetic test
  * documents, examine them, include the findings in a version, and respond to them. Every step goes through the server;
@@ -27,16 +29,16 @@ import { CreatorRecordQuestionnaire, type QuestionnaireProps } from '@/component
 import type { CreatorRecordFormState, FormIssue } from '@/lib/creator-record/prototype/form'
 import { CUSTOMER_SECTION_TITLES } from '@/lib/creator-record/prototype/questionnaire-structure'
 import type { PreparedView } from '@/lib/creator-record/customer-flow/service'
-import { V2_REVIEW_PAGE } from '@/lib/creator-record-flow/wording'
+import { V2_REVIEW_PAGE, fillReviewText } from '@/lib/creator-record-flow/wording'
 import { EvidencePanel } from '@/components/creator-record/EvidencePanel'
 import { ExaminationReview } from '@/components/creator-record/ExaminationReview'
-import { EXAM_TEXT, SYNTHETIC_UAT_NOTICE, attachmentsOf, preparedBody, type Attachment, type ResponseInput } from '@/lib/creator-record-flow/examination-ui'
+import { SYNTHETIC_UAT_NOTICE, attachmentsOf, preparedBody, type Attachment, type ResponseInput } from '@/lib/creator-record-flow/examination-ui'
 import { carryAnswersToContract, contractProvenanceOf, RECOVERY_TEXT, type ContractProvenance, type QuestionnaireDefinition, type QuestionnaireRecovery } from '@/lib/creator-record-flow/questionnaire-recovery'
 
 const INK = '#1a1918'
 const MUTED = '#6b6560'
 const LINE = '#e5e2dc'
-const FAILED = 'Something went wrong. Nothing was changed.'
+const FAILED = V2_REVIEW_PAGE.failed
 const buttonClass = 'rounded-md border px-4 py-2 text-sm font-medium bg-white disabled:opacity-50'
 const primaryClass = 'rounded-md px-4 py-2 text-sm font-medium text-white disabled:opacity-50'
 
@@ -231,10 +233,8 @@ export function CreatorRecordV2Client(props: Props) {
     return (
       <div>
         {uatNotice}
-        <h1 className="font-display text-2xl font-bold mb-2" style={{ color: INK }}>Check your declarations</h1>
-        <p className="text-sm mb-6" style={{ color: MUTED }}>
-          This is exactly what SI8 recorded from your answers (version {view.version}). SI8 has not checked them. If anything is wrong, correct your answers. The corrected version is then the one you review.
-        </p>
+        <h1 className="font-display text-2xl font-bold mb-2" style={{ color: INK }}>{V2_REVIEW_PAGE.heading}</h1>
+        <p className="text-sm mb-6" style={{ color: MUTED }}>{fillReviewText(V2_REVIEW_PAGE.intro, { version: view.version })}</p>
         {reviewed && (
           <div role="status" className="mb-6 rounded-lg border p-4" style={{ borderColor: '#16a34a', backgroundColor: '#F0FDF4' }}>
             <p className="text-sm font-semibold" style={{ color: '#166534' }}>{props.paymentOpen ? V2_REVIEW_PAGE.confirmed : V2_REVIEW_PAGE.payment_closed}</p>
@@ -242,7 +242,7 @@ export function CreatorRecordV2Client(props: Props) {
         )}
         {error && <p className="mb-4 text-sm font-medium" style={{ color: '#b42318' }} role="alert">{error}</p>}
         <section className="mb-6 rounded-lg border bg-white p-6" style={{ borderColor: LINE }} aria-labelledby="decl-answers">
-          <h2 id="decl-answers" className="font-display text-lg font-semibold mb-3" style={{ color: INK }}>Your answers</h2>
+          <h2 id="decl-answers" className="font-display text-lg font-semibold mb-3" style={{ color: INK }}>{V2_REVIEW_PAGE.answers_heading}</h2>
           <dl className="space-y-3">
             {single.map((a, i) => (
               <div key={`s-${a.q_id}-${i}`}>
@@ -253,7 +253,7 @@ export function CreatorRecordV2Client(props: Props) {
           </dl>
           {tools.map((t) => (
             <div key={`tool-${t}`} className="mt-5">
-              <h3 className="text-sm font-semibold mb-2" style={{ color: INK }}>Tool {t + 1}</h3>
+              <h3 className="text-sm font-semibold mb-2" style={{ color: INK }}>{fillReviewText(V2_REVIEW_PAGE.tool_heading, { n: t + 1 })}</h3>
               <dl className="space-y-3">
                 {view.declarations.answers.filter((a) => a.tool_index === t).map((a, i) => (
                   <div key={`t-${t}-${a.q_id}-${i}`}>
@@ -265,24 +265,26 @@ export function CreatorRecordV2Client(props: Props) {
             </div>
           ))}
         </section>
-        {view.examination && <ExaminationReview key={view.id} view={view} busy={busy} onRespond={(r) => void respond(r)} />}
+        {view.examination && <ExaminationReview key={view.id} view={view} busy={busy} onRespond={(r) => void respond(r)} textMode={props.examination?.aiPermissionVersion ? 'live' : 'replay'} />}
         <section className="mb-6 rounded-lg border bg-white p-6" style={{ borderColor: LINE }} aria-labelledby="decl-acks">
-          <h2 id="decl-acks" className="font-display text-lg font-semibold mb-3" style={{ color: INK }}>What you acknowledged</h2>
+          <h2 id="decl-acks" className="font-display text-lg font-semibold mb-3" style={{ color: INK }}>{V2_REVIEW_PAGE.acknowledgements_heading}</h2>
           <ul className="list-disc pl-5 space-y-2">
             {view.declarations.acknowledgements.map((a) => <li key={a.id} className="text-sm" style={{ color: MUTED }}>{a.text}</li>)}
           </ul>
         </section>
         <div className="flex flex-wrap gap-3">
-          <button type="button" className={buttonClass} onClick={correct} disabled={busy}>Correct my answers</button>
+          <button type="button" className={buttonClass} onClick={correct} disabled={busy}>{V2_REVIEW_PAGE.correct}</button>
           {!reviewed && (
             <button type="button" className={primaryClass} style={{ backgroundColor: INK }} onClick={confirm} disabled={busy}>
-              {busy ? 'Confirming…' : 'Confirm these declarations'}
+              {busy ? V2_REVIEW_PAGE.confirming : V2_REVIEW_PAGE.confirm}
             </button>
           )}
-          {reviewed && props.paymentOpen && view.examination && (
-            <p className="text-sm" style={{ color: MUTED }} role="status">{EXAM_TEXT.payment_blocked}</p>
+          {/* CR-V2-SCHEMA8-PATH-1 (E2): offered for either schema only when the server says this version is purchasable now;
+              the purchase and checkout routes re-check everything. A version the server would refuse is never presented as payable. */}
+          {reviewed && props.paymentOpen && !view.purchasable && (
+            <p className="text-sm" style={{ color: MUTED }} role="status" data-not-purchasable>{V2_REVIEW_PAGE.not_purchasable}</p>
           )}
-          {reviewed && props.paymentOpen && !view.examination && (
+          {reviewed && props.paymentOpen && view.purchasable && (
             <button type="button" className={primaryClass} style={{ backgroundColor: INK }} onClick={pay} disabled={busy}>
               {busy ? V2_REVIEW_PAGE.paying : V2_REVIEW_PAGE.pay}
             </button>

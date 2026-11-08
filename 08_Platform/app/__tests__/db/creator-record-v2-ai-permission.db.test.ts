@@ -23,7 +23,7 @@ import { CUSTOMER_LIVE_DATABASE_REFUSALS, examineCustomerDocumentLive, type Cust
 import { LivePortError } from '@/lib/creator-record/live-examination/examine'
 import type { LiveAnthropicAdapter } from '@/lib/creator-record/live-examination/real-executor'
 import { AiPermissionRefusal, requestCustomerExamination, type CustomerExaminationDeps } from '@/lib/creator-record/customer-flow/examination'
-import { AI_EXAMINATION_PERMISSION_DRAFT_VERSION } from '@/lib/creator-record/evidence-intake/contract'
+import { AI_EXAMINATION_PERMISSION_DRAFT_VERSION, boundAuthorizationVersion } from '@/lib/creator-record/evidence-intake/contract'
 import { REPLAY_FIXTURES } from '@/lib/creator-record/evidence/replay-fixtures.data'
 import { syntheticTextPdf } from '@/test-support/synthetic-pdf'
 
@@ -35,9 +35,14 @@ const MIGRATIONS = [
   '20261104000000_creator_record_v2_examination_runs.sql', '20261105000000_creator_record_v2_operator_synthetic_uat.sql', '20261106000000_creator_record_v2_customer_path_uat.sql',
   '20261107000000_creator_record_v2_admin_uat.sql', '20261108000000_creator_record_v2_live_examination_foundation.sql', '20261110000000_creator_record_v2_customer_live_examination.sql',
   '20261111000000_creator_record_v2_retention_m1a.sql', '20261112000000_creator_record_v2_ai_examination_permission.sql',
+  // CR-V2-SCHEMA8-PATH-1 (E6): the current-version authority, grant and guard.
+  '20261113000000_creator_record_v2_ai_permission_current_version.sql',
 ].map((f) => join(DIR, f))
 const CONSENT = 'DRAFT-UNAPPROVED-cr-v2-evidence-storage-consent-0'
-const VERSION = AI_EXAMINATION_PERMISSION_DRAFT_VERSION
+// CR-V2-SCHEMA8-PATH-1 (E6/E7): the database refuses to make a draft identifier current, so the tests use a non-draft wording
+// version bound to test policy versions, exactly as the application would build it once both are approved.
+const VERSION = boundAuthorizationVersion('cr-v2-ai-examination-permission-1', { privacy: 'privacy-test-1', terms: 'terms-test-1' }) as string
+const NEXT_VERSION = boundAuthorizationVersion('cr-v2-ai-examination-permission-1', { privacy: 'privacy-test-2', terms: 'terms-test-1' }) as string
 const ENV = { CREATOR_RECORD_EXTRACTION_API_KEY: 'test-key-not-real' }
 const OUTPUT = REPLAY_FIXTURES.find((f) => f.fixture_id === 'pdf-pika-pro-no-period')!.parsed_output
 
@@ -70,6 +75,7 @@ maybe('Decision 8Q: AI-examination permission (PostgreSQL, through 2026111200000
     for (const m of MIGRATIONS) await admin.query(readFileSync(m, 'utf8'))
     await admin.query(`INSERT INTO public.creator_record_v2_customer_live_enablement (supabase_project_ref, max_attempts_per_creator_per_day, max_spend_micro_usd_per_creator, max_reserve_micro_usd_per_attempt, established_by, reason)
       VALUES ('localpg15launchfound', 24, 5000000, 1000000, 'db test operator', 'isolated local PostgreSQL test')`)
+    await admin.query("INSERT INTO public.creator_record_v2_ai_permission_authority (permission_version, established_by, reason) VALUES ($1, 'db test operator', 'isolated local PostgreSQL test')", [VERSION])
     svc = new Client({ connectionString: URL })
     await svc.connect()
     await svc.query('SET ROLE service_role')
@@ -299,7 +305,7 @@ maybe('Decision 8Q: AI-examination permission (PostgreSQL, through 2026111200000
     try {
       await c.query('BEGIN')
       await c.query('DROP TABLE public.creator_record_v2_consent_withdrawals CASCADE')
-      await expect(c.query(readFileSync(MIGRATIONS[MIGRATIONS.length - 1], 'utf8'))).rejects.toThrow('20261112000000 requires 20261111000000')
+      await expect(c.query(readFileSync(MIGRATIONS.find((m) => m.includes('20261112000000'))!, 'utf8'))).rejects.toThrow('20261112000000 requires 20261111000000')
     } finally {
       await c.query('ROLLBACK').catch(() => undefined)
       await c.end()
@@ -363,6 +369,115 @@ maybe('Decision 8Q: AI-examination permission (PostgreSQL, through 2026111200000
       expect(sql).not.toMatch(/^\s*(COMMIT|ROLLBACK|START TRANSACTION|BEGIN\s+(TRANSACTION|WORK))\s*;/im)
       expect(sql.indexOf('CREATE TABLE public.creator_record_v2_consent_withdrawals')).toBeGreaterThan(-1)
       expect(sql).toMatch(/GRANT EXECUTE ON FUNCTION public\.creator_record_v2_withdraw_consent\(uuid\) TO service_role/)
+    })
+  })
+
+  test('migration ordering: 20261113000000 refuses to apply without 20261112000000', async () => {
+    const c = new Client({ connectionString: URL })
+    await c.connect()
+    try {
+      await c.query('BEGIN')
+      await c.query('DROP TABLE public.creator_record_v2_ai_examination_permissions CASCADE')
+      await expect(c.query(readFileSync(MIGRATIONS[MIGRATIONS.length - 1], 'utf8'))).rejects.toThrow('20261113000000 requires 20261112000000')
+    } finally {
+      await c.query('ROLLBACK').catch(() => undefined)
+      await c.end()
+    }
+  })
+
+  // ── CR-V2-SCHEMA8-PATH-1 (E6): a permission counts only under the version CURRENTLY authorized ──
+  describe('E6: the current AI-examination permission version', () => {
+    const current = async () => (await admin.query('SELECT permission_version FROM public.creator_record_v2_ai_permission_authority')).rows.map((r) => r.permission_version)
+    async function setCurrent(v: string | null) {
+      await admin.query('DELETE FROM public.creator_record_v2_ai_permission_authority')
+      if (v !== null) await admin.query("INSERT INTO public.creator_record_v2_ai_permission_authority (permission_version, established_by, reason) VALUES ($1, 'db test operator', 'version change')", [v])
+    }
+    const liveRead = (d: string, owner: string) => svc.query("INSERT INTO public.creator_record_v2_evidence_access_log (document_id, actor_user_id, actor_role, purpose) VALUES ($1, $2, 'owner', 'live_examination')", [d, owner])
+    const insertAuthority = (v: string, singleton = false) => admin.query(
+      singleton
+        ? "INSERT INTO public.creator_record_v2_ai_permission_authority (singleton, permission_version, established_by, reason) VALUES (true, $1, 'op', 'r')"
+        : "INSERT INTO public.creator_record_v2_ai_permission_authority (permission_version, established_by, reason) VALUES ($1, 'op', 'r')",
+      [v],
+    )
+    afterEach(async () => { await setCurrent(VERSION) })
+
+    test('the test version is current, and differs from the draft identifier and from a version under changed policies', async () => {
+      expect(await current()).toEqual([VERSION])
+      expect(VERSION).not.toBe(AI_EXAMINATION_PERMISSION_DRAFT_VERSION)
+      expect(NEXT_VERSION).not.toBe(VERSION)
+    })
+
+    test('a stale grant no longer permits examination after the version changes; the creator must grant the current one again', async () => {
+      const owner = await user()
+      const d = await doc(owner)
+      expect(await grant(svc, owner, d.id, VERSION)).toBe('granted')
+      await liveRead(d.id, owner)   // permitted under the version it was granted for
+
+      await setCurrent(NEXT_VERSION)
+      const before = calls.n
+      await expect(liveRead(d.id, owner)).rejects.toThrow('creator_record_v2_ai_permission_required')
+      await expect(admin.query('INSERT INTO public.creator_record_v2_customer_live_reservations (document_id) VALUES ($1)', [d.id])).rejects.toThrow('creator_record_v2_ai_permission_required')
+      await expect(admin.query("INSERT INTO public.creator_record_v2_live_examination_attempts (document_id, execution_origin) VALUES ($1, 'live_model')", [d.id])).rejects.toThrow('creator_record_v2_ai_permission_required')
+      expect((await examine(owner, d.id)).result).toEqual({ kind: 'not_read', reason: 'ai_permission_required' })
+      expect(calls.n).toBe(before)
+      // The stale version cannot be granted again; the application, still on the stale version, is refused and examines nothing.
+      await expect(grant(svc, owner, d.id, VERSION)).rejects.toThrow('creator_record_v2_ai_permission_invalid')
+      expect(await requestCustomerExamination(service(), owner, d.id, { aiPermission: VERSION })).toEqual({ ok: false, status: 400, code: 'ai_permission_required' })
+      expect(calls.n).toBe(before)
+      // The earlier grant stays as history; a grant of the current version restores examination.
+      expect(await grant(svc, owner, d.id, NEXT_VERSION)).toBe('granted')
+      await liveRead(d.id, owner)
+      const rows = (await admin.query('SELECT permission_version FROM public.creator_record_v2_ai_examination_permissions WHERE document_id = $1 ORDER BY granted_at', [d.id])).rows.map((r) => r.permission_version)
+      expect(rows).toEqual([VERSION, NEXT_VERSION])
+    })
+
+    test('no current version: nothing is granted and nothing is examined, even with an earlier grant', async () => {
+      const owner = await user()
+      const d = await doc(owner)
+      await grant(svc, owner, d.id, VERSION)
+      await setCurrent(null)
+      await expect(liveRead(d.id, owner)).rejects.toThrow('creator_record_v2_ai_permission_required')
+      await expect(grant(svc, owner, d.id, VERSION)).rejects.toThrow('creator_record_v2_ai_permission_invalid')
+      const other = await doc(owner)
+      await expect(grant(svc, owner, other.id, VERSION)).rejects.toThrow('creator_record_v2_ai_permission_invalid')
+    })
+
+    test('withdrawal still wins: a withdrawn document answers "withdrawn" under the current or any other version', async () => {
+      const owner = await user()
+      const d = await doc(owner)
+      await withdraw(svc, owner)
+      await expect(grant(svc, owner, d.id, VERSION)).rejects.toThrow('creator_record_v2_ai_permission_withdrawn')
+      await expect(grant(svc, owner, d.id, NEXT_VERSION)).rejects.toThrow('creator_record_v2_ai_permission_withdrawn')
+      expect(await requestCustomerExamination(service(), owner, d.id, { aiPermission: VERSION })).toEqual({ ok: false, status: 409, code: 'examination_not_permitted' })
+    })
+
+    test('the current version can never be a draft or unapproved identifier, and is never changed in place', async () => {
+      await setCurrent(null)
+      for (const bad of [AI_EXAMINATION_PERMISSION_DRAFT_VERSION, 'cr-v2-perm-1__draft-privacy__terms-1', 'x-UNAPPROVED-y', 'Draft-1', 'bad version!', '']) {
+        await expect(insertAuthority(bad)).rejects.toThrow(/check constraint/)
+      }
+      expect(await current()).toEqual([])
+      await setCurrent(VERSION)
+      await expect(insertAuthority(NEXT_VERSION, true)).rejects.toThrow(/duplicate key/)
+      await expect(admin.query('UPDATE public.creator_record_v2_ai_permission_authority SET permission_version = $1', [NEXT_VERSION])).rejects.toThrow('not changed in place')
+      expect(await current()).toEqual([VERSION])
+    })
+
+    test('only the database owner (an operator) can set the current version; no application or customer role can read or change it', async () => {
+      await expect(svc.query('SELECT * FROM public.creator_record_v2_ai_permission_authority')).rejects.toThrow(/permission denied/)
+      await expect(svc.query("INSERT INTO public.creator_record_v2_ai_permission_authority (permission_version, established_by, reason) VALUES ('v-1', 'x', 'y')")).rejects.toThrow(/permission denied/)
+      await expect(svc.query('DELETE FROM public.creator_record_v2_ai_permission_authority')).rejects.toThrow(/permission denied/)
+      await expect(svc.query('SELECT public.creator_record_v2_current_ai_permission_version()')).rejects.toThrow(/permission denied/)
+      for (const role of ['anon', 'authenticated']) {
+        const c = new Client({ connectionString: URL })
+        await c.connect()
+        await c.query(`SET ROLE ${role}`)
+        try {
+          await expect(c.query('SELECT * FROM public.creator_record_v2_ai_permission_authority')).rejects.toThrow(/permission denied/)
+          await expect(c.query('SELECT public.creator_record_v2_current_ai_permission_version()')).rejects.toThrow(/permission denied/)
+        } finally { await c.end() }
+      }
+      expect(await current()).toEqual([VERSION])
     })
   })
 })

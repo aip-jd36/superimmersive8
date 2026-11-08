@@ -61,6 +61,31 @@ export const EXAM_TEXT = {
   terms_link: 'terms',
 } as const
 
+/**
+ * CR-V2-SCHEMA8-PATH-1 (E3): the strings that differ when the page offers a LIVE examination (an AI model reads the creator's own
+ * document) instead of the synthetic replay above. DRAFT, NOT APPROVED, like everything here: engineering wording that states what
+ * the product does, held to the customer wording lock (`__tests__/creator-record-flow/v2-delivery-wording-dashboard.test.ts`).
+ * `EXAM_TEXT` itself stays the replay wording (synthetic UAT only; it says so). Every other string is shared.
+ */
+export const EXAM_LIVE_TEXT = {
+  evidence_title: 'Supporting documents (optional)',
+  evidence_intro: 'You can add documents that support what you tell us, such as receipts or invoices for the AI tools you used, and link each one to a tool. When you ask, an AI model reads a document and reports what it appears to show. No person at SI8 checks the reading.',
+  consent_label: 'I agree that SI8 stores the documents I add privately, for this record, as described in the privacy notice.',
+  examined: 'Read. What the document appears to show is listed when you include it in a version.',
+  include_label: 'Include what the documents appear to show in this version',
+  include_note: 'These readings are printed in your record as what each document appears to show, kept apart from what you told us. They do not change the guidance.',
+  findings_intro: 'An AI model read these documents and reported what each one appears to show. No person checked the readings. They are not something you told us, they are not legal advice and they are not a clearance. They do not change your declarations or the guidance.',
+  not_verified: 'Not checked by a person',
+} as const
+
+export type ExaminationTextMode = 'replay' | 'live'
+export type ExaminationText = Omit<typeof EXAM_TEXT, keyof typeof EXAM_LIVE_TEXT> & { readonly [K in keyof typeof EXAM_LIVE_TEXT]: string }
+
+/** The wording for the mode the page offers: live only when a live AI examination is offered; otherwise the replay wording. */
+export function examText(mode: ExaminationTextMode): ExaminationText {
+  return mode === 'live' ? { ...EXAM_TEXT, ...EXAM_LIVE_TEXT } : EXAM_TEXT
+}
+
 /** CR-V2-UAT-PROD-MIN-1: shown on every page of the identity-scoped synthetic UAT (draft; display only). */
 export const SYNTHETIC_UAT_NOTICE = {
   title: 'SYNTHETIC TEST — SI8 internal UAT only',

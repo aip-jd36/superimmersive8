@@ -20,6 +20,7 @@
 
 import { CREATOR_RECORD_CONCLUSIONS } from '../contract/compose'
 import { isIsoDate } from '../contract/types'
+import { violatesCustomerWordingLock, violatesDependencyLabelLock } from '../contract/wording-lock'
 import { CREATOR_RECORD_OBJECTIVE_TOPICS } from '../integration/objectives'
 import { canonicalJson, sha256Hex } from '../record-core/canonical'
 import { arr, fail, int, isPlainObject, obj, oneOf, opt, ProjectionRefusal, str, type P } from '../record-core/projection'
@@ -175,29 +176,22 @@ export interface PdfTemplateApproval {
 export const templateFingerprint = (templates: unknown): string => sha256Hex(canonicalJson(templates))
 
 /**
- * PRD v0.3 §5.4 wording lock, applied to every template string. Negated
- * "clearance" ("not a clearance") and "approved for Creator Records" are the
- * only exceptions. Dependency code labels may not use met / satisfied /
- * confirmed / resolved.
+ * PRD v0.3 §5.4 wording lock, applied to every template string (`../contract/wording-lock`, shared with the approved-source
+ * check since CR-V2-SCHEMA8-PATH-1). Negated "clearance" ("not a clearance") and "approved for Creator Records" are the only
+ * exceptions. Dependency code labels may not use met / satisfied / confirmed / resolved.
  */
-const BANNED = /\b(cleared|clearance|compliant|certified|certification|verified|verification|approved)\b|licensed to|permitted to|safe to|applies to you|governed by|does not apply/i
-const ALLOWED = [/\bnot (a |an )?(legal )?clearance\b/gi, /\bnot cleared\b/gi, /\bapproved for Creator Records\b/gi]
-const DEPENDENCY_BANNED = /\b(met|satisfied|confirmed|resolved)\b/i
-
 export function wordingLockViolations(templates: CustomerPdfTemplates): string[] {
   const out: string[] = []
   const walk = (v: unknown, path: string) => {
     if (typeof v === 'string') {
-      let t = v
-      for (const a of ALLOWED) t = t.replace(a, '')
-      if (BANNED.test(t)) out.push(path)
+      if (violatesCustomerWordingLock(v)) out.push(path)
       return
     }
     if (Array.isArray(v)) v.forEach((x, i) => walk(x, `${path}[${i}]`))
     else if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) if (path !== '' || k !== 'template_id') walk(x, path ? `${path}.${k}` : k)
   }
   walk(templates, '')
-  for (const [k, v] of Object.entries(templates.dependency_codes)) for (const [code, label] of Object.entries(v)) if (DEPENDENCY_BANNED.test(label)) out.push(`dependency_codes.${k}.${code}`)
+  for (const [k, v] of Object.entries(templates.dependency_codes)) for (const [code, label] of Object.entries(v)) if (violatesDependencyLabelLock(label)) out.push(`dependency_codes.${k}.${code}`)
   return out.sort()
 }
 

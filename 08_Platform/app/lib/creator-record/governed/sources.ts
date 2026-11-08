@@ -51,6 +51,12 @@ export const CREATOR_RECORD_MAX_TOOLS = 3
 /** The Source Text Approval covering the wording above. None issued yet. */
 export const CREATOR_RECORD_SOURCE_TEXT_APPROVAL: SourceTextApproval | null = null
 
+/**
+ * CR-V2-SCHEMA8-PATH-1: the Source Text Approval covering the same wording for the examination-bearing record (schema 8).
+ * None issued yet.
+ */
+export const CREATOR_RECORD_EXAMINATION_SOURCE_TEXT_APPROVAL: SourceTextApproval | null = null
+
 /** The approval of the exact questionnaire contract (CR-V2-DECL-1B-1). None issued yet. */
 export const CREATOR_RECORD_QUESTIONNAIRE_APPROVAL: QuestionnaireContractApproval | null = null
 
@@ -79,6 +85,7 @@ export const CREATOR_RECORD_GOVERNANCE_AUTHORITY: PublicationAuthorityBundle = O
   versions: CREATOR_RECORD_VERSIONS,
   max_tools: CREATOR_RECORD_MAX_TOOLS,
   source_text_approval: CREATOR_RECORD_SOURCE_TEXT_APPROVAL,
+  source_text_examination_approval: CREATOR_RECORD_EXAMINATION_SOURCE_TEXT_APPROVAL,
   questionnaire_approval: CREATOR_RECORD_QUESTIONNAIRE_APPROVAL,
   pdf_templates: CREATOR_RECORD_PDF_TEMPLATES,
   pdf_template_approval: CREATOR_RECORD_PDF_TEMPLATE_APPROVAL,

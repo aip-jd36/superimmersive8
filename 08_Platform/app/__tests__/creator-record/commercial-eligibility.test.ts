@@ -72,7 +72,7 @@ const SYN_TEMPLATES = (schema: { id: string; version: number }) => approvedPdfTe
 function purchaseDeps(governance: () => ReturnType<typeof state>, rows: PreparedRow[] = [ROW]) {
   const bind = jest.fn(async () => ({ submissionId: SUB_ID, reason: 'created' as const }))
   const deps: PurchaseDeps = {
-    submissions: 'open', issuance: 'enabled', hasPilotAccess: async () => true,
+    submissions: 'open', issuance: 'enabled', hasPilotAccess: async () => true, legalPoliciesApproved: () => true,
     getPrepared: async (id) => rows.find((r) => r.id === id) ?? null,
     latestVersion: async (d) => [...rows].filter((r) => r.draft_id === d).sort((a, b) => b.version - a.version)[0] ?? null,
     boundTo: async () => ({ ...rows[0], submission_id: SUB_ID }),

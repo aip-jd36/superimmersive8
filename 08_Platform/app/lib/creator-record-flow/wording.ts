@@ -69,4 +69,20 @@ export const V2_REVIEW_PAGE = {
   paying: 'Opening payment…',
   payment_closed: 'You confirmed these declarations. This version is now fixed. Payment is not open yet.',
   confirmed: 'You confirmed these declarations. This version is now fixed.',
+  // CR-V2-SCHEMA8-PATH-1 (E2/E3): the review page's own strings, held here so the M0 review covers them. DRAFT.
+  not_purchasable: 'This version cannot be paid for right now. Your answers are kept. If this does not change, email jd@superimmersive8.com.',
+  heading: 'Check your declarations',
+  intro: 'This is exactly what SI8 recorded from your answers (version {version}). SI8 has not checked them. If anything is wrong, correct your answers. The corrected version is then the one you review.',
+  answers_heading: 'Your answers',
+  tool_heading: 'Tool {n}',
+  acknowledgements_heading: 'What you acknowledged',
+  correct: 'Correct my answers',
+  confirm: 'Confirm these declarations',
+  confirming: 'Confirming…',
+  failed: 'Something went wrong. Please try again. If this keeps happening, email jd@superimmersive8.com.',
 } as const
+
+/** Fills `{name}` slots in a review-page string (display only). */
+export function fillReviewText(text: string, values: Readonly<Record<string, string | number>>): string {
+  return text.replace(/\{([a-z_]+)\}/g, (m, k: string) => (Object.prototype.hasOwnProperty.call(values, k) ? String(values[k]) : m))
+}

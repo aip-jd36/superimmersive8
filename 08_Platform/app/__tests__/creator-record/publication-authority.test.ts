@@ -13,7 +13,8 @@
 import { pilotSources, type CreatorRecordSources } from '@/lib/creator-record/prototype/build-draft'
 import type { GovernanceApproval } from '@/lib/creator-record/contract/types'
 import { loadQuestionRegistry } from '@/lib/creator-record/contract/question-registry'
-import { buildCustomerRecord as buildCurrentRecord, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION, HISTORICAL_RECORD_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
+import { buildCustomerRecord as buildCurrentRecord, CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION, HISTORICAL_RECORD_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
+import { checkApprovedSources } from '@/lib/creator-record/customer-record/sources'
 import { SOURCE_TEXT_CATEGORIES, SOURCE_TEXT_SOURCE_ID, sourceTextContent, sourceTextDigest, type SourceTextApproval } from '@/lib/creator-record/customer-record/source-text'
 import { evaluateIssuanceEligibility } from '@/lib/creator-record/customer-record/eligibility'
 import { CUSTOMER_PDF_TEMPLATE_ID, templateFingerprint, type PdfTemplateApproval } from '@/lib/creator-record/customer-pdf/templates'
@@ -21,10 +22,10 @@ import { buildCustomerDocument, documentModelCanonical } from '@/lib/creator-rec
 import {
   approvedCustomerRecordInputs, approvedGovernanceSnapshot, approvedPdfTemplates, currentPublicationAuthority, CREATOR_RECORD_V2_SUBMISSIONS,
 } from '@/lib/creator-record/customer-flow/approved-inputs'
-import { renderV2ForIssuance, V2IssuanceRefusal, type V2IssuanceDeps } from '@/lib/creator-record/customer-flow/purchase'
+import { purchaseOfferable, renderV2ForIssuance, V2IssuanceRefusal, type V2IssuanceDeps } from '@/lib/creator-record/customer-flow/purchase'
 import type { PreparedRow } from '@/lib/creator-record/customer-flow/service'
 import {
-  PRODUCTION_SUPABASE_PROJECT_REF, resolvePublicationAuthority, selectAuthorityBundle, supabaseProjectRef, type PublicationAuthorityBundle,
+  PRODUCTION_SUPABASE_PROJECT_REF, resolvePublicationAuthority, selectAuthorityBundle, sourceTextApprovalsDistinct, supabaseProjectRef, type PublicationAuthorityBundle,
 } from '@/lib/creator-record/governed/publication-authority'
 import { CREATOR_RECORD_GOVERNANCE_AUTHORITY } from '@/lib/creator-record/governed/sources'
 import * as Governed from '@/lib/creator-record/governed/sources'
@@ -310,7 +311,10 @@ describe('genuine governance behaviour is unchanged', () => {
         questionnaire_approval: Governed.CREATOR_RECORD_QUESTIONNAIRE_APPROVAL,
       },
       source_text: null,
+      // CR-V2-SCHEMA8-PATH-1 (E1): the schema 8 approval slot, empty in governance.
+      source_text_examination: null,
     })
+    expect(Governed.CREATOR_RECORD_EXAMINATION_SOURCE_TEXT_APPROVAL).toBeNull()
     expect(approvedPdfTemplates(CREATOR_RECORD_GOVERNANCE_AUTHORITY)).toEqual({ templates: Governed.CREATOR_RECORD_PDF_TEMPLATES, approval: Governed.CREATOR_RECORD_PDF_TEMPLATE_APPROVAL })
   })
 
@@ -331,5 +335,101 @@ describe('the stops stay authoritative in every authority mode', () => {
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('stopped')
     expect(authorityFor(ISOLATED)).toBe(SYNTHETIC)
     expect(() => rendererForFamily('creator_record_v2')).toThrow(CreatorRecordIssuanceStoppedError)
+  })
+})
+
+// ── CR-V2-SCHEMA8-PATH-1 ──
+describe('E1: one governance bundle approves the same wording for schema 7 and for schema 8', () => {
+  const base: PublicationAuthorityBundle = { ...cleanText(SYNTHETIC), authority_class: 'governance' }
+  const text7 = base.source_text_approval as SourceTextApproval
+  const text8: SourceTextApproval = { ...text7, version: 2, record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION }, review_ref: 'GOV-TEXT-8' }
+  const both: PublicationAuthorityBundle = { ...base, source_text_examination_approval: text8 }
+  const check = (b: PublicationAuthorityBundle, slot: 'source_text' | 'source_text_examination', version: number) => {
+    const inputs = approvedCustomerRecordInputs(b)
+    return checkApprovedSources(inputs.sources, inputs[slot] ?? null, TOPIC_CLAIMS_FIXTURE, '2026-11-01', { id: CUSTOMER_RECORD_SCHEMA, version })
+  }
+  const codes = (r: ReturnType<typeof check>) => (r.ok ? [] : Array.from(new Set(r.refusals.map((x) => x.code))).sort())
+
+  test('Production selects the bundle; each approval reaches its own slot and passes for its own schema only', () => {
+    expect(authorityFor(PRODUCTION, null, both)).toBe(both)
+    const inputs = approvedCustomerRecordInputs(both)
+    expect(inputs.source_text?.approval).toBe(text7)
+    expect(inputs.source_text_examination?.approval).toBe(text8)
+    expect(inputs.source_text_examination?.acknowledgements).toBe(both.acknowledgements)
+    expect(check(both, 'source_text', CUSTOMER_RECORD_SCHEMA_VERSION).ok).toBe(true)
+    expect(check(both, 'source_text_examination', CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION).ok).toBe(true)
+    // Crossed: each approval is refused for the other schema, never reinterpreted.
+    expect(codes(check(both, 'source_text', CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION))).toContain('source_text_schema_mismatch')
+    expect(codes(check(both, 'source_text_examination', CUSTOMER_RECORD_SCHEMA_VERSION))).toContain('source_text_schema_mismatch')
+  })
+
+  test('without a schema 8 approval schema 8 has nothing to pass, and schema 7 is exactly as before', () => {
+    expect(approvedCustomerRecordInputs(base).source_text_examination).toBeNull()
+    expect(check(base, 'source_text', CUSTOMER_RECORD_SCHEMA_VERSION).ok).toBe(true)
+    expect(prepare(base).ok).toBe(true)
+    expect(prepare(both).ok).toBe(true)
+  })
+
+  test('the issuance snapshot carries both approvals, so a withdrawal of one never touches records of the other schema', () => {
+    const snap = (b: PublicationAuthorityBundle) => withCommercialSupportUnderTest(approvedGovernanceSnapshot('2026-11-01', TOPIC_CLAIMS_FIXTURE, b))
+    const entries = (b: PublicationAuthorityBundle) => {
+      const st = snap(b).authorities.source_text as { status: string; entries?: { id: string; version: string; lifecycle: string }[] }
+      return st.status === 'ok' && st.entries ? st.entries.map((e) => `${e.id}@${e.version}:${e.lifecycle}`) : st.status
+    }
+    expect(entries(both)).toEqual([`${text7.source_id}@1:approved`, `${text8.source_id}@2:approved`])
+    const p = prepare(both)
+    if (!p.ok) throw new Error('prepare')
+    expect(evaluateIssuanceEligibility(p.canonical, p.sha256, snap(both)).decision).toBe('eligible')
+    const schema8Withdrawn: PublicationAuthorityBundle = { ...both, source_text_examination_approval: { ...text8, lifecycle: 'withdrawn' } }
+    expect(evaluateIssuanceEligibility(p.canonical, p.sha256, snap(schema8Withdrawn)).decision).toBe('eligible')
+    const schema7Withdrawn: PublicationAuthorityBundle = { ...both, source_text_approval: { ...text7, lifecycle: 'withdrawn' } }
+    expect(evaluateIssuanceEligibility(p.canonical, p.sha256, snap(schema7Withdrawn)).decision).toBe('ineligible')
+  })
+
+  test('two approvals with the same identity are refused as a bundle (they would be ambiguous at issuance): fail closed', () => {
+    const same: PublicationAuthorityBundle = { ...both, source_text_examination_approval: { ...text8, version: text7.version } }
+    expect(sourceTextApprovalsDistinct(same)).toBe(false)
+    expect(sourceTextApprovalsDistinct(both)).toBe(true)
+    expect(authorityFor(PRODUCTION, null, same)).toBeNull()
+    expect(authorityFor(ISOLATED, { ...same, authority_class: 'synthetic_test' })).toBeNull()
+  })
+
+  test('a schema 8 approval that reads as synthetic makes Production refuse the whole bundle', () => {
+    const marked: PublicationAuthorityBundle = { ...both, source_text_examination_approval: { ...text8, review_ref: 'SYNTHETIC-TEXT-8' } }
+    expect(authorityFor(PRODUCTION, null, marked)).toBeNull()
+  })
+})
+
+describe('E2: purchaseOfferable — the page may offer payment only when every pure purchase condition holds', () => {
+  const deps = (over: Partial<Parameters<typeof purchaseOfferable>[0]> = {}): Parameters<typeof purchaseOfferable>[0] => ({
+    issuance: 'enabled', submissions: 'open', legalPoliciesApproved: () => true,
+    governance: (d) => withCommercialSupportUnderTest(approvedGovernanceSnapshot(d, TOPIC_CLAIMS_FIXTURE, SYNTHETIC)),
+    templates: () => approvedPdfTemplates(SYNTHETIC),
+    now: () => new Date('2026-11-01T10:00:00Z'),
+    ...over,
+  })
+
+  test('an eligible, reviewed, renderable version is offered', () => {
+    expect(purchaseOfferable(deps(), ROW)).toBe(true)
+  })
+
+  test.each<[string, Partial<Parameters<typeof purchaseOfferable>[0]>]>([
+    ['issuance stopped', { issuance: 'stopped' }],
+    ['submissions stopped', { submissions: 'stopped' }],
+    ['policies not published', { legalPoliciesApproved: () => false }],
+    ['no policy port', { legalPoliciesApproved: undefined }],
+    ['the policy port throws', { legalPoliciesApproved: () => { throw new Error('x') } }],
+    ['no commercial support for the schema (this build)', { governance: (d) => approvedGovernanceSnapshot(d, TOPIC_CLAIMS_FIXTURE, SYNTHETIC) }],
+    ['governance unavailable', { governance: (d) => approvedGovernanceSnapshot(d, TOPIC_CLAIMS_FIXTURE, null) }],
+    ['governance throws', { governance: () => { throw new Error('x') } }],
+    ['no templates port', { templates: undefined }],
+    ['no approved templates', { templates: () => ({ templates: null, approval: null }) }],
+  ])('not offered: %s', (_l, over) => {
+    expect(purchaseOfferable(deps(over), ROW)).toBe(false)
+  })
+
+  test('not offered for an unreviewed or tampered version', () => {
+    expect(purchaseOfferable(deps(), { ...ROW, status: 'prepared' })).toBe(false)
+    expect(purchaseOfferable(deps(), { ...ROW, sha256: 'f'.repeat(64) })).toBe(false)
   })
 })

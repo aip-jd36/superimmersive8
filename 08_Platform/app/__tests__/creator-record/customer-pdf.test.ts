@@ -659,7 +659,7 @@ describe('rendering boundary', () => {
     const targets = new Set(walk(ROOT).flatMap(importsOf))
     expect(Array.from(targets).sort()).toEqual([
       // CR-V2-MVP-M3A: the examination envelope's closed codes and the response codes (schema 8), read-only vocabularies.
-      '../contract/compose', '../contract/types', '../customer-record/examination-section', '../customer-record/record', '../evidence-intake/vocabulary', '../examination/envelope', '../integration/objectives', '../live-examination/envelope', '../record-core/canonical', '../record-core/projection',
+      '../contract/compose', '../contract/types', '../contract/wording-lock', '../customer-record/examination-section', '../customer-record/record', '../evidence-intake/vocabulary', '../examination/envelope', '../integration/objectives', '../live-examination/envelope', '../record-core/canonical', '../record-core/projection',
       './document-model', './templates', './text-layout', '@react-pdf/renderer', 'node:path', 'react',
     ])
   })

@@ -195,7 +195,7 @@ describe('the customer flow under Production conditions (submissions stopped, em
   test('ordinary Production paths never reach synthetic content: the governance inputs stay empty, and a non-UAT request gets nothing synthetic', async () => {
     const gov = approvedCustomerRecordInputs()
     expect(gov.source_text).toBeNull()
-    expect(gov.source_text_examination).toBeUndefined()
+    expect(gov.source_text_examination).toBeNull() // CR-V2-SCHEMA8-PATH-1: the governance slot exists and is empty
     expect(JSON.stringify(gov)).not.toMatch(/synthetic/i)
     // Even with submissions open (e.g. a future governed launch), the UAT exception is not consulted: governed inputs only.
     const w = production()
@@ -258,7 +258,7 @@ describe('closed paths and unchanged controls', () => {
     const w = production()
     viewOf(await preparePrepared(w.deps, UAT_USER, { state: syntheticState() }))
     const row = { ...w.rows[0], status: 'reviewed' as const, reviewed_at: INSIDE.toISOString() }
-    const deps: PurchaseDeps = { submissions: 'stopped', issuance: 'stopped', hasPilotAccess: async () => true, getPrepared: async () => row, latestVersion: async () => row, boundTo: async () => null, bind: async () => { throw new Error('must not bind') }, governance: () => { throw new Error('must not check') }, now: () => INSIDE }
+    const deps: PurchaseDeps = { submissions: 'stopped', issuance: 'stopped', hasPilotAccess: async () => true, legalPoliciesApproved: () => true, getPrepared: async () => row, latestVersion: async () => row, boundTo: async () => null, bind: async () => { throw new Error('must not bind') }, governance: () => { throw new Error('must not check') }, now: () => INSIDE }
     // Refused by the global stops (issuance first, then submissions); the exception is never consulted.
     const r = await startPurchase(deps, UAT_USER, row.id)
     expect(r.ok).toBe(false)
@@ -288,7 +288,7 @@ describe('closed paths and unchanged controls', () => {
     const w = production()
     viewOf(await preparePrepared(w.deps, UAT_USER, { state: syntheticState() }))
     const row = { ...w.rows[0], status: 'reviewed' as const, reviewed_at: INSIDE.toISOString() }
-    const deps: PurchaseDeps = { submissions: 'open', issuance: 'enabled', hasPilotAccess: async () => true, getPrepared: async () => row, latestVersion: async () => row, boundTo: async () => null, bind: async () => { throw new Error('must not bind') }, governance: (d) => approvedGovernanceSnapshot(d, TOPIC_CLAIMS_FIXTURE), now: () => INSIDE }
+    const deps: PurchaseDeps = { submissions: 'open', issuance: 'enabled', hasPilotAccess: async () => true, legalPoliciesApproved: () => true, getPrepared: async () => row, latestVersion: async () => row, boundTo: async () => null, bind: async () => { throw new Error('must not bind') }, governance: (d) => approvedGovernanceSnapshot(d, TOPIC_CLAIMS_FIXTURE), now: () => INSIDE }
     const r = await startPurchase(deps, UAT_USER, row.id)
     expect(r.ok).toBe(false)
     expect(['ineligible', 'unavailable']).toContain((r as { code: string }).code)
@@ -297,7 +297,7 @@ describe('closed paths and unchanged controls', () => {
   test('the customer page never serves synthetic content; the notice lives in the shared client for the admin page', () => {
     const page = read('app/creator-record/page.tsx')
     expect(page).not.toMatch(/syntheticUat|synthetic-uat/)
-    expect(page).toContain("paymentOpen={CREATOR_RECORD_V2_ISSUANCE === 'enabled'}")
+    expect(page).toContain("paymentOpen={CREATOR_RECORD_V2_ISSUANCE === 'enabled' && legalPoliciesApproved()}")
     expect(read('app/creator-record/CreatorRecordV2Client.tsx')).toContain('data-synthetic-uat')
   })
 })

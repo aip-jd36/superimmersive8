@@ -297,7 +297,7 @@ describe('compatibility and closed behaviour', () => {
     const v = viewOf(await prepare(w.deps, { include_examinations: true }))
     const row = { ...w.rows[0], status: 'reviewed' as const, reviewed_at: NOW.toISOString() }
     const deps: PurchaseDeps = {
-      submissions: 'open', issuance: 'enabled', hasPilotAccess: async () => true,
+      submissions: 'open', issuance: 'enabled', hasPilotAccess: async () => true, legalPoliciesApproved: () => true,
       getPrepared: async () => row, latestVersion: async () => row, boundTo: async () => null,
       bind: async () => { throw new Error('must not bind') }, governance: () => ({ approved: false } as never), now: () => NOW,
       evidenceIntact: async () => ({ ok: true }),

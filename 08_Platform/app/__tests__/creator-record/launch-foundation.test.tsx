@@ -128,8 +128,9 @@ describe('the browser asks separately for AI permission, only when live examinat
   })
   test('the page offers the permission only when live examination is offered (code locks AND approved policies)', () => {
     const page = src('app/creator-record/page.tsx')
-    expect(page).toMatch(/customerLiveOffered\(\) \? \{ aiPermissionVersion: AI_EXAMINATION_PERMISSION_DRAFT_VERSION \}/)
-    expect(src('lib/creator-record-flow/examination-customer.ts')).toMatch(/customerLiveOffered\(\) \? \{ live: productionCustomerLive, aiPermission: productionAiPermission \}/)
+    // CR-V2-SCHEMA8-PATH-1 (E7): the permission asked for is the current one, bound to the approved policy versions.
+    expect(page).toMatch(/const aiPermissionVersion = customerLiveOffered\(\) \? aiExaminationPermissionVersion\(\) : null/)
+    expect(src('lib/creator-record-flow/examination-customer.ts')).toMatch(/customerLiveOffered\(\) && permission !== null \? \{ live: productionCustomerLive, aiPermission: productionAiPermission\(permission\) \}/)
   })
 })
 

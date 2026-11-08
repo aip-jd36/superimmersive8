@@ -17,7 +17,11 @@
  *   - anything that breaks the declaration integrity contracts
  *     (`declarationIntegrityRefusals`, CR-V2-DECL-1A);
  *   - a questionnaire that is not exactly the contract its approval names, or that
- *     has a field nobody has classified (`./questionnaire-contract`, CR-V2-DECL-1B-1).
+ *     has a field nobody has classified (`./questionnaire-contract`, CR-V2-DECL-1B-1);
+ *   - a governed customer string (question wording, help, option labels, acknowledgements,
+ *     caveats, dependency labels, eligible ledger explanations and evidence notes) that
+ *     breaks the customer wording lock (`../contract/wording-lock`, CR-V2-SCHEMA8-PATH-1).
+ *     A safety net only: it never replaces the human approval of that content.
  *
  * An explicitly approved, EMPTY ledger is accepted (a declarations-only record,
  * PRD OD-14). Whether that may launch is a PM decision, not this module's.
@@ -28,6 +32,7 @@
 import type { PublicationLedgerEntry } from '../contract/publication-ledger'
 import { declarationIntegrityRefusals, INTEGRITY_REFUSAL_CODES, loadQuestionRegistry, type QuestionRegistry } from '../contract/question-registry'
 import { isApproved, isIsoDate, type GovernanceApproval } from '../contract/types'
+import { violatesCustomerWordingLock, violatesDependencyLabelLock } from '../contract/wording-lock'
 import type { BuildDraftInput, CreatorRecordSources } from '../prototype/build-draft'
 import { checkQuestionnaireContract, QUESTIONNAIRE_CONTRACT_REFUSAL_CODES, questionnaireContract, type ApprovedQuestionnaireContract } from './questionnaire-contract'
 import { checkSourceText, SOURCE_TEXT_REFUSAL_CODES, sourceTextContent, sourceTextDigest, type AcknowledgementText, type SourceTextApproval, type SourceTextContent } from './source-text'
@@ -58,6 +63,8 @@ export const SOURCE_REFUSAL_CODES = [
   'ledger_claim_reverified',
   'ledger_refresh_lapsed',
   'caveat_text_missing',
+  // CR-V2-SCHEMA8-PATH-1 (E5): a governed customer string uses wording the customer wording lock forbids.
+  'customer_wording_lock',
   ...INTEGRITY_REFUSAL_CODES,
   ...QUESTIONNAIRE_CONTRACT_REFUSAL_CODES,
 ] as const
@@ -166,6 +173,26 @@ export function checkApprovedSources(sources: CreatorRecordSources, sourceText: 
     if (!claim) refuse('ledger_claim_unknown', e.entry_id)
     else if (claim.last_verified !== e.claim_last_verified) refuse('ledger_claim_reverified', e.entry_id)
     for (const id of e.required_caveats) if (!has(sources.caveats, id) || String(sources.caveats[id]).trim() === '') refuse('caveat_text_missing', `${e.entry_id}.${id}`)
+  }
+
+  // ── Customer wording lock (CR-V2-SCHEMA8-PATH-1, E5): every governed string a customer reads. A safety net only: it never
+  //    approves anything, and each string still needs its own approval (above). The ref names the field, never the text. ──
+  const lock = (text: unknown, ref: string, dependencyLabel = false) => {
+    if (typeof text !== 'string') return
+    if (violatesCustomerWordingLock(text) || (dependencyLabel && violatesDependencyLabelLock(text))) refuse('customer_wording_lock', ref)
+  }
+  for (const [id, p] of Object.entries(sources.presentation)) {
+    lock(p.text, `presentation.${id}.text`)
+    lock(p.help, `presentation.${id}.help`)
+    for (const [option, label] of Object.entries(p.option_labels ?? {})) lock(label, `presentation.${id}.option_labels.${option}`)
+  }
+  for (const [id, text] of Object.entries(sourceText?.acknowledgements ?? {})) lock(text, `acknowledgements.${id}`)
+  for (const [id, text] of Object.entries(sources.caveats)) lock(text, `caveats.${id}`)
+  for (const [id, text] of Object.entries(sources.dependency_labels)) lock(text, `dependency_labels.${id}`, true)
+  for (const e of current) {
+    if (e.creator_record_eligible !== 'Yes') continue
+    lock(e.explanation, `ledger.${e.entry_id}.explanation`)
+    for (const [dep, note] of Object.entries(e.evidence_notes ?? {})) lock(note, `ledger.${e.entry_id}.evidence_notes.${dep}`)
   }
 
   if (refusals.length > 0 || !registry || !text || !text.ok || wording === null) return { ok: false, refusals }

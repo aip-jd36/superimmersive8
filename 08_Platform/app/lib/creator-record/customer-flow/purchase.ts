@@ -85,6 +85,11 @@ export interface PurchaseDeps {
    * nothing is sold (fail closed).
    */
   templates?: TemplatesForSchema
+  /**
+   * CR-V2-SCHEMA8-PATH-1 (E4): the approved privacy notice and terms of service are both published (`legalPoliciesApproved`).
+   * Checked at both purchase steps, for every record schema, before anything else. Absent or false → nothing is sold (fail closed).
+   */
+  legalPoliciesApproved?(): boolean
 }
 
 /** The inventory fields the evidence check needs, read from the verified record. */
@@ -126,9 +131,22 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 type WithoutOk<T> = T extends unknown ? Omit<T, 'ok'> : never
 const err = (e: WithoutOk<PurchaseError>): PurchaseError => ({ ok: false, ...e }) as PurchaseError
 
+/** E4: true only when the port exists and says both policies are published. Any throw is false. */
+function policiesPublished(deps: Pick<PurchaseDeps, 'legalPoliciesApproved'>): boolean {
+  try {
+    return typeof deps.legalPoliciesApproved === 'function' && deps.legalPoliciesApproved() === true
+  } catch {
+    return false
+  }
+}
+
 async function gate(deps: PurchaseDeps, userId: string): Promise<PurchaseError | null> {
   if (deps.issuance !== 'enabled') return err({ status: 503, code: 'issuance_stopped' })
   if (deps.submissions !== 'open') return err({ status: 503, code: 'submissions_stopped' })
+  if (!policiesPublished(deps)) {
+    deps.log?.('creator_record_v2_purchase_refused', { decision: 'legal_policies_unavailable' })
+    return err({ status: 503, code: 'unavailable' })
+  }
   if (!(await deps.hasPilotAccess(userId))) return err({ status: 403, code: 'not_invited' })
   return null
 }
@@ -197,6 +215,31 @@ async function purchasable(deps: PurchaseDeps, userId: string, row: PreparedRow 
     return err({ status: 503, code: 'unavailable' })
   }
   return null
+}
+
+/**
+ * CR-V2-SCHEMA8-PATH-1 (E2): may the customer page OFFER payment for this version, of either record schema? DISPLAY ONLY: it
+ * never authorizes anything, and both purchase steps re-check every condition (`purchasable`), including those this pure check
+ * cannot see (invitation, latest version, documents and readings still held). It answers false unless issuance and submissions
+ * are open, both legal policies are published, the version is reviewed and verifies, it is eligible under the current
+ * governance (for schema 8 this includes each reading's method being commercially supported), and the approved templates for
+ * its own schema can render it. Any error is false, so an ineligible version is never presented as purchasable.
+ */
+export function purchaseOfferable(
+  deps: Pick<PurchaseDeps, 'issuance' | 'submissions' | 'legalPoliciesApproved' | 'governance' | 'templates' | 'now'>,
+  row: PreparedRow,
+): boolean {
+  try {
+    if (deps.issuance !== 'enabled' || deps.submissions !== 'open' || !policiesPublished(deps)) return false
+    if (row.status !== 'reviewed') return false
+    const record = verifiedRecord(row)
+    if (!record) return false
+    const on = today(deps.now())
+    if (evaluateIssuanceEligibility(row.canonical, row.sha256, deps.governance(on)).decision !== 'eligible') return false
+    return renderable(deps.templates, row, record, on)
+  } catch {
+    return false
+  }
 }
 
 /** Step 1: the creator's reviewed version becomes (or already is) a submission. `id` is untrusted. */

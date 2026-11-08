@@ -49,6 +49,13 @@ export interface PublicationAuthorityBundle {
   readonly versions: Readonly<{ registry: string; ledger: string }>
   readonly max_tools: number
   readonly source_text_approval: SourceTextApproval | null
+  /**
+   * CR-V2-SCHEMA8-PATH-1: the Source Text Approval for the examination-bearing record (schema 8), over the SAME wording. A Source
+   * Text Approval names one record schema, so a bundle that publishes both the no-reading record (schema 7, `source_text_approval`)
+   * and the evidence-oriented record (schema 8) carries one approval for each. Each is checked against its own schema
+   * (`checkSourceText`: `source_text_schema_mismatch`); a misfiled approval is refused, never reinterpreted. Absent or null: none.
+   */
+  readonly source_text_examination_approval?: SourceTextApproval | null
   readonly questionnaire_approval: QuestionnaireContractApproval | null
   readonly pdf_templates: unknown
   readonly pdf_template_approval: PdfTemplateApproval | null
@@ -127,6 +134,7 @@ function approvalTexts(b: PublicationAuthorityBundle): string[] {
   for (const e of b.publication_ledger) out.push(e.entry_id, e.approver)
   out.push(b.versions.registry, b.versions.ledger)
   out.push(b.source_text_approval?.authority, b.source_text_approval?.review_ref)
+  out.push(b.source_text_examination_approval?.authority, b.source_text_examination_approval?.review_ref)
   out.push(b.questionnaire_approval?.authority, b.questionnaire_approval?.review_ref)
   out.push(b.pdf_template_approval?.authority, b.pdf_template_approval?.review_ref)
   for (const t of b.pdf_template_sets ?? []) out.push(t.approval?.authority, t.approval?.review_ref)
@@ -137,6 +145,17 @@ function approvalTexts(b: PublicationAuthorityBundle): string[] {
  * The bundle this build may publish from, or null (fail closed). The class must match the mode exactly;
  * in governance mode a bundle whose approval text looks synthetic is refused as well.
  */
+/**
+ * CR-V2-SCHEMA8-PATH-1: the schema 7 and schema 8 Source Text Approvals must be distinct authorities (different id or version).
+ * A record references its approval by id and version, so two approvals sharing both would be ambiguous at issuance and refuse
+ * every record of either schema; distinct identities keep a withdrawal of one from touching records of the other.
+ */
+export function sourceTextApprovalsDistinct(b: PublicationAuthorityBundle): boolean {
+  const a = b.source_text_approval
+  const e = b.source_text_examination_approval ?? null
+  return !a || !e || a.source_id !== e.source_id || a.version !== e.version
+}
+
 export function selectAuthorityBundle(
   resolution: AuthorityResolution,
   bundles: { governance: PublicationAuthorityBundle; synthetic_test: PublicationAuthorityBundle | null },
@@ -145,10 +164,11 @@ export function selectAuthorityBundle(
   if (resolution.mode === 'governance') {
     const b = bundles.governance
     if (b.authority_class !== 'governance') return null
+    if (!sourceTextApprovalsDistinct(b)) return null
     if (approvalTexts(b).some((t) => SYNTHETIC_TEXT.test(t))) return null
     return b
   }
   const b = bundles.synthetic_test
-  if (!b || b.authority_class !== 'synthetic_test') return null
+  if (!b || b.authority_class !== 'synthetic_test' || !sourceTextApprovalsDistinct(b)) return null
   return b
 }

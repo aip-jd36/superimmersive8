@@ -18,7 +18,8 @@ import { redirect } from 'next/navigation'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { checkApprovedSources } from '@/lib/creator-record/customer-record/sources'
 import { CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION, CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
-import { AI_EXAMINATION_PERMISSION_DRAFT_VERSION, EVIDENCE_CONSENT_DRAFT_VERSION } from '@/lib/creator-record/evidence-intake/contract'
+import { aiExaminationPermissionVersion, evidenceConsentVersion } from '@/lib/creator-record-flow/authorization-versions'
+import { legalPoliciesApproved } from '@/lib/legal/policies'
 import { customerLiveOffered } from '@/lib/creator-record-flow/live-offer'
 import { productionFlowDeps } from '@/lib/creator-record-flow/production'
 import { sessionUserId } from '@/lib/creator-record-flow/http'
@@ -53,6 +54,8 @@ export default async function CreatorRecordPage() {
   const check = checkApprovedSources(inputs.sources, inputs.source_text, TOPIC_CLAIMS_FIXTURE, today, { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION })
   if (!check.ok || !inputs.source_text) return <Unavailable message="Creator Record is not available yet." />
   // CR-V2-EXAM-INTEGRATION-X3: offered only with an approval for the examination-bearing record.
+  // CR-V2-SCHEMA8-PATH-1 (E7): the identifiers the creator agrees to now (wording + approved policy versions).
+  const aiPermissionVersion = customerLiveOffered() ? aiExaminationPermissionVersion() : null
   const examinationOffered = checkApprovedSources(inputs.sources, inputs.source_text_examination ?? inputs.source_text, TOPIC_CLAIMS_FIXTURE, today, { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION }).ok
 
   return (
@@ -63,9 +66,10 @@ export default async function CreatorRecordPage() {
         acknowledgements={inputs.source_text.acknowledgements}
         maxTools={inputs.sources.max_tools}
         questionnaireContractSha256={check.approved.questionnaire_contract.contract_sha256}
-        paymentOpen={CREATOR_RECORD_V2_ISSUANCE === 'enabled'}
+        // E4: payment is offered only with issuance enabled AND both legal policies published (the server decides either way).
+        paymentOpen={CREATOR_RECORD_V2_ISSUANCE === 'enabled' && legalPoliciesApproved()}
         {...(examinationOffered
-          ? { examination: { consentVersion: EVIDENCE_CONSENT_DRAFT_VERSION, ...(customerLiveOffered() ? { aiPermissionVersion: AI_EXAMINATION_PERMISSION_DRAFT_VERSION } : {}) } }
+          ? { examination: { consentVersion: evidenceConsentVersion(), ...(aiPermissionVersion ? { aiPermissionVersion } : {}) } }
           : {})}
       />
     </main>

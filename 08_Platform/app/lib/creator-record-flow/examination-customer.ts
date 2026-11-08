@@ -16,7 +16,7 @@ import { CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flo
 import { AiPermissionRefusal, examinationProjectionFor, verifyReferencedReadings, type AiPermissionRefusalCode, type CustomerExaminationDeps, type CustomerExaminationError, type ReferencedReading } from '@/lib/creator-record/customer-flow/examination'
 import type { FlowDeps } from '@/lib/creator-record/customer-flow/service'
 import { productionExaminationDeps } from '@/lib/creator-record-flow/examination-production'
-import { AI_EXAMINATION_PERMISSION_DRAFT_VERSION } from '@/lib/creator-record/evidence-intake/contract'
+import { aiExaminationPermissionVersion } from './authorization-versions'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { customerLiveEnabledInThisBuild, customerLiveOffered } from './live-offer'
 import { hasPilotAccess } from './pilot-access'
@@ -33,9 +33,13 @@ const AI_PERMISSION_REFUSALS: Readonly<Record<string, AiPermissionRefusalCode>> 
   creator_record_v2_ai_permission_invalid: 'invalid',
 }
 
-/** Decision 8Q: the owner's explicit, versioned permission for one document, recorded in the database before a live examination. */
-const productionAiPermission: NonNullable<CustomerExaminationDeps['aiPermission']> = {
-  version: AI_EXAMINATION_PERMISSION_DRAFT_VERSION,
+/**
+ * Decision 8Q: the owner's explicit, versioned permission for one document, recorded in the database before a live examination.
+ * CR-V2-SCHEMA8-PATH-1 (E6/E7): `version` is the CURRENT identifier (wording + approved policy versions), computed per request; the
+ * database also requires it to be the version currently authorized there (20261113000000).
+ */
+const productionAiPermission = (version: string): NonNullable<CustomerExaminationDeps['aiPermission']> => ({
+  version,
   async grant(userId, documentId, version) {
     const { data, error } = await supabaseAdmin.rpc('creator_record_v2_grant_ai_examination_permission', { p_user_id: userId, p_document_id: documentId, p_permission_version: version })
     const known = error && error.code === 'P0001' && typeof error.message === 'string' ? AI_PERMISSION_REFUSALS[error.message] : undefined
@@ -43,7 +47,7 @@ const productionAiPermission: NonNullable<CustomerExaminationDeps['aiPermission'
     if (error || (data !== 'granted' && data !== 'existing')) throw new Error('creator_record_ai_permission_unavailable')
     return data as 'granted' | 'existing'
   },
-}
+})
 
 /** The customer live port: the reviewed production ports, the committed fixture registry and the real executor. No other composition. */
 const productionCustomerLive: NonNullable<CustomerExaminationDeps['live']> = {
@@ -58,13 +62,15 @@ const productionCustomerLive: NonNullable<CustomerExaminationDeps['live']> = {
 }
 
 export function productionCustomerExaminationDeps(): CustomerExaminationDeps {
+  // E7: no live examination without a current, policy-bound permission identifier to ask for.
+  const permission = aiExaminationPermissionVersion()
   return {
     submissions: CREATOR_RECORD_V2_SUBMISSIONS,
     hasPilotAccess,
     adapter: productionExaminationDeps(),
     log: (event, detail) => console.warn(`[creator-record-v2/examination] ${event}`, detail),
     now: () => new Date(),
-    ...(customerLiveOffered() ? { live: productionCustomerLive, aiPermission: productionAiPermission } : {}),
+    ...(customerLiveOffered() && permission !== null ? { live: productionCustomerLive, aiPermission: productionAiPermission(permission) } : {}),
   }
 }
 
