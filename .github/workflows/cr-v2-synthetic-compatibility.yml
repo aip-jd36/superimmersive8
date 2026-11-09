@@ -1,0 +1,140 @@
+name: CR-V2 Synthetic Compatibility Test (manual, paid)
+
+# CR-V2-MVP-GITHUB-SYNTHETIC-1 — the PM-approved, three-fixture synthetic Anthropic compatibility test (CR-V2-MVP-SYNTHETIC-RUN-1),
+# run with SI8's existing GitHub Actions secret instead of a local key (main integration: CR-V2-MVP-GITHUB-SYNTHETIC-3).
+# PASS = every fixture has a parsed end_turn response from the pinned model, within its input bound, in at most 6 requests.
+#
+#   - Manual only (workflow_dispatch), no inputs: no ref, path, fixture, model, limit or command can be chosen at dispatch.
+#   - Runs only from the default branch's copy of this file, and checks out exactly the reviewed revision below.
+#   - SI8's committed synthetic fixtures only (generated here, hash-checked by the tool); never a real or customer document.
+#   - The secret reaches the live step only. Install, generation, dry run and summary steps never see it.
+#   - The private report stays in the runner's temporary directory. Nothing is uploaded; only a sanitized metadata summary is
+#     printed (no model output, document content or credential).
+#   - Paid: at most 6 API requests (hard, retries included), $1 predictive ceiling. Each run is a separate approval; do not re-run
+#     a job without one.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cr-v2-synthetic-compatibility
+  cancel-in-progress: false
+
+env:
+  # The reviewed revision of the synthetic runner: C1 of CR-V2-MVP-GITHUB-SYNTHETIC-3, whose runner and tests are byte-identical to
+  # fe8af936 (CR-V2-SYNTHETIC-KEY-REUSE-1). Changing it is a reviewed change to this file.
+  REVIEWED_SHA: 1387f2b55982efc0028c8d6de5b7b0627fa24ade
+  SUBSET: pdf-runway-standard-monthly,shot-runway-billing-history,photo-runway-rotated
+  MODEL: claude-sonnet-5
+
+jobs:
+  synthetic-compatibility:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.repository == 'aip-jd36/superimmersive8'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+        working-directory: 08_Platform/app
+
+    steps:
+      - name: Check out the reviewed revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.REVIEWED_SHA }}
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Verify the reviewed revision
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$REVIEWED_SHA"
+          test -z "$(git status --porcelain)"
+          echo "Running reviewed revision $REVIEWED_SHA"
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: 08_Platform/app/package-lock.json
+
+      - name: Install Node dependencies (lockfile, no install scripts)
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install the fixture generator's dependencies (the versions the fixtures were generated with)
+        run: |
+          python -m pip install --no-cache-dir --only-binary=:all: "pymupdf==1.27.2.3" "pillow==12.2.0"
+
+      - name: Generate the synthetic fixtures
+        run: python -I lib/creator-record/eval/fixtures/generate_receipt_fixtures.py
+
+      - name: Dry run (no model call)
+        run: |
+          set -euo pipefail
+          npx tsx lib/creator-record/eval/run-receipt-eval.ts --mode dry-run --subset "$SUBSET" \
+            --input-usd-per-mtok 2 --output-usd-per-mtok 10 --out "$RUNNER_TEMP/dry-run.json"
+
+      - name: Check the dry run before any paid call
+        run: |
+          set -euo pipefail
+          node - "$RUNNER_TEMP/dry-run.json" <<'NODE'
+          const r = JSON.parse(require('fs').readFileSync(process.argv[2], 'utf8'))
+          const ids = process.env.SUBSET.split(',')
+          const bad = []
+          if (r.mode !== 'dry-run' || r.api_requests_made !== 0) bad.push('dry run made a request')
+          if (JSON.stringify(r.subset) !== JSON.stringify(ids)) bad.push('subset is not exactly the three approved fixtures')
+          if (r.plan.documents !== 3 || r.plan.max_api_requests !== 6) bad.push('plan is not 3 documents / 6 requests')
+          if (!r.live_input_bound.every((b) => b.admitted)) bad.push('a fixture is outside the live input bound')
+          if (bad.length) { console.error('DRY RUN CHECK FAILED: ' + bad.join('; ')); process.exit(1) }
+          console.log('Dry run check passed: 3 approved fixtures, at most 6 requests, all within the input bound, no request made.')
+          NODE
+
+      - name: Live run (paid, single execution)
+        id: live
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -euo pipefail
+          npx tsx lib/creator-record/eval/run-receipt-eval.ts --mode live --confirm-paid-calls \
+            --model "$MODEL" --max-calls 6 --max-usd 1 \
+            --input-usd-per-mtok 2 --output-usd-per-mtok 10 \
+            --subset "$SUBSET" --out "$RUNNER_TEMP/live-report.json"
+
+      - name: Sanitized summary (metadata only)
+        if: always() && steps.live.conclusion != 'skipped'
+        run: |
+          set -euo pipefail
+          node - "$RUNNER_TEMP/live-report.json" <<'NODE'
+          const fs = require('fs')
+          const file = process.argv[2]
+          if (!fs.existsSync(file)) { console.error('No live report was written (the run refused or failed before writing it).'); process.exit(1) }
+          const r = JSON.parse(fs.readFileSync(file, 'utf8'))
+          const model = process.env.MODEL
+          const bounds = new Map(r.live_input_bound.map((b) => [b.fixture_id, b.input_tokens]))
+          console.log(`Model requested: ${model}; credential source: ${r.credential_source}`)
+          console.log(`API requests: ${r.api_requests_made} (retries: ${r.requests.filter((q) => q.attempt > 1).length}); stopped early: ${r.stopped_early ?? 'no'}`)
+          let allPass = r.api_requests_made <= 6 && !r.stopped_early
+          for (const id of process.env.SUBSET.split(',')) {
+            const reqs = r.requests.filter((q) => q.fixture_id === id)
+            const bound = bounds.get(id)
+            const withinBound = reqs.every((q) => q.input_tokens === null || q.input_tokens <= bound)
+            const modelOk = reqs.length > 0 && reqs.every((q) => q.response_model === null || q.response_model === model)
+            const reading = reqs.some((q) => q.outcome === 'parsed' && q.stop_reason === 'end_turn')
+            const pass = reading && modelOk && withinBound
+            allPass = allPass && pass
+            console.log(`${pass ? 'PASS' : 'FAIL'} ${id}: requests ${reqs.length}; response models ${[...new Set(reqs.map((q) => q.response_model))].join(',')}; stop reasons ${reqs.map((q) => q.stop_reason).join(',')}; outcomes ${reqs.map((q) => q.outcome).join(',')}; input tokens ${reqs.map((q) => q.input_tokens).join(',')} (bound ${bound}); output tokens ${reqs.map((q) => q.output_tokens).join(',')}`)
+          }
+          const s = r.spend
+          console.log(`Estimated cost: accounted $${s.accounted_usd}, conservative $${s.conservative_usd} (predictive ceiling $${s.max_usd}). Check billed usage in the Anthropic account.`)
+          if (!allPass) { console.error('RESULT: FAIL (see the lines above; do not re-run without review)'); process.exit(1) }
+          console.log('RESULT: PASS')
+          NODE
