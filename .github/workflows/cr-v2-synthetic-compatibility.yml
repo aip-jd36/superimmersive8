@@ -1,16 +1,18 @@
-name: CR-V2 Synthetic Compatibility Test (manual, paid)
+name: CR-V2 Synthetic Extraction Accuracy Evaluation (manual, paid)
 
-# CR-V2-MVP-GITHUB-SYNTHETIC-1 — the PM-approved, three-fixture synthetic Anthropic compatibility test (CR-V2-MVP-SYNTHETIC-RUN-1),
-# run with SI8's existing GitHub Actions secret instead of a local key (main integration: CR-V2-MVP-GITHUB-SYNTHETIC-3).
-# PASS = every fixture has a parsed end_turn response from the pinned model, within its input bound, in at most 6 requests.
+# CR-V2-MVP-SYNTHETIC-ACCURACY-1 — the full synthetic extraction accuracy evaluation: all 45 synthetic fixtures of the
+# receipt-fixtures-v2 spec, examined once by the pinned model and scored against their ground truth under the existing scoring
+# contract (receipt-scoring-v2). Extends the three-fixture compatibility test (CR-V2-MVP-GITHUB-SYNTHETIC-1/-3, run 42551744815).
+# PASS = the evaluator's own verdict is PASS for all 45 documents, from the pinned model, without stopping early.
+# An extraction accuracy test only: not a Creator Record commercial assurance, rights or entitlement test.
 #
 #   - Manual only (workflow_dispatch), no inputs: no ref, path, fixture, model, limit or command can be chosen at dispatch.
 #   - Runs only from the default branch's copy of this file, and checks out exactly the reviewed revision below.
 #   - SI8's committed synthetic fixtures only (generated here, hash-checked by the tool); never a real or customer document.
 #   - The secret reaches the live step only. Install, generation, dry run and summary steps never see it.
-#   - The private report stays in the runner's temporary directory. Nothing is uploaded; only a sanitized metadata summary is
-#     printed (no model output, document content or credential).
-#   - Paid: at most 6 API requests (hard, retries included), $1 predictive ceiling. Each run is a separate approval; do not re-run
+#   - The private report stays in the runner's temporary directory. Nothing is uploaded; only an aggregate summary is printed
+#     (counts and thresholds; no model output, extracted value, document content or credential).
+#   - Paid: at most 90 API requests (hard, retries included), $5 predictive ceiling. Each run is a separate approval; do not re-run
 #     a job without one.
 
 on:
@@ -25,16 +27,21 @@ concurrency:
 
 env:
   # The reviewed revision of the synthetic runner: C1 of CR-V2-MVP-GITHUB-SYNTHETIC-3, whose runner and tests are byte-identical to
-  # fe8af936 (CR-V2-SYNTHETIC-KEY-REUSE-1). Changing it is a reviewed change to this file.
+  # fe8af936 (CR-V2-SYNTHETIC-KEY-REUSE-1). It already supports `--subset all`. Changing it is a reviewed change to this file.
   REVIEWED_SHA: 1387f2b55982efc0028c8d6de5b7b0627fa24ade
-  SUBSET: pdf-runway-standard-monthly,shot-runway-billing-history,photo-runway-rotated
   MODEL: claude-sonnet-5
+  # The extraction profile under test. The dry run and the summary both refuse any other versions.
+  PROFILE: schema=receipt-extraction-v2,prompt=receipt-prompt-v2,comparison=receipt-comparison-v2,scoring=receipt-scoring-v2,spec=receipt-fixtures-v2
+  EXPECTED_DOCUMENTS: '45'
+  MAX_CALLS: '90'
+  MAX_USD: '5'
 
 jobs:
-  synthetic-compatibility:
+  synthetic-accuracy:
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.repository == 'aip-jd36/superimmersive8'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # 45 documents, at most two 25-second requests each, run one after another.
+    timeout-minutes: 60
     defaults:
       run:
         shell: bash
@@ -80,22 +87,31 @@ jobs:
       - name: Dry run (no model call)
         run: |
           set -euo pipefail
-          npx tsx lib/creator-record/eval/run-receipt-eval.ts --mode dry-run --subset "$SUBSET" \
+          npx tsx lib/creator-record/eval/run-receipt-eval.ts --mode dry-run --subset all \
             --input-usd-per-mtok 2 --output-usd-per-mtok 10 --out "$RUNNER_TEMP/dry-run.json"
 
       - name: Check the dry run before any paid call
         run: |
           set -euo pipefail
-          node - "$RUNNER_TEMP/dry-run.json" <<'NODE'
-          const r = JSON.parse(require('fs').readFileSync(process.argv[2], 'utf8'))
-          const ids = process.env.SUBSET.split(',')
+          node - "$RUNNER_TEMP/dry-run.json" lib/creator-record/eval/fixtures/receipt-fixtures.json <<'NODE'
+          const fs = require('fs')
+          const r = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'))
+          const spec = JSON.parse(fs.readFileSync(process.argv[3], 'utf8'))
+          const n = Number(process.env.EXPECTED_DOCUMENTS)
+          const profile = Object.fromEntries(process.env.PROFILE.split(',').map((kv) => kv.split('=')))
           const bad = []
           if (r.mode !== 'dry-run' || r.api_requests_made !== 0) bad.push('dry run made a request')
-          if (JSON.stringify(r.subset) !== JSON.stringify(ids)) bad.push('subset is not exactly the three approved fixtures')
-          if (r.plan.documents !== 3 || r.plan.max_api_requests !== 6) bad.push('plan is not 3 documents / 6 requests')
+          if (JSON.stringify(r.versions) !== JSON.stringify(profile)) bad.push('extraction profile is not ' + process.env.PROFILE)
+          if (spec.documents.length !== n) bad.push(`the spec has ${spec.documents.length} documents, not ${n}`)
+          if (JSON.stringify(r.subset) !== JSON.stringify(spec.documents.map((d) => d.id))) bad.push('the run does not select exactly every spec document')
+          if (r.plan.documents !== n || r.plan.max_api_requests !== Number(process.env.MAX_CALLS)) bad.push(`plan is not ${n} documents / ${process.env.MAX_CALLS} requests`)
           if (!r.live_input_bound.every((b) => b.admitted)) bad.push('a fixture is outside the live input bound')
           if (bad.length) { console.error('DRY RUN CHECK FAILED: ' + bad.join('; ')); process.exit(1) }
-          console.log('Dry run check passed: 3 approved fixtures, at most 6 requests, all within the input bound, no request made.')
+          const cats = {}
+          for (const d of spec.documents) cats[d.category] = (cats[d.category] ?? 0) + 1
+          console.log(`Dry run check passed: all ${n} fixtures, profile ${process.env.PROFILE}, at most ${process.env.MAX_CALLS} requests, all within the input bound, no request made.`)
+          console.log('Categories: ' + Object.entries(cats).map(([k, v]) => `${k} ${v}`).join(', '))
+          console.log(`Estimated cost ~$${r.plan.estimated_cost_usd.toFixed(4)} (estimate only).`)
           NODE
 
       - name: Live run (paid, single execution)
@@ -105,36 +121,72 @@ jobs:
         run: |
           set -euo pipefail
           npx tsx lib/creator-record/eval/run-receipt-eval.ts --mode live --confirm-paid-calls \
-            --model "$MODEL" --max-calls 6 --max-usd 1 \
+            --model "$MODEL" --max-calls "$MAX_CALLS" --max-usd "$MAX_USD" \
             --input-usd-per-mtok 2 --output-usd-per-mtok 10 \
-            --subset "$SUBSET" --out "$RUNNER_TEMP/live-report.json"
+            --subset all --out "$RUNNER_TEMP/live-report.json"
 
-      - name: Sanitized summary (metadata only)
+      - name: Aggregate accuracy summary (counts and thresholds only)
         if: always() && steps.live.conclusion != 'skipped'
         run: |
           set -euo pipefail
           node - "$RUNNER_TEMP/live-report.json" <<'NODE'
+          // Reads only scores, counts and request metadata. Never prints `per_document[].extraction`, `injection_followed`,
+          // `plan_candidates_not_in_document` or any other document-derived text.
           const fs = require('fs')
           const file = process.argv[2]
-          if (!fs.existsSync(file)) { console.error('No live report was written (the run refused or failed before writing it).'); process.exit(1) }
+          if (!fs.existsSync(file)) { console.error('RESULT: FAIL (no live report was written: the run refused or failed before writing it)'); process.exit(1) }
           const r = JSON.parse(fs.readFileSync(file, 'utf8'))
+          const n = Number(process.env.EXPECTED_DOCUMENTS)
           const model = process.env.MODEL
-          const bounds = new Map(r.live_input_bound.map((b) => [b.fixture_id, b.input_tokens]))
-          console.log(`Model requested: ${model}; credential source: ${r.credential_source}`)
-          console.log(`API requests: ${r.api_requests_made} (retries: ${r.requests.filter((q) => q.attempt > 1).length}); stopped early: ${r.stopped_early ?? 'no'}`)
-          let allPass = r.api_requests_made <= 6 && !r.stopped_early
-          for (const id of process.env.SUBSET.split(',')) {
-            const reqs = r.requests.filter((q) => q.fixture_id === id)
-            const bound = bounds.get(id)
-            const withinBound = reqs.every((q) => q.input_tokens === null || q.input_tokens <= bound)
-            const modelOk = reqs.length > 0 && reqs.every((q) => q.response_model === null || q.response_model === model)
-            const reading = reqs.some((q) => q.outcome === 'parsed' && q.stop_reason === 'end_turn')
-            const pass = reading && modelOk && withinBound
-            allPass = allPass && pass
-            console.log(`${pass ? 'PASS' : 'FAIL'} ${id}: requests ${reqs.length}; response models ${[...new Set(reqs.map((q) => q.response_model))].join(',')}; stop reasons ${reqs.map((q) => q.stop_reason).join(',')}; outcomes ${reqs.map((q) => q.outcome).join(',')}; input tokens ${reqs.map((q) => q.input_tokens).join(',')} (bound ${bound}); output tokens ${reqs.map((q) => q.output_tokens).join(',')}`)
+          const profile = Object.fromEntries(process.env.PROFILE.split(',').map((kv) => kv.split('=')))
+          const fails = []
+          const s = r.summary
+          const reqs = r.requests
+          const models = [...new Set(reqs.map((q) => q.response_model))]
+          const tally = (xs) => Object.entries(xs.reduce((a, x) => ((a[x] = (a[x] ?? 0) + 1), a), {})).map(([k, v]) => `${k} ${v}`).join(', ')
+
+          console.log(`Model requested: ${model}; response models: ${models.join(',')}; credential source: ${r.credential_source}`)
+          console.log(`Profile: ${Object.entries(r.versions).map(([k, v]) => `${k}=${v}`).join(',')}`)
+          console.log(`API requests: ${r.api_requests_made} of at most ${process.env.MAX_CALLS} (retries: ${reqs.filter((q) => q.attempt > 1).length}); stopped early: ${r.stopped_early ?? 'no'}`)
+          console.log(`Stop reasons: ${tally(reqs.map((q) => q.stop_reason))}; request outcomes: ${tally(reqs.map((q) => q.outcome))}`)
+          console.log(`Tokens: input ${r.spend.accounted_input_tokens}, output ${r.spend.accounted_output_tokens}. Estimated cost: accounted $${r.spend.accounted_usd}, conservative $${r.spend.conservative_usd} (predictive ceiling $${r.spend.max_usd}). Check billed usage in the Anthropic account.`)
+
+          if (r.mode !== 'live') fails.push('not a live report')
+          if (JSON.stringify(r.versions) !== JSON.stringify(profile)) fails.push('extraction profile differs')
+          if (r.stopped_early) fails.push('the run stopped early')
+          if (r.api_requests_made > Number(process.env.MAX_CALLS)) fails.push('request limit exceeded')
+          if (models.some((m) => m !== null && m !== model)) fails.push('a response named another model')
+
+          if (!s) {
+            fails.push('no accuracy summary')
+          } else {
+            console.log(`Documents evaluated: ${s.documents} (observations ${s.observations}) of ${n}`)
+            if (s.documents !== n || s.observations !== n) fails.push(`evaluated ${s.documents}/${s.observations}, expected ${n}`)
+            const cne = s.could_not_examine
+            console.log(`Could not examine: ${cne.total} (${Object.entries(cne).filter(([k, v]) => k !== 'total' && v).map(([k, v]) => `${k} ${v}`).join(', ') || 'none'})`)
+            const byCat = {}
+            for (const d of r.per_document) {
+              const c = (byCat[d.category] ??= { documents: 0, examined: 0 })
+              c.documents += 1
+              if (d.status === 'examined') c.examined += 1
+            }
+            console.log('Coverage by category (examined/documents): ' + Object.entries(byCat).map(([k, v]) => `${k} ${v.examined}/${v.documents}`).join(', '))
+            const fa = s.field_accuracy_non_photo
+            console.log('Field accuracy, non-photo documents (correct/total): ' + Object.entries(fa).map(([k, v]) => `${k} ${v.correct}/${v.total}`).join(', '))
+            console.log(`Photo fields: correct ${s.photo_fields.correct}, abstained ${s.photo_fields.abstained}, wrong ${s.photo_fields.wrong}, total ${s.photo_fields.total}`)
+            const fieldNames = [...new Set(r.per_document.flatMap((d) => Object.keys(d.fields)))]
+            for (const f of fieldNames) console.log(`Field outcomes, ${f}: ${tally(r.per_document.map((d) => d.fields[f]).filter(Boolean))}`)
+            console.log(`Comparison accuracy: ${s.comparison_accuracy.correct}/${s.comparison_accuracy.total}; false consistent: ${s.false_consistent}`)
+            console.log(`Unsupported values: critical ${s.unsupported_values_critical}, other ${s.unsupported_values_other} of ${s.absent_field_slots_other} absent slots; evidence not found in the document: ${s.evidence_unsupported}`)
+            console.log(`Non-receipts classified non-billing: ${s.non_receipt_classified.ok}/${s.non_receipt_classified.total}; pricing pages: ${s.pricing_pages_classified.ok}/${s.pricing_pages_classified.total}; unreadable handled: ${s.illegible_handled.ok}/${s.illegible_handled.total}; plan conflicts surfaced: ${s.plan_conflicts_surfaced.ok}/${s.plan_conflicts_surfaced.total}; injection documents followed: ${s.injection_followed}/${s.injection_documents}`)
+            console.log(`Latency ms: p50 ${s.latency_ms.p50}, p95 ${s.latency_ms.p95}, max ${s.latency_ms.max}`)
+            console.log('Thresholds (id, hard/soft, observed, limit, result):')
+            for (const t of s.thresholds) console.log(`  ${t.pass === true ? 'PASS' : t.pass === false ? 'FAIL' : 'UNTESTED'} ${t.id} [${t.hard ? 'hard' : 'soft'}] observed ${t.observed} limit ${t.limit}`)
+            const untested = s.thresholds.filter((t) => t.pass === null).map((t) => t.id)
+            console.log(`Untested thresholds: ${untested.join(', ') || 'none'}`)
+            console.log(`Evaluator verdict: ${s.verdict}`)
+            if (s.verdict !== 'PASS') fails.push(`evaluator verdict ${s.verdict}`)
           }
-          const s = r.spend
-          console.log(`Estimated cost: accounted $${s.accounted_usd}, conservative $${s.conservative_usd} (predictive ceiling $${s.max_usd}). Check billed usage in the Anthropic account.`)
-          if (!allPass) { console.error('RESULT: FAIL (see the lines above; do not re-run without review)'); process.exit(1) }
+          if (fails.length) { console.error('RESULT: FAIL (' + fails.join('; ') + '). Do not re-run without review.'); process.exit(1) }
           console.log('RESULT: PASS')
           NODE
