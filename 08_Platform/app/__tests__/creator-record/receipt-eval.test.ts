@@ -241,9 +241,10 @@ describe('evaluation runner: no model calls without explicit opt-in', () => {
     ['without --model', { ...LIVE_OK, model: null }, KEY_ENV],
     ['with a model other than the live pin', { ...LIVE_OK, model: 'claude-other-model' }, KEY_ENV],
     ['while CREATOR_RECORD_RECEIPT_MODEL names another model', LIVE_OK, { ...KEY_ENV, CREATOR_RECORD_RECEIPT_MODEL: 'claude-other-model' }],
-    ['without the dedicated key', LIVE_OK, {}],
-    ['with only the shared ANTHROPIC_API_KEY', LIVE_OK, { ANTHROPIC_API_KEY: 'x' }],
-    ['when the dedicated key is the shared key', LIVE_OK, { CREATOR_RECORD_EXTRACTION_API_KEY: 'same', ANTHROPIC_API_KEY: 'same' }],
+    // CR-V2-SYNTHETIC-KEY-REUSE-1: the shared ANTHROPIC_API_KEY is now accepted for this synthetic tool; no key at all still refuses.
+    ['without any Anthropic key', LIVE_OK, {}],
+    ['with only blank keys', LIVE_OK, { CREATOR_RECORD_EXTRACTION_API_KEY: ' ', ANTHROPIC_API_KEY: '' }],
+    ['with --out inside the repository', { ...LIVE_OK, out: path.join(__dirname, 'report-in-repo.json') }, KEY_ENV],
     ...['ANTHROPIC_BASE_URL', 'ANTHROPIC_LOG', 'ANTHROPIC_AUTH_TOKEN', 'ANTHROPIC_PROFILE', 'ANTHROPIC_CUSTOM_HEADERS'].map((v): [string, Record<string, unknown>, Record<string, string>] => [`while ${v} is set`, LIVE_OK, { ...KEY_ENV, [v]: 'x' }]),
   ])('live mode refuses %s before any caller is constructed', async (_l, over, env) => {
     const d = deps()
@@ -267,7 +268,8 @@ describe('evaluation runner: no model calls without explicit opt-in', () => {
     d.createLiveCaller.mockResolvedValue(liveCaller(fake))
     const report = await live({ maxCalls: 2 }, d)
     expect(d.createLiveCaller).toHaveBeenCalledTimes(1)
-    expect(d.createLiveCaller).toHaveBeenCalledWith(LIVE_EXTRACTION_MODEL)
+    expect(d.createLiveCaller).toHaveBeenCalledWith(LIVE_EXTRACTION_MODEL, 'CREATOR_RECORD_EXTRACTION_API_KEY')
+    expect(report.credential_source).toBe('CREATOR_RECORD_EXTRACTION_API_KEY')
     expect(report.model).toBe(LIVE_EXTRACTION_MODEL)
     expect(calls).toHaveLength(1)
     expect(report.api_requests_made).toBe(1)
@@ -276,6 +278,62 @@ describe('evaluation runner: no model calls without explicit opt-in', () => {
     expect(report.stopped_early).toMatch(/max-calls/)
     expect(report.requests).toEqual([expect.objectContaining({ request_index: 1, attempt: 1, outcome: 'provider_error', error_kind: 'unknown', response_model: null, input_tokens: null })])
     expect(JSON.stringify(report)).not.toContain('test-not-a-key')
+  })
+
+  // ── CR-V2-SYNTHETIC-KEY-REUSE-1 ──
+  describe('synthetic credential selection', () => {
+    const failing: ReceiptModelCaller = async () => { throw new Error('network disabled in test') }
+    const run = async (env: Record<string, string>, maxCalls = 1) => {
+      const lines: string[] = []
+      const d: EvalDeps & { createLiveCaller: jest.Mock } = { createLiveCaller: jest.fn(), log: (l) => lines.push(l) }
+      d.createLiveCaller.mockResolvedValue(liveCaller(failing))
+      const opts = { ...base(), mode: 'live' as const, ...LIVE_OK, maxCalls }
+      const report = await runReceiptEval(opts, d, env)
+      return { d, report, lines, written: readFileSync(opts.out as string, 'utf8') }
+    }
+
+    test('the existing ANTHROPIC_API_KEY is accepted when the dedicated key is absent; only its name is recorded', async () => {
+      const { d, report, lines, written } = await run({ ANTHROPIC_API_KEY: 'shared-test-value-not-a-key' })
+      expect(d.createLiveCaller).toHaveBeenCalledWith(LIVE_EXTRACTION_MODEL, 'ANTHROPIC_API_KEY')
+      expect(report.credential_source).toBe('ANTHROPIC_API_KEY')
+      expect(written + lines.join(' ')).not.toContain('shared-test-value-not-a-key')
+    })
+
+    test('the dedicated key still works, and takes precedence when both are set (even when they are equal)', async () => {
+      for (const env of <Record<string, string>[]>[{ CREATOR_RECORD_EXTRACTION_API_KEY: 'dedicated-test-value' }, { CREATOR_RECORD_EXTRACTION_API_KEY: 'dedicated-test-value', ANTHROPIC_API_KEY: 'shared-test-value' }, { CREATOR_RECORD_EXTRACTION_API_KEY: 'same-test-value', ANTHROPIC_API_KEY: 'same-test-value' }]) {
+        const { d, report, lines, written } = await run(env)
+        expect(d.createLiveCaller).toHaveBeenCalledWith(LIVE_EXTRACTION_MODEL, 'CREATOR_RECORD_EXTRACTION_API_KEY')
+        expect(report.credential_source).toBe('CREATOR_RECORD_EXTRACTION_API_KEY')
+        for (const v of Object.values(env)) expect(written + lines.join(' ')).not.toContain(v)
+      }
+    })
+
+    test('unsafe SDK variables still refuse with the shared key, and every other control is unchanged', async () => {
+      const shared = { ANTHROPIC_API_KEY: 'shared-test-value' }
+      for (const v of ['ANTHROPIC_BASE_URL', 'ANTHROPIC_LOG', 'ANTHROPIC_AUTH_TOKEN', 'ANTHROPIC_PROFILE', 'ANTHROPIC_CUSTOM_HEADERS'])
+        expect(() => assertLiveAllowed({ ...base(), mode: 'live', ...LIVE_OK }, { ...shared, [v]: 'x' }, NO_PROCESS_ENV)).toThrow(new RegExp(v))
+      expect(() => assertLiveAllowed({ ...base(), mode: 'live', ...LIVE_OK, model: 'claude-other-model' }, shared, NO_PROCESS_ENV)).toThrow(/live pin/)
+      expect(() => assertLiveAllowed({ ...base(), mode: 'live', ...LIVE_OK, confirmPaidCalls: false }, shared, NO_PROCESS_ENV)).toThrow(/confirm-paid-calls/)
+      expect(() => assertLiveAllowed({ ...base(), mode: 'live', ...LIVE_OK, maxCalls: null }, shared, NO_PROCESS_ENV)).toThrow(/max-calls/)
+      expect(() => assertLiveAllowed({ ...base(), mode: 'live', ...LIVE_OK, maxUsd: null }, shared, NO_PROCESS_ENV)).toThrow(/max-usd/)
+      expect(() => assertLiveAllowed({ ...base(), mode: 'live', ...LIVE_OK, pricing: null }, shared, NO_PROCESS_ENV)).toThrow(/usd-per-mtok/)
+      expect(() => assertLiveAllowed({ ...base(), mode: 'live', ...LIVE_OK }, { ...shared, CREATOR_RECORD_RECEIPT_MODEL: 'claude-other-model' }, NO_PROCESS_ENV)).toThrow(/CREATOR_RECORD_RECEIPT_MODEL/)
+      expect(LIVE_EXTRACTION_MODEL).toBe('claude-sonnet-5')
+    })
+
+    test('--max-calls stays a hard request limit with the shared key', async () => {
+      // One document may need 2 requests: a limit of 1 stops before it; a limit of 2 allows exactly one failing request here.
+      const one = await run({ ANTHROPIC_API_KEY: 'shared-test-value' }, 1)
+      expect([one.report.api_requests_made, one.report.stopped_early]).toEqual([0, expect.stringMatching(/max-calls/)])
+      const two = await run({ ANTHROPIC_API_KEY: 'shared-test-value' }, 2)
+      expect(two.report.api_requests_made).toBe(1)
+      expect(two.report.stopped_early).toMatch(/max-calls/)
+    })
+
+    test('dry-run and mock modes still need no key and record no credential source', async () => {
+      const r = await runReceiptEval(base(), deps(), {})
+      expect(r.credential_source).toBeNull()
+    })
   })
 
   test('live mode stops before a document whose worst case could exceed --max-usd', async () => {

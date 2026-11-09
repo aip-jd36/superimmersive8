@@ -15,7 +15,8 @@
  *                                         against its worst case; actual usage is only known after
  *                                         the response. Needs --input/--output-usd-per-mtok)
  *                      --model ID        exactly the live pin (CR-V2-DOC-LIVE-1C-B2B)
- *                      CREATOR_RECORD_EXTRACTION_API_KEY, the dedicated key, in the process environment
+ *                      an Anthropic key in the process environment: CREATOR_RECORD_EXTRACTION_API_KEY if set, otherwise
+ *                      ANTHROPIC_API_KEY (CR-V2-SYNTHETIC-KEY-REUSE-1; this synthetic tool only)
  *                    An external workspace spending limit is required before any paid run; nothing here replaces it.
  *
  * Other options:
@@ -101,15 +102,15 @@ export interface LiveCaller {
 
 export interface EvalDeps {
   /** Constructs the real caller. Only ever invoked in live mode, after every guard passes. */
-  createLiveCaller: (model: string) => Promise<LiveCaller>
+  createLiveCaller: (model: string, keyEnv: SyntheticCredentialEnv) => Promise<LiveCaller>
   log: (line: string) => void
 }
 
 export const defaultEvalDeps: EvalDeps = {
-  createLiveCaller: async (model) => {
+  createLiveCaller: async (model, keyEnv) => {
     const mod = await import('../receipt-examination/examine.anthropic')
     return {
-      call: mod.createAnthropicReceiptCaller({ model, apiKeyEnv: LIVE_EXTRACTION_API_KEY_ENV, timeoutMs: LIVE_REQUEST_TIMEOUT_MS }),
+      call: mod.createAnthropicReceiptCaller({ model, apiKeyEnv: keyEnv, timeoutMs: LIVE_REQUEST_TIMEOUT_MS }),
       classifyFailure: mod.classifyAnthropicFailure,
     }
   },
@@ -198,6 +199,32 @@ export function parseArgs(argv: string[]): EvalOptions {
 }
 
 /**
+ * CR-V2-SYNTHETIC-KEY-REUSE-1 — the credential of a SYNTHETIC compatibility run. This tool reads only SI8's committed synthetic
+ * fixtures (each checked against its manifest hash), so it may use SI8's existing Anthropic key. Precedence: the dedicated key
+ * `CREATOR_RECORD_EXTRACTION_API_KEY` when set and non-empty, otherwise `ANTHROPIC_API_KEY`; neither = refused. Only the variable's
+ * NAME is ever used or reported; the SDK reads the value itself. Nothing here loads `.env.local` or any other file.
+ *
+ * Unchanged and separate: the real-document evaluation runner and the app live path read ONLY the dedicated key, never
+ * ANTHROPIC_API_KEY (pinned by synthetic-key-reuse-isolation.test.ts).
+ */
+export const SYNTHETIC_CREDENTIAL_SOURCES = [LIVE_EXTRACTION_API_KEY_ENV, 'ANTHROPIC_API_KEY'] as const
+export type SyntheticCredentialEnv = (typeof SYNTHETIC_CREDENTIAL_SOURCES)[number]
+export function syntheticCredentialEnv(env: EnvLike): SyntheticCredentialEnv | null {
+  for (const name of SYNTHETIC_CREDENTIAL_SOURCES) {
+    const v = env[name]
+    if (typeof v === 'string' && v.trim() !== '') return name
+  }
+  return null
+}
+
+/** The repository this file belongs to (five levels above `lib/creator-record/eval`). A live report must be written outside it. */
+const REPOSITORY_ROOT = path.resolve(__dirname, '..', '..', '..', '..', '..')
+export function insideRepository(file: string, root: string = REPOSITORY_ROOT): boolean {
+  const rel = path.relative(path.resolve(root).toLowerCase(), path.resolve(file).toLowerCase())
+  return rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel))
+}
+
+/**
  * Throws unless every live-mode guard is satisfied. Pure. The SDK reads the real process environment itself, whatever `env` is passed,
  * so both are checked for unsafe variables.
  */
@@ -212,9 +239,9 @@ export function assertLiveAllowed(opts: EvalOptions, env: EnvLike, processEnv: E
   if (inherited !== undefined && inherited !== '' && inherited !== opts.model) throw new Error('live mode requires CREATOR_RECORD_RECEIPT_MODEL to be unset or to equal --model')
   const unsafe = unsafeSdkEnvironment(env, processEnv)
   if (unsafe.length > 0) throw new Error(`live mode requires these SDK variables to be unset: ${unsafe.join(', ')}`)
-  const key = env[LIVE_EXTRACTION_API_KEY_ENV]
-  if (!key) throw new Error(`live mode requires the dedicated key ${LIVE_EXTRACTION_API_KEY_ENV} in the process environment`)
-  if (key === env.ANTHROPIC_API_KEY) throw new Error(`live mode requires ${LIVE_EXTRACTION_API_KEY_ENV} to differ from ANTHROPIC_API_KEY (a dedicated key)`)
+  if (!syntheticCredentialEnv(env)) throw new Error(`live mode requires an Anthropic key in the process environment: ${SYNTHETIC_CREDENTIAL_SOURCES.join(' or ')}`)
+  // A paid run's report holds per-request metadata; it is written outside the repository (which is public).
+  if (opts.out !== null && insideRepository(opts.out)) throw new Error('live mode requires --out to be outside the repository')
 }
 
 /** Whether the command-line pricing equals the live examination's cached price table for the model. Null outside live mode. */
@@ -294,6 +321,8 @@ export interface EvalReport {
   repeats: number
   pricing: Pricing | null
   model: string | null
+  /** CR-V2-SYNTHETIC-KEY-REUSE-1: the NAME of the variable the live key came from; never its value. Null outside live mode. */
+  credential_source: SyntheticCredentialEnv | null
   manifest: Pick<FixtureManifest, 'generator_version' | 'spec_sha256' | 'pymupdf_version' | 'pillow_version'> | null
   plan: { documents: number; max_api_requests: number; estimated_input_tokens: number; estimated_output_tokens: number; estimated_cost_usd: number | null }
   api_requests_made: number
@@ -361,6 +390,7 @@ export async function runReceiptEval(opts: EvalOptions, deps: EvalDeps = default
     repeats: opts.repeats,
     pricing: opts.pricing,
     model: opts.mode === 'live' ? opts.model : null,
+    credential_source: opts.mode === 'live' ? syntheticCredentialEnv(env) : null,
     manifest: {
       generator_version: manifest.generator_version,
       spec_sha256: manifest.spec_sha256,
@@ -404,7 +434,7 @@ export async function runReceiptEval(opts: EvalOptions, deps: EvalDeps = default
   }
 
   const requestedModel = opts.model ?? ''
-  const live = opts.mode === 'live' ? await deps.createLiveCaller(requestedModel) : null
+  const live = opts.mode === 'live' ? await deps.createLiveCaller(requestedModel, syntheticCredentialEnv(env) as SyntheticCredentialEnv) : null
   const observations: RunObservation[] = []
   for (let repeat = 1; repeat <= opts.repeats && !report.stopped_early; repeat++) {
     for (const f of fixtures) {
