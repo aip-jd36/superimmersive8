@@ -56,6 +56,7 @@ export const QUESTIONNAIRE_FIELD_CLASSES = {
   sources: {
     kind: 'gate', questionnaire_approval: 'gate', ledger: 'separately_governed', dependency_labels: 'wording', caveats: 'wording',
     registry_input: 'contract', presentation: 'contract', acknowledgement_ids: 'contract', versions: 'contract', max_tools: 'contract',
+    customer_wording: 'wording',
   },
   versions: { registry: 'contract', ledger: 'separately_governed' },
   registry_input: { questions: 'contract', observation_map: 'contract', semantic_mappings: 'contract', prohibited_dependency_targets: 'contract' },

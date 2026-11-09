@@ -10,11 +10,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { examText, EVIDENCE_CATEGORIES, EVIDENCE_CATEGORY_DEFAULT, examineStateFrom, type Attachment, type ExamineState } from '@/lib/creator-record-flow/examination-ui'
 import { LEGAL_PATHS } from '@/lib/legal/paths'
+import { fillReviewText, PANEL_TEXT, QUESTIONNAIRE_CHROME } from '@/lib/creator-record-flow/wording'
 
 const INK = '#1a1918'
 const MUTED = '#6b6560'
 const LINE = '#e5e2dc'
-const FAILED = 'Something went wrong. Nothing was changed.'
+const FAILED = PANEL_TEXT.failed
 
 /** Exactly the evidence list route's view (stored documents only). */
 export interface EvidenceDocument { id: string; file_name: string; media_type: string; byte_size: number; sha256: string; created_at: string }
@@ -121,7 +122,7 @@ export function EvidencePanel(props: EvidencePanelProps) {
       <p className="text-sm mb-4" style={{ color: MUTED }}>{EXAM_TEXT.evidence_intro}</p>
 
       <div className="mb-5 space-y-2">
-        <input type="file" accept="application/pdf,image/png,image/jpeg" aria-label="Choose a document" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+        <input type="file" accept="application/pdf,image/png,image/jpeg" aria-label={PANEL_TEXT.choose_document} onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
         <label className="flex items-start gap-2 text-sm" style={{ color: MUTED }}>
           <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
           <span>{EXAM_TEXT.consent_label}</span>
@@ -137,12 +138,12 @@ export function EvidencePanel(props: EvidencePanelProps) {
           </label>
         )}
         <p className="text-xs" style={{ color: MUTED }}>
-          {EXAM_TEXT.legal_links_intro} <a className="underline" href={LEGAL_PATHS.privacy} target="_blank" rel="noopener noreferrer">{EXAM_TEXT.privacy_link}</a> and{' '}
+          {EXAM_TEXT.legal_links_intro} <a className="underline" href={LEGAL_PATHS.privacy} target="_blank" rel="noopener noreferrer">{EXAM_TEXT.privacy_link}</a>{PANEL_TEXT.legal_links_and}
           <a className="underline" href={LEGAL_PATHS.terms} target="_blank" rel="noopener noreferrer">{EXAM_TEXT.terms_link}</a>.
         </p>
       </div>
 
-      {loading && <p className="text-sm" style={{ color: MUTED }} role="status">Loading documents…</p>}
+      {loading && <p className="text-sm" style={{ color: MUTED }} role="status">{PANEL_TEXT.loading_documents}</p>}
       {listError && (
         <p className="text-sm font-medium" style={{ color: '#b42318' }} role="alert">
           {listError} <button type="button" className="underline" onClick={() => void load()}>{EXAM_TEXT.retry}</button>
@@ -161,14 +162,14 @@ export function EvidencePanel(props: EvidencePanelProps) {
                 <label style={{ color: MUTED }}>
                   {EXAM_TEXT.link_label}{' '}
                   <select value={a ? (a.tool_index === null ? 'unlinked' : String(a.tool_index)) : 'none'} onChange={(e) => setLink(d.id, e.target.value)}>
-                    <option value="none">Not in this version</option>
+                    <option value="none">{PANEL_TEXT.not_in_version}</option>
                     <option value="unlinked">{EXAM_TEXT.not_linked}</option>
-                    {Array.from({ length: props.maxTools }, (_, i) => <option key={i} value={String(i)}>Tool {i + 1}</option>)}
+                    {Array.from({ length: props.maxTools }, (_, i) => <option key={i} value={String(i)}>{fillReviewText(QUESTIONNAIRE_CHROME.tool_heading, { n: i + 1 })}</option>)}
                   </select>
                 </label>
                 {a && (
                   <label style={{ color: MUTED }}>
-                    Kind{' '}
+                    {PANEL_TEXT.kind}{' '}
                     <select value={a.category} onChange={(e) => setCategory(d.id, e.target.value)}>
                       {EVIDENCE_CATEGORIES.map((c) => <option key={c} value={c}>{c.replace(/_/g, ' ')}</option>)}
                     </select>

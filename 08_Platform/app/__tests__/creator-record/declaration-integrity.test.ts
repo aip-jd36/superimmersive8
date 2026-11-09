@@ -6,6 +6,7 @@
 
 import { readFileSync } from 'fs'
 import { join } from 'path'
+import { QUESTIONNAIRE_CHROME } from '@/lib/creator-record-flow/wording'
 import { declarationIntegrityRefusals, loadQuestionRegistry, NOT_APPLICABLE, type QuestionEntry, type RegistryInput } from '@/lib/creator-record/contract/question-registry'
 import type { GovernanceApproval } from '@/lib/creator-record/contract/types'
 import { applyMultiSelection, formToObservations, validateForm, visibleQuestions, type CreatorRecordFormState, type FormConfig } from '@/lib/creator-record/prototype/form'
@@ -235,7 +236,9 @@ describe('C. exclusive selections', () => {
     expect(applyMultiSelection(['a'], 'b', true)).toEqual(['a', 'b'])
     const src = readFileSync(join(__dirname, '..', '..', 'components', 'creator-record', 'CreatorRecordQuestionnaire.tsx'), 'utf8')
     expect(src).toContain('applyMultiSelection(current, o, e.target.checked, p.exclusive_options)')
-    expect(src).toContain('exclusive_option_conflict:')
+    // CR-V2-MVP-PROD-PREP-1: the issue wording lives in the customer wording set; the component reads it from there.
+    expect(src).toContain('= C.issues')
+    expect(QUESTIONNAIRE_CHROME.issues.exclusive_option_conflict).toMatch(/cannot be combined/)
   })
 
   test('validation holds no question id or content domain', () => {
@@ -551,8 +554,9 @@ describe('guidance is unchanged by removing the two mappings', () => {
 })
 
 describe('compatibility', () => {
+  // CR-V2-MVP-PROD-PREP-1: re-pinned once, because the Source Text content now names the customer wording set.
   test('synthetic pinned digests are unchanged, and still match the wording and templates', () => {
-    expect(SYNTHETIC_SOURCE_TEXT_SHA256).toBe('e589b6d8b9172463994a2f6335f622e08f11a53e0e3822e3c9acfce4003c221e')
+    expect(SYNTHETIC_SOURCE_TEXT_SHA256).toBe('973029718942ffd4aa60b481126fef74d65cad3b693dd38252052172e1faf1f0')
     expect(SYNTHETIC_PDF_TEMPLATES_FINGERPRINT).toBe('19857320de6f205f3c56d899beb5f05cf8b1359e3e6035dc32be123880458ec2')
     const reg = loadQuestionRegistry(SYN.registry_input)
     if (!reg.ok) throw new Error('registry')

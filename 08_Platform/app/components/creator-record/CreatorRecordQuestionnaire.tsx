@@ -34,6 +34,7 @@ import type { ExaminedDocument, ExtractionMode, ToolDocument } from '@/lib/creat
 import { QUESTIONNAIRE_SECTION_ORDER, TOOL_QUESTION_ROLES } from '@/lib/creator-record/prototype/questionnaire-structure'
 import { applyMultiSelection, visibleQuestions, visibleToolQuestions, type CreatorRecordFormState, type FormConfig, type FormIssue, type QuestionPresentation } from '@/lib/creator-record/prototype/form'
 import { DocumentReviewPanel } from './DocumentReviewPanel'
+import { fillReviewText, QUESTIONNAIRE_CHROME } from '@/lib/creator-record-flow/wording'
 
 export type ExamineResult = { ok: true; document: ExaminedDocument } | { ok: false; error: string }
 export interface FixtureDocumentOption {
@@ -67,17 +68,9 @@ const ROLES = TOOL_QUESTION_ROLES
 const ANOTHER = '__another_plan'
 const UNSURE = '__not_sure'
 
-const ISSUE_TEXT: Record<FormIssue['issue'], string> = {
-  required: 'Please answer this question.',
-  invalid_option: 'Please choose one of the options.',
-  too_long: 'Please shorten this answer.',
-  single_choice_only: 'Please choose one option.',
-  too_many_tools: 'Too many tools.',
-  no_tools: 'Please add at least one tool.',
-  acknowledgement_required: 'Please confirm this statement.',
-  unknown_question: 'Unexpected answer.',
-  exclusive_option_conflict: 'This choice cannot be combined with your other choices.',
-}
+// CR-V2-MVP-PROD-PREP-1: chrome wording lives in the customer wording set (`lib/creator-record-flow/wording`), text unchanged.
+const C = QUESTIONNAIRE_CHROME
+const ISSUE_TEXT: Readonly<Record<FormIssue['issue'], string>> = C.issues
 
 const docsFrom = (tools: number, initial: readonly ToolDocument[] | undefined): (ToolDocument | null)[] =>
   Array.from({ length: tools }, (_, i) => initial?.find((d) => d.tool_index === i) ?? null)
@@ -163,7 +156,7 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
               else onChange([next])
             }}
           >
-            <option value="">Choose…</option>
+            <option value="">{C.choose}</option>
             {suggestions.length > 0 && (
               <optgroup label="Some plan names SI8 has guidance about (not a full list)">
                 {suggestions.map((s) => (
@@ -173,14 +166,14 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
                 ))}
               </optgroup>
             )}
-            <option value={ANOTHER}>Another plan (type its name)</option>
-            <option value={UNSURE}>Not sure</option>
+            <option value={ANOTHER}>{C.another_plan}</option>
+            <option value={UNSURE}>{C.not_sure}</option>
           </select>
           {selectValue === ANOTHER && (
             <input
               type="text"
               id={`${id}-other`}
-              aria-label={`Tool ${tool_index + 1}: plan name`}
+              aria-label={fillReviewText(C.plan_name_label, { n: tool_index + 1 })}
               aria-describedby={describedBy}
               className="w-full rounded-md border px-3 py-2 text-sm bg-white"
               style={{ borderColor: 'rgba(0,0,0,0.15)' }}
@@ -195,9 +188,9 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
     return (
       <fieldset key={key} id={id} className="mb-6" aria-invalid={!!issue} aria-describedby={describedBy} data-question-id={q_id}>
         <legend id={`${id}-legend`} className="text-sm font-medium mb-1" style={{ color: '#1a1918' }}>
-          {tool_index !== null && <span>Tool {tool_index + 1}: </span>}
+          {tool_index !== null && <span>{fillReviewText(C.tool_prefix, { n: tool_index + 1 })}</span>}
           {p.text}
-          <span className="ml-1 text-xs" style={{ color: '#6b6560' }}>{p.required ? '(required)' : '(optional)'}</span>
+          <span className="ml-1 text-xs" style={{ color: '#6b6560' }}>{p.required ? C.required : C.optional}</span>
         </legend>
         {p.help && <p id={`${id}-help`} className="text-xs mb-2" style={{ color: '#6b6560' }}>{p.help}</p>}
         {(p.input === 'text' || p.input === 'textarea') && (
@@ -232,7 +225,7 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
             {p.allow_not_sure && (
               <label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={notSure} onChange={(e) => onChange(e.target.checked ? [NOT_SURE] : [])} />
-                Not sure
+                {C.not_sure}
               </label>
             )}
           </div>
@@ -248,7 +241,7 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
             value={current[0] ?? ''}
             onChange={(e) => onChange(e.target.value === '' ? [] : [e.target.value])}
           >
-            <option value="">Choose…</option>
+            <option value="">{C.choose}</option>
             {options.map((o) => (
               <option key={o} value={o}>
                 {p.option_labels[o] ?? o}
@@ -281,7 +274,7 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
             ))}
           </div>
         )}
-        {issue && <p id={`${id}-error`} className="text-xs mt-1 font-medium" style={{ color: '#b42318' }}>Error: {ISSUE_TEXT[issue.issue]}</p>}
+        {issue && <p id={`${id}-error`} className="text-xs mt-1 font-medium" style={{ color: '#b42318' }}>{C.error_prefix}{ISSUE_TEXT[issue.issue]}</p>}
       </fieldset>
     )
   }
@@ -289,8 +282,8 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
   const toolIssue = props.issues.find((i) => i.issue === 'no_tools' || i.issue === 'too_many_tools')
 
   const issueLabel = (i: FormIssue) => {
-    const text = i.q_id ? props.presentation[i.q_id]?.text ?? props.acknowledgements[i.q_id] ?? i.q_id : 'AI tools'
-    return `${i.tool_index !== null ? `Tool ${i.tool_index + 1}: ` : ''}${text}`
+    const text = i.q_id ? props.presentation[i.q_id]?.text ?? props.acknowledgements[i.q_id] ?? i.q_id : C.issue_tools_label
+    return `${i.tool_index !== null ? fillReviewText(C.tool_prefix, { n: i.tool_index + 1 }) : ''}${text}`
   }
 
   const removeTool = (index: number) => {
@@ -314,7 +307,7 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
   return (
     <form
       noValidate
-      aria-label="Creator Record questionnaire"
+      aria-label={C.form_label}
       onSubmit={(e) => {
         e.preventDefault()
         props.onSubmit(state, docs.filter((d): d is ToolDocument => d !== null))
@@ -322,7 +315,7 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
     >
       {props.issues.length > 0 && (
         <div role="alert" className="mb-6 rounded-lg border p-4" style={{ borderColor: '#b42318', backgroundColor: '#FEF3F2' }}>
-          <h2 className="text-sm font-semibold" style={{ color: '#b42318' }}>Some answers need attention ({props.issues.length})</h2>
+          <h2 className="text-sm font-semibold" style={{ color: '#b42318' }}>{fillReviewText(C.issues_heading, { count: props.issues.length })}</h2>
           <ul className="mt-2 list-disc pl-5 text-sm" style={{ color: '#b42318' }}>
             {props.issues.map((i, n) => (
               <li key={n}>{issueLabel(i)} — {ISSUE_TEXT[i.issue]}</li>
@@ -340,14 +333,12 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
             {singles.map((q) => field(q.q_id, state.answers[q.q_id], (v) => setAnswer(q.q_id, v), null, q.q_id))}
             {hasTools && uploadsOffered && (
               <div className="mb-6 rounded-md border p-3" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
-                <p className="text-sm font-medium">Before you add a document</p>
+                <p className="text-sm font-medium">{C.documents_heading}</p>
                 <label className="flex items-start gap-2 text-sm mt-2">
                   <input type="checkbox" className="mt-1" checked={consented} onChange={(e) => setConsented(e.target.checked)} />
                   <span>
-                    I will add only synthetic test documents. I understand that a file I add is read on SI8’s server to describe what it appears to show, and is then discarded.
-                    {props.examinationMode === 'live_model'
-                      ? ' Automated reading is turned on: the file is sent to an AI model provider to be read.'
-                      : ' Automated reading is turned off: only SI8’s own synthetic test documents can be described, from recorded test data, and no AI model is used.'}
+                    {C.synthetic_consent}
+                    {props.examinationMode === 'live_model' ? C.synthetic_reading_on : C.synthetic_reading_off}
                   </span>
                 </label>
               </div>
@@ -356,10 +347,10 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
               state.tools.map((t, i) => (
                 <div key={i} role="group" aria-labelledby={`cr-tool-${i}`} className="mb-6 rounded-md border p-4" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 id={`cr-tool-${i}`} className="text-sm font-semibold">Tool {i + 1}</h3>
+                    <h3 id={`cr-tool-${i}`} className="text-sm font-semibold">{fillReviewText(C.tool_heading, { n: i + 1 })}</h3>
                     {state.tools.length > 1 && (
                       <button type="button" className="rounded-md border px-3 py-1 text-xs" onClick={() => removeTool(i)}>
-                        Remove tool {i + 1}
+                        {fillReviewText(C.remove_tool, { n: i + 1 })}
                       </button>
                     )}
                   </div>
@@ -382,16 +373,16 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
               ))}
             {hasTools && state.tools.length < props.maxTools && (
               <button type="button" className="rounded-md border px-3 py-1.5 text-sm" onClick={addTool}>
-                Add another tool
+                {C.add_tool}
               </button>
             )}
-            {section === 'tools' && toolIssue && <p className="text-xs mt-1 font-medium" style={{ color: '#b42318' }}>Error: {ISSUE_TEXT[toolIssue.issue]}</p>}
+            {section === 'tools' && toolIssue && <p className="text-xs mt-1 font-medium" style={{ color: '#b42318' }}>{C.error_prefix}{ISSUE_TEXT[toolIssue.issue]}</p>}
           </section>
         )
       })}
 
       <section aria-labelledby="cr-section-acknowledgements" className="mb-8 rounded-lg border bg-white p-6" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
-        <h2 id="cr-section-acknowledgements" className="font-display text-lg font-semibold mb-4">Before you continue</h2>
+        <h2 id="cr-section-acknowledgements" className="font-display text-lg font-semibold mb-4">{C.acknowledgements_heading}</h2>
         {Object.entries(props.acknowledgements).map(([id, text]) => (
           <label key={id} className="flex items-start gap-2 text-sm mb-3">
             <input
@@ -402,7 +393,7 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
             />
             <span>
               {text}
-              {issueFor(id, null) && <span className="block text-xs mt-1 font-medium" style={{ color: '#b42318' }}>Error: {ISSUE_TEXT.acknowledgement_required}</span>}
+              {issueFor(id, null) && <span className="block text-xs mt-1 font-medium" style={{ color: '#b42318' }}>{C.error_prefix}{ISSUE_TEXT.acknowledgement_required}</span>}
             </span>
           </label>
         ))}
@@ -414,7 +405,7 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
         className="rounded-md px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
         style={{ backgroundColor: '#1a1918' }}
       >
-        {props.submitting ? 'Preparing draft…' : 'Prepare draft record'}
+        {props.submitting ? C.submitting : C.submit}
       </button>
     </form>
   )

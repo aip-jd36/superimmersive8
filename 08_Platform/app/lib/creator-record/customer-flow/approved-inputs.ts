@@ -17,6 +17,10 @@ import type { PdfTemplateApproval } from '../customer-pdf/templates'
 import { CREATOR_RECORD_GOVERNANCE_AUTHORITY } from '../governed/sources'
 import { CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY } from '../governed/synthetic-test-authority'
 import { resolvePublicationAuthority, selectAuthorityBundle, type PublicationAuthorityBundle } from '../governed/publication-authority'
+import { loadQuestionRegistry } from '../contract/question-registry'
+import { sourceTextContent, sourceTextDigest } from '../customer-record/source-text'
+// CR-V2-APPROVAL-AUTHORITY-FIX-1: the identity derived from the wording this build renders (the wording set is pure data).
+import { customerWordingIdentity } from '@/lib/creator-record-flow/customer-wording'
 
 /**
  * CR-V2-MVP-M2 — stop for NEW Creator Record v2 submissions (preparing and reviewing).
@@ -62,6 +66,9 @@ export function approvedCustomerRecordInputs(bundle: PublicationAuthorityBundle 
       versions: { registry: bundle.versions.registry, ledger: bundle.versions.ledger },
       max_tools: bundle.max_tools,
       questionnaire_approval: bundle.questionnaire_approval,
+      // CR-V2-MVP-PROD-PREP-1: the customer wording set THIS build renders, from code (never from the bundle). It is part of the
+      // Source Text content, so an approval that does not name exactly this set no longer matches.
+      customer_wording: customerWordingIdentity(),
     },
     source_text: bundle.source_text_approval === null ? null : { approval: bundle.source_text_approval, acknowledgements: bundle.acknowledgements },
     // CR-V2-SCHEMA8-PATH-1: the schema 8 approval of the same wording, from the same bundle (null when none).
@@ -84,13 +91,27 @@ function sourceTextApprovalsOf(bundle: PublicationAuthorityBundle) {
  */
 export function approvedGovernanceSnapshot(issuanceDate: string, topicClaims: TopicClaims, bundle: PublicationAuthorityBundle | null = currentPublicationAuthority()): GovernanceSnapshot {
   if (!bundle) return governanceSnapshotFrom({ issuance_date: issuanceDate, sources: UNAVAILABLE, topicClaims, source_text_approvals: UNAVAILABLE })
+  const sources = approvedCustomerRecordInputs(bundle).sources
   return governanceSnapshotFrom({
     issuance_date: issuanceDate,
-    sources: approvedCustomerRecordInputs(bundle).sources,
+    sources,
     topicClaims,
     source_text_approvals: sourceTextApprovalsOf(bundle),
+    source_text_current_sha256: currentSourceTextDigest(sources, bundle),
     authority_class: bundle.authority_class,
   })
+}
+
+/**
+ * CR-V2-MVP-PROD-PREP-1 — the digest of the wording this build would publish NOW (bundle wording plus the customer wording set in
+ * code). At checkout and issuance an approval whose digest differs no longer counts as approved, so wording changed after
+ * preparation (in the bundle or in code) refuses new commercial actions instead of being sold or issued under the old approval.
+ * Null when the registry cannot be loaded: every approval then reads as not approved (fail closed).
+ */
+function currentSourceTextDigest(sources: ApprovedInputs['sources'], bundle: PublicationAuthorityBundle): string | null {
+  const loaded = loadQuestionRegistry(sources.registry_input)
+  if (!loaded.ok) return null
+  return sourceTextDigest(sourceTextContent(sources, loaded.registry, bundle.acknowledgements))
 }
 
 /**

@@ -185,6 +185,9 @@ describe('schema boundaries', () => {
     r.content = CUSTOMER_RECORD_EXAMINATION_CONTENT
     r.sources.source_text.record_schema.version = CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION
     r.sources.questionnaire_contract = REC.record.sources.questionnaire_contract
+    // CR-V2-MVP-PROD-PREP-1: the embedded contract names the current wording, so the source-text reference must name it too.
+    r.sources.source_text.content_sha256 = REC.record.sources.source_text.content_sha256
+    r.sources.source_text.categories = REC.record.sources.source_text.categories
     const canonical = canonicalJson(r)
     const stored = { canonical, sha256: sha256Hex(canonical) }
     expect(verifyCustomerRecord(stored.canonical, stored.sha256).ok).toBe(true)

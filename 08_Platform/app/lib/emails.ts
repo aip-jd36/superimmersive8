@@ -2,7 +2,7 @@ import { Resend } from 'resend'
 import { escapeHtml } from '@/lib/crc-engine/results-email-template'
 import { sendAndClassify, type PaymentEmailOutcome } from '@/lib/payments/email-outcome'
 import { ASSESSMENT_NOTICE, ASSESSMENT_NOTICE_HEADING } from '@/lib/pdf/creator-record-claims'
-import { V2_READY_EMAIL } from '@/lib/creator-record-flow/wording'
+import { fillReviewText, V2_READY_EMAIL } from '@/lib/creator-record-flow/wording'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
@@ -540,19 +540,18 @@ export async function sendCreatorRecordReadyPaymentEmail(p: {
 export async function sendCreatorRecordV2ReadyPaymentEmail(p: {
   creatorName: string; filmTitle: string; dashboardUrl: string; to: string
 }): Promise<PaymentEmailOutcome> {
-  const name = escapeHtml(p.creatorName)
   return sendAndClassify(() => resend.emails.send({
     from: FROM_EMAIL,
     to: p.to,
     subject: V2_READY_EMAIL.subject,
     html: `
-        <h2>Hi ${name},</h2>
+        <h2>${escapeHtml(fillReviewText(V2_READY_EMAIL.greeting, { name: p.creatorName }))}</h2>
         <p>${escapeHtml(V2_READY_EMAIL.intro)}</p>
         <p>${escapeHtml(V2_READY_EMAIL.nature)}</p>
         <p><strong>${escapeHtml(V2_READY_EMAIL.limits)}</strong></p>
         <p><a href="${escapeHtml(p.dashboardUrl)}" style="background: #1a1918; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">${escapeHtml(V2_READY_EMAIL.cta)}</a></p>
         <br>
-        <p>Best,<br>The SI8 Team</p>
+        <p>${escapeHtml(V2_READY_EMAIL.sign_off)}<br>${escapeHtml(V2_READY_EMAIL.signature)}</p>
       `,
   }))
 }

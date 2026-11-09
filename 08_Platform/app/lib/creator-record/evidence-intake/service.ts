@@ -34,7 +34,12 @@
  */
 
 import {
+  approvedStorageConsentIdentifier,
+  AUTHORIZATION_VERSION_PATTERN,
+  CONSENT_VERSION_UNBINDABLE,
+  EVIDENCE_CONSENT_APPROVED_WORDING,
   EVIDENCE_CONSENT_DRAFT_VERSION,
+  type ApprovedAuthorizationWording,
   EVIDENCE_MAX_LIVE_PER_CREATOR,
   EVIDENCE_PENDING_STALE_MS,
   sanitizeEvidenceFileName,
@@ -123,6 +128,11 @@ export interface EvidenceDeps {
    * `realDocumentsPermitted`, and every wiring that can set it also supplies this.
    */
   consentVersion?: string
+  /**
+   * CR-V2-APPROVAL-AUTHORITY-FIX-1: the approved storage-consent wording real documents require. Absent: the shipped slot
+   * (`EVIDENCE_CONSENT_APPROVED_WORDING`, null today). Tests supply one; no production wiring sets it.
+   */
+  approvedStorageConsent?: ApprovedAuthorizationWording | null
 }
 
 export interface EvidenceView {
@@ -182,8 +192,12 @@ export async function uploadEvidence(deps: EvidenceDeps, userId: string, input: 
   if (gated) return gated
   // CR-V2-SCHEMA8-PATH-1 (E7): only the current identifier (wording + approved policy versions) is accepted, and it is recorded.
   const consentVersion = deps.consentVersion ?? EVIDENCE_CONSENT_DRAFT_VERSION
-  // A real document is never stored under the unbound draft identifier (fail closed even if a wiring omitted it).
-  if (deps.realDocumentsPermitted && consentVersion === EVIDENCE_CONSENT_DRAFT_VERSION) return err({ status: 400, code: 'consent_required' })
+  // CR-V2-APPROVAL-AUTHORITY-FIX-1: the unbindable placeholder, or anything not shaped like an identifier, is never a consent.
+  if (consentVersion === CONSENT_VERSION_UNBINDABLE || !AUTHORIZATION_VERSION_PATTERN.test(consentVersion)) return err({ status: 400, code: 'consent_required' })
+  // A real document needs a POSITIVELY approved storage-consent identifier: the approved wording bound to policy versions. Missing,
+  // draft, unavailable and unrecognised identifiers are refused here, at the intake boundary, whatever the wiring supplied.
+  const approved = deps.approvedStorageConsent === undefined ? EVIDENCE_CONSENT_APPROVED_WORDING : deps.approvedStorageConsent
+  if (deps.realDocumentsPermitted && !approvedStorageConsentIdentifier(consentVersion, approved)) return err({ status: 400, code: 'consent_required' })
   if (input.consent !== consentVersion) return err({ status: 400, code: 'consent_required' })
 
   const v = validateEvidenceBytes(input.bytes)

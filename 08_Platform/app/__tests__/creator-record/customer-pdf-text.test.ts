@@ -149,7 +149,7 @@ describe('the source keeps these properties', () => {
       .map((f) => `/${f.slice(join(APP, 'app').length + 1).split(/[\\/]/).join('/').replace(/\/route\.tsx?$/, '')}`).sort()
     expect(issuing.length).toBeGreaterThan(0)
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const includes = require(join(APP, 'next.config.js')).experimental.outputFileTracingIncludes as Record<string, string[]>
+    const includes = require(join(APP, 'next.config.js'))('phase-development-server').experimental.outputFileTracingIncludes as Record<string, string[]>
     expect(Object.keys(includes).sort()).toEqual(issuing)
     for (const globs of Object.values(includes)) expect(globs).toEqual(['./lib/creator-record/customer-pdf/fonts/**'])
   })

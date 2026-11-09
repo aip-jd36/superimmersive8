@@ -23,12 +23,13 @@ import { legalPoliciesApproved } from '@/lib/legal/policies'
 import { customerLiveOffered } from '@/lib/creator-record-flow/live-offer'
 import { productionFlowDeps } from '@/lib/creator-record-flow/production'
 import { sessionUserId } from '@/lib/creator-record-flow/http'
+import { PAGE_TEXT } from '@/lib/creator-record-flow/wording'
 import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/config'
 import { CreatorRecordV2Client } from './CreatorRecordV2Client'
 
 export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
-  title: 'Creator Record',
+  title: PAGE_TEXT.title,
   robots: { index: false, follow: false, nocache: true },
 }
 

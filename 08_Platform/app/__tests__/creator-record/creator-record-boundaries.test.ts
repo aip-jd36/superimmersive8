@@ -112,6 +112,8 @@ describe('lib/creator-record boundaries', () => {
     expect(Array.from(external).sort()).toEqual([
       '@/lib/bounded-interpretation/build-bounded-interpretation',
       '@/lib/bounded-interpretation/types',
+      // CR-V2-APPROVAL-AUTHORITY-FIX-1: the customer wording set (pure data), so the Source Text content names the wording actually rendered.
+      '@/lib/creator-record-flow/customer-wording',
       '@/lib/hrr/bi-adapters',
       '@/lib/interview-engine/anthropic-structured-output-retry',
       '@/lib/interview-engine/extraction',
@@ -224,6 +226,7 @@ describe('lib/creator-record boundaries', () => {
       'lib/creator-record-flow/admin-uat.ts', // Permanent admin-only UAT: the injected dependencies
       'lib/creator-record-flow/authorization-versions.ts', // CR-V2-SCHEMA8-PATH-1 (E7): consent and permission identifiers bound to the approved policy versions
       'lib/creator-record-flow/customer-live-production.ts', // CR-V2-MVP-M2A: customer live examination ports (the entry point's refusal map and port types); loaded on demand only while both code locks are true
+      'lib/creator-record-flow/customer-wording.ts', // CR-V2-MVP-PROD-PREP-1: the customer wording set (canonical form, presentation templates, its pinned identity)
       'lib/creator-record-flow/evidence-http.ts', // CR-V2-DOC-1: evidence route helpers
       'lib/creator-record-flow/evidence-production.ts', // CR-V2-DOC-1: evidence intake ports
       'lib/creator-record-flow/examination-customer.ts', // CR-V2-EXAM-INTEGRATION-X2: creator examination wiring (one route)

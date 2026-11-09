@@ -57,6 +57,42 @@ export function boundAuthorizationVersion(wording: string, policies: { privacy: 
   return AUTHORIZATION_VERSION_PATTERN.test(v) ? v : null
 }
 
+/**
+ * CR-V2-MVP-PROD-PREP-1, moved here by CR-V2-APPROVAL-AUTHORITY-FIX-1 so the intake boundary itself can read them — the APPROVED
+ * wording identifiers of the storage consent and the AI-examination permission. Both null until counsel and PM approve the wording.
+ * Each names the customer wording set (`customer_wording_sha256`, `lib/creator-record-flow/customer-wording.ts`) whose consent text
+ * it approves, so the consent text cannot change without the approval being renewed (`lib/creator-record-flow/authorization-versions.ts`).
+ */
+export interface ApprovedAuthorizationWording {
+  /** Lower case, 3–40 characters, never a draft, unapproved or test marker, e.g. "cr-v2-storage-consent-1". */
+  id: string
+  customer_wording_sha256: string
+}
+export const EVIDENCE_CONSENT_APPROVED_WORDING: ApprovedAuthorizationWording | null = null
+export const AI_EXAMINATION_PERMISSION_APPROVED_WORDING: ApprovedAuthorizationWording | null = null
+
+/** Shown nowhere and accepted nowhere: what the flow uses when no consent can be bound. The intake refuses it in every mode. */
+export const CONSENT_VERSION_UNBINDABLE = 'consent-version-unavailable'
+
+const APPROVED_WORDING_ID = /^[a-z0-9][a-z0-9._-]{2,39}$/
+const NOT_APPROVED_MARKER = /(^|[._-])(draft|unapproved|unavailable|pilot|synthetic|test|fixture)([._-]|$)/i
+const POLICY_VERSION = /^[a-z0-9][a-z0-9._-]{2,31}$/
+
+/** An approved wording identifier's own form: lower case, bounded, no draft, unapproved or test marker. */
+export const approvedWordingIdWellFormed = (id: unknown): id is string => typeof id === 'string' && APPROVED_WORDING_ID.test(id) && !NOT_APPROVED_MARKER.test(id)
+
+/**
+ * CR-V2-APPROVAL-AUTHORITY-FIX-1 — the intake boundary's POSITIVE test for real documents: exactly
+ * `<approved storage-consent wording>__<privacy version>__<terms version>`, where the wording is the approved slot. Missing, draft,
+ * unavailable, malformed or any other wording is refused. (That the policy versions and the wording set are the CURRENT ones is
+ * established by the flow, which supplies this identifier only when both are; see `evidenceConsentVersion`.)
+ */
+export function approvedStorageConsentIdentifier(v: unknown, approved: ApprovedAuthorizationWording | null = EVIDENCE_CONSENT_APPROVED_WORDING): boolean {
+  if (!approved || !approvedWordingIdWellFormed(approved.id) || typeof v !== 'string' || !AUTHORIZATION_VERSION_PATTERN.test(v)) return false
+  const parts = v.split('__')
+  return parts.length === 3 && parts[0] === approved.id && POLICY_VERSION.test(parts[1]) && POLICY_VERSION.test(parts[2])
+}
+
 /** Request bodies: one file plus a small form overhead. */
 export const EVIDENCE_MAX_REQUEST_BYTES = EVIDENCE_MAX_BYTES + 64 * 1024
 /** Provisional bound on a creator's live (stored or in-flight) documents, to limit storage abuse. */

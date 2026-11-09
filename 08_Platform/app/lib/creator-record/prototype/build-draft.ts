@@ -48,6 +48,11 @@ export interface CreatorRecordSources {
   max_tools: number
   /** CR-V2-DECL-1B-1: names the exact questionnaire contract of these sources. Checked by `checkApprovedSources`; pilot sources have none. */
   questionnaire_approval: QuestionnaireContractApproval | null
+  /**
+   * CR-V2-MVP-PROD-PREP-1: the customer wording set this build renders, set only by the approved-inputs layer from code
+   * (`lib/creator-record-flow/customer-wording`). Part of the Source Text content, so its approval covers it. Absent: none.
+   */
+  customer_wording?: { set_id: string; version: number; sha256: string } | null
 }
 
 /** The authoritative sources. Empty today: no question is shown and nothing is published. */

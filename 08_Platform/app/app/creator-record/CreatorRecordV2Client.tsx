@@ -29,7 +29,7 @@ import { CreatorRecordQuestionnaire, type QuestionnaireProps } from '@/component
 import type { CreatorRecordFormState, FormIssue } from '@/lib/creator-record/prototype/form'
 import { CUSTOMER_SECTION_TITLES } from '@/lib/creator-record/prototype/questionnaire-structure'
 import type { PreparedView } from '@/lib/creator-record/customer-flow/service'
-import { V2_REVIEW_PAGE, fillReviewText } from '@/lib/creator-record-flow/wording'
+import { PAGE_TEXT, QUESTIONNAIRE_CHROME, V2_REVIEW_PAGE, fillReviewText } from '@/lib/creator-record-flow/wording'
 import { EvidencePanel } from '@/components/creator-record/EvidencePanel'
 import { ExaminationReview } from '@/components/creator-record/ExaminationReview'
 import { SYNTHETIC_UAT_NOTICE, attachmentsOf, preparedBody, type Attachment, type ResponseInput } from '@/lib/creator-record-flow/examination-ui'
@@ -313,9 +313,9 @@ export function CreatorRecordV2Client(props: Props) {
   return (
     <div>
       {uatNotice}
-      <h1 className="font-display text-2xl font-bold mb-2" style={{ color: INK }}>Creator Record</h1>
+      <h1 className="font-display text-2xl font-bold mb-2" style={{ color: INK }}>{PAGE_TEXT.title}</h1>
       <p className="text-sm mb-8" style={{ color: MUTED }}>
-        Tell us about your video and how you made it. You will check your declarations before anything is completed. SI8 does not check your answers.
+        {PAGE_TEXT.intro}
       </p>
       {error && issues.length === 0 && <p className="mb-4 text-sm font-medium" style={{ color: '#b42318' }} role="alert">{error}</p>}
       {recovery && (
@@ -326,7 +326,7 @@ export function CreatorRecordV2Client(props: Props) {
             <ul className="list-disc pl-5 space-y-2 mb-2">
               {recovery.changes.map((c, i) => (
                 <li key={`${c.q_id}-${c.tool_index}-${i}`} data-answer-change={c.reason}>
-                  <span className="font-medium" style={{ color: INK }}>{c.tool_index !== null ? `Tool ${c.tool_index + 1}: ` : ''}{c.question}</span>
+                  <span className="font-medium" style={{ color: INK }}>{c.tool_index !== null ? fillReviewText(QUESTIONNAIRE_CHROME.tool_prefix, { n: c.tool_index + 1 }) : ''}{c.question}</span>
                   <br />{RECOVERY_TEXT.reasons[c.reason]}. {RECOVERY_TEXT.earlier_answer}: {c.previous}
                 </li>
               ))}
@@ -345,7 +345,7 @@ export function CreatorRecordV2Client(props: Props) {
           <dl className="space-y-2">
             {earlierAnswers.answers.map((a, i) => (
               <div key={`${a.q_id}-${a.tool_index}-${i}`}>
-                <dt className="font-medium" style={{ color: INK }}>{a.tool_index !== null ? `Tool ${a.tool_index + 1}: ` : ''}{a.question}</dt>
+                <dt className="font-medium" style={{ color: INK }}>{a.tool_index !== null ? fillReviewText(QUESTIONNAIRE_CHROME.tool_prefix, { n: a.tool_index + 1 }) : ''}{a.question}</dt>
                 <dd style={{ color: MUTED }}>{a.answer}</dd>
               </div>
             ))}

@@ -20,10 +20,11 @@ import { violatesCustomerWordingLock, violatesDependencyLabelLock } from '@/lib/
 import { AI_EXAMINATION_PERMISSION_DRAFT_VERSION, AUTHORIZATION_VERSION_PATTERN, boundAuthorizationVersion, EVIDENCE_CONSENT_DRAFT_VERSION, sha256Bytes } from '@/lib/creator-record/evidence-intake/contract'
 import { syntheticTextPdf } from '@/test-support/synthetic-pdf'
 import { uploadEvidence, type EvidenceDeps, type EvidenceRow } from '@/lib/creator-record/evidence-intake/service'
-import { aiExaminationPermissionVersion, CONSENT_VERSION_UNBINDABLE, evidenceConsentVersion } from '@/lib/creator-record-flow/authorization-versions'
+import { aiExaminationPermissionVersion, AI_EXAMINATION_PERMISSION_APPROVED_WORDING, CONSENT_VERSION_UNBINDABLE, EVIDENCE_CONSENT_APPROVED_WORDING, evidenceConsentVersion } from '@/lib/creator-record-flow/authorization-versions'
+import { customerWordingIdentity } from '@/lib/creator-record-flow/customer-wording'
 import { approvedPolicyVersions, legalPoliciesApproved, type ApprovedLegalDocument } from '@/lib/legal/policies'
 import { EXAM_LIVE_TEXT, EXAM_TEXT, examText } from '@/lib/creator-record-flow/examination-ui'
-import { V2_REVIEW_PAGE } from '@/lib/creator-record-flow/wording'
+import { EVIDENCE_MESSAGES, V2_REVIEW_PAGE } from '@/lib/creator-record-flow/wording'
 import { EvidencePanel } from '@/components/creator-record/EvidencePanel'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 
@@ -31,6 +32,9 @@ const APP = path.join(__dirname, '..', '..')
 const src = (p: string) => readFileSync(path.join(APP, p), 'utf8')
 const OWNER = 'aaaaaaaa-2222-4333-8444-555555555555'
 const POLICIES = { privacy: 'privacy-2026-12-01', terms: 'terms-2026-12-01' }
+// CR-V2-MVP-PROD-PREP-1: a stand-in for APPROVED consent and permission wording (the shipped slots are null).
+const CONSENT_WORDING = { id: 'cr-v2-storage-consent-1', customer_wording_sha256: customerWordingIdentity().sha256 }
+const PERMISSION_WORDING = { id: 'cr-v2-ai-permission-1', customer_wording_sha256: customerWordingIdentity().sha256 }
 const doc = (version: string): ApprovedLegalDocument => ({ version, effective_date: '2026-12-01', approval_reference: 'GOV-LEGAL-1', title: 'T', paragraphs: ['p'] })
 
 // ── E4 ──
@@ -148,20 +152,34 @@ describe('E7: consent and AI-permission identifiers are bound to the approved pr
     expect(approvedPolicyVersions()).toBeNull()
   })
 
-  test('storage consent: the draft identifier until the policies are approved, then only the bound one', () => {
+  test('storage consent: the draft identifier until the policies are approved, then only the bound APPROVED wording', () => {
     expect(evidenceConsentVersion(null)).toBe(EVIDENCE_CONSENT_DRAFT_VERSION)
     expect(evidenceConsentVersion()).toBe(EVIDENCE_CONSENT_DRAFT_VERSION)
-    expect(evidenceConsentVersion(POLICIES)).toBe(`${EVIDENCE_CONSENT_DRAFT_VERSION}__privacy-2026-12-01__terms-2026-12-01`)
-    expect(evidenceConsentVersion({ privacy: 'p'.repeat(32), terms: 't'.repeat(32) })).not.toBe(CONSENT_VERSION_UNBINDABLE)
+    expect(evidenceConsentVersion(POLICIES, CONSENT_WORDING)).toBe('cr-v2-storage-consent-1__privacy-2026-12-01__terms-2026-12-01')
+    expect(evidenceConsentVersion({ privacy: 'p'.repeat(32), terms: 't'.repeat(32) }, CONSENT_WORDING)).not.toBe(CONSENT_VERSION_UNBINDABLE)
   })
 
-  test('AI permission: none until the policies are approved; the bound draft is one the database can never make current', () => {
+  // CR-V2-MVP-PROD-PREP-1: publishing the policies alone never binds the DRAFT wording.
+  test('storage consent: policies published but no approved wording, draft-marked wording, or wording approved for another customer wording set → unbindable', () => {
+    expect(EVIDENCE_CONSENT_APPROVED_WORDING).toBeNull()
+    expect(evidenceConsentVersion(POLICIES)).toBe(CONSENT_VERSION_UNBINDABLE)
+    expect(evidenceConsentVersion(POLICIES, null)).toBe(CONSENT_VERSION_UNBINDABLE)
+    expect(evidenceConsentVersion(POLICIES, { id: EVIDENCE_CONSENT_DRAFT_VERSION.toLowerCase(), customer_wording_sha256: customerWordingIdentity().sha256 })).toBe(CONSENT_VERSION_UNBINDABLE)
+    expect(evidenceConsentVersion(POLICIES, { id: 'cr-v2-draft-consent', customer_wording_sha256: customerWordingIdentity().sha256 })).toBe(CONSENT_VERSION_UNBINDABLE)
+    expect(evidenceConsentVersion(POLICIES, { ...CONSENT_WORDING, customer_wording_sha256: 'f'.repeat(64) })).toBe(CONSENT_VERSION_UNBINDABLE)
+  })
+
+  test('AI permission: none until both the policies and the approved wording exist', () => {
     expect(aiExaminationPermissionVersion(null)).toBeNull()
     expect(aiExaminationPermissionVersion()).toBeNull()
-    const bound = aiExaminationPermissionVersion(POLICIES) as string
-    expect(bound.startsWith(`${AI_EXAMINATION_PERMISSION_DRAFT_VERSION}__`)).toBe(true)
-    // 20261113000000: CHECK (permission_version !~* '(draft|unapproved)') — so a draft wording stays unusable until replaced.
-    expect(/(draft|unapproved)/i.test(bound)).toBe(true)
+    expect(AI_EXAMINATION_PERMISSION_APPROVED_WORDING).toBeNull()
+    expect(aiExaminationPermissionVersion(POLICIES)).toBeNull()
+    expect(aiExaminationPermissionVersion(null, PERMISSION_WORDING)).toBeNull()
+    expect(aiExaminationPermissionVersion(POLICIES, { ...PERMISSION_WORDING, customer_wording_sha256: 'f'.repeat(64) })).toBeNull()
+    expect(aiExaminationPermissionVersion(POLICIES, { id: 'unapproved-permission', customer_wording_sha256: customerWordingIdentity().sha256 })).toBeNull()
+    expect(aiExaminationPermissionVersion(POLICIES, PERMISSION_WORDING)).toBe('cr-v2-ai-permission-1__privacy-2026-12-01__terms-2026-12-01')
+    // 20261113000000: CHECK (permission_version !~* '(draft|unapproved)') — a draft wording stays unusable in the database too.
+    expect(/(draft|unapproved)/i.test(boundAuthorizationVersion(AI_EXAMINATION_PERMISSION_DRAFT_VERSION, POLICIES) as string)).toBe(true)
     expect(src('supabase/migrations/20261113000000_creator_record_v2_ai_permission_current_version.sql')).toContain("CHECK (permission_version !~* '(draft|unapproved)')")
   })
 
@@ -177,13 +195,13 @@ describe('E7: consent and AI-permission identifiers are bound to the approved pr
     const upload = (d: EvidenceDeps, consent: unknown) => uploadEvidence(d, OWNER, { bytes: PNG, file_name: 'r.png', consent }).catch((e: Error) => ({ thrown: e.message }))
 
     test('a stale identifier is refused once the policies are bound', async () => {
-      const bound = evidenceConsentVersion(POLICIES)
+      const bound = evidenceConsentVersion(POLICIES, CONSENT_WORDING)
       expect(await upload(deps({ consentVersion: bound }), EVIDENCE_CONSENT_DRAFT_VERSION)).toEqual({ ok: false, status: 400, code: 'consent_required' })
-      expect(await upload(deps({ consentVersion: bound }), evidenceConsentVersion({ ...POLICIES, terms: 'terms-2025-01-01' }))).toEqual({ ok: false, status: 400, code: 'consent_required' })
+      expect(await upload(deps({ consentVersion: bound }), evidenceConsentVersion({ ...POLICIES, terms: 'terms-2025-01-01' }, CONSENT_WORDING))).toEqual({ ok: false, status: 400, code: 'consent_required' })
     })
 
     test('the current identifier passes the consent step (the request then fails on its synthetic bytes, before any recording here)', async () => {
-      const bound = evidenceConsentVersion(POLICIES)
+      const bound = evidenceConsentVersion(POLICIES, CONSENT_WORDING)
       const r = await upload(deps({ consentVersion: bound }), bound)
       expect(r).not.toEqual({ ok: false, status: 400, code: 'consent_required' })
     })
@@ -244,8 +262,8 @@ describe('E3: live examination wording is separate from the synthetic replay wor
 describe('deduplication never reports a document stored under another consent as covered by the current one', () => {
   const PDF = syntheticTextPdf('dedup consent regression')
   const SHA = sha256Bytes(PDF)
-  const CURRENT = evidenceConsentVersion({ privacy: 'privacy-2', terms: 'terms-1' })
-  const EARLIER = evidenceConsentVersion({ privacy: 'privacy-1', terms: 'terms-1' })
+  const CURRENT = evidenceConsentVersion({ privacy: 'privacy-2', terms: 'terms-1' }, CONSENT_WORDING)
+  const EARLIER = evidenceConsentVersion({ privacy: 'privacy-1', terms: 'terms-1' }, CONSENT_WORDING)
   const held = (consent_version: string): EvidenceRow => Object.freeze({
     id: '99999999-2222-4333-8444-555555555555', user_id: OWNER, sha256: SHA, media_type: 'application/pdf', byte_size: PDF.length, file_name: 'receipt.pdf',
     storage_path: `${OWNER}/99999999-2222-4333-8444-555555555555`, consent_version, state: 'stored', created_at: '2026-11-01T00:00:00.000Z', stored_at: '2026-11-01T00:00:01.000Z',
@@ -266,6 +284,8 @@ describe('deduplication never reports a document stored under another consent as
       submissions: 'open', hasPilotAccess: async () => true, realDocumentsPermitted: true, isSyntheticTestDocument: () => false,
       store: store as unknown as EvidenceDeps['store'], objects: objects as unknown as EvidenceDeps['objects'],
       newId: () => '11111111-2222-4333-8444-555555555555', now: () => new Date('2026-11-08T00:00:00Z'), consentVersion: CURRENT,
+      // CR-V2-APPROVAL-AUTHORITY-FIX-1: real documents need the approved storage-consent wording; this stands in for it.
+      approvedStorageConsent: CONSENT_WORDING,
     }
     return { d, writes }
   }
@@ -295,10 +315,11 @@ describe('deduplication never reports a document stored under another consent as
   })
 
   test('the customer message is a draft that directs to support and promises no deletion or re-upload', () => {
-    const http = src('lib/creator-record-flow/evidence-http.ts')
-    const line = http.split('\n').find((l) => l.includes('consent_outdated:')) ?? ''
+    // CR-V2-MVP-PROD-PREP-1: the message now lives in the customer wording set (still DRAFT, pending M0).
+    const line = EVIDENCE_MESSAGES.consent_outdated
     expect(line).toMatch(/jd@superimmersive8\.com/)
     expect(line).not.toMatch(/delet|re-?upload|add it again/i)
-    expect(http).toMatch(/DEDUP-CORRECTION\. DRAFT wording, not approved\./)
+    expect(src('lib/creator-record-flow/wording.ts')).toMatch(/DRAFT — PENDING M0 WORDING APPROVAL/)
+    expect(src('lib/creator-record-flow/evidence-http.ts')).toMatch(/= EVIDENCE_MESSAGES/)
   })
 })

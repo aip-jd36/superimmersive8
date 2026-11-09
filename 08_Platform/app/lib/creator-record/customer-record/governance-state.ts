@@ -64,6 +64,12 @@ export interface CurrentGovernance {
   sources: Available<CreatorRecordSources>
   topicClaims: Available<TopicClaims>
   source_text_approvals: Available<readonly SourceTextApproval[]>
+  /**
+   * CR-V2-MVP-PROD-PREP-1: the digest of the wording the running build would publish now. When supplied, an approval naming any
+   * other digest is not current authority (read as pending); null = could not be established (every approval pending). Absent: not
+   * checked (callers that only read history).
+   */
+  source_text_current_sha256?: string | null
   support?: IssuanceSupport
   /** The class of the bundle these sources come from, when they come from one. */
   authority_class?: PublicationAuthorityClass
@@ -143,7 +149,8 @@ export function governanceSnapshotFrom(g: CurrentGovernance): GovernanceSnapshot
       g.source_text_approvals.map((a) => {
         const categoriesExact = Array.isArray(a.categories) && [...a.categories].sort().join('|') === [...SOURCE_TEXT_CATEGORIES].sort().join('|')
         const complete = typeof a.authority === 'string' && a.authority.trim() !== '' && isIsoDate(a.decision_date) && categoriesExact && !marked(a.authority, a.review_ref)
-        const lifecycle: AuthorityLifecycle = a.lifecycle === 'approved' && !complete ? 'pending' : a.lifecycle
+        const current = g.source_text_current_sha256 === undefined || (g.source_text_current_sha256 !== null && a.content_sha256 === g.source_text_current_sha256)
+        const lifecycle: AuthorityLifecycle = a.lifecycle === 'approved' && (!complete || !current) ? 'pending' : a.lifecycle
         return state('source_text', { id: a.source_id, version: String(a.version) }, lifecycle, a.content_sha256)
       }),
     )

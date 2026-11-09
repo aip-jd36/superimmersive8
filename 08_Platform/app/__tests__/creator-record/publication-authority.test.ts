@@ -36,6 +36,16 @@ import { questionnaireApprovalFor } from '@/test-support/questionnaire-approval'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { APPLICABILITY_FACTS } from '@/lib/retrieval-engine/types'
 import { withCommercialSupportUnderTest } from '@/test-support/commercial-support'
+import { customerWordingIdentity } from '@/lib/creator-record-flow/customer-wording'
+import { V2_CHECKOUT_COPY } from '@/lib/creator-record-flow/wording'
+import { readdirSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { authorizePublication } from '@/lib/creator-record/contract/publication-ledger'
+import { CURRENT_ISSUANCE_SUPPORT, governanceSnapshotFrom } from '@/lib/creator-record/customer-record/governance-state'
+import { AI_EXAMINATION_PERMISSION_APPROVED_WORDING, aiExaminationPermissionVersion, EVIDENCE_CONSENT_APPROVED_WORDING, evidenceConsentVersion } from '@/lib/creator-record-flow/authorization-versions'
+import { EVIDENCE_CONSENT_DRAFT_VERSION } from '@/lib/creator-record/evidence-intake/contract'
+import { approvedPolicyVersions, legalPoliciesApproved } from '@/lib/legal/policies'
+import { customerLiveOffered } from '@/lib/creator-record-flow/live-offer'
 
 const buildCustomerRecord = buildCurrentRecord
 
@@ -76,8 +86,10 @@ function syntheticBundle(over: Partial<PublicationAuthorityBundle> = {}, approve
   const acks = Object.fromEntries(sources.acknowledgement_ids.map((id) => [id, `Placeholder acknowledgement ${id}.`]))
   const reg = loadQuestionRegistry(sources.registry_input)
   if (!reg.ok) throw new Error('registry')
+  // CR-V2-MVP-PROD-PREP-1: approvals cover what the approved inputs publish, which includes the customer wording set from code.
+  const published: CreatorRecordSources = { ...sources, customer_wording: customerWordingIdentity() }
   const text: SourceTextApproval = {
-    source_id: SOURCE_TEXT_SOURCE_ID as typeof SOURCE_TEXT_SOURCE_ID, version: 1, content_sha256: sourceTextDigest(sourceTextContent(sources, reg.registry, acks)),
+    source_id: SOURCE_TEXT_SOURCE_ID as typeof SOURCE_TEXT_SOURCE_ID, version: 1, content_sha256: sourceTextDigest(sourceTextContent(published, reg.registry, acks)),
     categories: [...SOURCE_TEXT_CATEGORIES], record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION },
     lifecycle: 'approved', authority: approver, decision_date: '2026-10-30', review_ref: 'SYN-TEXT-REVIEW-1',
   }
@@ -90,7 +102,7 @@ function syntheticBundle(over: Partial<PublicationAuthorityBundle> = {}, approve
     authority_class: 'synthetic_test',
     registry_input: sources.registry_input, publication_ledger: sources.ledger, dependency_labels: sources.dependency_labels, presentation: sources.presentation,
     acknowledgements: acks, caveats: sources.caveats, versions: sources.versions, max_tools: sources.max_tools,
-    source_text_approval: text, questionnaire_approval: questionnaireApprovalFor(sources, acks, { authority: approver, review_ref: 'SYN-CONTRACT-REVIEW-1' }), pdf_templates: templates, pdf_template_approval: templateApproval,
+    source_text_approval: text, questionnaire_approval: questionnaireApprovalFor(published, acks, { authority: approver, review_ref: 'SYN-CONTRACT-REVIEW-1' }), pdf_templates: templates, pdf_template_approval: templateApproval,
     ...over,
   }
 }
@@ -309,6 +321,8 @@ describe('genuine governance behaviour is unchanged', () => {
         dependency_labels: Governed.CREATOR_RECORD_DEPENDENCY_LABELS, caveats: Governed.CREATOR_RECORD_CAVEATS,
         versions: { ...Governed.CREATOR_RECORD_VERSIONS }, max_tools: Governed.CREATOR_RECORD_MAX_TOOLS,
         questionnaire_approval: Governed.CREATOR_RECORD_QUESTIONNAIRE_APPROVAL,
+        // CR-V2-MVP-PROD-PREP-1: the customer wording set this build renders, always from code.
+        customer_wording: customerWordingIdentity(),
       },
       source_text: null,
       // CR-V2-SCHEMA8-PATH-1 (E1): the schema 8 approval slot, empty in governance.
@@ -431,5 +445,155 @@ describe('E2: purchaseOfferable — the page may offer payment only when every p
   test('not offered for an unreviewed or tampered version', () => {
     expect(purchaseOfferable(deps(), { ...ROW, status: 'prepared' })).toBe(false)
     expect(purchaseOfferable(deps(), { ...ROW, sha256: 'f'.repeat(64) })).toBe(false)
+  })
+})
+
+// ── CR-V2-MVP-PROD-PREP-1: changed wording, expired guidance, absent issuance authorization and missing legal documents ──
+describe('CR-V2-MVP-PROD-PREP-1: no unapproved or stale content reaches a prepared, sold or issued record', () => {
+  // A governance-classed bundle standing in for real approvals (test only; never in Production).
+  const fixed: PublicationAuthorityBundle = { ...cleanText(SYNTHETIC), authority_class: 'governance' }
+  const prep = prepare(fixed)
+  if (!prep.ok) throw new Error('fixed bundle did not prepare')
+  const reasons = (e: ReturnType<typeof evaluateIssuanceEligibility>) => (e.decision === 'ineligible' ? Array.from(new Set(e.reasons.map((r) => `${r.kind}:${r.code}`))).sort() : [e.decision])
+  const sourceTextStates = (s: ReturnType<typeof approvedGovernanceSnapshot>) => {
+    const l = s.authorities.source_text
+    return l && l.status === 'ok' ? l.entries.map((e) => e.lifecycle) : [l?.status]
+  }
+  const ISSUE = '2026-11-08'
+
+  test('baseline: the record prepared under the bundle is eligible once issuance is authorized (the shipped support list refuses it)', () => {
+    expect(evaluateIssuanceEligibility(prep.canonical, prep.sha256, withCommercialSupportUnderTest(approvedGovernanceSnapshot(ISSUE, TOPIC_CLAIMS_FIXTURE, fixed))).decision).toBe('eligible')
+    // Absent issuance authorization: the shipped support list names no record schema or builder.
+    expect(reasons(evaluateIssuanceEligibility(prep.canonical, prep.sha256, approvedGovernanceSnapshot(ISSUE, TOPIC_CLAIMS_FIXTURE, fixed)))).toEqual(['builder:reference_missing', 'record_schema:reference_missing'])
+  })
+
+  test('changed bundle wording under the same approval: preparation refuses, and checkout and issuance refuse the earlier record', () => {
+    const changed: PublicationAuthorityBundle = { ...fixed, acknowledgements: { ...fixed.acknowledgements, A2: `${fixed.acknowledgements.A2} Changed.` } }
+    const again = prepare(changed)
+    expect(again.ok).toBe(false)
+    expect(!again.ok && again.stage === 'sources' ? again.refusals.map((r) => r.code) : []).toContain('source_text_digest_mismatch')
+    const snapshot = approvedGovernanceSnapshot(ISSUE, TOPIC_CLAIMS_FIXTURE, changed)
+    expect(sourceTextStates(snapshot)).toEqual(['pending'])
+    expect(reasons(evaluateIssuanceEligibility(prep.canonical, prep.sha256, withCommercialSupportUnderTest(snapshot)))).toContain('source_text:lifecycle_pending')
+  })
+
+  test('changed customer wording in code (a different wording-set identity) refuses preparation and issuance the same way', () => {
+    const inputs = approvedCustomerRecordInputs(fixed)
+    const otherCode = { ...inputs.sources, customer_wording: { ...customerWordingIdentity(), sha256: 'e'.repeat(64) } }
+    const prepared = buildCurrentRecord({
+      state: { answers: { ...ANS }, tools: [{ T1: ['pika'], T3: ['Pro'], T4: ['May 2026'] }], acknowledgements: { A1: true, A2: true } },
+      sources: otherCode, source_text: inputs.source_text, topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: '2026-11-01',
+      record: { record_id: `PREP-${PREP}`, record_version: 1, captured_at: '2026-11-01T09:00:00.000Z' },
+    })
+    expect(!prepared.ok && prepared.stage === 'sources' ? prepared.refusals.map((r) => r.code) : []).toContain('source_text_digest_mismatch')
+    // At checkout and issuance the current digest is recomputed: an approval naming any other digest reads as pending.
+    const reg = loadQuestionRegistry(otherCode.registry_input)
+    if (!reg.ok) throw new Error('registry')
+    const current = sourceTextDigest(sourceTextContent(otherCode, reg.registry, fixed.acknowledgements))
+    const snapshot = governanceSnapshotFrom({ issuance_date: ISSUE, sources: otherCode, topicClaims: TOPIC_CLAIMS_FIXTURE, source_text_approvals: [fixed.source_text_approval as SourceTextApproval], source_text_current_sha256: current, authority_class: 'governance' })
+    expect(sourceTextStates(snapshot)).toEqual(['pending'])
+    expect(reasons(evaluateIssuanceEligibility(prep.canonical, prep.sha256, withCommercialSupportUnderTest(snapshot)))).toContain('source_text:lifecycle_pending')
+    // A digest that could not be established refuses too (fail closed).
+    expect(sourceTextStates(governanceSnapshotFrom({ issuance_date: ISSUE, sources: inputs.sources, topicClaims: TOPIC_CLAIMS_FIXTURE, source_text_approvals: [fixed.source_text_approval as SourceTextApproval], source_text_current_sha256: null }))).toEqual(['pending'])
+  })
+
+  test('expired guidance: past a ledger entry refresh date, guidance from it is refused and the earlier record is not issued', () => {
+    const entries = prep.record.sources.publications
+    expect(entries.length).toBeGreaterThan(0)
+    const d = new Date(`${entries[0].refresh_by}T00:00:00Z`)
+    d.setUTCDate(d.getUTCDate() + 1)
+    const lapsed = d.toISOString().slice(0, 10)
+    expect(reasons(evaluateIssuanceEligibility(prep.canonical, prep.sha256, withCommercialSupportUnderTest(approvedGovernanceSnapshot(lapsed, TOPIC_CLAIMS_FIXTURE, fixed))))).toContain('publication_entry:validity_lapsed')
+    const entry = fixed.publication_ledger.find((e) => e.entry_id === entries[0].entry_id)!
+    const claim = TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === entry.claim_id)!
+    expect(authorizePublication(fixed.publication_ledger, claim, lapsed)).toEqual({ authorized: false, reason: 'refresh_lapsed' })
+  })
+
+  test('the Production bundle is empty, its approval and consent slots are null, and nothing is issuable', () => {
+    const G = CREATOR_RECORD_GOVERNANCE_AUTHORITY
+    expect([G.registry_input.questions.length, G.publication_ledger.length, G.pdf_template_sets?.length]).toEqual([0, 0, 0])
+    expect([G.source_text_approval, G.source_text_examination_approval, G.questionnaire_approval, G.pdf_templates, G.pdf_template_approval]).toEqual([null, null, null, null, null])
+    expect([EVIDENCE_CONSENT_APPROVED_WORDING, AI_EXAMINATION_PERMISSION_APPROVED_WORDING]).toEqual([null, null])
+    expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [], builders: [], examination_methods: [] })
+    expect(prepare(G).ok).toBe(false)
+    expect(evaluateIssuanceEligibility(prep.canonical, prep.sha256, approvedGovernanceSnapshot(ISSUE, TOPIC_CLAIMS_FIXTURE, G)).decision).not.toBe('eligible')
+  })
+
+  test('missing legal documents: no policy versions, no real-document intake, no live reading, no bindable permission', () => {
+    expect(legalPoliciesApproved()).toBe(false)
+    expect(approvedPolicyVersions()).toBeNull()
+    expect(customerLiveOffered()).toBe(false)
+    expect(evidenceConsentVersion()).toBe(EVIDENCE_CONSENT_DRAFT_VERSION)
+    expect(aiExaminationPermissionVersion()).toBeNull()
+    const read = (f: string) => readFileSync(join(process.cwd(), f), 'utf8')
+    expect(read('lib/creator-record-flow/evidence-production.ts')).toMatch(/realDocumentsPermitted: EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED && legalPoliciesApproved\(\)/)
+    expect(read('lib/creator-record-flow/live-offer.ts')).toMatch(/customerLiveEnabledInThisBuild\(\) && legalPoliciesApproved\(\)/)
+  })
+
+  test('no application module reads the DRAFT content package', () => {
+    const files: string[] = []
+    const walkDir = (dir: string) => {
+      for (const e of readdirSync(dir, { withFileTypes: true })) {
+        const p = join(dir, e.name)
+        if (e.isDirectory()) walkDir(p)
+        else if (/\.(ts|tsx)$/.test(e.name)) files.push(p)
+      }
+    }
+    for (const d of ['app', 'components', 'lib']) walkDir(join(process.cwd(), d))
+    // An import, require or file read of the drafts folder (a comment pointing reviewers to it is not a read).
+    expect(files.filter((f) => /(from\s+|import\(|require\(|readFileSync\()[^;\n]*content-drafts/.test(readFileSync(f, 'utf8')))).toEqual([])
+  })
+})
+
+// ── CR-V2-APPROVAL-AUTHORITY-FIX-1: the reproduced wording bypass (a customer string edited, nothing re-pinned) ──
+describe('CR-V2-APPROVAL-AUTHORITY-FIX-1: edited customer wording cannot reach an issuable record without a new approval', () => {
+  const fixed: PublicationAuthorityBundle = { ...cleanText(SYNTHETIC), authority_class: 'governance' }
+  const prep = prepare(fixed)
+  if (!prep.ok) throw new Error('fixed bundle did not prepare')
+  const states = (s: ReturnType<typeof approvedGovernanceSnapshot>) => {
+    const l = s.authorities.source_text
+    return l && l.status === 'ok' ? l.entries.map((e) => e.lifecycle) : [l?.status]
+  }
+  const edit = <R,>(run: () => R): R => {
+    const original = V2_CHECKOUT_COPY.description
+    try {
+      ;(V2_CHECKOUT_COPY as { description: string }).description = 'UNAPPROVED EDIT: cleared for commercial use.'
+      return run()
+    } finally {
+      ;(V2_CHECKOUT_COPY as { description: string }).description = original
+    }
+  }
+
+  test('before the edit the approval matches and the record is eligible once issuance is authorized', () => {
+    expect(states(approvedGovernanceSnapshot('2026-11-09', TOPIC_CLAIMS_FIXTURE, fixed))).toEqual(['approved'])
+    expect(evaluateIssuanceEligibility(prep.canonical, prep.sha256, withCommercialSupportUnderTest(approvedGovernanceSnapshot('2026-11-09', TOPIC_CLAIMS_FIXTURE, fixed))).decision).toBe('eligible')
+  })
+
+  test('after the edit (no re-pin, no new approval): preparation refuses and the earlier record is no longer issuable', () => {
+    edit(() => {
+      const again = prepare(fixed)
+      expect(!again.ok && again.stage === 'sources' ? again.refusals.map((r) => r.code) : []).toContain('source_text_digest_mismatch')
+      const snapshot = approvedGovernanceSnapshot('2026-11-09', TOPIC_CLAIMS_FIXTURE, fixed)
+      expect(states(snapshot)).toEqual(['pending'])
+      const e = evaluateIssuanceEligibility(prep.canonical, prep.sha256, withCommercialSupportUnderTest(snapshot))
+      expect(e.decision).toBe('ineligible')
+      expect(e.decision === 'ineligible' ? e.reasons.map((r) => `${r.kind}:${r.code}`) : []).toContain('source_text:lifecycle_pending')
+    })
+  })
+
+  test('schema 7 and schema 8 approvals stay independent: each is checked against its own schema, and the edit voids both', () => {
+    const text7 = fixed.source_text_approval as SourceTextApproval
+    const text8: SourceTextApproval = { ...text7, version: 2, record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION }, review_ref: 'GOV-TEXT-8' }
+    const both: PublicationAuthorityBundle = { ...fixed, source_text_examination_approval: text8 }
+    const inputs = approvedCustomerRecordInputs(both)
+    const codes = (slot: 'source_text' | 'source_text_examination', version: number) => {
+      const r = checkApprovedSources(inputs.sources, inputs[slot] ?? null, TOPIC_CLAIMS_FIXTURE, '2026-11-01', { id: CUSTOMER_RECORD_SCHEMA, version })
+      return r.ok ? [] : Array.from(new Set(r.refusals.map((x) => x.code)))
+    }
+    expect([codes('source_text', 7), codes('source_text_examination', 8)]).toEqual([[], []])
+    expect(codes('source_text', 8)).toContain('source_text_schema_mismatch')
+    expect(codes('source_text_examination', 7)).toContain('source_text_schema_mismatch')
+    edit(() => expect(states(approvedGovernanceSnapshot('2026-11-09', TOPIC_CLAIMS_FIXTURE, both))).toEqual(['pending', 'pending']))
+    expect(states(approvedGovernanceSnapshot('2026-11-09', TOPIC_CLAIMS_FIXTURE, both))).toEqual(['approved', 'approved'])
   })
 })

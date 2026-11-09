@@ -25,6 +25,14 @@ export function historicalForm<R extends CustomerRecordResult>(built: R): R {
   if (!built.ok) return built
   const r = JSON.parse(built.canonical) as CustomerRecordV2
   const examination = r.schema_version === CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION
+  // CR-V2-MVP-PROD-PREP-1: historical records had no customer wording category. Their content digest is the digest of the embedded
+  // wording without the customer wording identity, and their categories are the five that existed then.
+  const wording = (r.sources.questionnaire_contract as { wording?: Record<string, unknown> } | undefined)?.wording
+  if (wording && Object.prototype.hasOwnProperty.call(wording, 'customer_wording')) {
+    const { customer_wording: _added, ...before } = wording
+    r.sources.source_text.content_sha256 = sha256Hex(canonicalJson(before))
+  }
+  r.sources.source_text.categories = r.sources.source_text.categories.filter((c) => c !== 'customer_wording')
   delete r.sources.questionnaire_contract
   r.schema_version = examination ? HISTORICAL_EXAMINATION_SCHEMA_VERSION : HISTORICAL_RECORD_SCHEMA_VERSION
   r.builder = examination ? HISTORICAL_V6_BUILDER : { ...HISTORICAL_RECORD_BUILDER }

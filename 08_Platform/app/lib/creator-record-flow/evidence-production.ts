@@ -13,7 +13,7 @@ import { randomUUID } from 'node:crypto'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { DEFAULT_REPLAY_TABLE } from '@/lib/creator-record/evidence/replay'
 import { CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flow/approved-inputs'
-import { EVIDENCE_BUCKET, EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED } from '@/lib/creator-record/evidence-intake/contract'
+import { approvedStorageConsentIdentifier, EVIDENCE_BUCKET, EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED } from '@/lib/creator-record/evidence-intake/contract'
 import type { EvidenceDeps, EvidenceObjects, EvidenceRow, EvidenceStore, NewEvidenceRow } from '@/lib/creator-record/evidence-intake/service'
 import { legalPoliciesApproved } from '@/lib/legal/policies'
 import { evidenceConsentVersion } from './authorization-versions'
@@ -123,7 +123,8 @@ export function productionEvidenceDeps(): EvidenceDeps {
     submissions: CREATOR_RECORD_V2_SUBMISSIONS,
     hasPilotAccess,
     // CR-V2-MVP-LAUNCH-FOUNDATION-1: real documents also need the approved privacy notice and terms (fail closed while absent).
-    realDocumentsPermitted: EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED && legalPoliciesApproved(),
+    // CR-V2-APPROVAL-AUTHORITY-FIX-1: and only with a current, approved storage-consent identifier to record (the service checks it too).
+    realDocumentsPermitted: EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED && legalPoliciesApproved() && approvedStorageConsentIdentifier(evidenceConsentVersion()),
     // CR-V2-SCHEMA8-PATH-1 (E7): the consent identifier bound to the approved policy versions (the draft one while none are approved).
     consentVersion: evidenceConsentVersion(),
     isSyntheticTestDocument: (sha256) => DEFAULT_REPLAY_TABLE.has(sha256),

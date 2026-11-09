@@ -7,32 +7,10 @@ import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import type { EvidenceError } from '@/lib/creator-record/evidence-intake/service'
 import { NO_STORE } from './http'
+import { EVIDENCE_MESSAGES } from './wording'
 
-const MESSAGES: Record<EvidenceError['code'], string> = {
-  invalid_request: 'The request could not be read.',
-  consent_required: 'Please confirm the document storage notice before adding documents.',
-  empty_file: 'The file is empty.',
-  file_too_large: 'The file is larger than 4 MB.',
-  unsupported_format: 'Only PDF, PNG and JPEG files can be added.',
-  pdf_malformed: 'This PDF could not be read.',
-  pdf_encrypted: 'Password-protected or encrypted PDFs cannot be added.',
-  pdf_active_content: 'This PDF contains scripts, attachments or interactive content and cannot be added.',
-  image_header_invalid: 'This image could not be read.',
-  image_too_large: 'This image is too large.',
-  not_invited: 'Creator Record is currently available by invitation only.',
-  synthetic_documents_only: 'Documents cannot be added yet.',
-  not_found: 'Not found.',
-  upload_in_progress: 'This file is still being added. Try again in a moment.',
-  too_many_documents: 'You have reached the maximum number of documents.',
-  document_retained: 'This document is part of a prepared record and is kept.',
-  // CR-V2-SCHEMA8-PATH-1-DEDUP-CORRECTION. DRAFT wording, not approved.
-  consent_outdated: 'You added this file earlier under a previous version of our storage notice, privacy notice or terms, so it cannot be reused under the current ones. Email jd@superimmersive8.com for help.',
-  object_missing: 'This document is no longer available.',
-  integrity_failure: 'This document could not be verified. Nothing was changed.',
-  storage_failed: 'The document could not be stored. Nothing was kept.',
-  submissions_stopped: 'Creator Record is not taking new submissions right now.',
-  audit_unavailable: 'This document cannot be opened right now.',
-}
+// CR-V2-MVP-PROD-PREP-1: the wording lives in `./wording` (customer wording set), text unchanged.
+const MESSAGES: Readonly<Record<EvidenceError['code'], string>> = EVIDENCE_MESSAGES
 
 export function evidenceError(e: EvidenceError): NextResponse {
   return NextResponse.json({ error: MESSAGES[e.code], code: e.code }, { status: e.status, headers: NO_STORE })

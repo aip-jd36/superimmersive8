@@ -69,6 +69,20 @@ export const CREATOR_RECORD_PDF_TEMPLATES: unknown = null
 /** The approval covering `CREATOR_RECORD_PDF_TEMPLATES`. None issued yet. */
 export const CREATOR_RECORD_PDF_TEMPLATE_APPROVAL: PdfTemplateApproval | null = null
 
+/**
+ * CR-V2-MVP-PROD-PREP-1: further approved template sets, one per other record schema. The schema 7 set goes in
+ * `CREATOR_RECORD_PDF_TEMPLATES` above and the schema 8 (examination-bearing) set here, each with its own approval naming its
+ * schema (`approvedPdfTemplates` selects exactly one per schema; none or more than one refuses). None approved yet.
+ */
+export const CREATOR_RECORD_PDF_TEMPLATE_SETS: readonly { readonly templates: unknown; readonly approval: PdfTemplateApproval }[] = Object.freeze([])
+
+// CR-V2-MVP-PROD-PREP-1 — the other integration points an approved launch fills, outside this file (each null or empty today):
+//   - customer wording set: `lib/creator-record-flow/customer-wording.ts` (identity, covered by the two Source Text Approvals above);
+//   - approved consent and permission wording identifiers: `lib/creator-record-flow/authorization-versions.ts`;
+//   - privacy notice and terms: `lib/legal/policies.ts`;
+//   - what may be issued (record schemas, builders, reading methods): `CURRENT_ISSUANCE_SUPPORT` in
+//     `lib/creator-record/customer-record/governance-state.ts` — deliberately empty until separately authorized.
+
 // CR-V2-MVP-M4B: the governance bundle — the only bundle Production can publish from
 // (`./publication-authority`). Synthetic test approvals never go here: they live in
 // `./synthetic-test-authority`, which governance mode never reads.
@@ -89,4 +103,5 @@ export const CREATOR_RECORD_GOVERNANCE_AUTHORITY: PublicationAuthorityBundle = O
   questionnaire_approval: CREATOR_RECORD_QUESTIONNAIRE_APPROVAL,
   pdf_templates: CREATOR_RECORD_PDF_TEMPLATES,
   pdf_template_approval: CREATOR_RECORD_PDF_TEMPLATE_APPROVAL,
+  pdf_template_sets: CREATOR_RECORD_PDF_TEMPLATE_SETS,
 })

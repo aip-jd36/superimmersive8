@@ -14,6 +14,7 @@ import {
   type ResponseInput, type ResponseTarget,
 } from '@/lib/creator-record-flow/examination-ui'
 import { T } from '@/lib/creator-record/presentation/templates'
+import { fillReviewText, PANEL_TEXT } from '@/lib/creator-record-flow/wording'
 
 const INK = '#1a1918'
 const MUTED = '#6b6560'
@@ -44,18 +45,18 @@ export function ExaminationReview({ view, busy, onRespond, textMode }: Examinati
   const [choice, setChoice] = useState<Record<string, string>>({})
   const [reaffirm, setReaffirm] = useState<Record<string, boolean>>({})
   if (!e) return null
-  const fileName = (id: string) => view.documents.find((d) => d.document_id === id)?.file_name ?? 'Document'
+  const fileName = (id: string) => view.documents.find((d) => d.document_id === id)?.file_name ?? PANEL_TEXT.document_fallback
   const recorded = (t: ResponseTarget) => e.responses.find((r) => targetKey(r.target) === targetKey(t))
 
   const select = (t: ResponseTarget) => (
-    <select aria-label="Your response" value={choice[targetKey(t)] ?? ''} onChange={(ev) => setChoice((c) => ({ ...c, [targetKey(t)]: ev.target.value }))} disabled={busy}>
+    <select aria-label={PANEL_TEXT.your_response} value={choice[targetKey(t)] ?? ''} onChange={(ev) => setChoice((c) => ({ ...c, [targetKey(t)]: ev.target.value }))} disabled={busy}>
       <option value="">{EXAM_TEXT.no_response}</option>
       {e.response_codes.map((code) => <option key={code} value={code}>{RESPONSE_LABELS[code] ?? code}</option>)}
     </select>
   )
   const recordedNote = (t: ResponseTarget) => {
     const r = recorded(t)
-    return r ? <span className="block text-xs" style={{ color: INK }} data-recorded-response>Your response (version {r.given_in_version}): {RESPONSE_LABELS[r.code] ?? r.code}</span> : null
+    return r ? <span className="block text-xs" style={{ color: INK }} data-recorded-response>{fillReviewText(PANEL_TEXT.recorded_response, { version: r.given_in_version, label: RESPONSE_LABELS[r.code] ?? r.code })}</span> : null
   }
 
   function submit() {
@@ -76,7 +77,7 @@ export function ExaminationReview({ view, busy, onRespond, textMode }: Examinati
             {fileName(d.document_id)} <span className="ml-2 rounded border px-1.5 py-0.5 text-xs" style={{ borderColor: '#d97706', color: '#92400e' }} data-not-verified>{EXAM_TEXT.not_verified}</span>
           </h3>
           <table className="w-full text-sm mt-2">
-            <thead><tr style={{ color: MUTED }}><th className="text-left font-medium">Detail</th><th className="text-left font-medium">Appears to show</th><th className="text-left font-medium">Respond</th></tr></thead>
+            <thead><tr style={{ color: MUTED }}><th className="text-left font-medium">{PANEL_TEXT.table_detail}</th><th className="text-left font-medium">{PANEL_TEXT.table_appears}</th><th className="text-left font-medium">{PANEL_TEXT.table_respond}</th></tr></thead>
             <tbody>
               {d.observations.map((o) => {
                 const t: ResponseTarget = { kind: 'observation', run_id: d.run_id, observation_id: o.observation_id }
@@ -106,13 +107,13 @@ export function ExaminationReview({ view, busy, onRespond, textMode }: Examinati
           <p className="text-sm mb-2" style={{ color: MUTED }}>{EXAM_TEXT.comparisons_intro}</p>
           {e.comparisons.map((c) => (
             <div key={`${c.tool_index}-${c.document_id}`} className="mb-3 text-sm">
-              <p style={{ color: INK }}>Tool {c.tool_index + 1} — {fileName(c.document_id)}</p>
+              <p style={{ color: INK }}>{fillReviewText(PANEL_TEXT.comparison_heading, { n: c.tool_index + 1, file: fileName(c.document_id) })}</p>
               {(['provider', 'plan'] as const).map((field) => {
                 const t: ResponseTarget = { kind: 'comparison', tool_index: c.tool_index, document_id: c.document_id, field }
                 const declared = field === 'provider' ? c.declared.tool_id : c.declared.plan
                 return (
                   <div key={field} className="ml-3 mt-1" data-comparison-field={field}>
-                    <span style={{ color: MUTED }}>{field === 'provider' ? 'Provider' : 'Plan'}: you declared {declared ?? 'nothing'} — </span>
+                    <span style={{ color: MUTED }}>{fillReviewText(PANEL_TEXT.comparison_declared, { field: field === 'provider' ? PANEL_TEXT.comparison_provider : PANEL_TEXT.comparison_plan, declared: declared ?? PANEL_TEXT.comparison_declared_nothing })}</span>
                     <strong style={{ color: INK }}>{COMPARISON_LABELS[c[field].result] ?? c[field].result}</strong>
                     <span className="ml-2">{select(t)}</span>
                     {recordedNote(t)}
@@ -131,7 +132,7 @@ export function ExaminationReview({ view, busy, onRespond, textMode }: Examinati
           {e.guidance.map((g) => {
             const notEstablished = [
               ...g.unresolved_requirements.map((r) => unresolvedText(r)),
-              ...g.open_dependencies.map((d) => EXAM_TEXT.guidance_open_dependency(d.label ?? T.open_unlabelled)),
+              ...g.open_dependencies.map((d) => fillReviewText(EXAM_TEXT.guidance_open_dependency, { label: d.label ?? T.open_unlabelled })),
             ]
             return (
               <article key={g.claim_id} className="mb-3 rounded-md border p-3 text-sm" style={{ borderColor: LINE }} data-guidance-claim={g.claim_id}>
@@ -153,15 +154,15 @@ export function ExaminationReview({ view, busy, onRespond, textMode }: Examinati
                   {g.documents.map((d) => (
                     <div key={d.document_id} className="mt-1" style={{ color: MUTED }} data-guidance-document={d.document_id}>
                       <p>
-                        {fileName(d.document_id)} — {d.examination.status === 'examined' ? EXAM_TEXT.guidance_examined(d.examination.observation_ids.length) : EXAM_TEXT.guidance_not_examined}
+                        {fileName(d.document_id)} — {d.examination.status === 'examined' ? fillReviewText(d.examination.observation_ids.length === 1 ? EXAM_TEXT.guidance_examined_one : EXAM_TEXT.guidance_examined_other, { count: d.examination.observation_ids.length }) : EXAM_TEXT.guidance_not_examined}
                         {d.examination.status === 'examined' && <span className="ml-2 rounded border px-1 py-0.5" style={{ borderColor: '#d97706', color: '#92400e' }} data-not-verified>{EXAM_TEXT.not_verified}</span>}
                       </p>
-                      {d.comparison && <p>Provider: {COMPARISON_LABELS[d.comparison.provider.result] ?? d.comparison.provider.result}. Plan: {COMPARISON_LABELS[d.comparison.plan.result] ?? d.comparison.plan.result}.</p>}
+                      {d.comparison && <p>{fillReviewText(PANEL_TEXT.comparison_summary, { provider: COMPARISON_LABELS[d.comparison.provider.result] ?? d.comparison.provider.result, plan: COMPARISON_LABELS[d.comparison.plan.result] ?? d.comparison.plan.result })}</p>}
                     </div>
                   ))}
                   {g.documents.length > 0 && <p className="mt-1" style={{ color: MUTED }}>{EXAM_TEXT.guidance_document_effect}</p>}
                 </div>
-                <p className="mt-2 text-xs" style={{ color: MUTED }} data-guidance-provenance>{T.source_line(g.provenance.claim_last_verified)} Reference: {g.claim_id}</p>
+                <p className="mt-2 text-xs" style={{ color: MUTED }} data-guidance-provenance>{T.source_line(g.provenance.claim_last_verified)} {fillReviewText(PANEL_TEXT.guidance_reference, { claim_id: g.claim_id })}</p>
               </article>
             )
           })}

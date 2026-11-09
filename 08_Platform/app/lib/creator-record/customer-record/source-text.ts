@@ -3,7 +3,9 @@
  *
  * Some customer-visible texts carry no approval of their own: question wording
  * and help, option labels, acknowledgement wording, dependency labels and
- * caveat wording. They are approved TOGETHER, as one immutable content set,
+ * caveat wording, and (CR-V2-MVP-PROD-PREP-1) the customer wording set held in code: checkout, email, dashboard, consent
+ * controls, questionnaire chrome, panels and messages, named by its identity (`lib/creator-record-flow/customer-wording`).
+ * They are approved TOGETHER, as one immutable content set,
  * identified by the SHA-256 of its canonical form. An approval names that exact
  * digest, so changing any text (or adding or removing one) without a new
  * approval is refused.
@@ -36,7 +38,7 @@ import { canonicalJson, sha256Hex } from '../record-core/canonical'
 export const SOURCE_TEXT_SOURCE_ID = 'si8/creator-record-v2-source-text'
 
 /** The exact wording categories an approval covers. All are required; no other category exists. */
-export const SOURCE_TEXT_CATEGORIES = ['question_wording', 'option_labels', 'acknowledgement_wording', 'dependency_labels', 'caveat_wording'] as const
+export const SOURCE_TEXT_CATEGORIES = ['question_wording', 'option_labels', 'acknowledgement_wording', 'dependency_labels', 'caveat_wording', 'customer_wording'] as const
 export type SourceTextCategory = (typeof SOURCE_TEXT_CATEGORIES)[number]
 
 export const SOURCE_TEXT_LIFECYCLE = ['pending', 'approved', 'withdrawn', 'superseded'] as const
@@ -50,6 +52,12 @@ export interface SourceTextContent {
   acknowledgements: Record<string, string>
   dependency_labels: Record<string, string>
   caveats: Record<string, string>
+  /**
+   * CR-V2-MVP-PROD-PREP-1: the customer wording set the flow renders (`customerWordingIdentity()`, derived from the wording itself), supplied by the approved-inputs
+   * layer from code, never from a bundle. Absent for sources that carry none (pilot and internal sources); an approval without it covers
+   * no customer flow wording; the key is then absent, so content built from such sources is byte-identical to before this field.
+   */
+  customer_wording?: { set_id: string; version: number; sha256: string }
 }
 
 export interface SourceTextApproval {
@@ -90,6 +98,7 @@ export function sourceTextContent(sources: CreatorRecordSources, registry: Quest
     acknowledgements: { ...acknowledgements },
     dependency_labels: { ...sources.dependency_labels },
     caveats: { ...sources.caveats },
+    ...(sources.customer_wording ? { customer_wording: { set_id: sources.customer_wording.set_id, version: sources.customer_wording.version, sha256: sources.customer_wording.sha256 } } : {}),
   }
 }
 

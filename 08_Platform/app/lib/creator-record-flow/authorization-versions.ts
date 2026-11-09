@@ -8,18 +8,35 @@
  *   - AI-examination permission: null until the policies are approved; without it no live examination is offered. The application
  *     sends and grants exactly this identifier, and the database accepts a grant only for the version currently authorized there
  *     (20261113000000), so a grant under an earlier version, wording or policy no longer permits examination.
+ *
+ * CR-V2-MVP-PROD-PREP-1 / CR-V2-APPROVAL-AUTHORITY-FIX-1: an identifier binds only APPROVED wording (the slots in
+ * `lib/creator-record/evidence-intake/contract.ts`, null today) and only while that approval names the customer wording set this
+ * build renders (`customerWordingIdentity().sha256`). Publishing the policies alone binds nothing, and changing the consent text
+ * (which changes the wording set) unbinds the approval until it is renewed. The intake boundary independently refuses anything but
+ * an approved storage-consent identifier for real documents (`approvedStorageConsentIdentifier`).
  */
-import { AI_EXAMINATION_PERMISSION_DRAFT_VERSION, boundAuthorizationVersion, EVIDENCE_CONSENT_DRAFT_VERSION } from '@/lib/creator-record/evidence-intake/contract'
+import {
+  AI_EXAMINATION_PERMISSION_APPROVED_WORDING, approvedWordingIdWellFormed, boundAuthorizationVersion, CONSENT_VERSION_UNBINDABLE,
+  EVIDENCE_CONSENT_APPROVED_WORDING, EVIDENCE_CONSENT_DRAFT_VERSION, type ApprovedAuthorizationWording,
+} from '@/lib/creator-record/evidence-intake/contract'
 import { approvedPolicyVersions, type ApprovedPolicyVersions } from '@/lib/legal/policies'
+import { customerWordingIdentity } from './customer-wording'
 
-/** Never shown and never accepted: a consent that could not be bound to the policies fails closed instead of going unbound. */
-export const CONSENT_VERSION_UNBINDABLE = 'consent-version-unavailable'
+export { AI_EXAMINATION_PERMISSION_APPROVED_WORDING, CONSENT_VERSION_UNBINDABLE, EVIDENCE_CONSENT_APPROVED_WORDING, type ApprovedAuthorizationWording }
 
-export function evidenceConsentVersion(policies: ApprovedPolicyVersions | null = approvedPolicyVersions()): string {
-  if (!policies) return EVIDENCE_CONSENT_DRAFT_VERSION
-  return boundAuthorizationVersion(EVIDENCE_CONSENT_DRAFT_VERSION, policies) ?? CONSENT_VERSION_UNBINDABLE
+/** Approved, well formed, and approving the customer wording set this build renders now. */
+export function approvedWordingUsable(w: ApprovedAuthorizationWording | null, customerWordingSha256: string = customerWordingIdentity().sha256): w is ApprovedAuthorizationWording {
+  return !!w && approvedWordingIdWellFormed(w.id) && w.customer_wording_sha256 === customerWordingSha256
 }
 
-export function aiExaminationPermissionVersion(policies: ApprovedPolicyVersions | null = approvedPolicyVersions()): string | null {
-  return boundAuthorizationVersion(AI_EXAMINATION_PERMISSION_DRAFT_VERSION, policies)
+export function evidenceConsentVersion(policies: ApprovedPolicyVersions | null = approvedPolicyVersions(), wording: ApprovedAuthorizationWording | null = EVIDENCE_CONSENT_APPROVED_WORDING): string {
+  if (!policies) return EVIDENCE_CONSENT_DRAFT_VERSION
+  // Policies published but no current approved consent wording: nothing a customer could agree to (fail closed).
+  if (!approvedWordingUsable(wording)) return CONSENT_VERSION_UNBINDABLE
+  return boundAuthorizationVersion(wording.id, policies) ?? CONSENT_VERSION_UNBINDABLE
+}
+
+export function aiExaminationPermissionVersion(policies: ApprovedPolicyVersions | null = approvedPolicyVersions(), wording: ApprovedAuthorizationWording | null = AI_EXAMINATION_PERMISSION_APPROVED_WORDING): string | null {
+  if (!approvedWordingUsable(wording)) return null
+  return boundAuthorizationVersion(wording.id, policies)
 }

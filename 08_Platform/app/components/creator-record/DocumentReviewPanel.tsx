@@ -19,6 +19,7 @@
 import { useState } from 'react'
 import { DOCUMENT_FIELDS, type ExtractionMode, type ToolDocument } from '@/lib/creator-record/evidence/document-observations'
 import { T } from '@/lib/creator-record/presentation/templates'
+import { fillReviewText, PANEL_TEXT, QUESTIONNAIRE_CHROME } from '@/lib/creator-record-flow/wording'
 import type { ExaminedDocument } from '@/lib/creator-record/evidence/document-observations'
 
 const MUTED = '#6b6560'
@@ -46,7 +47,7 @@ export function DocumentReviewPanel(p: DocumentReviewPanelProps) {
   if (!p.doc && p.fixtures) {
     return (
       <div role="group" aria-labelledby={`${id}-label`} className="mt-2 mb-2 rounded-md border p-3" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
-        <p id={`${id}-label`} className="text-sm font-medium">Tool {n}: {T.public_uat_documents_choose}</p>
+        <p id={`${id}-label`} className="text-sm font-medium">{fillReviewText(QUESTIONNAIRE_CHROME.tool_prefix, { n })}{T.public_uat_documents_choose}</p>
         <p id={`${id}-help`} className="text-xs mb-2" style={{ color: MUTED }}>{T.public_uat_documents_note}</p>
         <select
           id={`${id}-fixture`}
@@ -57,7 +58,7 @@ export function DocumentReviewPanel(p: DocumentReviewPanelProps) {
           value=""
           onChange={(e) => e.target.value && p.onSelectFixture?.(e.target.value)}
         >
-          <option value="">No document</option>
+          <option value="">{PANEL_TEXT.no_document}</option>
           {p.fixtures.map((f) => (
             <option key={f.fixture_id} value={f.fixture_id}>
               {f.label}
@@ -71,10 +72,10 @@ export function DocumentReviewPanel(p: DocumentReviewPanelProps) {
   if (!p.doc) {
     return (
       <div role="group" aria-labelledby={`${id}-label`} className="mt-2 mb-2 rounded-md border p-3" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
-        <p id={`${id}-label`} className="text-sm font-medium">Tool {n}: billing document (optional)</p>
+        <p id={`${id}-label`} className="text-sm font-medium">{fillReviewText(PANEL_TEXT.billing_document_label, { n })}</p>
         <p id={`${id}-help`} className="text-xs mb-2" style={{ color: MUTED }}>
-          A receipt, invoice or billing screenshot for this tool. PDF, PNG or JPEG, up to 4 MB. Synthetic test documents only.
-          {!p.consented && ' Tick the statement under “Before you add a document” to enable this.'}
+          {PANEL_TEXT.billing_document_help}
+          {!p.consented && PANEL_TEXT.billing_document_enable}
         </p>
         <input
           type="file"
@@ -93,11 +94,11 @@ export function DocumentReviewPanel(p: DocumentReviewPanelProps) {
             disabled={!p.consented || !file || p.examining}
             onClick={() => file && p.onExamine(file)}
           >
-            {p.examining ? `Reading document for Tool ${n}…` : `Read document for Tool ${n}`}
+            {fillReviewText(p.examining ? PANEL_TEXT.reading_document : PANEL_TEXT.read_document, { n })}
           </button>
         </div>
-        {p.examining && <p role="status" className="text-xs mt-2" style={{ color: MUTED }}>Reading the document. This can take a few seconds.</p>}
-        {p.error && <p role="alert" className="text-xs mt-2 font-medium" style={{ color: ERROR }}>Error: {p.error}</p>}
+        {p.examining && <p role="status" className="text-xs mt-2" style={{ color: MUTED }}>{PANEL_TEXT.reading}</p>}
+        {p.error && <p role="alert" className="text-xs mt-2 font-medium" style={{ color: ERROR }}>{QUESTIONNAIRE_CHROME.error_prefix}{p.error}</p>}
       </div>
     )
   }
@@ -107,7 +108,7 @@ export function DocumentReviewPanel(p: DocumentReviewPanelProps) {
 
   return (
     <section aria-labelledby={`${id}-heading`} data-document-id={d.document_id} className="mt-2 mb-2 rounded-md border p-3" style={{ borderColor: 'rgba(0,0,0,0.15)' }}>
-      <h4 id={`${id}-heading`} className="text-sm font-semibold">Tool {n}: what this document appears to show</h4>
+      <h4 id={`${id}-heading`} className="text-sm font-semibold">{fillReviewText(PANEL_TEXT.appears_heading, { n })}</h4>
       <p className="text-xs mt-1" style={{ color: MUTED }}>{d.file_name} · {T.doc_fingerprint_label} {d.sha256}</p>
       <p role="status" className="text-xs mt-2">
         <span className="font-semibold">{T.doc_read_label}: </span>
@@ -138,7 +139,7 @@ export function DocumentReviewPanel(p: DocumentReviewPanelProps) {
 
       <div className="mt-3">
         <button type="button" className="rounded-md border px-3 py-1 text-xs bg-white" onClick={p.onRemove}>
-          Remove document for Tool {n}
+          {fillReviewText(PANEL_TEXT.remove_document, { n })}
         </button>
       </div>
     </section>

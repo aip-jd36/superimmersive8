@@ -101,6 +101,9 @@ function stored8(): PreparedRow {
   r.content = CUSTOMER_RECORD_EXAMINATION_CONTENT
   r.sources.source_text.record_schema.version = CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION
   r.sources.questionnaire_contract = plain.record.sources.questionnaire_contract
+  // CR-V2-MVP-PROD-PREP-1: the embedded contract names the current wording, so the source-text reference must name it too.
+  r.sources.source_text.content_sha256 = plain.record.sources.source_text.content_sha256
+  r.sources.source_text.categories = plain.record.sources.source_text.categories
   const canonical = canonicalJson(r)
   return { ...v6, canonical, sha256: sha256Hex(canonical), record_schema_version: CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION, status: 'prepared', reviewed_at: null, submission_id: null }
 }
@@ -585,10 +588,11 @@ describe('locks: PDF and issuance stay closed for schemas 7 and 8', () => {
     expect(approvedGovernanceSnapshot(asOf, CLAIMS, null).authorities.question).toEqual({ status: 'unavailable' })
   })
 
+  // CR-V2-MVP-PROD-PREP-1: re-pinned once, because the Source Text content now names the customer wording set.
   test('the synthetic contract and wording digests did not move', () => {
     const i = syntheticUatInputs()
-    expect(i.sources.questionnaire_approval!.contract_sha256).toBe('1aefef89527e17670a82be11cfe8e312386c8e1b30a03f3b1c665f228fbc1d4a')
-    expect(i.source_text!.approval!.content_sha256).toBe('e589b6d8b9172463994a2f6335f622e08f11a53e0e3822e3c9acfce4003c221e')
+    expect(i.sources.questionnaire_approval!.contract_sha256).toBe('196fdf9669a4eb17523293269e8bfe589946bd1ddccf2ca1c1b0482660d0f6c6')
+    expect(i.source_text!.approval!.content_sha256).toBe('973029718942ffd4aa60b481126fef74d65cad3b693dd38252052172e1faf1f0')
     expect(i.source_text!.approval!.record_schema.version).toBe(7)
     expect(i.source_text_examination!.approval!.record_schema.version).toBe(8)
   })

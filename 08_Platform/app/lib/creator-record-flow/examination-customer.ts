@@ -21,6 +21,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { customerLiveEnabledInThisBuild, customerLiveOffered } from './live-offer'
 import { hasPilotAccess } from './pilot-access'
 import { NO_STORE } from './http'
+import { EXAMINATION_MESSAGES } from './wording'
 
 // Both code locks (`customerLiveEnabledInThisBuild`), and the offer of a NEW live examination (`customerLiveOffered`: the locks
 // AND the approved privacy notice and terms) — CR-V2-MVP-LAUNCH-FOUNDATION-1, `./live-offer`.
@@ -110,19 +111,8 @@ export function productionReadingsIntact(ownerUserId: string, refs: readonly Ref
   )
 }
 
-const MESSAGES: Record<CustomerExaminationError['code'] | 'invalid_request', string> = {
-  invalid_request: 'The request could not be read.',
-  submissions_stopped: 'Creator Record is not taking new submissions right now.',
-  not_invited: 'Creator Record is currently available by invitation only.',
-  not_found: 'Not found.',
-  not_ready: 'This document is still being added. Try again in a moment.',
-  not_examinable: 'This document cannot be examined.',
-  examination_not_permitted: 'Document examination is not available for this document.',
-  examination_limit_reached: 'Document examination has reached its limit for now.',
-  unavailable: 'Document examination is not available right now.',
-  // CR-V2-MVP-LAUNCH-FOUNDATION-1 (8Q). DRAFT wording, not approved.
-  ai_permission_required: 'Confirm that SI8 may send this document to an AI model provider to be read before examining it.',
-}
+// CR-V2-MVP-PROD-PREP-1: the wording lives in `./wording` (customer wording set), text unchanged.
+const MESSAGES: Readonly<Record<CustomerExaminationError['code'] | 'invalid_request', string>> = EXAMINATION_MESSAGES
 
 export function examinationError(e: CustomerExaminationError | { status: 400; code: 'invalid_request' }): NextResponse {
   return NextResponse.json({ error: MESSAGES[e.code], code: e.code }, { status: e.status, headers: NO_STORE })

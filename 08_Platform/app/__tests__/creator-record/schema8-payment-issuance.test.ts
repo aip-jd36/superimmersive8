@@ -512,7 +512,8 @@ describe('8. every commercial gate stays closed by default', () => {
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('stopped')
     expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
     expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 8 })).toEqual({ templates: null, approval: null })
-    expect(GOV.pdf_template_sets).toBeUndefined()
+    // CR-V2-MVP-PROD-PREP-1: the schema 8 slot exists in the governance bundle and is empty.
+    expect(GOV.pdf_template_sets).toEqual([])
     // The controls module is mocked in this file; the shipped source is read directly.
     const controls = readFileSync(join(process.cwd(), 'lib', 'creator-record', 'live-examination', 'controls.ts'), 'utf8')
     expect(controls).toMatch(/export const LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD(: boolean)? = false/)

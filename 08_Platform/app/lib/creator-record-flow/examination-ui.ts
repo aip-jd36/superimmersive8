@@ -50,9 +50,11 @@ export const EXAM_TEXT = {
   guidance_document_effect: 'Shown for reference. Documents were not used to decide this guidance or its status, and they do not establish any condition it depends on.',
   guidance_no_document: 'No document is linked to this tool in this version.',
   guidance_not_examined: 'Linked, but not examined.',
-  guidance_examined: (count: number) => `${count} unverified ${count === 1 ? 'observation' : 'observations'}, listed above.`,
+  // CR-V2-MVP-PROD-PREP-1: `{slot}` strings instead of functions, so the customer wording set can fingerprint them. Text unchanged.
+  guidance_examined_one: '{count} unverified observation, listed above.',
+  guidance_examined_other: '{count} unverified observations, listed above.',
   guidance_not_established_label: 'Not established by this record',
-  guidance_open_dependency: (label: string) => `Open: ${label}`,
+  guidance_open_dependency: 'Open: {label}',
   payment_blocked: 'This version includes examination findings, so it cannot be paid for or issued. Prepare a version without them to continue.',
   // CR-V2-MVP-LAUNCH-FOUNDATION-1 (Decision 8Q): separate from the storage consent above. DRAFT, not approved.
   ai_permission_label: 'I permit SI8 to send the document I examine to an AI model provider, to be read for this record. Storing a document does not give this permission. I can withdraw it at any time from my dashboard.',

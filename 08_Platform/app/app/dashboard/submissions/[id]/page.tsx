@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { formatDate } from '@/lib/utils'
 import { deliveryPathFor } from '@/lib/creator-record-artifacts/config'
 import { v2DashboardState, v2DashboardView, v2FulfilmentView } from '@/lib/creator-record-flow/dashboard'
-import { V2_DASHBOARD } from '@/lib/creator-record-flow/wording'
+import { fillReviewText, V2_DASHBOARD } from '@/lib/creator-record-flow/wording'
 import {
   ArrowLeft, CheckCircle, Clock, XCircle, FileText,
   Download, ExternalLink, AlertCircle
@@ -158,12 +158,12 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 mb-6">
           <ArrowLeft className="w-4 h-4" />
-          Back to Dashboard
+          {V2_DASHBOARD.back}
         </Link>
         <div className="flex items-start justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">{V2_DASHBOARD.heading}</h1>
-            <p className="text-sm text-gray-500 mt-1">Started {formatDate(submission.created_at)}</p>
+            <p className="text-sm text-gray-500 mt-1">{fillReviewText(V2_DASHBOARD.started, { date: formatDate(submission.created_at) })}</p>
           </div>
           <span className="px-3 py-1.5 rounded-full text-sm font-semibold bg-gray-100 text-gray-800">{v2.badge}</span>
         </div>

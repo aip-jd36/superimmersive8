@@ -8,9 +8,10 @@ import { v2ListBadge } from '@/lib/creator-record-flow/dashboard'
 import { consentControlState } from '@/lib/creator-record-flow/consent-dashboard'
 import { ConsentWithdrawalControl } from '@/components/creator-record/ConsentWithdrawalControl'
 import { CREATOR_RECORD_V1_NEW_SALES } from '@/lib/submissions/build-intake-insert'
+import { V2_DASHBOARD } from '@/lib/creator-record-flow/wording'
 
 // CR-V2-CUTOVER-1: new Creator Records start at the v2 entry point; /record (v1) only while v1 sales are open.
-const CREATOR_RECORD_ENTRY = CREATOR_RECORD_V1_NEW_SALES === 'open' ? { href: '/record', label: 'Creator Record — $29' } : { href: '/creator-record', label: 'Creator Record' }
+const CREATOR_RECORD_ENTRY = CREATOR_RECORD_V1_NEW_SALES === 'open' ? { href: '/record', label: 'Creator Record — $29' } : { href: '/creator-record', label: V2_DASHBOARD.entry_label }
 
 type Submission = {
   id: string

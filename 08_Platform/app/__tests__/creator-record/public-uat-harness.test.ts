@@ -473,7 +473,8 @@ describe('analytics exclusion and noindex', () => {
 
   test('X-Robots-Tag is set for /uat and /api/uat only; the page metadata is noindex', async () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const config = require(path.join(APP, 'next.config.js'))
+    // CR-V2-APPROVAL-AUTHORITY-FIX-1: the config is a function of the build phase (the production build also checks customer wording).
+    const config = require(path.join(APP, 'next.config.js'))('phase-development-server')
     const headers = await config.headers()
     expect(headers).toEqual([
       { source: '/uat/:path*', headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] },

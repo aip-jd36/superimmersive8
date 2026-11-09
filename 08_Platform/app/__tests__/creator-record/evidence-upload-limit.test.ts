@@ -60,10 +60,13 @@ describe('Decision 8P: 4 MB upload limit, separate from the 1 MiB AI-examination
   })
 
   test('the upload help text and the route contract say 4 MB; no 1 MB upload wording remains', () => {
+    // CR-V2-MVP-PROD-PREP-1: the panel's help text and the error messages live in the customer wording set (`wording.ts`).
     const panel = readFileSync(path.join(APP, 'components/creator-record/DocumentReviewPanel.tsx'), 'utf8')
-    expect(panel).toContain('PDF, PNG or JPEG, up to 4 MB.')
-    expect(panel).not.toMatch(/up to 1 MB/)
+    const wording = readFileSync(path.join(APP, 'lib/creator-record-flow/wording.ts'), 'utf8')
+    expect(panel).toContain('PANEL_TEXT.billing_document_help')
+    expect(wording).toContain('PDF, PNG or JPEG, up to 4 MB.')
+    expect(panel + wording).not.toMatch(/up to 1 MB/)
     expect(readFileSync(path.join(APP, 'app/api/creator-record-v2/evidence/route.ts'), 'utf8')).toMatch(/at most 4 MB/)
-    expect(readFileSync(path.join(APP, 'lib/creator-record-flow/evidence-http.ts'), 'utf8')).not.toMatch(/larger than 1 MB/)
+    expect(readFileSync(path.join(APP, 'lib/creator-record-flow/evidence-http.ts'), 'utf8') + wording).not.toMatch(/larger than 1 MB/)
   })
 })

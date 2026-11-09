@@ -8,6 +8,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import type { FlowResult } from '@/lib/creator-record/customer-flow/service'
 import type { PurchaseError } from '@/lib/creator-record/customer-flow/purchase'
+import { FLOW_MESSAGES, PURCHASE_MESSAGES } from './wording'
 
 export const NO_STORE = { 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex' }
 
@@ -18,25 +19,10 @@ export async function sessionUserId(): Promise<string | null> {
   return data.user.id
 }
 
-export const unauthorized = () => NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: NO_STORE })
+export const unauthorized = () => NextResponse.json({ error: FLOW_MESSAGES.unauthorized }, { status: 401, headers: NO_STORE })
 
-const MESSAGES: Record<string, string> = {
-  invalid_request: 'The request could not be read.',
-  invalid_documents: 'One or more documents could not be used. Check your documents and try again.',
-  // CR-V2-EXAM-INTEGRATION-X3
-  invalid_responses: 'One or more responses could not be recorded. Nothing was changed.',
-  examination_unavailable: 'Examination findings could not be included right now. Nothing was changed.',
-  invalid_answers: 'Some answers need attention.',
-  not_invited: 'Creator Record is currently available by invitation only.',
-  not_found: 'Not found.',
-  superseded: 'A newer version of these answers exists. Review the latest version.',
-  conflict: 'This version changed while you were reviewing it. Reload and try again.',
-  // CR-V2-DECL-1B-2. Draft wording, not approved.
-  questionnaire_changed: 'The questionnaire has changed since this page was loaded. Nothing was recorded.',
-  integrity_failure: 'This record could not be verified. Nothing was changed.',
-  submissions_stopped: 'Creator Record is not taking new submissions right now.',
-  unavailable: 'Creator Record is not available yet.',
-}
+// CR-V2-MVP-PROD-PREP-1: the wording lives in `./wording` (customer wording set), text unchanged.
+const MESSAGES: Readonly<Record<string, string>> = FLOW_MESSAGES
 
 export function respond(result: FlowResult): NextResponse {
   if (result.ok) return NextResponse.json({ prepared: result.view }, { status: 200, headers: NO_STORE })
@@ -45,20 +31,9 @@ export function respond(result: FlowResult): NextResponse {
   return NextResponse.json(body, { status: result.status, headers: NO_STORE })
 }
 
-export const internalError = () => NextResponse.json({ error: 'Something went wrong. Nothing was changed.' }, { status: 500, headers: NO_STORE })
+export const internalError = () => NextResponse.json({ error: FLOW_MESSAGES.internal_error }, { status: 500, headers: NO_STORE })
 
-const PURCHASE_MESSAGES: Record<PurchaseError['code'], string> = {
-  not_invited: MESSAGES.not_invited,
-  not_found: MESSAGES.not_found,
-  not_reviewed: 'Confirm your declarations before payment.',
-  superseded: MESSAGES.superseded,
-  ineligible: 'This Creator Record cannot be completed at the moment.',
-  integrity_failure: MESSAGES.integrity_failure,
-  submissions_stopped: MESSAGES.submissions_stopped,
-  issuance_stopped: 'Creator Record payments are not open yet.',
-  evidence_unavailable: 'A document in this record is no longer available. Nothing was charged.',
-  unavailable: 'Creator Record is not available right now.',
-}
+const PURCHASE: Readonly<Record<PurchaseError['code'], string>> = PURCHASE_MESSAGES
 
 /** CR-V2-MVP-M3: fixed customer message for a purchase refusal (no internal detail). */
-export const purchaseMessage = (code: PurchaseError['code']): string => PURCHASE_MESSAGES[code]
+export const purchaseMessage = (code: PurchaseError['code']): string => PURCHASE[code]

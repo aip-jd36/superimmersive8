@@ -9,6 +9,7 @@
  */
 import { readFileSync } from 'fs'
 import { join } from 'path'
+import { V2_DASHBOARD } from '@/lib/creator-record-flow/wording'
 import { buildIntakeInsert, CREATOR_RECORD_V1_NEW_SALES, isV1CreatorRecord } from '@/lib/submissions/build-intake-insert'
 import {
   CREATOR_RECORD_V1_FAMILY, CREATOR_RECORD_V2_FAMILY, CreatorRecordIssuanceStoppedError, productFamilyFor, rendererForFamily, selectCreatorRecordRenderer,
@@ -56,7 +57,9 @@ describe('v1 entry points lead to the v2 entry point', () => {
 
   test('the dashboard offers Creator Record only through /creator-record, without the v1 price', () => {
     const page = read('app/dashboard/page.tsx')
-    expect(page).toContain("{ href: '/creator-record', label: 'Creator Record' }")
+    // CR-V2-APPROVAL-AUTHORITY-FIX-1: the label lives in the customer wording set.
+    expect(page).toContain("{ href: '/creator-record', label: V2_DASHBOARD.entry_label }")
+    expect(V2_DASHBOARD.entry_label).toBe('Creator Record')
     expect(page).not.toMatch(/<Link href="\/record">/)
     expect(read('app/dashboard/layout.tsx')).toContain("href={CREATOR_RECORD_V1_NEW_SALES === 'open' ? '/record' : '/creator-record'}")
   })

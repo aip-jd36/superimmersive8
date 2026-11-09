@@ -235,14 +235,14 @@ const PDF_TEMPLATES = {
 }
 
 /** Pinned digests (recomputed by the test; a mismatch means the wording changed and must be re-pinned). */
-export const SYNTHETIC_SOURCE_TEXT_SHA256 = 'e589b6d8b9172463994a2f6335f622e08f11a53e0e3822e3c9acfce4003c221e'
+export const SYNTHETIC_SOURCE_TEXT_SHA256 = '973029718942ffd4aa60b481126fef74d65cad3b693dd38252052172e1faf1f0'
 export const SYNTHETIC_PDF_TEMPLATES_FINGERPRINT = '19857320de6f205f3c56d899beb5f05cf8b1359e3e6035dc32be123880458ec2'
 
 /**
  * CR-V2-DECL-1B-1: the exact synthetic questionnaire contract. Test authorization only, like everything in this bundle: it
  * is no SI8 decision, carries no customer approval, and governance mode refuses it by its class and its text.
  */
-export const SYNTHETIC_QUESTIONNAIRE_CONTRACT_SHA256 = '1aefef89527e17670a82be11cfe8e312386c8e1b30a03f3b1c665f228fbc1d4a'
+export const SYNTHETIC_QUESTIONNAIRE_CONTRACT_SHA256 = '196fdf9669a4eb17523293269e8bfe589946bd1ddccf2ca1c1b0482660d0f6c6'
 const QUESTIONNAIRE_APPROVAL: QuestionnaireContractApproval = Object.freeze({
   contract_id: 'si8/creator-record-v2-questionnaire-contract',
   contract_version: 1,
@@ -257,7 +257,7 @@ const SOURCE_TEXT_APPROVAL: SourceTextApproval = {
   source_id: 'si8/creator-record-v2-source-text',
   version: 2,
   content_sha256: SYNTHETIC_SOURCE_TEXT_SHA256,
-  categories: ['question_wording', 'option_labels', 'acknowledgement_wording', 'dependency_labels', 'caveat_wording'],
+  categories: ['question_wording', 'option_labels', 'acknowledgement_wording', 'dependency_labels', 'caveat_wording', 'customer_wording'],
   record_schema: RECORD_SCHEMA,
   lifecycle: 'approved',
   authority: SYNTHETIC_TEST_AUTHORITY_NAME,

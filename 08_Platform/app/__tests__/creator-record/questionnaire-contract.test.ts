@@ -154,6 +154,8 @@ describe('canonical contract', () => {
     'presentation.text': (s) => { s.presentation.P1.text = 'OTHER' },
     'presentation.help': (s) => { s.presentation.P1.help = 'OTHER' },
     'presentation.option_labels': (s) => { s.presentation.L1.option_labels.yes = 'OTHER' },
+    // CR-V2-MVP-PROD-PREP-1: the customer wording set's identity (from code) is wording, covered through the wording digest.
+    'sources.customer_wording': (s) => { s.customer_wording = { set_id: 'si8/creator-record-v2-customer-wording', version: 99, sha256: 'f'.repeat(64) } },
   }
   const outsideFields: Record<string, (s: any) => void> = {
     'sources.kind': (s) => { s.kind = 'pilot' },

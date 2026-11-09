@@ -31,4 +31,14 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+// CR-V2-APPROVAL-AUTHORITY-FIX-1: every production build (whatever command runs it, including Vercel's) verifies that the customer
+// wording on disk is what the approved identity describes (template fingerprint pinned, no inline customer wording). A mismatch
+// stops the build, so no deployment can carry unapproved customer wording. Development servers are not affected.
+module.exports = (phase) => {
+  const { PHASE_PRODUCTION_BUILD } = require('next/constants')
+  if (phase === PHASE_PRODUCTION_BUILD) {
+    const errors = require('./scripts/customer-wording-check').checkCustomerWording(__dirname)
+    if (errors.length > 0) throw new Error(['Customer wording check failed (CR-V2-APPROVAL-AUTHORITY-FIX-1):', ...errors].join('\n- '))
+  }
+  return nextConfig
+}

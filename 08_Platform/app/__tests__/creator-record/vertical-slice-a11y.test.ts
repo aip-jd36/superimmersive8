@@ -11,6 +11,7 @@
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { PILOT_QUESTION_META } from '@/lib/creator-record/pilot/pilot-registry'
+import { PANEL_TEXT, QUESTIONNAIRE_CHROME as CH } from '@/lib/creator-record-flow/wording'
 
 const APP = path.resolve(__dirname, '..', '..')
 const src = (f: string) => readFileSync(path.join(APP, f), 'utf8')
@@ -37,32 +38,43 @@ test('inputs and dropdowns are labelled by the visible question legend; options 
   expect((Q.match(/aria-labelledby=\{`\$\{id\}-legend`\}/g) ?? []).length).toBe(4)
   expect(Q).toMatch(/<legend id=\{`\$\{id\}-legend`\}/)
   expect((Q.match(/<label key=\{o\}/g) ?? []).length).toBe(2)
-  expect(Q).toMatch(/Tool \{tool_index \+ 1\}: /)
-  expect(Q).toMatch(/\(required\)/)
-  expect(Q).toMatch(/<option value="">Choose…<\/option>/)
+  // CR-V2-MVP-PROD-PREP-1: the visible wording lives in the customer wording set; the component references it by key.
+  expect(Q).toMatch(/fillReviewText\(C\.tool_prefix, \{ n: tool_index \+ 1 \}\)/)
+  expect(CH.tool_prefix).toBe('Tool {n}: ')
+  expect(Q).toMatch(/p\.required \? C\.required : C\.optional/)
+  expect(CH.required).toBe('(required)')
+  expect(Q).toMatch(/<option value="">\{C\.choose\}<\/option>/)
+  expect(CH.choose).toBe('Choose…')
   // The plan dropdown always offers a way out of the suggestions.
-  expect(Q).toMatch(/Another plan \(type its name\)/)
-  expect(Q).toMatch(/aria-label=\{`Tool \$\{tool_index \+ 1\}: plan name`\}/)
+  expect(Q).toMatch(/<option value=\{ANOTHER\}>\{C\.another_plan\}<\/option>/)
+  expect(CH.another_plan).toBe('Another plan (type its name)')
+  expect(Q).toMatch(/aria-label=\{fillReviewText\(C\.plan_name_label, \{ n: tool_index \+ 1 \}\)\}/)
+  expect(CH.plan_name_label).toBe('Tool {n}: plan name')
 })
 
 test('validation errors are visible text, summarised in an alert, and tied to their field', () => {
   expect(Q).toMatch(/role="alert"/)
-  expect(Q).toMatch(/Some answers need attention/)
+  expect(Q).toMatch(/C\.issues_heading/)
+  expect(CH.issues_heading).toMatch(/^Some answers need attention/)
   expect(Q).toMatch(/id=\{`\$\{id\}-error`\}/)
   expect(Q).toMatch(/aria-invalid=\{!!issue\}/)
-  expect(Q).toMatch(/Error: \{ISSUE_TEXT/)
+  expect(Q).toMatch(/\{C\.error_prefix\}\{ISSUE_TEXT/)
+  expect(CH.error_prefix).toBe('Error: ')
 })
 
 test('the document panel uses a file input and buttons, with visible status and errors (CR-V2-MVP-6: no choice to adopt)', () => {
   expect(D).toMatch(/type="file"/)
   expect(D).toMatch(/accept="application\/pdf,image\/png,image\/jpeg"/)
-  expect(D).toMatch(/Read document for Tool \$\{n\}/)
+  expect(D).toMatch(/PANEL_TEXT\.read_document/)
+  expect(PANEL_TEXT.read_document).toBe('Read document for Tool {n}')
   expect(D).toMatch(/role="status"/)
   expect(D).toMatch(/role="alert"/)
   expect(D).not.toMatch(/type="radio"|<legend|<fieldset/)
-  expect(D).toMatch(/Remove document for Tool \{n\}/)
+  expect(D).toMatch(/PANEL_TEXT\.remove_document/)
+  expect(PANEL_TEXT.remove_document).toBe('Remove document for Tool {n}')
   // The consent statement is a visible checkbox before any document can be added.
-  expect(Q).toMatch(/Before you add a document/)
+  expect(Q).toMatch(/\{C\.documents_heading\}/)
+  expect(CH.documents_heading).toBe('Before you add a document')
 })
 
 test('submission produces a clear completion state and Start new test is always visible', () => {
