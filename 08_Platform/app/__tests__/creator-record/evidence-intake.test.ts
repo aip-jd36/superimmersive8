@@ -76,8 +76,8 @@ describe('byte validation', () => {
     expect(Array.from(sanitizeEvidenceFileName('x'.repeat(500))).length).toBe(120)
   })
 
-  test('the code lock is on: real documents are not accepted in this build', () => {
-    expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(false)
+  test('the code lock is lifted for the controlled UAT (CR-V2-MVP-PROD-UAT-ACTIVATION-1); the consent identifier stays draft-unbound here', () => {
+    expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(true)
     expect(EVIDENCE_CONSENT_DRAFT_VERSION).toMatch(/^DRAFT-UNAPPROVED-/)
   })
 })

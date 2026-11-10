@@ -23,10 +23,10 @@ jest.mock('@/lib/creator-record-flow/production', () => ({ renderCreatorRecordV2
 const read = (p: string) => readFileSync(join(__dirname, '..', '..', p), 'utf8')
 
 describe('launch configuration', () => {
-  test('v1 new sales are retired; both v2 stops are still stopped', () => {
+  test('v1 new sales are retired; both v2 stops ship open for the controlled UAT (CR-V2-MVP-PROD-UAT-ACTIVATION-1)', () => {
     expect(CREATOR_RECORD_V1_NEW_SALES).toBe('retired')
-    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
-    expect(CREATOR_RECORD_V2_ISSUANCE).toBe('stopped')
+    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open')
+    expect(CREATOR_RECORD_V2_ISSUANCE).toBe('enabled')
   })
 
   test.each([
@@ -107,7 +107,8 @@ describe('existing v1 records are served unchanged', () => {
 describe('v2 never falls back to v1', () => {
   test('a v2 submission is refused while issuance is stopped, never given the v1 renderer', () => {
     expect(productFamilyFor({ tier: 'creator_record', creator_record_product: 'v2' })).toBe(CREATOR_RECORD_V2_FAMILY)
-    expect(() => selectCreatorRecordRenderer({ tier: 'creator_record', creator_record_product: 'v2' })).toThrow(CreatorRecordIssuanceStoppedError)
+    expect(() => rendererForFamily(CREATOR_RECORD_V2_FAMILY, 'stopped')).toThrow(CreatorRecordIssuanceStoppedError) // CR-V2-MVP-PROD-UAT-ACTIVATION-1: the stop, explicitly
+    expect(selectCreatorRecordRenderer({ tier: 'creator_record', creator_record_product: 'v2' }).family).toBe(CREATOR_RECORD_V2_FAMILY)
   })
 
   test('when enabled, the v2 renderer permits no legacy path and owns no v1 version', () => {

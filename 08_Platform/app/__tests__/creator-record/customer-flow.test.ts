@@ -121,8 +121,8 @@ const okView = (r: Awaited<ReturnType<typeof preparePrepared>>) => {
 }
 
 describe('pilot controls', () => {
-  test('new V2 submissions are stopped by default in production', () => {
-    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
+  test('new V2 submissions ship open for the controlled UAT (CR-V2-MVP-PROD-UAT-ACTIVATION-1); the invitation gate below still applies', () => {
+    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open')
   })
 
   test('stopped submissions prepare and review nothing', async () => {
@@ -147,7 +147,7 @@ describe('approved sources only', () => {
   test('the production approved inputs are the founder-approved governance content, and the Production flow stays stopped', async () => {
     // CR-V2-MVP-LEGAL-CONTENT-6: R1-R6 approved (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109). New submissions remain behind their own stop.
     expect(approvedCustomerRecordInputs().source_text?.approval?.review_ref).toContain('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109')
-    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
+    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open') // CR-V2-MVP-PROD-UAT-ACTIVATION-1
     const d = deps({ inputs: approvedCustomerRecordInputs, submissions: 'stopped' })
     expect((await preparePrepared(d, OWNER, { state: state() })).ok).toBe(false)
     expect(d.mem.calls.insert).toBe(0)

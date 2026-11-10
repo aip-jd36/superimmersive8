@@ -469,8 +469,8 @@ describe('boundaries', () => {
   test('every gate stays closed', async () => {
     const lib = path.join(process.cwd(), 'lib', 'creator-record')
     expect(readFileSync(path.join(lib, 'evidence', 'config.ts'), 'utf8')).toContain('export const LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD: boolean = false')
-    expect(readFileSync(path.join(lib, 'live-examination', 'controls.ts'), 'utf8')).toContain('export const LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: boolean = false')
-    expect(readFileSync(path.join(lib, 'evidence-intake', 'contract.ts'), 'utf8')).toContain('export const EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED: boolean = false')
+    expect(readFileSync(path.join(lib, 'live-examination', 'controls.ts'), 'utf8')).toContain('export const LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: boolean = true') // CR-V2-MVP-PROD-UAT-ACTIVATION-1
+    expect(readFileSync(path.join(lib, 'evidence-intake', 'contract.ts'), 'utf8')).toContain('export const EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED: boolean = true')
     const { liveExtractionEnabled } = await import('@/lib/creator-record/evidence/config')
     expect(liveExtractionEnabled({ CREATOR_RECORD_LIVE_EXTRACTION: 'enabled' })).toBe(false)
   })

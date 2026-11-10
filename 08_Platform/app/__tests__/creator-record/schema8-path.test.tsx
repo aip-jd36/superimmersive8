@@ -80,9 +80,9 @@ describe('E4: no purchase and no checkout without both published legal policies 
     expect(src('lib/creator-record/customer-flow/purchase.ts')).toMatch(/issuance_stopped[\s\S]*submissions_stopped[\s\S]*policiesPublished\(deps\)[\s\S]*not_invited/)
     expect(src('lib/creator-record-flow/production.ts')).toMatch(/legalPoliciesApproved: \(\) => legalPoliciesApproved\(\)/)
     expect(src('app/creator-record/page.tsx')).toContain("paymentOpen={CREATOR_RECORD_V2_ISSUANCE === 'enabled' && legalPoliciesApproved()}")
-    // CR-V2-MVP-LEGAL-CONTENT-6: the policies are published, so payment now depends on the issuance stop alone, which stays stopped.
+    // CR-V2-MVP-LEGAL-CONTENT-6: the policies are published, so payment depends on the issuance stop alone (CR-V2-MVP-PROD-UAT-ACTIVATION-1: enabled for the controlled UAT).
     expect(legalPoliciesApproved()).toBe(true)
-    expect(CREATOR_RECORD_V2_ISSUANCE).toBe('stopped')
+    expect(CREATOR_RECORD_V2_ISSUANCE).toBe('enabled')
   })
 })
 

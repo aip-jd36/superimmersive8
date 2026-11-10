@@ -359,7 +359,7 @@ describe('Check 1 — governance authority for the examination-bearing record', 
       expect([f, /source_text|SourceTextApproval|record_schema|CUSTOMER_RECORD_EXAMINATION|approvedCustomerRecordInputs/.test(readFileSync(p.join(process.cwd(), f), 'utf8'))]).toEqual([f, false])
     const contract = await import('@/lib/creator-record/evidence-intake/contract')
     expect(contract.EVIDENCE_CONSENT_DRAFT_VERSION).toMatch(/^DRAFT-UNAPPROVED-/)
-    expect(contract.EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(false)
+    expect(contract.EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(true) // CR-V2-MVP-PROD-UAT-ACTIVATION-1
   })
 })
 

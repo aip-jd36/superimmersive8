@@ -5,6 +5,9 @@
  * admin-retry-renderer.test.ts and is unchanged.
  */
 
+// CR-V2-MVP-PROD-UAT-ACTIVATION-1: v2 issuance ships 'enabled' for the controlled UAT. This file proves what the stop does, so it pins the stop closed (the rollback state).
+jest.mock('@/lib/creator-record-artifacts/config', () => ({ ...jest.requireActual('@/lib/creator-record-artifacts/config'), CREATOR_RECORD_V2_ISSUANCE: 'stopped' }))
+
 const state = { submission: {} as Record<string, unknown>, pathCalls: 0, issueCalls: 0, legacyCalls: 0 }
 jest.mock('@/lib/supabase/server', () => ({ createClient: () => ({ auth: { getUser: async () => ({ data: { user: { id: 'admin-1' } }, error: null }) } }) }))
 jest.mock('@/lib/supabase/admin', () => ({

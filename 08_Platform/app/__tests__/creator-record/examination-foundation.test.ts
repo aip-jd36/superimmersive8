@@ -508,7 +508,7 @@ describe('CR-V2-DOC-2B examination foundation', () => {
     test('real-document and live-extraction code locks are unchanged', () => {
       const lib = path.join(process.cwd(), 'lib', 'creator-record')
       expect(readFileSync(path.join(lib, 'evidence', 'config.ts'), 'utf8')).toContain('export const LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD: boolean = false')
-      expect(readFileSync(path.join(lib, 'evidence-intake', 'contract.ts'), 'utf8')).toContain('export const EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED: boolean = false')
+      expect(readFileSync(path.join(lib, 'evidence-intake', 'contract.ts'), 'utf8')).toContain('export const EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED: boolean = true') // CR-V2-MVP-PROD-UAT-ACTIVATION-1
     })
   })
 

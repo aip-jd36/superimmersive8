@@ -97,10 +97,10 @@ describe('B. storage consent at the intake boundary', () => {
     expect(i.reached).toEqual(['insertPending'])
   })
 
-  test('the shipped state: the founder-approved wording names the current customer wording set, and the production wiring still admits no real document', () => {
-    // CR-V2-MVP-LEGAL-CONTENT-6: approved (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109). Real documents stay behind the separate code lock.
+  test('the shipped state: the founder-approved wording names the current customer wording set, and real documents also need the approved consent and published policies', () => {
+    // CR-V2-MVP-LEGAL-CONTENT-6: approved (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109). CR-V2-MVP-PROD-UAT-ACTIVATION-1: the real-document code lock is lifted for the controlled UAT.
     expect(EVIDENCE_CONSENT_APPROVED_WORDING).toEqual({ id: 'cr-v2-storage-consent-1', customer_wording_sha256: customerWordingIdentity().sha256 })
-    expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(false)
+    expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(true)
     expect(approvedStorageConsentIdentifier('DRAFT-UNAPPROVED-cr-v2-evidence-storage-consent-0__privacy-2026-12-01__terms-2026-12-01')).toBe(false)
     const wiring = readFileSync(path.join(APP, 'lib/creator-record-flow/evidence-production.ts'), 'utf8')
     expect(wiring).toMatch(/realDocumentsPermitted: EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED && legalPoliciesApproved\(\) && approvedStorageConsentIdentifier\(evidenceConsentVersion\(\)\)/)

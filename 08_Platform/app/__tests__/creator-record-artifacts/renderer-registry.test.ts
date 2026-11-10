@@ -119,7 +119,7 @@ describe('selection', () => {
 
   test('unsupported or unknown families fail closed; there is no default', () => {
     for (const f of ['creator_record_v2', 'creator_record', 'v1', '', '__proto__', 'constructor', 'toString', 'hasOwnProperty', null]) {
-      expect(() => rendererForFamily(f)).toThrow(UnsupportedProductFamilyError)
+      expect(() => rendererForFamily(f, 'stopped')).toThrow(UnsupportedProductFamilyError) // CR-V2-MVP-PROD-UAT-ACTIVATION-1: v2 issuance ships enabled; 'creator_record_v2' is refused here by the stop
     }
   })
 

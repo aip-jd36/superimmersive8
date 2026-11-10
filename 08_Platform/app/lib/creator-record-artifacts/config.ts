@@ -38,7 +38,7 @@ export const CREATOR_RECORD_ARTIFACT_ROLLOUT: ArtifactRolloutMode = 'all'
  * It does not affect v1.
  */
 export type V2IssuanceMode = 'stopped' | 'enabled'
-export const CREATOR_RECORD_V2_ISSUANCE: V2IssuanceMode = 'stopped'
+export const CREATOR_RECORD_V2_ISSUANCE: V2IssuanceMode = 'enabled'
 
 export const CREATOR_RECORDS_BUCKET = 'creator-records'
 export const ARTIFACTS_TABLE = 'creator_record_artifacts'

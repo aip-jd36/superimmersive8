@@ -248,8 +248,8 @@ describe('route boundaries', () => {
     expect(src('../../.github/workflows/creator-record-retention-sweep.yml')).toMatch(/secrets\.CREATOR_RECORD_RETENTION_SWEEP_SECRET/)
   })
   test('no commercial gate is opened', () => {
-    expect(src('lib/creator-record/evidence-intake/contract.ts')).toMatch(/export const EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED: boolean = false/)
-    expect(src('lib/creator-record/live-examination/controls.ts')).toMatch(/export const LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: boolean = false/)
-    expect(src('lib/creator-record/live-examination/controls.ts')).toMatch(/export const CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: boolean = false/)
+    expect(src('lib/creator-record/evidence-intake/contract.ts')).toMatch(/export const EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED: boolean = true/) // CR-V2-MVP-PROD-UAT-ACTIVATION-1
+    expect(src('lib/creator-record/live-examination/controls.ts')).toMatch(/export const LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: boolean = true/)
+    expect(src('lib/creator-record/live-examination/controls.ts')).toMatch(/export const CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: boolean = true/)
   })
 })

@@ -453,8 +453,9 @@ describe('v2 renderer and private artifact issuance', () => {
     ;(production.renderCreatorRecordV2Pdf as jest.Mock).mockReset().mockImplementation((s: CheckoutSubmission, rid: string, at: Date) => renderV2ForIssuance(deps, s, rid, at))
   })
 
-  test('stopped by default: a v2 submission never reaches a renderer', () => {
-    expect(() => selectCreatorRecordRenderer(fulfilmentSub())).toThrow(CreatorRecordIssuanceStoppedError)
+  test('stopped: a v2 submission never reaches a renderer (CR-V2-MVP-PROD-UAT-ACTIVATION-1: issuance ships enabled, so the shipped selection is the v2 renderer)', () => {
+    expect(() => rendererForFamily(CREATOR_RECORD_V2_FAMILY, 'stopped')).toThrow(CreatorRecordIssuanceStoppedError)
+    expect(selectCreatorRecordRenderer(fulfilmentSub()).family).toBe(CREATOR_RECORD_V2_FAMILY)
   })
 
   test('enabled: the v2 renderer issues one private artifact with its own generator version; a duplicate run re-issues nothing', async () => {

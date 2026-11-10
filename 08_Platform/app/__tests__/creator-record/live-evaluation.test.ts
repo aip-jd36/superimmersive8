@@ -12,6 +12,9 @@ import { createAnthropicReceiptCaller } from '@/lib/creator-record/receipt-exami
 import { deflateSync } from 'node:zlib'
 import { syntheticObjStmPdf, syntheticPdf, xrefPdf } from '@/test-support/synthetic-pdf'
 
+// CR-V2-MVP-PROD-UAT-ACTIVATION-1: both live locks ship true for the controlled UAT. This file proves the locked build, so it pins both locks false (the rollback state).
+jest.mock('@/lib/creator-record/live-examination/controls', () => ({ ...jest.requireActual('@/lib/creator-record/live-examination/controls'), LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: false, CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: false }))
+
 const ROOT = process.cwd()
 const SQL_PATH = path.join(ROOT, 'supabase', 'evaluation-only', '20261109000000_creator_record_v2_live_evaluation.sql')
 const OUTPUT = REPLAY_FIXTURES.find((f) => f.fixture_id === 'pdf-kling-pro-monthly')!.parsed_output

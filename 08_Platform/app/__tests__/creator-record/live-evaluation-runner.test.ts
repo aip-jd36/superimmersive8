@@ -17,6 +17,8 @@ import { main } from '@/scripts/creator-record-live-evaluation'
 import { syntheticFormPdf, syntheticObjStmPdf, syntheticPdf, syntheticTextPdf } from '@/test-support/synthetic-pdf'
 import { extractPdfTextLayer, MAX_FORM_DEPTH, MAX_FORM_DRAWS } from '@/lib/creator-record/evidence/pdf-text-layer'
 
+// CR-V2-MVP-PROD-UAT-ACTIVATION-1: both live locks ship true for the controlled UAT. This file proves the locked build, so it pins both locks false (the rollback state).
+jest.mock('@/lib/creator-record/live-examination/controls', () => ({ ...jest.requireActual('@/lib/creator-record/live-examination/controls'), LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: false, CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: false }))
 jest.mock('@/lib/supabase/admin', () => { throw new Error('the Supabase client must not load in this file') })
 jest.mock('@anthropic-ai/sdk', () => { throw new Error('the Anthropic SDK must not load in this file') })
 jest.mock('@anthropic-ai/sdk/helpers/json-schema', () => { throw new Error('the Anthropic SDK must not load in this file') })
@@ -209,8 +211,8 @@ describe('the pre-call input bound', () => {
 })
 
 describe('closed gates', () => {
-  test('every lock and commercial stop is unchanged', () => {
-    expect([LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD, LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD, EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED]).toEqual([false, false, false])
-    expect([CREATOR_RECORD_V2_SUBMISSIONS, CREATOR_RECORD_V2_ISSUANCE]).toEqual(['stopped', 'stopped'])
+  test('the live lock is pinned false here; the legacy lock stays false; the other gates ship in the controlled-UAT launch state (CR-V2-MVP-PROD-UAT-ACTIVATION-1)', () => {
+    expect([LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD, LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD, EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED]).toEqual([false, false, true])
+    expect([CREATOR_RECORD_V2_SUBMISSIONS, CREATOR_RECORD_V2_ISSUANCE]).toEqual(['open', 'enabled'])
   })
 })

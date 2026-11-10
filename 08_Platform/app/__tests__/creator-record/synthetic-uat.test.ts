@@ -274,9 +274,9 @@ describe('closed paths and unchanged controls', () => {
   })
 
   test('global stops, real-document and live-extraction locks are unchanged', () => {
-    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
-    expect(CREATOR_RECORD_V2_ISSUANCE).toBe('stopped')
-    expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(false)
+    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open') // CR-V2-MVP-PROD-UAT-ACTIVATION-1
+    expect(CREATOR_RECORD_V2_ISSUANCE).toBe('enabled')
+    expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(true)
     expect(LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD).toBe(false)
   })
 

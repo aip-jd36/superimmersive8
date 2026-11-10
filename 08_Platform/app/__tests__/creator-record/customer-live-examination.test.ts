@@ -14,6 +14,8 @@ import { CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flo
 import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/config'
 import { CURRENT_ISSUANCE_SUPPORT } from '@/lib/creator-record/customer-record/governance-state'
 
+// CR-V2-MVP-PROD-UAT-ACTIVATION-1: both live locks ship true for the controlled UAT. This file proves the locked build, so it pins both locks false (the rollback state).
+jest.mock('@/lib/creator-record/live-examination/controls', () => ({ ...jest.requireActual('@/lib/creator-record/live-examination/controls'), LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: false, CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: false }))
 jest.mock('@/lib/supabase/admin', () => ({ supabaseAdmin: new Proxy({}, { get: () => { throw new Error('no database in this test') } }) }))
 
 const APP = process.cwd()
@@ -26,7 +28,7 @@ describe('both code locks are off in this build', () => {
   test('the constants', () => {
     expect(LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD).toBe(false)
     expect(CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD).toBe(false)
-    expect(readFileSync(path.join(APP, 'lib/creator-record/live-examination/controls.ts'), 'utf8')).toContain('export const CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: boolean = false')
+    expect(readFileSync(path.join(APP, 'lib/creator-record/live-examination/controls.ts'), 'utf8')).toContain('export const CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: boolean = true') // the shipped value; pinned false above
   })
 
   test('the customer entry point refuses on its first line and touches no port', async () => {
@@ -49,10 +51,10 @@ describe('both code locks are off in this build', () => {
     expect(src).toContain("import('@/lib/creator-record/live-examination/customer')")
   })
 
-  test('every other gate is closed too', () => {
-    expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(false)
-    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
-    expect(CREATOR_RECORD_V2_ISSUANCE).toBe('stopped')
+  test('the other gates ship in the controlled-UAT launch state (CR-V2-MVP-PROD-UAT-ACTIVATION-1)', () => {
+    expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(true)
+    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open')
+    expect(CREATOR_RECORD_V2_ISSUANCE).toBe('enabled')
     expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [{ id: 'si8/creator-record-v2-record', version: 7 }, { id: 'si8/creator-record-v2-record', version: 8 }], builders: [{ id: 'si8/creator-record-v2-record-builder', version: 5 }, { id: 'si8/creator-record-v2-record-builder', version: 7 }], examination_methods: [{ origin: 'live_model', provider: 'anthropic', model: 'claude-sonnet-5', profile: { id: 'receipt', version: 1, schema: 'receipt-extraction-v2', prompt: 'receipt-prompt-v2' } }] }) // R15 option (a), JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110
   })
 })

@@ -579,9 +579,9 @@ describe('locks: PDF and issuance stay closed for schemas 7 and 8', () => {
   })
 
   test('publication, payment and issuance switches are unchanged, and customer governance stays closed', () => {
-    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
-    expect(CREATOR_RECORD_V2_ISSUANCE).toBe('stopped')
-    expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(false)
+    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open') // CR-V2-MVP-PROD-UAT-ACTIVATION-1
+    expect(CREATOR_RECORD_V2_ISSUANCE).toBe('enabled')
+    expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(true)
     // CR-V2-MVP-LEGAL-CONTENT-6: customer governance carries the founder-approved content; the stops above stay in force.
     expect(GOV.questionnaire_approval?.review_ref).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109')
     expect(GOV.source_text_approval?.review_ref).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109 schema 7')

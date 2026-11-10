@@ -26,7 +26,7 @@ import { EVIDENCE_CATEGORIES, EVIDENCE_MAX_BYTES, EVIDENCE_MAX_FILE_NAME_CHARS, 
 export const EVIDENCE_BUCKET = 'creator-record-evidence'
 
 /** Code lock: real customer documents are not accepted in this build. */
-export const EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED: boolean = false
+export const EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED: boolean = true
 
 /**
  * DRAFT consent identifier. NOT approved wording: it only lets the server require and record that a consent

@@ -39,6 +39,9 @@ jest.mock('@anthropic-ai/sdk/helpers/json-schema', () => {
   throw new Error('the Anthropic SDK must not load in this file')
 })
 
+// CR-V2-MVP-PROD-UAT-ACTIVATION-1: both live locks ship true for the controlled UAT. This file proves the locked build, so it pins both locks false (the rollback state).
+jest.mock('@/lib/creator-record/live-examination/controls', () => ({ ...jest.requireActual('@/lib/creator-record/live-examination/controls'), LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: false, CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: false }))
+
 const OWNER = '11111111-1111-4111-8111-111111111111'
 const OTHER = '22222222-2222-4222-8222-222222222222'
 const DOC = '33333333-3333-4333-8333-333333333333'
@@ -60,8 +63,8 @@ describe('the code lock', () => {
   test('every lock is false in this build', () => {
     expect(LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD).toBe(false)
     expect(LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD).toBe(false)
-    expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(false)
-    expect(readFileSync(path.join(process.cwd(), 'lib', 'creator-record', 'live-examination', 'controls.ts'), 'utf8')).toContain('export const LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: boolean = false')
+    expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(true)
+    expect(readFileSync(path.join(process.cwd(), 'lib', 'creator-record', 'live-examination', 'controls.ts'), 'utf8')).toContain('export const LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: boolean = true') // the shipped value; pinned false above
   })
 
   test('the real executor cannot be built, even with a valid authorization, the environment and a key, and the adapter is never loaded', async () => {
@@ -72,7 +75,7 @@ describe('the code lock', () => {
   })
 
   test('the environment alone opens nothing', () => {
-    expect(liveEvaluationEnabled(ENV, AUTH, NOW)).toBe(false)
+    expect(liveEvaluationEnabled(ENV, AUTH, NOW, LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD)).toBe(false)
     expect(extractionMode({ [LIVE_EXTRACTION_ENV]: 'enabled', ...ENV })).toBe('fixture_replay')
   })
 
@@ -348,9 +351,9 @@ describe('what stays closed', () => {
   const files = ['lib', 'app', 'components', 'scripts'].flatMap((r) => { try { return walk(path.join(root, r)) } catch { return [] } })
   const NEW = ['lib/creator-record/live-examination/controls.ts', 'lib/creator-record/live-examination/real-executor.ts', 'lib/creator-record/live-examination/document-access.ts', 'lib/creator-record/live-examination/evaluation.ts', 'lib/creator-record-flow/live-examination-production.ts']
 
-  test('customer submissions and issuance are stopped', () => {
-    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
-    expect(CREATOR_RECORD_V2_ISSUANCE).toBe('stopped')
+  test('customer submissions and issuance ship open for the controlled UAT (CR-V2-MVP-PROD-UAT-ACTIVATION-1)', () => {
+    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open')
+    expect(CREATOR_RECORD_V2_ISSUANCE).toBe('enabled')
   })
 
   test('no route or page reaches the foundation, the real executor or the production ports', () => {

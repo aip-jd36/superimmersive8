@@ -10,6 +10,8 @@ import { RECEIPT_LIVE_PROFILE, runLiveExamination } from '@/lib/creator-record/l
 import { loadRealLiveExecutor } from '@/lib/creator-record/live-examination/real-executor'
 
 jest.mock('@/lib/creator-record/evidence/config', () => ({ ...jest.requireActual('@/lib/creator-record/evidence/config'), LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD: true }))
+// CR-V2-MVP-PROD-UAT-ACTIVATION-1: both live locks ship true for the controlled UAT. This file proves the locked build, so it pins both locks false (the rollback state).
+jest.mock('@/lib/creator-record/live-examination/controls', () => ({ ...jest.requireActual('@/lib/creator-record/live-examination/controls'), LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: false, CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: false }))
 jest.mock('@anthropic-ai/sdk', () => {
   throw new Error('the Anthropic SDK must not load in this file')
 })
@@ -25,7 +27,7 @@ describe('the old prototype lock open, the v3 lock closed', () => {
   test('the two locks are in that state', () => {
     expect(LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD).toBe(true)
     expect(LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD).toBe(false)
-    expect(liveEvaluationEnabled(ENV, AUTH, new Date('2026-11-06T10:00:00.000Z'))).toBe(false)
+    expect(liveEvaluationEnabled(ENV, AUTH, new Date('2026-11-06T10:00:00.000Z'), LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD)).toBe(false)
   })
 
   test('the v3 examination refuses, with no read and no model call, whatever the caller supplies', async () => {

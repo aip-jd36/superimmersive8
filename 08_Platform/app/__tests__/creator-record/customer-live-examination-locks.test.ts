@@ -6,7 +6,7 @@ import { CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD, LIVE_EXAMINATION_PER
 import { examineCustomerDocumentLive, type CustomerLivePorts } from '@/lib/creator-record/live-examination/customer'
 import { loadCustomerLiveExecutor } from '@/lib/creator-record/live-examination/real-executor'
 
-jest.mock('@/lib/creator-record/live-examination/controls', () => ({ ...jest.requireActual('@/lib/creator-record/live-examination/controls'), LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: true }))
+jest.mock('@/lib/creator-record/live-examination/controls', () => ({ ...jest.requireActual('@/lib/creator-record/live-examination/controls'), LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: true, CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: false })) // CR-V2-MVP-PROD-UAT-ACTIVATION-1: the customer lock ships true; pinned false here
 jest.mock('@/lib/supabase/admin', () => ({ supabaseAdmin: new Proxy({}, { get: () => { throw new Error('no database in this test') } }) }))
 
 test('the evaluation lock is lifted here, the customer lock is not', () => {

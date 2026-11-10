@@ -13,6 +13,8 @@ import path from 'node:path'
 
 const counts = { artifactStatus: 0, gate: 0, issueArtifact: 0, legacy: 0, legacyHas: 0 }
 jest.mock('@/lib/supabase/admin', () => ({ supabaseAdmin: {} }))
+// CR-V2-MVP-PROD-UAT-ACTIVATION-1: v2 issuance ships 'enabled' for the controlled UAT. This file proves what the stop does, so it pins the stop closed (the rollback state).
+jest.mock('@/lib/creator-record-artifacts/config', () => ({ ...jest.requireActual('@/lib/creator-record-artifacts/config'), CREATOR_RECORD_V2_ISSUANCE: 'stopped' }))
 jest.mock('@/lib/creator-record-artifacts/store', () => ({
   artifactStatus: async () => ((counts.artifactStatus++), null),
   artifactGateDecision: async () => ((counts.gate++), 'all'),
@@ -51,7 +53,8 @@ const v1 = (): FulfillmentSubmission => ({ ...v2(), id: 'sub-v1', creator_record
 const reset = () => { for (const k of Object.keys(counts) as (keyof typeof counts)[]) counts[k] = 0 }
 
 describe('the stop at the renderer-selection boundary', () => {
-  test('v2 issuance is stopped by default', () => {
+  test('v2 issuance ships enabled for the controlled UAT; this file pins it stopped', () => {
+    expect(jest.requireActual<typeof import('@/lib/creator-record-artifacts/config')>('@/lib/creator-record-artifacts/config').CREATOR_RECORD_V2_ISSUANCE).toBe('enabled')
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('stopped')
   })
 

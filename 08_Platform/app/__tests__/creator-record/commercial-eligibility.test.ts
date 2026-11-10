@@ -428,8 +428,8 @@ describe('9: reading stays exactly as it was', () => {
 
 describe('10: the existing stops are all still in force', () => {
   test('submissions and issuance are stopped, and customer governance carries the approved wording and PDF templates', () => {
-    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
-    expect(CREATOR_RECORD_V2_ISSUANCE).toBe('stopped')
+    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open') // CR-V2-MVP-PROD-UAT-ACTIVATION-1
+    expect(CREATOR_RECORD_V2_ISSUANCE).toBe('enabled')
     // Wording and contract: JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109. Templates (R9): JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110. Issuance stays stopped.
     expect(GOV.questionnaire_approval?.review_ref).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109')
     expect(approvedCustomerRecordInputs(GOV).source_text?.approval?.review_ref).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109 schema 7')
@@ -438,8 +438,9 @@ describe('10: the existing stops are all still in force', () => {
   })
 
   test('the renderer stop still comes first, on every issuance path', () => {
-    expect(() => selectCreatorRecordRenderer(FULFILLMENT_SUB)).toThrow(CreatorRecordIssuanceStoppedError)
-    expect(() => rendererForFamily(CREATOR_RECORD_V2_FAMILY)).toThrow(CreatorRecordIssuanceStoppedError)
+    // CR-V2-MVP-PROD-UAT-ACTIVATION-1: issuance ships enabled, so the shipped selection reaches the v2 renderer; the stop still refuses first when stopped.
+    expect(selectCreatorRecordRenderer(FULFILLMENT_SUB).family).toBe(CREATOR_RECORD_V2_FAMILY)
+    expect(() => rendererForFamily(CREATOR_RECORD_V2_FAMILY, 'stopped')).toThrow(CreatorRecordIssuanceStoppedError)
   })
 
   test('purchase and checkout still refuse on each stop before anything else', async () => {

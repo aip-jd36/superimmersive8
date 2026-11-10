@@ -509,14 +509,14 @@ describe('7. historical schema 7 behaviour is unchanged', () => {
 describe('8. every commercial gate stays closed by default', () => {
   test('the support list is the approved R15 list, both stops are stopped, Production has the approved templates, and both live locks are false in source', () => {
     expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [{ id: 'si8/creator-record-v2-record', version: 7 }, { id: 'si8/creator-record-v2-record', version: 8 }], builders: [{ id: 'si8/creator-record-v2-record-builder', version: 5 }, { id: 'si8/creator-record-v2-record-builder', version: 7 }], examination_methods: [{ origin: 'live_model', provider: 'anthropic', model: 'claude-sonnet-5', profile: { id: 'receipt', version: 1, schema: 'receipt-extraction-v2', prompt: 'receipt-prompt-v2' } }] }) // R15 option (a), JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110
-    expect(CREATOR_RECORD_V2_ISSUANCE).toBe('stopped')
-    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
+    expect(CREATOR_RECORD_V2_ISSUANCE).toBe('enabled') // CR-V2-MVP-PROD-UAT-ACTIVATION-1
+    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open')
     expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).approval?.fingerprint).toBe('a26f10643cfa838541fc4cf5ffd11e4d80cb90d2241610e8bbb7530c320a7346')
     expect(GOV.pdf_template_sets).toHaveLength(1)
     // The controls module is mocked in this file; the shipped source is read directly.
     const controls = readFileSync(join(process.cwd(), 'lib', 'creator-record', 'live-examination', 'controls.ts'), 'utf8')
-    expect(controls).toMatch(/export const LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD(: boolean)? = false/)
-    expect(controls).toMatch(/export const CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD(: boolean)? = false/)
+    expect(controls).toMatch(/export const LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD(: boolean)? = true/)
+    expect(controls).toMatch(/export const CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD(: boolean)? = true/)
   })
 
   test('an unlisted schema, builder or reading method refuses the eligible record, not merely one of them', () => {
@@ -535,6 +535,6 @@ describe('8. every commercial gate stays closed by default', () => {
     const p = purchaseDeps()
     expect(await startPurchase({ ...p.deps, issuance: 'stopped' }, OWNER, ROW.id)).toEqual({ ok: false, status: 503, code: 'issuance_stopped' })
     expect(await startPurchase({ ...p.deps, submissions: 'stopped' }, OWNER, ROW.id)).toEqual({ ok: false, status: 503, code: 'submissions_stopped' })
-    expect(() => rendererForFamily(CREATOR_RECORD_V2_FAMILY)).toThrow(CreatorRecordIssuanceStoppedError)
+    expect(() => rendererForFamily(CREATOR_RECORD_V2_FAMILY, 'stopped')).toThrow(CreatorRecordIssuanceStoppedError)
   })
 })
