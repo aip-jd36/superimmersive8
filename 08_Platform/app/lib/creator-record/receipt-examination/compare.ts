@@ -18,10 +18,12 @@
  * 'unresolved'. None of these results is an entitlement, licence or rights
  * finding, and none feeds Living Knowledge, applicability or interpretation.
  *
- * Plan (v2, SPIKE-1D): the comparison considers EVERY printed plan-name
- * observation (`plan_candidates` plus the selected `product_or_plan_name`).
- * Two observations are the same plan only when their identifying tokens are
- * identical after removing formatting, filler words and provider-name tokens;
+ * Plan (v2, SPIKE-1D; v3 G-R1, CR-V2-RECEIPT-GATE-1B): the comparison
+ * considers EVERY printed plan-name observation (`plan_candidates` plus the
+ * selected `product_or_plan_name`). Two observations are the same plan only
+ * when their identifying tokens are identical after removing formatting,
+ * filler words and a leading canonical tool identifier (bracketed text kept;
+ * customer-typed and issuer-printed names never removed — `planIdentityTokens`);
  * no subset, prefix or synonym equivalence. More than one distinct plan ->
  * 'unresolved', whichever one the model selected and whatever
  * `multiple_plans_shown` says. LIMITATION: these rules see only what the model
@@ -34,7 +36,7 @@
  */
 
 import { normalizeCandidate, type CandidateObservation } from '@/lib/interview-engine/extraction'
-import { distinctPlanObservations, normalizeName, planTokens } from './plan-tokens'
+import { distinctPlanIdentities, distinctPlanObservations, normalizeName, planIdentityTokens, planTokens } from './plan-tokens'
 import {
   BILLING_DOCUMENT_TYPES,
   isIsoCalendarDate,
@@ -42,9 +44,10 @@ import {
   type ReceiptExtraction,
 } from './schema'
 
-export { distinctPlanObservations, normalizeName, planTokens }
+export { distinctPlanIdentities, distinctPlanObservations, normalizeName, planIdentityTokens, planTokens }
 
-export const COMPARISON_RULES_VERSION = 'receipt-comparison-v2' as const
+/** v3 (CR-V2-RECEIPT-GATE-1B): plan comparison uses the G-R1 rules (`planIdentityTokens`). */
+export const COMPARISON_RULES_VERSION = 'receipt-comparison-v3' as const
 
 /** Mirrors the persisted `tools_used[]` keys written by app/record/page.tsx. */
 export interface DeclaredTool {
@@ -213,14 +216,35 @@ export function compareProvider(ex: ReceiptExtraction, declared: DeclaredTool): 
 
 
 
+/**
+ * G-R1: the only identity tokens a plan name may lose are those of a canonical
+ * tool identifier resolved by SI8 (never the customer's typed text, never the
+ * issuer's printed name).
+ */
+function canonicalToolIds(ex: ReceiptExtraction, declared: DeclaredTool): string[] {
+  const ids: string[] = []
+  for (const name of [declared.tool_name, ex.issuer_name.status === 'present' ? ex.issuer_name.value : null]) {
+    if (!name || !name.trim()) continue
+    const r = resolveIdentity(name)
+    if (r.status === 'resolved' && !ids.includes(r.id)) ids.push(r.id)
+  }
+  return ids
+}
+
+/** Exact existing alias resolution only (no merchant cleanup): used to recognise a tool name printed at the start of a plan line. */
+function aliasIdentity(phrase: string): string | null {
+  const r = normalizeToolName(phrase)
+  return r.status === 'resolved' ? r.canonical_identifier : null
+}
+
 export function comparePlan(ex: ReceiptExtraction, declared: DeclaredTool): Comparison {
   const gate = documentGate(ex)
   if (gate) return gate
   if (ex.multiple_plans_shown) return c('unresolved', 'multiple_plans_shown')
 
-  const providers = [declared.tool_name, ex.issuer_name.status === 'present' ? ex.issuer_name.value : null]
+  const providers = canonicalToolIds(ex, declared)
   // Conflict check first, independent of which observation the model selected.
-  const observed = distinctPlanObservations(ex, providers)
+  const observed = distinctPlanIdentities(ex, providers, aliasIdentity)
   if (observed.length > 1) return c('unresolved', 'plan_candidates_conflict')
 
   const selected = ex.product_or_plan_name
@@ -231,14 +255,14 @@ export function comparePlan(ex: ReceiptExtraction, declared: DeclaredTool): Comp
   const fg = fieldGate(selected)
   if (fg) return fg
   // The selected value must be backed by a listed observation of the same plan.
-  const docTokens = planTokens(selected.value!, providers)
+  const docTokens = planIdentityTokens(selected.value!, providers, aliasIdentity)
   const docKey = docTokens.join(' ')
-  if (!ex.plan_candidates.some((p) => planTokens(p.text, providers).join(' ') === docKey)) {
+  if (!ex.plan_candidates.some((p) => planIdentityTokens(p.text, providers, aliasIdentity).join(' ') === docKey)) {
     return c('unresolved', 'plan_candidates_missing')
   }
   if (!declared.plan_type || !declared.plan_type.trim()) return c('unresolved', 'declared_value_missing')
 
-  const declaredTokens = planTokens(declared.plan_type, providers)
+  const declaredTokens = planIdentityTokens(declared.plan_type, providers, aliasIdentity)
   if (docTokens.length === 0 || declaredTokens.length === 0) return c('unresolved', 'plan_not_identifiable')
   const equal = docTokens.length === declaredTokens.length && docTokens.every((t, i) => t === declaredTokens[i])
   return equal ? c('consistent', 'plan_tokens_equal') : c('differs', 'plan_tokens_differ')

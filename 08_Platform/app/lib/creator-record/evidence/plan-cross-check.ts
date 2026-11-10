@@ -25,6 +25,11 @@
  *     represented in the reported plan observations → `other_plan_names_found`.
  *     Occurrences inside the seller's name do not count (G-R1: issuer names
  *     never feed plan tokens).
+ *   - CR-V2-RECEIPT-GATE-1B (PM architecture decision): the vocabulary for
+ *     G-R2 comes from the product-side factual list
+ *     (`receipt-examination/provider-plan-vocabulary.ts`, via
+ *     `receipt-examination/receipt-plan-scope.ts`), not from governed propositions. The
+ *     governed-value scope above is retained, unwired, for its existing tests.
  *   - One-directional: the text layer can only push toward "could not be
  *     determined" and withhold adoption. It never establishes which plan was
  *     purchased, never confirms a reading, and never relaxes anything.
@@ -42,12 +47,22 @@ export const CROSS_CHECK_STATUSES = ['other_plan_names_found', 'no_other_plan_na
 export type CrossCheckStatus = (typeof CROSS_CHECK_STATUSES)[number]
 
 /** Why no provider-scoped vocabulary could be applied (CR-V2-MVP-4). */
-export const PLAN_SCOPE_UNAVAILABLE_REASONS = ['provider_not_shown', 'provider_not_recognized', 'provider_ambiguous', 'no_governed_plan_names'] as const
+export const PLAN_SCOPE_UNAVAILABLE_REASONS = [
+  'provider_not_shown', 'provider_not_recognized', 'provider_ambiguous', 'no_governed_plan_names',
+  // CR-V2-RECEIPT-GATE-1B: the product-side factual vocabulary (`provider-plan-vocabulary.ts`) could not be used.
+  'vocabulary_not_found', 'vocabulary_duplicate', 'vocabulary_not_approved', 'vocabulary_review_overdue', 'vocabulary_insufficiently_sourced',
+  // A partial vocabulary found nothing: absence is not established.
+  'vocabulary_incomplete',
+] as const
 export type PlanScopeUnavailableReason = (typeof PLAN_SCOPE_UNAVAILABLE_REASONS)[number]
 
-/** The vocabulary for one document: its seller resolved to exactly one canonical tool, with that tool's governed plan names. */
+/**
+ * The vocabulary for one document: its seller resolved to exactly one canonical tool, with that tool's plan names.
+ * `complete: false` (CR-V2-RECEIPT-GATE-1B) = the names are known not to cover every plan: hits still count,
+ * but no hits never yields `no_other_plan_names_found`.
+ */
 export type PlanScope =
-  | { status: 'established'; provider: string; vocabulary: readonly string[] }
+  | { status: 'established'; provider: string; vocabulary: readonly string[]; complete?: boolean }
   | { status: 'unavailable'; reason: PlanScopeUnavailableReason }
 
 export interface PlanCrossCheck {
@@ -128,5 +143,6 @@ export function crossCheckPlan(extraction: ReceiptExtraction | null, layer: Text
       break
     }
   }
-  return found.length > 0 ? result('other_plan_names_found', found) : result('no_other_plan_names_found')
+  if (found.length > 0) return result('other_plan_names_found', found)
+  return scope.complete === false ? result('provider_scope_unavailable', [], 'vocabulary_incomplete') : result('no_other_plan_names_found')
 }

@@ -187,7 +187,7 @@ describe('v2 plan candidates (SPIKE-1D)', () => {
   const providers = [declared.tool_name, 'Runway AI, Inc.']
 
   test('comparison contract is versioned', () => {
-    expect(COMPARISON_RULES_VERSION).toBe('receipt-comparison-v2')
+    expect(COMPARISON_RULES_VERSION).toBe('receipt-comparison-v3')
   })
 
   test('SPIKE-1C false consistent: title "Standard" + charge line "Pro Plan (Monthly)" is unresolved once both are listed', () => {

@@ -30,7 +30,7 @@ import {
   type ReceiptExtraction,
 } from '../receipt-examination/schema'
 import type { DocumentObservation, RecordContext } from '../contract/provenance'
-import { distinctPlanObservations, planTokens } from '../receipt-examination/plan-tokens'
+import { distinctPlanIdentities, planIdentityTokens } from '../receipt-examination/plan-tokens'
 import { CROSS_CHECK_STATUSES, type PlanCrossCheck } from './plan-cross-check'
 import type { CouldNotExamineReason } from '../receipt-examination/examine'
 import type { ReceiptMediaType } from '../receipt-examination/prompt'
@@ -217,11 +217,12 @@ export function reconcileToolEvidence(input: ToolEvidenceInput, resolveSeller: (
     if (p.status !== 'present' || !p.value) return r('does_not_establish', 'plan_not_read')
     if (INCOMPLETE.test(p.value) || ex.plan_candidates.some((c) => INCOMPLETE.test(c.text))) return r('does_not_establish', 'plan_incomplete')
     if (!p.evidence || !p.evidence.normalize('NFKC').toLowerCase().includes(p.value.normalize('NFKC').toLowerCase())) return r('does_not_establish', 'plan_not_in_excerpt')
-    const providers = [ex.issuer_name.value, input.declared_tool_id]
-    if (ex.multiple_plans_shown || distinctPlanObservations(ex, providers).length > 1) return r('does_not_establish', 'more_than_one_plan')
-    const docKey = planTokens(p.value, providers).join(' ')
-    if (!ex.plan_candidates.some((c) => planTokens(c.text, providers).join(' ') === docKey)) return r('does_not_establish', 'plan_not_listed')
-    const declaredKey = planTokens(plan, providers).join(' ')
+    // G-R1 (CR-V2-RECEIPT-GATE-1B): only the resolved canonical tool id may be removed from plan text; the printed issuer name never is.
+    const providers = [input.declared_tool_id]
+    if (ex.multiple_plans_shown || distinctPlanIdentities(ex, providers).length > 1) return r('does_not_establish', 'more_than_one_plan')
+    const docKey = planIdentityTokens(p.value, providers).join(' ')
+    if (!ex.plan_candidates.some((c) => planIdentityTokens(c.text, providers).join(' ') === docKey)) return r('does_not_establish', 'plan_not_listed')
+    const declaredKey = planIdentityTokens(plan, providers).join(' ')
     if (docKey === '' || declaredKey === '') return r('does_not_establish', 'plan_not_identifiable')
     return docKey === declaredKey ? r('appears_consistent', 'same_plan_name') : r('appears_to_conflict', 'different_plan_name')
   })()
