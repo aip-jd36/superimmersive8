@@ -432,7 +432,7 @@ describe('referenced runs at payment and issuance', () => {
   })
 
   test('v6 is not an issuable record schema, and current templates do not render it', () => {
-    expect(CURRENT_ISSUANCE_SUPPORT.record_schemas).toEqual([])
+    expect(CURRENT_ISSUANCE_SUPPORT.record_schemas.map((s) => s.version)).toEqual([7, 8]) // v6 is never listed
     const r = built(buildCustomerRecord(examined()))
     const b = CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY
     expect(() => buildCustomerDocument({ canonical: r.canonical, sha256: r.sha256, issued: { record_id: 'CR-2026-AAAAAAAA', issued_on: '2026-11-01' }, templates: b?.pdf_templates ?? null, template_approval: b?.pdf_template_approval ?? null })).toThrow()

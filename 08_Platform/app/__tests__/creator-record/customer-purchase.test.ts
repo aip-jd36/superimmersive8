@@ -387,9 +387,10 @@ describe('renderV2ForIssuance', () => {
   })
 
   test('without approved PDF templates (production: none until M0) issuance refuses before anything is rendered', async () => {
-    expect(approvedPdfTemplates()).toEqual({ templates: null, approval: null })
+    // JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110: Production now has approved templates; the refusal path is exercised with none supplied.
+    expect(approvedPdfTemplates().approval?.review_ref).toBe('JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110 R9')
     // CR-V2-MVP-M4A: the render check is part of the issuance authorization, so the refusal is typed and nothing reaches the PDF step.
-    const { deps, rendered } = issuance([preparedRow({ submission_id: SUB_ID })], { templates: (schema) => approvedPdfTemplates(undefined, schema) })
+    const { deps, rendered } = issuance([preparedRow({ submission_id: SUB_ID })], { templates: () => ({ templates: null, approval: null }) })
     await expect(renderV2ForIssuance(deps, v2sub(), RECORD_ID, NOW)).rejects.toEqual(new V2IssuanceRefusal('templates_unavailable'))
     expect(rendered).toHaveLength(0)
     // The PDF builder itself still refuses them, as before.

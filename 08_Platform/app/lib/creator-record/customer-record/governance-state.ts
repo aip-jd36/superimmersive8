@@ -53,10 +53,14 @@ export interface IssuanceSupport {
  * a model reading stays refused even once schema 8 is listed, until that exact method is separately authorized. Reading a record
  * does not depend on this list.
  */
+// R15 option (a), founder-approved (JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110). Issuance itself stays behind CREATOR_RECORD_V2_ISSUANCE ('stopped'), and a
+// schema 8 reading exists only once live examination is separately activated.
 export const CURRENT_ISSUANCE_SUPPORT: IssuanceSupport = Object.freeze({
-  record_schemas: [],
-  builders: [],
-  examination_methods: [],
+  record_schemas: [{ id: 'si8/creator-record-v2-record', version: 7 }, { id: 'si8/creator-record-v2-record', version: 8 }],
+  builders: [{ id: 'si8/creator-record-v2-record-builder', version: 5 }, { id: 'si8/creator-record-v2-record-builder', version: 7 }],
+  examination_methods: [
+    { origin: 'live_model' as const, provider: 'anthropic', model: 'claude-sonnet-5', profile: { id: 'receipt', version: 1, schema: 'receipt-extraction-v2', prompt: 'receipt-prompt-v2' } },
+  ],
 })
 
 export interface CurrentGovernance {

@@ -435,7 +435,7 @@ describe('E2: purchaseOfferable — the page may offer payment only when every p
     ['policies not published', { legalPoliciesApproved: () => false }],
     ['no policy port', { legalPoliciesApproved: undefined }],
     ['the policy port throws', { legalPoliciesApproved: () => { throw new Error('x') } }],
-    ['no commercial support for the schema (this build)', { governance: (d) => approvedGovernanceSnapshot(d, TOPIC_CLAIMS_FIXTURE, SYNTHETIC) }],
+    ['no commercial support listed for the schema', { governance: (d) => { const s = approvedGovernanceSnapshot(d, TOPIC_CLAIMS_FIXTURE, SYNTHETIC); return { ...s, authorities: { ...s.authorities, record_schema: { status: 'ok', entries: [] }, builder: { status: 'ok', entries: [] } } } } }],
     ['governance unavailable', { governance: (d) => approvedGovernanceSnapshot(d, TOPIC_CLAIMS_FIXTURE, null) }],
     ['governance throws', { governance: () => { throw new Error('x') } }],
     ['no templates port', { templates: undefined }],
@@ -463,10 +463,10 @@ describe('CR-V2-MVP-PROD-PREP-1: no unapproved or stale content reaches a prepar
   }
   const ISSUE = '2026-11-08'
 
-  test('baseline: the record prepared under the bundle is eligible once issuance is authorized (the shipped support list refuses it)', () => {
+  test('baseline: the record prepared under the bundle is eligible, now that issuance support is authorized (R15)', () => {
     expect(evaluateIssuanceEligibility(prep.canonical, prep.sha256, withCommercialSupportUnderTest(approvedGovernanceSnapshot(ISSUE, TOPIC_CLAIMS_FIXTURE, fixed))).decision).toBe('eligible')
-    // Absent issuance authorization: the shipped support list names no record schema or builder.
-    expect(reasons(evaluateIssuanceEligibility(prep.canonical, prep.sha256, approvedGovernanceSnapshot(ISSUE, TOPIC_CLAIMS_FIXTURE, fixed)))).toEqual(['builder:reference_missing', 'record_schema:reference_missing'])
+    // JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110: the shipped support list now names schema 7 and its builder.
+    expect(evaluateIssuanceEligibility(prep.canonical, prep.sha256, approvedGovernanceSnapshot(ISSUE, TOPIC_CLAIMS_FIXTURE, fixed)).decision).toBe('eligible')
   })
 
   test('changed bundle wording under the same approval: preparation refuses, and checkout and issuance refuse the earlier record', () => {
@@ -511,15 +511,15 @@ describe('CR-V2-MVP-PROD-PREP-1: no unapproved or stale content reaches a prepar
     expect(authorizePublication(fixed.publication_ledger, claim, lapsed)).toEqual({ authorized: false, reason: 'refresh_lapsed' })
   })
 
-  test('the Production bundle carries the founder-approved content only; no ledger, no PDF templates, and nothing is issuable', () => {
+  test('the Production bundle carries the founder-approved content only, and a synthetic record is still not issuable', () => {
     // CR-V2-MVP-LEGAL-CONTENT-6 (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109): R1-R6 and the consent wording are approved; R7 (ledger), R9/R10 (templates) and
     // issuance support (R15) are not, so nothing can be issued.
     const G = CREATOR_RECORD_GOVERNANCE_AUTHORITY
-    expect([G.registry_input.questions.length, G.publication_ledger.length, G.pdf_template_sets?.length]).toEqual([21, 0, 0])
+    expect([G.registry_input.questions.length, G.publication_ledger.length, G.pdf_template_sets?.length]).toEqual([21, 3, 1])
     expect([G.source_text_approval?.review_ref, G.source_text_examination_approval?.review_ref, G.questionnaire_approval?.review_ref]).toEqual(['JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109 schema 7', 'JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109 schema 8', 'JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109'])
-    expect([G.pdf_templates, G.pdf_template_approval]).toEqual([null, null])
+    expect([G.pdf_template_approval?.review_ref, G.pdf_template_sets?.[0].approval.review_ref]).toEqual(['JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110 R9', 'JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110 R10'])
     expect([EVIDENCE_CONSENT_APPROVED_WORDING?.id, AI_EXAMINATION_PERMISSION_APPROVED_WORDING?.id]).toEqual(['cr-v2-storage-consent-1', 'cr-v2-ai-permission-1'])
-    expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [], builders: [], examination_methods: [] })
+    expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [{ id: 'si8/creator-record-v2-record', version: 7 }, { id: 'si8/creator-record-v2-record', version: 8 }], builders: [{ id: 'si8/creator-record-v2-record-builder', version: 5 }, { id: 'si8/creator-record-v2-record-builder', version: 7 }], examination_methods: [{ origin: 'live_model', provider: 'anthropic', model: 'claude-sonnet-5', profile: { id: 'receipt', version: 1, schema: 'receipt-extraction-v2', prompt: 'receipt-prompt-v2' } }] }) // R15 option (a), JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110
     expect(evaluateIssuanceEligibility(prep.canonical, prep.sha256, approvedGovernanceSnapshot(ISSUE, TOPIC_CLAIMS_FIXTURE, G)).decision).not.toBe('eligible')
   })
 

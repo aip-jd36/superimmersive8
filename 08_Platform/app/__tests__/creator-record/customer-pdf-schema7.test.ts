@@ -237,7 +237,7 @@ describe('issuance consumes the PDF without weakening a safeguard', () => {
     ['a stale contract', () => issuing({ governance: () => state({ sources: { ...SYN.sources, questionnaire_approval: { ...SYN.sources.questionnaire_approval!, contract_version: 2, contract_sha256: 'b'.repeat(64) } } }) }), 'governance_ineligible'],
     ['a withdrawn contract', () => issuing({ governance: () => state({ sources: { ...SYN.sources, questionnaire_approval: { ...SYN.sources.questionnaire_approval!, lifecycle: 'withdrawn' } } }) }), 'governance_ineligible'],
     ['a synthetic record under real governance', () => issuing({ governance: () => state({ authority_class: 'governance' }) }), 'governance_ineligible'],
-    ['the shipped support list', () => issuing({ governance: () => state({ support: undefined }) }), 'governance_ineligible'],
+    ['no issuance support listed', () => issuing({ governance: () => state({ support: { record_schemas: [], builders: [], examination_methods: [] } }) }), 'governance_ineligible'],
     ['an unconfirmed version', () => issuing({}, [{ ...row, status: 'prepared', reviewed_at: null }]), 'record_not_reviewed'],
   ] as const)('%s: refused before any document is built', async (_n, make, code) => {
     const i = make()
@@ -246,12 +246,11 @@ describe('issuance consumes the PDF without weakening a safeguard', () => {
   })
 
   test('commercial gates are all still closed', () => {
-    expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [], builders: [], examination_methods: [] })
+    expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [{ id: 'si8/creator-record-v2-record', version: 7 }, { id: 'si8/creator-record-v2-record', version: 8 }], builders: [{ id: 'si8/creator-record-v2-record-builder', version: 5 }, { id: 'si8/creator-record-v2-record-builder', version: 7 }], examination_methods: [{ origin: 'live_model', provider: 'anthropic', model: 'claude-sonnet-5', profile: { id: 'receipt', version: 1, schema: 'receipt-extraction-v2', prompt: 'receipt-prompt-v2' } }] }) // R15 option (a), JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110
     expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('stopped')
-    expect(GOV.pdf_templates).toBeNull()
-    expect(GOV.pdf_template_approval).toBeNull()
-    expect(approvedPdfTemplates(GOV)).toEqual({ templates: null, approval: null })
-    expect(refusalOf(() => buildCustomerDocument({ canonical: REC.canonical, sha256: REC.sha256, issued: ISSUED, ...{ templates: GOV.pdf_templates, template_approval: GOV.pdf_template_approval } }))).toMatch(/^templates_/)
+    // R9 (JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110): the approved schema 7 templates, exactly.
+    expect(GOV.pdf_template_approval).toMatchObject({ version: 1, fingerprint: 'c5fe2a21ec8a096c6abf7eccf0bd55f3103401e10a26512052e5d2ee15a11c6c', record_schema: { version: 7 }, review_ref: 'JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110 R9' })
+    expect(approvedPdfTemplates(GOV)).toEqual({ templates: GOV.pdf_templates, approval: GOV.pdf_template_approval })
   })
 })

@@ -539,10 +539,10 @@ describe('locks: PDF and issuance stay closed for schemas 7 and 8', () => {
     if (!b.ok) throw new Error(JSON.stringify(b))
     return b
   }
-  const synthetic = () => { const i = syntheticUatInputs(); return governanceSnapshotFrom({ issuance_date: asOf, authority_class: 'synthetic_test', sources: i.sources, topicClaims: CLAIMS, source_text_approvals: [i.source_text!.approval!, i.source_text_examination!.approval!] }) }
+  const synthetic = () => { const i = syntheticUatInputs(); return governanceSnapshotFrom({ issuance_date: asOf, support: { record_schemas: [], builders: [], examination_methods: [] } /* the refusal mechanism, not the shipped list */, authority_class: 'synthetic_test', sources: i.sources, topicClaims: CLAIMS, source_text_approvals: [i.source_text!.approval!, i.source_text_examination!.approval!] }) }
 
   test('CR-V2-MVP-ELIGIBILITY-1: issuance supports no schema, and the contract is an authority kind', () => {
-    expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [], builders: [], examination_methods: [] })
+    expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [{ id: 'si8/creator-record-v2-record', version: 7 }, { id: 'si8/creator-record-v2-record', version: 8 }], builders: [{ id: 'si8/creator-record-v2-record-builder', version: 5 }, { id: 'si8/creator-record-v2-record-builder', version: 7 }], examination_methods: [{ origin: 'live_model', provider: 'anthropic', model: 'claude-sonnet-5', profile: { id: 'receipt', version: 1, schema: 'receipt-extraction-v2', prompt: 'receipt-prompt-v2' } }] }) // R15 option (a), JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110
     expect(AUTHORITY_KINDS).toEqual(['source_text', 'questionnaire_contract', 'question', 'observation_map_entry', 'publication_entry', 'governed_claim', 'record_schema', 'builder'])
   })
 

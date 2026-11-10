@@ -51,9 +51,8 @@ describe('the governed content is the approved R2-R5 wording', () => {
     expect(sha(packetJson({ item: 'R4 launch dependency labels', dependency_labels: Governed.CREATOR_RECORD_DEPENDENCY_LABELS }))).toBe('5ec6e19c9c756f421b10507138a8ff77de3c9d18f3bd91bf50e8ef4cfb808525')
     expect(sha(packetJson({ item: 'R5 caveats', caveats: Governed.CREATOR_RECORD_CAVEATS }))).toBe('fe4538761172a56293f02eaad552de63c60821626dc7dc01365f9e37a44ab7b9')
   })
-  test('every launch question carries the founder approval; no ledger entry is published', () => {
+  test('every launch question carries the founder approval', () => {
     for (const q of Governed.CREATOR_RECORD_REGISTRY_INPUT.questions) expect(q.approval).toMatchObject({ status: 'approved', review_ref: REF, decision_date: '2026-11-09' })
-    expect(Governed.CREATOR_RECORD_PUBLICATION_LEDGER).toEqual([])
   })
 })
 
@@ -80,3 +79,29 @@ describe('R6 consent and AI permission, and the R11 customer wording set', () =>
     expect(flat).toHaveLength(452)
   })
 })
+
+// CR-V2-MVP-APPROVED-CONTENT-IMPLEMENTATION-1 — R7-R10 and R15 are exactly the frozen CR-V2-MVP-APPROVAL-PACKET-1 content
+// (approval JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110; packet manifest 5027f3470a0a8b05fd85501feb1e8787450a04e032afb00c21853bdad6c351b9).
+describe('the approved guidance ledger, PDF templates and issuance support', () => {
+  const REF2 = 'JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110'
+  test('R7/R8: the three entries equal the packet (approver and decision date recorded at approval)', () => {
+    const core = Governed.CREATOR_RECORD_PUBLICATION_LEDGER.map(({ approver: _a, decision_date: _d, ...rest }) => rest)
+    expect(sha(packetJson(core))).toBe('0093152825039253e85314e534bacb259fcf72903d062dd7128cec54873cd28c')
+    for (const e of Governed.CREATOR_RECORD_PUBLICATION_LEDGER) {
+      expect(e).toMatchObject({ approver: 'JD, for PMF Strategy Inc. d/b/a SuperImmersive 8', decision_date: '2026-11-10', refresh_by: '2027-02-10', applicability_policy: 'met_only', creator_record_eligible: 'Yes', superseded_by: null })
+    }
+  })
+  test('the printed guidance set names the approved ledger, never the empty one', () => {
+    expect(Governed.CREATOR_RECORD_VERSIONS.ledger).toBe('CR-V2-LAUNCH-LEDGER-2')
+  })
+  test('R9/R10: both template sets carry their approved fingerprints, schemas and references', () => {
+    expect(Governed.CREATOR_RECORD_PDF_TEMPLATE_APPROVAL).toMatchObject({ version: 1, fingerprint: 'c5fe2a21ec8a096c6abf7eccf0bd55f3103401e10a26512052e5d2ee15a11c6c', record_schema: { version: 7 }, review_ref: `${REF2} R9` })
+    expect(Governed.CREATOR_RECORD_PDF_TEMPLATE_SETS.map((s) => s.approval)).toEqual([expect.objectContaining({ version: 2, fingerprint: 'a26f10643cfa838541fc4cf5ffd11e4d80cb90d2241610e8bbb7530c320a7346', record_schema: { id: 'si8/creator-record-v2-record', version: 8 }, review_ref: `${REF2} R10` })])
+    expect(sha(JSON.stringify(sortDeep(Governed.CREATOR_RECORD_PDF_TEMPLATES)))).toBe('c5fe2a21ec8a096c6abf7eccf0bd55f3103401e10a26512052e5d2ee15a11c6c')
+    expect(sha(JSON.stringify(sortDeep(Governed.CREATOR_RECORD_PDF_TEMPLATE_SETS[0].templates)))).toBe('a26f10643cfa838541fc4cf5ffd11e4d80cb90d2241610e8bbb7530c320a7346')
+  })
+})
+
+function sortDeep(x: unknown): unknown {
+  return Array.isArray(x) ? x.map(sortDeep) : x && typeof x === 'object' ? Object.fromEntries(Object.keys(x as object).sort().map((k) => [k, sortDeep((x as Record<string, unknown>)[k])])) : x
+}

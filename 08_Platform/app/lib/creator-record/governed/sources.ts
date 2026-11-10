@@ -146,8 +146,67 @@ export const CREATOR_RECORD_REGISTRY_INPUT: RegistryInput = Object.freeze({
   semantic_mappings: LAUNCH_SEMANTIC_MAPPINGS,
 }) as RegistryInput
 
-/** Approved Creator Record publication ledger. None approved yet (R7 is a separate approval): no guidance is published. */
-export const CREATOR_RECORD_PUBLICATION_LEDGER: readonly PublicationLedgerEntry[] = Object.freeze([])
+/**
+ * Approved Creator Record publication ledger (R7, R8): Runway, Pika baseline and Higgsfield, founder-approved
+ * (JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110). Explanations, applicability, caveats and refresh dates verbatim from the frozen packet; JD is responsible for
+ * re-verification before refresh_by. An entry lapses after refresh_by, and is suspended if its claim is re-verified.
+ */
+export const CREATOR_RECORD_PUBLICATION_LEDGER: readonly PublicationLedgerEntry[] = Object.freeze([
+  {
+    "entry_id": "CR-V2-LAUNCH-LEDGER-CLAIM-RUNWAY-COMMERCIAL-USE-001-v1",
+    "version": 1,
+    "claim_id": "CLAIM-RUNWAY-COMMERCIAL-USE-001-v1",
+    "claim_last_verified": "2026-09-03",
+    "creator_record_eligible": "Yes",
+    "explanation": "Under Runway’s current Terms of Use, generated output may be used commercially on Runway’s Free, Standard, Pro and Max plans, except that the service and its outputs may not be used to create, train, develop or improve similar or competing products or services. This does not cover Runway’s Enterprise plan. This record does not show which Runway plan applied to your video.",
+    "applicability_policy": "met_only",
+    "evidence_notes": {},
+    "required_caveats": [
+      "CR-CAV-PROVIDER-OWN-TERMS",
+      "CR-CAV-TERMS-CHANGE"
+    ],
+    "approver": "JD, for PMF Strategy Inc. d/b/a SuperImmersive 8",
+    "decision_date": "2026-11-10",
+    "refresh_by": "2027-02-10",
+    "superseded_by": null
+  },
+  {
+    "entry_id": "CR-V2-LAUNCH-LEDGER-CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1",
+    "version": 1,
+    "claim_id": "CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1",
+    "claim_last_verified": "2026-09-06",
+    "creator_record_eligible": "Yes",
+    "explanation": "Under Pika’s current Terms of Service, generated output is limited to personal, non-commercial use by default. Pika’s paid subscription plans (Standard, Pro and Fancy) are the exception: they include commercial-use rights. This record does not show which Pika plan applied to your video.",
+    "applicability_policy": "met_only",
+    "evidence_notes": {},
+    "required_caveats": [
+      "CR-CAV-PROVIDER-OWN-TERMS",
+      "CR-CAV-TERMS-CHANGE"
+    ],
+    "approver": "JD, for PMF Strategy Inc. d/b/a SuperImmersive 8",
+    "decision_date": "2026-11-10",
+    "refresh_by": "2027-02-10",
+    "superseded_by": null
+  },
+  {
+    "entry_id": "CR-V2-LAUNCH-LEDGER-CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1",
+    "version": 1,
+    "claim_id": "CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1",
+    "claim_last_verified": "2026-10-14",
+    "creator_record_eligible": "Yes",
+    "explanation": "Under Higgsfield’s current Terms of Use, generated output may be used commercially on Higgsfield’s standard (non-Enterprise) terms, and those rights continue after an account or subscription ends. The terms also allow exported outputs to be transferred or sublicensed, including to clients. This does not extend to Higgsfield’s Enterprise tier, which has its own separate agreement that is not public. This concerns Higgsfield’s own terms only. It does not address the terms of any other provider’s model used through Higgsfield, or rights in people, voices, music or other material in the video.",
+    "applicability_policy": "met_only",
+    "evidence_notes": {},
+    "required_caveats": [
+      "CR-CAV-PROVIDER-OWN-TERMS",
+      "CR-CAV-TERMS-CHANGE"
+    ],
+    "approver": "JD, for PMF Strategy Inc. d/b/a SuperImmersive 8",
+    "decision_date": "2026-11-10",
+    "refresh_by": "2027-02-10",
+    "superseded_by": null
+  }
+]) as readonly PublicationLedgerEntry[]
 
 // Approved wording (R2-R5 and the R1 section titles), verbatim from the frozen packet.
 export const CREATOR_RECORD_PRESENTATION: CreatorRecordSources['presentation'] = Object.freeze({
@@ -180,7 +239,7 @@ export const CREATOR_RECORD_DEPENDENCY_LABELS: Readonly<Record<string, string>> 
 export const CREATOR_RECORD_SECTION_TITLES: Readonly<Record<string, string>> = Object.freeze({"acknowledgements": "Before you continue", "contribution": "Your own contribution", "locations": "Where you are and where it will be shown", "materials": "Material from other sources", "people": "Real people", "project": "Your video", "tools": "The AI tools you used"})
 
 /** Customer-facing versions of the approved registry and ledger. */
-export const CREATOR_RECORD_VERSIONS: Readonly<{ registry: string; ledger: string }> = Object.freeze({ registry: 'CR-V2-LAUNCH-REGISTRY-1', ledger: 'CR-V2-LAUNCH-LEDGER-1 (no entries)' })
+export const CREATOR_RECORD_VERSIONS: Readonly<{ registry: string; ledger: string }> = Object.freeze({ registry: 'CR-V2-LAUNCH-REGISTRY-1', ledger: 'CR-V2-LAUNCH-LEDGER-2' })
 
 /** Maximum number of tool blocks in the approved questionnaire. */
 export const CREATOR_RECORD_MAX_TOOLS = 3
@@ -224,18 +283,590 @@ export const CREATOR_RECORD_QUESTIONNAIRE_APPROVAL: QuestionnaireContractApprova
 // CR-V2-MVP-M3: the customer PDF template set and its approval (`../customer-pdf/templates`). Rendering
 // refuses without both, so no Creator Record v2 PDF can be issued until they are approved (M0).
 
-/** The approved customer PDF template set (data only). None approved yet. */
-export const CREATOR_RECORD_PDF_TEMPLATES: unknown = null
+/** The approved schema 7 customer PDF template set (R9, JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110), verbatim from the frozen packet. */
+export const CREATOR_RECORD_PDF_TEMPLATES: unknown = Object.freeze({
+  "template_id": "si8/creator-record-v2-pdf-templates",
+  "version": 1,
+  "record_schema": {
+    "id": "si8/creator-record-v2-record",
+    "version": 7
+  },
+  "document_title": "SI8 Creator Record {record_id}",
+  "stamp": "SELF-DECLARED RECORD · EDUCATIONAL GUIDANCE · NOT LEGAL ADVICE · NOT A CLEARANCE",
+  "footer": "SI8 Creator Record {record_id} · Self-declared · Not legal advice · Not a clearance",
+  "page_label": "Page {page} of {pages}",
+  "sections": {
+    "about": {
+      "heading": "1. About this record",
+      "intro": [
+        "This Creator Record sets out what you told SI8 about your AI video, and general educational guidance that SI8 has published for the tools and services you named.",
+        "Everything in sections 2 to 4 is your own declaration, recorded as you gave it. No person at SI8 checked it.",
+        "The guidance in section 5 is educational. It describes providers’ own terms and policies as SI8 read them. It is not legal advice, and it does not say whether your video may be used commercially.",
+        "Section 6 lists what this record does not establish. Section 7 lists what SI8 did not do."
+      ],
+      "counts": {
+        "answers": {
+          "one": "{n} answer recorded.",
+          "other": "{n} answers recorded."
+        },
+        "guidance": {
+          "one": "{n} guidance item.",
+          "other": "{n} guidance items."
+        },
+        "open_items": {
+          "one": "{n} open item.",
+          "other": "{n} open items."
+        }
+      }
+    },
+    "project": {
+      "heading": "2. Your video",
+      "intro": "What you told SI8 about the video, where you are based and where it will be shown.",
+      "empty": "You did not give any details here."
+    },
+    "tools": {
+      "heading": "3. Your AI tools",
+      "intro": "The AI tools you told SI8 you used, with the plan and dates you gave for each.",
+      "tool_heading": "Tool {n}",
+      "empty": "You did not name any tools."
+    },
+    "contribution": {
+      "heading": "4. What went into the video",
+      "intro": "What you told SI8 about real people, material from other sources and your own contribution.",
+      "empty": "You did not give any details here."
+    },
+    "guidance": {
+      "heading": "5. Educational guidance",
+      "intro": "Guidance SI8 has published for Creator Records, selected from what you told SI8. Each item says why it was selected and what it depends on. An item is not a finding about your video.",
+      "empty": "SI8 has no published guidance for the tools and services you named. That is not a finding about them: it neither suggests nor rules out commercial use, and it does not mean there is nothing to consider.",
+      "item_heading": "Item {index}: {subject}",
+      "subject_with_tool": "{topic} (tool {n})",
+      "conclusion": "How this relates to what you told us",
+      "item_limitation": "This is general educational guidance about the provider’s terms. It is not a determination about your video, your account or your use.",
+      "selected_because": "Selected because you told us",
+      "on_what_you_told_us": "Based on what you told us",
+      "depends_on": "Depends on",
+      "unspecified_condition": "A condition this record does not identify.",
+      "topic_level": "Other information in this record means this subject is shown as not established, even though this item’s own conditions are based on what you told us.",
+      "caveats": "Please note"
+    },
+    "open_items": {
+      "heading": "6. Open items",
+      "intro": "What this record does not establish. An open item is not a problem SI8 has found, and it is not resolved by anything in this record.",
+      "empty": "No open items were identified from what you told SI8. This does not mean nothing is open.",
+      "item_ref": "Item {index}",
+      "for_guidance": "Relates to",
+      "what_you_told_us": "What you told us",
+      "nothing_told": "You did not tell us about this.",
+      "evidence_note": "About evidence",
+      "status": "Status",
+      "sufficiency": "Sufficiency",
+      "not_established_heading": "Not established by this record",
+      "affects": "Affects items {items}",
+      "unspecified_heading": "Conditions this record does not identify",
+      "topic_qualified_heading": "Subjects shown as not established",
+      "not_sure_heading": "Answers you were not sure about",
+      "documents_heading": "Documents you added",
+      "documents_not_provided": "You did not add any documents.",
+      "limitations_heading": "Limitations of this record",
+      "limitations": [
+        "This record contains only what you told SI8. No person checked it against your video, your accounts or your documents.",
+        "Guidance reflects providers’ terms as SI8 last read them. Terms change.",
+        "Where you are based and where the video will be shown are recorded, but they do not change which guidance is shown.",
+        "Tools and services SI8 has no published guidance for are recorded as you gave them, without guidance. That says nothing about whether they may be used commercially."
+      ]
+    },
+    "not_done": {
+      "heading": "7. What SI8 did not do",
+      "lines": [
+        "SI8 did not give legal advice.",
+        "SI8 did not decide whether your video may be used commercially. This record is not a clearance.",
+        "No person at SI8 reviewed your video, your answers or your documents.",
+        "SI8 did not read or examine any document for this record.",
+        "SI8 did not check that any document is genuine, complete or current.",
+        "This is not SI8’s human-reviewed Commercial Assurance Assessment."
+      ]
+    },
+    "provenance": {
+      "heading": "8. How this record was made",
+      "acknowledgements_heading": "What you acknowledged",
+      "identity_heading": "This record",
+      "sources_heading": "Questions and wording used",
+      "publications_heading": "Guidance sources",
+      "labels": {
+        "record_id": "Record number",
+        "issued_on": "Issued on",
+        "prepared_ref": "Prepared record reference",
+        "record_version": "Declaration version",
+        "prepared_on": "Prepared on",
+        "captured_at": "Answers captured at",
+        "snapshot": "Answers fingerprint (SHA-256)",
+        "record_schema": "Record format",
+        "record_schema_version": "Record format version",
+        "builder": "Record builder",
+        "builder_version": "Record builder version",
+        "registry_version": "Question set version",
+        "ledger_version": "Guidance set version",
+        "wording": "Wording set",
+        "wording_version": "Wording version",
+        "wording_digest": "Wording fingerprint",
+        "questionnaire_contract": "Questionnaire",
+        "questionnaire_contract_version": "Questionnaire version",
+        "questionnaire_contract_ref": "Questionnaire reference",
+        "templates": "Document layout",
+        "templates_version": "Document layout version",
+        "templates_fingerprint": "Document layout fingerprint",
+        "publication_version": "Guidance entry version"
+      }
+    }
+  },
+  "documents": {
+    "intro": "Documents you added, listed as received. SI8 did not read or examine them for this record.",
+    "item_label": "File {n}",
+    "type": "File type",
+    "category": "Your description",
+    "tool": "Linked to",
+    "tool_value": "Tool {n}",
+    "size": "Size",
+    "size_value": "{bytes} bytes",
+    "fingerprint": "SHA-256 fingerprint",
+    "fingerprint_note": "A fingerprint identifies the exact file SI8 received. It does not show that the document is genuine, who made it, or when.",
+    "examination": "Examination",
+    "not_examined": "Not examined"
+  },
+  "document_type_labels": {
+    "application/pdf": "PDF",
+    "image/png": "PNG image",
+    "image/jpeg": "JPEG image"
+  },
+  "document_category_labels": {
+    "billing_receipt": "Receipt or invoice",
+    "licence": "Licence",
+    "provider_terms": "Provider terms",
+    "release_or_consent": "Release or consent",
+    "permission": "Permission",
+    "project_file": "Project file",
+    "other": "Other"
+  },
+  "question_sections": {
+    "P1": "project",
+    "P2": "project",
+    "P3": "project",
+    "F1": "project",
+    "F2": "project",
+    "F3": "project",
+    "L1": "contribution",
+    "M0": "contribution",
+    "M1": "contribution",
+    "M1X": "contribution",
+    "M2": "contribution",
+    "M3": "contribution",
+    "M3X": "contribution",
+    "M3D": "contribution",
+    "M4": "contribution",
+    "H1": "contribution",
+    "H2": "contribution"
+  },
+  "conclusion_labels": {
+    "relevant_on_declared_facts": "Relevant to what you told us",
+    "relevant_applicability_unresolved": "May be relevant: it depends on something this record does not establish"
+  },
+  "topic_labels": {
+    "commercial_use": "Commercial use of AI output",
+    "third_party_source_rights": "Material from other sources"
+  },
+  "fact_labels": {
+    "tool_plan_tier": "The plan you were on with this tool",
+    "tool_account_status": "Your account status with this tool",
+    "jurisdiction": "Where the terms are in force"
+  },
+  "not_sure_label": "Not sure",
+  "dependency_codes": {
+    "status": {
+      "open": "Open"
+    },
+    "sufficiency": {
+      "not_assessed": "Not assessed"
+    }
+  }
+})
 
-/** The approval covering `CREATOR_RECORD_PDF_TEMPLATES`. None issued yet. */
-export const CREATOR_RECORD_PDF_TEMPLATE_APPROVAL: PdfTemplateApproval | null = null
+/** The approval covering `CREATOR_RECORD_PDF_TEMPLATES` (schema 7). */
+export const CREATOR_RECORD_PDF_TEMPLATE_APPROVAL: PdfTemplateApproval | null = Object.freeze({
+  template_id: 'si8/creator-record-v2-pdf-templates', version: 1, fingerprint: 'c5fe2a21ec8a096c6abf7eccf0bd55f3103401e10a26512052e5d2ee15a11c6c',
+  record_schema: { id: 'si8/creator-record-v2-record', version: 7 }, lifecycle: 'approved',
+  authority: 'JD, for PMF Strategy Inc. d/b/a SuperImmersive 8', decision_date: '2026-11-10', review_ref: 'JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110 R9',
+}) as PdfTemplateApproval
 
 /**
  * CR-V2-MVP-PROD-PREP-1: further approved template sets, one per other record schema. The schema 7 set goes in
  * `CREATOR_RECORD_PDF_TEMPLATES` above and the schema 8 (examination-bearing) set here, each with its own approval naming its
  * schema (`approvedPdfTemplates` selects exactly one per schema; none or more than one refuses). None approved yet.
  */
-export const CREATOR_RECORD_PDF_TEMPLATE_SETS: readonly { readonly templates: unknown; readonly approval: PdfTemplateApproval }[] = Object.freeze([])
+export const CREATOR_RECORD_PDF_TEMPLATE_SETS: readonly { readonly templates: unknown; readonly approval: PdfTemplateApproval }[] = Object.freeze([
+  Object.freeze({
+    // R10 (JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110): the schema 8 set, including the approved live-reading labels, verbatim from the frozen packet.
+    templates: Object.freeze({
+  "template_id": "si8/creator-record-v2-pdf-templates",
+  "version": 2,
+  "record_schema": {
+    "id": "si8/creator-record-v2-record",
+    "version": 8
+  },
+  "document_title": "SI8 Creator Record {record_id}",
+  "stamp": "SELF-DECLARED RECORD · ANY DOCUMENT READINGS ARE AUTOMATED, NOT CHECKED BY A PERSON · EDUCATIONAL GUIDANCE · NOT LEGAL ADVICE · NOT A CLEARANCE",
+  "footer": "SI8 Creator Record {record_id} · Self-declared · Not legal advice · Not a clearance",
+  "page_label": "Page {page} of {pages}",
+  "sections": {
+    "about": {
+      "heading": "1. About this record",
+      "intro": [
+        "This Creator Record sets out what you told SI8 about your AI video, what any documents you added appear to show, and general educational guidance that SI8 has published for the tools and services you named.",
+        "Everything in sections 2 to 4 is your own declaration, recorded as you gave it. No person at SI8 checked it.",
+        "Section 5 lists your documents, what an automated reading reported each one appears to show, and any response you gave to a reading. A reading is not something you told SI8, and no person checked it. A reading does not show that a document is genuine or what rights it gives. Readings do not change your declarations or the guidance.",
+        "The guidance in section 6 is educational. It describes providers’ own terms and policies as SI8 read them. It is not legal advice, and it does not say whether your video may be used commercially.",
+        "Section 7 lists what this record does not establish. Section 8 lists what SI8 did not do."
+      ],
+      "counts": {
+        "answers": {
+          "one": "{n} answer recorded.",
+          "other": "{n} answers recorded."
+        },
+        "guidance": {
+          "one": "{n} guidance item.",
+          "other": "{n} guidance items."
+        },
+        "open_items": {
+          "one": "{n} open item.",
+          "other": "{n} open items."
+        }
+      }
+    },
+    "project": {
+      "heading": "2. Your video",
+      "intro": "What you told SI8 about the video, where you are based and where it will be shown.",
+      "empty": "You did not give any details here."
+    },
+    "tools": {
+      "heading": "3. Your AI tools",
+      "intro": "The AI tools you told SI8 you used, with the plan and dates you gave for each.",
+      "tool_heading": "Tool {n}",
+      "empty": "You did not name any tools."
+    },
+    "contribution": {
+      "heading": "4. What went into the video",
+      "intro": "What you told SI8 about real people, material from other sources and your own contribution.",
+      "empty": "You did not give any details here."
+    },
+    "guidance": {
+      "heading": "6. Educational guidance",
+      "intro": "Guidance SI8 has published for Creator Records, selected from what you told SI8. Document readings in section 5 were not used to select it. Each item says why it was selected and what it depends on. An item is not a finding about your video.",
+      "empty": "SI8 has no published guidance for the tools and services you named. That is not a finding about them: it neither suggests nor rules out commercial use, and it does not mean there is nothing to consider.",
+      "item_heading": "Item {index}: {subject}",
+      "subject_with_tool": "{topic} (tool {n})",
+      "conclusion": "How this relates to what you told us",
+      "item_limitation": "This is general educational guidance about the provider’s terms. It is not a determination about your video, your account or your use.",
+      "selected_because": "Selected because you told us",
+      "on_what_you_told_us": "Based on what you told us",
+      "depends_on": "Depends on",
+      "unspecified_condition": "A condition this record does not identify.",
+      "topic_level": "Other information in this record means this subject is shown as not established, even though this item’s own conditions are based on what you told us.",
+      "caveats": "Please note"
+    },
+    "open_items": {
+      "heading": "7. Open items",
+      "intro": "What this record does not establish. An open item is not a problem SI8 has found, and it is not resolved by anything in this record.",
+      "empty": "No open items were identified from what you told SI8. This does not mean nothing is open.",
+      "item_ref": "Item {index}",
+      "for_guidance": "Relates to",
+      "what_you_told_us": "What you told us",
+      "nothing_told": "You did not tell us about this.",
+      "evidence_note": "About evidence",
+      "status": "Status",
+      "sufficiency": "Sufficiency",
+      "not_established_heading": "Not established by this record",
+      "affects": "Affects items {items}",
+      "unspecified_heading": "Conditions this record does not identify",
+      "topic_qualified_heading": "Subjects shown as not established",
+      "not_sure_heading": "Answers you were not sure about",
+      "documents_heading": "Documents you added",
+      "documents_not_provided": "You did not add any documents.",
+      "limitations_heading": "Limitations of this record",
+      "limitations": [
+        "Sections 2 to 4 contain only what you told SI8. No person checked them against your video, your accounts or your documents.",
+        "Document readings in section 5 were made automatically and were not checked by a person. They may be wrong or incomplete.",
+        "Guidance reflects providers’ terms as SI8 last read them. Terms change.",
+        "Where you are based and where the video will be shown are recorded, but they do not change which guidance is shown.",
+        "Tools and services SI8 has no published guidance for are recorded as you gave them, without guidance. That says nothing about whether they may be used commercially."
+      ]
+    },
+    "not_done": {
+      "heading": "8. What SI8 did not do",
+      "lines": [
+        "SI8 did not give legal advice.",
+        "SI8 did not decide whether your video may be used commercially. This record is not a clearance.",
+        "No person at SI8 reviewed your video, your answers, your documents or the readings of your documents.",
+        "SI8 did not check that any document is genuine, complete or current, or that it belongs to you.",
+        "SI8 drew no conclusion from comparing your documents with your declarations.",
+        "This is not SI8’s human-reviewed Commercial Assurance Assessment."
+      ]
+    },
+    "provenance": {
+      "heading": "9. How this record was made",
+      "acknowledgements_heading": "What you acknowledged",
+      "identity_heading": "This record",
+      "sources_heading": "Questions and wording used",
+      "publications_heading": "Guidance sources",
+      "labels": {
+        "record_id": "Record number",
+        "issued_on": "Issued on",
+        "prepared_ref": "Prepared record reference",
+        "record_version": "Declaration version",
+        "prepared_on": "Prepared on",
+        "captured_at": "Answers captured at",
+        "snapshot": "Answers fingerprint (SHA-256)",
+        "record_schema": "Record format",
+        "record_schema_version": "Record format version",
+        "builder": "Record builder",
+        "builder_version": "Record builder version",
+        "registry_version": "Question set version",
+        "ledger_version": "Guidance set version",
+        "wording": "Wording set",
+        "wording_version": "Wording version",
+        "wording_digest": "Wording fingerprint",
+        "questionnaire_contract": "Questionnaire",
+        "questionnaire_contract_version": "Questionnaire version",
+        "questionnaire_contract_ref": "Questionnaire reference",
+        "templates": "Document layout",
+        "templates_version": "Document layout version",
+        "templates_fingerprint": "Document layout fingerprint",
+        "publication_version": "Guidance entry version"
+      }
+    }
+  },
+  "documents": {
+    "intro": "Documents you added, listed as received.",
+    "item_label": "File {n}",
+    "type": "File type",
+    "category": "Your description",
+    "tool": "Linked to",
+    "tool_value": "Tool {n}",
+    "size": "Size",
+    "size_value": "{bytes} bytes",
+    "fingerprint": "SHA-256 fingerprint",
+    "fingerprint_note": "A fingerprint identifies the exact file SI8 received. It does not show that the document is genuine, who made it, or when.",
+    "examination": "Examination",
+    "not_examined": "Not examined"
+  },
+  "document_type_labels": {
+    "application/pdf": "PDF",
+    "image/png": "PNG image",
+    "image/jpeg": "JPEG image"
+  },
+  "document_category_labels": {
+    "billing_receipt": "Receipt or invoice",
+    "licence": "Licence",
+    "provider_terms": "Provider terms",
+    "release_or_consent": "Release or consent",
+    "permission": "Permission",
+    "project_file": "Project file",
+    "other": "Other"
+  },
+  "question_sections": {
+    "P1": "project",
+    "P2": "project",
+    "P3": "project",
+    "F1": "project",
+    "F2": "project",
+    "F3": "project",
+    "L1": "contribution",
+    "M0": "contribution",
+    "M1": "contribution",
+    "M1X": "contribution",
+    "M2": "contribution",
+    "M3": "contribution",
+    "M3X": "contribution",
+    "M3D": "contribution",
+    "M4": "contribution",
+    "H1": "contribution",
+    "H2": "contribution"
+  },
+  "conclusion_labels": {
+    "relevant_on_declared_facts": "Relevant to what you told us",
+    "relevant_applicability_unresolved": "May be relevant: it depends on something this record does not establish"
+  },
+  "topic_labels": {
+    "commercial_use": "Commercial use of AI output",
+    "third_party_source_rights": "Material from other sources"
+  },
+  "fact_labels": {
+    "tool_plan_tier": "The plan you were on with this tool",
+    "tool_account_status": "Your account status with this tool",
+    "jurisdiction": "Where the terms are in force"
+  },
+  "not_sure_label": "Not sure",
+  "dependency_codes": {
+    "status": {
+      "open": "Open"
+    },
+    "sufficiency": {
+      "not_assessed": "Not assessed"
+    }
+  },
+  "examination": {
+    "heading": "5. Your documents and what they appear to show",
+    "intro": [
+      "For each document you added, this section shows what an automated reading reported it appears to show. Where you asked for it, the reading was made by an AI model.",
+      "A reading is not something you told SI8, and no person checked it. It may be wrong or incomplete. It does not show that a document is genuine, that it belongs to you, or what rights it gives.",
+      "Readings were not used to select or qualify the guidance in section 6."
+    ],
+    "document_heading": "Document {n}",
+    "status": "Examination",
+    "status_labels": {
+      "not_examined": "Not examined",
+      "examined": "Read",
+      "could_not_examine": "Could not be read"
+    },
+    "failure": "Reason",
+    "failure_labels": {
+      "unsupported_format": "The file format could not be read",
+      "file_too_large": "The file is too large to be read",
+      "empty_file": "The file is empty",
+      "model_error": "The reading failed",
+      "structured_output_missing": "No reading was returned",
+      "schema_invalid": "The reading returned could not be used"
+    },
+    "observations_heading": "What the document appears to show",
+    "no_observations": "Nothing was reported for this document.",
+    "field_labels": {
+      "document_type": "Kind of document",
+      "readability": "Legibility",
+      "multiple_plans_shown": "More than one plan shown",
+      "instruction_like_text_present": "Contains text addressed to an AI",
+      "issuer_name": "Issued by",
+      "product_or_plan_name": "Product or plan",
+      "transaction_date": "Transaction date",
+      "service_period_start": "Service period start",
+      "service_period_end": "Service period end",
+      "plan_candidate": "Plan name shown"
+    },
+    "qualifier": "Where it appears",
+    "qualifier_labels": {
+      "heading_or_title": "Heading or title",
+      "current_plan_label": "Current plan label",
+      "charge_line": "Charge line",
+      "account_detail": "Account details",
+      "other": "Elsewhere on the document"
+    },
+    "classification_labels": {
+      "document_type": {
+        "receipt": "Receipt",
+        "invoice": "Invoice",
+        "subscription_confirmation": "Subscription confirmation",
+        "billing_screenshot": "Billing screenshot",
+        "not_a_billing_document": "Not a billing document",
+        "unknown": "Unknown"
+      },
+      "readability": {
+        "legible": "Legible",
+        "partially_legible": "Partly legible",
+        "illegible": "Illegible"
+      },
+      "multiple_plans_shown": {
+        "true": "Yes",
+        "false": "No"
+      },
+      "instruction_like_text_present": {
+        "true": "Yes",
+        "false": "No"
+      }
+    },
+    "basis": "Basis",
+    "basis_labels": {
+      "printed_text": "Text printed on the document",
+      "examiner_classification": "The reading’s own description of the document"
+    },
+    "reading": "Reading",
+    "reading_labels": {
+      "present": "Shown",
+      "not_shown": "Not shown",
+      "unreadable": "Unreadable",
+      "ambiguous": "Unclear"
+    },
+    "value": "Reported value",
+    "excerpt": "Text it was read from",
+    "your_response": "Your response",
+    "response_labels": {
+      "reading_incorrect": "You said this reading is wrong",
+      "wrong_document": "You said this is the wrong document",
+      "other_plan_applies": "You said a different plan was the one you used",
+      "not_relevant": "You said this is not relevant"
+    },
+    "comparison_response": "Your response about the {field}",
+    "comparison_field_labels": {
+      "provider": "tool provider",
+      "plan": "plan"
+    },
+    "limitations_heading": "Limitations of this reading",
+    "limitation_labels": {
+      "recorded_test_data_not_model_output": "This result replays SI8 test data. No AI model read the file.",
+      "observations_not_verified": "No person checked this reading.",
+      "no_location_reference": "The reading does not say where on the document each detail appears.",
+      "fields_not_established": "Some details could not be read from the document.",
+      "single_plan_reading_does_not_exclude_others": "Reading one plan name does not rule out other plans.",
+      "multiple_plans_shown": "The document shows more than one plan.",
+      "instruction_like_text_present": "The document contains text that looks like instructions to an AI. The reading was instructed to ignore it.",
+      "not_a_billing_document": "The document does not appear to be a billing document.",
+      "partially_legible": "Parts of the document are hard to read.",
+      "illegible": "The document appears illegible."
+    },
+    "provenance_heading": "How the reading was made",
+    "reference": "Reading reference",
+    "method": "Method",
+    "method_labels": {
+      "fixture_replay": "Replay of SI8 test data (no AI model read a document)"
+    },
+    "content": "Document",
+    "content_labels": {
+      "known_synthetic_fixture": "An SI8 synthetic test document"
+    },
+    "profile": "Reading profile",
+    "profile_value": "{id}, version {version}",
+    "comparison_note": "This record does not say whether a document matches what you told SI8.",
+    "open_items_pointer": "Your documents, and what each appears to show, are listed in section 5."
+  },
+  "live_examination": {
+    "method": "Read by an AI model",
+    "provider": "AI model provider",
+    "provider_labels": {
+      "anthropic": "Anthropic"
+    },
+    "model": "AI model",
+    "executed_at": "Read at",
+    "content_labels": {
+      "customer_document": "A document you uploaded"
+    },
+    "limitation_labels": {
+      "mock_test_data_not_model_output": "This result uses SI8 test data. No AI model read the file.",
+      "observations_not_verified": "No person checked this reading.",
+      "no_location_reference": "The reading does not say where on the document each detail appears.",
+      "fields_not_established": "Some details could not be read from the document.",
+      "single_plan_reading_does_not_exclude_others": "Reading one plan name does not rule out other plans.",
+      "multiple_plans_shown": "The document shows more than one plan.",
+      "instruction_like_text_present": "The document contains text that looks like instructions to an AI. The reading was instructed to ignore it.",
+      "not_a_billing_document": "The document does not appear to be a billing document.",
+      "partially_legible": "Parts of the document are hard to read.",
+      "illegible": "The document appears illegible."
+    }
+  }
+}),
+    approval: Object.freeze({
+      template_id: 'si8/creator-record-v2-pdf-templates', version: 2, fingerprint: 'a26f10643cfa838541fc4cf5ffd11e4d80cb90d2241610e8bbb7530c320a7346',
+      record_schema: { id: 'si8/creator-record-v2-record', version: 8 }, lifecycle: 'approved',
+      authority: 'JD, for PMF Strategy Inc. d/b/a SuperImmersive 8', decision_date: '2026-11-10', review_ref: 'JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110 R10',
+    }) as PdfTemplateApproval,
+  }),
+])
 
 // CR-V2-MVP-PROD-PREP-1 — the other integration points an approved launch fills, outside this file (each null or empty today):
 //   - customer wording set: `lib/creator-record-flow/customer-wording.ts` (identity, covered by the two Source Text Approvals above);

@@ -256,11 +256,10 @@ describe('governance', () => {
     expect((approvedPdfTemplates(BUNDLE).templates as CustomerPdfTemplates).record_schema.version).toBe(7)
   })
 
-  test('every commercial gate is still closed, and Production has no templates', () => {
-    expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [], builders: [], examination_methods: [] })
+  test('every commercial gate is still closed, and Production has the approved schema 8 templates', () => {
+    expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [{ id: 'si8/creator-record-v2-record', version: 7 }, { id: 'si8/creator-record-v2-record', version: 8 }], builders: [{ id: 'si8/creator-record-v2-record-builder', version: 5 }, { id: 'si8/creator-record-v2-record-builder', version: 7 }], examination_methods: [{ origin: 'live_model', provider: 'anthropic', model: 'claude-sonnet-5', profile: { id: 'receipt', version: 1, schema: 'receipt-extraction-v2', prompt: 'receipt-prompt-v2' } }] }) // R15 option (a), JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110
     expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('stopped')
-    expect(GOV.pdf_templates).toBeNull()
-    expect(GOV.pdf_template_approval).toBeNull()
+    expect(GOV.pdf_template_sets?.map((s) => [s.approval.record_schema.version, s.approval.fingerprint, s.approval.review_ref])).toEqual([[8, 'a26f10643cfa838541fc4cf5ffd11e4d80cb90d2241610e8bbb7530c320a7346', 'JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110 R10']])
   })
 })

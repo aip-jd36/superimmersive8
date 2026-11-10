@@ -449,7 +449,7 @@ describe('5. unsupported templates → refusal', () => {
     expect(approvedPdfTemplates(SYN_AUTH)).toEqual({ templates: SYN_AUTH!.pdf_templates, approval: SYN_AUTH!.pdf_template_approval })
     expect(approvedPdfTemplates(SYN_AUTH, { id: CUSTOMER_RECORD_SCHEMA, version: 6 })).toEqual({ templates: null, approval: null })
     expect(approvedPdfTemplates(SYN_AUTH, { id: 'si8/other', version: 8 })).toEqual({ templates: null, approval: null })
-    expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 8 })).toEqual({ templates: null, approval: null })
+    expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).approval?.review_ref).toBe('JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110 R10')
     expect(approvedPdfTemplates(null, { id: CUSTOMER_RECORD_SCHEMA, version: 8 })).toEqual({ templates: null, approval: null })
   })
 })
@@ -507,25 +507,24 @@ describe('7. historical schema 7 behaviour is unchanged', () => {
 })
 
 describe('8. every commercial gate stays closed by default', () => {
-  test('support lists are empty, both stops are stopped, Production has no templates, and both live locks are false in source', () => {
-    expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [], builders: [], examination_methods: [] })
+  test('the support list is the approved R15 list, both stops are stopped, Production has the approved templates, and both live locks are false in source', () => {
+    expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [{ id: 'si8/creator-record-v2-record', version: 7 }, { id: 'si8/creator-record-v2-record', version: 8 }], builders: [{ id: 'si8/creator-record-v2-record-builder', version: 5 }, { id: 'si8/creator-record-v2-record-builder', version: 7 }], examination_methods: [{ origin: 'live_model', provider: 'anthropic', model: 'claude-sonnet-5', profile: { id: 'receipt', version: 1, schema: 'receipt-extraction-v2', prompt: 'receipt-prompt-v2' } }] }) // R15 option (a), JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('stopped')
     expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
-    expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 8 })).toEqual({ templates: null, approval: null })
-    // CR-V2-MVP-PROD-PREP-1: the schema 8 slot exists in the governance bundle and is empty.
-    expect(GOV.pdf_template_sets).toEqual([])
+    expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).approval?.fingerprint).toBe('a26f10643cfa838541fc4cf5ffd11e4d80cb90d2241610e8bbb7530c320a7346')
+    expect(GOV.pdf_template_sets).toHaveLength(1)
     // The controls module is mocked in this file; the shipped source is read directly.
     const controls = readFileSync(join(process.cwd(), 'lib', 'creator-record', 'live-examination', 'controls.ts'), 'utf8')
     expect(controls).toMatch(/export const LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD(: boolean)? = false/)
     expect(controls).toMatch(/export const CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD(: boolean)? = false/)
   })
 
-  test('the shipped support refuses the eligible record: schema, builder and reading method, not merely one of them', () => {
+  test('an unlisted schema, builder or reading method refuses the eligible record, not merely one of them', () => {
     // A refusal read from the record itself (here: the unsupported reading method) is definitive and reported on its own, as a
     // synthetic record is; with the method supported, the shipped schema and builder lists refuse it too.
-    const shipped = state({ support: CURRENT_ISSUANCE_SUPPORT })
+    const shipped = state({ support: { record_schemas: [], builders: [], examination_methods: [] } }) // the refusal mechanism, with nothing listed
     expect(reasons(evaluateIssuanceEligibility(ROW.canonical, ROW.sha256, shipped))).toEqual(['examination_method:examination_method_not_supported'])
-    expect(reasons(evaluateIssuanceEligibility(ROW.canonical, ROW.sha256, state({ support: { ...CURRENT_ISSUANCE_SUPPORT, examination_methods: [METHOD] } })))).toEqual(['builder:reference_missing', 'record_schema:reference_missing'])
+    expect(reasons(evaluateIssuanceEligibility(ROW.canonical, ROW.sha256, state({ support: { ...{ record_schemas: [], builders: [], examination_methods: [] }, examination_methods: [METHOD] } })))).toEqual(['builder:reference_missing', 'record_schema:reference_missing'])
     // Schema 8 supported but no method: still refused. Supporting a schema never admits its readings.
     expect(reasons(evaluateIssuanceEligibility(ROW.canonical, ROW.sha256, state({ support: { ...COMMERCIAL_SUPPORT_UNDER_TEST } })))).toEqual(['examination_method:examination_method_not_supported'])
     // Production governance (no approvals at all) refuses it outright.

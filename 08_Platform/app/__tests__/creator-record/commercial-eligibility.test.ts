@@ -252,13 +252,13 @@ describe('4: a synthetic record cannot be commercially purchased or issued', () 
 })
 
 describe('schemas 7 and 8 are not enabled by any of this', () => {
-  test('a complete, non-synthetic record under its current contract is still ineligible in a shipped build', async () => {
+  test('a complete, non-synthetic record is ineligible everywhere while no issuance support is listed for it', async () => {
     const inputs = realLooking()
     const row = rowFrom(inputs)
-    const shipped = () => governanceSnapshotFrom({ issuance_date: AS_OF, sources: inputs.sources, topicClaims: CLAIMS, source_text_approvals: [inputs.source_text!.approval!], authority_class: 'governance' })
+    const shipped = () => governanceSnapshotFrom({ issuance_date: AS_OF, support: { record_schemas: [], builders: [], examination_methods: [] }, sources: inputs.sources, topicClaims: CLAIMS, source_text_approvals: [inputs.source_text!.approval!], authority_class: 'governance' })
     expect(reasons(evaluateIssuanceEligibility(row.canonical, row.sha256, shipped()))).toEqual(['builder:reference_missing', 'record_schema:reference_missing'])
     await refusedEverywhere(shipped, row, 'ineligible', 'governance_ineligible')
-    expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [], builders: [], examination_methods: [] })
+    expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [{ id: 'si8/creator-record-v2-record', version: 7 }, { id: 'si8/creator-record-v2-record', version: 8 }], builders: [{ id: 'si8/creator-record-v2-record-builder', version: 5 }, { id: 'si8/creator-record-v2-record-builder', version: 7 }], examination_methods: [{ origin: 'live_model', provider: 'anthropic', model: 'claude-sonnet-5', profile: { id: 'receipt', version: 1, schema: 'receipt-extraction-v2', prompt: 'receipt-prompt-v2' } }] }) // R15 option (a), JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110
   })
 })
 
@@ -427,14 +427,14 @@ describe('9: reading stays exactly as it was', () => {
 })
 
 describe('10: the existing stops are all still in force', () => {
-  test('submissions and issuance are stopped, and customer governance has approved wording but no PDF templates', () => {
+  test('submissions and issuance are stopped, and customer governance carries the approved wording and PDF templates', () => {
     expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('stopped')
-    // CR-V2-MVP-LEGAL-CONTENT-6 (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109): wording and contract approved; templates (R9/R10) are not, so nothing can be rendered.
+    // Wording and contract: JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109. Templates (R9): JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110. Issuance stays stopped.
     expect(GOV.questionnaire_approval?.review_ref).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109')
     expect(approvedCustomerRecordInputs(GOV).source_text?.approval?.review_ref).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109 schema 7')
-    expect(GOV.pdf_template_approval).toBeNull()
-    expect(approvedPdfTemplates(GOV)).toEqual({ templates: null, approval: null })
+    expect(GOV.pdf_template_approval?.review_ref).toBe('JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110 R9')
+    expect(approvedPdfTemplates(GOV)).toEqual({ templates: GOV.pdf_templates, approval: GOV.pdf_template_approval })
   })
 
   test('the renderer stop still comes first, on every issuance path', () => {

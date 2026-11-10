@@ -571,7 +571,7 @@ describe('compatibility', () => {
     expect(g.registry_input.questions).toHaveLength(21)
     expect(g.registry_input.semantic_mappings?.map((m) => m.dependency_id)).toEqual(['which_music_provider', 'which_provider', 'human_contribution_description'])
     expect(Object.keys(g.presentation)).toHaveLength(21)
-    expect(g.publication_ledger).toEqual([])
+    expect(g.publication_ledger.map((e) => e.claim_id).sort()).toEqual(['CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1'])
     expect(g.source_text_approval?.review_ref).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109 schema 7')
     expect(resolvePublicationAuthority({})).toEqual({ ok: true, mode: 'governance' })
     const inputs = approvedCustomerRecordInputs(g)
