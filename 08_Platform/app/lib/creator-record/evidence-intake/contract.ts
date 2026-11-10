@@ -68,8 +68,9 @@ export interface ApprovedAuthorizationWording {
   id: string
   customer_wording_sha256: string
 }
-export const EVIDENCE_CONSENT_APPROVED_WORDING: ApprovedAuthorizationWording | null = null
-export const AI_EXAMINATION_PERMISSION_APPROVED_WORDING: ApprovedAuthorizationWording | null = null
+// CR-V2-MVP-LEGAL-CONTENT-6: founder-approved (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109, R6), naming the approved customer wording set.
+export const EVIDENCE_CONSENT_APPROVED_WORDING: ApprovedAuthorizationWording | null = Object.freeze({ id: 'cr-v2-storage-consent-1', customer_wording_sha256: 'be6e06e826cff62c0d3b8838c10d73464c78f6b5c719a4cde75822ac031a01ec' })
+export const AI_EXAMINATION_PERMISSION_APPROVED_WORDING: ApprovedAuthorizationWording | null = Object.freeze({ id: 'cr-v2-ai-permission-1', customer_wording_sha256: 'be6e06e826cff62c0d3b8838c10d73464c78f6b5c719a4cde75822ac031a01ec' })
 
 /** Shown nowhere and accepted nowhere: what the flow uses when no consent can be bound. The intake refuses it in every mode. */
 export const CONSENT_VERSION_UNBINDABLE = 'consent-version-unavailable'

@@ -23,8 +23,8 @@ export const EXAM_TEXT = {
   consent_label: 'I will add only synthetic test documents, and I agree that SI8 stores them privately for this record.',
   upload: 'Add document',
   uploading: 'Adding…',
-  examine: 'Examine',
-  examining: 'Examining…',
+  examine: 'Read with AI',
+  examining: 'Reading…',
   retry: 'Try again',
   examined: 'Examined. The findings appear when you include them in a version.',
   include_label: 'Include examination findings in this version',
@@ -36,28 +36,28 @@ export const EXAM_TEXT = {
   findings_intro: 'These are observations from an automated examination of recorded test data. They are NOT verified. They are not a finding, a certification, a licence check or commercial clearance, and they do not change your declarations.',
   not_verified: 'Not verified',
   limitations_title: 'Limitations',
-  comparisons_title: 'How this compares with your declarations',
-  comparisons_intro: 'Each comparison is provisional and uses this version’s declarations. Correcting your answers recalculates it.',
+  comparisons_title: 'How the readings compare with your declarations',
+  comparisons_intro: 'Each comparison is provisional and uses this version’s declarations. Correcting your answers recalculates it. A comparison is not a finding that a document is right or wrong.',
   responses_title: 'Your responses',
-  responses_intro: 'You can respond to an observation or a comparison. Your response is recorded on a new version. It does not change the document, the observation or your declarations.',
+  responses_intro: 'You can respond to a reading or a comparison. Your response is recorded on a new version. It does not change the document, the reading or your declarations.',
   record_responses: 'Record my responses',
   recording: 'Recording…',
   earlier_title: 'Responses from your previous version',
-  earlier_intro: 'These targets did not change. Earlier responses are not carried over automatically: tick any you want to give again.',
+  earlier_intro: 'These did not change. Earlier responses are not carried over automatically: tick any you want to give again.',
   no_response: 'No response',
   guidance_title: 'Guidance beside your documents',
   guidance_documents_label: 'Documents linked to this tool',
-  guidance_document_effect: 'Shown for reference. Documents were not used to decide this guidance or its status, and they do not establish any condition it depends on.',
+  guidance_document_effect: 'Shown for reference. Documents were not used to select this guidance or its status, and they do not establish anything it depends on.',
   guidance_no_document: 'No document is linked to this tool in this version.',
-  guidance_not_examined: 'Linked, but not examined.',
+  guidance_not_examined: 'Linked, but not read.',
   // CR-V2-MVP-PROD-PREP-1: `{slot}` strings instead of functions, so the customer wording set can fingerprint them. Text unchanged.
-  guidance_examined_one: '{count} unverified observation, listed above.',
-  guidance_examined_other: '{count} unverified observations, listed above.',
+  guidance_examined_one: '{count} reading, not checked by a person, listed above.',
+  guidance_examined_other: '{count} readings, not checked by a person, listed above.',
   guidance_not_established_label: 'Not established by this record',
   guidance_open_dependency: 'Open: {label}',
   payment_blocked: 'This version includes examination findings, so it cannot be paid for or issued. Prepare a version without them to continue.',
   // CR-V2-MVP-LAUNCH-FOUNDATION-1 (Decision 8Q): separate from the storage consent above. DRAFT, not approved.
-  ai_permission_label: 'I permit SI8 to send the document I examine to an AI model provider, to be read for this record. Storing a document does not give this permission. I can withdraw it at any time from my dashboard.',
+  ai_permission_label: 'I permit SI8 to send the document I choose to an AI model provider, to be read for this record. Storing a document does not give this permission. I can withdraw it at any time by emailing SI8.',
   legal_links_intro: 'Read the',
   privacy_link: 'privacy notice',
   terms_link: 'terms',
@@ -71,7 +71,7 @@ export const EXAM_TEXT = {
  */
 export const EXAM_LIVE_TEXT = {
   evidence_title: 'Supporting documents (optional)',
-  evidence_intro: 'You can add documents that support what you tell us, such as receipts or invoices for the AI tools you used, and link each one to a tool. When you ask, an AI model reads a document and reports what it appears to show. No person at SI8 checks the reading.',
+  evidence_intro: 'You can add documents that relate to what you tell us, such as receipts or invoices for the AI tools you used, and link each one to a tool. When you ask, an AI model reads a document and reports what it appears to show. No person at SI8 checks the reading.',
   consent_label: 'I agree that SI8 stores the documents I add privately, for this record, as described in the privacy notice.',
   examined: 'Read. What the document appears to show is listed when you include it in a version.',
   include_label: 'Include what the documents appear to show in this version',
@@ -95,38 +95,38 @@ export const SYNTHETIC_UAT_NOTICE = {
 } as const
 
 export const COMPARISON_LABELS: Record<string, string> = {
-  appears_consistent: 'Appears consistent',
-  appears_to_conflict: 'Appears to conflict',
-  does_not_establish: 'Does not establish',
-  not_assessed: 'Not assessed',
+  appears_consistent: 'Reading shows the same value as your answer',
+  appears_to_conflict: 'Reading shows a different value from your answer',
+  does_not_establish: 'The reading does not show this',
+  not_assessed: 'Not compared',
 }
 
 export const OBSERVATION_STATUS_LABELS: Record<string, string> = {
   present: 'Shown',
   not_shown: 'Not shown',
   unreadable: 'Unreadable',
-  ambiguous: 'Ambiguous',
+  ambiguous: 'Unclear',
 }
 
 export const RESPONSE_LABELS: Record<string, string> = {
   reading_incorrect: 'This reading is wrong',
   wrong_document: 'This is the wrong document',
-  other_plan_applies: 'A different plan applies',
+  other_plan_applies: 'A different plan was the one I used',
   not_relevant: 'Not relevant',
 }
 
 /** Plain explanations of the envelope's limitation codes. An unknown code is shown as is, never hidden. */
 export const LIMITATION_LABELS: Record<string, string> = {
   recorded_test_data_not_model_output: 'This result replays recorded test data. No AI model read the file.',
-  observations_not_verified: 'Nothing here has been verified by SI8 or anyone else.',
-  no_location_reference: 'Observations do not point to a place in the document.',
+  observations_not_verified: 'No person at SI8 checked these readings.',
+  no_location_reference: 'The reading does not say where on the document each detail appears.',
   fields_not_established: 'Some details could not be read from the document.',
-  single_plan_reading_does_not_exclude_others: 'Reading one plan does not rule out others.',
+  single_plan_reading_does_not_exclude_others: 'Reading one plan name does not rule out other plans.',
   multiple_plans_shown: 'The document shows more than one plan.',
-  instruction_like_text_present: 'The document contains text that looks like instructions; it was not followed.',
+  instruction_like_text_present: 'The document contains text that looks like instructions to an AI. The reading was instructed to ignore it.',
   not_a_billing_document: 'The document does not appear to be a billing document.',
   partially_legible: 'Parts of the document are hard to read.',
-  illegible: 'The document could not be read.',
+  illegible: 'The document appears illegible.',
 }
 export const limitationText = (code: string) => LIMITATION_LABELS[code] ?? code
 

@@ -192,15 +192,17 @@ describe('the customer flow under Production conditions (submissions stopped, em
       expect(await preparePrepared(w.deps, UAT_USER, { state: syntheticState(), ...extra })).toEqual({ ok: false, status: 400, code: 'invalid_request' })
   })
 
-  test('ordinary Production paths never reach synthetic content: the governance inputs stay empty, and a non-UAT request gets nothing synthetic', async () => {
+  test('ordinary Production paths never reach synthetic content: the governance inputs are the approved ones, and a non-UAT request gets nothing synthetic', async () => {
     const gov = approvedCustomerRecordInputs()
-    expect(gov.source_text).toBeNull()
-    expect(gov.source_text_examination).toBeNull() // CR-V2-SCHEMA8-PATH-1: the governance slot exists and is empty
+    // CR-V2-MVP-LEGAL-CONTENT-6: the founder-approved governance content, never the synthetic bundle.
+    expect(gov.source_text?.approval?.review_ref).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109 schema 7')
+    expect(gov.source_text_examination?.approval?.review_ref).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109 schema 8')
     expect(JSON.stringify(gov)).not.toMatch(/synthetic/i)
     // Even with submissions open (e.g. a future governed launch), the UAT exception is not consulted: governed inputs only.
     const w = production()
     const open: FlowDeps = { ...w.deps, submissions: 'open', syntheticUat: { admits: () => { throw new Error('must not be consulted') }, inputs: () => { throw new Error('must not be used') } } }
-    expect(await preparePrepared(open, UAT_USER, { state: syntheticState() })).toEqual({ ok: false, status: 503, code: 'unavailable' })
+    // The synthetic answers do not fit the governed questionnaire: refused, and the UAT exception was never consulted.
+    expect((await preparePrepared(open, UAT_USER, { state: syntheticState() })).ok).toBe(false)
   })
 
   test('a non-synthetic (governed) version is retrieved exactly as before, with no admission check', async () => {

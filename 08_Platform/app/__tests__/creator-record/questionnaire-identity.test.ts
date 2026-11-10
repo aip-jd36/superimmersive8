@@ -175,7 +175,8 @@ describe('a matching digest is not authorization: approval failure takes precede
     w.deps.syntheticUat = undefined
     expect(await preparePrepared(w.deps, OWNER, body())).toEqual({ ok: false, status: 503, code: 'submissions_stopped' })
     w.deps.submissions = 'open'
-    expect(await preparePrepared(w.deps, OWNER, body())).toEqual(UNAVAILABLE)
+    // CR-V2-MVP-LEGAL-CONTENT-6: governance now has its own approved contract; the synthetic contract digest still opens nothing.
+    expect((await preparePrepared(w.deps, OWNER, body())).ok).toBe(false)
     expect(w.inserts.count).toBe(0)
   })
 
@@ -581,18 +582,19 @@ describe('locks: PDF and issuance stay closed for schemas 7 and 8', () => {
     expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('stopped')
     expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(false)
-    expect(GOV.questionnaire_approval).toBeNull()
-    expect(GOV.source_text_approval).toBeNull()
-    expect(GOV.registry_input.questions).toHaveLength(0)
-    expect(currentPublicationAuthority({})?.questionnaire_approval ?? null).toBeNull()
+    // CR-V2-MVP-LEGAL-CONTENT-6: customer governance carries the founder-approved content; the stops above stay in force.
+    expect(GOV.questionnaire_approval?.review_ref).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109')
+    expect(GOV.source_text_approval?.review_ref).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109 schema 7')
+    expect(GOV.registry_input.questions).toHaveLength(21)
+    expect(currentPublicationAuthority({})?.questionnaire_approval?.review_ref).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109')
     expect(approvedGovernanceSnapshot(asOf, CLAIMS, null).authorities.question).toEqual({ status: 'unavailable' })
   })
 
   // CR-V2-MVP-PROD-PREP-1: re-pinned once, because the Source Text content now names the customer wording set.
   test('the synthetic contract and wording digests did not move', () => {
     const i = syntheticUatInputs()
-    expect(i.sources.questionnaire_approval!.contract_sha256).toBe('196fdf9669a4eb17523293269e8bfe589946bd1ddccf2ca1c1b0482660d0f6c6')
-    expect(i.source_text!.approval!.content_sha256).toBe('973029718942ffd4aa60b481126fef74d65cad3b693dd38252052172e1faf1f0')
+    expect(i.sources.questionnaire_approval!.contract_sha256).toBe('d34bc6ce2ee5410ce10d16d049c9d94e320b0a321603dcce5a0d01175a518b26')
+    expect(i.source_text!.approval!.content_sha256).toBe('260391e7d6ad73482bb877639db1e84e40c96ec68b35128850634be42e08dd6e')
     expect(i.source_text!.approval!.record_schema.version).toBe(7)
     expect(i.source_text_examination!.approval!.record_schema.version).toBe(8)
   })

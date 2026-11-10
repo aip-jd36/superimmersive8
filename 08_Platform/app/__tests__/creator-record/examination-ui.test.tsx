@@ -8,7 +8,7 @@ import path from 'node:path'
 import { renderToStaticMarkup } from 'react-dom/server'
 import type { PreparedView } from '@/lib/creator-record/customer-flow/service'
 import {
-  EXAM_TEXT, LIMITATION_LABELS, X3_WORDING_STATUS, attachmentsOf, chosenResponses, examineStateFrom, preparedBody, targetKey, type ResponseInput,
+  COMPARISON_LABELS, EXAM_TEXT, LIMITATION_LABELS, RESPONSE_LABELS, X3_WORDING_STATUS, attachmentsOf, chosenResponses, examineStateFrom, preparedBody, targetKey, type ResponseInput,
 } from '@/lib/creator-record-flow/examination-ui'
 import { ExaminationReview } from '@/components/creator-record/ExaminationReview'
 import { EvidencePanel } from '@/components/creator-record/EvidencePanel'
@@ -106,12 +106,12 @@ describe('presentation: unverified observations, limitations, comparisons, versi
   test('comparisons show the declaration compared and a provisional label', () => {
     expect(html).toContain('you declared kling')
     expect(html).toContain('you declared Pro')
-    expect(html).toContain('Appears consistent')
-    expect(html).toContain('Appears to conflict')
+    expect(html).toContain(COMPARISON_LABELS.appears_consistent)
+    expect(html).toContain(COMPARISON_LABELS.appears_to_conflict)
   })
 
   test('a recorded response shows the version it was given in', () => {
-    expect(html).toContain('Your response (version 2): A different plan applies')
+    expect(html).toContain(`Your response (version 2): ${RESPONSE_LABELS.other_plan_applies}`)
   })
 
   test('no claim of clearance, verification, licence or legal assurance is made', () => {

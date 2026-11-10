@@ -74,7 +74,8 @@ describe('the injected dependencies', () => {
     expect(d.isSyntheticTestDocument('f'.repeat(64))).toBe(false)
     expect(d.isSyntheticTestDocument(REPLAY_FIXTURES[0].sha256)).toBe(true)
     const pdf = new Uint8Array(Buffer.from('%PDF-1.4\n% not a committed fixture\n%%EOF\n'))
-    expect(await uploadEvidence({ ...d, now: () => NOW }, ADMIN, { bytes: pdf, file_name: 'real.pdf', consent: 'DRAFT-UNAPPROVED-cr-v2-evidence-storage-consent-0' })).toMatchObject({ ok: false, code: 'synthetic_documents_only' })
+    // CR-V2-MVP-LEGAL-CONTENT-6: the consent this wiring records is now the approved one; a real document is still refused.
+    expect(await uploadEvidence({ ...d, now: () => NOW }, ADMIN, { bytes: pdf, file_name: 'real.pdf', consent: d.consentVersion })).toMatchObject({ ok: false, code: 'synthetic_documents_only' })
   })
 
   test('another identity is refused through every admin dependency set', async () => {

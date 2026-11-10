@@ -12,15 +12,15 @@
 export const V2_WORDING_STATUS = 'DRAFT — pending M0 wording approval' as const
 
 export const V2_CHECKOUT_COPY = {
-  name: 'Creator Record — Self-Declared Record',
-  description: 'A PDF record of what you told us about your AI video, with educational guidance. Not legal advice, a clearance or a human-reviewed SI8 assessment.',
+  name: 'SI8 Creator Record',
+  description: 'A private PDF of what you told SI8 about your AI video, what any documents you added appear to show, and educational guidance. Not legal advice, not a clearance and not a human-reviewed SI8 assessment.',
 } as const
 
 export const V2_READY_EMAIL = {
   subject: 'Your Creator Record is ready',
   intro: 'Your Creator Record PDF is ready to download from your dashboard.',
-  nature: 'It records what you told us about your video, with educational guidance where SI8 has published it. SI8 did not check your answers or review your video or documents.',
-  limits: 'It is not legal advice, a commercial clearance or a human-reviewed SI8 Commercial Assurance Assessment.',
+  nature: 'It records what you told SI8 about your video, what any documents you added appear to show, and educational guidance where SI8 has published it. No person at SI8 checked your answers, your video or your documents.',
+  limits: 'It is not legal advice, not a clearance and not SI8’s human-reviewed Commercial Assurance Assessment.',
   cta: 'Download your Creator Record',
   // CR-V2-APPROVAL-AUTHORITY-FIX-1: the greeting and sign-off, previously typed into the email builder.
   greeting: 'Hi {name},',
@@ -30,17 +30,17 @@ export const V2_READY_EMAIL = {
 
 export const V2_DASHBOARD = {
   heading: 'Creator Record',
-  awaiting_payment: 'Your declarations are confirmed. Complete payment to receive your Creator Record.',
-  preparing: 'Payment received. Your Creator Record PDF is being prepared. If it is not ready soon, contact us at jd@superimmersive8.com: your payment is recorded and nothing more is charged.',
+  awaiting_payment: 'You confirmed your declarations. Complete payment to receive your Creator Record.',
+  preparing: 'Payment received. Your Creator Record PDF is being prepared. If it is not ready soon, email jd@superimmersive8.com. Your payment is recorded and you will not be charged again.',
   // CR-V2-MVP-LAUNCH-FOUNDATION-1: a paid order waiting for a person (any reason), and a record paused by withdrawn AI permission.
-  support_required: 'We need to look at this Creator Record before it can be completed, and we will contact you. Your payment is recorded and nothing more is charged. You can also email jd@superimmersive8.com.',
+  support_required: 'SI8 needs to look at this Creator Record before it can be completed, and will contact you. Your payment is recorded and you will not be charged again. You can also email jd@superimmersive8.com.',
   paused: 'This record is paused because you withdrew permission for AI examination of a document it uses. It cannot be paid for or completed as it is. Email jd@superimmersive8.com to discuss your options.',
   badge_support_required: 'NEEDS ATTENTION',
   badge_paused: 'PAUSED',
   ready: 'Your Creator Record PDF is ready.',
-  unavailable: 'The status of your Creator Record could not be shown right now. Please try again later.',
+  unavailable: 'The status of your Creator Record cannot be shown right now. Please try again later.',
   download: 'Download Creator Record PDF',
-  nature: 'A self-declared record of what you told us, with educational guidance. Not legal advice, a clearance or a human-reviewed SI8 assessment.',
+  nature: 'A record of what you told SI8, what any documents you added appear to show, and educational guidance. Not legal advice, not a clearance and not a human-reviewed SI8 assessment.',
   badge_awaiting_payment: 'AWAITING PAYMENT',
   badge_preparing: 'BEING PREPARED',
   badge_ready: 'READY',
@@ -54,7 +54,7 @@ export const V2_DASHBOARD = {
 /** CR-V2-MVP-LAUNCH-FOUNDATION-1: the dashboard control for withdrawing AI-examination permission (Decision 8Q / 8N). */
 export const V2_CONSENT = {
   title: 'AI examination permission',
-  active: 'You can withdraw permission for AI examination of the documents you have added. After you withdraw, no AI model reads those documents again, and records that use them are paused. This does not delete your documents; you can ask for deletion separately.',
+  active: 'You can withdraw permission for AI examination of the documents you have added. After you withdraw, no AI model reads those documents again, and records that use them are paused. Withdrawing does not delete your documents. You can ask for deletion separately by emailing jd@superimmersive8.com.',
   withdraw: 'Withdraw AI examination permission',
   confirm_prompt: 'Withdraw now? This cannot be undone for the documents you have already added.',
   confirm: 'Yes, withdraw',
@@ -63,7 +63,7 @@ export const V2_CONSENT = {
   withdrawn: 'You withdrew permission for AI examination. No AI model reads the documents you added before then, and records that use them are paused. Email jd@superimmersive8.com about any paid order.',
   withdrawn_on: 'Withdrawn on',
   // CR-V2-MVP-LAUNCH-FOUNDATION-1-CORRECTIONS-1: the outcome of a failed or timed-out request is not known, so it is never stated.
-  failed: 'We could not confirm whether your withdrawal was recorded. You can try again: withdrawing more than once has the same effect as withdrawing once. If this keeps happening, email jd@superimmersive8.com.',
+  failed: 'SI8 could not confirm whether your withdrawal was recorded. You can try again: withdrawing more than once has the same effect as withdrawing once. If this keeps happening, email jd@superimmersive8.com.',
   signed_out: 'You are signed out, so your withdrawal was not recorded. Sign in again, then withdraw.',
   // Shown when the current state cannot be read: the withdrawal stays available (the request is idempotent).
   unknown: 'Your AI examination permission status cannot be shown right now. You can still withdraw permission here; if you have already withdrawn, withdrawing again changes nothing. You can also email jd@superimmersive8.com.',
@@ -80,7 +80,7 @@ export const V2_REVIEW_PAGE = {
   // CR-V2-SCHEMA8-PATH-1 (E2/E3): the review page's own strings, held here so the M0 review covers them. DRAFT.
   not_purchasable: 'This version cannot be paid for right now. Your answers are kept. If this does not change, email jd@superimmersive8.com.',
   heading: 'Check your declarations',
-  intro: 'This is exactly what SI8 recorded from your answers (version {version}). SI8 has not checked them. If anything is wrong, correct your answers. The corrected version is then the one you review.',
+  intro: 'This is exactly what SI8 recorded from your answers (version {version}). No person at SI8 has checked them. If anything is wrong, correct your answers; the corrected version is then the one you check.',
   answers_heading: 'Your answers',
   tool_heading: 'Tool {n}',
   acknowledgements_heading: 'What you acknowledged',
@@ -100,14 +100,14 @@ export const FLOW_MESSAGES = {
   invalid_request: 'The request could not be read.',
   invalid_documents: 'One or more documents could not be used. Check your documents and try again.',
   invalid_responses: 'One or more responses could not be recorded. Nothing was changed.',
-  examination_unavailable: 'Examination findings could not be included right now. Nothing was changed.',
+  examination_unavailable: 'What the documents appear to show could not be included right now. Nothing was changed.',
   invalid_answers: 'Some answers need attention.',
   not_invited: 'Creator Record is currently available by invitation only.',
   not_found: 'Not found.',
   superseded: 'A newer version of these answers exists. Review the latest version.',
   conflict: 'This version changed while you were reviewing it. Reload and try again.',
   questionnaire_changed: 'The questionnaire has changed since this page was loaded. Nothing was recorded.',
-  integrity_failure: 'This record could not be verified. Nothing was changed.',
+  integrity_failure: 'This record could not be processed. Nothing was changed.',
   submissions_stopped: 'Creator Record is not taking new submissions right now.',
   unavailable: 'Creator Record is not available yet.',
 } as const
@@ -119,7 +119,7 @@ export const PURCHASE_MESSAGES = {
   not_reviewed: 'Confirm your declarations before payment.',
   superseded: FLOW_MESSAGES.superseded,
   ineligible: 'This Creator Record cannot be completed at the moment.',
-  integrity_failure: FLOW_MESSAGES.integrity_failure,
+  integrity_failure: 'This record could not be verified. Nothing was changed.',
   submissions_stopped: FLOW_MESSAGES.submissions_stopped,
   issuance_stopped: 'Creator Record payments are not open yet.',
   evidence_unavailable: 'A document in this record is no longer available. Nothing was charged.',
@@ -129,7 +129,7 @@ export const PURCHASE_MESSAGES = {
 /** Document upload and storage refusals (`./evidence-http`). */
 export const EVIDENCE_MESSAGES = {
   invalid_request: 'The request could not be read.',
-  consent_required: 'Please confirm the document storage notice before adding documents.',
+  consent_required: 'Please agree to the document storage notice before adding documents.',
   empty_file: 'The file is empty.',
   file_too_large: 'The file is larger than 4 MB.',
   unsupported_format: 'Only PDF, PNG and JPEG files can be added.',
@@ -144,9 +144,9 @@ export const EVIDENCE_MESSAGES = {
   upload_in_progress: 'This file is still being added. Try again in a moment.',
   too_many_documents: 'You have reached the maximum number of documents.',
   document_retained: 'This document is part of a prepared record and is kept.',
-  consent_outdated: 'You added this file earlier under a previous version of our storage notice, privacy notice or terms, so it cannot be reused under the current ones. Email jd@superimmersive8.com for help.',
+  consent_outdated: 'You added this file earlier under a previous version of SI8’s storage notice, privacy notice or terms, so it cannot be reused under the current ones. Email jd@superimmersive8.com for help.',
   object_missing: 'This document is no longer available.',
-  integrity_failure: 'This document could not be verified. Nothing was changed.',
+  integrity_failure: 'This document could not be processed. Nothing was changed.',
   storage_failed: 'The document could not be stored. Nothing was kept.',
   submissions_stopped: 'Creator Record is not taking new submissions right now.',
   audit_unavailable: 'This document cannot be opened right now.',
@@ -159,11 +159,11 @@ export const EXAMINATION_MESSAGES = {
   not_invited: 'Creator Record is currently available by invitation only.',
   not_found: 'Not found.',
   not_ready: 'This document is still being added. Try again in a moment.',
-  not_examinable: 'This document cannot be examined.',
-  examination_not_permitted: 'Document examination is not available for this document.',
-  examination_limit_reached: 'Document examination has reached its limit for now.',
-  unavailable: 'Document examination is not available right now.',
-  ai_permission_required: 'Confirm that SI8 may send this document to an AI model provider to be read before examining it.',
+  not_examinable: 'This document cannot be read.',
+  examination_not_permitted: 'AI reading is not available for this document.',
+  examination_limit_reached: 'AI reading has reached its limit for now. Please try again later.',
+  unavailable: 'AI reading is not available right now.',
+  ai_permission_required: 'Before a document is read, confirm that SI8 may send it to an AI model provider to be read.',
 } as const
 
 /** Questionnaire chrome (`components/creator-record/CreatorRecordQuestionnaire.tsx`). Section titles are in the questionnaire contract. */

@@ -15,6 +15,7 @@ import type { CustomerLiveResult } from '@/lib/creator-record/live-examination/c
 import { examinationRequestBody, emptyRequestBody } from '@/lib/creator-record-flow/examination-customer'
 import { v2DashboardState, v2DashboardView, v2FulfilmentView } from '@/lib/creator-record-flow/dashboard'
 import { V2_CONSENT, V2_DASHBOARD } from '@/lib/creator-record-flow/wording'
+import { EXAM_TEXT } from '@/lib/creator-record-flow/examination-ui'
 import { legalPageContent, legalPoliciesApproved, PRIVACY_NOTICE, TERMS_OF_SERVICE, type ApprovedLegalDocument } from '@/lib/legal/policies'
 import { LegalDocumentPage } from '@/components/legal/LegalDocumentPage'
 import { ConsentWithdrawalControl } from '@/components/creator-record/ConsentWithdrawalControl'
@@ -115,7 +116,8 @@ describe('the browser asks separately for AI permission, only when live examinat
     const html = panel(VERSION)
     expect(html).toContain('data-ai-permission')
     expect(html).toMatch(/AI model provider/)
-    expect(html).toMatch(/<button[^>]*disabled=""[^>]*>Examine<\/button>/)
+    // CR-V2-MVP-LEGAL-CONTENT-6: the approved R11 label for the examine button.
+    expect(html).toMatch(new RegExp('<button[^>]*disabled=""[^>]*>' + EXAM_TEXT.examine + '</button>'))
   })
   test('not offered (replay): no AI permission box; the storage consent is unchanged; legal links shown', () => {
     const html = panel()
@@ -504,10 +506,11 @@ describe('dashboard: paid orders awaiting a person, and paused records', () => {
 // ── Legal pages ──
 describe('privacy and terms: infrastructure only, nothing published until approved', () => {
   const complete: ApprovedLegalDocument = { version: 'privacy-test-1', effective_date: '2026-12-01', approval_reference: 'ref', title: 'Privacy notice', paragraphs: ['Text.'] }
-  test('no approved content exists, so the policies are not approved and the pages say "not available yet"', () => {
-    expect(PRIVACY_NOTICE).toBeNull()
-    expect(TERMS_OF_SERVICE).toBeNull()
-    expect(legalPoliciesApproved()).toBe(false)
+  test('the founder-approved documents are published; a missing document still renders "not available yet"', () => {
+    // CR-V2-MVP-LEGAL-CONTENT-6 (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109).
+    expect(PRIVACY_NOTICE?.approval_reference).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109')
+    expect(TERMS_OF_SERVICE?.approval_reference).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109')
+    expect(legalPoliciesApproved()).toBe(true)
     const html = renderToStaticMarkup(<LegalDocumentPage doc={null} fallbackTitle="Privacy notice" />)
     expect(html).toContain('data-legal-unavailable')
     expect(html).toContain('This document is not available yet.')

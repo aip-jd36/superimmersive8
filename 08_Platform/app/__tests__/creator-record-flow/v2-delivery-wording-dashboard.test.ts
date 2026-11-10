@@ -81,8 +81,9 @@ describe('draft customer wording (PRD wording lock)', () => {
       expect(s).toMatch(/not legal advice/i)
       expect(s).toMatch(/clearance/i)
     }
-    expect(wording.V2_CHECKOUT_COPY.name).toMatch(/self-declared/i)
-    expect(wording.V2_READY_EMAIL.nature).toMatch(/did not check your answers/i)
+    // CR-V2-MVP-LEGAL-CONTENT-6 (approved R11): self-declared is stated as "what you told SI8"; no person checked the answers.
+    for (const s of [wording.V2_CHECKOUT_COPY.description, wording.V2_READY_EMAIL.nature, wording.V2_DASHBOARD.nature]) expect(s).toMatch(/what you told SI8/)
+    expect(wording.V2_READY_EMAIL.nature).toMatch(/No person at SI8 checked your answers/)
   })
 
   test('the v2 email uses only this wording and escapes it; no review date is printed', () => {

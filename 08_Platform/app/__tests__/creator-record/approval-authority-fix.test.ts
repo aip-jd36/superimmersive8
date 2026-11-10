@@ -7,7 +7,7 @@ import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:f
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import {
-  approvedStorageConsentIdentifier, CONSENT_VERSION_UNBINDABLE, EVIDENCE_CONSENT_APPROVED_WORDING, EVIDENCE_CONSENT_DRAFT_VERSION,
+  approvedStorageConsentIdentifier, CONSENT_VERSION_UNBINDABLE, EVIDENCE_CONSENT_APPROVED_WORDING, EVIDENCE_CONSENT_DRAFT_VERSION, EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED,
   type ApprovedAuthorizationWording,
 } from '@/lib/creator-record/evidence-intake/contract'
 import { uploadEvidence, type EvidenceDeps } from '@/lib/creator-record/evidence-intake/service'
@@ -37,7 +37,7 @@ const REFUSED = { ok: false, status: 400, code: 'consent_required' }
 
 describe('B. storage consent at the intake boundary', () => {
   test('the reproduced bypass: policies published, no approved consent wording, the placeholder sent as consent → refused before storage', async () => {
-    const consentVersion = evidenceConsentVersion(POLICIES) // the shipped slot is null
+    const consentVersion = evidenceConsentVersion(POLICIES, null) // no approved consent wording
     expect(consentVersion).toBe(CONSENT_VERSION_UNBINDABLE)
     const i = intake({ consentVersion })
     expect(await i.upload(CONSENT_VERSION_UNBINDABLE)).toEqual(REFUSED)
@@ -97,9 +97,11 @@ describe('B. storage consent at the intake boundary', () => {
     expect(i.reached).toEqual(['insertPending'])
   })
 
-  test('the shipped state: no approved wording, so no identifier is approvable and the production wiring admits no real document', () => {
-    expect(EVIDENCE_CONSENT_APPROVED_WORDING).toBeNull()
-    expect(approvedStorageConsentIdentifier(CURRENT)).toBe(false)
+  test('the shipped state: the founder-approved wording names the current customer wording set, and the production wiring still admits no real document', () => {
+    // CR-V2-MVP-LEGAL-CONTENT-6: approved (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109). Real documents stay behind the separate code lock.
+    expect(EVIDENCE_CONSENT_APPROVED_WORDING).toEqual({ id: 'cr-v2-storage-consent-1', customer_wording_sha256: customerWordingIdentity().sha256 })
+    expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(false)
+    expect(approvedStorageConsentIdentifier('DRAFT-UNAPPROVED-cr-v2-evidence-storage-consent-0__privacy-2026-12-01__terms-2026-12-01')).toBe(false)
     const wiring = readFileSync(path.join(APP, 'lib/creator-record-flow/evidence-production.ts'), 'utf8')
     expect(wiring).toMatch(/realDocumentsPermitted: EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED && legalPoliciesApproved\(\) && approvedStorageConsentIdentifier\(evidenceConsentVersion\(\)\)/)
   })

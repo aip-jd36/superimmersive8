@@ -27,6 +27,7 @@ import { EXAM_LIVE_TEXT, EXAM_TEXT, examText } from '@/lib/creator-record-flow/e
 import { EVIDENCE_MESSAGES, V2_REVIEW_PAGE } from '@/lib/creator-record-flow/wording'
 import { EvidencePanel } from '@/components/creator-record/EvidencePanel'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
+import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/config'
 
 const APP = path.join(__dirname, '..', '..')
 const src = (p: string) => readFileSync(path.join(APP, p), 'utf8')
@@ -79,7 +80,9 @@ describe('E4: no purchase and no checkout without both published legal policies 
     expect(src('lib/creator-record/customer-flow/purchase.ts')).toMatch(/issuance_stopped[\s\S]*submissions_stopped[\s\S]*policiesPublished\(deps\)[\s\S]*not_invited/)
     expect(src('lib/creator-record-flow/production.ts')).toMatch(/legalPoliciesApproved: \(\) => legalPoliciesApproved\(\)/)
     expect(src('app/creator-record/page.tsx')).toContain("paymentOpen={CREATOR_RECORD_V2_ISSUANCE === 'enabled' && legalPoliciesApproved()}")
-    expect(legalPoliciesApproved()).toBe(false)
+    // CR-V2-MVP-LEGAL-CONTENT-6: the policies are published, so payment now depends on the issuance stop alone, which stays stopped.
+    expect(legalPoliciesApproved()).toBe(true)
+    expect(CREATOR_RECORD_V2_ISSUANCE).toBe('stopped')
   })
 })
 
@@ -149,20 +152,20 @@ describe('E7: consent and AI-permission identifiers are bound to the approved pr
     for (const w of [AI_EXAMINATION_PERMISSION_DRAFT_VERSION, EVIDENCE_CONSENT_DRAFT_VERSION]) expect(AUTHORIZATION_VERSION_PATTERN.test(boundAuthorizationVersion(w, longest) as string)).toBe(true)
     expect(approvedPolicyVersions({ privacy: doc('p'.repeat(33)), terms: doc('terms-1') })).toBeNull()
     expect(approvedPolicyVersions({ privacy: doc('privacy-1'), terms: doc('terms-1') })).toEqual({ privacy: 'privacy-1', terms: 'terms-1' })
-    expect(approvedPolicyVersions()).toBeNull()
+    expect(approvedPolicyVersions()).toEqual({ privacy: 'privacy-2026-11-09', terms: 'terms-2026-11-09' })
   })
 
   test('storage consent: the draft identifier until the policies are approved, then only the bound APPROVED wording', () => {
     expect(evidenceConsentVersion(null)).toBe(EVIDENCE_CONSENT_DRAFT_VERSION)
-    expect(evidenceConsentVersion()).toBe(EVIDENCE_CONSENT_DRAFT_VERSION)
+    // CR-V2-MVP-LEGAL-CONTENT-6: the shipped state binds the approved wording to the published policies.
+    expect(evidenceConsentVersion()).toBe('cr-v2-storage-consent-1__privacy-2026-11-09__terms-2026-11-09')
     expect(evidenceConsentVersion(POLICIES, CONSENT_WORDING)).toBe('cr-v2-storage-consent-1__privacy-2026-12-01__terms-2026-12-01')
     expect(evidenceConsentVersion({ privacy: 'p'.repeat(32), terms: 't'.repeat(32) }, CONSENT_WORDING)).not.toBe(CONSENT_VERSION_UNBINDABLE)
   })
 
   // CR-V2-MVP-PROD-PREP-1: publishing the policies alone never binds the DRAFT wording.
   test('storage consent: policies published but no approved wording, draft-marked wording, or wording approved for another customer wording set → unbindable', () => {
-    expect(EVIDENCE_CONSENT_APPROVED_WORDING).toBeNull()
-    expect(evidenceConsentVersion(POLICIES)).toBe(CONSENT_VERSION_UNBINDABLE)
+    expect(EVIDENCE_CONSENT_APPROVED_WORDING).toEqual({ id: 'cr-v2-storage-consent-1', customer_wording_sha256: customerWordingIdentity().sha256 })
     expect(evidenceConsentVersion(POLICIES, null)).toBe(CONSENT_VERSION_UNBINDABLE)
     expect(evidenceConsentVersion(POLICIES, { id: EVIDENCE_CONSENT_DRAFT_VERSION.toLowerCase(), customer_wording_sha256: customerWordingIdentity().sha256 })).toBe(CONSENT_VERSION_UNBINDABLE)
     expect(evidenceConsentVersion(POLICIES, { id: 'cr-v2-draft-consent', customer_wording_sha256: customerWordingIdentity().sha256 })).toBe(CONSENT_VERSION_UNBINDABLE)
@@ -171,9 +174,10 @@ describe('E7: consent and AI-permission identifiers are bound to the approved pr
 
   test('AI permission: none until both the policies and the approved wording exist', () => {
     expect(aiExaminationPermissionVersion(null)).toBeNull()
-    expect(aiExaminationPermissionVersion()).toBeNull()
-    expect(AI_EXAMINATION_PERMISSION_APPROVED_WORDING).toBeNull()
-    expect(aiExaminationPermissionVersion(POLICIES)).toBeNull()
+    // CR-V2-MVP-LEGAL-CONTENT-6: the shipped state binds the approved permission wording (still not offered: the live locks are false).
+    expect(aiExaminationPermissionVersion()).toBe('cr-v2-ai-permission-1__privacy-2026-11-09__terms-2026-11-09')
+    expect(AI_EXAMINATION_PERMISSION_APPROVED_WORDING).toEqual({ id: 'cr-v2-ai-permission-1', customer_wording_sha256: customerWordingIdentity().sha256 })
+    expect(aiExaminationPermissionVersion(POLICIES, null)).toBeNull()
     expect(aiExaminationPermissionVersion(null, PERMISSION_WORDING)).toBeNull()
     expect(aiExaminationPermissionVersion(POLICIES, { ...PERMISSION_WORDING, customer_wording_sha256: 'f'.repeat(64) })).toBeNull()
     expect(aiExaminationPermissionVersion(POLICIES, { id: 'unapproved-permission', customer_wording_sha256: customerWordingIdentity().sha256 })).toBeNull()

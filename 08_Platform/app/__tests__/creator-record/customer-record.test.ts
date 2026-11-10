@@ -97,9 +97,10 @@ async function toolDoc(fixtureId: string): Promise<ToolDocument> {
 // ───────────────────────────────────────────── governance
 
 describe('only approved governed sources are accepted', () => {
-  test('the real governed sources (nothing approved yet) are refused, with every reason', () => {
+  test('the real governed sources without their Source Text Approval are refused', () => {
+    // CR-V2-MVP-LEGAL-CONTENT-6: the governed content is approved, but wording is never usable without its approval.
     const r = buildCustomerRecord(input({ sources: governedSources(), source_text: null }))
-    expect(refusalCodes(r)).toEqual(['ledger_version_missing', 'no_approved_questions', 'questionnaire_contract_missing', 'registry_version_missing', 'source_text_missing'])
+    expect(refusalCodes(r)).toContain('source_text_missing')
   })
 
   test('pilot sources are refused', () => {

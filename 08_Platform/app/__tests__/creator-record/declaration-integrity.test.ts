@@ -556,7 +556,7 @@ describe('guidance is unchanged by removing the two mappings', () => {
 describe('compatibility', () => {
   // CR-V2-MVP-PROD-PREP-1: re-pinned once, because the Source Text content now names the customer wording set.
   test('synthetic pinned digests are unchanged, and still match the wording and templates', () => {
-    expect(SYNTHETIC_SOURCE_TEXT_SHA256).toBe('973029718942ffd4aa60b481126fef74d65cad3b693dd38252052172e1faf1f0')
+    expect(SYNTHETIC_SOURCE_TEXT_SHA256).toBe('260391e7d6ad73482bb877639db1e84e40c96ec68b35128850634be42e08dd6e')
     expect(SYNTHETIC_PDF_TEMPLATES_FINGERPRINT).toBe('19857320de6f205f3c56d899beb5f05cf8b1359e3e6035dc32be123880458ec2')
     const reg = loadQuestionRegistry(SYN.registry_input)
     if (!reg.ok) throw new Error('registry')
@@ -565,19 +565,18 @@ describe('compatibility', () => {
     expect(checkApprovedSources(synInputs.sources, synInputs.source_text, CLAIMS, AS_OF, SCHEMA).ok).toBe(true)
   })
 
-  test('governance stays empty, and prepares nothing, until approved sources exist', () => {
+  test('governance carries the founder-approved launch content, passes every declaration-integrity check, and publishes no guidance', () => {
+    // CR-V2-MVP-LEGAL-CONTENT-6 (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109): R1-R6 approved; no ledger entry (R7) is.
     const g = CREATOR_RECORD_GOVERNANCE_AUTHORITY
-    expect(g.registry_input.questions).toEqual([])
-    expect(g.registry_input.observation_map).toEqual([])
-    expect(g.registry_input.semantic_mappings ?? []).toEqual([])
-    expect(g.presentation).toEqual({})
+    expect(g.registry_input.questions).toHaveLength(21)
+    expect(g.registry_input.semantic_mappings?.map((m) => m.dependency_id)).toEqual(['which_music_provider', 'which_provider', 'human_contribution_description'])
+    expect(Object.keys(g.presentation)).toHaveLength(21)
     expect(g.publication_ledger).toEqual([])
-    expect(g.source_text_approval).toBeNull()
+    expect(g.source_text_approval?.review_ref).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109 schema 7')
     expect(resolvePublicationAuthority({})).toEqual({ ok: true, mode: 'governance' })
     const inputs = approvedCustomerRecordInputs(g)
     const check = checkApprovedSources(inputs.sources, inputs.source_text, CLAIMS, AS_OF, SCHEMA)
-    expect(check.ok).toBe(false)
-    if (!check.ok) expect(check.refusals.map((r) => r.code)).toContain('no_approved_questions')
+    expect(check.ok).toBe(true)
     expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
   })
 })

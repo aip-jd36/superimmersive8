@@ -7,14 +7,15 @@
 /** Display order of the sections. A question in any other section is never rendered. */
 export const QUESTIONNAIRE_SECTION_ORDER = ['project', 'locations', 'tools', 'people', 'materials', 'contribution'] as const
 
-/** The customer page's section headings. */
+/** The customer page's section headings: the founder-approved R1 titles (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109), verbatim. */
 export const CUSTOMER_SECTION_TITLES: Readonly<Record<string, string>> = {
-  project: 'About the video',
-  locations: 'Where',
-  tools: 'AI tools',
-  people: 'People',
-  materials: 'Other material in the video',
-  contribution: 'Your contribution',
+  acknowledgements: 'Before you continue',
+  contribution: 'Your own contribution',
+  locations: 'Where you are and where it will be shown',
+  materials: 'Material from other sources',
+  people: 'Real people',
+  project: 'Your video',
+  tools: 'The AI tools you used',
 }
 
 /** Tool identity, its typed name, its plan, and the option meaning "not listed". The questionnaire and the record's comparisons read these. */

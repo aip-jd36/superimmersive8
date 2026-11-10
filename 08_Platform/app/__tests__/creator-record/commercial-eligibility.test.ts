@@ -427,13 +427,13 @@ describe('9: reading stays exactly as it was', () => {
 })
 
 describe('10: the existing stops are all still in force', () => {
-  test('submissions and issuance are stopped, and customer governance is empty', () => {
+  test('submissions and issuance are stopped, and customer governance has approved wording but no PDF templates', () => {
     expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('stopped')
-    expect(GOV.questionnaire_approval).toBeNull()
-    expect(GOV.source_text_approval).toBeNull()
+    // CR-V2-MVP-LEGAL-CONTENT-6 (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109): wording and contract approved; templates (R9/R10) are not, so nothing can be rendered.
+    expect(GOV.questionnaire_approval?.review_ref).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109')
+    expect(approvedCustomerRecordInputs(GOV).source_text?.approval?.review_ref).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109 schema 7')
     expect(GOV.pdf_template_approval).toBeNull()
-    expect(approvedCustomerRecordInputs(GOV).source_text).toBeNull()
     expect(approvedPdfTemplates(GOV)).toEqual({ templates: null, approval: null })
   })
 

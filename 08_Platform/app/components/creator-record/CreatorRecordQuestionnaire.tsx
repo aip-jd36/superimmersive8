@@ -34,7 +34,9 @@ import type { ExaminedDocument, ExtractionMode, ToolDocument } from '@/lib/creat
 import { QUESTIONNAIRE_SECTION_ORDER, TOOL_QUESTION_ROLES } from '@/lib/creator-record/prototype/questionnaire-structure'
 import { applyMultiSelection, visibleQuestions, visibleToolQuestions, type CreatorRecordFormState, type FormConfig, type FormIssue, type QuestionPresentation } from '@/lib/creator-record/prototype/form'
 import { DocumentReviewPanel } from './DocumentReviewPanel'
-import { fillReviewText, QUESTIONNAIRE_CHROME } from '@/lib/creator-record-flow/wording'
+import { fillReviewText, PANEL_TEXT, QUESTIONNAIRE_CHROME } from '@/lib/creator-record-flow/wording'
+import { EXAM_TEXT } from '@/lib/creator-record-flow/examination-ui'
+import { LEGAL_PATHS } from '@/lib/legal/paths'
 
 export type ExamineResult = { ok: true; document: ExaminedDocument } | { ok: false; error: string }
 export interface FixtureDocumentOption {
@@ -397,6 +399,11 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
             </span>
           </label>
         ))}
+        {/* CR-V2-MVP-LEGAL-CONTENT-6: the Terms and Privacy Notice A2 refers to, with the existing approved link wording. */}
+        <p className="text-xs" style={{ color: '#6b6560' }} data-legal-links>
+          {EXAM_TEXT.legal_links_intro} <a className="underline" href={LEGAL_PATHS.privacy} target="_blank" rel="noopener noreferrer">{EXAM_TEXT.privacy_link}</a>{PANEL_TEXT.legal_links_and}
+          <a className="underline" href={LEGAL_PATHS.terms} target="_blank" rel="noopener noreferrer">{EXAM_TEXT.terms_link}</a>.
+        </p>
       </section>
 
       <button

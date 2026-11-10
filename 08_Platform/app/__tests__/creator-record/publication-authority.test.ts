@@ -43,7 +43,7 @@ import { join } from 'node:path'
 import { authorizePublication } from '@/lib/creator-record/contract/publication-ledger'
 import { CURRENT_ISSUANCE_SUPPORT, governanceSnapshotFrom } from '@/lib/creator-record/customer-record/governance-state'
 import { AI_EXAMINATION_PERMISSION_APPROVED_WORDING, aiExaminationPermissionVersion, EVIDENCE_CONSENT_APPROVED_WORDING, evidenceConsentVersion } from '@/lib/creator-record-flow/authorization-versions'
-import { EVIDENCE_CONSENT_DRAFT_VERSION } from '@/lib/creator-record/evidence-intake/contract'
+import { EVIDENCE_CONSENT_DRAFT_VERSION, EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED } from '@/lib/creator-record/evidence-intake/contract'
 import { approvedPolicyVersions, legalPoliciesApproved } from '@/lib/legal/policies'
 import { customerLiveOffered } from '@/lib/creator-record-flow/live-offer'
 
@@ -295,7 +295,9 @@ describe('end to end: prepare, checkout governance and issuance', () => {
   ])('%s: a record prepared under synthetic authority is neither preparable, eligible nor issuable', async (_, env) => {
     const bundle = authorityFor(env)
     expect(bundle === null || bundle.authority_class === 'governance').toBe(true)
-    expect(prepare(bundle).ok).toBe(false)
+    // CR-V2-MVP-LEGAL-CONTENT-6: governance content is approved, so Production can build ITS OWN record; never the synthetic one.
+    const own = prepare(bundle)
+    expect(own.ok ? own.sha256 !== ROW.sha256 : true).toBe(true)
     expect(evaluateIssuanceEligibility(ROW.canonical, ROW.sha256, approvedGovernanceSnapshot('2026-11-01', TOPIC_CLAIMS_FIXTURE, bundle)).decision).not.toBe('eligible')
     expect(await refusalOf(issue(bundle))).toMatch(/^governance_(ineligible|indeterminate)$/)
   })
@@ -324,11 +326,11 @@ describe('genuine governance behaviour is unchanged', () => {
         // CR-V2-MVP-PROD-PREP-1: the customer wording set this build renders, always from code.
         customer_wording: customerWordingIdentity(),
       },
-      source_text: null,
-      // CR-V2-SCHEMA8-PATH-1 (E1): the schema 8 approval slot, empty in governance.
-      source_text_examination: null,
+      // CR-V2-MVP-LEGAL-CONTENT-6: the founder-approved schema 7 and schema 8 approvals of the same wording.
+      source_text: { approval: Governed.CREATOR_RECORD_SOURCE_TEXT_APPROVAL, acknowledgements: Governed.CREATOR_RECORD_ACKNOWLEDGEMENTS },
+      source_text_examination: { approval: Governed.CREATOR_RECORD_EXAMINATION_SOURCE_TEXT_APPROVAL, acknowledgements: Governed.CREATOR_RECORD_ACKNOWLEDGEMENTS },
     })
-    expect(Governed.CREATOR_RECORD_EXAMINATION_SOURCE_TEXT_APPROVAL).toBeNull()
+    expect(Governed.CREATOR_RECORD_EXAMINATION_SOURCE_TEXT_APPROVAL?.record_schema.version).toBe(8)
     expect(approvedPdfTemplates(CREATOR_RECORD_GOVERNANCE_AUTHORITY)).toEqual({ templates: Governed.CREATOR_RECORD_PDF_TEMPLATES, approval: Governed.CREATOR_RECORD_PDF_TEMPLATE_APPROVAL })
   })
 
@@ -509,22 +511,26 @@ describe('CR-V2-MVP-PROD-PREP-1: no unapproved or stale content reaches a prepar
     expect(authorizePublication(fixed.publication_ledger, claim, lapsed)).toEqual({ authorized: false, reason: 'refresh_lapsed' })
   })
 
-  test('the Production bundle is empty, its approval and consent slots are null, and nothing is issuable', () => {
+  test('the Production bundle carries the founder-approved content only; no ledger, no PDF templates, and nothing is issuable', () => {
+    // CR-V2-MVP-LEGAL-CONTENT-6 (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109): R1-R6 and the consent wording are approved; R7 (ledger), R9/R10 (templates) and
+    // issuance support (R15) are not, so nothing can be issued.
     const G = CREATOR_RECORD_GOVERNANCE_AUTHORITY
-    expect([G.registry_input.questions.length, G.publication_ledger.length, G.pdf_template_sets?.length]).toEqual([0, 0, 0])
-    expect([G.source_text_approval, G.source_text_examination_approval, G.questionnaire_approval, G.pdf_templates, G.pdf_template_approval]).toEqual([null, null, null, null, null])
-    expect([EVIDENCE_CONSENT_APPROVED_WORDING, AI_EXAMINATION_PERMISSION_APPROVED_WORDING]).toEqual([null, null])
+    expect([G.registry_input.questions.length, G.publication_ledger.length, G.pdf_template_sets?.length]).toEqual([21, 0, 0])
+    expect([G.source_text_approval?.review_ref, G.source_text_examination_approval?.review_ref, G.questionnaire_approval?.review_ref]).toEqual(['JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109 schema 7', 'JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109 schema 8', 'JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109'])
+    expect([G.pdf_templates, G.pdf_template_approval]).toEqual([null, null])
+    expect([EVIDENCE_CONSENT_APPROVED_WORDING?.id, AI_EXAMINATION_PERMISSION_APPROVED_WORDING?.id]).toEqual(['cr-v2-storage-consent-1', 'cr-v2-ai-permission-1'])
     expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [], builders: [], examination_methods: [] })
-    expect(prepare(G).ok).toBe(false)
     expect(evaluateIssuanceEligibility(prep.canonical, prep.sha256, approvedGovernanceSnapshot(ISSUE, TOPIC_CLAIMS_FIXTURE, G)).decision).not.toBe('eligible')
   })
 
-  test('missing legal documents: no policy versions, no real-document intake, no live reading, no bindable permission', () => {
-    expect(legalPoliciesApproved()).toBe(false)
-    expect(approvedPolicyVersions()).toBeNull()
+  test('published legal documents: bound consent identifiers, but still no real-document intake and no live reading (separate locks)', () => {
+    // CR-V2-MVP-LEGAL-CONTENT-6: the founder-approved Privacy Notice and Terms are published.
+    expect(legalPoliciesApproved()).toBe(true)
+    expect(approvedPolicyVersions()).toEqual({ privacy: 'privacy-2026-11-09', terms: 'terms-2026-11-09' })
     expect(customerLiveOffered()).toBe(false)
-    expect(evidenceConsentVersion()).toBe(EVIDENCE_CONSENT_DRAFT_VERSION)
-    expect(aiExaminationPermissionVersion()).toBeNull()
+    expect(evidenceConsentVersion()).toBe('cr-v2-storage-consent-1__privacy-2026-11-09__terms-2026-11-09')
+    expect(aiExaminationPermissionVersion()).toBe('cr-v2-ai-permission-1__privacy-2026-11-09__terms-2026-11-09')
+    expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(false)
     const read = (f: string) => readFileSync(join(process.cwd(), f), 'utf8')
     expect(read('lib/creator-record-flow/evidence-production.ts')).toMatch(/realDocumentsPermitted: EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED && legalPoliciesApproved\(\)/)
     expect(read('lib/creator-record-flow/live-offer.ts')).toMatch(/customerLiveEnabledInThisBuild\(\) && legalPoliciesApproved\(\)/)

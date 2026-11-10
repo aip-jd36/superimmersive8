@@ -277,7 +277,7 @@ describe('presentation', () => {
     expect(card).toContain(EXAM_TEXT.guidance_not_established_label)
     expect(card).toContain(T.not_established_next_account('Kling', 'Member Account').replace(/\s+/g, ' '))
     expect(card).toContain('synthetic-receipt.png')
-    expect(card).toContain('10 unverified observations, listed above.')
+    expect(card).toContain(EXAM_TEXT.guidance_examined_other.replace('{count}', '10'))
     expect(card).toContain(EXAM_TEXT.not_verified)
     expect(card).toContain(EXAM_TEXT.guidance_document_effect)
     expect(card).toContain(`Reference: ${MEMBER}`)

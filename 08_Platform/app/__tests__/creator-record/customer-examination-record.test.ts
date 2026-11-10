@@ -338,9 +338,12 @@ describe('Check 1 — governance authority for the examination-bearing record', 
     expect(w.rows).toEqual([])
   })
 
-  test('approvals come only from the server’s governed bundle: Production has none, so the page offers nothing', async () => {
+  test('approvals come only from the server’s governed bundle: Production carries the founder-approved ones', async () => {
     const { approvedCustomerRecordInputs } = await import('@/lib/creator-record/customer-flow/approved-inputs')
-    expect(approvedCustomerRecordInputs().source_text).toBeNull()
+    const i = approvedCustomerRecordInputs()
+    expect(i.source_text?.approval?.record_schema.version).toBe(7)
+    expect(i.source_text_examination?.approval?.record_schema.version).toBe(8)
+    expect(i.source_text_examination?.approval?.review_ref).toContain('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109')
     const { readFileSync } = await import('node:fs')
     const page = readFileSync(require('node:path').join(process.cwd(), 'app/creator-record/page.tsx'), 'utf8')
     // The v6 offer is computed from the same server inputs, and only after every existing gate passes.

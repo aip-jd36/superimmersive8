@@ -490,12 +490,12 @@ describe('records prepared before this contract', () => {
 })
 
 describe('locks and boundaries', () => {
-  test('the customer governance bundle stays empty, unapproved and closed', () => {
-    expect(GOV.questionnaire_approval).toBeNull()
-    expect(GOV.registry_input.questions).toHaveLength(0)
+  test('the customer governance bundle carries the founder-approved contract, and it matches exactly', () => {
+    // CR-V2-MVP-LEGAL-CONTENT-6 (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109): the approval names the exact contract the code computes.
+    expect(GOV.questionnaire_approval).toMatchObject({ contract_sha256: expect.stringMatching(/^[0-9a-f]{64}$/), review_ref: 'JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109', lifecycle: 'approved' })
+    expect(GOV.registry_input.questions).toHaveLength(21)
     const i = approvedCustomerRecordInputs(GOV)
-    expect(gate(i.sources, V5, i.source_text)).toEqual(expect.arrayContaining(['questionnaire_contract_missing', 'no_approved_questions', 'source_text_missing']))
-    expect(i.sources.questionnaire_approval).toBeNull()
+    expect(gate(i.sources, V5, i.source_text)).toEqual([])
   })
 
   test('the synthetic approval is never governance: refused by class and by text', () => {
@@ -506,8 +506,8 @@ describe('locks and boundaries', () => {
     expect(SYN.questionnaire_approval?.review_ref).toMatch(/synthetic/)
   })
 
-  test('production resolves to the governance bundle, which has no questionnaire approval', () => {
-    expect(currentPublicationAuthority({ VERCEL_ENV: 'production' })?.questionnaire_approval).toBeNull()
+  test('production resolves to the governance bundle and its founder-approved questionnaire contract', () => {
+    expect(currentPublicationAuthority({ VERCEL_ENV: 'production' })?.questionnaire_approval?.review_ref).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109')
   })
 
   test('publication, payment and issuance locks are unchanged', () => {
