@@ -74,14 +74,23 @@ export interface Schema8Fixture {
  * A schema 8 record. `fileNames` overrides the stored file names (for Unicode and long-text checks); `responses` builds a function
  * of the envelopes, so a response can target a real observation.
  */
-export async function schema8Fixture(o: { fileNames?: string[]; title?: string; responses?: (envelopes: Map<string, ExaminationEnvelope>, runIds: Map<string, string>) => CreatorResponseInput[] } = {}): Promise<Schema8Fixture> {
+export async function schema8Fixture(o: {
+  fileNames?: string[]
+  title?: string
+  responses?: (envelopes: Map<string, ExaminationEnvelope>, runIds: Map<string, string>) => CreatorResponseInput[]
+  /** CR-V2-MVP-INTEGRATION-2: per document (same order as DOCS), a different replay fixture and/or tool link. */
+  docs?: ({ fixture_id?: string | null; tool_index?: number | null } | undefined)[]
+  /** CR-V2-MVP-INTEGRATION-2: the declared plan for tool 1 (default 'Standard'). */
+  plan?: string
+} = {}): Promise<Schema8Fixture> {
   const SYN = syntheticUatInputs()
   if (!SYN.source_text_examination) throw new Error('no synthetic schema 8 wording approval')
   const envelopes = new Map<string, ExaminationEnvelope>()
   const runIds = new Map<string, string>()
   const documents: CustomerRecordDocument[] = []
   const examinations = []
-  for (const [i, d] of DOCS.entries()) {
+  for (const [i, base] of DOCS.entries()) {
+    const d = { ...base, ...(o.docs?.[i] ?? {}) }
     const bytes = standIn(d.fixture_id ?? 'not-examined')
     documents.push({
       document_id: d.document_id, sha256: createHash('sha256').update(bytes).digest('hex'), media_type: 'image/png', byte_size: bytes.length,
@@ -99,7 +108,7 @@ export async function schema8Fixture(o: { fileNames?: string[]; title?: string; 
   const b = buildCustomerRecord({
     state: {
       answers: { P1: [o.title ?? 'Schema 8 test video'], P3: ['own_channels'], F1: ['TW'], F2: ['online_worldwide'], L1: ['no'], M0: ['none'], H1: ['edited'] },
-      tools: [{ T1: ['pika'], T3: ['Standard'] }],
+      tools: [{ T1: ['pika'], T3: [o.plan ?? 'Standard'] }],
       acknowledgements: { A1: true, A2: true },
     },
     sources: SYN.sources,

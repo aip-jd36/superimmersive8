@@ -33,7 +33,17 @@ export function mapReceiptReading(ex: ReceiptExtraction): Mapped[] {
   ]
 }
 
-export function receiptReadingOf(envelope: ExaminationEnvelope): ReceiptExtraction | null {
+/**
+ * The parts of an envelope this inversion reads. A replay `ExaminationEnvelope` and a customer live envelope both satisfy it
+ * (same profile identity and observation shape); CR-V2-MVP-INTEGRATION-2 reads both through this one exact inversion.
+ */
+export interface ReceiptReadableEnvelope {
+  outcome: { status: string }
+  profile: Pick<ExaminationEnvelope['profile'], 'id' | 'version' | 'schema'>
+  observations: readonly Mapped[]
+}
+
+export function receiptReadingOf(envelope: ReceiptReadableEnvelope): ReceiptExtraction | null {
   if (envelope.outcome.status !== 'examined') return null
   const p = envelope.profile
   if (p.id !== RECEIPT_READING_PROFILE.id || p.version !== RECEIPT_READING_PROFILE.version || p.schema !== RECEIPT_EXTRACTION_SCHEMA_VERSION) return null

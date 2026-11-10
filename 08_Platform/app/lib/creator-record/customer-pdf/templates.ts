@@ -28,6 +28,7 @@ import { EVIDENCE_CATEGORIES, EVIDENCE_MEDIA_TYPES } from '../evidence-intake/vo
 import { CONTENT_CLASSES, EXAMINATION_FAILURE_REASONS, EXAMINATION_LIMITATIONS, EXECUTOR_MODES, OBSERVATION_BASES, OBSERVATION_STATUSES } from '../examination/envelope'
 import { COMPARISON_FIELDS, CREATOR_RESPONSE_CODES } from '../customer-record/examination-section'
 import { LIVE_LIMITATIONS } from '../live-examination/envelope'
+import { DOCUMENT_EVIDENCE_REASONS, DOCUMENT_EVIDENCE_STATUSES, REQUIREMENT_EVIDENCE, REQUIREMENT_STANDINGS } from '../integrated-assessment/vocabulary'
 
 export const CUSTOMER_PDF_TEMPLATE_ID = 'si8/creator-record-v2-pdf-templates'
 export const CUSTOMER_PDF_SECTIONS = ['about', 'project', 'tools', 'contribution', 'guidance', 'open_items', 'not_done', 'provenance'] as const
@@ -141,6 +142,21 @@ const templateSpec = obj({
   live_examination: opt(obj({
     method: str, provider: str, provider_labels: exactLabels(['anthropic']), model: str, executed_at: str,
     content_labels: exactLabels(['customer_document']), limitation_labels: exactLabels(LIVE_LIMITATIONS),
+  })),
+  /**
+   * CR-V2-MVP-INTEGRATION-2 (PRD MVP scope §9): the integrated assessment, printed INSIDE each guidance item. Optional: a template
+   * set approved without it renders exactly as before (this is the activation gate; approving a set that carries it activates it).
+   * `intro` and `not_compared` must say that a reading is not verified and was not compared with the creator's answer (D10).
+   * `document` fills `{n}` (the document's number in the documents section); `method` fills `{version}`.
+   */
+  integrated_assessment: opt(obj({
+    heading: str, intro: str, requirement: str, unlabelled_requirement: str,
+    you_told_us: str, nothing_told: str,
+    standing: str, standing_labels: exactLabels(REQUIREMENT_STANDINGS),
+    evidence_labels: exactLabels(REQUIREMENT_EVIDENCE.filter((x) => x !== 'documents_considered')),
+    document: str, status_labels: exactLabels(DOCUMENT_EVIDENCE_STATUSES), reason: str, reason_labels: exactLabels(DOCUMENT_EVIDENCE_REASONS),
+    appears_to_show: str, excerpt: str, your_response: str,
+    not_compared: str, method: str,
   })),
   document_type_labels: exactLabels(EVIDENCE_MEDIA_TYPES),
   document_category_labels: exactLabels(EVIDENCE_CATEGORIES),

@@ -32,6 +32,7 @@
  * Errors: `CustomerPdfRefusal` with a code, never a partial model.
  */
 
+import { assessIntegrated, type IntegratedAssessment } from '../integrated-assessment/assess'
 import { CREATOR_RECORD_CONCLUSIONS } from '../contract/compose'
 import { isIsoDate } from '../contract/types'
 import { CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION, CUSTOMER_RECORD_SCHEMA_VERSION, declarationIncompatibilities, isUncertainValue, verifyCustomerRecord, type CustomerRecordV2 } from '../customer-record/record'
@@ -260,7 +261,9 @@ export function buildCustomerDocument(input: CustomerDocumentInput): CustomerDoc
   if (r.documents.items.some((d) => d.examination !== 'not_examined' && isLive(d.examination)) && !t.live_examination) throw new CustomerPdfRefusal('templates_live_examination_missing')
 
   try {
-    return compose(r, issued, t, check.fingerprint, input.sha256)
+    // CR-V2-MVP-INTEGRATION-2: assessed from the full verified record (the projected view omits declaration targets).
+    const integrated = examinationBearing && t.integrated_assessment ? assessIntegrated(verified.record) : null
+    return compose(r, issued, t, check.fingerprint, input.sha256, integrated)
   } catch (err) {
     if (err instanceof CustomerPdfRefusal) throw err
     // A template slot that does not match its values: the templates are unusable.
@@ -268,7 +271,7 @@ export function buildCustomerDocument(input: CustomerDocumentInput): CustomerDoc
   }
 }
 
-function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: CustomerPdfTemplates, fingerprint: string, sha256: string): CustomerDocumentModel {
+function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: CustomerPdfTemplates, fingerprint: string, sha256: string, integrated: IntegratedAssessment | null): CustomerDocumentModel {
   const tpl = (text: string): Block => ({ kind: 'paragraph', text, from: 'template' })
   const heading = (text: string): Block => ({ kind: 'heading', text, from: 'template' })
   const row = (label: string, value: string, value_from: TextOrigin = 'record'): Block => ({ kind: 'row', label, label_from: 'template', value, value_from })
@@ -444,6 +447,49 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
     return { id: 'documents', blocks }
   }
 
+  // CR-V2-MVP-INTEGRATION-2 (PRD MVP scope §9): the integrated assessment, inside each guidance item, only when the approved
+  // templates carry its wording (the activation gate). Derived from this record alone; the conclusion printed above is the
+  // record's own and nothing here changes it. Every code maps to an approved label; readings are printed verbatim with their
+  // provenance and are never compared with the creator's answer.
+  const IA = examinationBearing ? t.integrated_assessment : undefined
+  const documentNumber = new Map(r.documents.items.map((d, n) => [d.document_id, n + 1]))
+  const integratedBlocks = (i: ItemView): Block[] => {
+    if (!IA || !integrated) return []
+    const at = r.guidance.items.indexOf(i)
+    const ia = integrated.items[at]
+    if (!ia || ia.claim_id !== i.claim_id || ia.conclusion !== i.conclusion) throw new CustomerPdfRefusal('record_unsupported', `integrated assessment for ${i.claim_id}`)
+    if (ia.requirements.length === 0) return []
+    const blocks: Block[] = [{ kind: 'label', text: IA.heading, from: 'template' }, tpl(IA.intro)]
+    for (const q of ia.requirements) {
+      blocks.push(
+        q.requirement.kind === 'applicability'
+          ? row(IA.requirement, factLabel(q.requirement.fact), 'template')
+          : q.requirement.label !== null
+            ? row(IA.requirement, q.requirement.label, 'record')
+            : row(IA.requirement, IA.unlabelled_requirement, 'template'),
+        row(IA.standing, IA.standing_labels[q.standing], 'template'),
+        { kind: 'label', text: IA.you_told_us, from: 'template' },
+        ...(q.declared.length > 0 ? q.declared.map((x): Block => ({ kind: 'bullet', text: x.answer_verbatim, from: 'record' })) : [{ kind: 'bullet', text: IA.nothing_told, from: 'template' } as Block]),
+      )
+      if (q.evidence !== 'documents_considered') {
+        blocks.push(tpl(IA.evidence_labels[q.evidence]))
+        continue
+      }
+      for (const d of q.documents) {
+        const n = documentNumber.get(d.document_id)
+        if (n === undefined) throw new CustomerPdfRefusal('record_unsupported', `integrated assessment document ${d.document_id}`)
+        blocks.push(row(fill(IA.document, { n }), IA.status_labels[d.status], 'template'), row(IA.reason, IA.reason_labels[d.reason], 'template'))
+        if (d.observed) {
+          blocks.push(row(IA.appears_to_show, d.observed.value))
+          if (d.observed.excerpt !== null) blocks.push(row(IA.excerpt, d.observed.excerpt))
+        }
+        for (const code of d.responses) blocks.push(row(IA.your_response, t.examination!.response_labels[code], 'template'))
+      }
+    }
+    blocks.push(tpl(IA.not_compared), tpl(fill(IA.method, { version: integrated.method.version })))
+    return blocks
+  }
+
   const sections: CustomerDocumentSection[] = [
     {
       id: 'about',
@@ -512,6 +558,7 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
               ...(topicQualified.includes(i) ? [{ kind: 'paragraph', text: S.guidance.topic_level, from: 'template' } as Block] : []),
               ...(unspecified.includes(i) ? [{ kind: 'paragraph', text: S.guidance.unspecified_condition, from: 'template' } as Block] : []),
               ...(i.caveats.length > 0 ? [{ kind: 'label', text: S.guidance.caveats, from: 'template' } as Block, ...i.caveats.map((c): Block => ({ kind: 'bullet', text: c.text, from: 'record' }))] : []),
+              ...integratedBlocks(i),
             ])),
       ],
     },

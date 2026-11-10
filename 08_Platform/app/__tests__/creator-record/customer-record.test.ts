@@ -477,6 +477,7 @@ describe('independence', () => {
       'lib/creator-record/governed/publication-authority.ts',
       'lib/creator-record/governed/sources.ts',
       'lib/creator-record/governed/synthetic-test-authority.ts', // CR-V2-MVP-M4C: type-only (the synthetic test bundle)
+      'lib/creator-record/integrated-assessment/assess.ts', // CR-V2-MVP-INTEGRATION-2: type-only (the creator response codes)
       'lib/creator-record/prototype/build-draft.ts', // CR-V2-DECL-1B-1: type-only (the questionnaire approval on the sources)
     ])
     for (const f of ['lib/creator-record/governed/publication-authority.ts', 'lib/creator-record/governed/synthetic-test-authority.ts'])
