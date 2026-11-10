@@ -506,9 +506,10 @@ export const CREATOR_RECORD_PDF_TEMPLATE_APPROVAL: PdfTemplateApproval | null = 
 export const CREATOR_RECORD_PDF_TEMPLATE_SETS: readonly { readonly templates: unknown; readonly approval: PdfTemplateApproval }[] = Object.freeze([
   Object.freeze({
     // R10 (JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110): the schema 8 set, including the approved live-reading labels, verbatim from the frozen packet.
+    // CR-V2-MVP-INTEGRATION-4: plus the founder-approved integrated-assessment wording (version 3).
     templates: Object.freeze({
   "template_id": "si8/creator-record-v2-pdf-templates",
-  "version": 2,
+  "version": 3,
   "record_schema": {
     "id": "si8/creator-record-v2-record",
     "version": 8
@@ -657,6 +658,54 @@ export const CREATOR_RECORD_PDF_TEMPLATE_SETS: readonly { readonly templates: un
     "fingerprint_note": "A fingerprint identifies the exact file SI8 received. It does not show that the document is genuine, who made it, or when.",
     "examination": "Examination",
     "not_examined": "Not examined"
+  },
+  "integrated_assessment": {
+    "heading": "How your documents relate to this guidance",
+    "intro": "This section shows what you told us and what our automated examination found in documents linked to the AI tool you used.\n\nWhere document information is relevant to a condition in the guidance above, we explain why.\n\nThe automated examination does not independently confirm the information in your documents. Finding relevant information does not mean a condition has been satisfied. A document may still be useful even when this automated check cannot read information relevant to that condition.\n\nThe guidance above remains unchanged.",
+    "requirement": "Condition",
+    "unlabelled_requirement": "A condition this guidance depends on",
+    "you_told_us": "What you told us",
+    "nothing_told": "You did not give an answer for this.",
+    "standing": "Current position",
+    "standing_labels": {
+      "rests_on_declaration": "Based on your answer.",
+      "not_established": "Not established in this record. The guidance above stays conditional on it.",
+      "open": "Open."
+    },
+    "evidence_labels": {
+      "no_linked_document": "You did not link a document to this tool, so this rests on your answer alone.",
+      "not_read_from_documents": "SI8's automated examination does not read this from documents, so your documents were not used for it.",
+      "evidence_requirement_not_defined": "SI8 has not set out what document could show this, so your documents were not used for it. It remains open."
+    },
+    "document": "Document {n}",
+    "status_labels": {
+      "not_examined": "Not examined, so nothing from it was used.",
+      "creator_disputed": "You asked SI8 not to rely on this reading, so it has not been used.",
+      "cannot_establish": "No usable information for this condition was found in this document.",
+      "leaves_uncertainty": "What this document shows about this condition is unclear.",
+      "relevant_observation_unverified": "Contains information relevant to this condition."
+    },
+    "reason": "Detail",
+    "reason_labels": {
+      "not_examined": "The document was not examined.",
+      "creator_response": "Your response to this document's reading.",
+      "examination_failed": "The automated examination could not read the document.",
+      "reading_not_recoverable": "The stored reading could not be used exactly as recorded.",
+      "tool_link_not_established": "This record does not show which of your tools the document relates to for this condition.",
+      "not_a_billing_document": "The examination did not read it as a receipt or invoice.",
+      "document_illegible": "The examination could not read it clearly.",
+      "field_not_shown": "The examination did not find a plan name on it.",
+      "field_unreadable": "The examination found a plan name but could not read it.",
+      "field_ambiguous": "The examination could not tell which plan name it shows.",
+      "multiple_plans_shown": "The examination found more than one plan name.",
+      "plan_text_incomplete": "The plan name the examination found appears cut off.",
+      "field_present": "The examination found a plan name, and this condition depends on which plan you were on."
+    },
+    "appears_to_show": "Plan name read from the document",
+    "excerpt": "Text it was read from",
+    "your_response": "Your response",
+    "not_compared": "SI8 has not determined whether the information read from your documents matches what you told us. This section explains how the document observations relate to the conditions in the guidance above.",
+    "method": "Integrated assessment method, version {version}."
   },
   "document_type_labels": {
     "application/pdf": "PDF",
@@ -861,9 +910,13 @@ export const CREATOR_RECORD_PDF_TEMPLATE_SETS: readonly { readonly templates: un
   }
 }),
     approval: Object.freeze({
-      template_id: 'si8/creator-record-v2-pdf-templates', version: 2, fingerprint: 'a26f10643cfa838541fc4cf5ffd11e4d80cb90d2241610e8bbb7530c320a7346',
+      // CR-V2-MVP-INTEGRATION-4 (founder approval 2026-11-10): version 3 = the R10 set (version 2, fingerprint
+      // a26f10643cfa838541fc4cf5ffd11e4d80cb90d2241610e8bbb7530c320a7346, unchanged) plus the approved `integrated_assessment` block
+      // (PRD MVP scope §9). Exactly one set may name schema 8 (`approvedPdfTemplates`), so version 3 replaces version 2 here; a test
+      // proves that removing the block and restoring `version: 2` reproduces version 2's approved fingerprint byte for byte. Issued records are not re-rendered.
+      template_id: 'si8/creator-record-v2-pdf-templates', version: 3, fingerprint: '287de01d8dc365e4e7c62ab0ea25fdce0b824b26e31367560b85b2f9e779c1b5',
       record_schema: { id: 'si8/creator-record-v2-record', version: 8 }, lifecycle: 'approved',
-      authority: 'JD, for PMF Strategy Inc. d/b/a SuperImmersive 8', decision_date: '2026-11-10', review_ref: 'JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110 R10',
+      authority: 'JD, for PMF Strategy Inc. d/b/a SuperImmersive 8', decision_date: '2026-11-10', review_ref: 'JD-CR-V2-MVP-INTEGRATION-4-20261110',
     }) as PdfTemplateApproval,
   }),
 ])

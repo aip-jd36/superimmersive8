@@ -459,7 +459,9 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
     const ia = integrated.items[at]
     if (!ia || ia.claim_id !== i.claim_id || ia.conclusion !== i.conclusion) throw new CustomerPdfRefusal('record_unsupported', `integrated assessment for ${i.claim_id}`)
     if (ia.requirements.length === 0) return []
-    const blocks: Block[] = [{ kind: 'label', text: IA.heading, from: 'template' }, tpl(IA.intro)]
+    // The explanation's paragraphs (blank-line separated in the approved text) print as separate paragraphs, so the heading keeps
+    // with the first one (CustomerRecordPDF `groupHeadings`). The text is unchanged.
+    const blocks: Block[] = [{ kind: 'label', text: IA.heading, from: 'template' }, ...IA.intro.split('\n\n').map(tpl)]
     for (const q of ia.requirements) {
       blocks.push(
         q.requirement.kind === 'applicability'

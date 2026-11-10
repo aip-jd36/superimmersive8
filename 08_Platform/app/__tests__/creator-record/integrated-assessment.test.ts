@@ -181,11 +181,25 @@ describe('customer PDF: integrated inside guidance, inactive until approved word
     expect(wordingLockViolations(withBlock().templates as CustomerPdfTemplates)).toEqual([])
   })
 
-  test('without the block (every template set shipped today) nothing changes: no integrated text anywhere', () => {
+  test('without the block nothing changes: no integrated text anywhere', () => {
     const m = render(BASE, EXAM_PDF)
     for (const s of m.sections) expect(texts(s.blocks)).not.toContain(W.heading)
-    for (const set of CREATOR_RECORD_PDF_TEMPLATE_SETS) expect(Object.prototype.hasOwnProperty.call(set.templates as object, 'integrated_assessment')).toBe(false)
+    // The schema 7 set never carries it (schema 7 records hold no examinations).
     expect(Object.prototype.hasOwnProperty.call(CREATOR_RECORD_PDF_TEMPLATES as object, 'integrated_assessment')).toBe(false)
+  })
+
+  test('CR-V2-MVP-INTEGRATION-4: the governed schema 8 set (version 3) carries exactly the approved wording', () => {
+    expect(CREATOR_RECORD_PDF_TEMPLATE_SETS).toHaveLength(1)
+    const set = CREATOR_RECORD_PDF_TEMPLATE_SETS[0]
+    expect(set.approval).toMatchObject({ version: 3, record_schema: { version: 8 }, lifecycle: 'approved', review_ref: 'JD-CR-V2-MVP-INTEGRATION-4-20261110' })
+    expect((set.templates as Record<string, unknown>).integrated_assessment).toEqual(W)
+    expect(templateFingerprint(set.templates)).toBe(set.approval.fingerprint)
+    expect(W.not_compared).toBe('SI8 has not determined whether the information read from your documents matches what you told us. This section explains how the document observations relate to the conditions in the guidance above.')
+    expect(W.intro.split('\n\n')).toHaveLength(4)
+    // Printed as four paragraph blocks directly after the heading, so the heading keeps with the first (`groupHeadings`).
+    const m = render(BASE, { templates: set.templates, approval: set.approval })
+    const ia = integratedOf(m, BASE.record.guidance.items.findIndex((i) => i.claim_id === PLAN_CLAIM))
+    expect(ia.slice(1, 5).map((b) => (b.kind === 'paragraph' ? b.text : null))).toEqual(W.intro.split('\n\n'))
   })
 
   test('with the block, the assessment prints inside the plan guidance item, not in the documents section', () => {
@@ -313,7 +327,7 @@ describe('CR-V2-MVP-INTEGRATION-3: exact rendered customer text (approved Produc
     expect(cases.C_no_usable_information).toContain(W.status_labels.cannot_establish)
     expect(cases.D_unresolved).toContain(W.standing_labels.not_established)
     for (const c of Object.values(cases)) {
-      expect(c.split(W.intro).length - 1).toBe(1) // the explanation once
+      for (const para of W.intro.split('\n\n')) expect(c.split(para).length - 1).toBe(1) // the explanation once, paragraph by paragraph
       expect(c).not.toContain('[TEST ONLY] Fact') // the requirement label is the approved one
     }
     if (process.env.PRINT_INTEGRATED_EXAMPLES) for (const [k, v] of Object.entries(cases)) console.log(`===== ${k}
