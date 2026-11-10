@@ -252,25 +252,24 @@ describe('CR-V2-MVP-INTEGRATION-3: the proposed wording keeps the required disti
 
   test('1: automated examination is presented as not an independent check', () => {
     expect(W.intro).toMatch(/automated/i)
-    expect(W.intro).toMatch(/not an independent check/)
-    expect(W.intro).toMatch(/has not confirmed/)
+    expect(W.intro).toMatch(/does not independently confirm/)
   })
 
   test('2: a relevant observation is never presented as satisfying the condition', () => {
-    expect(W.intro).toMatch(/does not show that a condition is satisfied/)
+    expect(W.intro).toMatch(/does not mean a condition has been satisfied/)
     for (const x of [W.status_labels.relevant_observation_unverified, W.reason_labels.field_present]) expect(x).not.toMatch(/\b(satisf|meets|fulfil|proves?|confirm|establish)/i)
   })
 
   test('3: missing usable evidence is never presented as the document being incapable', () => {
     expect(W.status_labels.cannot_establish).not.toMatch(/\b(cannot|can't|unable|incapable|never)\b/i)
     expect(W.status_labels.cannot_establish).toMatch(/no usable information/i)
-    expect(W.intro).toMatch(/no usable information for a condition may still be relevant/)
+    expect(W.intro).toMatch(/may still be useful even when this automated check cannot read/)
   })
 
   test('4: no wording says or implies that plan names match, conflict or were compared (only that they were not)', () => {
     const texts = all(W).filter((x) => x !== W.not_compared)
     for (const x of texts) expect(x).not.toMatch(/\b(match(es|ed|ing)?|conflict\w*|contradict\w*|consistent|inconsistent|differ\w*|compar\w*|same plan|different plan)\b/i)
-    expect(W.not_compared).toMatch(/has not compared/)
+    expect(W.not_compared).toMatch(/has not determined whether/)
   })
 
   test('5: creator corrections are acknowledged and the reading is not used', () => {
@@ -281,9 +280,9 @@ describe('CR-V2-MVP-INTEGRATION-3: the proposed wording keeps the required disti
   test('6: one explanation, then concise rows: no row text repeats the explanation, and rows stay short', () => {
     for (const x of rowTexts) {
       expect(x.length).toBeLessThanOrEqual(120)
-      expect(x).not.toMatch(/independent check|has not confirmed/)
+      expect(x).not.toMatch(/independently confirm|does not mean a condition/)
     }
-    expect(W.not_compared.length).toBeLessThanOrEqual(80)
+    expect(W.not_compared.length).toBeLessThanOrEqual(200)
   })
 
   test('the full block passes the customer wording lock (with the approved Production labels too)', () => {

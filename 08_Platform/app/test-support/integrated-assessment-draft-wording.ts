@@ -5,12 +5,17 @@
  * carries the block, so nothing a customer sees changes. Activation = approving this wording into a new template set version.
  *
  * Structure (6): the one full explanation is `intro`, printed once at the top of a guidance item's block; each condition row then
- * uses short, condition-specific lines; `not_compared` is a one-line closing reminder.
+ * uses short, condition-specific lines; `not_compared` is the closing statement. `intro` and `not_compared` are the product
+ * owner's own edits (2026-11-10).
  */
 export const DRAFT_INTEGRATED_WORDING = {
   heading: 'How your documents relate to this guidance',
+  // CR-V2-MVP-INTEGRATION-3: product-owner edit (2026-11-10). Four paragraphs as written, printed as one (the contract's `intro` is one string).
   intro:
-    'Each condition this guidance depends on is shown below with what you told us and what SI8\'s automated examination read on the documents you linked to that tool. An automated reading is not an independent check: SI8 has not confirmed what any document says. A document that contains relevant information does not show that a condition is satisfied, and a document with no usable information for a condition may still be relevant to it. Nothing here changes the guidance above.',
+    'This section shows what you told us and what our automated examination found in documents linked to the AI tool you used. ' +
+    'Where document information is relevant to a condition in the guidance above, we explain why. ' +
+    'The automated examination does not independently confirm the information in your documents. Finding relevant information does not mean a condition has been satisfied. A document may still be useful even when this automated check cannot read information relevant to that condition. ' +
+    'The guidance above remains unchanged.',
   requirement: 'Condition',
   unlabelled_requirement: 'A condition this guidance depends on',
   you_told_us: 'What you told us',
@@ -53,6 +58,7 @@ export const DRAFT_INTEGRATED_WORDING = {
   appears_to_show: 'Plan name read from the document',
   excerpt: 'Text it was read from',
   your_response: 'Your response',
-  not_compared: 'SI8 has not compared what your documents show with your answers.',
-  method: 'Integrated assessment method, version {version}',
+  // Product-owner edit (2026-11-10): the closing statement.
+  not_compared: 'SI8 has not determined whether the information read from your documents matches what you told us. This section shows the document observations alongside your answers.',
+  method: 'Integrated assessment method, version {version}.',
 }
