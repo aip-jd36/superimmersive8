@@ -2,7 +2,7 @@
  * CR-V2-MVP-INTEGRATION-2 — the MVP integrated assessment (PRD_CREATOR_RECORD_v2_MVP_SCOPE.md §9).
  *
  * Real schema 8 records (real builder, real replay examinations, synthetic test sources). The `integrated_assessment` wording
- * below is a DRAFT for PM review, NOT APPROVED; it is used here under a synthetic test approval only. No database, model or network.
+ * (`test-support/integrated-assessment-draft-wording.ts`) is a DRAFT for PM review, NOT APPROVED; it is used here under a synthetic test approval only. No database, model or network.
  */
 import { buildCustomerDocument, CustomerPdfRefusal, type Block, type CustomerDocumentModel } from '@/lib/creator-record/customer-pdf/document-model'
 import { templateFingerprint, wordingLockViolations, type CustomerPdfTemplates, type PdfTemplateApproval } from '@/lib/creator-record/customer-pdf/templates'
@@ -10,56 +10,12 @@ import { assessIntegrated, INTEGRATED_ASSESSMENT_METHOD, type IntegratedAssessme
 import { CREATOR_RECORD_PDF_TEMPLATE_SETS, CREATOR_RECORD_PDF_TEMPLATES } from '@/lib/creator-record/governed/sources'
 import { SYNTHETIC_TEST_EXAMINATION_PDF as EXAM_PDF } from '@/lib/creator-record/governed/synthetic-test-authority'
 import { DOCS, schema8Fixture, type Schema8Fixture } from '@/test-support/customer-record-schema8'
+import { DRAFT_INTEGRATED_WORDING } from '@/test-support/integrated-assessment-draft-wording'
 
 const clone = <V,>(v: V): V => JSON.parse(JSON.stringify(v)) as V
 const ISSUED = { record_id: 'CR-2026-ABCD1234', issued_on: '2026-11-07' }
 const PLAN_CLAIM = 'CLAIM-PIKA-COMMERCIAL-USE-PAID-PLAN-STANDARD-001-v1'
 
-/** DRAFT customer wording (not approved). */
-export const DRAFT_INTEGRATED_WORDING = {
-  heading: 'How your documents relate to this guidance',
-  intro: 'For each requirement this guidance depends on, this shows what you told us and what your linked documents appear to show. SI8 has not checked what a document shows, and a document never changes the guidance above.',
-  requirement: 'Requirement',
-  unlabelled_requirement: 'A condition this guidance depends on',
-  you_told_us: 'What you told us',
-  nothing_told: 'You did not tell us anything about this.',
-  standing: 'Where this stands',
-  standing_labels: { rests_on_declaration: 'Taken from what you told us.', not_established: 'Not established by this record.', open: 'Open.' },
-  evidence_labels: {
-    no_linked_document: 'No document you uploaded is linked to this tool, so this rests on what you told us alone.',
-    not_read_from_documents: 'This is not something SI8 reads from documents, so your documents were not considered for it.',
-    evidence_requirement_not_defined: 'SI8 has not defined which document could show this, so your documents were not assessed against it. It remains open.',
-  },
-  document: 'Document {n}',
-  status_labels: {
-    not_examined: 'Not examined. Nothing from this document was used.',
-    creator_disputed: 'You told us this reading should not be relied on, so SI8 does not rely on it.',
-    cannot_establish: 'This document cannot establish this requirement.',
-    leaves_uncertainty: 'This document leaves this requirement uncertain.',
-    relevant_observation_unverified: 'This document appears to show information relevant to this requirement. SI8 has not checked it.',
-  },
-  reason: 'Why',
-  reason_labels: {
-    not_examined: 'The document was not examined.',
-    creator_response: 'Your response to this document.',
-    examination_failed: 'The document could not be read.',
-    reading_not_recoverable: 'The stored reading could not be used exactly as recorded.',
-    tool_link_not_established: 'The record does not show which of your tools this document belongs to for this requirement.',
-    not_a_billing_document: 'It does not appear to be a receipt or invoice.',
-    document_illegible: 'It could not be read clearly.',
-    field_not_shown: 'No plan name appears on it.',
-    field_unreadable: 'The plan name could not be read.',
-    field_ambiguous: 'The plan name is unclear.',
-    multiple_plans_shown: 'It shows more than one plan name.',
-    plan_text_incomplete: 'The plan name appears cut off.',
-    field_present: 'A plan name appears on it.',
-  },
-  appears_to_show: 'The document appears to show',
-  excerpt: 'Where it appears',
-  your_response: 'Your response',
-  not_compared: 'SI8 did not compare what your documents appear to show with what you told us, and does not say whether they match.',
-  method: 'Integrated assessment method, version {version}',
-}
 const W = DRAFT_INTEGRATED_WORDING
 
 /** The synthetic schema 8 templates plus the DRAFT block, under a synthetic approval of exactly that set. */
@@ -287,5 +243,81 @@ describe('customer PDF: integrated inside guidance, inactive until approved word
     delete t.integrated_assessment.reason_labels.field_present
     const approval = { ...EXAM_PDF.approval, fingerprint: templateFingerprint(t) }
     expect(() => render(BASE, { templates: t, approval })).toThrow(CustomerPdfRefusal)
+  })
+})
+
+describe('CR-V2-MVP-INTEGRATION-3: the proposed wording keeps the required distinctions', () => {
+  const all = (o: unknown): string[] => (typeof o === 'string' ? [o] : o && typeof o === 'object' ? Object.values(o).flatMap(all) : [])
+  const rowTexts = [...Object.values(W.status_labels), ...Object.values(W.reason_labels), ...Object.values(W.evidence_labels), ...Object.values(W.standing_labels)]
+
+  test('1: automated examination is presented as not an independent check', () => {
+    expect(W.intro).toMatch(/automated/i)
+    expect(W.intro).toMatch(/not an independent check/)
+    expect(W.intro).toMatch(/has not confirmed/)
+  })
+
+  test('2: a relevant observation is never presented as satisfying the condition', () => {
+    expect(W.intro).toMatch(/does not show that a condition is satisfied/)
+    for (const x of [W.status_labels.relevant_observation_unverified, W.reason_labels.field_present]) expect(x).not.toMatch(/\b(satisf|meets|fulfil|proves?|confirm|establish)/i)
+  })
+
+  test('3: missing usable evidence is never presented as the document being incapable', () => {
+    expect(W.status_labels.cannot_establish).not.toMatch(/\b(cannot|can't|unable|incapable|never)\b/i)
+    expect(W.status_labels.cannot_establish).toMatch(/no usable information/i)
+    expect(W.intro).toMatch(/no usable information for a condition may still be relevant/)
+  })
+
+  test('4: no wording says or implies that plan names match, conflict or were compared (only that they were not)', () => {
+    const texts = all(W).filter((x) => x !== W.not_compared)
+    for (const x of texts) expect(x).not.toMatch(/\b(match(es|ed|ing)?|conflict\w*|contradict\w*|consistent|inconsistent|differ\w*|compar\w*|same plan|different plan)\b/i)
+    expect(W.not_compared).toMatch(/has not compared/)
+  })
+
+  test('5: creator corrections are acknowledged and the reading is not used', () => {
+    expect(W.status_labels.creator_disputed).toMatch(/You asked SI8 not to rely/)
+    expect(W.status_labels.creator_disputed).toMatch(/not been used/)
+  })
+
+  test('6: one explanation, then concise rows: no row text repeats the explanation, and rows stay short', () => {
+    for (const x of rowTexts) {
+      expect(x.length).toBeLessThanOrEqual(120)
+      expect(x).not.toMatch(/independent check|has not confirmed/)
+    }
+    expect(W.not_compared.length).toBeLessThanOrEqual(80)
+  })
+
+  test('the full block passes the customer wording lock (with the approved Production labels too)', () => {
+    expect(wordingLockViolations(withBlock().templates as CustomerPdfTemplates)).toEqual([])
+    expect(wordingLockViolations(withProductionLabels().templates as CustomerPdfTemplates)).toEqual([])
+  })
+})
+
+/** The APPROVED Production schema 8 template set plus the DRAFT block, under a synthetic test approval of exactly that set. */
+function withProductionLabels(): { templates: unknown; approval: PdfTemplateApproval } {
+  const set = CREATOR_RECORD_PDF_TEMPLATE_SETS.find((x) => (x.templates as { record_schema: { version: number } }).record_schema.version === 8)!
+  const t = clone(set.templates) as Record<string, unknown>
+  t.integrated_assessment = clone(W)
+  // The synthetic fixture's questions are the synthetic set's: map them exactly as the synthetic templates do.
+  t.question_sections = clone((EXAM_PDF.templates as unknown as CustomerPdfTemplates).question_sections)
+  return { templates: t, approval: { ...set.approval, fingerprint: templateFingerprint(t) } }
+}
+
+describe('CR-V2-MVP-INTEGRATION-3: exact rendered customer text (approved Production labels + DRAFT block)', () => {
+  test('cases A–D render inside the plan guidance item', async () => {
+    const UNRESOLVED = await schema8Fixture({ plan: 'Free' })
+    const at = (f: Schema8Fixture) => f.record.guidance.items.findIndex((i) => i.claim_id === PLAN_CLAIM)
+    const out = (f: Schema8Fixture) => printed(integratedOf(render(f, withProductionLabels()), at(f)))
+    const cases = { A_relevant: out(BASE), B1_ambiguous: out(AMBIG), B2_disputed: out(DISPUTED), C_no_usable_information: out(CANNOT), D_unresolved: out(UNRESOLVED) }
+    expect(cases.A_relevant).toContain(W.status_labels.relevant_observation_unverified)
+    expect(cases.B1_ambiguous).toContain(W.status_labels.leaves_uncertainty)
+    expect(cases.B2_disputed).toContain(W.status_labels.creator_disputed)
+    expect(cases.C_no_usable_information).toContain(W.status_labels.cannot_establish)
+    expect(cases.D_unresolved).toContain(W.standing_labels.not_established)
+    for (const c of Object.values(cases)) {
+      expect(c.split(W.intro).length - 1).toBe(1) // the explanation once
+      expect(c).not.toContain('[TEST ONLY] Fact') // the requirement label is the approved one
+    }
+    if (process.env.PRINT_INTEGRATED_EXAMPLES) for (const [k, v] of Object.entries(cases)) console.log(`===== ${k}
+${v}`)
   })
 })
