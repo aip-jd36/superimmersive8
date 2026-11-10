@@ -12,6 +12,9 @@
  * Deterministic; no model call. Vocabulary entries here are TEST DATA only.
  */
 
+import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
 import { comparePlan, COMPARISON_RULES_VERSION, type DeclaredTool } from '@/lib/creator-record/receipt-examination/compare'
 import { distinctPlanIdentities, planIdentityTokens, planTokens } from '@/lib/creator-record/receipt-examination/plan-tokens'
 import {
@@ -124,9 +127,28 @@ describe('G-R1 normalization (receipt-comparison-v3)', () => {
 })
 
 describe('G-R2 product-side vocabulary (fail closed)', () => {
-  test('ships with no approved entries until the approval authority signs off', () => {
-    expect(PROVIDER_PLAN_VOCABULARY).toHaveLength(0)
+  test('ships only the approved entries (Pika complete, Higgsfield partial); Runway is absent pending D-1', () => {
+    expect(PROVIDER_PLAN_VOCABULARY.map((e) => [e.tool_id, e.coverage, e.approval.status])).toEqual([
+      ['pika', 'complete', 'approved'],
+      ['higgsfield', 'partial', 'approved'],
+    ])
     expect(vocabularyForTool('runway-gen3', TODAY)).toEqual({ status: 'unusable', reason: 'vocabulary_not_found' })
+    expect(vocabularyForTool('pika', TODAY)).toEqual(expect.objectContaining({ status: 'usable', complete: true }))
+    expect(vocabularyForTool('higgsfield', TODAY)).toEqual(expect.objectContaining({ status: 'usable', complete: false }))
+    expect(vocabularyForTool('pika', '2027-02-11')).toEqual({ status: 'unusable', reason: 'vocabulary_review_overdue' })
+  })
+
+  test('every shipped source is a preserved capture whose bytes match the recorded SHA-256 and show each supported name', () => {
+    const repo = path.resolve(__dirname, '..', '..', '..', '..')
+    for (const e of PROVIDER_PLAN_VOCABULARY) {
+      for (const s of e.sources) {
+        expect(s.capture_file.startsWith('06_Operations/creator-record/receipt-plan-vocabulary/')).toBe(true)
+        const bytes = readFileSync(path.join(repo, s.capture_file))
+        expect(createHash('sha256').update(bytes).digest('hex')).toBe(s.raw_sha256)
+        const text = bytes.toString('utf8')
+        for (const n of s.supports) expect(new RegExp(`(?<![\\p{L}\\p{N}])${n}(?![\\p{L}\\p{N}])`, 'u').test(text)).toBe(true)
+      }
+    }
   })
 
   test('approved, in date, fully sourced → usable', () => {

@@ -1,0 +1,2 @@
+# Raw official-source captures must be preserved byte-for-byte (SHA-256 recorded in MANIFEST.md).
+*.html -text -diff binary

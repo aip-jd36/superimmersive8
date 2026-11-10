@@ -52,8 +52,62 @@ export interface ProviderPlanVocabularyEntry {
   approval: { status: 'proposed' } | { status: 'approved'; approved_by: string; approved_on: string }
 }
 
-/** Approved entries only. Empty until the approval authority signs off. */
-export const PROVIDER_PLAN_VOCABULARY: readonly ProviderPlanVocabularyEntry[] = Object.freeze([])
+const CAPTURES = '06_Operations/creator-record/receipt-plan-vocabulary/'
+
+/**
+ * Approved entries only (CR-V2-RECEIPT-GATE-1B, JD 2026-11-10: provisional approval subject to source
+ * verification; verified the same day: raw and extracted-text SHA-256 re-checked, every name present in the
+ * extracted text, same-day re-fetch text-identical). Evidence: `${CAPTURES}MANIFEST.md`.
+ * Runway is deliberately absent: its current-plan names are candidates only until decision D-1 is resolved.
+ */
+export const PROVIDER_PLAN_VOCABULARY: readonly ProviderPlanVocabularyEntry[] = Object.freeze([
+  {
+    tool_id: 'pika',
+    plan_names: ['Free', 'Starter', 'Creator', 'Fancy', 'Enterprise', 'Basic', 'Standard', 'Pro', 'Unlimited'],
+    // The provider's own page names its current AND legacy individual plans.
+    coverage: 'complete',
+    sources: [
+      {
+        url: 'https://pika.art/pricing',
+        captured_at: '2026-11-10T14:04:56Z',
+        capture_file: `${CAPTURES}pika/pika-pricing_20261110T140456Z.html`,
+        raw_sha256: 'f8a8760bf55e65e4d7e4a5d4c8b9f0510e343eaee66e144f94dec6e506ce6123',
+        text_sha256: '6d00011a5b3ccb221d9a2a093ab3e13bc10ff3b2bc1db958624e9f8c1f576b01',
+        supports: ['Free', 'Starter', 'Creator', 'Fancy', 'Enterprise', 'Basic', 'Standard', 'Pro', 'Unlimited'],
+      },
+    ],
+    owner: 'SI8 Product/Operations',
+    review_by: '2027-02-10',
+    approval: { status: 'approved', approved_by: 'JD', approved_on: '2026-11-10' },
+  },
+  {
+    tool_id: 'higgsfield',
+    plan_names: ['Team', 'Scale', 'Enterprise'],
+    // Team plans only; individual plan names are not in any served official text. Never supports absence.
+    coverage: 'partial',
+    sources: [
+      {
+        url: 'https://higgsfield.ai/creator-hub/help-center/business/team-and-business-higgsfield',
+        captured_at: '2026-11-10T14:07:33Z',
+        capture_file: `${CAPTURES}higgsfield/higgsfield-help-team-and-business_20261110T140733Z.html`,
+        raw_sha256: '5cba1b9b66e9008e7c29f536c93b1f8aea87c922a38a4effde3864eeee1930a9',
+        text_sha256: 'fcc7a852b820930aabe2c41ad427b2f1dd86f39972e913786377c5b6a6d78f40',
+        supports: ['Team', 'Scale', 'Enterprise'],
+      },
+      {
+        url: 'https://higgsfield.ai/creator-hub/help-center/plans/how-do-higgsfield-plans-work',
+        captured_at: '2026-11-10T14:06:58Z',
+        capture_file: `${CAPTURES}higgsfield/higgsfield-help-how-plans-work_20261110T140658Z.html`,
+        raw_sha256: 'f42fbf42a77d114c9116f11101cb07f38181760ad49b5ccabce871246d7ffd8f',
+        text_sha256: '35da56422f8d26096f9260b6e5c7d2867cf34ad5802ad0705cbdc7d5c43a31fa',
+        supports: ['Team', 'Scale', 'Enterprise'],
+      },
+    ],
+    owner: 'SI8 Product/Operations',
+    review_by: '2027-02-10',
+    approval: { status: 'approved', approved_by: 'JD', approved_on: '2026-11-10' },
+  },
+] satisfies ProviderPlanVocabularyEntry[])
 
 export const PLAN_VOCABULARY_UNUSABLE_REASONS = [
   'vocabulary_not_found',
