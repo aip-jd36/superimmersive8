@@ -12,6 +12,8 @@
 
 Each of those still needs its own governance approval (see "Outstanding approvals").
 
+**Amended 2026-11-10** by founder decision CR-V2-MVP-INTEGRATION-2: see **§9, MVP integrated assessment**. §9 records how the integration requirement is met for the MVP, why automated receipt matching is deferred, and what post-MVP verification would need. Where §3 or §8 differ for the MVP, §9 governs; their original text is kept as history.
+
 **Supersedes:**
 - every assumption that Creator Record V2's MVP is a declarations-only record;
 - implementation-phase scope reductions, which are now gaps, not scope (see "Implemented vs. approved scope");
@@ -59,6 +61,7 @@ It is **not**:
 - **AI document parsing is never a parallel authority** for commercial-use requirements.
 - **Document-derived observations never automatically establish** rights ownership, legal sufficiency, authorization or commercial clearance.
 - **Document-derived observations are an intended input to governed retrieval and applicability evaluation,** subject to provenance-aware Bounded Interpretation. They are neither display-only nor automatically authoritative. The admissibility and corroboration rules (when an observation may count, and against what) are an engineering design decision.
+  - *2026-11-10, MVP (§9):* for the MVP, observations do **not** enter retrieval, applicability or Bounded Interpretation. They are related to governed requirements after composition, by the bounded integrated assessment (§9.3). Feeding them into applicability remains the post-MVP direction (§9.5), and needs fresh authorization.
 - **Human-verified findings are not produced by the automated Creator Record MVP.** Any human-verified category is reserved for evidence that a human has genuinely reviewed, and is never populated through automated extraction.
 - **All guidance stays subject to:**
   - provider scope, applicability and lifecycle;
@@ -101,6 +104,7 @@ It is **not**:
 - Customer wording (the Source Text Approval).
 - Per-claim Creator Record publication entries, with their explanations.
 - PDF templates.
+  - *2026-11-10:* including the optional `integrated_assessment` wording block (§9.3), whose approval activates the integrated assessment.
 - Flow copy (`lib/creator-record-flow/wording.ts`, DRAFT).
 - Legal terms: acknowledgements, and consent for AI processing of uploads.
 - Who the named approver is (PRD v0.3 OD-2a).
@@ -125,7 +129,7 @@ Decided 2026-11-01 (PM review of this record), and now in §3:
 
 Still open:
 
-1. **Admissibility and corroboration rules for document observations** (an engineering design decision, §3). This covers which observations may enter applicability, at what provenance and uncertainty, how they relate to the matching declaration, and how a conflict is shown, without ever becoming automatically authoritative.
+1. **Admissibility and corroboration rules for document observations** (an engineering design decision, §3). *2026-11-10: deferred past the MVP by §9; observations are not admitted to applicability in the MVP.* This covers which observations may enter applicability, at what provenance and uncertainty, how they relate to the matching declaration, and how a conflict is shown, without ever becoming automatically authoritative.
 2. **Live AI extraction:** what are the authorization criteria, including the real-document validation gate and a per-record cost ceiling?
 3. **Upload policy:**
    - supported types and size, page and count limits (the PRD v0.3 proposal and the prototype differ);
@@ -136,3 +140,135 @@ Still open:
 5. **Tool limit:** 3, as implemented, or up to 6, as PRD v0.3 proposed.
 
 A positioning question that does not block implementation: **how the free CRC and the $29 Creator Record V2 relate in the funnel.**
+
+---
+
+## 9. MVP integrated assessment [DECISION, founder, 2026-11-10, CR-V2-MVP-INTEGRATION-2]
+
+**Decided by:** the founder (JD). This section governs the MVP wherever §3 or §8 differ; their text is kept above as history.
+
+### 9.1 Founder-approved MVP definition
+
+> "An integrated assessment of declarations and supporting documents against governed requirements."
+
+For the MVP this is met by combining four things, for each guidance item, inside that item:
+
+1. **Creator-confirmed declarations**, as recorded and attributed to the creator. They are never changed.
+2. **AI-generated document observations**, always `not_verified`, with their provenance (run, observation ids, excerpt).
+3. **Governed Living Knowledge requirements**: each applicability requirement of the claim, and each governed open dependency, exactly as composition recorded them.
+4. **An integrated explanation**, for each requirement and each linked document. It says whether the document contains a relevant observation, leaves the requirement uncertain, cannot establish it, was disputed by the creator, or was not examined. It also says what that means for the requirement.
+
+**Simply displaying document observations alongside governed guidance does not satisfy this requirement.** A documents section placed next to a guidance section, with no per-requirement explanation, is not an integrated assessment. The pre-existing CR-V2-MVP-M3A layout (separate `documents` section, comparisons withheld) and `customer-flow/guidance-with-documents.ts` (id-level links only) are therefore not sufficient on their own.
+
+### 9.2 MVP approach and rationale
+
+SI8 deliberately chooses **bounded, evidence-aware integration** rather than definitive automated receipt-to-declaration matching. This is an intentional product decision, not an accidental missing feature. The reasons:
+
+- **The product has to be useful and educational now.** Creators need to see how their documents relate to the requirements that matter, and where the gaps are.
+- **Reliable provider-plan verification is complex.** It needs normalization semantics, issuer identity, provider plan vocabularies and text-layer cross-checks, and each part failed or was incomplete when tested (§9.6).
+- **Historical coverage is unsolved.** Providers rename and retire plans. A current pricing page cannot prove what a receipt from an earlier period could have said (the Runway case, §9.6).
+- **Observations are not verified facts.** An AI reading of a document is what the document appears to show; it is not a fact about the creator's subscription.
+- **D10's safety boundary must hold.** Until the reliability gates pass, no positive or negative comparison claim is made.
+- **The cost is out of proportion at MVP stage.** Comprehensive receipt verification would mean maintaining sourced, time-scoped plan catalogues for every provider, plus a real-document validation programme.
+
+### 9.3 MVP architecture
+
+Permitted flow:
+
+```
+creator declarations --> Retrieval -> applicability -> Bounded Interpretation -> Composition --> guidance items
+                                                                                                   |
+document observations (not_verified) -------------------------------------------------------------+
+                                                                                                   v
+                                          bounded evidence-aware integrated assessment (pure, derived)
+                                                                                                   v
+                                                                     customer-facing Creator Record (PDF)
+```
+
+**Authority is preserved:**
+- Living Knowledge, Retrieval and Bounded Interpretation keep sole authority over conclusions.
+- The integrated layer runs **after** composition. It copies each guidance item's conclusion, applicability status and dependency status unchanged, and cannot alter them.
+
+**What the integrated layer may and may not do:**
+- **It may** explain evidence relevance and uncertainty.
+- **It may not** create a stronger commercial-use conclusion, certify that evidence is sufficient, mark a dependency satisfied, change a declaration, or state that a document matches or contradicts a declaration (D10).
+
+**How a document is linked to a requirement:** only through the record's own links:
+- the tool declarations that selected the claim (`selection_basis`);
+- the creator's own `tool_index` on the document;
+- for a declared-plan requirement, its declared instance.
+
+Nothing is matched by provider or plan name.
+
+**No provider-specific orchestration.** A single generic table maps a requirement *fact type* to the observation fields that could bear on it. In the MVP that is only `tool_plan_tier` → printed plan name and plan candidates. Any other fact type is "not something a document examination reads". Governed dependencies have no governed evidence requirement (`contract/dependency-rows.ts`: `evidence_requirement: 'not_defined_by_governance'`), so documents are never assessed against them, and the assessment says so.
+
+**Creator corrections:** a creator response to a document ("reading incorrect", "wrong document", "not relevant", "another plan applies") takes precedence. That document's reading is then not relied on for the requirement.
+
+**Fail closed:** a reading that cannot be recovered exactly from its stored examination, or a document whose link to a requirement's tool cannot be established, is reported as "cannot establish", never as relevant.
+
+**Implementation and activation:**
+- **Code:** `lib/creator-record/integrated-assessment/assess.ts` (method `si8/creator-record-v2-integrated-assessment` v1). It is derived from a stored schema 8 record at render time: no new persistence, no schema change, no migration.
+- **Rendering:** it prints inside each guidance item only when the approved PDF template set carries the optional `integrated_assessment` wording block.
+- **Activation:** approving a template set that contains the block. Until then Production renders exactly as before, and issued records are never re-rendered.
+
+### 9.4 MVP exclusions
+
+- Definitive automated receipt-to-declaration matching.
+- Automatic certification of subscription or commercial-use eligibility.
+- Historical provider-plan catalogue maintenance.
+- Automated verification of document authenticity.
+- Automated resolution of conflicting evidence. Conflicting or multiple plan names are reported as leaving the requirement uncertain, never resolved.
+- The human-reviewed Commercial Assurance Assessment.
+
+**D10's display-only fallback is preserved unchanged:**
+- the persisted comparison method v2 records only `not_assessed` / `determination_withheld`;
+- the PDF never prints a comparison result;
+- the integrated assessment always states that SI8 did not compare a reading with the creator's answer.
+
+### 9.5 Post-MVP automated verification roadmap [NOT APPROVED for implementation]
+
+Nothing in this subsection is approved for implementation. Each item needs **fresh product-owner authorization**.
+
+| Capability | State (2026-11-10) |
+|---|---|
+| Approved normalization and comparison semantics (G-R1: brackets kept; no customer-typed or issuer text removed; empty → unresolved) | **Implemented but inactive:** `904e46da`, receipt-comparison-v3, local branch only (§9.6) |
+| Provider and plan identity resolution (legal-entity issuers, e.g. "Runway AI, Inc.") | **Implemented but inactive:** `904e46da`, reuses the comparison's existing resolver |
+| Sourced, maintained, time-scoped factual plan vocabularies | **Partly implemented, inactive:** `ecae1e45`, Pika (complete) and Higgsfield (partial: team plans) approved 2026-11-10. **Time-scoping not implemented**, because the existing contracts carry no date for vocabulary coverage |
+| Historical subscription-plan coverage | **Not established.** Runway's historical plan names are unsourced (D-1). Work stopped |
+| Document-reading reliability and PDF text-layer cross-checks (G-R2) | **Implemented but inactive** (`evidence/plan-cross-check.ts`, unwired since CR-V2-MVP-6; scope wiring in `904e46da`) |
+| G-R3 offline replay | **Failed** with approved vocabulary: 12/15 planted conflicts unresolved; clean-PDF true "consistent" 0/3; G-R2 ran on 0/9 PDFs. A simulated-approval preview passed, but it is not a result |
+| G-R4 real-document check | **Not started**; needs separate PM authorization (real documents and paid calls) |
+| Provenance, evidence retention, verification records | **Partly implemented:** examination runs, projections, retention. No verification-record type exists |
+| Reliable handling of conflicting or ambiguous evidence | **Proposed future capability** |
+| Persistence, issuance verification and schema approvals for any comparison outcome | **Proposed;** GATE-1 stopped because persisting a G-R2 outcome needs a migration |
+| Customer-facing comparison wording and Bounded Interpretation controls | **Proposed;** the C2 label vocabulary is still open |
+| Monitoring, maintenance (vocabulary review dates, provider renames) and regression testing | **Proposed;** vocabulary entries carry review dates and fail closed when overdue |
+| Observations as inputs to retrieval/applicability (§3 original direction, §8.1 admissibility) | **Proposed; deferred** by this decision |
+
+### 9.6 Engineering history and evidence (preserved for future agents)
+
+**D10 (PRD v0.3 §0.1, a PM decision; branch `work/cr-option-c-oc0`):**
+- display-only fallback;
+- positive plan consistency only after G-R1–G-R3 pass, plus G-R4 for real documents.
+
+**Option C / C1:** no real-document positive or negative comparisons without the gate (`PRD_CREATOR_RECORD_v2_RECONCILIATION_PROPOSED.md`).
+
+**CR-V2-RECEIPT-GATE-1:** stopped, because persisting a G-R2 outcome needs a migration.
+
+**CR-V2-RECEIPT-GATE-1A, G-R3 offline replay (2026-11-10). NO-GO.**
+- **Inputs:** preserved SPIKE-1E extractions (30 entries; SPIKE-1C unusable, schema v1) over the regenerated fixtures.
+- **Failure modes:** G-R1 unimplemented (bracket and provider-token merges); G-R2's provider scope failed on legal-entity issuers; the governed vocabulary was empty for Runway.
+- **Result:** 3/15 planted conflicts were not unresolved, and clean-PDF true "consistent" fell from 3 to 0.
+
+**CR-V2-RECEIPT-GATE-1B (2026-11-10): two local commits in worktree `si8-cr-v2-github-synthetic-3`, branch `work/cr-v2-receipt-gate-1b` (parent `e0f0b037`). Not pushed, not merged, and inactive:**
+- `904e46da`: G-R1 fixes (receipt-comparison-v3), G-R2 issuer scope, and a fail-closed product-side vocabulary module (approved entries only; review dates; partial coverage never supports absence).
+- `ecae1e45`: the approved Pika and Higgsfield entries, with captures preserved byte-for-byte in `06_Operations/creator-record/receipt-plan-vocabulary/` (MANIFEST; hashes re-verified by test).
+- Founder architecture decision: the plan vocabulary must be product-side factual data from dated official captures, never governed commercial-use propositions.
+
+**Runway:**
+- Current-plan names (Free, Standard, Pro, Max, Team, Enterprise) are sourced from a 2026-11-10 capture, but kept as **candidates only**.
+- D-1: a current pricing-page capture does not prove historical completeness.
+- The existing contracts cannot date-scope coverage.
+- The replay's Runway receipts are dated April 2026, before any capture, so even a date-scoped rule could not make G-R3 pass honestly.
+
+**Stop (founder, 2026-11-10):** receipt-verification engineering stopped for the MVP. CR-V2-RECEIPT-GATE-1C, historical Runway research, date-aware vocabulary completeness and receipt-matching persistence do **not** resume without a new founder decision.
