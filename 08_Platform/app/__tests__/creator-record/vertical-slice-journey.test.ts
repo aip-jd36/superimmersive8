@@ -203,8 +203,8 @@ describe('5. claims without Creator Record publication authorization', () => {
     // CR-V2-MVP-LEGAL-CONTENT-6: R1 approved (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109). No ledger entry is approved (R7), so no guidance.
     const qs = CREATOR_RECORD_REGISTRY_INPUT.questions
     expect(qs.map((q) => q.q_id)).toEqual(['P1', 'P2', 'P3', 'F1', 'F2', 'F3', 'T1', 'T1X', 'T3', 'T4', 'L1', 'M0', 'M1', 'M1X', 'M2', 'M3', 'M3X', 'M3D', 'M4', 'H1', 'H2'])
-    // T1 v2 carries the provider-scope decision (CR-V2-MVP-PROVIDER-SCOPE-1); every other question the launch approval.
-    for (const q of qs) expect([q.q_id, q.approval?.review_ref, /PILOT/i.test(JSON.stringify(q))]).toEqual([q.q_id, q.q_id === 'T1' ? 'JD-CR-V2-MVP-PROVIDER-SCOPE-1-20261111' : 'JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109', false])
+    // T1 v3 carries the provider-scope-2 decision (CR-V2-MVP-PROVIDER-SCOPE-2); every other question the launch approval.
+    for (const q of qs) expect([q.q_id, q.approval?.review_ref, /PILOT/i.test(JSON.stringify(q))]).toEqual([q.q_id, q.q_id === 'T1' ? 'JD-CR-V2-MVP-PROVIDER-SCOPE-2-20261111' : 'JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109', false])
     const current = CREATOR_RECORD_PUBLICATION_LEDGER.filter((e) => e.superseded_by === null && e.creator_record_eligible === 'Yes').map((e) => e.claim_id)
     expect([...current].sort()).toEqual(['CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1'])
     const r = buildCreatorRecordDraft({ state: base(), sources: governedSources(), topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: '2026-10-26', record: RECORD })

@@ -343,7 +343,7 @@ describe('Check 1 — governance authority for the examination-bearing record', 
     const i = approvedCustomerRecordInputs()
     expect(i.source_text?.approval?.record_schema.version).toBe(7)
     expect(i.source_text_examination?.approval?.record_schema.version).toBe(8)
-    expect(i.source_text_examination?.approval?.review_ref).toContain('JD-CR-V2-MVP-PROVIDER-SCOPE-1-20261111') // CR-V2-MVP-PROVIDER-SCOPE-1
+    expect(i.source_text_examination?.approval?.review_ref).toContain('JD-CR-V2-MVP-PROVIDER-SCOPE-2-20261111') // CR-V2-MVP-PROVIDER-SCOPE-1
     const { readFileSync } = await import('node:fs')
     const page = readFileSync(require('node:path').join(process.cwd(), 'app/creator-record/page.tsx'), 'utf8')
     // The v6 offer is computed from the same server inputs, and only after every existing gate passes.

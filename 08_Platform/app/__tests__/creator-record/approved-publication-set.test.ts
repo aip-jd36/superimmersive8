@@ -41,11 +41,19 @@ describe('the governed content is the approved R2-R5 wording', () => {
   test('R2 question wording (text, help, option labels) equals the packet', () => {
     const versions = new Map(Governed.CREATOR_RECORD_REGISTRY_INPUT.questions.map((q) => [q.q_id, q.version]))
     const questions: Record<string, { help: string | null | undefined; option_labels: Record<string, string>; q_version: number | undefined; text: string }> = Object.fromEntries(Object.entries(Governed.CREATOR_RECORD_PRESENTATION).map(([id, p]) => [id, { help: p.help, option_labels: p.option_labels, q_version: versions.get(id), text: p.text }]))
-    // CR-V2-MVP-PROVIDER-SCOPE-1: T1 is now version 2 without the Pika option. Restoring exactly that one option and the version
-    // reproduces the R2 packet, so nothing else in the approved wording changed.
-    expect(questions.T1.q_version).toBe(2)
-    expect(questions.T1.option_labels).not.toHaveProperty('pika')
-    const r2 = { ...questions, T1: { ...questions.T1, q_version: 1, option_labels: { ...questions.T1.option_labels, pika: 'Pika' } } }
+    // CR-V2-MVP-PROVIDER-SCOPE-2: T1 is now version 3, offering only Higgsfield, Runway and "Not sure", with the founder-approved
+    // shortened help text. Restoring exactly the R2 T1 (version 1, every option label, the original help) reproduces the R2
+    // packet, so nothing else in the approved wording changed.
+    expect(questions.T1.q_version).toBe(3)
+    expect(questions.T1.help).toBe('Choose it from the list. You can add up to 3 tools.')
+    expect(questions.T1.option_labels).toEqual({ higgsfield: 'Higgsfield', not_sure: 'Not sure', 'runway-gen3': 'Runway' })
+    const R2_T1_LABELS = {
+      'adobe-firefly': 'Adobe Firefly', elevenlabs: 'ElevenLabs', 'gemini-api': 'Gemini API (developer access)', 'gemini-consumer-app': 'Gemini app (consumer)', 'google-veo': 'Google Veo',
+      higgsfield: 'Higgsfield', kling: 'Kling', luma: 'Luma Dream Machine', midjourney: 'Midjourney', not_sure: 'Not sure', 'openai-sora': 'OpenAI Sora', other_tool: 'My tool isn’t listed',
+      pika: 'Pika', 'runway-gen3': 'Runway', 'stability-ai': 'Stability AI', suno: 'Suno', synthesia: 'Synthesia',
+    }
+    const R2_T1_HELP = 'Choose it from the list. If it is not listed, choose “My tool isn’t listed” and type its name. You can add up to 3 tools.'
+    const r2 = { ...questions, T1: { ...questions.T1, q_version: 1, help: R2_T1_HELP, option_labels: R2_T1_LABELS } }
     expect(sha(packetJson({ item: 'R2 question wording, help and option labels', questions: r2 }))).toBe('25aa8fc0a21624dcaa00c32f3d8ccbbb896b7f5d61791a1563913fbc3c256fed')
   })
   test('R3 acknowledgements A1 and A2, with the Terms and Privacy agreement', () => {
@@ -58,8 +66,8 @@ describe('the governed content is the approved R2-R5 wording', () => {
   })
   test('every launch question carries the founder approval', () => {
     for (const q of Governed.CREATOR_RECORD_REGISTRY_INPUT.questions) {
-      // T1 v2 carries the provider-scope decision (CR-V2-MVP-PROVIDER-SCOPE-1); every other question the launch approval.
-      const expected = q.q_id === 'T1' ? { review_ref: Governed.CREATOR_RECORD_PROVIDER_SCOPE_APPROVAL_REF, decision_date: '2026-11-11' } : { review_ref: REF, decision_date: '2026-11-09' }
+      // T1 v3 carries the provider-scope-2 decision (CR-V2-MVP-PROVIDER-SCOPE-2); every other question the launch approval.
+      const expected = q.q_id === 'T1' ? { review_ref: Governed.CREATOR_RECORD_PROVIDER_SCOPE_2_APPROVAL_REF, decision_date: '2026-11-11' } : { review_ref: REF, decision_date: '2026-11-09' }
       expect(q.approval).toMatchObject({ status: 'approved', ...expected })
     }
   })
@@ -118,7 +126,7 @@ describe('the approved guidance ledger, PDF templates and issuance support', () 
     expect(current).toEqual(['CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1'])
   })
   test('the printed guidance set names the approved ledger, never the empty one', () => {
-    expect(Governed.CREATOR_RECORD_VERSIONS).toEqual({ registry: 'CR-V2-LAUNCH-REGISTRY-2', ledger: 'CR-V2-LAUNCH-LEDGER-3' })
+    expect(Governed.CREATOR_RECORD_VERSIONS).toEqual({ registry: 'CR-V2-LAUNCH-REGISTRY-3', ledger: 'CR-V2-LAUNCH-LEDGER-3' })
   })
   test('R9/R10: both template sets carry their approved fingerprints, schemas and references', () => {
     expect(Governed.CREATOR_RECORD_PDF_TEMPLATE_APPROVAL).toMatchObject({ version: 1, fingerprint: 'c5fe2a21ec8a096c6abf7eccf0bd55f3103401e10a26512052e5d2ee15a11c6c', record_schema: { version: 7 }, review_ref: `${REF2} R9` })

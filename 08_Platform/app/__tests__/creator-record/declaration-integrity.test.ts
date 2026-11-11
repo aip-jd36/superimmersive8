@@ -573,7 +573,7 @@ describe('compatibility', () => {
     expect(Object.keys(g.presentation)).toHaveLength(21)
     // CR-V2-MVP-PROVIDER-SCOPE-1: the Pika baseline is withdrawn (v1 superseded by a v2 'No' entry); only Runway and Higgsfield are current.
     expect(g.publication_ledger.filter((e) => e.superseded_by === null && e.creator_record_eligible === 'Yes').map((e) => e.claim_id).sort()).toEqual(['CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1'])
-    expect(g.source_text_approval?.review_ref).toBe('JD-CR-V2-MVP-PROVIDER-SCOPE-1-20261111 schema 7')
+    expect(g.source_text_approval?.review_ref).toBe('JD-CR-V2-MVP-PROVIDER-SCOPE-2-20261111 schema 7')
     expect(resolvePublicationAuthority({})).toEqual({ ok: true, mode: 'governance' })
     const inputs = approvedCustomerRecordInputs(g)
     const check = checkApprovedSources(inputs.sources, inputs.source_text, CLAIMS, AS_OF, SCHEMA)

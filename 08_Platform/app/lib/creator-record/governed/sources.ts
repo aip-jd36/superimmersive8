@@ -22,6 +22,7 @@ import type { PdfTemplateApproval } from '../customer-pdf/templates'
 import type { PublicationAuthorityBundle } from './publication-authority'
 import type { GovernanceApproval } from '../contract/types'
 import type { ObservationMapEntry, QuestionEntry } from '../contract/question-registry'
+import { NOT_SURE } from '../contract/question-registry'
 import {
   ASSET_PROVIDER_OPTION_CODES, CANONICAL_ASSET_PROVIDER_ID_LIST, CANONICAL_TOOL_ID_LIST, OTHER_PROVIDER, OTHER_TOOL, TOOL_OPTION_CODES,
 } from '../identity/selectable-identities'
@@ -52,15 +53,25 @@ const LAUNCH_ID = 'CR-V2-LAUNCH'
 // The other registered tools stay selectable and, outside MVP scope, receive no guidance, as before.
 export const CREATOR_RECORD_PROVIDER_SCOPE_APPROVAL_REF = 'JD-CR-V2-MVP-PROVIDER-SCOPE-1-20261111'
 const PROVIDER_SCOPE_DECISION_DATE = '2026-11-11'
-const PROVIDER_SCOPE_APPROVAL: GovernanceApproval = Object.freeze({
+
+// ── CR-V2-MVP-PROVIDER-SCOPE-2 (CRV2-PA-1A, founder decision, JD, 2026-11-11) ──
+// New Creator Records may select only the MVP tools, Higgsfield and Runway. Every other registered tool, and "My tool isn't
+// listed" (so the free-text tool name T1X can no longer be shown or answered), is removed from T1 v3. "Not sure" stays: the
+// question registry requires it on every closed question, and it attaches to no identity and no guidance. The T1 help text
+// drops its sentence about "My tool isn't listed" (founder-approved wording). The tool identity registry, CRC, Living
+// Knowledge and the publication ledger are unchanged. Issued records keep their own embedded contract and guidance.
+export const CREATOR_RECORD_PROVIDER_SCOPE_2_APPROVAL_REF = 'JD-CR-V2-MVP-PROVIDER-SCOPE-2-20261111'
+const PROVIDER_SCOPE_2_APPROVAL: GovernanceApproval = Object.freeze({
   status: 'approved',
   approver: LAUNCH_AUTHORITY,
   decision_date: PROVIDER_SCOPE_DECISION_DATE,
-  review_ref: CREATOR_RECORD_PROVIDER_SCOPE_APPROVAL_REF,
+  review_ref: CREATOR_RECORD_PROVIDER_SCOPE_2_APPROVAL_REF,
 }) as GovernanceApproval
-/** Registered tools that new Creator Records do not offer as a choice (CR-V2-MVP-PROVIDER-SCOPE-1). */
-export const CREATOR_RECORD_EXCLUDED_TOOL_IDS: readonly string[] = Object.freeze(['pika'])
-const offeredTool = (code: string) => !CREATOR_RECORD_EXCLUDED_TOOL_IDS.includes(code)
+/** The only tools a new Creator Record offers (CR-V2-MVP-PROVIDER-SCOPE-2). */
+export const CREATOR_RECORD_MVP_TOOL_IDS: readonly string[] = Object.freeze(['higgsfield', 'runway-gen3'])
+/** Registered tools that new Creator Records do not offer as a choice: every registered tool outside the MVP set. */
+export const CREATOR_RECORD_EXCLUDED_TOOL_IDS: readonly string[] = Object.freeze(CANONICAL_TOOL_ID_LIST.filter((id) => !CREATOR_RECORD_MVP_TOOL_IDS.includes(id)))
+const offeredTool = (code: string) => CREATOR_RECORD_MVP_TOOL_IDS.includes(code) || code === NOT_SURE
 const question = (over: Partial<QuestionEntry> & Pick<QuestionEntry, 'q_id'>): QuestionEntry => ({
   version: 1,
   question_kind: 'factual_value',
@@ -93,8 +104,10 @@ const LAUNCH_QUESTIONS: QuestionEntry[] = [
   question({ q_id: 'F1', options: LOCATION_CODES }),
   question({ q_id: 'F2', options: LOCATION_CODES }),
   question({ q_id: 'F3', options: LOCATION_CODES, display_condition: showWhen('P3', ['client_work', 'paid_advertising']) }),
-  // T1 v2 (CR-V2-MVP-PROVIDER-SCOPE-1): v1 offered every registered tool; v2 omits the excluded ones. Wording otherwise unchanged.
-  question({ q_id: 'T1', version: 2, options: TOOL_OPTION_CODES.filter(offeredTool), approval: PROVIDER_SCOPE_APPROVAL }),
+  // T1 v3 (CR-V2-MVP-PROVIDER-SCOPE-2): v1 offered every registered tool, v2 every tool but Pika; v3 offers only the MVP tools
+  // and "Not sure". T1X is unchanged but can no longer be shown: its condition needs "My tool isn't listed", which v3 does not
+  // offer, and an answer to a question that is not shown is refused (`hidden_answer`).
+  question({ q_id: 'T1', version: 3, options: TOOL_OPTION_CODES.filter(offeredTool), approval: PROVIDER_SCOPE_2_APPROVAL }),
   question({ q_id: 'T1X', display_condition: showWhen('T1', [OTHER_TOOL]) }),
   question({ q_id: 'T3' }),
   question({ q_id: 'T4' }),
@@ -119,7 +132,7 @@ const LAUNCH_OBSERVATION_MAP: ObservationMapEntry[] = [
   observation({ o_id: `${LAUNCH_ID}-O-F1`, q_id: 'F1', target: { kind: 'location', role: 'creator_base' } }),
   observation({ o_id: `${LAUNCH_ID}-O-F2`, q_id: 'F2', target: { kind: 'location', role: 'distribution_market' } }),
   observation({ o_id: `${LAUNCH_ID}-O-F3`, q_id: 'F3', target: { kind: 'location', role: 'client_base' } }),
-  ...CANONICAL_TOOL_ID_LIST.filter(offeredTool).map((id) => observation({ o_id: `${LAUNCH_ID}-O-T1-${id}`, version: 2, q_id: 'T1', q_version: 2, applies_to: { kind: 'option', value: id }, target: { kind: 'tool_identity' }, approval: PROVIDER_SCOPE_APPROVAL })),
+  ...CANONICAL_TOOL_ID_LIST.filter(offeredTool).map((id) => observation({ o_id: `${LAUNCH_ID}-O-T1-${id}`, version: 3, q_id: 'T1', q_version: 3, applies_to: { kind: 'option', value: id }, target: { kind: 'tool_identity' }, approval: PROVIDER_SCOPE_2_APPROVAL })),
   observation({ o_id: `${LAUNCH_ID}-O-T3`, q_id: 'T3', target: { kind: 'applicability_fact', fact: 'tool_plan_tier' } }),
   ...CANONICAL_ASSET_PROVIDER_ID_LIST.map((id) => observation({ o_id: `${LAUNCH_ID}-O-M1-PROVIDER-${id}`, q_id: 'M1', applies_to: { kind: 'option', value: id }, target: { kind: 'asset_provider_identity' } })),
   observation({ o_id: `${LAUNCH_ID}-O-M1-DEP`, q_id: 'M1', target: { kind: 'dependency', dependency_id: 'which_music_provider' } }),
@@ -253,7 +266,7 @@ export const CREATOR_RECORD_PRESENTATION: CreatorRecordSources['presentation'] =
   F1: { q_id: "F1", section: "locations", input: "single", required: true, per_tool: false, allow_not_sure: false, text: "Where are you or your business based?", help: "This is recorded in your record only. It does not change which guidance is shown.", option_labels: {"AE": "United Arab Emirates", "EU": "European Union (as a whole)", "GB": "United Kingdom", "NL": "Netherlands", "SG": "Singapore", "TW": "Taiwan", "US": "United States", "not_sure": "Not sure", "online_worldwide": "Online, worldwide", "other": "Somewhere else"} },
   F2: { q_id: "F2", section: "locations", input: "multi", required: true, per_tool: false, allow_not_sure: false, text: "Where do you expect the video to be published or shown? Select all that apply.", help: "This is recorded in your record only. It does not change which guidance is shown.", option_labels: {"AE": "United Arab Emirates", "EU": "European Union (as a whole)", "GB": "United Kingdom", "NL": "Netherlands", "SG": "Singapore", "TW": "Taiwan", "US": "United States", "not_sure": "Not sure", "online_worldwide": "Online, worldwide", "other": "Somewhere else"} },
   F3: { q_id: "F3", section: "locations", input: "single", required: true, per_tool: false, allow_not_sure: false, text: "Where is the client or advertiser based?", help: "This is recorded in your record only. It does not change which guidance is shown.", option_labels: {"AE": "United Arab Emirates", "EU": "European Union (as a whole)", "GB": "United Kingdom", "NL": "Netherlands", "SG": "Singapore", "TW": "Taiwan", "US": "United States", "not_sure": "Not sure", "online_worldwide": "Online, worldwide", "other": "Somewhere else"} },
-  T1: { q_id: "T1", section: "tools", input: "select", required: true, per_tool: true, allow_not_sure: false, text: "Which AI tool did you use?", help: "Choose it from the list. If it is not listed, choose “My tool isn’t listed” and type its name. You can add up to 3 tools.", option_labels: {"adobe-firefly": "Adobe Firefly", "elevenlabs": "ElevenLabs", "gemini-api": "Gemini API (developer access)", "gemini-consumer-app": "Gemini app (consumer)", "google-veo": "Google Veo", "higgsfield": "Higgsfield", "kling": "Kling", "luma": "Luma Dream Machine", "midjourney": "Midjourney", "not_sure": "Not sure", "openai-sora": "OpenAI Sora", "other_tool": "My tool isn’t listed", "runway-gen3": "Runway", "stability-ai": "Stability AI", "suno": "Suno", "synthesia": "Synthesia"} },
+  T1: { q_id: "T1", section: "tools", input: "select", required: true, per_tool: true, allow_not_sure: false, text: "Which AI tool did you use?", help: "Choose it from the list. You can add up to 3 tools.", option_labels: {"higgsfield": "Higgsfield", "not_sure": "Not sure", "runway-gen3": "Runway"} },
   T1X: { q_id: "T1X", section: "tools", input: "text", required: true, per_tool: true, allow_not_sure: false, text: "What is the tool called?", help: "Type the name as it appears on the tool’s website. SI8 records it as you type it.", option_labels: {} },
   T3: { q_id: "T3", section: "tools", input: "plan", required: true, per_tool: true, allow_not_sure: true, text: "Which plan were you on with this tool while you made the video?", help: "The list shows only some plan names, and may not include yours. If your plan is not listed, choose “Another plan” and type its name as the tool shows it. If you do not know, choose “Not sure”.", option_labels: {} },
   T4: { q_id: "T4", section: "tools", input: "text", required: true, per_tool: true, allow_not_sure: true, text: "When did you use this tool for the video?", help: "Month and year, for example March–May 2026. If you do not know, choose “Not sure”.", option_labels: {} },
@@ -276,7 +289,7 @@ export const CREATOR_RECORD_DEPENDENCY_LABELS: Readonly<Record<string, string>> 
 export const CREATOR_RECORD_SECTION_TITLES: Readonly<Record<string, string>> = Object.freeze({"acknowledgements": "Before you continue", "contribution": "Your own contribution", "locations": "Where you are and where it will be shown", "materials": "Material from other sources", "people": "Real people", "project": "Your video", "tools": "The AI tools you used"})
 
 /** Customer-facing versions of the approved registry and ledger. */
-export const CREATOR_RECORD_VERSIONS: Readonly<{ registry: string; ledger: string }> = Object.freeze({ registry: 'CR-V2-LAUNCH-REGISTRY-2', ledger: 'CR-V2-LAUNCH-LEDGER-3' })
+export const CREATOR_RECORD_VERSIONS: Readonly<{ registry: string; ledger: string }> = Object.freeze({ registry: 'CR-V2-LAUNCH-REGISTRY-3', ledger: 'CR-V2-LAUNCH-LEDGER-3' })
 
 /** Maximum number of tool blocks in the approved questionnaire. */
 export const CREATOR_RECORD_MAX_TOOLS = 3
@@ -285,8 +298,8 @@ export const CREATOR_RECORD_MAX_TOOLS = 3
  * Pinned digests, computed by the code from the approved content above and the customer wording set. A mismatch means
  * approved content changed: preparation, checkout and issuance then refuse.
  */
-export const CREATOR_RECORD_SOURCE_TEXT_SHA256 = '06fc6f6d6a103450c149b57a0edf03cbd210ebc30a56989c98a3bf3d39930277'
-export const CREATOR_RECORD_QUESTIONNAIRE_CONTRACT_SHA256 = '69d32b7df61ddade4f006be12c2a371a9cd7c9d6f0db80d6420850689eb27868'
+export const CREATOR_RECORD_SOURCE_TEXT_SHA256 = '7798a482cbb31772bce7819e503e5b065ac657a8ae2537faf69e494b6efdfbd9'
+export const CREATOR_RECORD_QUESTIONNAIRE_CONTRACT_SHA256 = 'b398b0136f806278311d12a00a1faed54f8a1cef455910f67359ac48130abc95'
 
 const sourceTextApproval = (version: number, recordSchemaVersion: number, reviewRef: string, decisionDate: string = LAUNCH_DECISION_DATE): SourceTextApproval => Object.freeze({
   source_id: 'si8/creator-record-v2-source-text',
@@ -302,23 +315,27 @@ const sourceTextApproval = (version: number, recordSchemaVersion: number, review
 
 /**
  * The Source Text Approval covering the wording above, for the declarations record (schema 7). Versions 3 (schema 7) and 4
- * (schema 8) approved the launch wording with Pika in T1; versions 5 and 6 approve the same wording without it
- * (CR-V2-MVP-PROVIDER-SCOPE-1). Nothing else in the wording changed.
+ * (schema 8) approved the launch wording with Pika in T1; versions 5 and 6 approved the same wording without it
+ * (CR-V2-MVP-PROVIDER-SCOPE-1). Versions 7 (schema 7) and 8 (schema 8) approve T1 v3: only Higgsfield, Runway and "Not sure",
+ * and the shortened T1 help text (CR-V2-MVP-PROVIDER-SCOPE-2). Nothing else in the wording changed.
  */
-export const CREATOR_RECORD_SOURCE_TEXT_APPROVAL: SourceTextApproval | null = sourceTextApproval(5, 7, `${CREATOR_RECORD_PROVIDER_SCOPE_APPROVAL_REF} schema 7`, PROVIDER_SCOPE_DECISION_DATE)
+export const CREATOR_RECORD_SOURCE_TEXT_APPROVAL: SourceTextApproval | null = sourceTextApproval(7, 7, `${CREATOR_RECORD_PROVIDER_SCOPE_2_APPROVAL_REF} schema 7`, PROVIDER_SCOPE_DECISION_DATE)
 
 /** CR-V2-SCHEMA8-PATH-1: the distinct approval of the same wording for the examination-bearing record (schema 8). */
-export const CREATOR_RECORD_EXAMINATION_SOURCE_TEXT_APPROVAL: SourceTextApproval | null = sourceTextApproval(6, 8, `${CREATOR_RECORD_PROVIDER_SCOPE_APPROVAL_REF} schema 8`, PROVIDER_SCOPE_DECISION_DATE)
+export const CREATOR_RECORD_EXAMINATION_SOURCE_TEXT_APPROVAL: SourceTextApproval | null = sourceTextApproval(8, 8, `${CREATOR_RECORD_PROVIDER_SCOPE_2_APPROVAL_REF} schema 8`, PROVIDER_SCOPE_DECISION_DATE)
 
-/** The approval of the exact questionnaire contract (R1; version 2 = R1 with T1 v2, CR-V2-MVP-PROVIDER-SCOPE-1). */
+/**
+ * The approval of the exact questionnaire contract (R1; version 2 = R1 with T1 v2, CR-V2-MVP-PROVIDER-SCOPE-1; version 3 = R1
+ * with T1 v3, CR-V2-MVP-PROVIDER-SCOPE-2).
+ */
 export const CREATOR_RECORD_QUESTIONNAIRE_APPROVAL: QuestionnaireContractApproval | null = Object.freeze({
   contract_id: 'si8/creator-record-v2-questionnaire-contract',
-  contract_version: 2,
+  contract_version: 3,
   contract_sha256: CREATOR_RECORD_QUESTIONNAIRE_CONTRACT_SHA256,
   lifecycle: 'approved',
   authority: LAUNCH_AUTHORITY,
   decision_date: PROVIDER_SCOPE_DECISION_DATE,
-  review_ref: CREATOR_RECORD_PROVIDER_SCOPE_APPROVAL_REF,
+  review_ref: CREATOR_RECORD_PROVIDER_SCOPE_2_APPROVAL_REF,
 }) as QuestionnaireContractApproval
 
 // CR-V2-MVP-M3: the customer PDF template set and its approval (`../customer-pdf/templates`). Rendering

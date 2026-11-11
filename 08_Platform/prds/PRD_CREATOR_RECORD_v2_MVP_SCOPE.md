@@ -307,3 +307,27 @@ Nothing in this subsection is approved for implementation. Each item needs **fre
 ### 10.5 What this does not change
 
 This decision does **not** complete the MVP integrated-assessment requirement (§9). The published Runway and Higgsfield claims carry no applicability requirement and no governed dependency, so the integrated assessment has nothing to relate documents to for them and prints nothing (CR-V2-MVP-INTEGRATION-5B). Meeting §9.1 in Production still needs a published claim with a structured, document-assessable requirement.
+
+## 11. MVP provider selection restriction [DECISION, founder, 2026-11-11, CR-V2-MVP-PROVIDER-SCOPE-2 / CRV2-PA-1A]
+
+**Decided by:** the founder (JD). Approval reference in code: `JD-CR-V2-MVP-PROVIDER-SCOPE-2-20261111`. This refines §10.1: Kling and the other registered providers are **no longer selectable** in a new Creator Record.
+
+### 11.1 Decision
+
+- A new Creator Record may select only **Higgsfield** and **Runway**. No other registered tool may be chosen.
+- "My tool isn't listed" is removed, so no tool can be named in free text (T1X is never shown).
+- "Not sure" stays: the question registry requires it on every closed question. It records no tool identity and no guidance.
+- T1 help text, founder-approved: "Choose it from the list. You can add up to 3 tools." (the sentence about "My tool isn't listed" is removed).
+- Existing unissued records follow the no-grandfathering policy (§10.4). Nothing is rewritten.
+
+### 11.2 How it is implemented (`lib/creator-record/governed/sources.ts`)
+
+- **T1 version 3** offers `higgsfield`, `runway-gen3` and `not_sure` (`CREATOR_RECORD_MVP_TOOL_IDS`); only Higgsfield and Runway have identity observation entries. **CR-V2-LAUNCH-REGISTRY-3.** The ledger is unchanged (LEDGER-3).
+- **New approval versions:** Source Text Approvals 7 (schema 7) and 8 (schema 8), questionnaire contract version 3, re-pinned digests. Versions 5, 6 and 2 are preserved in history.
+- **Server-side enforcement** is the existing questionnaire validation: a T1 value outside the approved options is refused at prepare, checkout and issuance, and an answer to a question that is not shown (T1X) is discarded, never mapped, stored in the record, shown in guidance or printed.
+- **Not changed:** the shared tool identity registry and its option list, CRC, Living Knowledge, the publication ledger, payment, pricing, issuance, legal policies, PDF templates, consent bindings and the synthetic admin UAT bundle.
+
+### 11.3 Existing records
+
+- Issued records verify and render exactly as issued (T1 v1 with Pika; T1 v2 with Kling or an unlisted tool), proven against reconstructions of both earlier approval states.
+- Records prepared but not issued under T1 v2 are refused at checkout and issuance, whatever tool they name, and must be prepared again. Before integration, confirm that Production holds no paid-but-unissued Creator Record V2.
