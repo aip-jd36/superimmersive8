@@ -104,6 +104,10 @@ describe('canonical contract', () => {
     expect((r.contract.answer_constraints as any).max_text_length).toBe(MAX_TEXT_LENGTH)
   })
 
+  const OFA = (over: Record<string, unknown> = {}) => ({
+    authorization_id: 'TEST-OFA', version: 1, objective_id: 'creator-record:copyrightability:v1', fact: 'jurisdiction',
+    source: { q_id: 'J1', q_version: 1 }, semantic_review_ref: 'TEST', approval: { status: 'approved', approver: 'T', decision_date: '2026-11-11', review_ref: 'T' }, ...over,
+  })
   // One row for EVERY classified field. The completeness test below fails if a classified field has no row.
   const contractFields: Record<string, (s: any) => void> = {
     'sources.registry_input': (s) => { s.registry_input.questions.pop() },
@@ -147,6 +151,18 @@ describe('canonical contract', () => {
     'presentation.per_tool': (s) => { s.presentation.T3.per_tool = false },
     'presentation.allow_not_sure': (s) => { s.presentation.P1.allow_not_sure = true },
     'presentation.exclusive_options': (s) => { delete s.presentation.M0.exclusive_options },
+    // CRV2-IA-4B: authorizations are in the contract only when present; each row adds one with that field varied, and
+    // ia4b-questionnaire-authorization.test.ts checks every field against a base that already carries one.
+    'sources.objective_fact_authorizations': (s) => { s.objective_fact_authorizations = [OFA()] },
+    'objective_fact_authorization.authorization_id': (s) => { s.objective_fact_authorizations = [OFA({ authorization_id: 'OTHER' })] },
+    'objective_fact_authorization.version': (s) => { s.objective_fact_authorizations = [OFA({ version: 2 })] },
+    'objective_fact_authorization.objective_id': (s) => { s.objective_fact_authorizations = [OFA({ objective_id: 'creator-record:copyright_ownership:v1' })] },
+    'objective_fact_authorization.fact': (s) => { s.objective_fact_authorizations = [OFA({ fact: 'jurisdiction' })] },
+    'objective_fact_authorization.source': (s) => { s.objective_fact_authorizations = [OFA({ source: { q_id: 'J1', q_version: 2 } })] },
+    'objective_fact_authorization.semantic_review_ref': (s) => { s.objective_fact_authorizations = [OFA({ semantic_review_ref: 'OTHER' })] },
+    'objective_fact_authorization.approval': (s) => { s.objective_fact_authorizations = [OFA({ approval: { status: 'pending', approver: null, decision_date: null, review_ref: null } })] },
+    'objective_fact_source.q_id': (s) => { s.objective_fact_authorizations = [OFA({ source: { q_id: 'J2', q_version: 1 } })] },
+    'objective_fact_source.q_version': (s) => { s.objective_fact_authorizations = [OFA({ source: { q_id: 'J1', q_version: 3 } })] },
   }
   const wordingFields: Record<string, (s: any) => void> = {
     'sources.dependency_labels': (s) => { s.dependency_labels.which_music_provider = 'OTHER' },

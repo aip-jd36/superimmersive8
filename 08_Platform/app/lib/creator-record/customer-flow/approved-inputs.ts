@@ -64,6 +64,10 @@ const NO_AUTHORITY_INPUTS: ApprovedInputs = Object.freeze({
 
 export function approvedCustomerRecordInputs(bundle: PublicationAuthorityBundle | null = currentPublicationAuthority()): ApprovedInputs {
   if (!bundle) return NO_AUTHORITY_INPUTS
+  // CRV2-IA-4B: authorizations reach the sources only from a bundle whose authorizations validate, whichever way the bundle was
+  // obtained. A malformed or unapproved list means no authority at all, never a partial one.
+  if (bundleAuthorizationErrors(bundle).length > 0) return NO_AUTHORITY_INPUTS
+  const authorizations = bundle.objective_fact_authorizations ?? []
   return {
     sources: {
       kind: 'governed',
@@ -79,6 +83,8 @@ export function approvedCustomerRecordInputs(bundle: PublicationAuthorityBundle 
       // CR-V2-MVP-PROD-PREP-1: the customer wording set THIS build renders, from code (never from the bundle). It is part of the
       // Source Text content, so an approval that does not name exactly this set no longer matches.
       customer_wording: customerWordingIdentity(),
+      // CRV2-IA-4B: only when non-empty, so sources without authorizations are byte-identical to before.
+      ...(authorizations.length > 0 ? { objective_fact_authorizations: authorizations } : {}),
     },
     source_text: bundle.source_text_approval === null ? null : { approval: bundle.source_text_approval, acknowledgements: bundle.acknowledgements },
     // CR-V2-SCHEMA8-PATH-1: the schema 8 approval of the same wording, from the same bundle (null when none).

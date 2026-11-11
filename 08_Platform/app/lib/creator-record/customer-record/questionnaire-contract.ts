@@ -57,6 +57,8 @@ export const QUESTIONNAIRE_FIELD_CLASSES = {
     kind: 'gate', questionnaire_approval: 'gate', ledger: 'separately_governed', dependency_labels: 'wording', caveats: 'wording',
     registry_input: 'contract', presentation: 'contract', acknowledgement_ids: 'contract', versions: 'contract', max_tools: 'contract',
     customer_wording: 'wording',
+    // CRV2-IA-4B: changes what an answer means for an objective, so it is part of the contract (only when present).
+    objective_fact_authorizations: 'contract',
   },
   versions: { registry: 'contract', ledger: 'separately_governed' },
   registry_input: { questions: 'contract', observation_map: 'contract', semantic_mappings: 'contract', prohibited_dependency_targets: 'contract' },
@@ -64,6 +66,10 @@ export const QUESTIONNAIRE_FIELD_CLASSES = {
   observation_map_entry: { o_id: 'contract', version: 'contract', q_id: 'contract', q_version: 'contract', applies_to: 'contract', observation_kind: 'contract', target: 'contract', value_mapping_version: 'contract', approval: 'contract' },
   semantic_mapping: { q_id: 'contract', q_version: 'contract', dependency_id: 'contract', review_ref: 'contract' },
   entry_approval: { status: 'contract', approver: 'contract', decision_date: 'contract', review_ref: 'contract' },
+  objective_fact_authorization: {
+    authorization_id: 'contract', version: 'contract', objective_id: 'contract', fact: 'contract', source: 'contract', semantic_review_ref: 'contract', approval: 'contract',
+  },
+  objective_fact_source: { q_id: 'contract', q_version: 'contract' },
   presentation: {
     q_id: 'contract', section: 'contract', input: 'contract', required: 'contract', per_tool: 'contract', allow_not_sure: 'contract', exclusive_options: 'contract',
     text: 'wording', help: 'wording', option_labels: 'wording',
@@ -75,6 +81,8 @@ const DISPLAY_CONDITION_FIELDS: Readonly<Record<string, readonly string[]>> = { 
 const APPLIES_TO_FIELDS: Readonly<Record<string, readonly string[]>> = { option: ['kind', 'value'], any_answer: ['kind'] }
 const TARGET_FIELDS: Readonly<Record<string, readonly string[]>> = {
   applicability_fact: ['kind', 'fact', 'tool'], tool_identity: ['kind'], asset_provider_identity: ['kind'], dependency: ['kind', 'dependency_id'], location: ['kind', 'role'],
+  // CRV2-IA-4B: classified so a future contract can carry it; the question registry still refuses this target today.
+  guidance_place: ['kind', 'place'],
 }
 
 type Plain = Record<string, unknown>
@@ -126,6 +134,11 @@ export function unclassifiedQuestionnaireFields(sources: CreatorRecordSources): 
     })
     list(r.semantic_mappings, 'semantic_mappings', (m, at) => fields(m, QUESTIONNAIRE_FIELD_CLASSES.semantic_mapping, at))
   }
+  list(sources.objective_fact_authorizations, 'objective_fact_authorizations', (a, at) => {
+    if (!fields(a, QUESTIONNAIRE_FIELD_CLASSES.objective_fact_authorization, at)) return
+    fields(a.source, QUESTIONNAIRE_FIELD_CLASSES.objective_fact_source, `${at}.source`)
+    approval(a.approval, `${at}.approval`)
+  })
   if (isPlain(sources.presentation)) {
     for (const [id, p] of Object.entries(sources.presentation)) {
       const at = `presentation.${id}`
@@ -173,6 +186,8 @@ export function questionnaireContract(sources: CreatorRecordSources, wording_sha
     },
     uncertainty: { not_sure: NOT_SURE, not_applicable: NOT_APPLICABLE, free_text_not_sure_verbatim: FREE_TEXT_NOT_SURE_VERBATIM },
     wording_sha256,
+    // CRV2-IA-4B: present only when there are authorizations, so every existing contract and its digest are unchanged.
+    ...((sources.objective_fact_authorizations ?? []).length > 0 ? { objective_fact_authorizations: sources.objective_fact_authorizations } : {}),
   }
   try {
     const canonical = canonicalJson(contract)

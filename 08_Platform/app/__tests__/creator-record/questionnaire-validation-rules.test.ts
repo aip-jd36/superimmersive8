@@ -23,7 +23,11 @@ import { canonicalJson, sha256Hex } from '@/lib/creator-record/record-core/canon
 
 /** One entry per rules version, never removed. */
 const PINS: Record<number, { behaviour: string; source: string }> = {
-  1: { behaviour: 'd459041bbd7959d7d760b094709cb34820144f889ae9173d84d76bb54923ca1d', source: 'a939b6eaae66d90938331b0ab1a95b638d75fb0dcf9ff61aa12ec3dbe14609b1' },
+  // Source pin updated by CRV2-IA-4B (declared-guidance.ts passes the sources' objective-fact authorizations to the guidance run
+  // and refuses a malformed list). Behaviour pin unchanged: no approved questionnaire carries authorizations, and the registry
+  // still refuses the guidance-place target, so no answer is accepted, refused or mapped differently. Previous source pin:
+  // a939b6eaae66d90938331b0ab1a95b638d75fb0dcf9ff61aa12ec3dbe14609b1.
+  1: { behaviour: 'd459041bbd7959d7d760b094709cb34820144f889ae9173d84d76bb54923ca1d', source: '48fa11babdde80ff6f2920f10d3efae421cbca0d9a188d67c2949ca93f4b471e' },
 }
 const RULE_FILES = ['lib/creator-record/contract/question-registry.ts', 'lib/creator-record/prototype/form.ts', 'lib/creator-record/prototype/parse-form-state.ts', 'lib/creator-record/prototype/declared-guidance.ts']
 

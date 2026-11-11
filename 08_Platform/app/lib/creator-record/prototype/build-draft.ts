@@ -31,6 +31,7 @@ import { PILOT_CAVEATS, PILOT_DEPENDENCY_LABELS, PILOT_LEDGER_VERSION, PILOT_PUB
 import { PILOT_ACKNOWLEDGEMENTS, PILOT_MAX_TOOLS, PILOT_QUESTION_META, PILOT_REGISTRY_INPUT, PILOT_REGISTRY_VERSION, type PilotQuestionMeta } from '../pilot/pilot-registry'
 import type { TopicClaim } from '@/lib/retrieval-engine/types'
 import type { QuestionnaireContractApproval } from '../customer-record/questionnaire-contract'
+import type { ObjectiveFactAuthorization } from '../contract/objective-fact-authorization'
 import { reconcileToolEvidence, toDocumentObservations, type EvidenceReconciliation, type ToolDocument } from '../evidence/document-observations'
 import { resolveSellerIdentity } from '../integration/seller-identity'
 import { shownToolQuestionIds, toolInstance, visibleQuestions, type CreatorRecordFormState, type FormIssue } from './form'
@@ -53,6 +54,12 @@ export interface CreatorRecordSources {
    * (`lib/creator-record-flow/customer-wording`). Part of the Source Text content, so its approval covers it. Absent: none.
    */
   customer_wording?: { set_id: string; version: number; sha256: string } | null
+  /**
+   * CRV2-IA-4B: which objective may use which applicability fact. Set ONLY by `approvedCustomerRecordInputs` from a bundle that
+   * passed `bundleAuthorizationErrors`, and present only when non-empty. Part of the questionnaire contract when present, so a
+   * caller that adds or changes it no longer matches the approved contract digest and is refused at checkout and issuance.
+   */
+  objective_fact_authorizations?: readonly ObjectiveFactAuthorization[]
 }
 
 /** The authoritative sources. Empty today: no question is shown and nothing is published. */

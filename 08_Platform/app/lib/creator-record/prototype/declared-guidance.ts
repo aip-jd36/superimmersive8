@@ -8,7 +8,9 @@
  * nor influence guidance.
  */
 
+import { objectiveFactAuthorizationErrors } from '../contract/objective-fact-authorization'
 import { declarationIntegrityRefusals, loadQuestionRegistry } from '../contract/question-registry'
+import { CREATOR_RECORD_OBJECTIVE_CATALOG_IDS } from '../integration/objectives'
 import type { DeclaredObservation } from '../contract/provenance'
 import { runCreatorRecordGuidance, type CreatorRecordGuidanceResult } from '../integration/run-creator-record-guidance'
 import type { BuildDraftInput, CreatorRecordSources } from './build-draft'
@@ -36,12 +38,18 @@ export function runDeclaredGuidance(input: DeclaredGuidanceInput): DeclaredGuida
 
   const { observations, discarded } = formToObservations(config, input.state, input.record)
   const labels = input.sources.dependency_labels
+  // CRV2-IA-4B: the sources' authorizations (set only from a validated bundle) are re-checked against these same sources;
+  // any error refuses the run rather than applying part of the list. Absent: none (default deny).
+  const authorizations = input.sources.objective_fact_authorizations ?? []
+  const authErrors = objectiveFactAuthorizationErrors(authorizations, { objective_ids: CREATOR_RECORD_OBJECTIVE_CATALOG_IDS, registry_input: input.sources.registry_input })
+  if (authErrors.length > 0) throw new Error(`Creator Record objective-fact authorizations rejected: ${authErrors.join('; ')}`)
   const guidance = runCreatorRecordGuidance({
     observations,
     topicClaims: input.topicClaims,
     ledger: input.sources.ledger,
     dependencyLabel: (id) => (Object.prototype.hasOwnProperty.call(labels, id) ? labels[id] : undefined),
     as_of: input.as_of,
+    objectiveFactAuthorizations: authorizations,
   })
   return { ok: true, config, observations, discarded, guidance }
 }
