@@ -384,6 +384,8 @@ describe('lib/creator-record boundaries', () => {
         // CR-V2-EXAM-INTEGRATION-X0 (evidence/persisted-comparison only): the exact receipt-reading inversion, the envelope
         // type and the existing seller-identity resolution. All pure; none loads the examination engine or any SDK.
         'examination/receipt-reading', 'examination/envelope', 'integration/seller-identity',
+        // CRV2-IA-4D2: the pure issuer-evidence contract (shared rule for issuer-dependent interpretation). No engine, no SDK.
+        'receipt-examination/issuer-evidence',
       ].includes(t) || t.startsWith('evidence/')).toBe(true)
     }
     for (const f of files) expect(staticImports(readFileSync(f, 'utf8')).some((i) => i.includes('examine.anthropic'))).toBe(false)

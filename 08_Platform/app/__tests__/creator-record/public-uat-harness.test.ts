@@ -518,9 +518,11 @@ describe('MVP-14 — the public UAT scenarios (R1–R6, Kling E, correction), th
     ['R4 Pika / Pro + Kling / Standard, A on tool 1 only', [tool('pika', 'Pro'), tool('kling', 'Standard')], [ref('pdf-pika-pro-no-period')], [[0, R.does_not_establish, R.does_not_establish], [1, R.not_assessed, R.not_assessed]]],
     ['R5 Runway / Pro + F', [tool('runway-gen3', 'Pro')], [ref('conflict-two-plan-names')], [[0, R.does_not_establish, R.does_not_establish]]],
     ['R6 Pika / Pro + C (reseller)', [tool('pika', 'Pro')], [ref('conflict-reseller-merchant')], [[0, R.does_not_establish, R.does_not_establish]]],
-    ['B Pika / Pro + B (plan name cut off)', [tool('pika', 'Pro')], [ref('shot-truncated-plan-name')], [[0, R.appears_consistent, R.does_not_establish]]],
-    ['E Kling / Pro + E: qualified apparent consistency', [tool('kling', 'Pro')], [ref('pdf-kling-pro-monthly')], [[0, R.appears_consistent, R.appears_consistent]]],
-    ['E2 Kling / Standard + E: apparent conflict, declaration unchanged', [tool('kling', 'Standard')], [ref('pdf-kling-pro-monthly')], [[0, R.appears_consistent, R.appears_to_conflict]]],
+    // CRV2-IA-4D2: these replay readings are v2 (no issuer basis), so the seller never establishes the provider and no plan is
+    // compared. The reconciliation logic for an attributed issuer is covered on v3 readings (evidence-reconciliation.test.ts).
+    ['B Pika / Pro + B (plan name cut off): recorded v2 reading, nothing established', [tool('pika', 'Pro')], [ref('shot-truncated-plan-name')], [[0, R.does_not_establish, R.does_not_establish]]],
+    ['E Kling / Pro + E: recorded v2 reading, nothing established', [tool('kling', 'Pro')], [ref('pdf-kling-pro-monthly')], [[0, R.does_not_establish, R.does_not_establish]]],
+    ['E2 Kling / Standard + E: recorded v2 reading, nothing established, declaration unchanged', [tool('kling', 'Standard')], [ref('pdf-kling-pro-monthly')], [[0, R.does_not_establish, R.does_not_establish]]],
   ])('%s', async (_n, tools, refs, expected) => {
     const view = await draft({ ...state(tools), documents: refs })
     expect(results(view)).toEqual(expected)
@@ -534,9 +536,9 @@ describe('MVP-14 — the public UAT scenarios (R1–R6, Kling E, correction), th
     expect(view.reconciliation.empty).toBe(T.recon_none)
   })
 
-  test('E2: the conflict note says the answer was not changed, and the declared plan stays Standard', async () => {
+  test('E2: no conflict is asserted from a recorded v2 reading, and the declared plan stays Standard', async () => {
     const view = await draft({ ...state([tool('kling', 'Standard')]), documents: [ref('pdf-kling-pro-monthly')] })
-    expect(view.reconciliation.items[0].rows[1].note).toMatch(/Your answer has not been changed/)
+    expect(view.reconciliation.items[0].rows[1].value).toBe(R.does_not_establish)
     expect(JSON.stringify(view.declarations)).toMatch(/Standard/)
     expect(JSON.stringify(view.declarations)).not.toMatch(/"Pro"/)
   })

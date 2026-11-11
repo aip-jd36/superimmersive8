@@ -19,6 +19,7 @@ import { createHash } from 'node:crypto'
 import { detectMediaType, examineReceiptDocument, type ReceiptModelCaller } from '../receipt-examination/examine'
 import { RECEIPT_PROMPT_VERSION } from '../receipt-examination/prompt'
 import { RECEIPT_EXTRACTION_SCHEMA_VERSION } from '../receipt-examination/schema'
+import { issuerEvidenceOf } from '../receipt-examination/issuer-evidence'
 import { documentIdFor, MAX_LIVE_UPLOAD_BYTES, MAX_UPLOAD_BYTES, sanitizeFileName, type ExaminedDocument, type ExtractionMode, type NotExaminedReason } from './document-observations'
 import { extractPdfTextLayer } from './pdf-text-layer'
 import { crossCheckPlan, notRun, type PlanScope } from './plan-cross-check'
@@ -78,7 +79,9 @@ export async function examineUpload(bytes: Uint8Array, rawFileName: string | nul
       ? crossCheckPlan(
           extraction,
           media === 'application/pdf' ? extractPdfTextLayer(bytes) : { status: 'unavailable', reason: 'not_pdf' },
-          deps.planScope(extraction && extraction.issuer_name.status === 'present' ? extraction.issuer_name.value : null),
+          // CRV2-IA-4D2: the plan vocabulary is scoped only by an issuer the document explicitly attributes (shared rule);
+          // otherwise no scope, so the cross-check cannot run on an unsupported issuer.
+          deps.planScope(extraction ? issuerEvidenceOf(extraction).business : null),
         )
       : notRun('no_vocabulary')
 

@@ -458,7 +458,11 @@ function documentView(td: ToolDocument): DraftDocument {
 /** One fixed result label + its fixed reason, then the limitation for any "appears" result. */
 function reconciliationRow(label: string, f: FieldReconciliation): DraftRow {
   const limit = f.result === 'appears_consistent' ? T.recon_limit_consistent : f.result === 'appears_to_conflict' ? T.recon_limit_conflict : null
-  return { label, value: T.recon_result[f.result], note: limit ? `${T.recon_reason[f.reason]} ${limit}` : T.recon_reason[f.reason] }
+  // CRV2-IA-4D2: a reason with no approved sentence (e.g. the issuer-evidence codes) prints no reason sentence, never a code or
+  // "undefined". The template table is part of the approved customer wording set, so no sentence is added here.
+  const reason = Object.prototype.hasOwnProperty.call(T.recon_reason, f.reason) ? (T.recon_reason as Record<string, string>)[f.reason] : null
+  const note = [reason, limit].filter((x): x is string => typeof x === 'string' && x !== '').join(' ')
+  return note === '' ? { label, value: T.recon_result[f.result] } : { label, value: T.recon_result[f.result], note }
 }
 
 function reconciliationView(r: EvidenceReconciliation, documents: readonly ToolDocument[], declaredToolName: (index: number) => string | null): DraftReconciliation {

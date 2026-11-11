@@ -35,6 +35,19 @@ const SCOPE = planScopeForSeller(TOPIC_CLAIMS_FIXTURE)
 const scopeOf = (ex: ReceiptExtraction) => SCOPE(ex.issuer_name.status === 'present' ? ex.issuer_name.value : null)
 
 const field = (status: 'present' | 'not_shown' | 'unreadable' | 'ambiguous', value: string | null = null, evidence: string | null = null) => ({ status, value, evidence })
+/**
+ * CRV2-IA-4D2: a TEST-ONLY v3 copy of a reading, in which the reading's issuer is explicitly attributed as the issuer (what a v3
+ * reading of a document that states its seller carries). It exercises the reconciliation logic that runs once an issuer is
+ * identified. The recorded readings themselves are v2 and now fail closed ('recorded v2 readings fail closed' below).
+ */
+const attributedEx = (ex: ReceiptExtraction): ReceiptExtraction => ({
+  ...ex,
+  issuer_evidence: {
+    contract: 'receipt-extraction-v3',
+    statements: ex.issuer_name.status === 'present' && ex.issuer_name.value ? [{ business: ex.issuer_name.value, role: 'issuer_attribution', evidence: ex.issuer_name.evidence ?? ex.issuer_name.value }] : [],
+  },
+})
+const asV3 = <D extends { extraction: ReceiptExtraction | null }>(d: D): D => ({ ...d, extraction: d.extraction ? attributedEx(d.extraction) : null })
 /** Observations recorded verbatim from the CR-V2-MVP-2D live run. */
 const LIVE: Record<string, ReceiptExtraction> = {
   'conflict-two-plan-names': {
@@ -232,19 +245,21 @@ describe('CR-V2-MVP-6 — G-R2 is unwired from the active path', () => {
 
 describe('Option C — the seven scenarios (server-side reconciliation)', () => {
   test('1 — Pika Pro declared, receipt appears consistent: "Appears consistent", always with its limitation', async () => {
-    const d = await live(tinyPdf(PIKA_CLEAR), LIVE['pika-seller-pro'])
+    const d = asV3(await live(tinyPdf(PIKA_CLEAR), LIVE['pika-seller-pro']))
     const r = build([tool('pika', 'Pro')], [{ tool_index: 0, document: d }])
     expect(r.view.trace.evidence_reconciliation[0]).toEqual({ tool_index: 0, document_id: d.document_id, provider: { result: 'appears_consistent', reason: 'same_tool' }, plan: { result: 'appears_consistent', reason: 'same_plan_name' } })
     expect(r.view.reconciliation.items[0].rows[1]).toEqual({ label: T.recon_plan_label, value: T.recon_result.appears_consistent, note: `${T.recon_reason.same_plan_name} ${T.recon_limit_consistent}` })
     expectQualified(r)
-    // The real synthetic receipt's seller is printed "Pika Labs, Inc.", which is not an existing alias: nothing is established.
+    // The real synthetic receipt's recorded reading is v2 (no issuer basis): nothing is established (CRV2-IA-4D2).
     const real = recon(documentForFixture('pdf-pika-pro-no-period'), 'pika', 'Pro')
-    expect(real.provider).toEqual({ result: 'does_not_establish', reason: 'seller_not_recognized' })
+    expect(real.provider).toEqual({ result: 'does_not_establish', reason: 'issuer_basis_unavailable' })
+    // As a v3 reading attributing "Pika Labs, Inc.", that name is still not an existing alias: still nothing is established.
+    expect(recon(asV3(documentForFixture('pdf-pika-pro-no-period')), 'pika', 'Pro').provider).toEqual({ result: 'does_not_establish', reason: 'seller_not_recognized' })
     expect(real.plan).toEqual({ result: 'does_not_establish', reason: 'seller_not_established' })
   })
 
   test('2 — Pika Pro declared, receipt appears to show Standard: "Appears to conflict"; the answer and guidance are unchanged', async () => {
-    const d = await live(tinyPdf(['Pika', 'RECEIPT', 'Standard $8.00']), withPlan(LIVE['pika-seller-pro'], 'Standard', 'Standard $8.00'))
+    const d = asV3(await live(tinyPdf(['Pika', 'RECEIPT', 'Standard $8.00']), withPlan(LIVE['pika-seller-pro'], 'Standard', 'Standard $8.00')))
     const r = build([tool('pika', 'Pro')], [{ tool_index: 0, document: d }])
     expect(r.view.trace.evidence_reconciliation[0].plan).toEqual({ result: 'appears_to_conflict', reason: 'different_plan_name' })
     expect(r.view.reconciliation.items[0].rows[1].note).toContain(T.recon_limit_conflict)
@@ -271,9 +286,9 @@ describe('Option C — the seven scenarios (server-side reconciliation)', () => 
   })
 
   test('5 — Pro declared, screenshot shows "Pro Pl…": does not establish (never consistent, never a conflict)', async () => {
-    const shot = await examineUpload(PNG(5), 'shot.png', { mode: 'live_model', liveCaller: scripted(LIVE['shot-truncated-plan-name']) })
+    const shot = asV3(await examineUpload(PNG(5), 'shot.png', { mode: 'live_model', liveCaller: scripted(LIVE['shot-truncated-plan-name']) }))
     expect(recon(shot, 'pika', 'Pro')).toEqual(expect.objectContaining({ provider: { result: 'appears_consistent', reason: 'same_tool' }, plan: { result: 'does_not_establish', reason: 'plan_not_read' } }))
-    const cut = { ...shot, extraction: withPlan(LIVE['shot-truncated-plan-name'], 'Pro Pl…', 'Pro Pl… $28.00') }
+    const cut = { ...shot, extraction: attributedEx(withPlan(LIVE['shot-truncated-plan-name'], 'Pro Pl…', 'Pro Pl… $28.00')) }
     expect(recon(cut, 'pika', 'Pro').plan).toEqual({ result: 'does_not_establish', reason: 'plan_incomplete' })
     expect(recon(cut, 'pika', 'Standard').plan.result).toBe('does_not_establish')
   })
@@ -298,14 +313,14 @@ describe('Option C — the seven scenarios (server-side reconciliation)', () => 
     ['no seller shown', 'Pika', { ...LIVE['pika-seller-pro'], issuer_name: field('not_shown') }, 'seller_not_read'],
     ['not a billing document', 'Pika', LIVE['nonreceipt-abstract-photo'], 'not_a_billing_document'],
   ])('7 — %s does not establish the provider or the plan', async (_n, _t, ex, reason) => {
-    const d = await examineUpload(PNG(7), 'x.png', { mode: 'live_model', liveCaller: scripted(ex as ReceiptExtraction) })
+    const d = asV3(await examineUpload(PNG(7), 'x.png', { mode: 'live_model', liveCaller: scripted(ex as ReceiptExtraction) }))
     const r = recon(d, 'pika', 'Pro')
     expect(r.provider).toEqual({ result: 'does_not_establish', reason })
     expect(r.plan.result).toBe('does_not_establish')
   })
 
   test('7b — a seller SI8 recognises as a different tool: "Appears to conflict" for the provider; the plan is not compared', async () => {
-    const d = await examineUpload(PNG(8), 'x.png', { mode: 'live_model', liveCaller: scripted(withSeller(LIVE['pika-seller-pro'], 'Midjourney')) })
+    const d = asV3(await examineUpload(PNG(8), 'x.png', { mode: 'live_model', liveCaller: scripted(withSeller(LIVE['pika-seller-pro'], 'Midjourney')) }))
     expect(recon(d, 'pika', 'Pro')).toEqual(expect.objectContaining({ provider: { result: 'appears_to_conflict', reason: 'different_tool' }, plan: { result: 'does_not_establish', reason: 'seller_not_established' } }))
   })
 
@@ -323,13 +338,13 @@ describe('Option C — the Runway conflicting-plan receipt (adversarial)', () =>
     const d = await live(tinyPdf(CONFLICT_LINES), RUNWAY_LIVE)
     for (const plan of ['Pro', 'Standard']) {
       const r = build([tool('runway-gen3', plan)], [{ tool_index: 0, document: d }])
-      expect(r.view.trace.evidence_reconciliation[0]).toEqual(expect.objectContaining({ provider: { result: 'does_not_establish', reason: 'seller_not_recognized' }, plan: { result: 'does_not_establish', reason: 'seller_not_established' } }))
+      expect(r.view.trace.evidence_reconciliation[0]).toEqual(expect.objectContaining({ provider: { result: 'does_not_establish', reason: 'issuer_basis_unavailable' }, plan: { result: 'does_not_establish', reason: 'seller_not_established' } }))
       expect(JSON.stringify(r.view.reconciliation)).not.toMatch(/Appears (consistent|to conflict)/)
       expect(r.guidance.facts.provenance.plans.map((p) => p.declared)).toEqual([plan])
     }
   })
   test('the same incomplete reading with a recognisable seller is never unqualified: any "appears" result carries its limitation', async () => {
-    const d = await live(tinyPdf(['Runway', ...CONFLICT_LINES.slice(1)]), withSeller(RUNWAY_LIVE, 'Runway'))
+    const d = asV3(await live(tinyPdf(['Runway', ...CONFLICT_LINES.slice(1)]), withSeller(RUNWAY_LIVE, 'Runway')))
     const pro = build([tool('runway-gen3', 'Pro')], [{ tool_index: 0, document: d }])
     expect(pro.view.trace.evidence_reconciliation[0].plan).toEqual({ result: 'appears_consistent', reason: 'same_plan_name' })
     expect(pro.view.reconciliation.items[0].rows[1].note).toContain('does not rule out another plan')
@@ -342,7 +357,7 @@ describe('Option C — the Runway conflicting-plan receipt (adversarial)', () =>
   test('the recorded ground truth (both plans listed, plan ambiguous): does not establish', () => {
     const d = documentForFixture('conflict-two-plan-names')
     expect(recon(d, 'runway-gen3', 'Pro').plan.result).toBe('does_not_establish')
-    expect(recon({ ...d, extraction: withSeller(d.extraction!, 'Runway') }, 'runway-gen3', 'Pro').plan).toEqual({ result: 'does_not_establish', reason: 'plan_not_read' })
+    expect(recon({ ...d, extraction: attributedEx(withSeller(d.extraction!, 'Runway')) }, 'runway-gen3', 'Pro').plan).toEqual({ result: 'does_not_establish', reason: 'plan_not_read' })
   })
 })
 
@@ -397,5 +412,19 @@ describe('Option C — server trust boundary', () => {
     const src = readFileSync(path.join(APP, 'lib', 'creator-record', 'prototype', 'build-draft.ts'), 'utf8')
     expect(src).toMatch(/reconcileToolEvidence\(/)
     expect(readFileSync(path.join(APP, 'lib', 'creator-record', 'prototype', 'parse-form-state.ts'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')).not.toMatch(/reconcil/i)
+  })
+})
+
+describe('CRV2-IA-4D2 — recorded v2 readings fail closed for every issuer-dependent interpretation', () => {
+  test.each(Object.keys(LIVE))('%s: the recorded seller never establishes the provider, so the plan is never compared', async (id) => {
+    const d = await live(tinyPdf(['x']), LIVE[id])
+    const r = recon(d, 'pika', 'Pro')
+    if (d.extraction && d.extraction.document_type !== 'not_a_billing_document' && d.extraction.readability !== 'illegible') {
+      expect(r.provider).toEqual({ result: 'does_not_establish', reason: 'issuer_basis_unavailable' })
+    }
+    expect(r.provider.result).not.toMatch(/^appears_/)
+    expect(r.plan.result).not.toMatch(/^appears_/)
+    // The stored reading is unchanged: no issuer evidence is added to it.
+    expect(d.extraction && 'issuer_evidence' in d.extraction).toBe(false)
   })
 })

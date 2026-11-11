@@ -13,9 +13,10 @@
  *   - limitations are fixed codes derived mechanically from the reading.
  */
 
-import { examineReceiptDocument, type ReceiptModelCaller } from '../receipt-examination/examine'
-import { RECEIPT_PROMPT_VERSION } from '../receipt-examination/prompt'
-import { EXTRACTED_FIELD_NAMES, RECEIPT_EXTRACTION_SCHEMA_VERSION, type ReceiptExtraction } from '../receipt-examination/schema'
+import { examineReceiptDocument, type ReceiptModelCaller, type ReceiptReadingContract } from '../receipt-examination/examine'
+import { RECEIPT_EXTRACTION_SCHEMA_VERSION_V3 } from '../receipt-examination/issuer-evidence'
+import { RECEIPT_PROMPT_VERSION, RECEIPT_PROMPT_VERSION_V3 } from '../receipt-examination/prompt'
+import { EXTRACTED_FIELD_NAMES, RECEIPT_EXTRACTION_SCHEMA_VERSION, validateReceiptExtractionV3, type ReceiptExtraction } from '../receipt-examination/schema'
 import type { ExaminationLimitation } from './envelope'
 import type { ExaminationProfile, ProfileObservation, ProfileReading } from './profile'
 
@@ -74,5 +75,36 @@ export const RECEIPT_PROFILE: ExaminationProfile = {
     const outcome = await examineReceiptDocument(bytes, { callModel: recordedCaller(recordedOutput) })
     if (outcome.status !== 'examined') return { status: 'could_not_examine', reason: outcome.reason, engine_attempts: outcome.usage.attempts }
     return { status: 'examined', observations: receiptObservations(outcome.extraction), limitations: receiptLimitations(outcome.extraction), engine_attempts: outcome.usage.attempts }
+  },
+}
+
+// -- CRV2-IA-4D2: receipt profile v2 (reading contract v3). DEFINED, INACTIVE. --------------------------------------------
+// No examination path selects it, no executor or live caller is configured for it, and its examination method is not in any
+// supported-issuance list. A v3 reading also cannot be printed in a customer document: the approved templates have no label
+// for its `issuer_statement` observations, and the customer document refuses an unlabelled field (fail closed).
+
+export const RECEIPT_PROFILE_V2_VERSION = 2
+
+export const RECEIPT_READING_CONTRACT_V3: ReceiptReadingContract = {
+  schema_version: RECEIPT_EXTRACTION_SCHEMA_VERSION_V3,
+  prompt_version: RECEIPT_PROMPT_VERSION_V3,
+  validate: validateReceiptExtractionV3,
+}
+
+/** v1's observations (with the DERIVED issuer_name), then one `issuer_statement` observation per statement, role as qualifier. */
+export function receiptObservationsV3(ex: ReceiptExtraction): ProfileObservation[] {
+  return [
+    ...receiptObservations(ex),
+    ...(ex.issuer_evidence?.statements ?? []).map((st): ProfileObservation => ({ field: 'issuer_statement', qualifier: st.role, basis: 'printed_text', status: 'present', value: st.business, excerpt: st.evidence })),
+  ]
+}
+
+export const RECEIPT_PROFILE_V2_INACTIVE: ExaminationProfile = {
+  ref: { id: RECEIPT_PROFILE_ID, version: RECEIPT_PROFILE_V2_VERSION, schema: RECEIPT_EXTRACTION_SCHEMA_VERSION_V3, prompt: RECEIPT_PROMPT_VERSION_V3 },
+  media_types: ['application/pdf', 'image/png', 'image/jpeg'],
+  async readRecorded(bytes: Uint8Array, recordedOutput: unknown): Promise<ProfileReading> {
+    const outcome = await examineReceiptDocument(bytes, { callModel: recordedCaller(recordedOutput), contract: RECEIPT_READING_CONTRACT_V3 })
+    if (outcome.status !== 'examined') return { status: 'could_not_examine', reason: outcome.reason, engine_attempts: outcome.usage.attempts }
+    return { status: 'examined', observations: receiptObservationsV3(outcome.extraction), limitations: receiptLimitations(outcome.extraction), engine_attempts: outcome.usage.attempts }
   },
 }

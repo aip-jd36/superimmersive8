@@ -36,6 +36,18 @@ const PNG = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]
 const sha = (b: Uint8Array) => createHash('sha256').update(b).digest('hex')
 const clone = <V,>(v: V): V => JSON.parse(JSON.stringify(v)) as V
 
+/**
+ * CRV2-IA-4D2: recorded replay readings are v2 and no longer produce provider/plan determinations. A TEST-ONLY v3 copy in
+ * which the recorded issuer is explicitly attributed restores them, so the control below still proves the snapshot ignores
+ * real positive and negative comparison output.
+ */
+function asV3(d: ToolDocument): ToolDocument {
+  const ex = d.document.extraction
+  if (!ex) return d
+  const statements = ex.issuer_name.status === 'present' && ex.issuer_name.value ? [{ business: ex.issuer_name.value, role: 'issuer_attribution' as const, evidence: ex.issuer_name.evidence ?? ex.issuer_name.value }] : []
+  return { ...d, document: { ...d.document, extraction: { ...ex, issuer_evidence: { contract: 'receipt-extraction-v3', statements } } } }
+}
+
 async function toolDoc(fixtureId: string, tool_index = 0): Promise<ToolDocument> {
   const bytes = new Uint8Array([...PNG, ...Buffer.from(`synthetic:${fixtureId}`)])
   const fixture = REPLAY_FIXTURES.find((f) => f.fixture_id === fixtureId)!
@@ -73,19 +85,21 @@ describe('the internal snapshot never reads prototype summary or comparison outp
   test('control: these cases give both positive and negative provisional comparison results in the prototype', async () => {
     const results = new Set<string>()
     for (const [tool, plan, fixture] of CASES) {
-      for (const r of draftOf(state(plan, tool), [await toolDoc(fixture)]).view.trace.evidence_reconciliation) for (const f of [r.provider, r.plan]) results.add(f.result)
+      for (const r of draftOf(state(plan, tool), [asV3(await toolDoc(fixture))]).view.trace.evidence_reconciliation) for (const f of [r.provider, r.plan]) results.add(f.result)
     }
     expect(results.has('appears_consistent')).toBe(true)
     expect(results.has('appears_to_conflict')).toBe(true)
   })
 
   test.each(CASES)('%s %s with %s: no positive or negative comparison reaches the snapshot or the PDF', async (tool, plan, fixture) => {
-    const r = buildInternalDraftSnapshot(input(state(plan, tool), [await toolDoc(fixture)]))
-    if (!r.ok) throw new Error('snapshot failed')
-    const pdf = documentText(buildInternalDraftDocument(r.snapshot, r.sha256)).join('\n')
-    for (const text of [r.canonical, pdf]) {
-      for (const w of RECON_STRINGS) expect([w, text.includes(w)]).toEqual([w, false])
-      expect(text).not.toMatch(RECON_TOKENS)
+    for (const doc of [await toolDoc(fixture), asV3(await toolDoc(fixture))]) {
+      const r = buildInternalDraftSnapshot(input(state(plan, tool), [doc]))
+      if (!r.ok) throw new Error('snapshot failed')
+      const pdf = documentText(buildInternalDraftDocument(r.snapshot, r.sha256)).join('\n')
+      for (const text of [r.canonical, pdf]) {
+        for (const w of RECON_STRINGS) expect([w, text.includes(w)]).toEqual([w, false])
+        expect(text).not.toMatch(RECON_TOKENS)
+      }
     }
   })
 

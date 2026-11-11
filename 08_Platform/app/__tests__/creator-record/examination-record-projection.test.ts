@@ -271,9 +271,10 @@ describe('examination-bearing record (v6)', () => {
       expect(c(r)[0].provider).toEqual(COMPARISON_WITHHELD)
       expect(c(r)[0].plan).toEqual(COMPARISON_WITHHELD)
     }
-    // The false positive this closes: the earlier method calls this document consistent with a declaration it cannot establish alone.
+    // The false positive this closes: the earlier method called this document consistent with a declaration it cannot establish
+    // alone. Since CRV2-IA-4D2 the recalculation itself fails closed too: the stored reading (v2) has no issuer basis.
     const earlier = comparePersistedExamination({ tool_index: 0, document_id: DOC_ID, file_name: DOCUMENT.file_name, envelope: ENVELOPE, declared_tool_id: 'kling', declared_plan: 'Pro' })
-    expect(earlier.provider.result).toBe('appears_consistent')
+    expect(earlier.provider).toEqual({ result: 'does_not_establish', reason: 'issuer_basis_unavailable' })
   })
 
   test('a new record cannot hold a determination; an earlier record keeps the one it holds and stays readable', () => {

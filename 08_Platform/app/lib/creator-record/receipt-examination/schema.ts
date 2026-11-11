@@ -20,6 +20,15 @@
  * the caller fails closed (`could_not_examine`).
  */
 
+import {
+  deriveIssuerEvidence,
+  ISSUER_STATEMENTS_JSON_SCHEMA,
+  issuerNameFromEvidence,
+  RECEIPT_EXTRACTION_SCHEMA_VERSION_V3,
+  validateIssuerStatements,
+  type IssuerEvidence,
+} from './issuer-evidence'
+
 export const RECEIPT_EXTRACTION_SCHEMA_VERSION = 'receipt-extraction-v2' as const
 
 export const DOCUMENT_TYPES = [
@@ -111,6 +120,12 @@ export interface ReceiptExtraction {
    * never changes any field or comparison.
    */
   instruction_like_text_present: boolean
+  /**
+   * CRV2-IA-4D2: present only on a v3 reading (`receipt-extraction-v3`). On a v3 reading `issuer_name` is DERIVED from these
+   * statements (`./issuer-evidence`), never taken from the model. Absent on every earlier reading, which therefore has no
+   * issuer basis (`issuerEvidenceOf` → `unclassified`).
+   */
+  issuer_evidence?: IssuerEvidence
 }
 
 function fieldSchema(description: string, isDate: boolean) {
@@ -283,4 +298,33 @@ export function validateReceiptExtraction(raw: unknown): ReceiptExtraction | nul
     multiple_plans_shown: raw.multiple_plans_shown,
     instruction_like_text_present: raw.instruction_like_text_present,
   }
+}
+
+// ── CRV2-IA-4D2: receipt-extraction-v3 (issuer evidence). Defined, not used by any active profile. ───────────────────────
+
+/** v3 output: the v2 fields except `issuer_name`, plus `issuer_statements`. The model never reports an issuer directly. */
+export const RECEIPT_EXTRACTION_SCHEMA_V3 = {
+  ...RECEIPT_EXTRACTION_SCHEMA,
+  properties: (() => {
+    const { issuer_name: _omit, ...rest } = RECEIPT_EXTRACTION_SCHEMA.properties
+    void _omit
+    return { ...rest, issuer_statements: ISSUER_STATEMENTS_JSON_SCHEMA }
+  })(),
+  required: [...RECEIPT_EXTRACTION_SCHEMA.required.filter((k) => k !== 'issuer_name'), 'issuer_statements'],
+} as const
+
+/**
+ * Deterministic, non-repairing validation of a v3 output. The statements are validated first; `issuer_name` is then derived
+ * from them and the remaining fields go through the UNCHANGED v2 validator, so v3 accepts nothing v2 would refuse.
+ */
+export function validateReceiptExtractionV3(raw: unknown): ReceiptExtraction | null {
+  if (!isPlainObject(raw) || Object.prototype.hasOwnProperty.call(raw, 'issuer_name')) return null
+  const statements = validateIssuerStatements(raw.issuer_statements)
+  if (!statements) return null
+  const { issuer_statements: _s, ...rest } = raw
+  void _s
+  const derived = issuerNameFromEvidence(deriveIssuerEvidence(statements))
+  const base = validateReceiptExtraction({ ...rest, issuer_name: derived })
+  if (!base) return null
+  return { ...base, issuer_evidence: { contract: RECEIPT_EXTRACTION_SCHEMA_VERSION_V3, statements } }
 }

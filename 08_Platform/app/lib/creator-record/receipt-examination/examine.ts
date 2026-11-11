@@ -57,16 +57,16 @@ export type ExaminationOutcome =
       extraction: ReceiptExtraction
       detected_media_type: ReceiptMediaType
       usage: ExaminationUsage
-      schema_version: typeof RECEIPT_EXTRACTION_SCHEMA_VERSION
-      prompt_version: typeof RECEIPT_PROMPT_VERSION
+      schema_version: string
+      prompt_version: string
     }
   | {
       status: 'could_not_examine'
       reason: CouldNotExamineReason
       detected_media_type: ReceiptMediaType | null
       usage: ExaminationUsage
-      schema_version: typeof RECEIPT_EXTRACTION_SCHEMA_VERSION
-      prompt_version: typeof RECEIPT_PROMPT_VERSION
+      schema_version: string
+      prompt_version: string
     }
 
 /** Media type from the file's own bytes; the browser-declared type is never trusted. */
@@ -78,15 +78,33 @@ export function detectMediaType(bytes: Uint8Array): ReceiptMediaType | null {
   return null
 }
 
+/**
+ * CRV2-IA-4D2: which reading contract the engine validates against. Defaults to v2 (the only contract any active profile uses);
+ * the v3 contract is used only by the inactive receipt profile v2. Input checks, retry and failure reasons are the same.
+ */
+export interface ReceiptReadingContract {
+  schema_version: string
+  prompt_version: string
+  validate: (raw: unknown) => ReceiptExtraction | null
+}
+
+export const RECEIPT_READING_CONTRACT_V2: ReceiptReadingContract = {
+  schema_version: RECEIPT_EXTRACTION_SCHEMA_VERSION,
+  prompt_version: RECEIPT_PROMPT_VERSION,
+  validate: validateReceiptExtraction,
+}
+
 export interface ExamineDeps {
   callModel: ReceiptModelCaller
   now?: () => number
+  contract?: ReceiptReadingContract
 }
 
 export async function examineReceiptDocument(bytes: Uint8Array, deps: ExamineDeps): Promise<ExaminationOutcome> {
   const now = deps.now ?? (() => Date.now())
   const usage: ExaminationUsage = { attempts: 0, input_tokens: 0, output_tokens: 0, latency_ms: 0 }
-  const versions = { schema_version: RECEIPT_EXTRACTION_SCHEMA_VERSION, prompt_version: RECEIPT_PROMPT_VERSION } as const
+  const contract = deps.contract ?? RECEIPT_READING_CONTRACT_V2
+  const versions = { schema_version: contract.schema_version, prompt_version: contract.prompt_version }
   const fail = (reason: CouldNotExamineReason, media: ReceiptMediaType | null): ExaminationOutcome => ({
     status: 'could_not_examine',
     reason,
@@ -132,7 +150,7 @@ export async function examineReceiptDocument(bytes: Uint8Array, deps: ExamineDep
   usage.latency_ms = now() - started
 
   if (parsed === undefined) return fail(lastFailure, media)
-  const extraction = validateReceiptExtraction(parsed)
+  const extraction = contract.validate(parsed)
   if (!extraction) return fail('schema_invalid', media)
   return { status: 'examined', extraction, detected_media_type: media, usage, ...versions }
 }

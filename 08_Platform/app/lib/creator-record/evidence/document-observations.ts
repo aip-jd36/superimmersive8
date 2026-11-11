@@ -31,6 +31,7 @@ import {
 } from '../receipt-examination/schema'
 import type { DocumentObservation, RecordContext } from '../contract/provenance'
 import { distinctPlanObservations, planTokens } from '../receipt-examination/plan-tokens'
+import { issuerEvidenceOf } from '../receipt-examination/issuer-evidence'
 import { CROSS_CHECK_STATUSES, type PlanCrossCheck } from './plan-cross-check'
 import type { CouldNotExamineReason } from '../receipt-examination/examine'
 import type { ReceiptMediaType } from '../receipt-examination/prompt'
@@ -153,6 +154,10 @@ export type ReconciliationReason =
   | 'same_plan_name'
   | 'different_plan_name'
   | 'determination_withheld'
+  // CRV2-IA-4D2: issuer evidence (shared rule `issuerEvidenceOf`). Internal codes; no customer label exists for them.
+  | 'issuer_basis_unavailable'
+  | 'issuer_denied'
+  | 'issuer_conflicting'
 
 export interface FieldReconciliation {
   result: ReconciliationResult
@@ -195,19 +200,30 @@ export function reconcileToolEvidence(input: ToolEvidenceInput, resolveSeller: (
   let provider: FieldReconciliation
   if (!input.declared_tool_id) provider = r('not_assessed', 'tool_not_identified')
   else if (gate) provider = gate
-  else if (ex.issuer_name.status !== 'present' || !ex.issuer_name.value) provider = r('does_not_establish', 'seller_not_read')
   else {
-    const seller = resolveSeller(ex.issuer_name.value)
-    provider =
-      seller.kind === 'unrecognized'
-        ? r('does_not_establish', 'seller_not_recognized')
-        : seller.kind === 'ambiguous'
-          ? r('does_not_establish', 'seller_ambiguous')
-          : seller.tool_id === input.declared_tool_id
-            ? r('appears_consistent', 'same_tool')
-            : r('appears_to_conflict', 'different_tool')
+    // CRV2-IA-4D2: only an issuer the document explicitly attributes can be linked to the declared tool. A business named
+    // without that attribution, a sender or letterhead, a denial, conflicting attributions, or a reading made before the
+    // issuer evidence contract (no basis) never establishes the provider, and so never unlocks the plan comparison.
+    const issuer = issuerEvidenceOf(ex)
+    provider = issuer.state === 'unclassified'
+      ? r('does_not_establish', 'issuer_basis_unavailable')
+      : issuer.state === 'denied'
+        ? r('does_not_establish', 'issuer_denied')
+        : issuer.state === 'conflicting'
+          ? r('does_not_establish', 'issuer_conflicting')
+          : issuer.state !== 'identified' || !issuer.business
+            ? r('does_not_establish', 'seller_not_read')
+            : providerFromSeller(resolveSeller(issuer.business))
   }
-
+  function providerFromSeller(seller: SellerIdentity): FieldReconciliation {
+    return seller.kind === 'unrecognized'
+      ? r('does_not_establish', 'seller_not_recognized')
+      : seller.kind === 'ambiguous'
+        ? r('does_not_establish', 'seller_ambiguous')
+        : seller.tool_id === input.declared_tool_id
+          ? r('appears_consistent', 'same_tool')
+          : r('appears_to_conflict', 'different_tool')
+  }
   const planResult = ((): FieldReconciliation => {
     if (!planDeclared) return r('not_assessed', 'plan_not_declared')
     if (!input.declared_tool_id) return r('not_assessed', 'tool_not_identified')

@@ -115,7 +115,8 @@ describe('E1–E14 (deterministic fixture replay)', () => {
     expect(d.rows).toContainEqual(expect.objectContaining({ label: T.doc_field_label.product_or_plan_name, value: 'Appears to show “Pro”' }))
     expect(d.rows).toContainEqual(expect.objectContaining({ label: T.doc_read_label, value: T.doc_read_replay }))
     expect(d.rows).toContainEqual(expect.objectContaining({ label: T.doc_fingerprint_label, note: T.doc_fingerprint_note }))
-    expect(r.view.trace.evidence_reconciliation[0]).toEqual({ tool_index: 0, document_id: d.document_id, provider: { result: 'does_not_establish', reason: 'seller_not_recognized' }, plan: { result: 'does_not_establish', reason: 'seller_not_established' } })
+    // CRV2-IA-4D2: the recorded reading is v2 (no issuer basis), so the seller never establishes the provider.
+    expect(r.view.trace.evidence_reconciliation[0]).toEqual({ tool_index: 0, document_id: d.document_id, provider: { result: 'does_not_establish', reason: 'issuer_basis_unavailable' }, plan: { result: 'does_not_establish', reason: 'seller_not_established' } })
     expect(r.view.banner!.lines[1]).toBe(T.record_banner_files_replay)
     expect(r.view.not_done).toContain(T.not_done_documents)
     expect(r.view.method).toContainEqual(expect.objectContaining({ label: T.method_documents }))
@@ -196,7 +197,8 @@ describe('E1–E14 (deterministic fixture replay)', () => {
     expect(r.guidance.facts.activeToolIds).toEqual(['pika'])
     // A non-governed plan text typed by the creator does not become a governed plan:
     // no plan card is "relevant on what you told us"; every plan card stays "may be relevant".
-    expect(r.view.trace.evidence_reconciliation[0].provider).toEqual({ result: 'does_not_establish', reason: 'seller_not_recognized' })
+    // CRV2-IA-4D2: v2 reading, no issuer basis.
+    expect(r.view.trace.evidence_reconciliation[0].provider).toEqual({ result: 'does_not_establish', reason: 'issuer_basis_unavailable' })
     expect(r.guidance.facts.provenance.plans[0].passed_to_applicability).toBe(false)
     const planCards = r.view.guidance.cards.filter((c) => c.claim_id.includes('PAID-PLAN'))
     expect(planCards.length).toBeGreaterThan(0)
