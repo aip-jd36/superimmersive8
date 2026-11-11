@@ -95,10 +95,16 @@ function prepare(state: ReturnType<typeof st>) {
 
 describe('claim selection and composition are unchanged', () => {
   test('identical to the pre-change snapshot on every state, apart from the new selection_basis field', () => {
-    const strip = (v: unknown): unknown => (Array.isArray(v) ? v.map(strip) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).filter(([k]) => k !== 'selection_basis').map(([k, x]) => [k, strip(x)])) : v)
+    // CRV2-IA-4A adds three fields that are always empty without an objective-fact authorization; they are asserted empty
+    // below and stripped, so every other byte must still match the pre-change snapshot.
+    const ADDITIVE = ['selection_basis', 'jurisdiction_basis', 'declaredGuidancePlaces', 'guidancePlaceDrops']
+    const strip = (v: unknown): unknown => (Array.isArray(v) ? v.map(strip) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).filter(([k]) => !ADDITIVE.includes(k)).map(([k, x]) => [k, strip(x)])) : v)
     const out: Record<string, unknown> = {}
     for (const [name, state] of Object.entries(CASES)) {
       const r = guidanceOf(state)
+      expect(r.guidance.facts.declaredGuidancePlaces).toEqual([])
+      expect(r.guidance.facts.guidancePlaceDrops).toEqual([])
+      for (const t of r.guidance.objectives) expect(t.jurisdiction_basis).toEqual([])
       out[name] = strip({ objectives: r.guidance.objectives, composition: r.guidance.composition, governance_gaps: r.guidance.governance_gaps, facts: r.guidance.facts })
     }
     expect(createHash('sha256').update(canonicalJson(JSON.parse(JSON.stringify(out)))).digest('hex')).toBe(SELECTION_SNAPSHOT_BEFORE)
@@ -158,6 +164,8 @@ describe('the selection boundary refuses rather than guesses', () => {
   const claim = (over: Record<string, unknown>) => ({ ...TOPIC_CLAIMS_FIXTURE.find((c) => c.claim_id === 'CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1')!, ...over }) as never
   const facts = (over: Partial<CreatorRecordFactsBundle> = {}): CreatorRecordFactsBundle => ({
     applicabilityFacts: { jurisdiction: { included: [], excluded: [] }, toolMentions: [] } as never,
+    declaredGuidancePlaces: [],
+    guidancePlaceDrops: [],
     activeToolIds: ['pika'],
     assetProviderIds: [],
     provenance: { tools: [{ observation_id: 'o-1', instance: 'tool-1', declared: 'pika', tool_id: 'pika' }], plans: [], providers: [], dropped: [] },

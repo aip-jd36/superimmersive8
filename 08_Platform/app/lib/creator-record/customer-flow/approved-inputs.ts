@@ -18,6 +18,8 @@ import { CREATOR_RECORD_GOVERNANCE_AUTHORITY } from '../governed/sources'
 import { CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY } from '../governed/synthetic-test-authority'
 import { resolvePublicationAuthority, selectAuthorityBundle, type PublicationAuthorityBundle } from '../governed/publication-authority'
 import { loadQuestionRegistry } from '../contract/question-registry'
+import { objectiveFactAuthorizationErrors } from '../contract/objective-fact-authorization'
+import { CREATOR_RECORD_OBJECTIVE_CATALOG_IDS } from '../integration/objectives'
 import { sourceTextContent, sourceTextDigest } from '../customer-record/source-text'
 // CR-V2-APPROVAL-AUTHORITY-FIX-1: the identity derived from the wording this build renders (the wording set is pure data).
 import { customerWordingIdentity } from '@/lib/creator-record-flow/customer-wording'
@@ -31,7 +33,15 @@ export const CREATOR_RECORD_V2_SUBMISSIONS: SubmissionsMode = 'open'
 
 /** CR-V2-MVP-M4B — the bundle this running build may publish from, resolved from the environment now; null = none. */
 export function currentPublicationAuthority(env: Readonly<Record<string, string | undefined>> = process.env): PublicationAuthorityBundle | null {
-  return selectAuthorityBundle(resolvePublicationAuthority(env), { governance: CREATOR_RECORD_GOVERNANCE_AUTHORITY, synthetic_test: CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY })
+  const bundle = selectAuthorityBundle(resolvePublicationAuthority(env), { governance: CREATOR_RECORD_GOVERNANCE_AUTHORITY, synthetic_test: CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY })
+  // CRV2-IA-4A: a malformed or unapproved objective-fact authorization makes the whole bundle unusable (fail closed).
+  if (bundle && bundleAuthorizationErrors(bundle).length > 0) return null
+  return bundle
+}
+
+/** CRV2-IA-4A: every reason the bundle's objective-fact authorizations cannot be used, or [] when they can (or there are none). */
+export function bundleAuthorizationErrors(bundle: PublicationAuthorityBundle): string[] {
+  return objectiveFactAuthorizationErrors(bundle.objective_fact_authorizations, { objective_ids: CREATOR_RECORD_OBJECTIVE_CATALOG_IDS, registry_input: bundle.registry_input })
 }
 
 /** No authority: nothing approved, nothing versioned (refused as unavailable). */

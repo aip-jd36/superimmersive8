@@ -29,7 +29,7 @@
  * Pure: no I/O and no clock (`as_of` is supplied).
  */
 
-import type { PublicationLedgerEntry } from '../contract/publication-ledger'
+import { isApplicabilityPolicy, type PublicationLedgerEntry } from '../contract/publication-ledger'
 import { declarationIntegrityRefusals, INTEGRITY_REFUSAL_CODES, loadQuestionRegistry, type QuestionRegistry } from '../contract/question-registry'
 import { isApproved, isIsoDate, type GovernanceApproval } from '../contract/types'
 import { violatesCustomerWordingLock, violatesDependencyLabelLock } from '../contract/wording-lock'
@@ -225,7 +225,7 @@ function complete(e: PublicationLedgerEntry): boolean {
     typeof e.approver === 'string' && e.approver.trim() !== '' &&
     isIsoDate(e.decision_date) &&
     typeof e.explanation === 'string' && e.explanation.trim() !== '' &&
-    (e.applicability_policy === 'met_only' || e.applicability_policy === 'met_or_unresolved') &&
+    isApplicabilityPolicy(e.applicability_policy) &&
     isIsoDate(e.refresh_by) &&
     isIsoDate(e.claim_last_verified)
   )

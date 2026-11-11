@@ -80,7 +80,7 @@ describe('authorized synthetic claims pass through the real pipeline', () => {
     expect(t.withheld).toEqual([{ claim_id: INTERNAL.claim_id, reason: 'publication_scope_not_reviewer_eligible' }])
     expect(t.excluded_not_met).toEqual([FREE.claim_id])
     expect(t.refused_before_bi).toEqual([
-      { claim_id: JUR.claim_id, reason: 'jurisdiction_scoped_guidance_disabled' },
+      { claim_id: JUR.claim_id, reason: 'jurisdiction_scoped_requires_met_policy' },
       { claim_id: UNAUTH.claim_id, reason: 'no_ledger_entry' },
     ])
     expect(t.bi_input_claim_ids).toEqual([PLAIN.claim_id, PRO.claim_id])
@@ -163,7 +163,7 @@ describe('publication authorization is enforced before BI', () => {
   test('governance gaps are reported: refused claims and ledger entries with no governed claim', () => {
     const r = run({ ledger: [...AUTHORIZED, synLedgerEntry({ claim_id: 'CLAIM-SYN-DOES-NOT-EXIST-v1' })] })
     expect(r.governance_gaps).toContainEqual({ kind: 'ledger_entry_without_governed_claim', entry_id: 'SYN-LEDGER-CLAIM-SYN-DOES-NOT-EXIST-v1', claim_id: 'CLAIM-SYN-DOES-NOT-EXIST-v1' })
-    expect(r.governance_gaps).toContainEqual({ kind: 'claim_refused', claim_id: JUR.claim_id, objective_id: 'creator-record:commercial_use:v1', reason: 'jurisdiction_scoped_guidance_disabled' })
+    expect(r.governance_gaps).toContainEqual({ kind: 'claim_refused', claim_id: JUR.claim_id, objective_id: 'creator-record:commercial_use:v1', reason: 'jurisdiction_scoped_requires_met_policy' })
   })
 })
 
@@ -224,7 +224,7 @@ describe('location facts never become jurisdiction facts', () => {
     const r = run({ observations: obs })
     expect(r.facts.applicabilityFacts.jurisdiction).toEqual({ included: [], excluded: [] })
     for (const [args] of spy.mock.calls) expect(args.applicabilityFacts.jurisdiction).toEqual({ included: [], excluded: [] })
-    expect(trace(r, 'commercial_use').refused_before_bi).toContainEqual({ claim_id: JUR.claim_id, reason: 'jurisdiction_scoped_guidance_disabled' })
+    expect(trace(r, 'commercial_use').refused_before_bi).toContainEqual({ claim_id: JUR.claim_id, reason: 'jurisdiction_scoped_requires_met_policy' })
     expect(r.composition.items.map((i) => i.claim_id)).not.toContain(JUR.claim_id)
   })
 

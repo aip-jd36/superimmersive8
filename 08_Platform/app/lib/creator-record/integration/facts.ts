@@ -14,7 +14,10 @@
  *     none as confirmed, and governed values among them are reported to the
  *     exclusion gate as withheld;
  *   - account status is not passed in this milestone (always `unknown`);
- *   - jurisdiction is ALWAYS empty. Location answers never reach it.
+ *   - jurisdiction is ALWAYS empty. Location answers never reach it. CRV2-IA-4A: explicit guidance-place
+ *     choices are collected separately (`declaredGuidancePlaces`), never into `applicabilityFacts`; only the
+ *     per-objective projection (`./project-objective-facts`) may pass them on, and only where an approved
+ *     ObjectiveFactAuthorization names that objective.
  * Every fact keeps the declared observation it came from.
  */
 
@@ -24,6 +27,7 @@ import { matchGovernedValue, normalizeGovernedValue, type GovernedValueMatch, ty
 import type { ApplicabilityFacts } from '@/lib/retrieval-engine/lookup-topic-claims'
 import type { TopicClaim } from '@/lib/retrieval-engine/types'
 import type { ToolMention } from '@/types/interview-engine'
+import { isGuidancePlace, type GuidancePlace } from '../contract/objective-fact-authorization'
 import { activeObservations, type DeclaredObservation } from '../contract/provenance'
 
 export type FactDropReason =
@@ -52,8 +56,23 @@ export interface FactProvenance {
   dropped: { observation_id: string; reason: FactDropReason }[]
 }
 
+/** CRV2-IA-4A: one explicit guidance-place choice, with the exact question version it came from. */
+export interface DeclaredGuidancePlace {
+  observation_id: string
+  q_id: string
+  q_version: number
+  place: GuidancePlace
+}
+
 export interface CreatorRecordFactsBundle {
+  /** Record-wide facts. `jurisdiction` is always empty here; see `declaredGuidancePlaces`. */
   applicabilityFacts: ApplicabilityFacts
+  /**
+   * CRV2-IA-4A: explicit guidance-place choices, canonical values only. Not an applicability fact by itself. Values outside
+   * the closed canonical list are dropped (reported in `guidancePlaceDrops`), never mapped or guessed.
+   */
+  declaredGuidancePlaces: DeclaredGuidancePlace[]
+  guidancePlaceDrops: { observation_id: string; reason: 'guidance_place_not_a_canonical_value' }[]
   activeToolIds: string[]
   assetProviderIds: string[]
   provenance: FactProvenance
@@ -169,6 +188,21 @@ export function buildCreatorRecordFacts(observations: readonly DeclaredObservati
     provenance.providers.push({ observation_id: o.observation_id, declared: raw, provider_id: providerId })
   }
 
+  // CRV2-IA-4A: guidance places, collected apart from every applicability fact.
+  const declaredGuidancePlaces: DeclaredGuidancePlace[] = []
+  const guidancePlaceDrops: CreatorRecordFactsBundle['guidancePlaceDrops'] = []
+  for (const o of active) {
+    if (o.target.kind !== 'guidance_place') continue
+    const place = o.target.place
+    if (!isGuidancePlace(place)) {
+      guidancePlaceDrops.push({ observation_id: o.observation_id, reason: 'guidance_place_not_a_canonical_value' })
+      continue
+    }
+    if (!declaredGuidancePlaces.some((p) => p.q_id === o.question.q_id && p.q_version === o.question.q_version && p.place === place)) {
+      declaredGuidancePlaces.push({ observation_id: o.observation_id, q_id: o.question.q_id, q_version: o.question.q_version, place })
+    }
+  }
+
   return {
     // Jurisdiction is deliberately and always empty: no location answer is an assessment jurisdiction.
     applicabilityFacts: {
@@ -176,6 +210,8 @@ export function buildCreatorRecordFacts(observations: readonly DeclaredObservati
       toolMentions,
       ...(withheldToolFacts.length > 0 ? { withheldToolFacts } : {}),
     },
+    declaredGuidancePlaces,
+    guidancePlaceDrops,
     activeToolIds,
     assetProviderIds,
     provenance,

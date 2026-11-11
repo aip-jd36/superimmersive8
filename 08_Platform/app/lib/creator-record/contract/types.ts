@@ -51,6 +51,13 @@ export type ObservationTarget =
   | { kind: 'asset_provider_identity' }
   | { kind: 'dependency'; dependency_id: string }
   | { kind: 'location'; role: LocationRole }
+  /**
+   * CRV2-IA-4A: an explicit choice of a place for general guidance (one canonical value per option). It is not an
+   * applicability fact: it reaches `jurisdiction` only for an objective an approved ObjectiveFactAuthorization names
+   * (`./objective-fact-authorization`). The question registry does not accept this target yet (questionnaire slice),
+   * so no approved questionnaire can produce it today.
+   */
+  | { kind: 'guidance_place'; place: string }
   | { kind: 'none' }
 
 export const OBSERVATION_KINDS = [

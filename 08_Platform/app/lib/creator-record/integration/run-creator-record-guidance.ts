@@ -4,11 +4,16 @@
  *
  *   declared observations
  *     → buildCreatorRecordFacts()             (jurisdiction always empty)
- *     → per fixed objective: selectReviewerClaims()            reused unchanged
+ *     → per fixed objective: projectFactsForObjective()        CRV2-IA-4A, default deny:
+ *         guidance places reach `jurisdiction.included` only for an objective an
+ *         approved ObjectiveFactAuthorization names; never `excluded`
+ *     → selectReviewerClaims()                                 reused unchanged
  *         (provider/tool scope, lifecycle, publication scope, supersession,
  *          authoritative applicability evaluation)
  *     → not_met excluded (as in HRR and Product A)
  *     → Creator Record publication authorization, BEFORE BI   default off
+ *     → jurisdiction-scoped claim whose applicability is not met → refused, BEFORE BI
+ *         (CRV2-IA-4A; independent of any ledger configuration)
  *     → buildBoundedInterpretations() via reviewerClaimToBiResult()  reused unchanged
  *     → composeGuidance(): re-checks authorization, never stronger than BI
  *
@@ -26,10 +31,12 @@ import { selectReviewerClaims } from '@/lib/reviewer-lk/select-reviewer-claims'
 import type { ReviewerLkClaim, ReviewerLkWithheld } from '@/lib/reviewer-lk/types'
 import { composeGuidance, type Composition, type ObjectiveEvaluation, type ScopeSelectionBasis, type SelectedClaim, type SelectionBasis } from '../contract/compose'
 import type { DeclaredObservation } from '../contract/provenance'
-import { authorizePublication, type PublicationLedgerEntry, type PublicationRefusalReason } from '../contract/publication-ledger'
+import type { ObjectiveFactAuthorization } from '../contract/objective-fact-authorization'
+import { authorizePublication, isJurisdictionScoped, type PublicationLedgerEntry, type PublicationRefusalReason } from '../contract/publication-ledger'
 import type { IsoDate } from '../contract/types'
 import { buildCreatorRecordFacts, type CreatorRecordFactsBundle } from './facts'
 import { CREATOR_RECORD_OBJECTIVES, objectiveToBiIntent, type CreatorRecordObjectiveDefinition } from './objectives'
+import { projectFactsForObjective, type ObjectiveFactProjection } from './project-objective-facts'
 
 export interface CreatorRecordGuidanceInput {
   observations: readonly DeclaredObservation[]
@@ -39,7 +46,15 @@ export interface CreatorRecordGuidanceInput {
   as_of: IsoDate
   /** Defaults to the two fixed objectives; overridable for tests only. */
   objectives?: readonly CreatorRecordObjectiveDefinition[]
+  /**
+   * CRV2-IA-4A: which objectives may use which applicability facts. Defaults to none: no objective receives a guidance
+   * place. Only approved entries are applied; the authority bundle refuses a malformed or unapproved list before here.
+   */
+  objectiveFactAuthorizations?: readonly ObjectiveFactAuthorization[]
 }
+
+/** Why a selected claim never reached Bounded Interpretation. */
+export type PreBiRefusalReason = PublicationRefusalReason | 'claim_metadata_missing' | 'jurisdiction_requirement_not_met'
 
 export interface ObjectiveTrace {
   objective_id: string
@@ -47,7 +62,9 @@ export interface ObjectiveTrace {
   withheld: ReviewerLkWithheld[]
   excluded_not_met: string[]
   /** Selected and applicable, but not authorized for Creator Record: never reaches BI. */
-  refused_before_bi: { claim_id: string; reason: PublicationRefusalReason | 'claim_metadata_missing' }[]
+  refused_before_bi: { claim_id: string; reason: PreBiRefusalReason }[]
+  /** CRV2-IA-4A: the guidance-place observations passed to this objective as `jurisdiction.included` (empty = none). */
+  jurisdiction_basis: ObjectiveFactProjection['jurisdiction_basis']
   /** Exactly the claim ids passed to BI. */
   bi_input_claim_ids: string[]
   bi_status: InterpretationStatus | null
@@ -55,7 +72,7 @@ export interface ObjectiveTrace {
 
 export type GovernanceGap =
   | { kind: 'ledger_entry_without_governed_claim'; entry_id: string; claim_id: string }
-  | { kind: 'claim_refused'; claim_id: string; objective_id: string; reason: PublicationRefusalReason | 'claim_metadata_missing' }
+  | { kind: 'claim_refused'; claim_id: string; objective_id: string; reason: PreBiRefusalReason }
 
 export interface CreatorRecordGuidanceResult {
   facts: CreatorRecordFactsBundle
@@ -119,16 +136,30 @@ export function runCreatorRecordGuidance(input: CreatorRecordGuidanceInput): Cre
   const evaluations: ObjectiveEvaluation[] = []
   const gaps: GovernanceGap[] = []
 
+  const authorizations = input.objectiveFactAuthorizations ?? []
   for (const objective of input.objectives ?? CREATOR_RECORD_OBJECTIVES) {
+    const projected = projectFactsForObjective(facts.applicabilityFacts, facts.declaredGuidancePlaces, authorizations, objective.objective_id)
     const selected = selectReviewerClaims({
       topic: objective.topic,
       topicClaims: input.topicClaims,
       assetProviderIds: facts.assetProviderIds,
       activeToolIds: facts.activeToolIds,
-      applicabilityFacts: facts.applicabilityFacts,
+      applicabilityFacts: projected.facts,
     })
 
-    const trace: ObjectiveTrace = { objective_id: objective.objective_id, withheld: selected.withheld, excluded_not_met: [], refused_before_bi: [], bi_input_claim_ids: [], bi_status: null }
+    const trace: ObjectiveTrace = {
+      objective_id: objective.objective_id,
+      withheld: selected.withheld,
+      excluded_not_met: [],
+      refused_before_bi: [],
+      jurisdiction_basis: projected.jurisdiction_basis,
+      bi_input_claim_ids: [],
+      bi_status: null,
+    }
+    const refuse = (claim_id: string, reason: PreBiRefusalReason) => {
+      trace.refused_before_bi.push({ claim_id, reason })
+      gaps.push({ kind: 'claim_refused', claim_id, objective_id: objective.objective_id, reason })
+    }
     const fedReviewer: ReviewerLkClaim[] = []
     const fed: SelectedClaim[] = []
 
@@ -140,9 +171,13 @@ export function runCreatorRecordGuidance(input: CreatorRecordGuidanceInput): Cre
       const governed = governedById.get(claim.claim_id)
       const auth = governed ? authorizePublication(input.ledger, governed, input.as_of) : null
       if (!governed || !auth || !auth.authorized) {
-        const reason = !governed ? 'claim_metadata_missing' : (auth as { reason: PublicationRefusalReason }).reason
-        trace.refused_before_bi.push({ claim_id: claim.claim_id, reason })
-        gaps.push({ kind: 'claim_refused', claim_id: claim.claim_id, objective_id: objective.objective_id, reason })
+        refuse(claim.claim_id, !governed ? 'claim_metadata_missing' : (auth as { reason: PublicationRefusalReason }).reason)
+        continue
+      }
+      // CRV2-IA-4A: guidance about a place is published only when its jurisdiction requirement is actually met by an
+      // authorized, explicit choice. Read from the one shared applicability status; never re-evaluated here.
+      if (isJurisdictionScoped(governed) && claim.applicability_status !== 'met') {
+        refuse(claim.claim_id, 'jurisdiction_requirement_not_met')
         continue
       }
       fedReviewer.push(claim)

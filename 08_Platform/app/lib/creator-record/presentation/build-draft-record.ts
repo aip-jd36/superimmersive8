@@ -341,7 +341,8 @@ export function buildDraftRecord(input: DraftRecordInput): DraftRecordView {
     }
     for (const r of tr.refused_before_bi) {
       const subject = subjectOf(claimsById.get(r.claim_id))
-      if (r.reason === 'jurisdiction_scoped_guidance_disabled') add(T.not_shown_location)
+      // CRV2-IA-4A: both jurisdiction refusals keep the existing location notice (same text as before).
+      if (r.reason === 'jurisdiction_scoped_requires_met_policy' || r.reason === 'jurisdiction_requirement_not_met') add(T.not_shown_location)
       else if (r.reason === 'no_ledger_entry' || r.reason === 'not_eligible') add(cards.some((c) => c.subject === subject) ? T.not_shown_more_no_entry(subject) : T.not_shown_no_entry(subject))
       else add(T.not_shown_could_not_show(subject))
     }

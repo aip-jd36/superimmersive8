@@ -107,12 +107,24 @@ describe('publication authorization defaults to ineligible', () => {
     expect(authorizePublication(ledger as never, c, AS_OF)).toEqual({ authorized: false, reason })
   })
 
-  test('jurisdiction-scoped claims are never authorized in this milestone, even with a complete entry', () => {
+  // CRV2-IA-4A: replaces the blanket refusal. Configuration only: whether the jurisdiction requirement is actually met is
+  // checked before Bounded Interpretation in the integration layer (integration-jurisdiction-boundary.test.ts).
+  test('a jurisdiction-scoped claim is refused under met_or_unresolved and authorized only under a policy requiring met', () => {
     const j = synClaim({ claim_id: 'CLAIM-SYN-A-v1', applicability_requirements: [{ fact: 'jurisdiction', operator: 'equals', value: 'SYN-PLACE' }] })
-    expect(isJurisdictionScoped(j)).toBe(true)
-    expect(authorizePublication([ok], j, AS_OF)).toEqual({ authorized: false, reason: 'jurisdiction_scoped_guidance_disabled' })
     const anyOf = synClaim({ claim_id: 'CLAIM-SYN-A-v1', applicability_any_of: [[{ fact: 'jurisdiction', operator: 'equals', value: 'SYN-PLACE' }]] })
-    expect(authorizePublication([ok], anyOf, AS_OF)).toEqual({ authorized: false, reason: 'jurisdiction_scoped_guidance_disabled' })
+    for (const c of [j, anyOf]) {
+      expect(isJurisdictionScoped(c)).toBe(true)
+      expect(authorizePublication([{ ...ok, applicability_policy: 'met_or_unresolved' }], c, AS_OF)).toEqual({ authorized: false, reason: 'jurisdiction_scoped_requires_met_policy' })
+      for (const policy of ['met_only', 'requirements_met'] as const) {
+        expect(authorizePublication([{ ...ok, applicability_policy: policy }], c, AS_OF)).toMatchObject({ authorized: true })
+      }
+    }
+    expect(PUBLICATION_REFUSAL_REASONS).not.toContain('jurisdiction_scoped_guidance_disabled' as never)
+  })
+
+  test('requirements_met is a recognised policy; an unknown policy is refused', () => {
+    expect(authorizePublication([{ ...ok, applicability_policy: 'requirements_met' }], claim, AS_OF)).toMatchObject({ authorized: true })
+    expect(authorizePublication([{ ...ok, applicability_policy: 'whenever' as never }], claim, AS_OF)).toEqual({ authorized: false, reason: 'missing_applicability_policy' })
   })
 
   test('the refusal vocabulary no longer has a selection-trigger reason', () => {

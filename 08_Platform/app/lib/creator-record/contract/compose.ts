@@ -136,6 +136,7 @@ export type OmissionReason =
   | 'not_cited_by_bi'
   | 'bi_permits_nothing'
   | 'policy_requires_met'
+  | 'policy_requires_requirements_met'
 
 export interface Omission {
   claim_id: string
@@ -217,6 +218,12 @@ export function composeGuidance(input: CompositionInput): Composition {
     const conclusion: CreatorRecordConclusion = biRank === 2 && !capped ? 'relevant_on_declared_facts' : 'relevant_applicability_unresolved'
     if (entry.applicability_policy === 'met_only' && conclusion !== 'relevant_on_declared_facts') {
       omit('policy_requires_met')
+      continue
+    }
+    // CRV2-IA-4A: requirements met (the one shared applicability status), dependencies may stay open. The conclusion above is
+    // already capped by any open dependency; this never strengthens it. Defence in depth behind the pre-BI check.
+    if (entry.applicability_policy === 'requirements_met' && selected.applicability_status !== 'met') {
+      omit('policy_requires_requirements_met')
       continue
     }
 

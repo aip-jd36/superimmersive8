@@ -22,7 +22,13 @@ export interface PublicationLedgerEntry {
   creator_record_eligible: 'Yes' | 'No' | 'Pending'
   /** Separately approved customer explanation. Never copied from CRC text. */
   explanation: string | null
-  applicability_policy: 'met_only' | 'met_or_unresolved' | null
+  /**
+   * met_only           shown only when the conclusion is `relevant_on_declared_facts` (applicability met, no open dependency);
+   * met_or_unresolved  shown when applicability is met or unresolved (never for a jurisdiction-scoped claim);
+   * requirements_met   CRV2-IA-4A: shown only when the shared applicability status is `met`; open project dependencies are
+   *                    allowed and cap the conclusion at `relevant_applicability_unresolved`.
+   */
+  applicability_policy: ApplicabilityPolicy | null
   /** Approved evidence text per dependency id. */
   evidence_notes: Readonly<Record<string, string>>
   required_caveats: string[]
@@ -44,9 +50,21 @@ export const PUBLICATION_REFUSAL_REASONS = [
   'claim_superseded',
   'claim_not_verified',
   'claim_reverified_since_approval',
-  'jurisdiction_scoped_guidance_disabled',
+  // CRV2-IA-4A (replaces `jurisdiction_scoped_guidance_disabled`): a jurisdiction-scoped claim's entry must use a policy that
+  // requires applicability to be met. `met_or_unresolved` would let guidance about a place the creator did not choose through.
+  'jurisdiction_scoped_requires_met_policy',
 ] as const
 export type PublicationRefusalReason = (typeof PUBLICATION_REFUSAL_REASONS)[number]
+
+export const APPLICABILITY_POLICIES = ['met_only', 'met_or_unresolved', 'requirements_met'] as const
+export type ApplicabilityPolicy = (typeof APPLICABILITY_POLICIES)[number]
+
+export function isApplicabilityPolicy(v: unknown): v is ApplicabilityPolicy {
+  return typeof v === 'string' && (APPLICABILITY_POLICIES as readonly string[]).includes(v)
+}
+
+/** Policies a jurisdiction-scoped claim may use: both require the shared applicability status to be `met`. */
+const JURISDICTION_SCOPED_POLICIES: readonly ApplicabilityPolicy[] = ['met_only', 'requirements_met']
 
 export type PublicationAuthorization = { authorized: true; entry: PublicationLedgerEntry } | { authorized: false; reason: PublicationRefusalReason }
 
@@ -71,12 +89,13 @@ export function authorizePublication(ledger: readonly PublicationLedgerEntry[], 
   if (e.creator_record_eligible !== 'Yes') return refuse('not_eligible')
   if (!e.approver || !isIsoDate(e.decision_date)) return refuse('missing_approval')
   if (!e.explanation || e.explanation.trim() === '') return refuse('missing_explanation')
-  if (e.applicability_policy !== 'met_only' && e.applicability_policy !== 'met_or_unresolved') return refuse('missing_applicability_policy')
+  if (!isApplicabilityPolicy(e.applicability_policy)) return refuse('missing_applicability_policy')
   if (!isIsoDate(e.refresh_by)) return refuse('missing_refresh_by')
   if (e.refresh_by < asOf) return refuse('refresh_lapsed')
   if (e.claim_last_verified !== claim.last_verified) return refuse('claim_reverified_since_approval')
-  // CR-IMPL-1b: Creator Record has no approved way to select jurisdiction-specific
-  // guidance (CR-ARCH-1 §2a), so such a claim is never authorized, whatever the entry says.
-  if (isJurisdictionScoped(claim)) return refuse('jurisdiction_scoped_guidance_disabled')
+  // CRV2-IA-4A: a jurisdiction-scoped claim is authorized only under a policy that requires `met` applicability. This is
+  // configuration only; the facts check (jurisdiction requirement actually met) runs before Bounded Interpretation in the
+  // integration layer, independent of what any entry says.
+  if (isJurisdictionScoped(claim) && !JURISDICTION_SCOPED_POLICIES.includes(e.applicability_policy)) return refuse('jurisdiction_scoped_requires_met_policy')
   return { authorized: true, entry: e }
 }

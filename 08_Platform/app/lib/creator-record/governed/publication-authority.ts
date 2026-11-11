@@ -29,6 +29,7 @@
  * submissions stops apply to both modes unchanged.
  */
 
+import type { ObjectiveFactAuthorization } from '../contract/objective-fact-authorization'
 import type { PublicationLedgerEntry } from '../contract/publication-ledger'
 import type { RegistryInput } from '../contract/question-registry'
 import type { CreatorRecordSources } from '../prototype/build-draft'
@@ -64,6 +65,13 @@ export interface PublicationAuthorityBundle {
    * selects the one set whose approval names the record's own schema (`approvedPdfTemplates`); none or more than one refuses.
    */
   readonly pdf_template_sets?: readonly { readonly templates: unknown; readonly approval: PdfTemplateApproval }[]
+  /**
+   * CRV2-IA-4A: which objective may use which applicability fact (`../contract/objective-fact-authorization`). Absent or empty:
+   * none (default deny). Any malformed or unapproved entry makes the whole bundle unusable (`currentPublicationAuthority`,
+   * `../customer-flow/approved-inputs`; this file keeps type-only imports).
+   * Not yet read by the customer path: no runtime caller passes it on (questionnaire/composition slice).
+   */
+  readonly objective_fact_authorizations?: readonly ObjectiveFactAuthorization[]
 }
 
 /** The Production Supabase project (public identifier; see DEPLOYMENT.md). Synthetic authority never runs against it. */
@@ -138,6 +146,7 @@ function approvalTexts(b: PublicationAuthorityBundle): string[] {
   out.push(b.questionnaire_approval?.authority, b.questionnaire_approval?.review_ref)
   out.push(b.pdf_template_approval?.authority, b.pdf_template_approval?.review_ref)
   for (const t of b.pdf_template_sets ?? []) out.push(t.approval?.authority, t.approval?.review_ref)
+  for (const a of b.objective_fact_authorizations ?? []) out.push(a.authorization_id, a.semantic_review_ref, a.approval?.approver, a.approval?.review_ref)
   return out.filter((x): x is string => typeof x === 'string')
 }
 
