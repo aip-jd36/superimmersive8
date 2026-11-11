@@ -71,11 +71,11 @@ export function normalizeBusiness(name: string): string {
 }
 
 /** The JSON schema of the `issuer_statements` output field (v3). */
+// CRV2-IA-4D3 S2b: no `maxItems`. Structured outputs do not support array-size constraints, so the bound lives in the description
+// (as v2 does for plan candidates) and `validateIssuerStatements` enforces it; a longer list fails validation (fail closed).
 export const ISSUER_STATEMENTS_JSON_SCHEMA = {
   type: 'array',
-  maxItems: MAX_ISSUER_STATEMENTS,
-  description:
-    'Every business name printed on the document, one entry per printed statement, with the role the document gives it. Use an empty list if no business is named.',
+  description: `Every business name printed on the document (at most ${MAX_ISSUER_STATEMENTS}), one entry per printed statement, with the role the document gives it. Use an empty list if no business is named.`,
   items: {
     type: 'object',
     properties: {

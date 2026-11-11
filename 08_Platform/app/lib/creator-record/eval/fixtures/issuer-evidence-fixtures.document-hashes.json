@@ -1,0 +1,19 @@
+{
+  "spec_version": "issuer-evidence-fixtures-v2",
+  "spec_sha256": "2b0267d4d6decfc11473cd4030784f36605657aee8a2406366f109c477f582f1",
+  "generator_version": "receipt-fixture-generator-v1",
+  "pymupdf_version": "1.27.2.3",
+  "pillow_version": "12.2.0",
+  "documents": {
+    "iev3-provider-label-only": "bbbc7b29a1bca527710cef11500ec255bfe22a24c54ab4d5bcd6713ed2a9e214",
+    "iev3-explicit-merchant": "feb134e24c54033bd4286052c66b1047d1e0711ea23c5058ee63a8a161d227cd",
+    "iev3-issuer-disclaimer": "035dc4340997860f55ef494e292ccfc0f99a621dda96a23c86b24f820f7a9b5f",
+    "iev3-competing-issuers": "85a80fd9b09df795a2e6f8a072e69e9b68ea20e1749addf14f2add24dc27b25e",
+    "iev3-sender-distinct-from-merchant": "4104b0996e2a961aaf2b27d70335e74ea791cf01df650f7ca901a756ac721ad2",
+    "iev3-sender-only": "f088f01f89b190af99bd8d81687bab530eb846a2583c628c532e9cb0f0807dab",
+    "iev3-reseller-issued": "f9f5fcb4be82c618ae7b2e7eb5ee3e0c94be2e05746f0661502c0a0f7c22fa3a",
+    "iev3-app-store-merchant": "7b59d2eb9bbbd62931d7b958101045688dff2421ecffea9f9c8aa656e8baa10d",
+    "iev3-no-business-named": "2fa2e813191b18586e1b9f9a10c0d4db8cf3d1fc0d4641961487a6e21bebc5ea",
+    "iev3-styled-letterhead-sender-only": "0d616f7b5fb910e4d42b5f578f6bc4e2a2e4608f31cb6537b0e73bb08b86885a"
+  }
+}

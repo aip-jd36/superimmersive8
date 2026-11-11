@@ -13,8 +13,9 @@
 
 import Anthropic from '@anthropic-ai/sdk'
 import { jsonSchemaOutputFormat } from '@anthropic-ai/sdk/helpers/json-schema'
-import { RECEIPT_EXAMINATION_SYSTEM_PROMPT } from './prompt'
-import { RECEIPT_EXTRACTION_SCHEMA } from './schema'
+import { RECEIPT_EXAMINATION_SYSTEM_PROMPT, RECEIPT_EXAMINATION_SYSTEM_PROMPT_V3 } from './prompt'
+import { RECEIPT_EXTRACTION_SCHEMA, RECEIPT_EXTRACTION_SCHEMA_V3, RECEIPT_EXTRACTION_SCHEMA_VERSION } from './schema'
+import { RECEIPT_EXTRACTION_SCHEMA_VERSION_V3 } from './issuer-evidence'
 import type { ReceiptModelCaller, ReceiptModelResponse } from './examine'
 
 export const DEFAULT_RECEIPT_MODEL = 'claude-sonnet-5'
@@ -33,7 +34,19 @@ export interface AnthropicReceiptCallerOptions {
    * here only and never logged or returned.
    */
   apiKeyEnv?: string
+  /**
+   * CRV2-IA-4D3 S2b. Which reading contract the request carries (system prompt and output schema together). Defaults to v2, so every
+   * existing caller is unchanged. Only the synthetic evaluation runner passes v3; no app path does.
+   */
+  readingContract?: ReceiptCallContract
 }
+
+/** The request side of each reading contract: the prompt and the schema always travel together. Fixed; nothing else can be sent. */
+export const RECEIPT_CALL_CONTRACTS = {
+  [RECEIPT_EXTRACTION_SCHEMA_VERSION]: { system: RECEIPT_EXAMINATION_SYSTEM_PROMPT, schema: RECEIPT_EXTRACTION_SCHEMA },
+  [RECEIPT_EXTRACTION_SCHEMA_VERSION_V3]: { system: RECEIPT_EXAMINATION_SYSTEM_PROMPT_V3, schema: RECEIPT_EXTRACTION_SCHEMA_V3 },
+} as const
+export type ReceiptCallContract = keyof typeof RECEIPT_CALL_CONTRACTS
 
 /** CR-V2-DOC-LIVE-1B. A fixed kind for a thrown provider error, decided by the SDK's own error classes. Carries no message or content. */
 export type ProviderFailureKind = 'timeout' | 'rate_limited' | 'overloaded' | 'server_error' | 'auth' | 'rejected' | 'connection' | 'unknown'
@@ -62,6 +75,9 @@ export function createAnthropicReceiptCaller(options?: AnthropicReceiptCallerOpt
   // add a credential is fixed here. ANTHROPIC_CUSTOM_HEADERS has no option that turns it off, so its presence refuses.
   if (process.env.ANTHROPIC_CUSTOM_HEADERS) throw new Error('ANTHROPIC_CUSTOM_HEADERS is set. Live receipt examination cannot run.')
   const model = resolveReceiptModel(options)
+  const contractId = options?.readingContract ?? RECEIPT_EXTRACTION_SCHEMA_VERSION
+  if (!Object.prototype.hasOwnProperty.call(RECEIPT_CALL_CONTRACTS, contractId)) throw new Error('Unknown reading contract. Live receipt examination cannot run.')
+  const contract = RECEIPT_CALL_CONTRACTS[contractId]
   const client = new Anthropic({
     apiKey,
     authToken: null,
@@ -77,9 +93,9 @@ export function createAnthropicReceiptCaller(options?: AnthropicReceiptCallerOpt
       model,
       max_tokens: maxTokens,
       thinking: { type: 'disabled' },
-      system: RECEIPT_EXAMINATION_SYSTEM_PROMPT,
+      system: contract.system,
       messages: [{ role: 'user', content }],
-      output_config: { format: jsonSchemaOutputFormat(RECEIPT_EXTRACTION_SCHEMA) },
+      output_config: { format: jsonSchemaOutputFormat(contract.schema) },
     })
     return response as unknown as ReceiptModelResponse
   }

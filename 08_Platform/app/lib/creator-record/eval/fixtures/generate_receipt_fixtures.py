@@ -3,7 +3,15 @@
 Offline developer tool. Not part of the app runtime and not installed by npm.
 Requires Python 3.10+ with PyMuPDF (fitz) and Pillow.
 
-    python -I generate_receipt_fixtures.py [--out DIR]
+    python -I generate_receipt_fixtures.py [--out DIR] [--spec FILE]
+
+CRV2-IA-4D3 S2b: `--spec` renders another spec in the same format (default: receipt-fixtures.json). The issuer-evidence set:
+
+    python -I generate_receipt_fixtures.py --spec issuer-evidence-fixtures.json --out generated/issuer-evidence
+
+It uses the generic `lines` template (an optional styled letterhead, then one paragraph per printed line). Adding the template does
+not change any existing template, the shared CSS or GENERATOR_VERSION (which is written into every PDF), so the existing fixtures
+render byte-identically.
 
 Every document is first laid out as HTML on a PDF page (so PDFs keep a real
 text layer), then optionally rasterized and degraded to simulate screenshots
@@ -156,6 +164,23 @@ def contract_html(c: dict, marker: str) -> str:
     return f"<h2>{esc(c['title'])}</h2>{body}<p class='marker'>{esc(marker)}</p>"
 
 
+def lines_html(c: dict, marker: str) -> str:
+    """CRV2-IA-4D3 S2b: arbitrary printed lines, optionally under a styled letterhead. Inline styles only (BASE_CSS unchanged)."""
+    parts = []
+    lh = c.get("letterhead")
+    if lh:
+        details = "<br/>".join(esc(d) for d in lh.get("details", []))
+        parts.append(
+            "<div style='background-color: #1f3a5f; color: #ffffff; padding: 10pt 12pt'>"
+            f"<span style='font-size: 18pt'><b>{esc(lh['name'])}</b></span><br/>"
+            f"<span style='font-size: 8pt'>{details}</span></div>"
+            "<div style='border-bottom: 2px solid #c8900a; margin-bottom: 10pt'>&#160;</div>"
+        )
+    parts.extend(f"<p>{esc(line)}</p>" for line in c["lines"])
+    parts.append(f"<p class='marker'>{esc(marker)}</p>")
+    return "".join(parts)
+
+
 HTML_TEMPLATES = {
     "invoice": (invoice_html, A4),
     "web_billing": (web_billing_html, SCREEN),
@@ -163,6 +188,7 @@ HTML_TEMPLATES = {
     "pricing": (pricing_html, SCREEN),
     "marketing": (marketing_html, SCREEN),
     "contract": (contract_html, A4),
+    "lines": (lines_html, A4),
 }
 
 
@@ -261,8 +287,12 @@ def encode(img: Image.Image, fmt: str, quality: int) -> bytes:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=str(HERE / "generated"))
+    ap.add_argument("--spec", default=str(SPEC))
     args = ap.parse_args()
-    spec = json.loads(SPEC.read_text(encoding="utf-8"))
+    spec_path = Path(args.spec)
+    if not spec_path.is_absolute():
+        spec_path = HERE / spec_path
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
     marker = spec["synthetic_marker"]
     by_id = {d["id"]: d for d in spec["documents"]}
     out = Path(args.out)
@@ -312,7 +342,7 @@ def main() -> int:
     manifest = {
         "generator_version": GENERATOR_VERSION,
         "spec_version": spec["spec_version"],
-        "spec_sha256": hashlib.sha256(SPEC.read_bytes()).hexdigest(),
+        "spec_sha256": hashlib.sha256(spec_path.read_bytes()).hexdigest(),
         "pymupdf_version": fitz.VersionBind,
         "pillow_version": Image.__version__,
         "documents": entries,

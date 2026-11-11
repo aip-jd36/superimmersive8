@@ -1,0 +1,169 @@
+{
+  "spec_version": "issuer-evidence-fixtures-v2",
+  "fixture_set": {
+    "id": "si8/creator-record-v2-issuer-evidence-fixtures",
+    "version": 2
+  },
+  "synthetic_marker": "SYNTHETIC TEST DOCUMENT - NOT A REAL RECEIPT",
+  "documents": [
+    {
+      "id": "iev3-provider-label-only",
+      "template": "lines",
+      "content": {
+        "letterhead": null,
+        "lines": [
+          "Subscription receipt (synthetic)",
+          "Receipt ID: SYN-IEV3-0001",
+          "Date: October 1, 2026",
+          "Amount: USD 15.00 (synthetic)",
+          "Provider: Runway",
+          "Plan: Standard"
+        ]
+      }
+    },
+    {
+      "id": "iev3-explicit-merchant",
+      "template": "lines",
+      "content": {
+        "letterhead": null,
+        "lines": [
+          "Subscription receipt (synthetic)",
+          "Receipt ID: SYN-IEV3-0001",
+          "Date: October 1, 2026",
+          "Amount: USD 15.00 (synthetic)",
+          "Merchant of record: Northwind Studio Tools Ltd",
+          "Product: Northwind Studio Pro"
+        ]
+      }
+    },
+    {
+      "id": "iev3-issuer-disclaimer",
+      "template": "lines",
+      "content": {
+        "letterhead": null,
+        "lines": [
+          "Subscription receipt (synthetic)",
+          "Receipt ID: SYN-IEV3-0001",
+          "Date: October 1, 2026",
+          "Amount: USD 15.00 (synthetic)",
+          "Provider: Runway",
+          "This document was not issued by Runway."
+        ]
+      }
+    },
+    {
+      "id": "iev3-competing-issuers",
+      "template": "lines",
+      "content": {
+        "letterhead": null,
+        "lines": [
+          "Subscription receipt (synthetic)",
+          "Receipt ID: SYN-IEV3-0001",
+          "Date: October 1, 2026",
+          "Amount: USD 15.00 (synthetic)",
+          "Invoice issued by Alpha Media Ltd",
+          "This invoice is issued by Beta Studio GmbH"
+        ]
+      }
+    },
+    {
+      "id": "iev3-sender-distinct-from-merchant",
+      "template": "lines",
+      "content": {
+        "letterhead": null,
+        "lines": [
+          "Gamma Creative Agency Ltd",
+          "12 Example Road, Example City",
+          "Subscription receipt (synthetic)",
+          "Receipt ID: SYN-IEV3-0001",
+          "Date: October 1, 2026",
+          "Amount: USD 15.00 (synthetic)",
+          "Billed by: Pika Labs, Inc.",
+          "Plan: Pro"
+        ]
+      }
+    },
+    {
+      "id": "iev3-sender-only",
+      "template": "lines",
+      "content": {
+        "letterhead": null,
+        "lines": [
+          "Delta Video Services Ltd",
+          "34 Example Avenue, Example City",
+          "Subscription receipt (synthetic)",
+          "Receipt ID: SYN-IEV3-0001",
+          "Date: October 1, 2026",
+          "Amount: USD 15.00 (synthetic)",
+          "Plan: Pro"
+        ]
+      }
+    },
+    {
+      "id": "iev3-reseller-issued",
+      "template": "lines",
+      "content": {
+        "letterhead": null,
+        "lines": [
+          "Subscription receipt (synthetic)",
+          "Receipt ID: SYN-IEV3-0001",
+          "Date: October 1, 2026",
+          "Amount: USD 15.00 (synthetic)",
+          "Sold by: ResellerHub Payments Ltd",
+          "Item: Runway Pro (12 months, resold)"
+        ]
+      }
+    },
+    {
+      "id": "iev3-app-store-merchant",
+      "template": "lines",
+      "content": {
+        "letterhead": null,
+        "lines": [
+          "Subscription receipt (synthetic)",
+          "Receipt ID: SYN-IEV3-0001",
+          "Date: October 1, 2026",
+          "Amount: USD 15.00 (synthetic)",
+          "App purchase receipt",
+          "Seller: Example App Marketplace Inc.",
+          "In-app subscription: Pika Pro"
+        ]
+      }
+    },
+    {
+      "id": "iev3-no-business-named",
+      "template": "lines",
+      "content": {
+        "letterhead": null,
+        "lines": [
+          "Payment confirmation (synthetic)",
+          "Reference: SYN-IEV3-0002",
+          "Date: October 1, 2026",
+          "Amount: USD 15.00 (synthetic)",
+          "Plan: Standard"
+        ]
+      }
+    },
+    {
+      "id": "iev3-styled-letterhead-sender-only",
+      "template": "lines",
+      "content": {
+        "letterhead": {
+          "name": "Epsilon Post Studio Ltd",
+          "details": [
+            "7 Example Lane, Example City",
+            "billing@epsilon-post.example",
+            "Company no. 00000000 (synthetic)"
+          ]
+        },
+        "lines": [
+          "Subscription receipt (synthetic)",
+          "Receipt ID: SYN-IEV3-0001",
+          "Date: October 1, 2026",
+          "Amount: USD 15.00 (synthetic)",
+          "Plan: Pro"
+        ]
+      }
+    }
+  ]
+}

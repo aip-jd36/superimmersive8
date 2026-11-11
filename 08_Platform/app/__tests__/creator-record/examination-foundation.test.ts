@@ -540,6 +540,9 @@ describe('CR-V2-DOC-2B examination foundation', () => {
       ['lib/creator-record/customer-pdf/templates.ts', ['examination/envelope']],
       ['lib/creator-record/customer-record/examination-section.ts', ['examination/projection']],
       ['lib/creator-record/customer-record/record.ts', ['examination/projection']],
+      // CRV2-IA-4D3 S2b: the offline synthetic evaluation runner (no app path imports eval/) reads the receipt profile's reading
+      // contract v3 and profile identities, to evaluate the inactive v3 profile and attribute its reports. It selects nothing.
+      ['lib/creator-record/eval/run-receipt-eval.ts', ['examination/receipt-profile']],
       ['lib/creator-record/evidence/persisted-comparison.ts', ['examination/envelope', 'examination/receipt-reading']],
       // CR-V2-MVP-INTEGRATION-2: the integrated assessment reads a record's projections only through the same exact inversion.
       ['lib/creator-record/integrated-assessment/assess.ts', ['examination/receipt-reading']],

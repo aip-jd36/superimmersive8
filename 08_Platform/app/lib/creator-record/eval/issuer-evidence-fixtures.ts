@@ -1,5 +1,9 @@
 /**
- * CRV2-IA-4D2 — synthetic issuer-evidence fixtures (reading contract v3). SPECIFICATIONS ONLY.
+ * CRV2-IA-4D2 — synthetic issuer-evidence fixtures (reading contract v3). This file is the SOURCE of the fixture set.
+ *
+ * CRV2-IA-4D3 S2b: the documents are rendered by the existing generator (`fixtures/generate_receipt_fixtures.py`, `lines` template)
+ * from `fixtures/issuer-evidence-fixtures.json`, which is exported from this file (`export-issuer-evidence-spec.ts`; a test pins the
+ * two as identical), and every rendered document's SHA-256 is pinned in `fixtures/issuer-evidence-fixtures.document-hashes.json`.
  *
  * Every document is fictional, synthetic and marked as such. Each fixture lists the lines its document prints and the v3 truth:
  * the statements a correct reading reports and the issuer state the shared rule must derive from them. The documents are not yet
@@ -11,7 +15,8 @@
 import type { IssuerEvidenceState, IssuerStatementRole } from '../receipt-examination/issuer-evidence'
 import type { ReceiptExtraction } from '../receipt-examination/schema'
 
-export const ISSUER_EVIDENCE_FIXTURE_SET = { id: 'si8/creator-record-v2-issuer-evidence-fixtures', version: 1 } as const
+/** v2 (CRV2-IA-4D3 S2b): adds a document naming no business and a styled sender-only letterhead; v1's eight documents unchanged. */
+export const ISSUER_EVIDENCE_FIXTURE_SET = { id: 'si8/creator-record-v2-issuer-evidence-fixtures', version: 2 } as const
 
 export const SYNTHETIC_FOOTER = 'SYNTHETIC TEST DOCUMENT - NOT A REAL RECEIPT'
 
@@ -29,6 +34,8 @@ export interface IssuerEvidenceDocumentFixture {
   case: string
   /** The printed lines, in order (a renderer lays them out; the synthetic footer is always added). */
   lines: string[]
+  /** A visually styled letterhead printed above the lines (name in large type, details beneath). Absent = no letterhead. */
+  letterhead?: { name: string; details: string[] }
   truth: IssuerEvidenceTruth
 }
 
@@ -139,6 +146,21 @@ export const ISSUER_EVIDENCE_FIXTURES: readonly IssuerEvidenceFixture[] = Object
         { business: 'Pika', role: 'mentioned_only' },
       ],
     },
+  },
+  {
+    kind: 'document',
+    id: 'iev3-no-business-named',
+    case: 'Document naming no business',
+    lines: ['Payment confirmation (synthetic)', 'Reference: SYN-IEV3-0002', 'Date: October 1, 2026', 'Amount: USD 15.00 (synthetic)', 'Plan: Standard'],
+    truth: { state: 'missing', business: null, statements: [] },
+  },
+  {
+    kind: 'document',
+    id: 'iev3-styled-letterhead-sender-only',
+    case: 'Visually realistic sender letterhead alone',
+    letterhead: { name: 'Epsilon Post Studio Ltd', details: ['7 Example Lane, Example City', 'billing@epsilon-post.example', 'Company no. 00000000 (synthetic)'] },
+    lines: [...common, 'Plan: Pro'],
+    truth: { state: 'not_attributed', business: null, statements: [{ business: 'Epsilon Post Studio Ltd', role: 'sender_only' }] },
   },
   {
     kind: 'historical_v2_reading',

@@ -220,11 +220,14 @@ describe('the v3 profile is inactive for customers', () => {
 
   test('only its own definition and the exact reading inversion reference the v3 profile, contract, prompt or validator', () => {
     const refs = (re: RegExp) => runtime.filter((f) => re.test(readFileSync(f, 'utf8'))).map(rel).sort()
-    expect(refs(/RECEIPT_PROFILE_V2_INACTIVE|RECEIPT_READING_CONTRACT_V3/)).toEqual(['lib/creator-record/examination/receipt-profile.ts'])
-    expect(refs(/RECEIPT_EXAMINATION_SYSTEM_PROMPT_V3/)).toEqual(['lib/creator-record/receipt-examination/prompt.ts'])
+    // CRV2-IA-4D3 S2b: the synthetic evaluation runner (eval/, which no app path imports) and the live caller's fixed contract table
+    // now reference the v3 contract. No app path selects it: only the evaluation runner passes `readingContract` (pinned below).
+    expect(refs(/RECEIPT_PROFILE_V2_INACTIVE|RECEIPT_READING_CONTRACT_V3/)).toEqual(['lib/creator-record/eval/run-receipt-eval.ts', 'lib/creator-record/examination/receipt-profile.ts'])
+    expect(refs(/RECEIPT_EXAMINATION_SYSTEM_PROMPT_V3/)).toEqual(['lib/creator-record/eval/run-receipt-eval.ts', 'lib/creator-record/receipt-examination/examine.anthropic.ts', 'lib/creator-record/receipt-examination/prompt.ts'])
     expect(refs(/validateReceiptExtractionV3/)).toEqual(['lib/creator-record/examination/receipt-profile.ts', 'lib/creator-record/examination/receipt-reading.ts', 'lib/creator-record/receipt-examination/schema.ts'])
-    // Live callers still send the v2 schema and prompt.
-    expect(refs(/RECEIPT_EXTRACTION_SCHEMA_V3\b/)).toEqual(['lib/creator-record/receipt-examination/schema.ts'])
+    expect(refs(/RECEIPT_EXTRACTION_SCHEMA_V3\b/)).toEqual(['lib/creator-record/eval/run-receipt-eval.ts', 'lib/creator-record/receipt-examination/examine.anthropic.ts', 'lib/creator-record/receipt-examination/schema.ts'])
+    // The app's live callers (evidence/live-caller.ts, live-examination/real-executor.ts) pass no contract, so they still send v2.
+    expect(refs(/readingContract/)).toEqual(['lib/creator-record/eval/run-receipt-eval.ts', 'lib/creator-record/receipt-examination/examine.anthropic.ts'])
   })
 
   test('the supported issuance methods are unchanged (v2 reading method only)', () => {

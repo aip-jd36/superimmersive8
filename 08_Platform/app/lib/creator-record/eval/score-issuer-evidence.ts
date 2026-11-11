@@ -15,9 +15,22 @@
 
 import { issuerEvidenceOf, normalizeBusiness, type IssuerEvidenceState } from '../receipt-examination/issuer-evidence'
 import type { ReceiptExtraction } from '../receipt-examination/schema'
-import { ISSUER_EVIDENCE_FIXTURES, type IssuerEvidenceFixture } from './issuer-evidence-fixtures'
+import { ISSUER_EVIDENCE_FIXTURES, type HistoricalReadingFixture, type IssuerEvidenceTruth } from './issuer-evidence-fixtures'
 
+export const ISSUER_EVIDENCE_SCORING_VERSION = 'issuer-evidence-scoring-v1' as const
 export const ISSUER_EVIDENCE_GATES = { state_accuracy_min: 0.95 } as const
+
+/**
+ * CRV2-IA-4D3 S2b: anything scorable — a rendered issuer-evidence fixture, a baseline document with its v3 truth, or a private
+ * document whose truth is held outside the repository. `accept_states` lists other derived states that are equally correct for that
+ * document; it can never contain `identified` (the critical gates are computed from the truth alone and are never relaxed).
+ */
+export interface ScorableIssuerDocument {
+  kind: 'document'
+  id: string
+  truth: IssuerEvidenceTruth & { accept_states?: readonly Exclude<IssuerEvidenceState, 'identified' | 'unclassified'>[] }
+}
+export type ScorableIssuerFixture = ScorableIssuerDocument | HistoricalReadingFixture
 
 export interface IssuerEvidenceDocResult {
   id: string
@@ -36,7 +49,7 @@ export interface IssuerEvidenceScore {
 
 export function scoreIssuerEvidence(
   readings: ReadonlyMap<string, ReceiptExtraction | null>,
-  fixtures: readonly IssuerEvidenceFixture[] = ISSUER_EVIDENCE_FIXTURES,
+  fixtures: readonly ScorableIssuerFixture[] = ISSUER_EVIDENCE_FIXTURES,
 ): IssuerEvidenceScore {
   const documents: IssuerEvidenceDocResult[] = []
   let historicalOk = true
@@ -53,7 +66,9 @@ export function scoreIssuerEvidence(
     const deniedByTruth = new Set(f.truth.statements.filter((s) => s.role === 'issuer_denied').map((s) => normalizeBusiness(s.business)))
     const falseIdentified = state === 'identified' && (truthBusiness === null || derivedBusiness !== truthBusiness)
     const denialIdentified = state === 'identified' && derivedBusiness !== null && deniedByTruth.has(derivedBusiness)
-    const stateCorrect = state === f.truth.state && (f.truth.state !== 'identified' || derivedBusiness === truthBusiness)
+    const accepted = (f.truth.accept_states ?? []).filter((x) => x !== ('identified' as string))
+    const stateCorrect =
+      (state === f.truth.state && (f.truth.state !== 'identified' || derivedBusiness === truthBusiness)) || (state !== 'no_reading' && (accepted as string[]).includes(state))
     documents.push({ id: f.id, expected_state: f.truth.state, derived_state: state, state_correct: stateCorrect, false_identified: falseIdentified, denial_identified: denialIdentified })
   }
   const n = documents.length
