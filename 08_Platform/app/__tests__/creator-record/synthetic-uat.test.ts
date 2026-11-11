@@ -195,8 +195,9 @@ describe('the customer flow under Production conditions (submissions stopped, em
   test('ordinary Production paths never reach synthetic content: the governance inputs are the approved ones, and a non-UAT request gets nothing synthetic', async () => {
     const gov = approvedCustomerRecordInputs()
     // CR-V2-MVP-LEGAL-CONTENT-6: the founder-approved governance content, never the synthetic bundle.
-    expect(gov.source_text?.approval?.review_ref).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109 schema 7')
-    expect(gov.source_text_examination?.approval?.review_ref).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109 schema 8')
+    // CR-V2-MVP-PROVIDER-SCOPE-1: provider-scope versions of the wording approvals.
+    expect(gov.source_text?.approval?.review_ref).toBe('JD-CR-V2-MVP-PROVIDER-SCOPE-1-20261111 schema 7')
+    expect(gov.source_text_examination?.approval?.review_ref).toBe('JD-CR-V2-MVP-PROVIDER-SCOPE-1-20261111 schema 8')
     expect(JSON.stringify(gov)).not.toMatch(/synthetic/i)
     // Even with submissions open (e.g. a future governed launch), the UAT exception is not consulted: governed inputs only.
     const w = production()

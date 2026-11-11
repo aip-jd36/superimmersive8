@@ -515,8 +515,9 @@ describe('CR-V2-MVP-PROD-PREP-1: no unapproved or stale content reaches a prepar
     // CR-V2-MVP-LEGAL-CONTENT-6 (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109): R1-R6 and the consent wording are approved; R7 (ledger), R9/R10 (templates) and
     // issuance support (R15) are not, so nothing can be issued.
     const G = CREATOR_RECORD_GOVERNANCE_AUTHORITY
-    expect([G.registry_input.questions.length, G.publication_ledger.length, G.pdf_template_sets?.length]).toEqual([21, 3, 1])
-    expect([G.source_text_approval?.review_ref, G.source_text_examination_approval?.review_ref, G.questionnaire_approval?.review_ref]).toEqual(['JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109 schema 7', 'JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109 schema 8', 'JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109'])
+    // CR-V2-MVP-PROVIDER-SCOPE-1: four ledger entries (Pika baseline v1 superseded by its v2 withdrawal); wording and contract approvals re-versioned.
+    expect([G.registry_input.questions.length, G.publication_ledger.length, G.pdf_template_sets?.length]).toEqual([21, 4, 1])
+    expect([G.source_text_approval?.review_ref, G.source_text_examination_approval?.review_ref, G.questionnaire_approval?.review_ref]).toEqual(['JD-CR-V2-MVP-PROVIDER-SCOPE-1-20261111 schema 7', 'JD-CR-V2-MVP-PROVIDER-SCOPE-1-20261111 schema 8', 'JD-CR-V2-MVP-PROVIDER-SCOPE-1-20261111'])
     expect([G.pdf_template_approval?.review_ref, G.pdf_template_sets?.[0].approval.review_ref]).toEqual(['JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110 R9', 'JD-CR-V2-MVP-INTEGRATION-4-20261110'])
     expect([EVIDENCE_CONSENT_APPROVED_WORDING?.id, AI_EXAMINATION_PERMISSION_APPROVED_WORDING?.id]).toEqual(['cr-v2-storage-consent-1', 'cr-v2-ai-permission-1'])
     expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [{ id: 'si8/creator-record-v2-record', version: 7 }, { id: 'si8/creator-record-v2-record', version: 8 }], builders: [{ id: 'si8/creator-record-v2-record-builder', version: 5 }, { id: 'si8/creator-record-v2-record-builder', version: 7 }], examination_methods: [{ origin: 'live_model', provider: 'anthropic', model: 'claude-sonnet-5', profile: { id: 'receipt', version: 1, schema: 'receipt-extraction-v2', prompt: 'receipt-prompt-v2' } }] }) // R15 option (a), JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110

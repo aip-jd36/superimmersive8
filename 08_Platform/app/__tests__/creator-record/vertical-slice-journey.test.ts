@@ -185,24 +185,30 @@ describe('5. claims without Creator Record publication authorization', () => {
     expect(rows[1]).toEqual(expect.objectContaining({ value: 'Vidmagic 9000', note: T.tool_not_recognized }))
   })
 
-  test('the AUTHORITATIVE ledger holds exactly the three approved entries; every other claim fails closed', () => {
-    // R7 (JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110): Runway, Pika baseline, Higgsfield.
-    const approved = new Set(CREATOR_RECORD_PUBLICATION_LEDGER.map((e) => e.claim_id))
-    expect([...approved].sort()).toEqual(['CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1'])
+  test('the AUTHORITATIVE ledger holds exactly the two current approved entries; every other claim fails closed', () => {
+    // R7 (JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110): Runway, Pika baseline, Higgsfield. CR-V2-MVP-PROVIDER-SCOPE-1 (LEDGER-3): the Pika
+    // baseline is withdrawn by a version 2 'No' entry, so it is refused as not_eligible; claims without an entry as before.
+    const current = CREATOR_RECORD_PUBLICATION_LEDGER.filter((e) => e.superseded_by === null)
+    const approved = new Set(current.filter((e) => e.creator_record_eligible === 'Yes').map((e) => e.claim_id))
+    const withdrawn = new Set(current.filter((e) => e.creator_record_eligible === 'No').map((e) => e.claim_id))
+    expect([...approved].sort()).toEqual(['CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1'])
+    expect([...withdrawn]).toEqual(['CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1'])
     const config = loadFormConfig(pilotSources())
     const { observations } = formToObservations(config, base(), RECORD)
     const g = runCreatorRecordGuidance({ observations, topicClaims: TOPIC_CLAIMS_FIXTURE, ledger: CREATOR_RECORD_PUBLICATION_LEDGER, dependencyLabel: () => undefined, as_of: '2026-10-26' })
-    expect(g.objectives.flatMap((o) => o.refused_before_bi).every((x) => x.reason === 'no_ledger_entry' && !approved.has(x.claim_id))).toBe(true)
+    expect(g.objectives.flatMap((o) => o.refused_before_bi).every((x) => !approved.has(x.claim_id) && (withdrawn.has(x.claim_id) ? x.reason === 'not_eligible' : x.reason === 'no_ledger_entry'))).toBe(true)
   })
 
   test('the AUTHORITATIVE registry holds only the founder-approved launch questions, no pilot entry, and publishes no guidance', () => {
     // CR-V2-MVP-LEGAL-CONTENT-6: R1 approved (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109). No ledger entry is approved (R7), so no guidance.
     const qs = CREATOR_RECORD_REGISTRY_INPUT.questions
     expect(qs.map((q) => q.q_id)).toEqual(['P1', 'P2', 'P3', 'F1', 'F2', 'F3', 'T1', 'T1X', 'T3', 'T4', 'L1', 'M0', 'M1', 'M1X', 'M2', 'M3', 'M3X', 'M3D', 'M4', 'H1', 'H2'])
-    for (const q of qs) expect([q.q_id, q.approval?.review_ref, /PILOT/i.test(JSON.stringify(q))]).toEqual([q.q_id, 'JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109', false])
-    expect(CREATOR_RECORD_PUBLICATION_LEDGER.map((e) => e.claim_id).sort()).toEqual(['CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1', 'CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1'])
+    // T1 v2 carries the provider-scope decision (CR-V2-MVP-PROVIDER-SCOPE-1); every other question the launch approval.
+    for (const q of qs) expect([q.q_id, q.approval?.review_ref, /PILOT/i.test(JSON.stringify(q))]).toEqual([q.q_id, q.q_id === 'T1' ? 'JD-CR-V2-MVP-PROVIDER-SCOPE-1-20261111' : 'JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109', false])
+    const current = CREATOR_RECORD_PUBLICATION_LEDGER.filter((e) => e.superseded_by === null && e.creator_record_eligible === 'Yes').map((e) => e.claim_id)
+    expect([...current].sort()).toEqual(['CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1'])
     const r = buildCreatorRecordDraft({ state: base(), sources: governedSources(), topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: '2026-10-26', record: RECORD })
-    if (r.ok) for (const c of r.view.guidance.cards) expect(CREATOR_RECORD_PUBLICATION_LEDGER.map((e) => e.claim_id)).toContain(c.claim_id)
+    if (r.ok) for (const c of r.view.guidance.cards) expect(current).toContain(c.claim_id)
   })
 
   test('a pilot entry stops working when the governed claim is re-verified after it (refresh discipline holds)', () => {

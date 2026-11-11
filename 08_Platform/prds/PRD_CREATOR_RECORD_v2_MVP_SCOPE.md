@@ -14,6 +14,8 @@ Each of those still needs its own governance approval (see "Outstanding approval
 
 **Amended 2026-11-10** by founder decision CR-V2-MVP-INTEGRATION-2: see **§9, MVP integrated assessment**. §9 records how the integration requirement is met for the MVP, why automated receipt matching is deferred, and what post-MVP verification would need. Where §3 or §8 differ for the MVP, §9 governs; their original text is kept as history.
 
+**Amended 2026-11-11** by founder decision CR-V2-MVP-PROVIDER-SCOPE-1: see **§10, MVP provider scope**. The MVP supports Higgsfield and Runway only; Pika is removed from new customer choices and from the active publication set, and Pika work is deferred until after the MVP.
+
 **Supersedes:**
 - every assumption that Creator Record V2's MVP is a declarations-only record;
 - implementation-phase scope reductions, which are now gaps, not scope (see "Implemented vs. approved scope");
@@ -272,3 +274,36 @@ Nothing in this subsection is approved for implementation. Each item needs **fre
 - The replay's Runway receipts are dated April 2026, before any capture, so even a date-scoped rule could not make G-R3 pass honestly.
 
 **Stop (founder, 2026-11-10):** receipt-verification engineering stopped for the MVP. CR-V2-RECEIPT-GATE-1C, historical Runway research, date-aware vocabulary completeness and receipt-matching persistence do **not** resume without a new founder decision.
+
+## 10. MVP provider scope [DECISION, founder, 2026-11-11, CR-V2-MVP-PROVIDER-SCOPE-1]
+
+**Decided by:** the founder (JD). Approval reference in code: `JD-CR-V2-MVP-PROVIDER-SCOPE-1-20261111`.
+
+### 10.1 Decision
+
+- The Creator Record V2 MVP supports two AI-video providers: **Higgsfield** and **Runway**.
+- **Pika** is removed from new Creator Record customer tool choices and from the active Creator Record publication set.
+- Kling and other providers remain outside MVP scope. They stay selectable, as before, and receive no guidance ("SI8 has no published guidance for the tools and services you named").
+- **Deferred until after the MVP:** Pika research (including governance issue G-PIKA-TIME, current plan versus plan at generation), Pika claim updates (including the legacy plan names Standard and Pro), and broader Living Knowledge expansion.
+
+### 10.2 Why
+
+- G-PIKA-TIME is unresolved. The governed Pika plan claims are conditioned on the user's *current* plan, the record asks for the plan *while the video was made*, and the official Pika text available on 2026-11-11 does not settle which one governs commercial-use permission (CR-V2-LK-PIKA-TIME-1).
+- Pika's 2026-11-10 pricing page names Standard and Pro as legacy plans; current paid plans are Starter, Creator and Fancy. The published Pika baseline wording names Standard, Pro and Fancy, so it would need re-verification before it could stay in issuance.
+
+### 10.3 How it is implemented (`lib/creator-record/governed/sources.ts`)
+
+- **T1 version 2:** the same question and wording, without the `pika` option and its observation-map entry (`CREATOR_RECORD_EXCLUDED_TOOL_IDS`). The tool identity registry is unchanged: Pika stays a registered tool for CRC and Living Knowledge.
+- **CR-V2-LAUNCH-REGISTRY-2 / CR-V2-LAUNCH-LEDGER-3:** the Pika baseline ledger entry (version 1) is superseded by a version 2 entry with `creator_record_eligible: 'No'`, recorded as `withdrawn`. Version 1 is otherwise unchanged. Runway and Higgsfield entries are unchanged.
+- **New approval versions** for the changed content: Source Text Approvals 5 (schema 7) and 6 (schema 8), questionnaire contract version 2. The earlier versions (3, 4 and 1) are preserved in history; the R2 packet digest is still reproduced by restoring the one removed option.
+- **Not changed:** Pika Living Knowledge (claims, evidence, FGR/CPR history), CRC provider coverage, Bounded Interpretation, receipt examination and D10, the integrated-assessment architecture, PDF templates, customer wording identity and consent bindings.
+
+### 10.4 Existing records
+
+- Issued records keep their own embedded questionnaire contract, ledger version and guidance. They verify and render exactly as issued, including Pika guidance; nothing is re-evaluated against the current ledger.
+- Per the no-grandfathering issuance policy (CR-V2-1C, CR-V2-MVP-ELIGIBILITY-1), a record **prepared but not yet issued** under the earlier approvals is refused at checkout and at issuance after this change, whatever tool it names. It must be prepared again. Before integration, confirm that Production holds no paid-but-unissued Creator Record.
+- A browser holding the earlier questionnaire contract is refused when it submits and must reload.
+
+### 10.5 What this does not change
+
+This decision does **not** complete the MVP integrated-assessment requirement (§9). The published Runway and Higgsfield claims carry no applicability requirement and no governed dependency, so the integrated assessment has nothing to relate documents to for them and prints nothing (CR-V2-MVP-INTEGRATION-5B). Meeting §9.1 in Production still needs a published claim with a structured, document-assessable requirement.

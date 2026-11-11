@@ -40,8 +40,13 @@ describe('the published legal documents are the approved text', () => {
 describe('the governed content is the approved R2-R5 wording', () => {
   test('R2 question wording (text, help, option labels) equals the packet', () => {
     const versions = new Map(Governed.CREATOR_RECORD_REGISTRY_INPUT.questions.map((q) => [q.q_id, q.version]))
-    const questions = Object.fromEntries(Object.entries(Governed.CREATOR_RECORD_PRESENTATION).map(([id, p]) => [id, { help: p.help, option_labels: p.option_labels, q_version: versions.get(id), text: p.text }]))
-    expect(sha(packetJson({ item: 'R2 question wording, help and option labels', questions }))).toBe('25aa8fc0a21624dcaa00c32f3d8ccbbb896b7f5d61791a1563913fbc3c256fed')
+    const questions: Record<string, { help: string | null | undefined; option_labels: Record<string, string>; q_version: number | undefined; text: string }> = Object.fromEntries(Object.entries(Governed.CREATOR_RECORD_PRESENTATION).map(([id, p]) => [id, { help: p.help, option_labels: p.option_labels, q_version: versions.get(id), text: p.text }]))
+    // CR-V2-MVP-PROVIDER-SCOPE-1: T1 is now version 2 without the Pika option. Restoring exactly that one option and the version
+    // reproduces the R2 packet, so nothing else in the approved wording changed.
+    expect(questions.T1.q_version).toBe(2)
+    expect(questions.T1.option_labels).not.toHaveProperty('pika')
+    const r2 = { ...questions, T1: { ...questions.T1, q_version: 1, option_labels: { ...questions.T1.option_labels, pika: 'Pika' } } }
+    expect(sha(packetJson({ item: 'R2 question wording, help and option labels', questions: r2 }))).toBe('25aa8fc0a21624dcaa00c32f3d8ccbbb896b7f5d61791a1563913fbc3c256fed')
   })
   test('R3 acknowledgements A1 and A2, with the Terms and Privacy agreement', () => {
     expect(sha(packetJson({ item: 'R3 acknowledgements A1 and A2', acknowledgements: Governed.CREATOR_RECORD_ACKNOWLEDGEMENTS }))).toBe('d978e6158fe62fd975de37fb6f93b8ea568d1c11d7cce81cd4abb2bfdb284362')
@@ -52,7 +57,11 @@ describe('the governed content is the approved R2-R5 wording', () => {
     expect(sha(packetJson({ item: 'R5 caveats', caveats: Governed.CREATOR_RECORD_CAVEATS }))).toBe('fe4538761172a56293f02eaad552de63c60821626dc7dc01365f9e37a44ab7b9')
   })
   test('every launch question carries the founder approval', () => {
-    for (const q of Governed.CREATOR_RECORD_REGISTRY_INPUT.questions) expect(q.approval).toMatchObject({ status: 'approved', review_ref: REF, decision_date: '2026-11-09' })
+    for (const q of Governed.CREATOR_RECORD_REGISTRY_INPUT.questions) {
+      // T1 v2 carries the provider-scope decision (CR-V2-MVP-PROVIDER-SCOPE-1); every other question the launch approval.
+      const expected = q.q_id === 'T1' ? { review_ref: Governed.CREATOR_RECORD_PROVIDER_SCOPE_APPROVAL_REF, decision_date: '2026-11-11' } : { review_ref: REF, decision_date: '2026-11-09' }
+      expect(q.approval).toMatchObject({ status: 'approved', ...expected })
+    }
   })
 })
 
@@ -84,15 +93,32 @@ describe('R6 consent and AI permission, and the R11 customer wording set', () =>
 // (approval JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110; packet manifest 5027f3470a0a8b05fd85501feb1e8787450a04e032afb00c21853bdad6c351b9).
 describe('the approved guidance ledger, PDF templates and issuance support', () => {
   const REF2 = 'JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110'
-  test('R7/R8: the three entries equal the packet (approver and decision date recorded at approval)', () => {
-    const core = Governed.CREATOR_RECORD_PUBLICATION_LEDGER.map(({ approver: _a, decision_date: _d, ...rest }) => rest)
+  // CR-V2-MVP-PROVIDER-SCOPE-1 (CR-V2-LAUNCH-LEDGER-3): the three packet entries are kept; the Pika one is superseded by a
+  // version 2 withdrawal entry. Without the withdrawal and with Pika's `superseded_by` cleared, the ledger is the packet again.
+  const PIKA_V1 = 'CR-V2-LAUNCH-LEDGER-CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1'
+  const PIKA_V2 = `${PIKA_V1}-WITHDRAWN-2`
+  const packetEntries = () => Governed.CREATOR_RECORD_PUBLICATION_LEDGER.filter((e) => e.entry_id !== PIKA_V2).map((e) => (e.entry_id === PIKA_V1 ? { ...e, superseded_by: null } : e))
+  test('R7/R8: the three packet entries are unchanged (approver and decision date recorded at approval)', () => {
+    const core = packetEntries().map(({ approver: _a, decision_date: _d, ...rest }) => rest)
     expect(sha(packetJson(core))).toBe('0093152825039253e85314e534bacb259fcf72903d062dd7128cec54873cd28c')
-    for (const e of Governed.CREATOR_RECORD_PUBLICATION_LEDGER) {
+    for (const e of packetEntries()) {
       expect(e).toMatchObject({ approver: 'JD, for PMF Strategy Inc. d/b/a SuperImmersive 8', decision_date: '2026-11-10', refresh_by: '2027-02-10', applicability_policy: 'met_only', creator_record_eligible: 'Yes', superseded_by: null })
     }
   })
+  test('the Pika baseline entry is withdrawn by a version 2 entry; Runway and Higgsfield stay current', () => {
+    const ledger = Governed.CREATOR_RECORD_PUBLICATION_LEDGER
+    expect(ledger).toHaveLength(4)
+    expect(ledger.find((e) => e.entry_id === PIKA_V1)?.superseded_by).toBe(PIKA_V2)
+    expect(ledger.find((e) => e.entry_id === PIKA_V2)).toEqual({
+      entry_id: PIKA_V2, version: 2, claim_id: 'CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1', claim_last_verified: '2026-09-06', creator_record_eligible: 'No',
+      explanation: null, applicability_policy: null, evidence_notes: {}, required_caveats: [], approver: 'JD, for PMF Strategy Inc. d/b/a SuperImmersive 8',
+      decision_date: '2026-11-11', refresh_by: null, superseded_by: null,
+    })
+    const current = ledger.filter((e) => e.superseded_by === null && e.creator_record_eligible === 'Yes').map((e) => e.claim_id).sort()
+    expect(current).toEqual(['CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1'])
+  })
   test('the printed guidance set names the approved ledger, never the empty one', () => {
-    expect(Governed.CREATOR_RECORD_VERSIONS.ledger).toBe('CR-V2-LAUNCH-LEDGER-2')
+    expect(Governed.CREATOR_RECORD_VERSIONS).toEqual({ registry: 'CR-V2-LAUNCH-REGISTRY-2', ledger: 'CR-V2-LAUNCH-LEDGER-3' })
   })
   test('R9/R10: both template sets carry their approved fingerprints, schemas and references', () => {
     expect(Governed.CREATOR_RECORD_PDF_TEMPLATE_APPROVAL).toMatchObject({ version: 1, fingerprint: 'c5fe2a21ec8a096c6abf7eccf0bd55f3103401e10a26512052e5d2ee15a11c6c', record_schema: { version: 7 }, review_ref: `${REF2} R9` })

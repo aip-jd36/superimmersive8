@@ -44,6 +44,23 @@ const LAUNCH_APPROVAL: GovernanceApproval = Object.freeze({
 }) as GovernanceApproval
 
 const LAUNCH_ID = 'CR-V2-LAUNCH'
+
+// ── CR-V2-MVP-PROVIDER-SCOPE-1 (founder decision, JD, 2026-11-11) ──
+// The MVP supports Higgsfield and Runway. Pika is removed from new customer tool choices and from the active publication set;
+// Pika research, claim updates and Living Knowledge expansion are deferred until after the MVP. Pika Living Knowledge is not
+// touched, CRC coverage is unchanged, and records already issued keep their own embedded questionnaire contract and guidance.
+// The other registered tools stay selectable and, outside MVP scope, receive no guidance, as before.
+export const CREATOR_RECORD_PROVIDER_SCOPE_APPROVAL_REF = 'JD-CR-V2-MVP-PROVIDER-SCOPE-1-20261111'
+const PROVIDER_SCOPE_DECISION_DATE = '2026-11-11'
+const PROVIDER_SCOPE_APPROVAL: GovernanceApproval = Object.freeze({
+  status: 'approved',
+  approver: LAUNCH_AUTHORITY,
+  decision_date: PROVIDER_SCOPE_DECISION_DATE,
+  review_ref: CREATOR_RECORD_PROVIDER_SCOPE_APPROVAL_REF,
+}) as GovernanceApproval
+/** Registered tools that new Creator Records do not offer as a choice (CR-V2-MVP-PROVIDER-SCOPE-1). */
+export const CREATOR_RECORD_EXCLUDED_TOOL_IDS: readonly string[] = Object.freeze(['pika'])
+const offeredTool = (code: string) => !CREATOR_RECORD_EXCLUDED_TOOL_IDS.includes(code)
 const question = (over: Partial<QuestionEntry> & Pick<QuestionEntry, 'q_id'>): QuestionEntry => ({
   version: 1,
   question_kind: 'factual_value',
@@ -76,7 +93,8 @@ const LAUNCH_QUESTIONS: QuestionEntry[] = [
   question({ q_id: 'F1', options: LOCATION_CODES }),
   question({ q_id: 'F2', options: LOCATION_CODES }),
   question({ q_id: 'F3', options: LOCATION_CODES, display_condition: showWhen('P3', ['client_work', 'paid_advertising']) }),
-  question({ q_id: 'T1', options: [...TOOL_OPTION_CODES] }),
+  // T1 v2 (CR-V2-MVP-PROVIDER-SCOPE-1): v1 offered every registered tool; v2 omits the excluded ones. Wording otherwise unchanged.
+  question({ q_id: 'T1', version: 2, options: TOOL_OPTION_CODES.filter(offeredTool), approval: PROVIDER_SCOPE_APPROVAL }),
   question({ q_id: 'T1X', display_condition: showWhen('T1', [OTHER_TOOL]) }),
   question({ q_id: 'T3' }),
   question({ q_id: 'T4' }),
@@ -101,7 +119,7 @@ const LAUNCH_OBSERVATION_MAP: ObservationMapEntry[] = [
   observation({ o_id: `${LAUNCH_ID}-O-F1`, q_id: 'F1', target: { kind: 'location', role: 'creator_base' } }),
   observation({ o_id: `${LAUNCH_ID}-O-F2`, q_id: 'F2', target: { kind: 'location', role: 'distribution_market' } }),
   observation({ o_id: `${LAUNCH_ID}-O-F3`, q_id: 'F3', target: { kind: 'location', role: 'client_base' } }),
-  ...CANONICAL_TOOL_ID_LIST.map((id) => observation({ o_id: `${LAUNCH_ID}-O-T1-${id}`, q_id: 'T1', applies_to: { kind: 'option', value: id }, target: { kind: 'tool_identity' } })),
+  ...CANONICAL_TOOL_ID_LIST.filter(offeredTool).map((id) => observation({ o_id: `${LAUNCH_ID}-O-T1-${id}`, version: 2, q_id: 'T1', q_version: 2, applies_to: { kind: 'option', value: id }, target: { kind: 'tool_identity' }, approval: PROVIDER_SCOPE_APPROVAL })),
   observation({ o_id: `${LAUNCH_ID}-O-T3`, q_id: 'T3', target: { kind: 'applicability_fact', fact: 'tool_plan_tier' } }),
   ...CANONICAL_ASSET_PROVIDER_ID_LIST.map((id) => observation({ o_id: `${LAUNCH_ID}-O-M1-PROVIDER-${id}`, q_id: 'M1', applies_to: { kind: 'option', value: id }, target: { kind: 'asset_provider_identity' } })),
   observation({ o_id: `${LAUNCH_ID}-O-M1-DEP`, q_id: 'M1', target: { kind: 'dependency', dependency_id: 'which_music_provider' } }),
@@ -150,6 +168,10 @@ export const CREATOR_RECORD_REGISTRY_INPUT: RegistryInput = Object.freeze({
  * Approved Creator Record publication ledger (R7, R8): Runway, Pika baseline and Higgsfield, founder-approved
  * (JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110). Explanations, applicability, caveats and refresh dates verbatim from the frozen packet; JD is responsible for
  * re-verification before refresh_by. An entry lapses after refresh_by, and is suspended if its claim is re-verified.
+ *
+ * CR-V2-LAUNCH-LEDGER-3 (CR-V2-MVP-PROVIDER-SCOPE-1): the Pika baseline entry is withdrawn by a version 2 entry
+ * (`creator_record_eligible: 'No'`). Version 1 is kept unchanged except for `superseded_by`, which names its successor.
+ * Runway and Higgsfield are unchanged.
  */
 export const CREATOR_RECORD_PUBLICATION_LEDGER: readonly PublicationLedgerEntry[] = Object.freeze([
   {
@@ -186,6 +208,21 @@ export const CREATOR_RECORD_PUBLICATION_LEDGER: readonly PublicationLedgerEntry[
     "approver": "JD, for PMF Strategy Inc. d/b/a SuperImmersive 8",
     "decision_date": "2026-11-10",
     "refresh_by": "2027-02-10",
+    "superseded_by": "CR-V2-LAUNCH-LEDGER-CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1-WITHDRAWN-2"
+  },
+  {
+    "entry_id": "CR-V2-LAUNCH-LEDGER-CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1-WITHDRAWN-2",
+    "version": 2,
+    "claim_id": "CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1",
+    "claim_last_verified": "2026-09-06",
+    "creator_record_eligible": "No",
+    "explanation": null,
+    "applicability_policy": null,
+    "evidence_notes": {},
+    "required_caveats": [],
+    "approver": "JD, for PMF Strategy Inc. d/b/a SuperImmersive 8",
+    "decision_date": "2026-11-11",
+    "refresh_by": null,
     "superseded_by": null
   },
   {
@@ -216,7 +253,7 @@ export const CREATOR_RECORD_PRESENTATION: CreatorRecordSources['presentation'] =
   F1: { q_id: "F1", section: "locations", input: "single", required: true, per_tool: false, allow_not_sure: false, text: "Where are you or your business based?", help: "This is recorded in your record only. It does not change which guidance is shown.", option_labels: {"AE": "United Arab Emirates", "EU": "European Union (as a whole)", "GB": "United Kingdom", "NL": "Netherlands", "SG": "Singapore", "TW": "Taiwan", "US": "United States", "not_sure": "Not sure", "online_worldwide": "Online, worldwide", "other": "Somewhere else"} },
   F2: { q_id: "F2", section: "locations", input: "multi", required: true, per_tool: false, allow_not_sure: false, text: "Where do you expect the video to be published or shown? Select all that apply.", help: "This is recorded in your record only. It does not change which guidance is shown.", option_labels: {"AE": "United Arab Emirates", "EU": "European Union (as a whole)", "GB": "United Kingdom", "NL": "Netherlands", "SG": "Singapore", "TW": "Taiwan", "US": "United States", "not_sure": "Not sure", "online_worldwide": "Online, worldwide", "other": "Somewhere else"} },
   F3: { q_id: "F3", section: "locations", input: "single", required: true, per_tool: false, allow_not_sure: false, text: "Where is the client or advertiser based?", help: "This is recorded in your record only. It does not change which guidance is shown.", option_labels: {"AE": "United Arab Emirates", "EU": "European Union (as a whole)", "GB": "United Kingdom", "NL": "Netherlands", "SG": "Singapore", "TW": "Taiwan", "US": "United States", "not_sure": "Not sure", "online_worldwide": "Online, worldwide", "other": "Somewhere else"} },
-  T1: { q_id: "T1", section: "tools", input: "select", required: true, per_tool: true, allow_not_sure: false, text: "Which AI tool did you use?", help: "Choose it from the list. If it is not listed, choose “My tool isn’t listed” and type its name. You can add up to 3 tools.", option_labels: {"adobe-firefly": "Adobe Firefly", "elevenlabs": "ElevenLabs", "gemini-api": "Gemini API (developer access)", "gemini-consumer-app": "Gemini app (consumer)", "google-veo": "Google Veo", "higgsfield": "Higgsfield", "kling": "Kling", "luma": "Luma Dream Machine", "midjourney": "Midjourney", "not_sure": "Not sure", "openai-sora": "OpenAI Sora", "other_tool": "My tool isn’t listed", "pika": "Pika", "runway-gen3": "Runway", "stability-ai": "Stability AI", "suno": "Suno", "synthesia": "Synthesia"} },
+  T1: { q_id: "T1", section: "tools", input: "select", required: true, per_tool: true, allow_not_sure: false, text: "Which AI tool did you use?", help: "Choose it from the list. If it is not listed, choose “My tool isn’t listed” and type its name. You can add up to 3 tools.", option_labels: {"adobe-firefly": "Adobe Firefly", "elevenlabs": "ElevenLabs", "gemini-api": "Gemini API (developer access)", "gemini-consumer-app": "Gemini app (consumer)", "google-veo": "Google Veo", "higgsfield": "Higgsfield", "kling": "Kling", "luma": "Luma Dream Machine", "midjourney": "Midjourney", "not_sure": "Not sure", "openai-sora": "OpenAI Sora", "other_tool": "My tool isn’t listed", "runway-gen3": "Runway", "stability-ai": "Stability AI", "suno": "Suno", "synthesia": "Synthesia"} },
   T1X: { q_id: "T1X", section: "tools", input: "text", required: true, per_tool: true, allow_not_sure: false, text: "What is the tool called?", help: "Type the name as it appears on the tool’s website. SI8 records it as you type it.", option_labels: {} },
   T3: { q_id: "T3", section: "tools", input: "plan", required: true, per_tool: true, allow_not_sure: true, text: "Which plan were you on with this tool while you made the video?", help: "The list shows only some plan names, and may not include yours. If your plan is not listed, choose “Another plan” and type its name as the tool shows it. If you do not know, choose “Not sure”.", option_labels: {} },
   T4: { q_id: "T4", section: "tools", input: "text", required: true, per_tool: true, allow_not_sure: true, text: "When did you use this tool for the video?", help: "Month and year, for example March–May 2026. If you do not know, choose “Not sure”.", option_labels: {} },
@@ -239,7 +276,7 @@ export const CREATOR_RECORD_DEPENDENCY_LABELS: Readonly<Record<string, string>> 
 export const CREATOR_RECORD_SECTION_TITLES: Readonly<Record<string, string>> = Object.freeze({"acknowledgements": "Before you continue", "contribution": "Your own contribution", "locations": "Where you are and where it will be shown", "materials": "Material from other sources", "people": "Real people", "project": "Your video", "tools": "The AI tools you used"})
 
 /** Customer-facing versions of the approved registry and ledger. */
-export const CREATOR_RECORD_VERSIONS: Readonly<{ registry: string; ledger: string }> = Object.freeze({ registry: 'CR-V2-LAUNCH-REGISTRY-1', ledger: 'CR-V2-LAUNCH-LEDGER-2' })
+export const CREATOR_RECORD_VERSIONS: Readonly<{ registry: string; ledger: string }> = Object.freeze({ registry: 'CR-V2-LAUNCH-REGISTRY-2', ledger: 'CR-V2-LAUNCH-LEDGER-3' })
 
 /** Maximum number of tool blocks in the approved questionnaire. */
 export const CREATOR_RECORD_MAX_TOOLS = 3
@@ -248,10 +285,10 @@ export const CREATOR_RECORD_MAX_TOOLS = 3
  * Pinned digests, computed by the code from the approved content above and the customer wording set. A mismatch means
  * approved content changed: preparation, checkout and issuance then refuse.
  */
-export const CREATOR_RECORD_SOURCE_TEXT_SHA256 = '0947f3d27e82e2bf9f509668a309baefb53caf3977f7d885edfe7ed56084d967'
-export const CREATOR_RECORD_QUESTIONNAIRE_CONTRACT_SHA256 = '7b63a6d98ebe1a4b02d43091135f8c58ac59e295c1f6a5b80d8e28702ec808be'
+export const CREATOR_RECORD_SOURCE_TEXT_SHA256 = '06fc6f6d6a103450c149b57a0edf03cbd210ebc30a56989c98a3bf3d39930277'
+export const CREATOR_RECORD_QUESTIONNAIRE_CONTRACT_SHA256 = '69d32b7df61ddade4f006be12c2a371a9cd7c9d6f0db80d6420850689eb27868'
 
-const sourceTextApproval = (version: number, recordSchemaVersion: number, reviewRef: string): SourceTextApproval => Object.freeze({
+const sourceTextApproval = (version: number, recordSchemaVersion: number, reviewRef: string, decisionDate: string = LAUNCH_DECISION_DATE): SourceTextApproval => Object.freeze({
   source_id: 'si8/creator-record-v2-source-text',
   version,
   content_sha256: CREATOR_RECORD_SOURCE_TEXT_SHA256,
@@ -259,25 +296,29 @@ const sourceTextApproval = (version: number, recordSchemaVersion: number, review
   record_schema: { id: 'si8/creator-record-v2-record', version: recordSchemaVersion },
   lifecycle: 'approved',
   authority: LAUNCH_AUTHORITY,
-  decision_date: LAUNCH_DECISION_DATE,
+  decision_date: decisionDate,
   review_ref: reviewRef,
 }) as SourceTextApproval
 
-/** The Source Text Approval covering the wording above, for the declarations record (schema 7). */
-export const CREATOR_RECORD_SOURCE_TEXT_APPROVAL: SourceTextApproval | null = sourceTextApproval(3, 7, `${CREATOR_RECORD_LAUNCH_APPROVAL_REF} schema 7`)
+/**
+ * The Source Text Approval covering the wording above, for the declarations record (schema 7). Versions 3 (schema 7) and 4
+ * (schema 8) approved the launch wording with Pika in T1; versions 5 and 6 approve the same wording without it
+ * (CR-V2-MVP-PROVIDER-SCOPE-1). Nothing else in the wording changed.
+ */
+export const CREATOR_RECORD_SOURCE_TEXT_APPROVAL: SourceTextApproval | null = sourceTextApproval(5, 7, `${CREATOR_RECORD_PROVIDER_SCOPE_APPROVAL_REF} schema 7`, PROVIDER_SCOPE_DECISION_DATE)
 
 /** CR-V2-SCHEMA8-PATH-1: the distinct approval of the same wording for the examination-bearing record (schema 8). */
-export const CREATOR_RECORD_EXAMINATION_SOURCE_TEXT_APPROVAL: SourceTextApproval | null = sourceTextApproval(4, 8, `${CREATOR_RECORD_LAUNCH_APPROVAL_REF} schema 8`)
+export const CREATOR_RECORD_EXAMINATION_SOURCE_TEXT_APPROVAL: SourceTextApproval | null = sourceTextApproval(6, 8, `${CREATOR_RECORD_PROVIDER_SCOPE_APPROVAL_REF} schema 8`, PROVIDER_SCOPE_DECISION_DATE)
 
-/** The approval of the exact questionnaire contract (R1). */
+/** The approval of the exact questionnaire contract (R1; version 2 = R1 with T1 v2, CR-V2-MVP-PROVIDER-SCOPE-1). */
 export const CREATOR_RECORD_QUESTIONNAIRE_APPROVAL: QuestionnaireContractApproval | null = Object.freeze({
   contract_id: 'si8/creator-record-v2-questionnaire-contract',
-  contract_version: 1,
+  contract_version: 2,
   contract_sha256: CREATOR_RECORD_QUESTIONNAIRE_CONTRACT_SHA256,
   lifecycle: 'approved',
   authority: LAUNCH_AUTHORITY,
-  decision_date: LAUNCH_DECISION_DATE,
-  review_ref: CREATOR_RECORD_LAUNCH_APPROVAL_REF,
+  decision_date: PROVIDER_SCOPE_DECISION_DATE,
+  review_ref: CREATOR_RECORD_PROVIDER_SCOPE_APPROVAL_REF,
 }) as QuestionnaireContractApproval
 
 // CR-V2-MVP-M3: the customer PDF template set and its approval (`../customer-pdf/templates`). Rendering
