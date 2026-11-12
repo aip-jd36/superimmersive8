@@ -4,6 +4,12 @@
     "status": "PROPOSED — NOT APPROVED — NOT IN THE LIVE LEDGER",
     "basis": "CR-PROD-1A §2 (approval register). Requires founder publication approval, a ledger version 4 rotation, a synthetic canary and the cross-domain bleed preflight before it may be added to CREATOR_RECORD_PUBLICATION_LEDGER.",
     "runtime": "Never imported by application code. A test enforces that only __tests__ may read files in governed/proposals.",
+    "revision": "CR-SUM-1b (CR-STAGE1-TEXT-1 §5): explanation changed from the exhaustive-sounding \"whether music, footage or images\" to the source-faithful \"such as music, footage or images\" (the source lists them as examples). Still PENDING.",
+    "release_blockers": [
+      "TERMS §5 CONTRADICTION: the live Terms of Service (terms-2026-11-09, approval JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109) say \"Guidance is available for Runway, Pika and Higgsfield only.\" Publishing Artlist guidance would contradict them. This entry must not be activated before an approved Terms change (CR-PROD-1A §7: provider-neutral wording).",
+      "RE-CONSENT: the Terms version is recorded inside every storage consent and AI-reading permission (lib/legal/policies.ts, CR-V2-SCHEMA8-PATH-1 E7). A new Terms version makes earlier authorizations stale: creators must consent again, and prepared versions relying on stale permissions cannot be bought until re-permitted. Issued records are unaffected.",
+      "LEDGER ROTATION: adding this entry is a ledger version 4 rotation; approved-source digests change, so prepared versions must be prepared again. A separately authorized read-only count of prepared-unpaid and paid-unissued versions must precede it."
+    ],
     "deviation_from_cr_prod_1a": "The proposed per-entry `relevance_note` field is omitted: the ledger contract (PublicationLedgerEntry) has no such field, and the consultative summary identifies the selecting declaration mechanically from the record's selection basis under the approved 'Selected because you told us' label instead.",
     "governed_claim": {
       "claim_id": "CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1",
@@ -25,7 +31,7 @@
     "claim_id": "CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1",
     "claim_last_verified": "2026-09-10",
     "creator_record_eligible": "Pending",
-    "explanation": "Under Artlist’s license terms, Artlist assets, whether music, footage or images, may only be used as part of a broader project. They may not be copied, distributed, sold, shared or otherwise used on their own. This record does not say whether the way your video uses Artlist material counts as use on its own.",
+    "explanation": "Under Artlist’s license terms, Artlist assets, such as music, footage or images, may only be used as part of a broader project. They may not be copied, distributed, sold, shared or otherwise used on their own. This record does not say whether the way your video uses Artlist material counts as use on its own.",
     "applicability_policy": "met_only",
     "evidence_notes": {},
     "required_caveats": ["CR-CAV-PROVIDER-OWN-TERMS", "CR-CAV-TERMS-CHANGE"],

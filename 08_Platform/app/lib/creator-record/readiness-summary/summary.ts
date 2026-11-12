@@ -56,6 +56,11 @@ export interface ReadinessSummaryTemplates {
   selected_because_label: string
   /** Question ids whose answers name a subject (a tool or a service). Governed configuration, not code knowledge. */
   subject_questions: readonly string[]
+  /**
+   * CR-SUM-1b: shown on a consideration whose own conditions are met but whose conclusion is capped by its objective's
+   * Bounded Interpretation status. Must reuse the approved PDF `topic_level` text exactly (enforced by the template approval).
+   */
+  topic_qualified_note: string
 }
 
 export interface ReadinessSummaryApproval {
@@ -124,6 +129,12 @@ export interface SummaryConsideration {
   selected_because: { label: string; declarations: SummaryDeclaration[] }
   /** What the record's own item says it depends on (codes and recorded labels only). */
   depends_on: ({ kind: 'applicability'; fact: string; tool: string | null } | { kind: 'dependency'; dependency_id: string; label: string })[]
+  /**
+   * CR-SUM-1b: the approved topic-level explanation, only when this item's own applicability is met, it has no own
+   * dependency, and its weaker conclusion comes from its objective's BI status (the PDF's `topicLevel` rule, exactly).
+   * Otherwise null. It never changes the conclusion and names no other item.
+   */
+  topic_qualified: string | null
   /** Integrated assessment as codes and document ids only. Never a reading value or excerpt (D10). */
   documents: { requirement: { kind: 'applicability' | 'dependency'; id: string }; standing: string; evidence: string; document_statuses: { document_id: string; status: string; reason: string }[] }[]
 }
@@ -143,6 +154,8 @@ export interface ReadinessSummary {
   open_items: {
     dependencies: { consideration: number; dependency_id: string; label: string; status: string; sufficiency: string }[]
     unresolved_applicability: { consideration: number; fact: string; tool: string | null }[]
+    /** CR-SUM-1b: considerations shown at the topic level (see `SummaryConsideration.topic_qualified`). */
+    topic_qualified: { consideration: number }[]
     not_sure: { q_id: string; tool_index: number | null; question: string }[]
   }
   /** Declared subjects (tools or services) that no consideration cites. Listing them is not a finding about them. */
@@ -153,6 +166,21 @@ type Item = CustomerRecordV2['guidance']['items'][number]
 type Observation = CustomerRecordV2['declarations']['observations'][number]
 
 const nonEmpty = (v: unknown): v is string => typeof v === 'string' && v.trim() !== ''
+
+/**
+ * CR-SUM-1b — exactly the customer PDF's `topicLevel` rule (`../customer-pdf/document-model.ts`): the item's own
+ * applicability is met, it has no own dependency, its conclusion is the weaker one, and that conclusion comes from its
+ * objective's BI status (`relevant_applicability_unresolved`, cited as supporting).
+ */
+export function isTopicQualified(i: Pick<Item, 'conclusion' | 'applicability' | 'dependency_rows' | 'provenance'>): boolean {
+  return (
+    i.conclusion === 'relevant_applicability_unresolved' &&
+    i.applicability.status === 'met' &&
+    i.dependency_rows.length === 0 &&
+    i.provenance.bounded_interpretation.citation === 'supporting' &&
+    i.provenance.bounded_interpretation.status === 'relevant_applicability_unresolved'
+  )
+}
 
 /** `tool-<n>` (1-based) → tool index; null instance → null. Anything else cannot be attributed. */
 function instanceToolIndex(instance: string | null): number | null | undefined {
@@ -166,7 +194,7 @@ function checkTemplates(t: ReadinessSummaryTemplates, a: ReadinessSummaryApprova
   if (a.template_id !== t.template_id || a.version !== t.version) throw new ReadinessSummaryRefusal('templates_not_approved', 'identity')
   const fp = readinessTemplatesFingerprint(t)
   if (fp !== a.fingerprint) throw new ReadinessSummaryRefusal('templates_fingerprint_mismatch')
-  if (!nonEmpty(t.selected_because_label) || !Array.isArray(t.subject_questions) || t.subject_questions.length === 0) throw new ReadinessSummaryRefusal('templates_incomplete')
+  if (!nonEmpty(t.selected_because_label) || !Array.isArray(t.subject_questions) || t.subject_questions.length === 0 || !nonEmpty(t.topic_qualified_note)) throw new ReadinessSummaryRefusal('templates_incomplete')
   for (const c of CREATOR_RECORD_CONCLUSIONS) if (!nonEmpty(t.conclusion_labels?.[c])) throw new ReadinessSummaryRefusal('templates_incomplete', `conclusion_labels.${c}`)
   return fp
 }
@@ -253,6 +281,7 @@ export function buildReadinessSummary(input: {
   const topicsSeen: string[] = []
   const openDeps: ReadinessSummary['open_items']['dependencies'] = []
   const openApplicability: ReadinessSummary['open_items']['unresolved_applicability'] = []
+  const topicQualified: ReadinessSummary['open_items']['topic_qualified'] = []
   placed.forEach((pl, i) => {
     const item = pl.item
     const n = i + 1
@@ -274,6 +303,8 @@ export function buildReadinessSummary(input: {
       ...item.dependency_rows.map((d) => ({ kind: 'dependency' as const, dependency_id: d.dependency_id, label: d.label as string })),
     ]
     for (const r of item.applicability.material_unresolved) openApplicability.push({ consideration: n, fact: r.fact, tool: r.tool ?? null })
+    const qualified = isTopicQualified(item)
+    if (qualified) topicQualified.push({ consideration: n })
     for (const d of item.dependency_rows) openDeps.push({ consideration: n, dependency_id: d.dependency_id, label: d.label as string, status: d.status, sufficiency: d.sufficiency })
     const consideration: SummaryConsideration = {
       index: n,
@@ -285,6 +316,7 @@ export function buildReadinessSummary(input: {
       caveats: item.caveats.map((c) => c.text),
       selected_because: { label: T.selected_because_label, declarations: pl.declarations },
       depends_on,
+      topic_qualified: qualified ? T.topic_qualified_note : null,
       documents,
     }
     // Group consecutive considerations selected by the same declaration. Items are never merged.
@@ -316,7 +348,7 @@ export function buildReadinessSummary(input: {
     templates: { template_id: T.template_id, version: T.version, fingerprint },
     topics: topicsSeen.map((t) => ({ topic: t, label: T.topic_labels[t], framing: T.topic_framing[t] })),
     groups,
-    open_items: { dependencies: openDeps, unresolved_applicability: openApplicability, not_sure },
+    open_items: { dependencies: openDeps, unresolved_applicability: openApplicability, topic_qualified: topicQualified, not_sure },
     uncovered_subjects,
   }
 }

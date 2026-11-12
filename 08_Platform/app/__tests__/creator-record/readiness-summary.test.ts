@@ -9,11 +9,14 @@ import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
 import { authorizePublication, type PublicationLedgerEntry } from '@/lib/creator-record/contract/publication-ledger'
 import { violatesCustomerWordingLock } from '@/lib/creator-record/contract/wording-lock'
-import { CREATOR_RECORD_PUBLICATION_LEDGER } from '@/lib/creator-record/governed/sources'
+import { approvedCustomerRecordInputs, approvedPdfTemplates } from '@/lib/creator-record/customer-flow/approved-inputs'
+import { buildCustomerRecord, CUSTOMER_RECORD_SCHEMA, type CustomerRecordV2 } from '@/lib/creator-record/customer-record/record'
+import { CREATOR_RECORD_GOVERNANCE_AUTHORITY as GOV, CREATOR_RECORD_PUBLICATION_LEDGER } from '@/lib/creator-record/governed/sources'
+import { historicalForm } from '@/test-support/historical-record'
 import { pilotSources } from '@/lib/creator-record/prototype/build-draft'
 import { runDeclaredGuidance } from '@/lib/creator-record/prototype/declared-guidance'
 import {
-  buildReadinessSummary, readinessTemplatesFingerprint, ReadinessSummaryRefusal, READINESS_SUMMARY_METHOD,
+  buildReadinessSummary, isTopicQualified, readinessTemplatesFingerprint, ReadinessSummaryRefusal, READINESS_SUMMARY_METHOD,
   type ReadinessSummary, type ReadinessSummaryApproval, type ReadinessSummaryTemplates,
 } from '@/lib/creator-record/readiness-summary/summary'
 import { canonicalJson, sha256Hex } from '@/lib/creator-record/record-core/canonical'
@@ -26,6 +29,9 @@ const PROPOSAL = JSON.parse(readFileSync(join(__dirname, '../../lib/creator-reco
 }
 const ARTLIST_ID = 'CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1'
 
+// CR-SUM-1b: the approved PDF `topic_level` text (schema 8 template set), reused verbatim.
+const APPROVED_TOPIC_LEVEL = (approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).templates as { sections: { guidance: { topic_level: string } } }).sections.guidance.topic_level
+
 // ── synthetic summary templates (TEST ONLY) under a synthetic approval of exactly these templates ──
 const TEMPLATES: ReadinessSummaryTemplates = {
   template_id: 'si8/creator-record-v2-readiness-summary-templates-SYNTHETIC-TEST',
@@ -35,6 +41,7 @@ const TEMPLATES: ReadinessSummaryTemplates = {
   topic_framing: { commercial_use: '[TEST ONLY] framing: commercial use', third_party_source_rights: '[TEST ONLY] framing: material from other sources' },
   selected_because_label: '[TEST ONLY] selected because you told us',
   subject_questions: ['T1', 'T1X', 'M1', 'M1X', 'M3', 'M3X'],
+  topic_qualified_note: APPROVED_TOPIC_LEVEL,
 }
 const approvalOf = (t: ReadinessSummaryTemplates): ReadinessSummaryApproval => ({
   template_id: t.template_id, version: t.version, fingerprint: readinessTemplatesFingerprint(t), lifecycle: 'approved', authority: 'SYNTHETIC TEST AUTHORITY', decision_date: '2026-11-12',
@@ -263,6 +270,9 @@ describe('Artlist standalone: staged, inactive publication proposal', () => {
     expect(claim.superseded_by ?? null).toBeNull()
     expect(PROPOSAL.proposal.governed_claim.source_verbatim).toContain('music, footage, or images')
     expect(violatesCustomerWordingLock(PROPOSAL.entry.explanation!)).toBe(false)
+    // CR-SUM-1b: source-faithful examples ("such as"), never the exhaustive-sounding "whether".
+    expect(PROPOSAL.entry.explanation).toContain('such as music, footage or images')
+    expect(PROPOSAL.entry.explanation).not.toContain('whether music')
   })
   test('it is not approved: Pending, no approver, no dates — and the ledger contract refuses it', () => {
     expect(PROPOSAL.entry).toMatchObject({ creator_record_eligible: 'Pending', approver: null, decision_date: null, refresh_by: null })
@@ -310,5 +320,104 @@ describe('Artlist standalone: staged, inactive publication proposal', () => {
       expect(run({ M0: ['music'], M1: ['artlist'], M2: ['yes'] }, ledger)).not.toContain(ARTLIST_ID)
       expect(run({ M0: ['stock'], M3: ['artlist'], M3D: ['yes'] }, ledger)).not.toContain(ARTLIST_ID)
     }
+  })
+})
+
+describe('CR-SUM-1b: considerations capped at the topic level', () => {
+  test('the note is the approved PDF topic-level text, exactly', () => {
+    expect(APPROVED_TOPIC_LEVEL).toBe('Other information in this record means this subject is shown as not established, even though this item’s own conditions are based on what you told us.')
+    expect(TEMPLATES.topic_qualified_note).toBe(APPROVED_TOPIC_LEVEL)
+  })
+  test('it appears exactly on the items the PDF rule selects, and never changes a conclusion', () => {
+    const s = summarize(OPEN)
+    const all = s.groups.flatMap((g) => g.considerations)
+    const qualified = all.filter((c) => c.topic_qualified !== null)
+    expect(qualified.length).toBeGreaterThan(0)
+    for (const c of all) {
+      const item = OPEN.record.guidance.items.find((i) => i.claim_id === c.claim_id)!
+      expect(c.topic_qualified !== null).toBe(isTopicQualified(item))
+      expect(c.conclusion.code).toBe(item.conclusion)
+      if (c.topic_qualified !== null) {
+        expect(c.topic_qualified).toBe(APPROVED_TOPIC_LEVEL)
+        expect(item.applicability.status).toBe('met')
+        expect(c.depends_on).toEqual([])
+      }
+    }
+    // The item with its own unresolved condition is shown with that condition, not with the topic-level note.
+    const own = all.find((c) => c.depends_on.length > 0)!
+    expect(own).toBeDefined()
+    expect(own.topic_qualified).toBeNull()
+    expect(s.open_items.topic_qualified.map((x) => x.consideration)).toEqual(qualified.map((c) => c.index))
+  })
+  test('it does not appear when nothing caps the item', () => {
+    for (const f of [DEFAULT, MIXED]) {
+      const s = summarize(f)
+      for (const c of s.groups.flatMap((g) => g.considerations)) {
+        const item = f.record.guidance.items.find((i) => i.claim_id === c.claim_id)!
+        expect(c.topic_qualified !== null).toBe(isTopicQualified(item))
+      }
+    }
+    expect(summarize(DEFAULT).open_items.topic_qualified).toEqual([])
+  })
+  test('a weaker conclusion without an objective-level cap gets no topic-level note (it is not justified)', () => {
+    const f = forge(DEFAULT, (r) => {
+      r.guidance.items[0].conclusion = 'relevant_applicability_unresolved'
+      r.guidance.items[0].provenance.bounded_interpretation.status = 'directly_relevant'
+    })
+    const c = summarize(f).groups.flatMap((g) => g.considerations).find((x) => x.claim_id === DEFAULT.record.guidance.items[0].claim_id)!
+    expect(c.conclusion.code).toBe('relevant_applicability_unresolved')
+    expect(c.topic_qualified).toBeNull()
+  })
+  test('templates without the note are incomplete', () => {
+    const t = { ...TEMPLATES, topic_qualified_note: '' }
+    expect(refusal(() => summarize(DEFAULT, t, approvalOf(t)))).toBe('templates_incomplete')
+  })
+})
+
+describe('schema compatibility', () => {
+  // A real schema 7 record from the LIVE approved sources and wording (Runway, Higgsfield), built locally; no database.
+  const live7 = () => {
+    const i = approvedCustomerRecordInputs(GOV as never)
+    const r = buildCustomerRecord({
+      state: { answers: { P1: ['Schema 7 summary check'], P3: ['own_channels'], F1: ['TW'], F2: ['TW'], L1: ['no'], M0: ['none'], H1: ['edited'] }, tools: [{ T1: ['runway-gen3'], T3: ['Pro'], T4: ['May 2026'] }, { T1: ['higgsfield'], T3: ['not_sure'], T4: ['not_sure'] }], acknowledgements: { A1: true, A2: true } } as never,
+      sources: i.sources as never, source_text: i.source_text as never, topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: '2026-11-12',
+      record: { record_id: 'PREP-SUM1B-LIVE7', record_version: 1, captured_at: '2026-11-12T00:00:00Z' },
+    })
+    if (!r.ok) throw new Error(JSON.stringify(r).slice(0, 400))
+    return r
+  }
+  test('a schema 7 record from the live sources: questionnaire order, no documents, not-sure answers, no topic-level notes', () => {
+    const r = live7()
+    expect(r.record.schema_version).toBe(7)
+    // The record lists Higgsfield first; the summary follows the questionnaire (Runway is tool 1).
+    expect(r.record.guidance.items.map((i) => i.claim_id)).toEqual(['CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1'])
+    const s = summarize(r)
+    expect(s.identity.schema_version).toBe(7)
+    expect(s.groups.map((g) => [g.subject!.q_id, g.subject!.tool_index])).toEqual([['T1', 0], ['T1', 1]])
+    expect(s.groups.map((g) => g.considerations.map((c) => c.claim_id))).toEqual([['CLAIM-RUNWAY-COMMERCIAL-USE-001-v1'], ['CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1']])
+    for (const c of s.groups.flatMap((g) => g.considerations)) {
+      expect(c.documents).toEqual([])
+      expect(c.topic_qualified).toBeNull()
+      expect(c.explanation).toBe(r.record.guidance.items.find((i) => i.claim_id === c.claim_id)!.explanation)
+    }
+    expect(s.open_items.not_sure.map((x) => [x.q_id, x.tool_index])).toEqual([['T3', 1], ['T4', 1]])
+    expect(s.uncovered_subjects).toEqual([])
+    expect(canonicalJson(summarize(r))).toBe(canonicalJson(s))
+  })
+  test('schema 7: publication, BI and provenance boundaries are enforced exactly as on schema 8', () => {
+    const r = live7()
+    expect(refusal(() => summarize(forge(r, (x) => { x.sources.publications = [] })))).toBe('publication_not_in_record')
+    expect(refusal(() => summarize(forge(r, (x) => { x.guidance.items[0].provenance.bounded_interpretation.status = 'determination_declined' })))).toBe('bi_permits_nothing')
+    expect(refusal(() => summarize(forge(r, (x) => { x.guidance.items[0].selection_basis.scopes[0].observation_ids = ['nope'] })))).toBe('selection_provenance_broken')
+    expect(refusal(() => summarize(forge(r, (x) => { x.guidance.items[0].conclusion = 'directly_relevant' })))).toBe('unknown_conclusion')
+  })
+  test('historical schemas 5 and 6 are refused, whatever they contain', () => {
+    const r = live7()
+    const v5 = historicalForm(r)
+    expect(v5.ok && v5.record.schema_version).toBe(5)
+    expect(refusal(() => summarize(v5 as { canonical: string; sha256: string }))).toBe('record_schema_unsupported')
+    const v6 = historicalForm({ ok: true, record: MIXED.record as CustomerRecordV2, canonical: MIXED.canonical, sha256: MIXED.sha256 })
+    expect(v6.ok && v6.record.schema_version).toBe(6)
+    expect(refusal(() => summarize(v6 as { canonical: string; sha256: string }))).toBe('record_schema_unsupported')
   })
 })
