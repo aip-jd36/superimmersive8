@@ -1,0 +1,235 @@
+name: CR-V2 S3-public v3 Issuer-Evidence Evaluation (manual, paid; public fixtures only)
+
+# CRV2-IA-4D3 S3-PUBLIC — the reading contract v3 evaluation (receipt-extraction-v3, receipt-prompt-v3, receipt profile v2, inactive):
+# the 11 issuer-evidence fixtures (issuer-evidence-fixtures-v3) and the 45 receipt-fixtures-v2 baseline documents (56 public synthetic
+# documents), examined once
+# by the pinned model, scored by issuer-evidence-scoring-v2 (issuer state, false identification, denial extraction) and by
+# receipt-v3-plan-date-regression-v1 (plan/date non-regression under the v2 semantics).
+# PASS = the evaluator's own v3 verdict is PASS for all 56 documents, from the pinned model, without stopping early.
+# An extraction accuracy test only: it activates nothing, and no customer path uses the v3 contract.
+#
+# S3-PUBLIC ONLY. The original private regression receipt is NOT part of this workflow and never enters Git or CI; a PASS here does
+# NOT complete that private regression case, which stays open. Its issuer structure (provider label, generator line, explicit
+# denial) is covered by an independently written PUBLIC fixture, iev3-generator-provider-denial.
+#
+#   - Manual only (workflow_dispatch), no inputs: no ref, path, fixture, model, limit or command can be chosen at dispatch.
+#   - Runs only from the default branch's copy of this file, and checks out exactly the reviewed revision below, which must be part
+#     of main's history. Every third-party action is pinned to a full commit SHA.
+#   - SI8's committed synthetic fixtures only, generated here; the issuer-evidence documents must match their committed pinned
+#     hashes and the baseline its manifest, or the run refuses before any paid call.
+#   - The secret reaches the live step only (credential-reuse decision, CR_V2_DOC_LIVE_EVALUATION_PROTOCOL.md section 1).
+#   - The report stays in the runner's temporary directory. Nothing is uploaded; only an aggregate summary is printed (counts, states,
+#     gates and thresholds; no model output, extracted value, excerpt, document content or credential).
+#   - Paid: at most 112 API requests (hard, retries included), $8 predictive ceiling. Each run is a separate approval; do not re-run
+#     a job without one.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cr-v2-v3-issuer-evidence-evaluation
+  cancel-in-progress: false
+
+env:
+  # The reviewed revision of the v3 runner (CRV2-IA-4D3 S2b + gate correction). Changing it is a reviewed change to this file.
+  REVIEWED_SHA: ddbeb9baaebc0079b06de10318ed411890645de8
+  MODEL: claude-sonnet-5
+  # The evaluation under test. The dry run and the summary both refuse any other attribution.
+  CONTRACT: receipt-extraction-v3
+  PROMPT: receipt-prompt-v3
+  PROFILE_VERSION: '2'
+  ISSUER_SCORER: issuer-evidence-scoring-v2
+  REGRESSION_SCORER: receipt-v3-plan-date-regression-v1
+  EXPECTED_DOCUMENTS: '56'
+  ISSUER_EVIDENCE_SET: issuer-evidence-fixtures-v3
+  EXPECTED_ISSUER_EVIDENCE: '11'
+  EXPECTED_BASELINE: '45'
+  MAX_CALLS: '112'
+  MAX_USD: '8'
+
+jobs:
+  v3-issuer-evidence:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.repository == 'aip-jd36/superimmersive8'
+    runs-on: ubuntu-latest
+    # 56 documents, at most two 25-second requests each, run one after another.
+    timeout-minutes: 75
+    defaults:
+      run:
+        shell: bash
+        working-directory: 08_Platform/app
+
+    steps:
+      - name: Check out the reviewed revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.REVIEWED_SHA }}
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Verify the reviewed revision
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$REVIEWED_SHA"
+          test -z "$(git status --porcelain)"
+          # The reviewed revision must be part of main (never a commit that exists only on another branch). Public repository:
+          # an anonymous, history-only fetch; no credential is used or stored.
+          git fetch --quiet --no-tags --filter=blob:none https://github.com/aip-jd36/superimmersive8.git main
+          git merge-base --is-ancestor "$REVIEWED_SHA" FETCH_HEAD
+          echo "Running reviewed revision $REVIEWED_SHA (part of main)"
+
+      # No dependency cache in this job: nothing restored from a cache another run wrote can reach the step that holds the secret.
+      # Every package is installed from the reviewed lockfile and checked against its integrity hash.
+      - name: Set up Node.js 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+
+      - name: Install Node dependencies (lockfile, no install scripts)
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.13'
+
+      - name: Install the fixture generator's dependencies (the versions the fixtures were generated and pinned with)
+        run: |
+          python -m pip install --no-cache-dir --only-binary=:all: "pymupdf==1.27.2.3" "pillow==12.2.0"
+
+      - name: Generate the synthetic fixtures (baseline and issuer-evidence)
+        run: |
+          set -euo pipefail
+          python -I lib/creator-record/eval/fixtures/generate_receipt_fixtures.py
+          cd lib/creator-record/eval/fixtures
+          python -I generate_receipt_fixtures.py --spec issuer-evidence-fixtures.json --out generated/issuer-evidence
+
+      - name: Compare the rendered issuer-evidence documents with the committed pins (before any paid call)
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('fs')
+          const dir = 'lib/creator-record/eval/fixtures'
+          const pins = JSON.parse(fs.readFileSync(`${dir}/issuer-evidence-fixtures.document-hashes.json`, 'utf8'))
+          const m = JSON.parse(fs.readFileSync(`${dir}/generated/issuer-evidence/manifest.json`, 'utf8'))
+          const bad = m.documents.filter((d) => pins.documents[d.id] !== d.sha256).map((d) => d.id)
+          if (Object.keys(pins.documents).length !== m.documents.length || pins.spec_version !== process.env.ISSUER_EVIDENCE_SET) bad.push('set')
+          if (bad.length) { console.error('PIN CHECK FAILED: ' + bad.join(', ')); process.exit(1) }
+          console.log(`Pin check passed: ${m.documents.length}/${m.documents.length} ${pins.spec_version} documents match their committed hashes.`)
+          NODE
+
+      - name: Dry run (no model call)
+        run: |
+          set -euo pipefail
+          npx tsx lib/creator-record/eval/run-receipt-eval.ts --mode dry-run --contract v3 --set all \
+            --input-usd-per-mtok 2 --output-usd-per-mtok 10 --out "$RUNNER_TEMP/dry-run.json"
+
+      - name: Check the dry run before any paid call
+        run: |
+          set -euo pipefail
+          node - "$RUNNER_TEMP/dry-run.json" <<'NODE'
+          const fs = require('fs')
+          const r = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'))
+          const e = process.env
+          const n = Number(e.EXPECTED_DOCUMENTS)
+          const a = r.attribution
+          const bad = []
+          if (r.mode !== 'dry-run' || r.api_requests_made !== 0) bad.push('dry run made a request')
+          if (a.reading_contract !== 'v3' || a.schema !== e.CONTRACT || a.prompt !== e.PROMPT) bad.push('not the v3 contract')
+          if (a.profile.id !== 'receipt' || String(a.profile.version) !== e.PROFILE_VERSION || a.profile.active !== false) bad.push('not the inactive receipt profile v2')
+          if (!a.scorers.includes(e.ISSUER_SCORER) || !a.scorers.includes(e.REGRESSION_SCORER)) bad.push('scorers differ')
+          const sets = Object.fromEntries(a.fixture_sets.map((s) => [s.version, s]))
+          const ie = sets[e.ISSUER_EVIDENCE_SET]
+          if (!ie || ie.documents !== Number(e.EXPECTED_ISSUER_EVIDENCE) || !ie.pinned_document_hashes) bad.push(`issuer-evidence set is not the pinned ${e.ISSUER_EVIDENCE_SET}`)
+          if (!r.subset.includes('iev3-generator-provider-denial')) bad.push('the public generator/provider/denial fixture is missing')
+          if (!sets['receipt-fixtures-v2'] || sets['receipt-fixtures-v2'].documents !== Number(e.EXPECTED_BASELINE)) bad.push('baseline is not receipt-fixtures-v2')
+          if (a.fixture_sets.length !== 2 || r.v3.private_fixture !== null) bad.push('a set other than the two public sets is present')
+          if (r.plan.documents !== n || r.plan.max_api_requests !== Number(e.MAX_CALLS)) bad.push(`plan is not ${n} documents / ${e.MAX_CALLS} requests`)
+          if (!r.live_input_bound.every((b) => b.admitted)) bad.push('a fixture is outside the live input bound')
+          if (bad.length) { console.error('DRY RUN CHECK FAILED: ' + bad.join('; ')); process.exit(1) }
+          console.log(`Dry run check passed: ${n} public synthetic documents (issuer-evidence ${e.EXPECTED_ISSUER_EVIDENCE}, baseline ${e.EXPECTED_BASELINE}), contract ${a.schema} / ${a.prompt}, profile receipt@${a.profile.version} (inactive), at most ${e.MAX_CALLS} requests, all within the input bound, no request made.`)
+          console.log(`Estimated cost ~$${r.plan.estimated_cost_usd.toFixed(4)} (estimate only).`)
+          NODE
+
+      - name: Live run (paid, single execution)
+        id: live
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -euo pipefail
+          npx tsx lib/creator-record/eval/run-receipt-eval.ts --mode live --confirm-paid-calls --contract v3 --set all \
+            --model "$MODEL" --max-calls "$MAX_CALLS" --max-usd "$MAX_USD" \
+            --input-usd-per-mtok 2 --output-usd-per-mtok 10 \
+            --out "$RUNNER_TEMP/live-report.json"
+          # The runner prints one line per document: fixture id, examined or not, derived issuer state, spend bound. No document text.
+
+      - name: Aggregate summary (counts, states and gates only)
+        if: always() && steps.live.conclusion != 'skipped'
+        run: |
+          set -euo pipefail
+          node - "$RUNNER_TEMP/live-report.json" <<'NODE'
+          console.log('S3-PUBLIC: 56 public synthetic documents. Not the original private regression receipt, which remains open.')
+          // Reads only scores, states, counts and request metadata. Never prints `v3.per_document[].extraction`, issuer statements,
+          // business names, excerpts, `injection_followed`, `plan_candidates_not_in_document` or any other document-derived text.
+          const fs = require('fs')
+          const file = process.argv[2]
+          if (!fs.existsSync(file)) { console.error('RESULT: FAIL (no live report was written: the run refused or failed before writing it)'); process.exit(1) }
+          const r = JSON.parse(fs.readFileSync(file, 'utf8'))
+          const e = process.env
+          const n = Number(e.EXPECTED_DOCUMENTS)
+          const fails = []
+          const reqs = r.requests
+          const models = [...new Set(reqs.map((q) => q.response_model))]
+          const tally = (xs) => Object.entries(xs.reduce((acc, x) => ((acc[x] = (acc[x] ?? 0) + 1), acc), {})).map(([k, v]) => `${k} ${v}`).join(', ')
+          const v3 = r.v3
+
+          console.log(`Model requested: ${e.MODEL}; response models: ${models.join(',')}; credential source: ${r.credential_source}`)
+          console.log(`Attribution: runner ${r.attribution.runner}; ${r.attribution.schema} / ${r.attribution.prompt}; profile receipt@${r.attribution.profile.version}; scorers ${r.attribution.scorers.join(', ')}`)
+          console.log(`API requests: ${r.api_requests_made} of at most ${e.MAX_CALLS} (retries: ${reqs.filter((q) => q.attempt > 1).length}); stopped early: ${r.stopped_early ?? 'no'}`)
+          console.log(`Stop reasons: ${tally(reqs.map((q) => q.stop_reason))}; request outcomes: ${tally(reqs.map((q) => q.outcome))}`)
+          console.log(`Tokens: input ${r.spend.accounted_input_tokens}, output ${r.spend.accounted_output_tokens}. Estimated cost: accounted $${r.spend.accounted_usd}, conservative $${r.spend.conservative_usd} (predictive ceiling $${r.spend.max_usd}). Check billed usage in the Anthropic account.`)
+
+          if (r.mode !== 'live') fails.push('not a live report')
+          if (r.attribution.schema !== e.CONTRACT || r.attribution.prompt !== e.PROMPT) fails.push('contract differs')
+          if (r.stopped_early) fails.push('the run stopped early')
+          if (r.api_requests_made > Number(e.MAX_CALLS)) fails.push('request limit exceeded')
+          if (models.some((m) => m !== null && m !== e.MODEL)) fails.push('a response named another model')
+
+          if (!v3 || !v3.issuer) {
+            fails.push('no v3 result')
+          } else {
+            const docs = v3.per_document
+            console.log(`Documents read: ${docs.length} of ${n}; could not examine: ${tally(docs.filter((d) => d.status !== 'examined').map((d) => d.could_not_examine_reason)) || 'none'}`)
+            if (docs.length !== n) fails.push(`read ${docs.length} documents, expected ${n}`)
+            const bySet = {}
+            for (const d of docs) {
+              const c = (bySet[d.set] ??= { documents: 0, examined: 0 })
+              c.documents += 1
+              if (d.status === 'examined') c.examined += 1
+            }
+            console.log('Examined by set: ' + Object.entries(bySet).map(([k, v]) => `${k} ${v.examined}/${v.documents}`).join(', '))
+            console.log('Issuer state correct by set: ' + Object.entries(v3.issuer_by_set).map(([k, v]) => `${k} ${v.correct}/${v.total}`).join(', '))
+            const wrong = v3.issuer.documents.filter((d) => !d.state_correct)
+            console.log(`Issuer state errors (fixture: expected -> derived): ${wrong.map((d) => `${d.id}: ${d.expected_state} -> ${d.derived_state}`).join('; ') || 'none'}`)
+            const fi = v3.issuer.documents.filter((d) => d.false_identified).map((d) => d.id)
+            const di = v3.issuer.documents.filter((d) => d.denial_identified).map((d) => d.id)
+            const dm = v3.issuer.documents.filter((d) => d.denials_expected > 0 && d.denials_extracted !== d.denials_expected).map((d) => d.id)
+            console.log(`False identifications: ${fi.join(', ') || 'none'}; denied business identified: ${di.join(', ') || 'none'}; denials not extracted: ${dm.join(', ') || 'none'}`)
+            console.log('Issuer gates:')
+            for (const g of v3.issuer.gates) console.log(`  ${g.passed ? 'PASS' : 'FAIL'} ${g.id}: ${g.detail}`)
+            if (v3.regression) {
+              const s = v3.regression.summary
+              const fa = s.field_accuracy_non_photo
+              console.log(`Plan/date regression (v2 semantics, issuer field excluded): plan ${fa.product_or_plan_name.correct}/${fa.product_or_plan_name.total}, date ${fa.transaction_date.correct}/${fa.transaction_date.total}; photo fields correct ${s.photo_fields.correct}, abstained ${s.photo_fields.abstained}, wrong ${s.photo_fields.wrong}; false consistent ${s.false_consistent}`)
+              console.log('Regression thresholds (gated):')
+              for (const t of v3.regression.gated) console.log(`  ${t.pass === true ? 'PASS' : t.pass === false ? 'FAIL' : 'UNTESTED'} ${t.id} [${t.hard ? 'hard' : 'soft'}] observed ${t.observed} limit ${t.limit}`)
+              console.log('Reported, not gated: ' + v3.regression.excluded.map((t) => `${t.id} observed ${t.observed}`).join('; '))
+            } else fails.push('no plan/date regression result')
+            console.log(`Evaluator v3 verdict: ${v3.verdict} (issuer gates ${v3.issuer.verdict}; regression ${v3.regression?.verdict ?? 'none'})`)
+            if (v3.verdict !== 'PASS') fails.push(`evaluator verdict ${v3.verdict}`)
+          }
+          if (fails.length) { console.error('S3-PUBLIC RESULT: FAIL (' + fails.join('; ') + '). Do not re-run without review.'); process.exit(1) }
+          console.log('S3-PUBLIC RESULT: PASS (56 public synthetic documents). The original private regression case is NOT completed by this run.')
+          NODE
