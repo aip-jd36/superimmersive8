@@ -16,6 +16,7 @@ import {
   assertContractOptions,
   createOracleCallerV3,
   parseArgs,
+  privateDiagnosticsPath,
   RECEIPT_EVAL_RUNNER_VERSION,
   runReceiptEval,
   type EvalDeps,
@@ -137,6 +138,11 @@ describe('options and guards', () => {
     expect(() => assertContractOptions(parseArgs(['--contract', 'v3', '--private-fixture', 'x']))).toThrow(/both --private-fixture/)
     expect(() => assertContractOptions(parseArgs(['--contract', 'v3', '--private-fixture', 'x', '--private-sha256', 'y']))).toThrow(/--out outside the repository/)
     expect(() => assertContractOptions(parseArgs(['--contract', 'v3', '--private-fixture', 'x', '--private-sha256', 'y', '--out', path.join(process.cwd(), 'r.json')]))).toThrow(/--out outside/)
+    // Another checkout of the same repository (any git working tree) is refused too.
+    const otherCheckout = mkdtempSync(path.join(os.tmpdir(), 'si8-v3-other-checkout-'))
+    mkdirSync(path.join(otherCheckout, '.git'))
+    mkdirSync(path.join(otherCheckout, 'reports'))
+    expect(() => assertContractOptions(parseArgs(['--contract', 'v3', '--private-fixture', 'x', '--private-sha256', 'y', '--out', path.join(otherCheckout, 'reports', 'r.json')]))).toThrow(/any git working tree/)
   })
 
   test('--set parsing', () => {
@@ -209,7 +215,7 @@ describe('v3 runner (no model call)', () => {
       profile: { id: 'receipt', version: 2, active: false },
     })
     expect(r.attribution.truth).toEqual(['receipt-fixtures-v2', 'receipt-fixtures-v3-issuer-truth-v1'])
-    expect(r.attribution.scorers).toEqual(expect.arrayContaining(['issuer-evidence-scoring-v1', 'receipt-v3-plan-date-regression-v1', 'receipt-scoring-v2']))
+    expect(r.attribution.scorers).toEqual(expect.arrayContaining(['issuer-evidence-scoring-v2', 'receipt-v3-plan-date-regression-v1', 'receipt-scoring-v2']))
     expect(r.v3?.verdict).toBeNull()
     expect(d.lines[0]).toMatch(/contract v3 .*45 documents/)
   })
@@ -254,6 +260,30 @@ describe('v3 runner (no model call)', () => {
     expect(JSON.parse(readFileSync(out, 'utf8')).attribution.model).toBe('claude-sonnet-5')
   })
 
+  ;(insideGitWorkTree(os.tmpdir()) ? test.skip : test)('a private document: the report is redacted, the local diagnostics file holds the reading', async () => {
+    const pdir = mkdtempSync(path.join(os.tmpdir(), 'si8-v3-private-run-'))
+    const bytes = PDF('private run')
+    writeFileSync(path.join(pdir, 'doc.pdf'), bytes)
+    const truth = { state: 'denied', business: null, statements: [{ business: 'Privateco Example', role: 'mentioned_only' }, { business: 'Privateco Example', role: 'issuer_denied' }] }
+    writeFileSync(path.join(pdir, 'd.json'), JSON.stringify({ id: 'private-test-run', file: 'doc.pdf', sha256: sha(bytes), truth }))
+    const out = path.join(pdir, 'report.json')
+    const d = deps()
+    const r = await runReceiptEval(
+      v3opts({ mode: 'mock', sets: 'baseline', subsetGiven: true, subset: 'pdf-kling-pro-monthly', fixturesDir: dir, privateFixture: path.join(pdir, 'd.json'), privateSha256: sha(bytes), out }),
+      d,
+      {},
+    )
+    const reportText = readFileSync(out, 'utf8')
+    expect(reportText).not.toContain('Privateco') // no business name, excerpt or truth text from the private document
+    expect(r.v3!.per_document.find((x) => x.set === 'private')).toMatchObject({ extraction: null, extraction_redacted: true, derived_state: 'denied' })
+    expect(r.v3!.issuer!.documents.find((x) => x.id === 'private-test-run')).toMatchObject({ denials_expected: 1, denials_extracted: 1 })
+    const diag = JSON.parse(readFileSync(privateDiagnosticsPath(out), 'utf8'))
+    expect(diag.validated_reading.issuer_evidence.statements.map((s: { role: string }) => s.role)).toEqual(['mentioned_only', 'issuer_denied'])
+    expect(diag.raw_structured_outputs).toHaveLength(1)
+    expect(diag.scoring).toMatchObject({ derived_state: 'denied', denials_extracted: 1 })
+    expect(d.lines.join('\n')).not.toContain('Privateco')
+  })
+
   test('live mode refuses a report path inside the repository', async () => {
     const opts = v3opts({ mode: 'live', sets: 'baseline', fixturesDir: dir, confirmPaidCalls: true, maxCalls: 4, maxUsd: 8, model: 'claude-sonnet-5', pricing: { input_usd_per_mtok: 2, output_usd_per_mtok: 10 }, out: path.join(process.cwd(), 'r.json') })
     await expect(runReceiptEval(opts, deps(), { ANTHROPIC_API_KEY: 'test' })).rejects.toThrow(/--out to be outside the repository/)
@@ -271,6 +301,60 @@ describe('gates', () => {
     const s = scoreIssuerEvidence(new Map([['k', o.status === 'examined' ? o.extraction : null]]), [truthDoc('k', { state: 'not_attributed', business: null, statements: [{ business: 'Kling AI', role: 'sender_only' }] })])
     expect(s.gates.find((g) => g.id === 'false_identified')!.passed).toBe(false)
     expect(s.verdict).toBe('FAIL')
+  })
+
+  describe('CRV2-IA-4D3: the private receipt shape (Runway mentioned and denied, SI8 as generator)', () => {
+    const truth: ScorableIssuerDocument['truth'] = {
+      state: 'denied',
+      business: null,
+      statements: [{ business: 'Runway', role: 'mentioned_only' }, { business: 'Runway', role: 'issuer_denied' }, { business: 'SI8', role: 'sender_only' }],
+    }
+    const read = (statements: { business: string; role: string; evidence: string }[]) =>
+      validateReceiptExtractionV3({
+        document_type: 'receipt', readability: 'legible',
+        product_or_plan_name: { status: 'not_shown', value: null, evidence: null }, transaction_date: { status: 'not_shown', value: null, evidence: null },
+        service_period_start: { status: 'not_shown', value: null, evidence: null }, service_period_end: { status: 'not_shown', value: null, evidence: null },
+        plan_candidates: [], multiple_plans_shown: false, instruction_like_text_present: false, issuer_statements: statements,
+      })
+    const score = (statements: { business: string; role: string; evidence: string }[], t = truth) => scoreIssuerEvidence(new Map([['p', read(statements)]]), [truthDoc('p', t)])
+    const gate = (s: ReturnType<typeof scoreIssuerEvidence>, id: string) => s.gates.find((g) => g.id === id)!.passed
+    const MENTION = { business: 'Runway', role: 'mentioned_only', evidence: 'Provider: Runway' }
+    const DENIAL = { business: 'Runway', role: 'issuer_denied', evidence: 'This document was not issued by Runway' }
+    const GENERATOR = { business: 'SI8', role: 'sender_only', evidence: 'Generated by SI8' }
+
+    test('denial extraction is matched by business identity: denying a different business does not count', () => {
+      const s = score([MENTION, { business: 'Some Other Company', role: 'issuer_denied', evidence: 'not issued by Some Other Company' }, GENERATOR])
+      expect(s.documents[0]).toMatchObject({ derived_state: 'denied', denials_expected: 1, denials_extracted: 0 })
+      expect(gate(s, 'denials_extracted')).toBe(false)
+    })
+
+    test('a correct reading extracts the denial and derives denied: PASS', () => {
+      const s = score([MENTION, DENIAL, GENERATOR])
+      expect(s.documents[0]).toMatchObject({ derived_state: 'denied', state_correct: true, denials_expected: 1, denials_extracted: 1 })
+      expect(s.verdict).toBe('PASS')
+    })
+
+    test('a reading that misses the denial is distinguished from one that extracts it, even where not_attributed is accepted', () => {
+      const s = score([MENTION, GENERATOR], { ...truth, accept_states: ['not_attributed'] })
+      expect(s.documents[0]).toMatchObject({ derived_state: 'not_attributed', state_correct: true, denials_expected: 1, denials_extracted: 0 })
+      expect(gate(s, 'denials_extracted')).toBe(false)
+      expect(s.verdict).toBe('FAIL')
+    })
+
+    test('"Generated by SI8" read as an issuing attribution FAILS the critical gate', () => {
+      const s = score([MENTION, DENIAL, { ...GENERATOR, role: 'issuer_attribution' }])
+      expect(s.documents[0].derived_state).toBe('identified')
+      expect(gate(s, 'false_identified')).toBe(false)
+    })
+
+    test('Runway read as the issuer FAILS both critical gates (attributed and denied = conflicting is never identified)', () => {
+      const attributedOnly = score([{ ...MENTION, role: 'issuer_attribution' }, GENERATOR])
+      expect(gate(attributedOnly, 'false_identified')).toBe(false)
+      expect(gate(attributedOnly, 'denials_extracted')).toBe(false)
+      const both = score([{ ...MENTION, role: 'issuer_attribution' }, DENIAL, GENERATOR])
+      expect(both.documents[0].derived_state).toBe('conflicting')
+      expect(both.documents[0].state_correct).toBe(false)
+    })
   })
 
   test('accept_states make an equally correct state count, but never relax the critical gates', () => {

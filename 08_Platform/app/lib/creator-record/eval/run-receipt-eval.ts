@@ -76,6 +76,7 @@ import { scoreV3Regression, V3_REGRESSION_SCORING_VERSION, type V3RegressionSumm
 import {
   ISSUER_EVIDENCE_SET_REF,
   loadIssuerEvidenceSet,
+  insideGitWorkTree,
   loadPrivateFixture,
   loadV3BaselineTruth,
   parseV3Sets,
@@ -257,7 +258,8 @@ export function assertContractOptions(opts: EvalOptions): void {
   if (opts.truthCorrections) throw new Error('--truth-corrections applies to the v2 contract only')
   if ((opts.privateFixture === null) !== (opts.privateSha256 === null)) throw new Error('give both --private-fixture and --private-sha256, or neither')
   // A report that read the private document is written outside the repository, in every mode (never the default temp path by accident).
-  if (opts.privateFixture !== null && (opts.out === null || insideRepository(opts.out))) throw new Error('--private-fixture requires --out outside the repository')
+  // Outside THIS checkout and outside ANY git working tree (another checkout of the same repository included).
+  if (opts.privateFixture !== null && (opts.out === null || insideRepository(opts.out) || insideGitWorkTree(opts.out))) throw new Error('--private-fixture requires --out outside the repository and any git working tree')
 }
 
 /**
@@ -785,14 +787,24 @@ async function runReceiptEvalV3(opts: EvalOptions, deps: EvalDeps, env: EnvLike)
   const requestedModel = opts.model ?? ''
   const live = opts.mode === 'live' ? await deps.createLiveCaller(requestedModel, syntheticCredentialEnv(env) as SyntheticCredentialEnv, RECEIPT_EXTRACTION_SCHEMA_VERSION_V3) : null
   const outcomes = new Map<string, ExaminationOutcome>()
+  const privateRawOutputs: Array<{ max_tokens: number; stop_reason: string | null; parsed_output: unknown }> = []
   for (const d of selected) {
     if (report.stopped_early) break
     const bound = bounds.get(d.id)!
     const estIn1 = Math.max(estimate(d) * INPUT_ESTIMATE_SAFETY_FACTOR, bound.input_tokens === null ? 0 : bound.input_tokens + V3_EXTRA_BOUND_TOKENS)
     if (live && stopBeforeDocument(report, opts, estIn1)) break
-    const caller = live
+    const counted = live
       ? createCountedCaller({ report, opts, live, requestedModel }, { fixtureId: d.id, repeat: 1, boundInputTokens: bound.input_tokens, worstInputTokens: estIn1 })
       : createOracleCallerV3(d)
+    // The private document only: keep each response's raw structured output for the local diagnostics file (never the report).
+    const caller: ReceiptModelCaller =
+      d.set === 'private'
+        ? async (req) => {
+            const res = await counted(req)
+            privateRawOutputs.push({ max_tokens: req.maxTokens, stop_reason: res.stop_reason ?? null, parsed_output: res.parsed_output ?? null })
+            return res
+          }
+        : counted
     const outcome = await examineReceiptDocument(d.read(), { callModel: caller, contract: RECEIPT_READING_CONTRACT_V3 })
     outcomes.set(d.id, outcome)
     const state = outcome.status === 'examined' ? issuerEvidenceOf(outcome.extraction).state : null
@@ -856,7 +868,50 @@ async function runReceiptEvalV3(opts: EvalOptions, deps: EvalDeps, env: EnvLike)
     `[${opts.mode}] v3 verdict: ${v3.verdict}; issuer gates ${v3.issuer.verdict} (${v3.issuer.gates.filter((g) => !g.passed).map((g) => g.id).join(', ') || 'all pass'}); ` +
       `plan/date regression ${regressionVerdict ?? 'not run (baseline not selected)'}; API requests: ${report.api_requests_made}`,
   )
+  const privateDoc = selected.find((d) => d.set === 'private')
+  if (privateDoc && opts.out !== null) writePrivateDiagnostics(opts.out, privateDoc, outcomes.get(privateDoc.id) ?? null, privateRawOutputs, report, deps)
   return finish(report, opts, deps)
+}
+
+/** Path of the private document's local diagnostics, beside the report (which a private run must write outside the repository). */
+export function privateDiagnosticsPath(out: string): string {
+  return out.replace(/\.json$/i, '') + '.private-diagnostics.json'
+}
+
+/**
+ * CRV2-IA-4D3. Everything needed to analyse the private document's result locally, kept OUT of the report: the validated reading
+ * with its excerpts, each raw structured output (including one that failed validation), the derived issuer result and its gate
+ * findings, and the private document's request metadata. Written only beside a report that is outside the repository (enforced by
+ * `assertContractOptions`), and never logged: the log line names only the file. The document itself is never copied.
+ */
+function writePrivateDiagnostics(
+  out: string,
+  doc: V3Doc,
+  outcome: ExaminationOutcome | null,
+  rawOutputs: Array<{ max_tokens: number; stop_reason: string | null; parsed_output: unknown }>,
+  report: EvalReport,
+  deps: EvalDeps,
+): void {
+  if (insideRepository(out) || insideGitWorkTree(out)) throw new Error('private diagnostics must be written outside the repository and any git working tree')
+  const file = privateDiagnosticsPath(out)
+  const ex = outcome && outcome.status === 'examined' ? outcome.extraction : null
+  const diagnostics = {
+    notice: 'PRIVATE. Local failure analysis only. Contains text read from a private document. Never commit, upload or share.',
+    fixture_id: doc.id,
+    document_sha256: doc.entry.sha256,
+    generated_at: report.generated_at,
+    attribution: report.attribution,
+    truth: doc.issuerTruth,
+    outcome: outcome ? { status: outcome.status, could_not_examine_reason: outcome.status === 'could_not_examine' ? outcome.reason : null, usage: outcome.usage } : null,
+    derived_issuer: ex ? issuerEvidenceOf(ex) : null,
+    issuer_statements: ex?.issuer_evidence?.statements ?? null,
+    scoring: report.v3?.issuer?.documents.find((d) => d.id === doc.id) ?? null,
+    validated_reading: ex,
+    raw_structured_outputs: rawOutputs,
+    requests: report.requests.filter((r) => r.fixture_id === doc.id),
+  }
+  writeFileSync(file, JSON.stringify(diagnostics, null, 2))
+  deps.log(`private diagnostics written to ${file}`)
 }
 
 // ---------------------------------------------------------------- live accounting (shared by both contracts)

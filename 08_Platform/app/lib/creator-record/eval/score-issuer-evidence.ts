@@ -11,13 +11,17 @@
  *   denial_identified        a business the document denies is derived as the issuer                    = 0  (critical)
  *   state_accuracy           derived state equals the truth state                                       >= 0.95
  *   historical_unclassified  every historical v2 reading derives `unclassified`                         = all
+ *   denials_extracted        every denial the truth records is read as an issuer_denied statement for    = all
+ *                            the same business (CRV2-IA-4D3: a missed denial is never the same result as an
+ *                            extracted one, even where the derived state is also accepted)
  */
 
 import { issuerEvidenceOf, normalizeBusiness, type IssuerEvidenceState } from '../receipt-examination/issuer-evidence'
 import type { ReceiptExtraction } from '../receipt-examination/schema'
 import { ISSUER_EVIDENCE_FIXTURES, type HistoricalReadingFixture, type IssuerEvidenceTruth } from './issuer-evidence-fixtures'
 
-export const ISSUER_EVIDENCE_SCORING_VERSION = 'issuer-evidence-scoring-v1' as const
+/** v2 (CRV2-IA-4D3 gate): adds per-document denial extraction and the `denials_extracted` gate. */
+export const ISSUER_EVIDENCE_SCORING_VERSION = 'issuer-evidence-scoring-v2' as const
 export const ISSUER_EVIDENCE_GATES = { state_accuracy_min: 0.95 } as const
 
 /**
@@ -39,6 +43,10 @@ export interface IssuerEvidenceDocResult {
   state_correct: boolean
   false_identified: boolean
   denial_identified: boolean
+  /** Distinct businesses the truth records as denied. */
+  denials_expected: number
+  /** Of those, how many the reading reports as `issuer_denied` (null without a reading). Counts only: no business names. */
+  denials_extracted: number | null
 }
 
 export interface IssuerEvidenceScore {
@@ -69,7 +77,18 @@ export function scoreIssuerEvidence(
     const accepted = (f.truth.accept_states ?? []).filter((x) => x !== ('identified' as string))
     const stateCorrect =
       (state === f.truth.state && (f.truth.state !== 'identified' || derivedBusiness === truthBusiness)) || (state !== 'no_reading' && (accepted as string[]).includes(state))
-    documents.push({ id: f.id, expected_state: f.truth.state, derived_state: state, state_correct: stateCorrect, false_identified: falseIdentified, denial_identified: denialIdentified })
+    const deniedInReading = new Set((reading?.issuer_evidence?.statements ?? []).filter((s) => s.role === 'issuer_denied').map((s) => normalizeBusiness(s.business)))
+    const denialsExtracted = reading ? Array.from(deniedByTruth).filter((b) => deniedInReading.has(b)).length : null
+    documents.push({
+      id: f.id,
+      expected_state: f.truth.state,
+      derived_state: state,
+      state_correct: stateCorrect,
+      false_identified: falseIdentified,
+      denial_identified: denialIdentified,
+      denials_expected: deniedByTruth.size,
+      denials_extracted: denialsExtracted,
+    })
   }
   const n = documents.length
   const correct = documents.filter((d) => d.state_correct).length
@@ -81,6 +100,11 @@ export function scoreIssuerEvidence(
     { id: 'denial_identified', passed: documents.every((d) => !d.denial_identified), detail: `${documents.filter((d) => d.denial_identified).length} (= 0 required)` },
     { id: 'state_accuracy', passed: accuracy >= ISSUER_EVIDENCE_GATES.state_accuracy_min, detail: `${correct}/${n} (>= ${ISSUER_EVIDENCE_GATES.state_accuracy_min} required)` },
     { id: 'historical_unclassified', passed: historicalOk, detail: historicalOk ? 'all unclassified' : 'a historical reading derived an issuer state' },
+    (() => {
+      const withDenials = documents.filter((d) => d.denials_expected > 0)
+      const missed = withDenials.filter((d) => d.denials_extracted !== d.denials_expected)
+      return { id: 'denials_extracted', passed: missed.length === 0, detail: `${withDenials.length - missed.length}/${withDenials.length} documents with every recorded denial extracted` }
+    })(),
   ]
   return { documents, gates, verdict: gates.every((g) => g.passed) ? 'PASS' : 'FAIL' }
 }
