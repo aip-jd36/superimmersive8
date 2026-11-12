@@ -1,7 +1,7 @@
 ---
 title: SI8 Creator Record — Prospect Research Methodology and Operating Standard
 version: 0.1
-status: PROPOSED — not approved policy. Repository presence is not approval; operator sign-off required.
+status: SUPERSEDED by 03_Sales/validation/CR-PROSPECT-RESEARCH-STANDARD-v0.2.md (2026-11-12). Preserved unmodified below this header. Was PROPOSED — never approved.
 as_of: 2026-11-12
 owner: SI8
 scope: Creator Record message-fit prospect sourcing
