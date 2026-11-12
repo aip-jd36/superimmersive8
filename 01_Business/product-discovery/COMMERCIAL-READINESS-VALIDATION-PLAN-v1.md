@@ -151,6 +151,7 @@ Do not, on the strength of this plan or the evidence it produces:
 | E — ledger schema | `03_Sales/validation/VALIDATION-LEDGER-SCHEMA.md` | Evidence ledger fields, identity-key findings, Dripify sourcing-vs-contact methodology |
 | E — ledger data | `data/validation-ledger.csv` | Row-level evidence (empty scaffold) |
 | F — review template | `03_Sales/validation/VALIDATION-REVIEW-TEMPLATE.md` | Reusable per-cycle Strategic OS review artifact |
+| G — prospect research standard (PROPOSED) | `03_Sales/validation/CR-PROSPECT-RESEARCH-STANDARD-v0.1.md` | Creator Record project-first sourcing, A/B evidence grading, suppression and clearance gates (2026-11-12; not yet approved) |
 
 **Synchronization note (2026-09-11):** this plan, and the C2/D2 spec files above, were brought into alignment with the Strategic OS memo "SI8 Commercial Readiness Validation — Strategic Thesis & Product-Surface Mapping" (2026-09-11) — the A1/A2/B1/B2 naming, the A–H evidence-chain framing (§5a below), and the Dripify sourcing-vs-contact methodology (now in `VALIDATION-LEDGER-SCHEMA.md`) all originate from that memo. The memo's §7 claim that A1/B1 have launched, and its attribution of specific current responses to four named respondents, is **not** synchronized into evidence files — see the new Open Question in §6.
 
