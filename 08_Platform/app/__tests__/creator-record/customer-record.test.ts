@@ -479,6 +479,7 @@ describe('independence', () => {
       'lib/creator-record/governed/synthetic-test-authority.ts', // CR-V2-MVP-M4C: type-only (the synthetic test bundle)
       'lib/creator-record/integrated-assessment/assess.ts', // CR-V2-MVP-INTEGRATION-2: type-only (the creator response codes)
       'lib/creator-record/prototype/build-draft.ts', // CR-V2-DECL-1B-1: type-only (the questionnaire approval on the sources)
+      'lib/creator-record/readiness-summary/summary.ts', // CR-STAGE1-IMPL-1: the INERT consultative summary (verifies a record; imported by no application code, pinned in readiness-summary.test.ts)
     ])
     for (const f of ['lib/creator-record/governed/publication-authority.ts', 'lib/creator-record/governed/synthetic-test-authority.ts'])
       expect(readFileSync(path.join(APP_ROOT, f), 'utf8')).not.toMatch(/^\s*import\s+(?!type\s)/m)

@@ -82,6 +82,8 @@ export async function schema8Fixture(o: {
   docs?: ({ fixture_id?: string | null; tool_index?: number | null } | undefined)[]
   /** CR-V2-MVP-INTEGRATION-2: the declared plan for tool 1 (default 'Standard'). */
   plan?: string
+  /** CR-STAGE1-IMPL-1: replace the whole questionnaire state (synthetic sources), for summary tests. Additive; default unchanged. */
+  state?: Parameters<typeof buildCustomerRecord>[0]['state']
 } = {}): Promise<Schema8Fixture> {
   const SYN = syntheticUatInputs()
   if (!SYN.source_text_examination) throw new Error('no synthetic schema 8 wording approval')
@@ -106,7 +108,7 @@ export async function schema8Fixture(o: {
     }
   }
   const b = buildCustomerRecord({
-    state: {
+    state: o.state ?? {
       answers: { P1: [o.title ?? 'Schema 8 test video'], P3: ['own_channels'], F1: ['TW'], F2: ['online_worldwide'], L1: ['no'], M0: ['none'], H1: ['edited'] },
       tools: [{ T1: ['pika'], T3: [o.plan ?? 'Standard'] }],
       acknowledgements: { A1: true, A2: true },

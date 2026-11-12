@@ -1,0 +1,37 @@
+{
+  "proposal": {
+    "id": "CR-STAGE1-IMPL-1/CR-V2-LEDGER-4-ARTLIST-STANDALONE",
+    "status": "PROPOSED — NOT APPROVED — NOT IN THE LIVE LEDGER",
+    "basis": "CR-PROD-1A §2 (approval register). Requires founder publication approval, a ledger version 4 rotation, a synthetic canary and the cross-domain bleed preflight before it may be added to CREATOR_RECORD_PUBLICATION_LEDGER.",
+    "runtime": "Never imported by application code. A test enforces that only __tests__ may read files in governed/proposals.",
+    "deviation_from_cr_prod_1a": "The proposed per-entry `relevance_note` field is omitted: the ledger contract (PublicationLedgerEntry) has no such field, and the consultative summary identifies the selecting declaration mechanically from the record's selection basis under the approved 'Selected because you told us' label instead.",
+    "governed_claim": {
+      "claim_id": "CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1",
+      "proposition": "Artlist Assets may only be used as integrated elements within a broader Project, and may not be copied, distributed, sold, shared, or otherwise exploited as standalone content (e.g. the music track on its own).",
+      "source": "Artlist License page, evidence-captures/artlist/artlist-formal-license_20260827T134509+0800_a18f3aa6.pdf, SHA-256 a18f3aa69e64557fe599d6900578e87f89861c8ddbaaa85c4333147bb9ef426b",
+      "source_verbatim": "Artlist Assets may only be used as integrated elements within broader Projects and may not be used, copied, distributed, performed, presented, sold, licensed, shared, or otherwise exploited as standalone content (such as music, footage, or images on their own)...",
+      "source_class": "Official platform authority, Class B, single source (disclosed)",
+      "prohibited_conclusions": "Does not establish whether a specific user's specific output configuration constitutes \"standalone\" use under Artlist's own terms. Is not a substitute for Commercial Assurance evidence review.",
+      "provider_scope": ["artlist"],
+      "applicability_requirements": [],
+      "unresolved_project_dependencies": [],
+      "asset_types_covered_by_source": "music, footage, images (source verbatim); selection by an Artlist answer to the music (M1) or stock (M3) question is therefore accurate for both",
+      "governance": "Adopted 2026-08-27 (FGR #6); CRC publication approved 2026-09-10 (CPR_021). CRC approval does not authorize Creator Record."
+    }
+  },
+  "entry": {
+    "entry_id": "CR-V2-LEDGER-4-CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1",
+    "version": 1,
+    "claim_id": "CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1",
+    "claim_last_verified": "2026-09-10",
+    "creator_record_eligible": "Pending",
+    "explanation": "Under Artlist’s license terms, Artlist assets, whether music, footage or images, may only be used as part of a broader project. They may not be copied, distributed, sold, shared or otherwise used on their own. This record does not say whether the way your video uses Artlist material counts as use on its own.",
+    "applicability_policy": "met_only",
+    "evidence_notes": {},
+    "required_caveats": ["CR-CAV-PROVIDER-OWN-TERMS", "CR-CAV-TERMS-CHANGE"],
+    "approver": null,
+    "decision_date": null,
+    "refresh_by": null,
+    "superseded_by": null
+  }
+}
