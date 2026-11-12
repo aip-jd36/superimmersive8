@@ -1,6 +1,6 @@
 {
-  "spec_version": "issuer-evidence-fixtures-v2",
-  "spec_sha256": "2b0267d4d6decfc11473cd4030784f36605657aee8a2406366f109c477f582f1",
+  "spec_version": "issuer-evidence-fixtures-v3",
+  "spec_sha256": "c5897991586431434d6cadf995c5a8fa617c1ecc17b7ae39b5c0b537d0323818",
   "generator_version": "receipt-fixture-generator-v1",
   "pymupdf_version": "1.27.2.3",
   "pillow_version": "12.2.0",
@@ -14,6 +14,7 @@
     "iev3-reseller-issued": "f9f5fcb4be82c618ae7b2e7eb5ee3e0c94be2e05746f0661502c0a0f7c22fa3a",
     "iev3-app-store-merchant": "7b59d2eb9bbbd62931d7b958101045688dff2421ecffea9f9c8aa656e8baa10d",
     "iev3-no-business-named": "2fa2e813191b18586e1b9f9a10c0d4db8cf3d1fc0d4641961487a6e21bebc5ea",
-    "iev3-styled-letterhead-sender-only": "0d616f7b5fb910e4d42b5f578f6bc4e2a2e4608f31cb6537b0e73bb08b86885a"
+    "iev3-styled-letterhead-sender-only": "0d616f7b5fb910e4d42b5f578f6bc4e2a2e4608f31cb6537b0e73bb08b86885a",
+    "iev3-generator-provider-denial": "c81e18965fc62e248e229fe96efb6e8a3df9c39525af2732c56a831e74b1713d"
   }
 }
