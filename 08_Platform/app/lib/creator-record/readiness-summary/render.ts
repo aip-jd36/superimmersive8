@@ -21,6 +21,13 @@
  * template string. No string is assembled from parts, no slot is filled, and no status is turned into prose: a
  * conclusion appears only as the label the summary already holds, in the same number and place.
  *
+ * CR-SUM-2B (readability, no new meaning):
+ *   - each consideration carries a mechanical reference: its position in the summary's own order (1, 2, …). It is shown
+ *     wherever that consideration is named (guidance and open items) and has no severity, priority or legal meaning;
+ *   - a caveat whose text is exactly identical across considerations is shown once, with the references of every
+ *     consideration it qualifies. Only byte-identical texts are combined; nothing is inferred from similar wording;
+ *   - the "Selected because" line and the exact selecting question and answer are kept unchanged.
+ *
  * Bounds: the renderer cannot strengthen a conclusion (it prints the summary's label verbatim and never omits a
  * consideration or its open items), cannot invent a fact (it has no source of facts but the summary), and cannot compare
  * a reading with a declaration (it renders no document data at all in this proof; the summary's document codes are
@@ -42,6 +49,10 @@ export interface ReadinessRenderTemplates {
   guidance_heading: string
   conclusion_label: string
   caveats_label: string
+  /** CR-SUM-2B: label shown before a consideration's mechanical reference (e.g. "Consideration"). */
+  consideration_ref_label: string
+  /** CR-SUM-2B: label shown before the references a shared caveat applies to. */
+  caveat_applies_to_label: string
   depends_on_label: string
   /** Applicability fact code → label. A fact without a label refuses. */
   fact_labels: Readonly<Record<string, string>>
@@ -84,14 +95,19 @@ export class ReadinessRenderRefusal extends Error {
 }
 
 export type RenderSection = 'header' | 'declared' | 'guidance' | 'unresolved' | 'not_established' | 'assurance'
-/** `summary`: a string the summary carries (record text or approved summary wording). `render`: a render template string. */
-export type RenderSource = 'summary' | 'render'
+/**
+ * `summary`: a string the summary carries (record text or approved summary wording). `render`: a render template string.
+ * `mechanical` (CR-SUM-2B): consideration references only — decimal positions from the summary's own order, joined by ", ".
+ */
+export type RenderSource = 'summary' | 'render' | 'mechanical'
+/** Structural annotations (not rendered): which consideration a block belongs to, and which ones a shared caveat qualifies. */
+type BlockMeta = { consideration?: number; applies_to?: number[] }
 export type RenderBlock =
-  | { section: RenderSection; kind: 'heading' | 'subheading' | 'label' | 'paragraph' | 'bullet'; role: RenderRole; text: string; source: RenderSource }
-  | { section: RenderSection; kind: 'row'; role: RenderRole; label: string; label_source: RenderSource; value: string; value_source: RenderSource }
+  | ({ section: RenderSection; kind: 'heading' | 'subheading' | 'label' | 'paragraph' | 'bullet'; role: RenderRole; text: string; source: RenderSource } & BlockMeta)
+  | ({ section: RenderSection; kind: 'row'; role: RenderRole; label: string; label_source: RenderSource; value: string; value_source: RenderSource } & BlockMeta)
 
 /** What a block is, so tests can check structure, not wording. Exactly one role carries a conclusion. */
-export type RenderRole = 'chrome' | 'subject' | 'declaration' | 'topic' | 'framing' | 'conclusion' | 'explanation' | 'caveat' | 'condition' | 'note' | 'open_item' | 'uncovered' | 'boundary'
+export type RenderRole = 'chrome' | 'reference' | 'subject' | 'declaration' | 'topic' | 'framing' | 'conclusion' | 'explanation' | 'caveat' | 'condition' | 'note' | 'open_item' | 'uncovered' | 'boundary'
 
 export interface RenderedReadinessSummary {
   method: typeof READINESS_RENDER_METHOD
@@ -101,7 +117,7 @@ export interface RenderedReadinessSummary {
 }
 
 const nonEmpty = (v: unknown): v is string => typeof v === 'string' && v.trim() !== ''
-const TEXT_KEYS = ['heading', 'orientation', 'declared_heading', 'guidance_heading', 'conclusion_label', 'caveats_label', 'depends_on_label', 'unresolved_heading', 'unresolved_intro', 'unresolved_empty', 'dependency_status_label', 'dependency_sufficiency_label', 'topic_qualified_heading', 'unspecified_heading', 'not_sure_heading', 'not_established_heading', 'guidance_empty', 'uncovered_intro', 'rest_of_answers', 'assurance_heading', 'assurance_text'] as const
+const TEXT_KEYS = ['heading', 'orientation', 'declared_heading', 'guidance_heading', 'conclusion_label', 'caveats_label', 'consideration_ref_label', 'caveat_applies_to_label', 'depends_on_label', 'unresolved_heading', 'unresolved_intro', 'unresolved_empty', 'dependency_status_label', 'dependency_sufficiency_label', 'topic_qualified_heading', 'unspecified_heading', 'not_sure_heading', 'not_established_heading', 'guidance_empty', 'uncovered_intro', 'rest_of_answers', 'assurance_heading', 'assurance_text'] as const
 
 function checkTemplates(t: ReadinessRenderTemplates, a: ReadinessRenderApproval | null): string {
   if (!a || a.lifecycle !== 'approved' || !nonEmpty(a.authority) || !nonEmpty(a.decision_date) || a.template_id !== t.template_id || a.version !== t.version) throw new ReadinessRenderRefusal('templates_not_approved')
@@ -129,18 +145,23 @@ export function renderReadinessSummary(summary: ReadinessSummary, templates: Rea
   for (const c of considerations) if (!topicOf.has(c.topic)) throw new ReadinessRenderRefusal('malformed_summary', `topic ${c.topic}`)
 
   const blocks: RenderBlock[] = []
+  let current: number | undefined
+  const meta = (): BlockMeta => (current === undefined ? {} : { consideration: current })
   const r = (section: RenderSection, kind: 'heading' | 'subheading' | 'label' | 'paragraph' | 'bullet', role: RenderRole, text: string): void => {
-    blocks.push({ section, kind, role, text, source: 'render' })
+    blocks.push({ section, kind, role, text, source: 'render', ...meta() })
   }
   const s = (section: RenderSection, kind: 'heading' | 'subheading' | 'label' | 'paragraph' | 'bullet', role: RenderRole, text: string): void => {
-    blocks.push({ section, kind, role, text, source: 'summary' })
+    blocks.push({ section, kind, role, text, source: 'summary', ...meta() })
   }
   const row = (section: RenderSection, role: RenderRole, label: string, label_source: RenderSource, value: string, value_source: RenderSource): void => {
-    blocks.push({ section, kind: 'row', role, label, label_source, value, value_source })
+    blocks.push({ section, kind: 'row', role, label, label_source, value, value_source, ...meta() })
   }
-  /** A consideration is named by what selected it (the creator's answer) and its topic label: both summary strings. */
+  /** CR-SUM-2B: the mechanical reference of a consideration (its 1-based position in the summary). */
+  const reference = (section: RenderSection, c: SummaryConsideration): void => row(section, 'reference', T.consideration_ref_label, 'render', String(c.index), 'mechanical')
+  /** A consideration is named by its reference, what selected it (the creator's answer) and its topic label. */
   const name = (section: RenderSection, c: SummaryConsideration): void => {
     const subject = subjectOf.get(c.index) ?? null
+    reference(section, c)
     row(section, 'subject', topicOf.get(c.topic)!.label, 'summary', subject ? subject.answer : topicOf.get(c.topic)!.label, 'summary')
   }
 
@@ -159,10 +180,14 @@ export function renderReadinessSummary(summary: ReadinessSummary, templates: Rea
   r('guidance', 'subheading', 'chrome', T.guidance_heading)
   if (considerations.length === 0) r('guidance', 'paragraph', 'boundary', T.guidance_empty)
   const framed = new Set<string>()
+  /** CR-SUM-2B: each distinct caveat text (exact string), in first-appearance order, with every consideration it qualifies. */
+  const caveats = new Map<string, number[]>()
   for (const g of summary.groups) {
     if (g.subject) s('guidance', 'label', 'subject', g.subject.answer)
     for (const c of g.considerations) {
+      current = c.index
       const topic = topicOf.get(c.topic)!
+      reference('guidance', c)
       s('guidance', 'label', 'topic', topic.label)
       if (!framed.has(c.topic)) {
         framed.add(c.topic)
@@ -174,10 +199,19 @@ export function renderReadinessSummary(summary: ReadinessSummary, templates: Rea
       if (c.unspecified_condition !== null) s('guidance', 'paragraph', 'note', c.unspecified_condition)
       s('guidance', 'label', 'chrome', c.selected_because.label)
       for (const d of c.selected_because.declarations) row('guidance', 'declaration', d.question, 'summary', d.answer, 'summary')
-      if (c.caveats.length > 0) {
-        r('guidance', 'label', 'chrome', T.caveats_label)
-        for (const cv of c.caveats) s('guidance', 'bullet', 'caveat', cv)
+      for (const cv of c.caveats) {
+        const refs = caveats.get(cv) ?? []
+        if (!refs.includes(c.index)) refs.push(c.index)
+        caveats.set(cv, refs)
       }
+      current = undefined
+    }
+  }
+  if (caveats.size > 0) {
+    r('guidance', 'label', 'chrome', T.caveats_label)
+    for (const [cv, refs] of caveats) {
+      blocks.push({ section: 'guidance', kind: 'bullet', role: 'caveat', text: cv, source: 'summary', applies_to: [...refs] })
+      blocks.push({ section: 'guidance', kind: 'row', role: 'reference', label: T.caveat_applies_to_label, label_source: 'render', value: refs.join(', '), value_source: 'mechanical', applies_to: [...refs] })
     }
   }
 
@@ -191,12 +225,13 @@ export function renderReadinessSummary(summary: ReadinessSummary, templates: Rea
     const facts = open.unresolved_applicability.filter((x) => x.consideration === c.index)
     const deps = open.dependencies.filter((x) => x.consideration === c.index)
     if (facts.length === 0 && deps.length === 0) continue
+    current = c.index
     name('unresolved', c)
     r('unresolved', 'label', 'chrome', T.depends_on_label)
     for (const f of facts) {
       const label = T.fact_labels[f.fact]
       if (!nonEmpty(label)) throw new ReadinessRenderRefusal('unlabelled_fact', f.fact)
-      blocks.push({ section: 'unresolved', kind: 'bullet', role: 'condition', text: label, source: 'render' })
+      blocks.push({ section: 'unresolved', kind: 'bullet', role: 'condition', text: label, source: 'render', ...meta() })
     }
     for (const d of deps) {
       const status = T.dependency_status_labels[d.status]
@@ -206,13 +241,16 @@ export function renderReadinessSummary(summary: ReadinessSummary, templates: Rea
       row('unresolved', 'open_item', T.dependency_status_label, 'render', status, 'render')
       row('unresolved', 'open_item', T.dependency_sufficiency_label, 'render', sufficiency, 'render')
     }
+    current = undefined
   }
   if (open.topic_qualified.length > 0) {
     r('unresolved', 'label', 'chrome', T.topic_qualified_heading)
     for (const x of open.topic_qualified) {
       const c = byIndex.get(x.consideration)
       if (!c || c.topic_qualified === null) throw new ReadinessRenderRefusal('malformed_summary', `topic_qualified ${x.consideration}`)
+      current = c.index
       name('unresolved', c)
+      current = undefined
     }
   }
   if (open.unspecified.length > 0) {
@@ -220,7 +258,9 @@ export function renderReadinessSummary(summary: ReadinessSummary, templates: Rea
     for (const x of open.unspecified) {
       const c = byIndex.get(x.consideration)
       if (!c || c.unspecified_condition === null) throw new ReadinessRenderRefusal('malformed_summary', `unspecified ${x.consideration}`)
+      current = c.index
       name('unresolved', c)
+      current = undefined
     }
   }
   if (open.not_sure.length > 0) {

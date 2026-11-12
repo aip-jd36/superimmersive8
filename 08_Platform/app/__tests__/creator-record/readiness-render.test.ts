@@ -59,6 +59,8 @@ const RENDER_TEMPLATES: ReadinessRenderTemplates = {
   guidance_heading: 'What SI8’s published guidance says', // DRAFT
   conclusion_label: V3.sections.guidance.conclusion, // v3
   caveats_label: V3.sections.guidance.caveats, // v3
+  consideration_ref_label: '[TEST ONLY] Consideration', // CR-SUM-2B synthetic test wording; formal wording pending approval
+  caveat_applies_to_label: '[TEST ONLY] Applies to considerations', // CR-SUM-2B synthetic test wording; formal wording pending approval
   depends_on_label: V3.sections.guidance.depends_on, // v3
   fact_labels: V3.fact_labels, // v3
   unresolved_heading: 'What remains open', // DRAFT
@@ -156,6 +158,7 @@ const texts = (r: RenderedReadinessSummary) => r.blocks.flatMap((b) => (b.kind =
 
 const BUILT: Record<string, Built> = {}
 const SUMMARIES: Record<string, ReadinessSummary> = {}
+const valueOf = (b: RenderedReadinessSummary['blocks'][number]) => (b.kind === 'row' ? b.value : b.text)
 const RENDERED: Record<string, RenderedReadinessSummary> = {}
 beforeAll(() => {
   for (const [k, f] of Object.entries(SCENARIOS)) {
@@ -206,7 +209,9 @@ describe('boundedness: rendering adds no interpretation', () => {
       const summaryStrings = new Set(strings(SUMMARIES[k]))
       for (const b of r.blocks) {
         const parts = b.kind === 'row' ? [[b.label, b.label_source], [b.value, b.value_source]] as const : [[b.text, b.source]] as const
-        for (const [text, source] of parts) expect([k, text, source === 'summary' ? summaryStrings.has(text) : templateStrings.has(text)]).toEqual([k, text, true])
+        const n = SUMMARIES[k].groups.flatMap((g) => g.considerations).length
+        const mechanical = (text: string) => /^[1-9]\d*(, [1-9]\d*)*$/.test(text) && text.split(', ').every((x) => Number(x) <= n)
+        for (const [text, source] of parts) expect([k, text, source === 'summary' ? summaryStrings.has(text) : source === 'render' ? templateStrings.has(text) : mechanical(text)]).toEqual([k, text, true])
       }
     }
   })
@@ -330,5 +335,109 @@ describe('inactive', () => {
     const own = join(root, 'lib/creator-record/readiness-summary')
     const offenders = files.filter((p) => !p.startsWith(own) && /readiness-summary|readiness-render|SYNTHETIC TEST APPROVAL — CR-SUM-2A/.test(readFileSync(p, 'utf8'))).map((p) => relative(root, p).split(sep).join('/'))
     expect(offenders).toEqual([])
+  })
+})
+
+describe('CR-SUM-2B: mechanical consideration references', () => {
+  test('each consideration carries its own position as its reference, in order, stable across renders', () => {
+    for (const [k, r] of Object.entries(RENDERED)) {
+      const n = SUMMARIES[k].groups.flatMap((g) => g.considerations).length
+      const refs = r.blocks.filter((b) => b.section === 'guidance' && b.role === 'reference' && b.applies_to === undefined)
+      expect(refs.map(valueOf)).toEqual(Array.from({ length: n }, (_, i) => String(i + 1)))
+      expect(refs.every((b) => b.kind === 'row' && b.value_source === 'mechanical' && b.consideration === Number(b.value))).toBe(true)
+      expect(canonicalJson(render(SUMMARIES[k]))).toBe(canonicalJson(r))
+    }
+  })
+  test('several considerations under one provider get distinct references, and the open items use the same ones', () => {
+    const k = '5-unresolved-and-topic-caps'
+    const s = SUMMARIES[k]
+    const r = RENDERED[k]
+    const pika = s.groups.find((g) => g.subject?.answer.toLowerCase().includes('pika'))!
+    expect(pika.considerations.length).toBeGreaterThan(1)
+    // Every open condition is shown under the reference of the consideration it belongs to.
+    for (const f of s.open_items.unresolved_applicability) {
+      const at = r.blocks.findIndex((b) => b.section === 'unresolved' && b.role === 'reference' && b.consideration === f.consideration)
+      expect(at).toBeGreaterThanOrEqual(0)
+      expect(valueOf(r.blocks[at])).toBe(String(f.consideration))
+      expect(r.blocks.some((b) => b.section === 'unresolved' && b.role === 'condition' && b.consideration === f.consideration && valueOf(b) === RENDER_TEMPLATES.fact_labels[f.fact])).toBe(true)
+    }
+    for (const d of s.open_items.dependencies) expect(r.blocks.some((b) => b.section === 'unresolved' && b.role === 'condition' && b.consideration === d.consideration && valueOf(b) === d.label)).toBe(true)
+    for (const x of s.open_items.topic_qualified) expect(r.blocks.some((b) => b.section === 'unresolved' && b.role === 'reference' && b.consideration === x.consideration)).toBe(true)
+    // The three previously indistinguishable "Commercial use of AI output: Pika" rows now each carry a different reference.
+    const pikaOpen = r.blocks.filter((b) => b.section === 'unresolved' && b.role === 'subject' && valueOf(b).toLowerCase().includes('pika'))
+    expect(new Set(pikaOpen.map((b) => b.consideration)).size).toBeGreaterThan(1)
+    for (const b of pikaOpen) {
+      const prev = r.blocks[r.blocks.indexOf(b) - 1]
+      expect(prev.kind === 'row' && prev.role === 'reference' && prev.consideration === b.consideration && prev.value === String(b.consideration)).toBe(true)
+    }
+  })
+  test('references carry no meaning: they never depend on status', () => {
+    const s = SUMMARIES['5-unresolved-and-topic-caps']
+    const flipped: ReadinessSummary = JSON.parse(JSON.stringify(s))
+    for (const c of flipped.groups.flatMap((g) => g.considerations)) c.conclusion = { code: 'relevant_on_declared_facts', label: SUMMARY_TEMPLATES.conclusion_labels.relevant_on_declared_facts }
+    const refsOf = (r: RenderedReadinessSummary) => r.blocks.filter((b) => b.section === 'guidance' && b.role === 'reference' && b.applies_to === undefined).map(valueOf)
+    expect(refsOf(render(flipped))).toEqual(refsOf(render(s)))
+  })
+})
+
+describe('CR-SUM-2B: caveats shown once, with an explicit mapping', () => {
+  test('each distinct caveat text is shown exactly once, mapped to exactly the considerations it qualifies', () => {
+    for (const [k, r] of Object.entries(RENDERED)) {
+      const cs = SUMMARIES[k].groups.flatMap((g) => g.considerations)
+      const shown = r.blocks.filter((b) => b.role === 'caveat')
+      const texts = shown.map(valueOf)
+      expect(new Set(texts).size).toBe(texts.length)
+      const expected = new Map<string, number[]>()
+      for (const c of cs) for (const cv of c.caveats) expected.set(cv, [...(expected.get(cv) ?? []), c.index].filter((x, i, a) => a.indexOf(x) === i))
+      expect(texts).toEqual([...expected.keys()])
+      for (const b of shown) expect(b.applies_to).toEqual(expected.get(valueOf(b)))
+      // The visible mapping row follows each caveat and states the same references.
+      for (const b of shown) {
+        const next = r.blocks[r.blocks.indexOf(b) + 1]
+        expect(next.kind === 'row' && next.role === 'reference' && next.value === b.applies_to!.join(', ')).toBe(true)
+      }
+    }
+  })
+  test('scenario 2: Runway and Artlist share both caveats; the record keeps them per item', () => {
+    const s = SUMMARIES['2-tools-artlist-music']
+    const r = RENDERED['2-tools-artlist-music']
+    expect(s.groups.flatMap((g) => g.considerations).every((c) => c.caveats.length === 2)).toBe(true)
+    expect(r.blocks.filter((b) => b.role === 'caveat').map((b) => b.applies_to)).toEqual([[1, 2], [1, 2]])
+  })
+  test('only identical text is combined: a one-character difference stays separate, and nothing is broadened', () => {
+    const s: ReadinessSummary = JSON.parse(JSON.stringify(SUMMARIES['2-tools-artlist-music']))
+    const second = s.groups.flatMap((g) => g.considerations)[1]
+    second.caveats = [second.caveats[0] + ' ', second.caveats[1]]
+    const r = render(s)
+    const shown = r.blocks.filter((b) => b.role === 'caveat')
+    expect(shown.length).toBe(3)
+    expect(shown.map((b) => b.applies_to)).toEqual([[1], [1, 2], [2]])
+  })
+})
+
+describe('CR-SUM-2B: selection provenance and test-only fixtures', () => {
+  test('"Selected because you told us" and the exact selecting answers are kept for every consideration', () => {
+    for (const [k, r] of Object.entries(RENDERED)) {
+      for (const c of SUMMARIES[k].groups.flatMap((g) => g.considerations)) {
+        const own = r.blocks.filter((b) => b.section === 'guidance' && b.consideration === c.index)
+        expect(own.some((b) => b.kind === 'label' && b.text === c.selected_because.label)).toBe(true)
+        for (const d of c.selected_because.declarations) expect(own.some((b) => b.kind === 'row' && b.role === 'declaration' && b.label === d.question && b.value === d.answer)).toBe(true)
+      }
+    }
+  })
+  test('the Pika and Getty items come from the renamed pilot (synthetic) ledger only, never the live one', () => {
+    const record = JSON.parse(BUILT['5-unresolved-and-topic-caps'].canonical)
+    const ids: string[] = record.sources.publications.map((p: { entry_id: string }) => p.entry_id)
+    expect(ids.length).toBeGreaterThan(0)
+    expect(ids.every((id) => id.startsWith('SYN-'))).toBe(true)
+    expect(ids.some((id) => CREATOR_RECORD_PUBLICATION_LEDGER.some((e) => e.entry_id === id))).toBe(false)
+    expect(record.sources.ledger_version).toBe('SYNTHETIC-LEDGER-SUM2A')
+  })
+  test('schema 8 (documents) renders with references and grouped caveats, and still no document data', async () => {
+    const f = await schema8Fixture({ docs: [{ tool_index: 0 }, { tool_index: 0 }] })
+    const r = render(summarize(f))
+    expect(r.blocks.some((b) => b.role === 'reference')).toBe(true)
+    const all = texts(r)
+    for (const d of f.record.documents.items) expect(all.some((x) => x.includes(d.document_id))).toBe(false)
   })
 })
