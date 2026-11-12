@@ -16,7 +16,7 @@ import { historicalForm } from '@/test-support/historical-record'
 import { pilotSources } from '@/lib/creator-record/prototype/build-draft'
 import { runDeclaredGuidance } from '@/lib/creator-record/prototype/declared-guidance'
 import {
-  buildReadinessSummary, isTopicQualified, readinessTemplatesFingerprint, ReadinessSummaryRefusal, READINESS_SUMMARY_METHOD,
+  buildReadinessSummary, isTopicQualified, isUnspecifiedCondition, readinessTemplatesFingerprint, ReadinessSummaryRefusal, READINESS_SUMMARY_METHOD,
   type ReadinessSummary, type ReadinessSummaryApproval, type ReadinessSummaryTemplates,
 } from '@/lib/creator-record/readiness-summary/summary'
 import { canonicalJson, sha256Hex } from '@/lib/creator-record/record-core/canonical'
@@ -30,7 +30,10 @@ const PROPOSAL = JSON.parse(readFileSync(join(__dirname, '../../lib/creator-reco
 const ARTLIST_ID = 'CLAIM-MUSIC-ARTLIST-STANDALONE-EXPLOITATION-001-v1'
 
 // CR-SUM-1b: the approved PDF `topic_level` text (schema 8 template set), reused verbatim.
-const APPROVED_TOPIC_LEVEL = (approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).templates as { sections: { guidance: { topic_level: string } } }).sections.guidance.topic_level
+const APPROVED_GUIDANCE = (approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).templates as { sections: { guidance: { topic_level: string; unspecified_condition: string } } }).sections.guidance
+const APPROVED_TOPIC_LEVEL = APPROVED_GUIDANCE.topic_level
+// CR-SUM-1c: the approved PDF `unspecified_condition` text, reused verbatim.
+const APPROVED_UNSPECIFIED = APPROVED_GUIDANCE.unspecified_condition
 
 // ── synthetic summary templates (TEST ONLY) under a synthetic approval of exactly these templates ──
 const TEMPLATES: ReadinessSummaryTemplates = {
@@ -42,6 +45,7 @@ const TEMPLATES: ReadinessSummaryTemplates = {
   selected_because_label: '[TEST ONLY] selected because you told us',
   subject_questions: ['T1', 'T1X', 'M1', 'M1X', 'M3', 'M3X'],
   topic_qualified_note: APPROVED_TOPIC_LEVEL,
+  unspecified_condition_note: APPROVED_UNSPECIFIED,
 }
 const approvalOf = (t: ReadinessSummaryTemplates): ReadinessSummaryApproval => ({
   template_id: t.template_id, version: t.version, fingerprint: readinessTemplatesFingerprint(t), lifecycle: 'approved', authority: 'SYNTHETIC TEST AUTHORITY', decision_date: '2026-11-12',
@@ -367,6 +371,8 @@ describe('CR-SUM-1b: considerations capped at the topic level', () => {
     const c = summarize(f).groups.flatMap((g) => g.considerations).find((x) => x.claim_id === DEFAULT.record.guidance.items[0].claim_id)!
     expect(c.conclusion.code).toBe('relevant_applicability_unresolved')
     expect(c.topic_qualified).toBeNull()
+    // CR-SUM-1c: with no reason the record can show, the approved "does not identify" text explains it instead.
+    expect(c.unspecified_condition).toBe(APPROVED_UNSPECIFIED)
   })
   test('templates without the note are incomplete', () => {
     const t = { ...TEMPLATES, topic_qualified_note: '' }
@@ -419,5 +425,100 @@ describe('schema compatibility', () => {
     const v6 = historicalForm({ ok: true, record: MIXED.record as CustomerRecordV2, canonical: MIXED.canonical, sha256: MIXED.sha256 })
     expect(v6.ok && v6.record.schema_version).toBe(6)
     expect(refusal(() => summarize(v6 as { canonical: string; sha256: string }))).toBe('record_schema_unsupported')
+  })
+})
+
+describe('CR-SUM-1c: an unresolved condition the record does not identify', () => {
+  const all = (s: ReadinessSummary) => s.groups.flatMap((g) => g.considerations)
+  test('the note is the approved PDF unspecified-condition text, exactly', () => {
+    expect(APPROVED_UNSPECIFIED).toBe('A condition this record does not identify.')
+    expect(TEMPLATES.unspecified_condition_note).toBe(APPROVED_UNSPECIFIED)
+  })
+  test('own applicability unresolved with no listed fact: the note appears, nothing is named, the conclusion is unchanged', () => {
+    const id = DEFAULT.record.guidance.items[0].claim_id
+    const f = forge(DEFAULT, (r) => {
+      r.guidance.items[0].conclusion = 'relevant_applicability_unresolved'
+      r.guidance.items[0].applicability = { status: 'unresolved', material_unresolved: [] }
+      r.guidance.items[0].provenance.bounded_interpretation.status = 'relevant_applicability_unresolved'
+    })
+    const s = summarize(f)
+    const c = all(s).find((x) => x.claim_id === id)!
+    expect(c.conclusion.code).toBe('relevant_applicability_unresolved')
+    expect(c.unspecified_condition).toBe(APPROVED_UNSPECIFIED)
+    expect(c.topic_qualified).toBeNull()
+    expect(c.depends_on).toEqual([])
+    expect(s.open_items.unspecified).toEqual([{ consideration: c.index }])
+    expect(s.open_items.unresolved_applicability).toEqual([])
+    expect(s.open_items.dependencies).toEqual([])
+    // Unrelated items stay without the note.
+    for (const o of all(s).filter((x) => x.claim_id !== id)) expect(o.unspecified_condition).toBeNull()
+  })
+  test('it never appears where the record shows a reason: a listed fact, an own dependency, or a topic-level cap', () => {
+    for (const f of [DEFAULT, MIXED, OPEN]) {
+      const s = summarize(f)
+      for (const c of all(s)) {
+        const item = f.record.guidance.items.find((i) => i.claim_id === c.claim_id)!
+        expect(c.unspecified_condition !== null).toBe(isUnspecifiedCondition(item))
+        if (c.depends_on.length > 0 || c.topic_qualified !== null || c.conclusion.code === 'relevant_on_declared_facts') expect(c.unspecified_condition).toBeNull()
+      }
+      expect(s.open_items.unspecified).toEqual([])
+    }
+  })
+  test('the rule matches the PDF rule on every item shape, including firm conclusions', () => {
+    const shapes: Parameters<typeof isUnspecifiedCondition>[0][] = []
+    const base = DEFAULT.record.guidance.items[0]
+    for (const conclusion of ['relevant_on_declared_facts', 'relevant_applicability_unresolved'] as const)
+      for (const status of ['met', 'unresolved'] as const)
+        for (const facts of [[], [{ fact: 'tool_plan_tier', operator: 'equals', value: 'pro' }]])
+          for (const deps of [[], base.dependency_rows.length ? base.dependency_rows : [{ dependency_id: 'd', label: 'l' }]])
+            for (const bi of ['directly_relevant', 'relevant_applicability_unresolved'] as const)
+              shapes.push({ conclusion, applicability: { status, material_unresolved: facts as never }, dependency_rows: deps as never, provenance: { ...base.provenance, bounded_interpretation: { ...base.provenance.bounded_interpretation, status: bi } } })
+    for (const i of shapes) {
+      // The customer PDF's own definition (document-model.ts `unspecified`), restated here independently.
+      const topicLevel = i.conclusion === 'relevant_applicability_unresolved' && i.applicability.status === 'met' && i.dependency_rows.length === 0 && i.provenance.bounded_interpretation.citation === 'supporting' && i.provenance.bounded_interpretation.status === 'relevant_applicability_unresolved'
+      const ownUnlisted = i.applicability.status === 'unresolved' && i.applicability.material_unresolved.length === 0
+      const shownReason = i.applicability.material_unresolved.length > 0 || i.dependency_rows.length > 0 || topicLevel
+      expect(isUnspecifiedCondition(i)).toBe(i.conclusion === 'relevant_applicability_unresolved' && (ownUnlisted || !shownReason))
+      expect(isTopicQualified(i)).toBe(topicLevel)
+    }
+  })
+  test('wording: missing, unapproved or changed text is refused', () => {
+    const missing = { ...TEMPLATES, unspecified_condition_note: '' }
+    expect(refusal(() => summarize(DEFAULT, missing, approvalOf(missing)))).toBe('templates_incomplete')
+    // Changed wording under the approval of the original wording: the fingerprint no longer matches.
+    expect(refusal(() => summarize(DEFAULT, { ...TEMPLATES, unspecified_condition_note: 'A condition exists.' }, APPROVAL))).toBe('templates_fingerprint_mismatch')
+    expect(refusal(() => summarize(DEFAULT, TEMPLATES, null))).toBe('templates_not_approved')
+  })
+  test('schema 7: the same rule and wording; provenance still enforced', async () => {
+    const i = approvedCustomerRecordInputs(GOV as never)
+    const r = buildCustomerRecord({
+      state: { answers: { P1: ['Schema 7 unspecified check'], P3: ['own_channels'], F1: ['TW'], F2: ['TW'], L1: ['no'], M0: ['none'], H1: ['edited'] }, tools: [{ T1: ['runway-gen3'], T3: ['Pro'], T4: ['May 2026'] }], acknowledgements: { A1: true, A2: true } } as never,
+      sources: i.sources as never, source_text: i.source_text as never, topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: '2026-11-12',
+      record: { record_id: 'PREP-SUM1C-LIVE7', record_version: 1, captured_at: '2026-11-12T00:00:00Z' },
+    })
+    if (!r.ok) throw new Error('fixture')
+    expect(r.record.schema_version).toBe(7)
+    expect(summarize(r).open_items.unspecified).toEqual([])
+    const f = forge(r, (x) => {
+      x.guidance.items[0].conclusion = 'relevant_applicability_unresolved'
+      x.guidance.items[0].applicability = { status: 'unresolved', material_unresolved: [] }
+    })
+    const c = summarize(f).groups[0].considerations[0]
+    expect(c.unspecified_condition).toBe(APPROVED_UNSPECIFIED)
+    expect(c.documents).toEqual([])
+    expect(refusal(() => summarize(forge(f, (x) => { x.guidance.items[0].selection_basis.scopes[0].observation_ids = ['nope'] })))).toBe('selection_provenance_broken')
+  })
+  test('D10 and correction semantics: the note carries no reading, and each version is summarised on its own', () => {
+    const f = forge(MIXED, (r) => {
+      const k = r.guidance.items.findIndex((x: { dependency_rows: unknown[] }) => x.dependency_rows.length === 0)
+      r.guidance.items[k].conclusion = 'relevant_applicability_unresolved'
+      r.guidance.items[k].applicability = { status: 'unresolved', material_unresolved: [] }
+    })
+    const s = summarize(f)
+    expect(s.open_items.unspecified.length).toBe(1)
+    expect(JSON.stringify(s)).not.toMatch(/"(value|excerpt|observed|run_id)"/)
+    expect(summarize(MIXED).open_items.unspecified).toEqual([])
+    expect(s.identity.snapshot_sha256).toBe(f.sha256)
+    expect(s.identity.snapshot_sha256).not.toBe(MIXED.sha256)
   })
 })

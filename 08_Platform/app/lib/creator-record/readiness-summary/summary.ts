@@ -61,6 +61,12 @@ export interface ReadinessSummaryTemplates {
    * Bounded Interpretation status. Must reuse the approved PDF `topic_level` text exactly (enforced by the template approval).
    */
   topic_qualified_note: string
+  /**
+   * CR-SUM-1c: shown on a consideration whose weaker conclusion has no reason the record can show (its own applicability is
+   * unresolved without a listed fact, or nothing else explains it). Must reuse the approved PDF `unspecified_condition` text
+   * exactly (enforced by the template approval). It names no condition: the record does not identify one.
+   */
+  unspecified_condition_note: string
 }
 
 export interface ReadinessSummaryApproval {
@@ -135,6 +141,11 @@ export interface SummaryConsideration {
    * Otherwise null. It never changes the conclusion and names no other item.
    */
   topic_qualified: string | null
+  /**
+   * CR-SUM-1c: the approved "condition this record does not identify" text, only under the PDF's `unspecified` rule
+   * (`isUnspecifiedCondition`). Otherwise null. It never names, invents or resolves a condition.
+   */
+  unspecified_condition: string | null
   /** Integrated assessment as codes and document ids only. Never a reading value or excerpt (D10). */
   documents: { requirement: { kind: 'applicability' | 'dependency'; id: string }; standing: string; evidence: string; document_statuses: { document_id: string; status: string; reason: string }[] }[]
 }
@@ -156,6 +167,8 @@ export interface ReadinessSummary {
     unresolved_applicability: { consideration: number; fact: string; tool: string | null }[]
     /** CR-SUM-1b: considerations shown at the topic level (see `SummaryConsideration.topic_qualified`). */
     topic_qualified: { consideration: number }[]
+    /** CR-SUM-1c: considerations whose unresolved condition the record does not identify. */
+    unspecified: { consideration: number }[]
     not_sure: { q_id: string; tool_index: number | null; question: string }[]
   }
   /** Declared subjects (tools or services) that no consideration cites. Listing them is not a finding about them. */
@@ -182,6 +195,18 @@ export function isTopicQualified(i: Pick<Item, 'conclusion' | 'applicability' | 
   )
 }
 
+/**
+ * CR-SUM-1c — exactly the customer PDF's `unspecified` rule (`../customer-pdf/document-model.ts`): the conclusion is the
+ * weaker one, and either the item's own applicability is unresolved with no listed fact, or the record shows no reason for
+ * it at all (no listed fact, no own dependency, and not topic-level).
+ */
+export function isUnspecifiedCondition(i: Pick<Item, 'conclusion' | 'applicability' | 'dependency_rows' | 'provenance'>): boolean {
+  if (i.conclusion !== 'relevant_applicability_unresolved') return false
+  const ownUnlisted = i.applicability.status === 'unresolved' && i.applicability.material_unresolved.length === 0
+  const shownReason = i.applicability.material_unresolved.length > 0 || i.dependency_rows.length > 0 || isTopicQualified(i)
+  return ownUnlisted || !shownReason
+}
+
 /** `tool-<n>` (1-based) → tool index; null instance → null. Anything else cannot be attributed. */
 function instanceToolIndex(instance: string | null): number | null | undefined {
   if (instance === null) return null
@@ -194,7 +219,7 @@ function checkTemplates(t: ReadinessSummaryTemplates, a: ReadinessSummaryApprova
   if (a.template_id !== t.template_id || a.version !== t.version) throw new ReadinessSummaryRefusal('templates_not_approved', 'identity')
   const fp = readinessTemplatesFingerprint(t)
   if (fp !== a.fingerprint) throw new ReadinessSummaryRefusal('templates_fingerprint_mismatch')
-  if (!nonEmpty(t.selected_because_label) || !Array.isArray(t.subject_questions) || t.subject_questions.length === 0 || !nonEmpty(t.topic_qualified_note)) throw new ReadinessSummaryRefusal('templates_incomplete')
+  if (!nonEmpty(t.selected_because_label) || !Array.isArray(t.subject_questions) || t.subject_questions.length === 0 || !nonEmpty(t.topic_qualified_note) || !nonEmpty(t.unspecified_condition_note)) throw new ReadinessSummaryRefusal('templates_incomplete')
   for (const c of CREATOR_RECORD_CONCLUSIONS) if (!nonEmpty(t.conclusion_labels?.[c])) throw new ReadinessSummaryRefusal('templates_incomplete', `conclusion_labels.${c}`)
   return fp
 }
@@ -282,6 +307,7 @@ export function buildReadinessSummary(input: {
   const openDeps: ReadinessSummary['open_items']['dependencies'] = []
   const openApplicability: ReadinessSummary['open_items']['unresolved_applicability'] = []
   const topicQualified: ReadinessSummary['open_items']['topic_qualified'] = []
+  const unspecified: ReadinessSummary['open_items']['unspecified'] = []
   placed.forEach((pl, i) => {
     const item = pl.item
     const n = i + 1
@@ -305,6 +331,8 @@ export function buildReadinessSummary(input: {
     for (const r of item.applicability.material_unresolved) openApplicability.push({ consideration: n, fact: r.fact, tool: r.tool ?? null })
     const qualified = isTopicQualified(item)
     if (qualified) topicQualified.push({ consideration: n })
+    const unlisted = isUnspecifiedCondition(item)
+    if (unlisted) unspecified.push({ consideration: n })
     for (const d of item.dependency_rows) openDeps.push({ consideration: n, dependency_id: d.dependency_id, label: d.label as string, status: d.status, sufficiency: d.sufficiency })
     const consideration: SummaryConsideration = {
       index: n,
@@ -317,6 +345,7 @@ export function buildReadinessSummary(input: {
       selected_because: { label: T.selected_because_label, declarations: pl.declarations },
       depends_on,
       topic_qualified: qualified ? T.topic_qualified_note : null,
+      unspecified_condition: unlisted ? T.unspecified_condition_note : null,
       documents,
     }
     // Group consecutive considerations selected by the same declaration. Items are never merged.
@@ -348,7 +377,7 @@ export function buildReadinessSummary(input: {
     templates: { template_id: T.template_id, version: T.version, fingerprint },
     topics: topicsSeen.map((t) => ({ topic: t, label: T.topic_labels[t], framing: T.topic_framing[t] })),
     groups,
-    open_items: { dependencies: openDeps, unresolved_applicability: openApplicability, topic_qualified: topicQualified, not_sure },
+    open_items: { dependencies: openDeps, unresolved_applicability: openApplicability, topic_qualified: topicQualified, unspecified, not_sure },
     uncovered_subjects,
   }
 }
