@@ -43,6 +43,7 @@ const TEMPLATES: ReadinessSummaryTemplates = {
   topic_labels: { commercial_use: '[TEST ONLY] topic: commercial use', third_party_source_rights: '[TEST ONLY] topic: material from other sources' },
   topic_framing: { commercial_use: '[TEST ONLY] framing: commercial use', third_party_source_rights: '[TEST ONLY] framing: material from other sources' },
   selected_because_label: '[TEST ONLY] selected because you told us',
+  based_on_label: '[TEST ONLY] based on what you told us',
   subject_questions: ['T1', 'T1X', 'M1', 'M1X', 'M3', 'M3X'],
   topic_qualified_note: APPROVED_TOPIC_LEVEL,
   unspecified_condition_note: APPROVED_UNSPECIFIED,
@@ -301,8 +302,11 @@ describe('Artlist standalone: staged, inactive publication proposal', () => {
       try { walk(join(root, d)) } catch { /* folder absent */ }
     }
     const self = join(root, 'lib/creator-record/readiness-summary/summary.ts')
-    const offenders = files.filter((p) => p !== self && /readiness-summary|governed\/proposals/.test(readFileSync(p, 'utf8'))).map((p) => relative(root, p).split(sep).join('/'))
-    expect(offenders).toEqual([])
+    // CR-SUM-PDF-B1 (Option R): the only application importer is the customer document model, behind the optional template
+    // block that no approved template set carries. Nothing imports the proposals folder.
+    const importers = files.filter((p) => p !== self && /from ['"][^'"]*(readiness-summary|governed\/proposals)/.test(readFileSync(p, 'utf8'))).map((p) => relative(root, p).split(sep).join('/'))
+    expect(importers).toEqual(['lib/creator-record/customer-pdf/document-model.ts'])
+    expect(files.filter((p) => /governed\/proposals/.test(readFileSync(p, 'utf8')))).toEqual([])
   })
 
   // Pilot sources (synthetic questionnaire with M1 and M3) — the real, unchanged guidance pipeline.

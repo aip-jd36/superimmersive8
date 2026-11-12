@@ -40,6 +40,7 @@ export const PROPOSED_SUMMARY_TEMPLATES: ReadinessSummaryTemplates = {
     third_party_source_rights: 'When a video includes music or stock material from a library, that library’s license sets how the material may be used.',
   },
   selected_because_label: V3.sections.guidance.selected_because,
+  based_on_label: V3.sections.guidance.on_what_you_told_us,
   subject_questions: ['T1', 'T1X', 'M1', 'M1X', 'M3', 'M3X'],
   topic_qualified_note: V3.sections.guidance.topic_level,
   unspecified_condition_note: V3.sections.guidance.unspecified_condition,
@@ -54,6 +55,11 @@ export const PROPOSED_RENDER_TEMPLATES: ReadinessRenderTemplates = {
   orientation: 'This section brings together what SI8’s published guidance says about the tools and services the creator named, and what this record does not establish. It does not weigh these points against each other or reach an overall conclusion, and it is not a decision about whether the video may be used commercially.',
   declared_heading: V3.sections.open_items.what_you_told_us,
   guidance_heading: 'What SI8’s published guidance says',
+  guidance_intro: V3.sections.guidance.intro,
+  item_limitation: V3.sections.guidance.item_limitation,
+  dependency_told_label: V3.sections.open_items.what_you_told_us,
+  dependency_nothing_told: V3.sections.open_items.nothing_told,
+  dependency_evidence_label: V3.sections.open_items.evidence_note,
   conclusion_label: V3.sections.guidance.conclusion,
   caveats_label: V3.sections.guidance.caveats,
   consideration_ref_label: 'Consideration',
@@ -137,3 +143,60 @@ export const READINESS_SCENARIOS = {
   '5-unresolved-and-topic-caps': () => pilotRecord('PREP-PDFA-5', pilotSourcesWith(null), { ...BASE, M0: ['stock'], M3: ['getty'], M3D: ['no'] }, [{ T1: ['pika'], T3: ['not_sure'], T4: ['May 2026'] }]),
 } as const
 export type ReadinessScenario = keyof typeof READINESS_SCENARIOS
+
+// ── CR-SUM-PDF-B1: synthetic Option R template sets (TEST ONLY; registered nowhere) ──
+import type { PdfTemplateApproval } from '@/lib/creator-record/customer-pdf/templates'
+import { templateFingerprint } from '@/lib/creator-record/customer-pdf/templates'
+
+export const SYNTHETIC_OPTION_R_AUTHORITY = 'SYNTHETIC TEST APPROVAL — CR-SUM-PDF-B1 Option R proof — NOT APPROVED WORDING'
+
+/**
+ * A synthetic Option R template set: an EXISTING template set (never modified) plus the `readiness_summary` block, as a new
+ * version, under a synthetic approval of exactly that set. The render keys that mirror text the replaced sections printed
+ * (guidance intro, item limitation, dependency labels) are taken from the base set itself, so they always match its schema.
+ */
+export function optionRTemplates(base: { templates: Record<string, unknown>; approval: PdfTemplateApproval }, schemaVersion: 7 | 8, block?: { summary: ReadinessSummaryTemplates; render: ReadinessRenderTemplates }): { templates: Record<string, unknown>; approval: PdfTemplateApproval } {
+  const b = JSON.parse(JSON.stringify(base.templates)) as any
+  const G = b.sections.guidance
+  const O = b.sections.open_items
+  // Every key that mirrors text the replaced sections printed comes from the base set itself; only new strings are proposed.
+  const summary: ReadinessSummaryTemplates = block?.summary ?? {
+    ...PROPOSED_SUMMARY_TEMPLATES,
+    conclusion_labels: b.conclusion_labels,
+    topic_labels: b.topic_labels,
+    selected_because_label: G.selected_because,
+    based_on_label: G.on_what_you_told_us,
+    topic_qualified_note: G.topic_level,
+    unspecified_condition_note: G.unspecified_condition,
+  }
+  const render: ReadinessRenderTemplates = block?.render ?? {
+    ...PROPOSED_RENDER_TEMPLATES,
+    declared_heading: O.what_you_told_us,
+    guidance_intro: G.intro,
+    item_limitation: G.item_limitation,
+    conclusion_label: G.conclusion,
+    caveats_label: G.caveats,
+    depends_on_label: G.depends_on,
+    fact_labels: b.fact_labels,
+    unresolved_empty: O.empty,
+    dependency_told_label: O.what_you_told_us,
+    dependency_nothing_told: O.nothing_told,
+    dependency_evidence_label: O.evidence_note,
+    dependency_status_label: O.status,
+    dependency_status_labels: b.dependency_codes.status,
+    dependency_sufficiency_label: O.sufficiency,
+    dependency_sufficiency_labels: b.dependency_codes.sufficiency,
+    topic_qualified_heading: O.topic_qualified_heading,
+    unspecified_heading: O.unspecified_heading,
+    not_sure_heading: O.not_sure_heading,
+    guidance_empty: G.empty,
+  }
+  const templates = { ...b, version: (b.version as number) + 100, readiness_summary: { summary: JSON.parse(JSON.stringify(summary)), render: JSON.parse(JSON.stringify(render)) } }
+  return {
+    templates,
+    approval: {
+      template_id: templates.template_id, version: templates.version, fingerprint: templateFingerprint(templates),
+      record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: schemaVersion }, lifecycle: 'approved', authority: SYNTHETIC_OPTION_R_AUTHORITY, decision_date: '2026-11-12', review_ref: null,
+    },
+  }
+}

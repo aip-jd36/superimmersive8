@@ -142,7 +142,8 @@ describe('determinism, version isolation and test-only material', () => {
       try { walk(join(root, d)) } catch { /* folder absent */ }
     }
     const own = join(root, 'lib/creator-record/readiness-summary')
-    const offenders = files.filter((p) => !p.startsWith(own) && /readiness-summary|readiness-pdf-proof|readiness-scenarios/.test(readFileSync(p, 'utf8'))).map((p) => relative(root, p).split(sep).join('/'))
-    expect(offenders).toEqual([])
+    // CR-SUM-PDF-B1: the customer document model is the one gated importer of the summary; nothing imports the test-side proof.
+    const importers = files.filter((p) => !p.startsWith(own) && /from ['"][^'"]*(readiness-summary|readiness-pdf-proof|readiness-scenarios)/.test(readFileSync(p, 'utf8'))).map((p) => relative(root, p).split(sep).join('/'))
+    expect(importers).toEqual(['lib/creator-record/customer-pdf/document-model.ts'])
   })
 })

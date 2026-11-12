@@ -43,6 +43,8 @@ import { CONTENT_CLASSES, EXAMINATION_FAILURE_REASONS, EXAMINATION_LIMITATIONS, 
 import { LIVE_LIMITATIONS } from '../live-examination/envelope'
 import { canonicalJson } from '../record-core/canonical'
 import { checkTemplates, fill, type CustomerPdfSectionId, type CustomerPdfTemplates, type PdfTemplateApproval, type TemplateRefusalCode } from './templates'
+import { buildReadinessSummary, readinessTemplatesFingerprint, ReadinessSummaryRefusal, type ReadinessSummary, type ReadinessSummaryTemplates } from '../readiness-summary/summary'
+import { readinessRenderFingerprint, renderReadinessSummary, ReadinessRenderRefusal, type ReadinessRenderTemplates, type RenderedReadinessSummary } from '../readiness-summary/render'
 
 export type TextOrigin = 'record' | 'issuance' | 'template'
 
@@ -263,10 +265,16 @@ export function buildCustomerDocument(input: CustomerDocumentInput): CustomerDoc
   // CR-V2-MVP-M2A: and a reading made by an AI model only through templates that carry its wording too.
   if (r.documents.items.some((d) => d.examination !== 'not_examined' && isLive(d.examination)) && !t.live_examination) throw new CustomerPdfRefusal('templates_live_examination_missing')
 
+  // CR-SUM-PDF-B1 (Option R): only a template set that carries `readiness_summary` selects the consultative summary. Its
+  // summary and render approvals are DERIVED from this template approval (already checked above, and binding the block through
+  // the template fingerprint); they are never supplied or approved separately. A refusal stops the document: there is no
+  // fallback to the legacy guidance and open-items presentation for a set that selects the summary.
+  const readiness = t.readiness_summary ? readinessOf(input, t.readiness_summary, input.template_approval as PdfTemplateApproval) : null
+
   try {
     // CR-V2-MVP-INTEGRATION-2: assessed from the full verified record (the projected view omits declaration targets).
     const integrated = examinationBearing && t.integrated_assessment ? assessIntegrated(verified.record) : null
-    return compose(r, issued, t, check.fingerprint, input.sha256, integrated)
+    return compose(r, issued, t, check.fingerprint, input.sha256, integrated, readiness)
   } catch (err) {
     if (err instanceof CustomerPdfRefusal) throw err
     // A template slot that does not match its values: the templates are unusable.
@@ -274,7 +282,26 @@ export function buildCustomerDocument(input: CustomerDocumentInput): CustomerDoc
   }
 }
 
-function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: CustomerPdfTemplates, fingerprint: string, sha256: string, integrated: IntegratedAssessment | null): CustomerDocumentModel {
+type ReadinessBlock = NonNullable<CustomerPdfTemplates['readiness_summary']>
+interface Readiness { summary: ReadinessSummary; rendered: RenderedReadinessSummary; block: ReadinessBlock }
+
+/** CR-SUM-PDF-B1: the bounded summary and its rendering, under approvals derived from the (already checked) template approval. */
+function readinessOf(input: CustomerDocumentInput, block: ReadinessBlock, approval: PdfTemplateApproval): Readiness {
+  const derived = (template_id: string, version: number, fingerprint: string) => ({ template_id, version, fingerprint, lifecycle: 'approved' as const, authority: approval.authority, decision_date: approval.decision_date })
+  const summaryTemplates = block.summary as ReadinessSummaryTemplates
+  const renderTemplates = block.render as ReadinessRenderTemplates
+  try {
+    const summary = buildReadinessSummary({ canonical: input.canonical, sha256: input.sha256, templates: summaryTemplates, approval: derived(summaryTemplates.template_id, summaryTemplates.version, readinessTemplatesFingerprint(summaryTemplates)) })
+    const rendered = renderReadinessSummary(summary, renderTemplates, derived(renderTemplates.template_id, renderTemplates.version, readinessRenderFingerprint(renderTemplates)))
+    return { summary, rendered, block }
+  } catch (err) {
+    if (err instanceof ReadinessSummaryRefusal) throw new CustomerPdfRefusal('readiness_summary_refused', err.ref ? `${err.code}: ${err.ref}` : err.code)
+    if (err instanceof ReadinessRenderRefusal) throw new CustomerPdfRefusal('readiness_render_refused', err.ref ? `${err.code}: ${err.ref}` : err.code)
+    throw err
+  }
+}
+
+function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: CustomerPdfTemplates, fingerprint: string, sha256: string, integrated: IntegratedAssessment | null, readiness: Readiness | null = null): CustomerDocumentModel {
   const tpl = (text: string): Block => ({ kind: 'paragraph', text, from: 'template' })
   const heading = (text: string): Block => ({ kind: 'heading', text, from: 'template' })
   const row = (label: string, value: string, value_from: TextOrigin = 'record'): Block => ({ kind: 'row', label, label_from: 'template', value, value_from })
@@ -663,6 +690,14 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
           ...r.sources.publications.flatMap((p): Block[] => {
             const item = items.find((i) => i.claim_id === p.claim_id)
             if (!item) throw new CustomerPdfRefusal('record_unsupported', 'publication without its guidance item')
+            // CR-SUM-PDF-B1 (Option R): the summary replaces the "Item n" numbering, so a publication is referenced by its
+            // consideration number instead (one numbering scheme across the document). Without the block: unchanged.
+            if (readiness) {
+              const c = readiness.summary.groups.flatMap((g) => g.considerations).find((x) => x.claim_id === p.claim_id)
+              if (!c) throw new CustomerPdfRefusal('readiness_render_refused', 'publication without its consideration')
+              const label = (readiness.block.render as ReadinessRenderTemplates).consideration_ref_label
+              return [row(label, String(c.index), 'template'), row(L.publication_version, String(p.version))]
+            }
             return [{ kind: 'label', text: ref(item), from: 'template' }, row(L.publication_version, String(p.version))]
           }),
         ]
@@ -670,10 +705,62 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
     },
   ]
 
+  // CR-SUM-PDF-B1 (Option R). Without the block, `sections` is returned exactly as composed above. With it, `guidance` and
+  // `open_items` are REPLACED (never kept alongside) by the consultative summary and by `record_limitations`.
+  const finalSections = readiness ? replaceWithReadiness(sections) : sections
+
+  function replaceWithReadiness(legacy: CustomerDocumentSection[]): CustomerDocumentSection[] {
+    const { summary, rendered, block } = readiness!
+    const templateStrings = new Set<string>()
+    const collectStrings = (v: unknown) => { if (typeof v === 'string') templateStrings.add(v); else if (v && typeof v === 'object') Object.values(v).forEach(collectStrings) }
+    collectStrings(block)
+    const origin = (text: string, source: 'summary' | 'render' | 'mechanical'): TextOrigin => (source === 'summary' && !templateStrings.has(text) ? 'record' : 'template')
+    const itemOf = new Map(summary.groups.flatMap((g) => g.considerations).map((c) => [c.index, items.find((i) => i.claim_id === c.claim_id)!]))
+    const out: Block[] = []
+    rendered.blocks.forEach((b, k) => {
+      if (b.kind === 'row') out.push({ kind: 'row', label: b.label, label_from: origin(b.label, b.label_source), value: b.value, value_from: origin(b.value, b.value_source) })
+      else out.push({ kind: b.kind, text: b.text, from: origin(b.text, b.source) })
+      // The approved integrated assessment (schema 8) stays inside its own guidance item: after that consideration's last block.
+      const next = rendered.blocks[k + 1]
+      if (b.section === 'guidance' && b.consideration !== undefined && !(next && next.section === 'guidance' && next.consideration === b.consideration)) {
+        const item = itemOf.get(b.consideration)
+        if (!item) throw new CustomerPdfRefusal('readiness_render_refused', `consideration ${b.consideration}`)
+        out.push(...integratedBlocks(item))
+      }
+    })
+    // Record-level content the replaced open-items section carried: a schema 7 record's document inventory (a schema 8 record
+    // keeps its own documents section) and the record's limitations, both exactly as the open-items section prints them.
+    const limitations: Block[] = [
+      ...(examinationBearing
+        ? []
+        : [
+            { kind: 'subheading', text: S.open_items.documents_heading, from: 'template' } as Block,
+            ...(r.documents.items.length === 0
+              ? [tpl(S.open_items.documents_not_provided)]
+              : [
+                  tpl(t.documents.intro),
+                  ...r.documents.items.flatMap((d, i): Block[] => [
+                    ...inventoryRows(d, i),
+                    { kind: 'row', label: t.documents.examination, label_from: 'template', value: t.documents.not_examined, value_from: 'template' },
+                  ]),
+                  tpl(t.documents.fingerprint_note),
+                ]),
+          ]),
+      { kind: 'subheading', text: S.open_items.limitations_heading, from: 'template' },
+      ...S.open_items.limitations.map((l): Block => ({ kind: 'bullet', text: l, from: 'template' })),
+    ]
+    const result: CustomerDocumentSection[] = []
+    for (const s of legacy) {
+      if (s.id === 'guidance') result.push({ id: 'readiness_summary', blocks: out }, { id: 'record_limitations', blocks: limitations })
+      else if (s.id !== 'open_items') result.push(s)
+    }
+    return result
+  }
+
   return {
     meta: { title: fill(t.document_title, { record_id: issued.record_id }), subject: t.stamp, creator: `${t.template_id} v${t.version}`, producer: `${r.builder.id} v${r.builder.version}` },
     marking: { stamp: t.stamp, record_id: issued.record_id, footer: fill(t.footer, { record_id: issued.record_id }), page_label: t.page_label },
-    sections,
+    sections: finalSections,
     identity: { record_id: issued.record_id, issued_on: issued.issued_on, record_ref: r.record.record_ref, record_version: r.record.record_version, snapshot_sha256: sha256, questionnaire_contract: { id: r.sources.questionnaire_contract.contract_id, version: r.sources.questionnaire_contract.contract_version, sha256: r.sources.questionnaire_contract.contract_sha256 }, templates: { id: t.template_id, version: t.version, fingerprint } },
   }
 }

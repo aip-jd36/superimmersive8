@@ -661,9 +661,19 @@ describe('rendering boundary', () => {
       // CR-V2-MVP-M3A: the examination envelope's closed codes and the response codes (schema 8), read-only vocabularies.
       '../contract/compose', '../contract/types', '../contract/wording-lock', '../customer-record/examination-section', '../customer-record/record', '../evidence-intake/vocabulary', '../examination/envelope',
       // CR-V2-MVP-INTEGRATION-2: the pure integrated assessment (derived from the verified record) and its closed codes.
-      '../integrated-assessment/assess', '../integrated-assessment/vocabulary', '../integration/objectives', '../live-examination/envelope', '../record-core/canonical', '../record-core/projection',
+      '../integrated-assessment/assess', '../integrated-assessment/vocabulary', '../integration/objectives', '../live-examination/envelope',
+      // CR-SUM-PDF-B1: the pure bounded readiness summary and its renderer (used only when a template set carries the
+      // readiness block; no approved set does). Their own imports are checked below.
+      '../readiness-summary/render', '../readiness-summary/summary',
+      '../record-core/canonical', '../record-core/projection',
       './document-model', './templates', './text-layout', '@react-pdf/renderer', 'node:path', 'react',
     ])
+  })
+
+  test('CR-SUM-PDF-B1: the readiness summary modules reach nothing beyond what the document model already reads', () => {
+    const SUMMARY = path.join(APP_ROOT, 'lib', 'creator-record', 'readiness-summary')
+    const reached = new Set(walk(SUMMARY).flatMap(importsOf))
+    expect(Array.from(reached).sort()).toEqual(['../contract/compose', '../customer-record/record', '../integrated-assessment/assess', '../record-core/canonical', './summary'])
   })
 
   test('no template set ships with the application (placeholders exist only in tests)', () => {

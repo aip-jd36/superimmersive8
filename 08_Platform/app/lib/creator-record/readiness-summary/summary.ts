@@ -54,6 +54,8 @@ export interface ReadinessSummaryTemplates {
   topic_framing: Readonly<Record<string, string>>
   /** Label shown before the declaration that selected a consideration. */
   selected_because_label: string
+  /** CR-SUM-PDF-B1: label shown before the declarations the item's applicability rests on (approved PDF `on_what_you_told_us`). */
+  based_on_label: string
   /** Question ids whose answers name a subject (a tool or a service). Governed configuration, not code knowledge. */
   subject_questions: readonly string[]
   /**
@@ -133,6 +135,11 @@ export interface SummaryConsideration {
   explanation: string
   caveats: string[]
   selected_because: { label: string; declarations: SummaryDeclaration[] }
+  /**
+   * CR-SUM-PDF-B1: the declarations this item's applicability rests on (the record's `declared_applicability_basis`), verbatim,
+   * in record order. Empty when the item cites none. Record text only; nothing is evaluated here.
+   */
+  based_on: { label: string; declarations: SummaryDeclaration[] }
   /** What the record's own item says it depends on (codes and recorded labels only). */
   depends_on: ({ kind: 'applicability'; fact: string; tool: string | null } | { kind: 'dependency'; dependency_id: string; label: string })[]
   /**
@@ -163,7 +170,11 @@ export interface ReadinessSummary {
   topics: { topic: string; label: string; framing: string }[]
   groups: SummarySubjectGroup[]
   open_items: {
-    dependencies: { consideration: number; dependency_id: string; label: string; status: string; sufficiency: string }[]
+    /**
+     * CR-SUM-PDF-B1: `declared` is what the creator told SI8 for the dependency (verbatim answers, in record order; empty when
+     * nothing), `evidence_note` the approved ledger evidence note or null. Both are record text, unchanged.
+     */
+    dependencies: { consideration: number; dependency_id: string; label: string; status: string; sufficiency: string; declared: string[]; evidence_note: string | null }[]
     unresolved_applicability: { consideration: number; fact: string; tool: string | null }[]
     /** CR-SUM-1b: considerations shown at the topic level (see `SummaryConsideration.topic_qualified`). */
     topic_qualified: { consideration: number }[]
@@ -219,7 +230,7 @@ function checkTemplates(t: ReadinessSummaryTemplates, a: ReadinessSummaryApprova
   if (a.template_id !== t.template_id || a.version !== t.version) throw new ReadinessSummaryRefusal('templates_not_approved', 'identity')
   const fp = readinessTemplatesFingerprint(t)
   if (fp !== a.fingerprint) throw new ReadinessSummaryRefusal('templates_fingerprint_mismatch')
-  if (!nonEmpty(t.selected_because_label) || !Array.isArray(t.subject_questions) || t.subject_questions.length === 0 || !nonEmpty(t.topic_qualified_note) || !nonEmpty(t.unspecified_condition_note)) throw new ReadinessSummaryRefusal('templates_incomplete')
+  if (!nonEmpty(t.selected_because_label) || !nonEmpty(t.based_on_label) || !Array.isArray(t.subject_questions) || t.subject_questions.length === 0 || !nonEmpty(t.topic_qualified_note) || !nonEmpty(t.unspecified_condition_note)) throw new ReadinessSummaryRefusal('templates_incomplete')
   for (const c of CREATOR_RECORD_CONCLUSIONS) if (!nonEmpty(t.conclusion_labels?.[c])) throw new ReadinessSummaryRefusal('templates_incomplete', `conclusion_labels.${c}`)
   return fp
 }
@@ -270,7 +281,7 @@ export function buildReadinessSummary(input: {
 
   const seen = new Set<string>()
   const cited = new Set<string>()
-  type Placed = { item: Item; recordIndex: number; subject: SummaryDeclaration | null; position: number; declarations: SummaryDeclaration[] }
+  type Placed = { item: Item; recordIndex: number; subject: SummaryDeclaration | null; position: number; declarations: SummaryDeclaration[]; basedOn: SummaryDeclaration[] }
   const placed: Placed[] = record.guidance.items.map((item, recordIndex) => {
     const ref = item.claim_id
     if (seen.has(item.claim_id)) throw new ReadinessSummaryRefusal('duplicate_claim', ref)
@@ -296,7 +307,9 @@ export function buildReadinessSummary(input: {
     resolved.sort((a, b) => a.position - b.position || a.d.observation_id.localeCompare(b.d.observation_id))
     for (const r of resolved) cited.add(r.d.observation_id)
     const first = resolved[0] ?? null
-    return { item, recordIndex, subject: first ? first.d : null, position: first ? first.position : Number.MAX_SAFE_INTEGER, declarations: resolved.map((r) => r.d) }
+    // CR-SUM-PDF-B1: the applicability basis, resolved exactly like the selection basis (provenance must hold), in record order.
+    const basedOn = item.declared_applicability_basis.map((b) => declarationOf(b.observation_id, ref).d)
+    return { item, recordIndex, subject: first ? first.d : null, position: first ? first.position : Number.MAX_SAFE_INTEGER, declarations: resolved.map((r) => r.d), basedOn }
   })
 
   // Neutral order: questionnaire position of the selecting declaration, then record order. Status is never used.
@@ -333,7 +346,16 @@ export function buildReadinessSummary(input: {
     if (qualified) topicQualified.push({ consideration: n })
     const unlisted = isUnspecifiedCondition(item)
     if (unlisted) unspecified.push({ consideration: n })
-    for (const d of item.dependency_rows) openDeps.push({ consideration: n, dependency_id: d.dependency_id, label: d.label as string, status: d.status, sufficiency: d.sufficiency })
+    for (const d of item.dependency_rows) {
+      openDeps.push({
+        consideration: n, dependency_id: d.dependency_id, label: d.label as string, status: d.status, sufficiency: d.sufficiency,
+        declared: (d.declarations as { answer_verbatim: unknown }[]).map((x) => {
+          if (!nonEmpty(x.answer_verbatim)) throw new ReadinessSummaryRefusal('selection_provenance_broken', `${item.claim_id}: dependency ${d.dependency_id}`)
+          return x.answer_verbatim
+        }),
+        evidence_note: d.evidence_note,
+      })
+    }
     const consideration: SummaryConsideration = {
       index: n,
       claim_id: item.claim_id,
@@ -343,6 +365,7 @@ export function buildReadinessSummary(input: {
       explanation: item.explanation,
       caveats: item.caveats.map((c) => c.text),
       selected_because: { label: T.selected_because_label, declarations: pl.declarations },
+      based_on: { label: T.based_on_label, declarations: pl.basedOn },
       depends_on,
       topic_qualified: qualified ? T.topic_qualified_note : null,
       unspecified_condition: unlisted ? T.unspecified_condition_note : null,

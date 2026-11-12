@@ -1,0 +1,72 @@
+{
+ "s7-1-runway-higgsfield": {
+  "model_sha256": "c40c3339d76a8ac51eee38d51e4090013165b2c61b860c5785be3c1546988b66",
+  "pages": 4,
+  "layout_sha256": "6199abf2c8b0b624268b4bd869f3fe5139c389bc8638648cc5ce8c7eb9934990"
+ },
+ "s7-2-tools-artlist-music": {
+  "model_sha256": "28badb8959933f6a2be710bc4cab290029e2be5e3c545edbe3150d8f02afb2a9",
+  "pages": 4,
+  "layout_sha256": "1e2ebce4b46bb433824a148279326bd70ab7cbc0f023e9ec2e53a75f527ff32c"
+ },
+ "s7-3-tools-artlist-stock": {
+  "model_sha256": "d76c957400576fe6c0027dc4b29e9d68804d3924b094d33eb2eff5eb42bee92c",
+  "pages": 4,
+  "layout_sha256": "30776cd2a18ea7d038e6d7e5695aed491a32d48be3721f221dbd876badd96504"
+ },
+ "s7-4-incomplete-declarations": {
+  "model_sha256": "c084be713f47def0074f7b6647f2d8d89785e0fa39d4e2bed23a798d41d28a98",
+  "pages": 4,
+  "layout_sha256": "8f7449d252f9c022c861bd359b6868ab7e2d590c732f6327e5711af136255d47"
+ },
+ "s7-5-unresolved-and-topic-caps": {
+  "model_sha256": "8fdc3372fd56c4121c22c49b0c661be097064ed9f1413066566d7767cfead876",
+  "pages": 5,
+  "layout_sha256": "ce30ff700a6a1c8a98cad1f7ac6050cd2a59b43b9774ec96c8ac294c808385e3"
+ },
+ "s8-default": {
+  "model_sha256": "5ff0b5662060c873f77c9a0c8bd16fb7e3cb859397ebe487c62743659f00ca03",
+  "pages": 5,
+  "layout_sha256": "2755b25739bb2b1c87e05229ffefe093388f1fb403302a8d4c96350bac19ee8a"
+ },
+ "s8-linked-docs": {
+  "model_sha256": "a024052c12abcd8930f836fc7b2dc00aa8aa340c88bb27243539c5aa63cf5e20",
+  "pages": 5,
+  "layout_sha256": "c8b1aea75d7be9cad50dcd8f40621c2bff2a82da01cce665d2fe348059a55015"
+ },
+ "s8-plan-not-sure": {
+  "model_sha256": "bc1c69f301f70025770d4da8fc647deb31765817a216ffeaf778a77f8e471ae4",
+  "pages": 5,
+  "layout_sha256": "66bf3f420354a3319a242301c82c050ab725f44fa78deff13664adf8ea7e3344"
+ },
+ "s8-responses": {
+  "model_sha256": "1dbf4e88613afec825e9c9a49d2b41d673e4660c9e19c33a8f35d6f0565c4ed2",
+  "pages": 5,
+  "layout_sha256": "e39668d37d2fbee969c336bce7f8563851c44039d61538bb238570526149d2b5"
+ },
+ "s8-music-dependency": {
+  "model_sha256": "96fe5e0be61c1b8e95195c023b79bee32ecb320be1f7cae2e31dd386dec0b1c5",
+  "pages": 6,
+  "layout_sha256": "43830dfa8af81ded6627b78e9cf2e8932bcb7b9a48b9bf5ccbca3ef2628b91ee"
+ },
+ "s8ia-linked-docs": {
+  "model_sha256": "3f6367c8d5a2a9436a52544c4a92e0203342cb9637fd57f6f91a1a0534e01553",
+  "pages": 6,
+  "layout_sha256": "8ea1afe69a7e3e3b62b6b2e1ef4e441e2c4f262e90b93cc440da64febe6b3093"
+ },
+ "s8ia-plan-not-sure": {
+  "model_sha256": "668191dc9f7b1b23a9c531cac05203d8e06ea3f182264aec792374df08f47302",
+  "pages": 6,
+  "layout_sha256": "f35c7d70259458402987af28821068e92fbfc7369984ba5944bf7bb7418cb5d6"
+ },
+ "s8ia-responses": {
+  "model_sha256": "8fe7ac8c6f2186d5b1b6455e8b9c28bd2302fd1d470776bde30a7b4777c61dc8",
+  "pages": 6,
+  "layout_sha256": "b999ac4c3f0d1ab4b9ca39f05961fedecbfc2602879eb6cbd9a74bd052620616"
+ },
+ "s8ia-music-dependency": {
+  "model_sha256": "8874dabbb6ce72af5fa709fef2817e45857a9d237043f70bb91a22765b6d163e",
+  "pages": 6,
+  "layout_sha256": "a87e5d44a5e84ee6e28a1ae9c8c819539dc330271c0e9211419b72aa720bcc9c"
+ }
+}

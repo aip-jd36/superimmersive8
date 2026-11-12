@@ -37,7 +37,14 @@ export const CUSTOMER_PDF_SECTIONS = ['about', 'project', 'tools', 'contribution
  * before guidance, so what a document appears to show is never printed among what the creator told SI8.
  */
 export const CUSTOMER_PDF_EXAMINATION_SECTIONS = ['about', 'project', 'tools', 'contribution', 'documents', 'guidance', 'open_items', 'not_done', 'provenance'] as const
-export type CustomerPdfSectionId = (typeof CUSTOMER_PDF_EXAMINATION_SECTIONS)[number]
+/**
+ * CR-SUM-PDF-B1 (Option R): a template set that carries the optional `readiness_summary` block prints the consultative summary
+ * INSTEAD OF `guidance` and `open_items`, followed by `record_limitations` (the record-level content that section carried:
+ * the document inventory of a schema 7 record and the record's limitations). Never both presentations in one document.
+ */
+export const CUSTOMER_PDF_READINESS_SECTIONS = ['about', 'project', 'tools', 'contribution', 'readiness_summary', 'record_limitations', 'not_done', 'provenance'] as const
+export const CUSTOMER_PDF_READINESS_EXAMINATION_SECTIONS = ['about', 'project', 'tools', 'contribution', 'documents', 'readiness_summary', 'record_limitations', 'not_done', 'provenance'] as const
+export type CustomerPdfSectionId = (typeof CUSTOMER_PDF_EXAMINATION_SECTIONS)[number] | (typeof CUSTOMER_PDF_READINESS_SECTIONS)[number]
 /** The examination states a document can be in. `not_examined` is the record's own value; the other two are the envelope's outcome. */
 export const DOCUMENT_EXAMINATION_STATES = ['not_examined', 'examined', 'could_not_examine'] as const
 /** Sections a single (not per-tool) question may be printed in. Per-tool answers are always printed under Tools. */
@@ -157,6 +164,32 @@ const templateSpec = obj({
     document: str, status_labels: exactLabels(DOCUMENT_EVIDENCE_STATUSES), reason: str, reason_labels: exactLabels(DOCUMENT_EVIDENCE_REASONS),
     appears_to_show: str, excerpt: str, your_response: str,
     not_compared: str, method: str,
+  })),
+  /**
+   * CR-SUM-PDF-B1 (Option R): the consultative summary's wording (`../readiness-summary/summary` and `./render` template sets).
+   * Optional: a template set approved without it renders exactly as before. Approving a set that carries it is what selects the
+   * summary in place of `guidance` and `open_items`; the summary and render approvals are derived from THIS set's approval
+   * (bound by its fingerprint), never approved separately. Every string is under the same wording lock.
+   */
+  readiness_summary: opt(obj({
+    summary: obj({
+      template_id: str, version: int,
+      conclusion_labels: exactLabels(CREATOR_RECORD_CONCLUSIONS), topic_labels: mapOf(str), topic_framing: mapOf(str),
+      selected_because_label: str, based_on_label: str, subject_questions: arr(str), topic_qualified_note: str, unspecified_condition_note: str,
+    }),
+    render: obj({
+      template_id: str, version: int, summary_method: obj({ id: str, version: int }),
+      heading: str, orientation: str, declared_heading: str, guidance_heading: str, guidance_intro: str, item_limitation: str,
+      conclusion_label: str, caveats_label: str, consideration_ref_label: str, caveat_applies_to_label: str, depends_on_label: str,
+      fact_labels: mapOf(str),
+      unresolved_heading: str, unresolved_intro: str, unresolved_empty: str,
+      dependency_told_label: str, dependency_nothing_told: str, dependency_evidence_label: str,
+      dependency_status_label: str, dependency_status_labels: exactLabels(['open']),
+      dependency_sufficiency_label: str, dependency_sufficiency_labels: exactLabels(['not_assessed']),
+      topic_qualified_heading: str, unspecified_heading: str, not_sure_heading: str,
+      not_established_heading: str, guidance_empty: str, uncovered_intro: str, rest_of_answers: str,
+      assurance_heading: str, assurance_text: str,
+    }),
   })),
   document_type_labels: exactLabels(EVIDENCE_MEDIA_TYPES),
   document_category_labels: exactLabels(EVIDENCE_CATEGORIES),

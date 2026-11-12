@@ -47,6 +47,10 @@ export interface ReadinessRenderTemplates {
   orientation: string
   declared_heading: string
   guidance_heading: string
+  /** CR-SUM-PDF-B1: the guidance introduction, shown under the guidance heading (approved PDF `sections.guidance.intro`). */
+  guidance_intro: string
+  /** CR-SUM-PDF-B1: shown after every explanation (approved PDF `sections.guidance.item_limitation`). */
+  item_limitation: string
   conclusion_label: string
   caveats_label: string
   /** CR-SUM-2B: label shown before a consideration's mechanical reference (e.g. "Consideration"). */
@@ -59,6 +63,10 @@ export interface ReadinessRenderTemplates {
   unresolved_heading: string
   unresolved_intro: string
   unresolved_empty: string
+  /** CR-SUM-PDF-B1: dependency details (approved PDF `open_items.what_you_told_us`, `nothing_told`, `evidence_note`). */
+  dependency_told_label: string
+  dependency_nothing_told: string
+  dependency_evidence_label: string
   dependency_status_label: string
   dependency_status_labels: Readonly<Record<string, string>>
   dependency_sufficiency_label: string
@@ -117,7 +125,7 @@ export interface RenderedReadinessSummary {
 }
 
 const nonEmpty = (v: unknown): v is string => typeof v === 'string' && v.trim() !== ''
-const TEXT_KEYS = ['heading', 'orientation', 'declared_heading', 'guidance_heading', 'conclusion_label', 'caveats_label', 'consideration_ref_label', 'caveat_applies_to_label', 'depends_on_label', 'unresolved_heading', 'unresolved_intro', 'unresolved_empty', 'dependency_status_label', 'dependency_sufficiency_label', 'topic_qualified_heading', 'unspecified_heading', 'not_sure_heading', 'not_established_heading', 'guidance_empty', 'uncovered_intro', 'rest_of_answers', 'assurance_heading', 'assurance_text'] as const
+const TEXT_KEYS = ['heading', 'orientation', 'declared_heading', 'guidance_heading', 'guidance_intro', 'item_limitation', 'dependency_told_label', 'dependency_nothing_told', 'dependency_evidence_label', 'conclusion_label', 'caveats_label', 'consideration_ref_label', 'caveat_applies_to_label', 'depends_on_label', 'unresolved_heading', 'unresolved_intro', 'unresolved_empty', 'dependency_status_label', 'dependency_sufficiency_label', 'topic_qualified_heading', 'unspecified_heading', 'not_sure_heading', 'not_established_heading', 'guidance_empty', 'uncovered_intro', 'rest_of_answers', 'assurance_heading', 'assurance_text'] as const
 
 function checkTemplates(t: ReadinessRenderTemplates, a: ReadinessRenderApproval | null): string {
   if (!a || a.lifecycle !== 'approved' || !nonEmpty(a.authority) || !nonEmpty(a.decision_date) || a.template_id !== t.template_id || a.version !== t.version) throw new ReadinessRenderRefusal('templates_not_approved')
@@ -178,6 +186,7 @@ export function renderReadinessSummary(summary: ReadinessSummary, templates: Rea
 
   // What governed guidance says.
   r('guidance', 'subheading', 'chrome', T.guidance_heading)
+  r('guidance', 'paragraph', 'boundary', T.guidance_intro)
   if (considerations.length === 0) r('guidance', 'paragraph', 'boundary', T.guidance_empty)
   const framed = new Set<string>()
   /** CR-SUM-2B: each distinct caveat text (exact string), in first-appearance order, with every consideration it qualifies. */
@@ -195,10 +204,15 @@ export function renderReadinessSummary(summary: ReadinessSummary, templates: Rea
       }
       row('guidance', 'conclusion', T.conclusion_label, 'render', c.conclusion.label, 'summary')
       s('guidance', 'paragraph', 'explanation', c.explanation)
+      r('guidance', 'paragraph', 'boundary', T.item_limitation)
       if (c.topic_qualified !== null) s('guidance', 'paragraph', 'note', c.topic_qualified)
       if (c.unspecified_condition !== null) s('guidance', 'paragraph', 'note', c.unspecified_condition)
       s('guidance', 'label', 'chrome', c.selected_because.label)
       for (const d of c.selected_because.declarations) row('guidance', 'declaration', d.question, 'summary', d.answer, 'summary')
+      if (c.based_on.declarations.length > 0) {
+        s('guidance', 'label', 'chrome', c.based_on.label)
+        for (const d of c.based_on.declarations) row('guidance', 'declaration', d.question, 'summary', d.answer, 'summary')
+      }
       for (const cv of c.caveats) {
         const refs = caveats.get(cv) ?? []
         if (!refs.includes(c.index)) refs.push(c.index)
@@ -238,6 +252,10 @@ export function renderReadinessSummary(summary: ReadinessSummary, templates: Rea
       const sufficiency = T.dependency_sufficiency_labels[d.sufficiency]
       if (!nonEmpty(status) || !nonEmpty(sufficiency)) throw new ReadinessRenderRefusal('unlabelled_dependency_code', `${d.status}/${d.sufficiency}`)
       s('unresolved', 'bullet', 'condition', d.label)
+      r('unresolved', 'label', 'chrome', T.dependency_told_label)
+      if (d.declared.length > 0) for (const a of d.declared) s('unresolved', 'bullet', 'declaration', a)
+      else r('unresolved', 'bullet', 'open_item', T.dependency_nothing_told)
+      if (d.evidence_note !== null) row('unresolved', 'open_item', T.dependency_evidence_label, 'render', d.evidence_note, 'summary')
       row('unresolved', 'open_item', T.dependency_status_label, 'render', status, 'render')
       row('unresolved', 'open_item', T.dependency_sufficiency_label, 'render', sufficiency, 'render')
     }

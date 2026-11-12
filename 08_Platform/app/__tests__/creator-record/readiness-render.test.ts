@@ -43,6 +43,7 @@ const SUMMARY_TEMPLATES: ReadinessSummaryTemplates = {
     third_party_source_rights: 'When a video includes music or stock material from a library, that library’s license sets how the material may be used.',
   },
   selected_because_label: V3.sections.guidance.selected_because,
+  based_on_label: V3.sections.guidance.on_what_you_told_us,
   subject_questions: ['T1', 'T1X', 'M1', 'M1X', 'M3', 'M3X'],
   topic_qualified_note: V3.sections.guidance.topic_level,
   unspecified_condition_note: V3.sections.guidance.unspecified_condition,
@@ -57,6 +58,11 @@ const RENDER_TEMPLATES: ReadinessRenderTemplates = {
   orientation: 'This section brings together what SI8’s published guidance says about the tools and services the creator named, and what this record does not establish. It does not weigh these points against each other or reach an overall conclusion, and it is not a decision about whether the video may be used commercially.', // DRAFT (SUM-O1)
   declared_heading: V3.sections.open_items.what_you_told_us, // v3 "What you told us"
   guidance_heading: 'What SI8’s published guidance says', // DRAFT
+  guidance_intro: V3.sections.guidance.intro, // v3
+  item_limitation: V3.sections.guidance.item_limitation, // v3
+  dependency_told_label: V3.sections.open_items.what_you_told_us, // v3
+  dependency_nothing_told: V3.sections.open_items.nothing_told, // v3
+  dependency_evidence_label: V3.sections.open_items.evidence_note, // v3
   conclusion_label: V3.sections.guidance.conclusion, // v3
   caveats_label: V3.sections.guidance.caveats, // v3
   consideration_ref_label: '[TEST ONLY] Consideration', // CR-SUM-2B synthetic test wording; formal wording pending approval
@@ -333,8 +339,10 @@ describe('inactive', () => {
       try { walk(join(root, d)) } catch { /* folder absent */ }
     }
     const own = join(root, 'lib/creator-record/readiness-summary')
-    const offenders = files.filter((p) => !p.startsWith(own) && /readiness-summary|readiness-render|SYNTHETIC TEST APPROVAL — CR-SUM-2A/.test(readFileSync(p, 'utf8'))).map((p) => relative(root, p).split(sep).join('/'))
-    expect(offenders).toEqual([])
+    // CR-SUM-PDF-B1: the customer document model is the one gated importer; the synthetic approval appears in no application file.
+    const importers = files.filter((p) => !p.startsWith(own) && /from ['"][^'"]*readiness-summary/.test(readFileSync(p, 'utf8'))).map((p) => relative(root, p).split(sep).join('/'))
+    expect(importers).toEqual(['lib/creator-record/customer-pdf/document-model.ts'])
+    expect(files.filter((p) => /SYNTHETIC TEST APPROVAL/.test(readFileSync(p, 'utf8')))).toEqual([])
   })
 })
 
