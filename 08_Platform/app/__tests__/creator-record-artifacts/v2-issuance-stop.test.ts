@@ -76,7 +76,8 @@ describe('the stop at the renderer-selection boundary', () => {
     const lifted = rendererForFamily(CREATOR_RECORD_V2_FAMILY, 'enabled')
     expect(lifted.family).toBe(CREATOR_RECORD_V2_FAMILY)
     expect(lifted.legacy_path_permitted).toBe(false)
-    expect(lifted.generator_version).toBe('creator-record-v2-pdf-v1')
+    expect(lifted.generator_version).toBe('creator-record-v2-pdf-v2') // CR-V2-ISSUER-DISPLAY-1
+    expect(lifted.ownsGeneratorVersion('creator-record-v2-pdf-v1')).toBe(true) // artifacts issued before it stay recognised
     expect(() => rendererForFamily(null, 'enabled')).toThrow(UnsupportedProductFamilyError)
     expect(rendererForFamily(CREATOR_RECORD_V1_FAMILY, 'stopped').family).toBe(CREATOR_RECORD_V1_FAMILY)
   })

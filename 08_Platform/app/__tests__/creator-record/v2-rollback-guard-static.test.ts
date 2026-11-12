@@ -27,6 +27,7 @@ describe('v2 rollback guard (static)', () => {
     expect(s).toContain(`NEW.generator_version ~ '^creator-record-v2-pdf-v[1-9][0-9]*$'`)
     const renderers = readFileSync(path.join(__dirname, '..', '..', 'lib', 'creator-record-artifacts', 'renderers.ts'), 'utf8')
     expect(renderers).toContain('const V2_GENERATOR_VERSION = /^creator-record-v2-pdf-v[1-9][0-9]*$/')
-    expect(renderers).toContain("export const CREATOR_RECORD_V2_GENERATOR_VERSION = 'creator-record-v2-pdf-v1'")
+    // CR-V2-ISSUER-DISPLAY-1: v2 (no issuer row). Artifacts issued as v1 still match the database guard and the renderer's pattern.
+    expect(renderers).toContain("export const CREATOR_RECORD_V2_GENERATOR_VERSION = 'creator-record-v2-pdf-v2'")
   })
 })

@@ -29,3 +29,11 @@ export const EVIDENCE_MAX_FILE_NAME_CHARS = 120
 
 /** Examination state recorded for every document in DOC-1: nothing is examined. */
 export const EVIDENCE_EXAMINATION_NOT_EXAMINED = 'not_examined' as const
+
+/**
+ * CR-V2-ISSUER-DISPLAY-1 — document-reading fields never shown to a customer, in the pre-issuance review or the customer PDF.
+ * `issuer_name`: a v2 reading reports the model's own judgement of who issued the document, which IA-4D and S3-PUBLIC showed it
+ * cannot make reliably (a provider label or a letterhead is reported as the issuer), so no label could describe it accurately.
+ * Display only: the stored reading, the record, its digests and every other reading are unchanged.
+ */
+export const CUSTOMER_SUPPRESSED_OBSERVATION_FIELDS: readonly string[] = Object.freeze(['issuer_name'])

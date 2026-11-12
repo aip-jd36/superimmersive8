@@ -64,7 +64,8 @@ const V1_RENDERER: CreatorRecordRenderer = Object.freeze({
 })
 
 /** CR-V2-MVP-M3: recorded on every v2 artifact row. */
-export const CREATOR_RECORD_V2_GENERATOR_VERSION = 'creator-record-v2-pdf-v1'
+/** CR-V2-ISSUER-DISPLAY-1: v2 = the customer PDF no longer prints a reading's issuer. Artifacts issued as v1 are unchanged. */
+export const CREATOR_RECORD_V2_GENERATOR_VERSION = 'creator-record-v2-pdf-v2'
 const V2_GENERATOR_VERSION = /^creator-record-v2-pdf-v[1-9][0-9]*$/
 
 const V2_RENDERER: CreatorRecordRenderer = Object.freeze({

@@ -85,7 +85,8 @@ describe('a schema 8 record renders', () => {
   test('every observation is printed once, verbatim where printed text, labelled where a classification, with its basis', () => {
     for (const n of [1, 2]) {
       const b = rows(documentBlocks(M, n))
-      const e = env(n)
+      // CR-V2-ISSUER-DISPLAY-1: every observation except a reading's issuer.
+      const e = { ...env(n), observations: env(n).observations.filter((o) => o.field !== 'issuer_name') }
       const fieldRows = b.filter((x) => Object.values(X.field_labels).includes(x.label))
       expect(fieldRows).toHaveLength(e.observations.length)
       e.observations.forEach((o, k) => {
@@ -204,6 +205,47 @@ describe('creator responses', () => {
   })
 })
 
+describe('CR-V2-ISSUER-DISPLAY-1: the issuer of a reading is never printed', () => {
+  test('the fixture readings hold a present issuer, and no document prints it: no "issuer" row, no issuer value in any row', () => {
+    for (const n of [1, 2]) {
+      const issuer = env(n).observations.find((o) => o.field === 'issuer_name')!
+      expect(issuer.status).toBe('present')
+      const b = rows(documentBlocks(M, n))
+      expect(b.some((x) => x.label === X.field_labels.issuer_name)).toBe(false)
+      expect(b.filter((x) => x.value_from === 'record').map((x) => x.value)).not.toContain(issuer.value)
+    }
+  })
+
+  test('the stored reading and the record are unchanged: the issuer observation stays in the verified record', () => {
+    expect(verifyCustomerRecord(F.canonical, F.sha256).ok).toBe(true)
+    expect(F.canonical).toContain('"field":"issuer_name"')
+  })
+
+  test('the approved template is unchanged: it still holds the issuer label, which is simply not used', () => {
+    expect(templateFingerprint(T8)).toBe(SYNTHETIC_EXAMINATION_PDF_TEMPLATES_FINGERPRINT)
+    expect(X.field_labels).toHaveProperty('issuer_name')
+    // A template without that label still renders: a suppressed field needs no label.
+    expect(refusalOf(() => doc(F, changed((t) => { delete t.examination!.field_labels.issuer_name })))).toBe('rendered')
+  })
+
+  test('a creator response aimed at the suppressed issuer reading makes the record refuse (fail closed)', async () => {
+    const R = await schema8Fixture({
+      responses: (envs, runs) => {
+        const id = DOCS[0].document_id
+        const o = envs.get(id)!.observations.find((x) => x.field === 'issuer_name')!
+        return [{ target: { kind: 'observation', run_id: runs.get(id)!, observation_id: o.observation_id }, code: 'reading_incorrect' }]
+      },
+    })
+    expect(verifyCustomerRecord(R.canonical, R.sha256).ok).toBe(true)
+    expect(refusalOf(() => doc(R))).toBe('response_targets_suppressed_observation')
+  })
+
+  test('other sections are unaffected: the guidance and the integrated assessment render exactly as before', () => {
+    expect(section(M, 'guidance').length).toBeGreaterThan(0)
+    expect(texts(section(M, 'guidance')).join(' ')).not.toContain(X.field_labels.issuer_name)
+  })
+})
+
 describe('fail closed', () => {
   test.each([
     ['the schema 7 templates', () => approvedPdfTemplates(BUNDLE), /^templates_/],
@@ -212,7 +254,7 @@ describe('fail closed', () => {
     ['an approval for other templates', () => ({ templates: EXAM_PDF.templates, approval: { ...EXAM_PDF.approval, fingerprint: 'f'.repeat(64) } }), /^templates_fingerprint_mismatch$/],
     ['a withdrawn approval', () => ({ templates: EXAM_PDF.templates, approval: { ...EXAM_PDF.approval, lifecycle: 'withdrawn' as const } }), /^templates_approval_withdrawn$/],
     ['templates without the examination wording', () => changed((t) => { delete (t as { examination?: unknown }).examination }), /^templates_examination_missing$/],
-    ['an unlabelled observation field', () => changed((t) => { delete t.examination!.field_labels.issuer_name }), /^observation_field_unlabelled$/],
+    ['an unlabelled observation field', () => changed((t) => { delete t.examination!.field_labels.product_or_plan_name }), /^observation_field_unlabelled$/],
     ['an unlabelled classification value', () => changed((t) => { delete t.examination!.classification_labels.document_type.receipt; delete t.examination!.classification_labels.document_type.invoice; delete t.examination!.classification_labels.document_type.billing_screenshot; delete t.examination!.classification_labels.document_type.subscription_confirmation; delete t.examination!.classification_labels.document_type.unknown }), /^classification_unlabelled$/],
     ['an unlabelled qualifier', () => changed((t) => { t.examination!.qualifier_labels = {} }), /^observation_qualifier_unlabelled$/],
     ['a limitation label missing', () => changed((t) => { delete (t.examination!.limitation_labels as Record<string, string>).illegible }), /^templates_templates_malformed$/],

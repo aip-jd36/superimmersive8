@@ -38,7 +38,7 @@ import { isIsoDate } from '../contract/types'
 import { CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION, CUSTOMER_RECORD_SCHEMA_VERSION, declarationIncompatibilities, isUncertainValue, verifyCustomerRecord, type CustomerRecordV2 } from '../customer-record/record'
 import { COMPARISON_FIELDS, CREATOR_RESPONSE_CODES } from '../customer-record/examination-section'
 import { arr, fail, int, isPlainObject, nullable, obj, oneOf, opt, ProjectionRefusal, str, WITHHELD, type P } from '../record-core/projection'
-import { EVIDENCE_CATEGORIES, EVIDENCE_MEDIA_TYPES } from '../evidence-intake/vocabulary'
+import { CUSTOMER_SUPPRESSED_OBSERVATION_FIELDS, EVIDENCE_CATEGORIES, EVIDENCE_MEDIA_TYPES } from '../evidence-intake/vocabulary'
 import { CONTENT_CLASSES, EXAMINATION_FAILURE_REASONS, EXAMINATION_LIMITATIONS, EXECUTOR_MODES, OBSERVATION_BASES, OBSERVATION_STATUSES, WORKFLOW_AUTHORIZATIONS } from '../examination/envelope'
 import { LIVE_LIMITATIONS } from '../live-examination/envelope'
 import { canonicalJson } from '../record-core/canonical'
@@ -84,6 +84,9 @@ export class CustomerPdfRefusal extends Error {
     super(`creator_record_v2_pdf_refused: ${code}${ref ? `: ${ref}` : ''}`)
   }
 }
+
+/** CR-V2-ISSUER-DISPLAY-1: reading fields never printed to a customer (the shared list, `../evidence-intake/vocabulary`). */
+const SUPPRESSED_OBSERVATION_FIELDS: ReadonlySet<string> = new Set(CUSTOMER_SUPPRESSED_OBSERVATION_FIELDS)
 
 const ISSUED_RECORD_ID = /^CR-\d{4}-[0-9A-F]{8}$/
 
@@ -408,8 +411,19 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
       blocks.push(row(X.status, X.status_labels[env.outcome.status], 'template'))
       if (!isLive(e) && e.envelope.outcome.reason !== null) blocks.push(row(X.failure, X.failure_labels[e.envelope.outcome.reason], 'template'))
       blocks.push({ kind: 'label', text: X.observations_heading, from: 'template' })
-      if (env.observations.length === 0) blocks.push(tpl(X.no_observations))
+      // CR-V2-ISSUER-DISPLAY-1: a reading's issuer is not printed. The v2 reading reports the model's own judgement of the issuer,
+      // which IA-4D/S3-PUBLIC showed it cannot make reliably (a provider label or a letterhead is reported as the issuer), so no
+      // label could describe it accurately. The stored reading is unchanged. A creator response aimed at it cannot be printed
+      // where it belongs, so the record refuses (fail closed; checked before checkout, at issuance and before marking issued).
       for (const o of env.observations) {
+        if (!SUPPRESSED_OBSERVATION_FIELDS.has(o.field)) continue
+        if (responses.some((x) => x.target.kind === 'observation' && x.target.run_id === e.run_id && x.target.observation_id === o.observation_id)) {
+          throw new CustomerPdfRefusal('response_targets_suppressed_observation', o.field)
+        }
+      }
+      const shown = env.observations.filter((o) => !SUPPRESSED_OBSERVATION_FIELDS.has(o.field))
+      if (shown.length === 0) blocks.push(tpl(X.no_observations))
+      for (const o of shown) {
         const field = labelled(X.field_labels, o.field, 'observation_field_unlabelled')
         // A value is printed only where the examination reports it present; otherwise the reading status is printed instead.
         const value: [string, TextOrigin] = o.status !== 'present' || o.value === null

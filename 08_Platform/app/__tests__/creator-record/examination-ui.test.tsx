@@ -93,7 +93,9 @@ describe('presentation: unverified observations, limitations, comparisons, versi
     expect(html).toContain(EXAM_TEXT.findings_intro.replace(/’/g, '&#x27;').slice(0, 40).replace(/'/g, '&#x27;'))
     expect(html).toContain('data-not-verified')
     expect(html).toContain('Not verified')
-    expect(html).toContain('Kling AI')
+    // CR-V2-ISSUER-DISPLAY-1: a reading's issuer is not shown, so it cannot be responded to either.
+    expect(html).not.toContain('Kling AI')
+    expect(html).not.toContain('issuer name')
     expect(html).toContain('Not shown')
   })
 
@@ -126,6 +128,19 @@ describe('presentation: unverified observations, limitations, comparisons, versi
     const block = h.slice(h.indexOf('data-carry-forward'))
     expect(block).toContain('type="checkbox"')
     expect(block.slice(0, block.indexOf('</label>'))).not.toContain('checked')
+  })
+
+  test('CR-V2-ISSUER-DISPLAY-1: an earlier response to the suppressed issuer reading is not offered again', () => {
+    const issuer = { kind: 'observation' as const, run_id: RUN, observation_id: 'k:issuer_name:0' }
+    const plan = { kind: 'comparison' as const, tool_index: 0, document_id: DOC, field: 'plan' as const }
+    const v = view({ carry_forward_candidates: [{ target: issuer, code: 'reading_incorrect' }, { target: plan, code: 'other_plan_applies' }] })
+    const h = renderToStaticMarkup(<ExaminationReview view={v} busy={false} onRespond={() => undefined} />)
+    const block = h.slice(h.indexOf('data-carry-forward'))
+    expect(block.match(/type="checkbox"/g)).toHaveLength(1)
+    expect(block).not.toContain(RESPONSE_LABELS.reading_incorrect)
+    expect(block).toContain(RESPONSE_LABELS.other_plan_applies)
+    // Only the issuer row is hidden: the document's other readings stay, each with its response control.
+    expect(h).toContain('billing period')
   })
 
   test('a version without examination findings renders nothing', () => {

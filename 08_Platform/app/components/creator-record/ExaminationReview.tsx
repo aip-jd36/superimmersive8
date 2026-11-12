@@ -14,6 +14,7 @@ import {
   type ResponseInput, type ResponseTarget,
 } from '@/lib/creator-record-flow/examination-ui'
 import { T } from '@/lib/creator-record/presentation/templates'
+import { CUSTOMER_SUPPRESSED_OBSERVATION_FIELDS } from '@/lib/creator-record/evidence-intake/vocabulary'
 import { fillReviewText, PANEL_TEXT } from '@/lib/creator-record-flow/wording'
 
 const INK = '#1a1918'
@@ -47,6 +48,11 @@ export function ExaminationReview({ view, busy, onRespond, textMode }: Examinati
   if (!e) return null
   const fileName = (id: string) => view.documents.find((d) => d.document_id === id)?.file_name ?? PANEL_TEXT.document_fallback
   const recorded = (t: ResponseTarget) => e.responses.find((r) => targetKey(r.target) === targetKey(t))
+  // CR-V2-ISSUER-DISPLAY-1: an earlier response to a reading that is not shown is not offered again (it would make the record refuse).
+  const suppressed = new Set(
+    e.documents.flatMap((d) => d.observations.filter((o) => CUSTOMER_SUPPRESSED_OBSERVATION_FIELDS.includes(o.field)).map((o) => targetKey({ kind: 'observation', run_id: d.run_id, observation_id: o.observation_id }))),
+  )
+  const candidates = (view.carry_forward_candidates ?? []).filter((c) => !suppressed.has(targetKey(c.target)))
 
   const select = (t: ResponseTarget) => (
     <select aria-label={PANEL_TEXT.your_response} value={choice[targetKey(t)] ?? ''} onChange={(ev) => setChoice((c) => ({ ...c, [targetKey(t)]: ev.target.value }))} disabled={busy}>
@@ -62,7 +68,7 @@ export function ExaminationReview({ view, busy, onRespond, textMode }: Examinati
   function submit() {
     const fresh = chosenResponses(choice, view)
     const freshKeys = new Set(fresh.map((r) => targetKey(r.target)))
-    const again = (view.carry_forward_candidates ?? []).filter((c) => reaffirm[targetKey(c.target)] && !freshKeys.has(targetKey(c.target)))
+    const again = candidates.filter((c) => reaffirm[targetKey(c.target)] && !freshKeys.has(targetKey(c.target)))
     onRespond([...fresh, ...again.map((c) => ({ target: c.target, code: c.code }))])
   }
 
@@ -79,7 +85,8 @@ export function ExaminationReview({ view, busy, onRespond, textMode }: Examinati
           <table className="w-full text-sm mt-2">
             <thead><tr style={{ color: MUTED }}><th className="text-left font-medium">{PANEL_TEXT.table_detail}</th><th className="text-left font-medium">{PANEL_TEXT.table_appears}</th><th className="text-left font-medium">{PANEL_TEXT.table_respond}</th></tr></thead>
             <tbody>
-              {d.observations.map((o) => {
+              {/* CR-V2-ISSUER-DISPLAY-1: a reading's issuer is not shown, so it cannot be responded to either. */}
+              {d.observations.filter((o) => !CUSTOMER_SUPPRESSED_OBSERVATION_FIELDS.includes(o.field)).map((o) => {
                 const t: ResponseTarget = { kind: 'observation', run_id: d.run_id, observation_id: o.observation_id }
                 return (
                   <tr key={o.observation_id} className="align-top border-t" style={{ borderColor: LINE }}>
@@ -169,11 +176,11 @@ export function ExaminationReview({ view, busy, onRespond, textMode }: Examinati
         </div>
       )}
 
-      {(view.carry_forward_candidates ?? []).length > 0 && (
+      {candidates.length > 0 && (
         <div className="mb-6" data-carry-forward>
           <h3 className="text-sm font-semibold mb-1" style={{ color: INK }}>{EXAM_TEXT.earlier_title}</h3>
           <p className="text-sm mb-2" style={{ color: MUTED }}>{EXAM_TEXT.earlier_intro}</p>
-          {(view.carry_forward_candidates ?? []).map((c) => (
+          {candidates.map((c) => (
             <label key={targetKey(c.target)} className="flex items-center gap-2 text-sm" style={{ color: MUTED }}>
               <input type="checkbox" checked={reaffirm[targetKey(c.target)] ?? false} onChange={(ev) => setReaffirm((r) => ({ ...r, [targetKey(c.target)]: ev.target.checked }))} disabled={busy} />
               {RESPONSE_LABELS[c.code] ?? c.code} — {c.target.kind === 'comparison' ? `tool ${c.target.tool_index + 1} ${c.target.field}` : 'an observation'}
