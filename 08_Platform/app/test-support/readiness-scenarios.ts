@@ -1,0 +1,139 @@
+/**
+ * CR-SUM-PDF-A — test fixtures only (never imported by application code).
+ *
+ * The five synthetic scenarios of the consultative-summary proofs, as real records built locally by the real builder:
+ * from the LIVE approved sources (Runway, Higgsfield), or from the pilot sources under a synthetic questionnaire/wording
+ * approval. The Artlist entry used here is an approved TEST COPY of the staged proposal (the proposal itself stays Pending
+ * and outside the live ledger); the Pika and Getty entries are the pilot ledger's, renamed SYN-. All test-only.
+ *
+ * The wording is the PROPOSED CR-SUM-2C render set and the CR-STAGE1-APPROVAL-1 summary set (draft fingerprints
+ * 083ac093… and 20d844ad…), read from the approved PDF set where reused, under approvals labelled as SYNTHETIC and
+ * registered nowhere. Nothing here approves any wording.
+ */
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import type { GovernanceApproval } from '@/lib/creator-record/contract/types'
+import { loadQuestionRegistry } from '@/lib/creator-record/contract/question-registry'
+import type { PublicationLedgerEntry } from '@/lib/creator-record/contract/publication-ledger'
+import { approvedCustomerRecordInputs, approvedPdfTemplates } from '@/lib/creator-record/customer-flow/approved-inputs'
+import { buildCustomerRecord, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
+import { SOURCE_TEXT_CATEGORIES, SOURCE_TEXT_SOURCE_ID, sourceTextContent, sourceTextDigest } from '@/lib/creator-record/customer-record/source-text'
+import { CREATOR_RECORD_CAVEATS, CREATOR_RECORD_GOVERNANCE_AUTHORITY as GOV, CREATOR_RECORD_PUBLICATION_LEDGER } from '@/lib/creator-record/governed/sources'
+import { pilotSources, type CreatorRecordSources } from '@/lib/creator-record/prototype/build-draft'
+import { readinessRenderFingerprint, type ReadinessRenderApproval, type ReadinessRenderTemplates } from '@/lib/creator-record/readiness-summary/render'
+import { readinessTemplatesFingerprint, READINESS_SUMMARY_METHOD, type ReadinessSummaryApproval, type ReadinessSummaryTemplates } from '@/lib/creator-record/readiness-summary/summary'
+import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
+import { withQuestionnaireApproval } from './questionnaire-approval'
+
+export const SYNTHETIC_PROOF_AUTHORITY = 'SYNTHETIC TEST APPROVAL — CR-SUM-PDF-A proof — NOT APPROVED WORDING'
+
+const V3 = (approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).templates as any)
+
+/** CR-STAGE1-APPROVAL-1 proposed summary set (draft fingerprint 20d844ad…). */
+export const PROPOSED_SUMMARY_TEMPLATES: ReadinessSummaryTemplates = {
+  template_id: 'si8/creator-record-v2-readiness-summary-templates',
+  version: 1,
+  conclusion_labels: { relevant_on_declared_facts: V3.conclusion_labels.relevant_on_declared_facts, relevant_applicability_unresolved: V3.conclusion_labels.relevant_applicability_unresolved },
+  topic_labels: { commercial_use: V3.topic_labels.commercial_use, third_party_source_rights: V3.topic_labels.third_party_source_rights },
+  topic_framing: {
+    commercial_use: 'An AI tool’s own terms set whether, and on which plans, what it generates may be used commercially.',
+    third_party_source_rights: 'When a video includes music or stock material from a library, that library’s license sets how the material may be used.',
+  },
+  selected_because_label: V3.sections.guidance.selected_because,
+  subject_questions: ['T1', 'T1X', 'M1', 'M1X', 'M3', 'M3X'],
+  topic_qualified_note: V3.sections.guidance.topic_level,
+  unspecified_condition_note: V3.sections.guidance.unspecified_condition,
+}
+
+/** CR-SUM-2C proposed render set (draft fingerprint 083ac093…). */
+export const PROPOSED_RENDER_TEMPLATES: ReadinessRenderTemplates = {
+  template_id: 'si8/creator-record-v2-readiness-render-templates',
+  version: 1,
+  summary_method: { ...READINESS_SUMMARY_METHOD },
+  heading: 'Commercial-readiness considerations',
+  orientation: 'This section brings together what SI8’s published guidance says about the tools and services the creator named, and what this record does not establish. It does not weigh these points against each other or reach an overall conclusion, and it is not a decision about whether the video may be used commercially.',
+  declared_heading: V3.sections.open_items.what_you_told_us,
+  guidance_heading: 'What SI8’s published guidance says',
+  conclusion_label: V3.sections.guidance.conclusion,
+  caveats_label: V3.sections.guidance.caveats,
+  consideration_ref_label: 'Consideration',
+  caveat_applies_to_label: 'Applies to considerations',
+  depends_on_label: V3.sections.guidance.depends_on,
+  fact_labels: V3.fact_labels,
+  unresolved_heading: 'What remains open',
+  unresolved_intro: 'An open item is not a problem SI8 has found, and it is not resolved by anything in this record.',
+  unresolved_empty: V3.sections.open_items.empty,
+  dependency_status_label: V3.sections.open_items.status,
+  dependency_status_labels: V3.dependency_codes.status,
+  dependency_sufficiency_label: V3.sections.open_items.sufficiency,
+  dependency_sufficiency_labels: V3.dependency_codes.sufficiency,
+  topic_qualified_heading: V3.sections.open_items.topic_qualified_heading,
+  unspecified_heading: V3.sections.open_items.unspecified_heading,
+  not_sure_heading: V3.sections.open_items.not_sure_heading,
+  not_established_heading: 'What this record does not establish',
+  guidance_empty: V3.sections.guidance.empty,
+  uncovered_intro: 'SI8 has no published guidance in this record for these tools and services the creator named:',
+  rest_of_answers: 'The rest of the creator’s answers received no guidance in this record. That is not a finding about them: it neither suggests nor rules out commercial use, and it does not mean there is nothing to consider.',
+  assurance_heading: 'How this differs from a human-reviewed assessment',
+  assurance_text: 'This record organises what the creator declared and what SI8’s published guidance says about it. It does not examine the evidence behind the answers, resolve open items or decide whether the video may be used commercially. SI8’s Commercial Assurance Assessment is a separate service in which a person at SI8 reviews a project and its evidence.',
+}
+
+export const SYNTHETIC_SUMMARY_APPROVAL: ReadinessSummaryApproval = { template_id: PROPOSED_SUMMARY_TEMPLATES.template_id, version: 1, fingerprint: readinessTemplatesFingerprint(PROPOSED_SUMMARY_TEMPLATES), lifecycle: 'approved', authority: SYNTHETIC_PROOF_AUTHORITY, decision_date: '2026-11-12' }
+export const SYNTHETIC_RENDER_APPROVAL: ReadinessRenderApproval = { template_id: PROPOSED_RENDER_TEMPLATES.template_id, version: 1, fingerprint: readinessRenderFingerprint(PROPOSED_RENDER_TEMPLATES), lifecycle: 'approved', authority: SYNTHETIC_PROOF_AUTHORITY, decision_date: '2026-11-12' }
+
+// ── record builders ──
+const ACK = { A1: true, A2: true }
+const RECORD = (id: string, version = 1) => ({ record_id: id, record_version: version, captured_at: '2026-11-12T00:00:00Z' })
+export function liveRecord(id: string, answers: Record<string, string[]>, tools: Record<string, string[]>[], version = 1) {
+  const i = approvedCustomerRecordInputs(GOV as never)
+  const r = buildCustomerRecord({ state: { answers, tools, acknowledgements: ACK } as never, sources: i.sources as never, source_text: i.source_text as never, topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: '2026-11-12', record: RECORD(id, version) })
+  if (!r.ok) throw new Error(JSON.stringify(r).slice(0, 500))
+  return r
+}
+const SYN: GovernanceApproval = { status: 'approved', approver: 'SYNTHETIC TEST APPROVER (fixture only)', decision_date: '2026-11-12', review_ref: 'SYNTHETIC-REVIEW-PDF-A' }
+export function pilotSourcesWith(ledger: readonly PublicationLedgerEntry[] | null): CreatorRecordSources {
+  const p = pilotSources()
+  return withQuestionnaireApproval({
+    ...p,
+    kind: 'governed',
+    registry_input: {
+      ...p.registry_input,
+      questions: p.registry_input.questions.map((q) => ({ ...q, approval: q.approval.status === 'approved' ? SYN : q.approval })),
+      observation_map: p.registry_input.observation_map.map((o) => ({ ...o, approval: o.approval.status === 'approved' ? SYN : o.approval })),
+    },
+    ...(ledger ? { ledger, caveats: { ...p.caveats, ...CREATOR_RECORD_CAVEATS } } : { ledger: p.ledger.map((e) => ({ ...e, entry_id: e.entry_id.replace(/^PILOT-UAT-/, 'SYN-'), approver: SYN.approver })) }),
+    versions: { registry: 'SYNTHETIC-REGISTRY-PDF-A', ledger: 'SYNTHETIC-LEDGER-PDF-A' },
+  } as CreatorRecordSources)
+}
+export function pilotRecord(id: string, sources: CreatorRecordSources, answers: Record<string, string[]>, tools: Record<string, string[]>[]) {
+  const acks = Object.fromEntries(sources.acknowledgement_ids.map((a) => [a, `Synthetic acknowledgement ${a} (test fixture only).`]))
+  const loaded = loadQuestionRegistry(sources.registry_input)
+  if (!loaded.ok) throw new Error('registry')
+  const approval = {
+    source_id: SOURCE_TEXT_SOURCE_ID as typeof SOURCE_TEXT_SOURCE_ID, version: 1, content_sha256: sourceTextDigest(sourceTextContent(sources, loaded.registry, acks)),
+    categories: [...SOURCE_TEXT_CATEGORIES], record_schema: { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_SCHEMA_VERSION },
+    lifecycle: 'approved' as const, authority: 'SYNTHETIC TEST AUTHORITY (fixture only)', decision_date: '2026-11-12', review_ref: 'SYNTHETIC-TEXT-PDF-A',
+  }
+  const r = buildCustomerRecord({ state: { answers, tools, acknowledgements: ACK } as never, sources, source_text: { approval, acknowledgements: acks }, topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: '2026-11-12', record: RECORD(id) })
+  if (!r.ok) throw new Error(JSON.stringify(r).slice(0, 500))
+  return r
+}
+
+const PROPOSAL = JSON.parse(readFileSync(join(__dirname, '../lib/creator-record/governed/proposals/CR-V2-LEDGER-4-artlist-standalone.proposal.json'), 'utf8')) as { entry: PublicationLedgerEntry }
+/** TEST ONLY: the Artlist proposal as if approved. The staged proposal itself stays Pending and outside the live ledger. */
+export const ARTLIST_APPROVED_TEST_COPY: PublicationLedgerEntry = { ...PROPOSAL.entry, creator_record_eligible: 'Yes', approver: 'SYNTHETIC TEST APPROVER', decision_date: '2026-11-12', refresh_by: '2027-02-12' }
+const LIVE_PLUS_ARTLIST = [...CREATOR_RECORD_PUBLICATION_LEDGER.filter((e) => !e.superseded_by && e.creator_record_eligible === 'Yes'), ARTLIST_APPROVED_TEST_COPY]
+
+const BASE = { P1: ['Synthetic PDF proof video'], P3: ['own_channels'], F1: ['TW'], F2: ['TW'], L1: ['no'], H1: ['edited'] }
+const RUNWAY = { T1: ['runway-gen3'], T3: ['Pro'], T4: ['May 2026'] }
+const HIGGSFIELD = { T1: ['higgsfield'], T3: ['Creator'], T4: ['May 2026'] }
+
+/** The five scenarios. Each returns a real, verifying record (canonical + sha256 + record). */
+export const READINESS_SCENARIOS = {
+  '1-runway-higgsfield': () => liveRecord('PREP-PDFA-1', { ...BASE, M0: ['none'] }, [RUNWAY, HIGGSFIELD]),
+  '2-tools-artlist-music': () => pilotRecord('PREP-PDFA-2', pilotSourcesWith(LIVE_PLUS_ARTLIST), { ...BASE, M0: ['music'], M1: ['artlist'], M2: ['yes'] }, [RUNWAY, HIGGSFIELD]),
+  '3-tools-artlist-stock': () => pilotRecord('PREP-PDFA-3', pilotSourcesWith(LIVE_PLUS_ARTLIST), { ...BASE, M0: ['stock'], M3: ['artlist'], M3D: ['yes'] }, [RUNWAY, HIGGSFIELD]),
+  '4-incomplete-declarations': () => liveRecord('PREP-PDFA-4', { ...BASE, L1: ['not_sure'], M0: ['music'], M1: ['not_sure'], M2: ['not_sure'] }, [{ T1: ['runway-gen3'], T3: ['not_sure'], T4: ['not_sure'] }, { T1: ['not_sure'], T3: ['not_sure'], T4: ['not_sure'] }]),
+  '5-unresolved-and-topic-caps': () => pilotRecord('PREP-PDFA-5', pilotSourcesWith(null), { ...BASE, M0: ['stock'], M3: ['getty'], M3D: ['no'] }, [{ T1: ['pika'], T3: ['not_sure'], T4: ['May 2026'] }]),
+} as const
+export type ReadinessScenario = keyof typeof READINESS_SCENARIOS
