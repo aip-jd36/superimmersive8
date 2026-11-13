@@ -36,7 +36,8 @@
 import { canonicalJson, sha256Hex } from '../record-core/canonical'
 import { READINESS_SUMMARY_METHOD, type ReadinessSummary, type SummaryConsideration, type SummaryDeclaration } from './summary'
 
-export const READINESS_RENDER_METHOD = { id: 'si8/creator-record-v2-readiness-render', version: 1 } as const
+// v2 (CR-SUM-PDF-B1 reading order): selection provenance opens each consideration. Never issued at v1 (inert).
+export const READINESS_RENDER_METHOD = { id: 'si8/creator-record-v2-readiness-render', version: 2 } as const
 
 export interface ReadinessRenderTemplates {
   template_id: string
@@ -198,21 +199,24 @@ export function renderReadinessSummary(summary: ReadinessSummary, templates: Rea
       const topic = topicOf.get(c.topic)!
       reference('guidance', c)
       s('guidance', 'label', 'topic', topic.label)
+      // CR-SUM-PDF-B1 reading order (method v2, presentation only): what selected the consideration opens it, so it cannot
+      // be read as the heading of the next one; the declared basis sits directly under the conclusion it explains. Same
+      // blocks, same text, same consideration; only their order within the consideration changed.
+      s('guidance', 'label', 'chrome', c.selected_because.label)
+      for (const d of c.selected_because.declarations) row('guidance', 'declaration', d.question, 'summary', d.answer, 'summary')
       if (!framed.has(c.topic)) {
         framed.add(c.topic)
         s('guidance', 'paragraph', 'framing', topic.framing)
       }
       row('guidance', 'conclusion', T.conclusion_label, 'render', c.conclusion.label, 'summary')
-      s('guidance', 'paragraph', 'explanation', c.explanation)
-      r('guidance', 'paragraph', 'boundary', T.item_limitation)
-      if (c.topic_qualified !== null) s('guidance', 'paragraph', 'note', c.topic_qualified)
-      if (c.unspecified_condition !== null) s('guidance', 'paragraph', 'note', c.unspecified_condition)
-      s('guidance', 'label', 'chrome', c.selected_because.label)
-      for (const d of c.selected_because.declarations) row('guidance', 'declaration', d.question, 'summary', d.answer, 'summary')
       if (c.based_on.declarations.length > 0) {
         s('guidance', 'label', 'chrome', c.based_on.label)
         for (const d of c.based_on.declarations) row('guidance', 'declaration', d.question, 'summary', d.answer, 'summary')
       }
+      s('guidance', 'paragraph', 'explanation', c.explanation)
+      r('guidance', 'paragraph', 'boundary', T.item_limitation)
+      if (c.topic_qualified !== null) s('guidance', 'paragraph', 'note', c.topic_qualified)
+      if (c.unspecified_condition !== null) s('guidance', 'paragraph', 'note', c.unspecified_condition)
       for (const cv of c.caveats) {
         const refs = caveats.get(cv) ?? []
         if (!refs.includes(c.index)) refs.push(c.index)

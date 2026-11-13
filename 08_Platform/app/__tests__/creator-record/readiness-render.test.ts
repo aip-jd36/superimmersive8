@@ -20,7 +20,7 @@ import { SOURCE_TEXT_CATEGORIES, SOURCE_TEXT_SOURCE_ID, sourceTextContent, sourc
 import { CREATOR_RECORD_CAVEATS, CREATOR_RECORD_GOVERNANCE_AUTHORITY as GOV, CREATOR_RECORD_PUBLICATION_LEDGER } from '@/lib/creator-record/governed/sources'
 import { pilotSources, type CreatorRecordSources } from '@/lib/creator-record/prototype/build-draft'
 import {
-  readinessRenderFingerprint, readinessRenderText, renderReadinessSummary, ReadinessRenderRefusal,
+  READINESS_RENDER_METHOD, readinessRenderFingerprint, readinessRenderText, renderReadinessSummary, ReadinessRenderRefusal,
   type ReadinessRenderApproval, type ReadinessRenderTemplates, type RenderedReadinessSummary,
 } from '@/lib/creator-record/readiness-summary/render'
 import { buildReadinessSummary, readinessTemplatesFingerprint, READINESS_SUMMARY_METHOD, type ReadinessSummary, type ReadinessSummaryTemplates } from '@/lib/creator-record/readiness-summary/summary'
@@ -420,6 +420,54 @@ describe('CR-SUM-2B: caveats shown once, with an explicit mapping', () => {
     const shown = r.blocks.filter((b) => b.role === 'caveat')
     expect(shown.length).toBe(3)
     expect(shown.map((b) => b.applies_to)).toEqual([[1], [1, 2], [2]])
+  })
+})
+
+describe('CR-SUM-PDF-B1 reading order: selection provenance belongs to the consideration it explains', () => {
+  test('each consideration opens with its reference, topic, then "Selected because you told us" and its selecting answers', () => {
+    expect(READINESS_RENDER_METHOD.version).toBe(2)
+    for (const [k, r] of Object.entries(RENDERED)) {
+      for (const c of SUMMARIES[k].groups.flatMap((g) => g.considerations)) {
+        const own = r.blocks.filter((b) => b.section === 'guidance' && b.consideration === c.index)
+        const head = own.slice(0, 3 + c.selected_because.declarations.length)
+        expect([k, c.index, head.map((b) => b.role)]).toEqual([k, c.index, ['reference', 'topic', 'chrome', ...c.selected_because.declarations.map(() => 'declaration')]])
+        expect(head[2].kind === 'label' && head[2].text).toBe(c.selected_because.label)
+        c.selected_because.declarations.forEach((d, n) => {
+          const b = head[3 + n]
+          expect(b.kind === 'row' && [b.label, b.value]).toEqual([d.question, d.answer])
+        })
+        // The declared basis sits directly under the conclusion it explains.
+        if (c.based_on.declarations.length > 0) {
+          const at = own.findIndex((b) => b.role === 'conclusion')
+          const nb = own[at + 1]; expect(nb.kind === 'label' ? nb.text : null).toBe(c.based_on.label)
+        }
+        // No consideration ends with a label or a declaration row, so nothing can be read as the next one's heading.
+        const last = own[own.length - 1]
+        expect([k, c.index, last.kind === 'label' || last.role === 'declaration']).toEqual([k, c.index, false])
+      }
+    }
+  })
+  test('presentation only: each consideration prints exactly the same blocks as before, in a different order', () => {
+    // The v1 order, rebuilt from the v2 blocks: same multiset of (kind, role, text) per consideration.
+    for (const [k, r] of Object.entries(RENDERED)) {
+      for (const c of SUMMARIES[k].groups.flatMap((g) => g.considerations)) {
+        const own = r.blocks.filter((b) => b.section === 'guidance' && b.consideration === c.index)
+        const key = (b: (typeof own)[number]) => JSON.stringify(b.kind === 'row' ? [b.kind, b.role, b.label, b.value] : [b.kind, b.role, b.text])
+        const expected = [
+          ['row', 'reference', RENDER_TEMPLATES.consideration_ref_label, String(c.index)],
+          ['row', 'conclusion', RENDER_TEMPLATES.conclusion_label, c.conclusion.label],
+          ['paragraph', 'explanation', c.explanation],
+          ['paragraph', 'boundary', RENDER_TEMPLATES.item_limitation],
+          ['label', 'chrome', c.selected_because.label],
+          ...c.selected_because.declarations.map((d) => ['row', 'declaration', d.question, d.answer]),
+          ...(c.based_on.declarations.length > 0 ? [['label', 'chrome', c.based_on.label], ...c.based_on.declarations.map((d) => ['row', 'declaration', d.question, d.answer])] : []),
+          ...(c.topic_qualified !== null ? [['paragraph', 'note', c.topic_qualified]] : []),
+          ...(c.unspecified_condition !== null ? [['paragraph', 'note', c.unspecified_condition]] : []),
+        ].map((x) => JSON.stringify(x))
+        const got = own.filter((b) => b.role !== 'topic' && b.role !== 'framing').map(key)
+        expect([k, c.index, [...got].sort()]).toEqual([k, c.index, [...expected].sort()])
+      }
+    }
   })
 })
 
