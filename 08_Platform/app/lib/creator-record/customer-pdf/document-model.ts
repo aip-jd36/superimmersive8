@@ -747,7 +747,7 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
     const render = block.render as ReadinessRenderTemplates
     let summaryLayout: ReturnType<typeof readinessLayout>
     try {
-      summaryLayout = readinessLayout(placed, summary, render.overview_no_open)
+      summaryLayout = readinessLayout(placed, summary, { overviewNoOpen: render.overview_no_open, appliesTo: render.caveat_applies_to_label })
     } catch (err) {
       if (err instanceof ReadinessLayoutRefusal) throw new CustomerPdfRefusal('readiness_layout_refused', err.ref)
       throw err
@@ -797,10 +797,25 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
         documents: s.id === 'documents',
         subRows: s.id === 'documents' ? readingSubRows : undefined,
         fine: s.id === 'not_done' || s.id === 'record_limitations',
+        compactRows: s.id === 'provenance',
       })
       return { id: s.id, blocks: l.blocks, layout: l.layout }
     }
     const byId = new Map(legacy.map((s) => [s.id as string, s]))
+    // CR-PDF-REVIEW-2 (U2, U3): the approved "open items" count also counts the answers the creator was not sure about. Here it is
+    // shown as its two parts, so an uncertain answer is never read as a governed open matter. The total is unchanged.
+    const about = byId.get('about')
+    const openLine = count(S.about.counts.open_items, openCount)
+    if (!about || about.blocks.length === 0 || (about.blocks[about.blocks.length - 1] as { text?: string }).text !== openLine) throw new CustomerPdfRefusal('record_unsupported', 'about counts')
+    if (summary.open_items.not_sure.length !== notSure.length) throw new CustomerPdfRefusal('readiness_render_refused', 'not-sure count')
+    byId.set('about', {
+      id: 'about',
+      blocks: [
+        ...about.blocks.slice(0, -1),
+        tpl(count(render.count_open_linked, openCount - notSure.length)),
+        ...(notSure.length > 0 ? [tpl(count(render.count_not_sure, notSure.length))] : []),
+      ],
+    })
     const order = examinationBearing ? CUSTOMER_PDF_READINESS_EXAMINATION_SECTIONS : CUSTOMER_PDF_READINESS_SECTIONS
     return order.map((id): CustomerDocumentSection => {
       if (id === 'identity') return identity

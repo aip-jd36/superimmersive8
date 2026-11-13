@@ -76,8 +76,8 @@ describe('proposed template sets: stable, PROPOSED, built from the approved base
       const file = JSON.parse(readFileSync(join(APP, `lib/creator-record/governed/proposals/CR-PDF-TEMPLATES-v${s === 7 ? 4 : 5}-schema${s}.proposal.json`), 'utf8'))
       expect(canonicalJson(file)).toBe(canonicalJson(PROPOSED[s]))
     }
-    expect(PROPOSED[7].fingerprints).toEqual({ pdf: '17923149c81f9f9be45eb51b3033aba5adcc081ef673fa4647fdf6da987f93f2', summary: '2843199d69017bb61531cde7c91a3207f8270c1e218862c0c23e2b76f0b9c288', render: 'e72529d37ecefb2d791f594b74c5406c376b075934554d9363ad3a040d50a1b2' })
-    expect(PROPOSED[8].fingerprints).toEqual({ pdf: 'cf8f170c164bdca1c90274015deca1c89a1d812d06538540b0c9d5fd5ebd71ac', summary: '2843199d69017bb61531cde7c91a3207f8270c1e218862c0c23e2b76f0b9c288', render: '6ab1ed793334f33124c075c3d649b652d349610c127935ae2c34298f896c60b5' })
+    expect(PROPOSED[7].fingerprints).toEqual({ pdf: '162a00739b317793fbd79caffa22f98c45ae9e14850950ba9890e5a8dc6d3f9f', summary: '2843199d69017bb61531cde7c91a3207f8270c1e218862c0c23e2b76f0b9c288', render: '47422b9dc1bf09da520273ba0c5966b997ea6287d0ce691553d81dd31608bffa' })
+    expect(PROPOSED[8].fingerprints).toEqual({ pdf: '476dfa664ed9bc2b5f060f43b61b24dff79752d45e971b139449d718b3c34c11', summary: '2843199d69017bb61531cde7c91a3207f8270c1e218862c0c23e2b76f0b9c288', render: 'b2a59233b4c7c8d8bd3da5d69dea9f1fd0066f6fb8cc3fcdd2d3bde20a9ae887' })
   })
   test('they are marked PROPOSED, pending, with no authority, and versions 4 (schema 7) and 5 (schema 8)', () => {
     for (const s of [7, 8] as const) {

@@ -8,7 +8,7 @@ import { join } from 'node:path'
 import { approvedPdfTemplates } from '@/lib/creator-record/customer-flow/approved-inputs'
 import { buildCustomerDocument, CustomerPdfRefusal, documentModelCanonical, documentText, type CustomerDocumentModel } from '@/lib/creator-record/customer-pdf/document-model'
 import { CUSTOMER_PDF_EXAMINATION_SECTIONS, CUSTOMER_PDF_READINESS_EXAMINATION_SECTIONS, CUSTOMER_PDF_READINESS_SECTIONS, CUSTOMER_PDF_SECTIONS, fill, type CustomerPdfTemplates } from '@/lib/creator-record/customer-pdf/templates'
-import { CUSTOMER_RECORD_SCHEMA } from '@/lib/creator-record/customer-record/record'
+import { CUSTOMER_RECORD_SCHEMA, isUncertainValue, type DeclaredAnswer } from '@/lib/creator-record/customer-record/record'
 import { CREATOR_RECORD_GOVERNANCE_AUTHORITY as GOV } from '@/lib/creator-record/governed/sources'
 import { SYNTHETIC_TEST_EXAMINATION_PDF as EXAM_PDF } from '@/lib/creator-record/governed/synthetic-test-authority'
 import { canonicalJson, sha256Hex } from '@/lib/creator-record/record-core/canonical'
@@ -60,8 +60,27 @@ describe('Option R replaces, never duplicates', () => {
     // CR-PDF-IMPL-1: they now also carry a layout tree (grouping only); their printed blocks are unchanged.
     const blocksOf = (m: CustomerDocumentModel, id: string) => canonicalJson(m.sections.find((s) => s.id === id)?.blocks ?? null)
     for (const c of CASES) {
-      const keep = ['about', 'project', 'tools', 'contribution', 'documents', 'not_done']
+      const keep = ['project', 'tools', 'contribution', 'documents', 'not_done']
       for (const id of keep) expect([c.name, id, blocksOf(OPTION_R[c.name], id)]).toEqual([c.name, id, blocksOf(LEGACY[c.name], id)])
+    }
+  })
+  test('about: the legacy blocks, except that the "open items" count is shown as its two parts (CR-PDF-REVIEW-2); same total', () => {
+    const R = PROPOSED_RENDER_TEMPLATES
+    for (const c of CASES) {
+      const T = legacyTemplates(c).templates as CustomerPdfTemplates
+      const legacy = LEGACY[c.name].sections.find((s) => s.id === 'about')!.blocks
+      const now = OPTION_R[c.name].sections.find((s) => s.id === 'about')!.blocks
+      // Everything before the final count is the legacy block, unchanged.
+      expect([c.name, canonicalJson(now.slice(0, legacy.length - 1))]).toEqual([c.name, canonicalJson(legacy.slice(0, -1))])
+      const total = Number(/\d+/.exec((legacy[legacy.length - 1] as { text: string }).text)![0])
+      expect((legacy[legacy.length - 1] as { text: string }).text).toBe(fill(total === 1 ? T.sections.about.counts.open_items.one : T.sections.about.counts.open_items.other, { n: total }))
+      const notSure = (JSON.parse(c.record.canonical).declarations.answers as DeclaredAnswer[]).filter((a) => a.values.some(isUncertainValue)).length
+      const tail = now.slice(legacy.length - 1).map((b) => (b as { text: string }).text)
+      const linked = total - notSure
+      expect([c.name, tail]).toEqual([c.name, [
+        fill(linked === 1 ? R.count_open_linked.one : R.count_open_linked.other, { n: linked }),
+        ...(notSure > 0 ? [fill(notSure === 1 ? R.count_not_sure.one : R.count_not_sure.other, { n: notSure })] : []),
+      ]])
     }
   })
   test('provenance is the legacy provenance, except that each publication is referenced by its consideration number', () => {

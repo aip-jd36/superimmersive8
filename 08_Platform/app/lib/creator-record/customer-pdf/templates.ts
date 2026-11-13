@@ -192,6 +192,8 @@ const templateSpec = obj({
       assurance_heading: str, assurance_text: str,
       // CR-PDF-IMPL-1: the record-limitations heading (N3) and the overview row of a consideration with no open matter (N4).
       limitations_heading: str, overview_no_open: str,
+      // CR-PDF-REVIEW-2: unidentified subjects (U1) and the About counts in two parts (U2, U3).
+      guidance_unidentified: str, count_open_linked: plural, count_not_sure: plural,
     }),
   })),
   document_type_labels: exactLabels(EVIDENCE_MEDIA_TYPES),

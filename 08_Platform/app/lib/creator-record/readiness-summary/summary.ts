@@ -42,7 +42,8 @@ import { assessIntegrated } from '../integrated-assessment/assess'
 import { canonicalJson, sha256Hex } from '../record-core/canonical'
 
 // v2 (CR-PDF-IMPL-1): an answer holding an uncertain value ("Not sure") is never listed as an uncovered subject; it is listed
-// with the answers the creator was not sure about. Never issued at v1 (inert).
+// with the answers the creator was not sure about. CR-PDF-REVIEW-2 (still v2, never issued): such an answer to a subject question
+// is also listed as an unidentified subject. Never issued at v1 or v2 (inert).
 export const READINESS_SUMMARY_METHOD = { id: 'si8/creator-record-v2-readiness-summary', version: 2 } as const
 
 /** The summary's wording. Every string here needs its own approval; none is approved today. */
@@ -186,6 +187,11 @@ export interface ReadinessSummary {
   }
   /** Declared subjects (tools or services) that no consideration cites. Listing them is not a finding about them. */
   uncovered_subjects: SummaryDeclaration[]
+  /**
+   * CR-PDF-REVIEW-2: answers to a subject question that hold an uncertain value ("Not sure"), so no tool or service can be
+   * identified from them. Never a subject, never inferred, never uncovered; the same answers stay in `open_items.not_sure`.
+   */
+  unidentified_subjects: { q_id: string; tool_index: number | null; question: string }[]
 }
 
 type Item = CustomerRecordV2['guidance']['items'][number]
@@ -397,6 +403,8 @@ export function buildReadinessSummary(input: {
     uncovered_subjects.push({ observation_id: o.observation_id, q_id: at.answer.q_id, tool_index: at.answer.tool_index, question: at.answer.question, answer: at.answer.answer_verbatim })
   }
   uncovered_subjects.sort((a, b) => answers.findIndex((x) => x.q_id === a.q_id && x.tool_index === a.tool_index) - answers.findIndex((x) => x.q_id === b.q_id && x.tool_index === b.tool_index))
+  // CR-PDF-REVIEW-2: a subject answer the creator was not sure about identifies no tool or service (questionnaire order).
+  const unidentified_subjects = answers.filter((a) => subjectQuestions.has(a.q_id) && a.values.some(isUncertainValue)).map((a) => ({ q_id: a.q_id, tool_index: a.tool_index, question: a.question }))
 
   return {
     method: READINESS_SUMMARY_METHOD,
@@ -406,5 +414,6 @@ export function buildReadinessSummary(input: {
     groups,
     open_items: { dependencies: openDeps, unresolved_applicability: openApplicability, topic_qualified: topicQualified, unspecified, not_sure },
     uncovered_subjects,
+    unidentified_subjects,
   }
 }

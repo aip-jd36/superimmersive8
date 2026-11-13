@@ -60,6 +60,11 @@ export function readingStyles(fallback: string) {
     mapTopicText: { fontSize: 9.6, fontFamily: BOLD, lineHeight: 1.35 },
     mapProvider: { fontSize: 8.8, fontFamily: REG, color: C.inkSoft, lineHeight: 1.35 },
     mapNone: { fontSize: 8.6, fontFamily: ITAL, color: C.inkSoft, lineHeight: 1.4 },
+    // CR-PDF-REVIEW-2: a subject group in the map (its heading, then its rows) and an open fact's cross-reference.
+    mapGroup: { fontSize: 9.4, fontFamily: BOLD, color: C.accent, paddingTop: 6, paddingBottom: 2, borderBottomWidth: 0.4, borderBottomColor: C.line, lineHeight: 1.3 },
+    mapXref: { flexDirection: 'row', paddingLeft: 10, marginBottom: 2 },
+    mapXrefLabel: { fontSize: 7.8, fontFamily: REG, color: C.muted, marginRight: 4, lineHeight: 1.4 },
+    mapXrefValue: { fontSize: 7.8, fontFamily: BOLD, color: C.inkSoft, lineHeight: 1.4 },
     scope: { marginTop: 14, paddingTop: 8, borderTopWidth: 0.75, borderTopColor: C.line },
     identity: { marginBottom: 14, paddingBottom: 10, borderBottomWidth: 1.25, borderBottomColor: C.accent },
     qa: { flexDirection: 'row', paddingVertical: 4, borderBottomWidth: 0.4, borderBottomColor: C.line },
@@ -85,6 +90,7 @@ const textsOf = (b: Block) => (b.kind === 'row' ? [b.label, b.value] : [b.text])
 function Leaf({ b, hint, s }: { b: Block; hint: LayoutHint; s: S }) {
   if (b.kind === 'row') {
     if (hint === 'reference') return <><T style={s.refLabel} text={b.label} /><T style={s.refValue} text={b.value} /></>
+    if (hint === 'map_xref') return <View style={s.mapXref} wrap={false}><T style={s.mapXrefLabel} text={b.label} /><T style={s.mapXrefValue} text={b.value} /></View>
     const compact = hint === 'compact' || hint === 'reading_sub'
     const style = hint === 'reading_sub' ? s.readingSub : compact || hint === 'conclusion' ? s.compact : s.row
     const value = DIGEST.test(b.value) ? s.digest : hint === 'conclusion' ? s.conclusionValue : hint === 'reading' ? s.readingValue : compact ? s.compactValue : s.rowValue
@@ -100,6 +106,8 @@ function Leaf({ b, hint, s }: { b: Block; hint: LayoutHint; s: S }) {
     case 'title': return <T style={s.title} text={t} />
     case 'h1': return <T style={s.h1} text={t} minPresenceAhead={80} />
     case 'h2': return <T style={s.h2} text={t} minPresenceAhead={60} />
+    // Inside an unbreakable unit with its content: no look-ahead needed (CR-PDF-REVIEW-2).
+    case 'h2_kept': return <T style={s.h2} text={t} />
     case 'lead': return <T style={s.lead} text={t} />
     case 'band': return <T style={s.band} text={t} minPresenceAhead={120} />
     case 'topic': return <T style={s.topic} text={t} />
@@ -114,6 +122,7 @@ function Leaf({ b, hint, s }: { b: Block; hint: LayoutHint; s: S }) {
     case 'map_topic': return <T style={s.mapTopicText} text={t} />
     case 'map_provider': return <T style={s.mapProvider} text={t} />
     case 'map_none': return <T style={s.mapNone} text={t} />
+    case 'map_group': return <T style={s.mapGroup} text={t} minPresenceAhead={40} />
     case 'qa_question': return <T style={s.qaQuestion} text={t} />
     case 'qa_answer': return <T style={s.qaAnswer} text={t} />
     case 'bullet': case 'condition': case 'map_item':
@@ -156,6 +165,8 @@ function Node({ n, blocks, s }: { n: LayoutNode; blocks: readonly Block[]; s: S 
     // A document may hold many readings: always breakable (each reading group itself never splits).
     case 'document': return <View style={s.document}>{kids}</View>
     case 'map_row': return <View style={s.mapRow} wrap={false}>{kids}</View>
+    // A subject group's heading travels with its first row; the group itself may break between rows.
+    case 'map_group': return <View><View wrap={false}>{kids.slice(0, 2)}</View>{kids.slice(2)}</View>
     case 'map_ref': return <View style={s.mapRef}>{kids}</View>
     case 'map_topic': return <View style={s.mapTopic}>{kids}</View>
     case 'map_open': return <View style={s.mapOpen}>{kids}</View>
@@ -172,12 +183,9 @@ function Node({ n, blocks, s }: { n: LayoutNode; blocks: readonly Block[]; s: S 
 /** One section of the reading layout. */
 export function ReadingSection({ section, s }: { section: CustomerDocumentSection; s: S }) {
   if (!section.layout) throw new Error('creator_record_reading_layout_missing')
-  const provenance = section.id === 'provenance'
   return (
     <View style={s.section}>
-      {section.layout.map((n, k) => (provenance && n.kind === 'block' && n.hint === 'row'
-        ? <Leaf key={k} b={section.blocks[n.index]} hint="compact" s={s} />
-        : <Node key={k} n={n} blocks={section.blocks} s={s} />))}
+      {section.layout.map((n, k) => <Node key={k} n={n} blocks={section.blocks} s={s} />)}
     </View>
   )
 }

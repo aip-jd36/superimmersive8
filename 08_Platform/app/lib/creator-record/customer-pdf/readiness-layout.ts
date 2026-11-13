@@ -16,7 +16,11 @@
  * same source is shown in the same place (the open entry's own reference/subject rows under its consideration; a provider's
  * selection provenance when every consideration under it was selected by the same declared observations). Navigation copies in
  * the map are verbatim copies of a reference, topic, provider, "depends on" label, condition or list label. The only template
- * text the layout places is the render set's own `overview_no_open` for a map row without open matters (never blank).
+ * text the layout places is the render set's own `overview_no_open` for a map row without open matters (never blank), and its
+ * own `caveat_applies_to_label` with a mechanical list of consideration numbers (CR-PDF-REVIEW-2) after an open fact the record
+ * holds for more than one consideration. That cross-reference joins items only by the record's own identity of the fact (fact
+ * type and tool), never by matching labels; governed dependencies are never cross-referenced (each belongs to its own claim).
+ * In the map, considerations are grouped under the summary's own subject groups (a verbatim copy of the subject).
  * Grouping uses only the structure the renderer emits (section, role, consideration). No provider, tool or claim is named here.
  */
 import type { RenderRole, RenderSection } from '../readiness-summary/render'
@@ -37,11 +41,11 @@ export interface PlacedSource {
 }
 
 export type LayoutHint =
-  | 'title' | 'h1' | 'lead' | 'h2' | 'band' | 'reference' | 'topic' | 'provider' | 'eyebrow' | 'compact' | 'conclusion' | 'framing'
+  | 'title' | 'h1' | 'lead' | 'h2' | 'h2_kept' | 'band' | 'reference' | 'topic' | 'provider' | 'eyebrow' | 'compact' | 'conclusion' | 'framing'
   | 'explanation' | 'fine' | 'note' | 'bullet' | 'row' | 'condition' | 'dep_title' | 'map_ref_label' | 'map_ref_value' | 'map_topic'
-  | 'map_provider' | 'map_label' | 'map_item' | 'map_none' | 'body' | 'qa_question' | 'qa_answer' | 'reading' | 'reading_sub' | 'digest'
+  | 'map_provider' | 'map_label' | 'map_item' | 'map_xref' | 'map_group' | 'map_none' | 'body' | 'qa_question' | 'qa_answer' | 'reading' | 'reading_sub' | 'digest'
 export type LayoutBox =
-  | 'identity' | 'overview' | 'panel' | 'map' | 'map_row' | 'map_ref' | 'map_topic' | 'map_open' | 'guidance' | 'group' | 'consideration'
+  | 'identity' | 'overview' | 'panel' | 'map' | 'map_group' | 'map_row' | 'map_ref' | 'map_topic' | 'map_open' | 'guidance' | 'group' | 'consideration'
   | 'consideration_head' | 'open' | 'dependency' | 'scope' | 'keep' | 'qa' | 'qa_answers' | 'reading' | 'document' | 'section' | 'inset'
 export type LayoutNode = { kind: 'block'; index: number; hint: LayoutHint } | { kind: 'box'; box: LayoutBox; children: LayoutNode[]; consideration?: number }
 
@@ -79,7 +83,15 @@ const box = (b: LayoutBox, children: LayoutNode[], consideration?: number): Layo
  * The readiness summary section. `sources` are the renderer's blocks in order, with the integrated-assessment blocks inserted
  * after their consideration (as the document model composes them). `overviewNoOpen` is the render set's own wording.
  */
-export function readinessLayout(sources: readonly PlacedSource[], summary: ReadinessSummary, overviewNoOpen: string): SectionLayout {
+export interface ReadinessLayoutWording {
+  /** The render set's `overview_no_open`. */
+  overviewNoOpen: string
+  /** The render set's `caveat_applies_to_label`, before a mechanical list of consideration numbers. */
+  appliesTo: string
+}
+
+export function readinessLayout(sources: readonly PlacedSource[], summary: ReadinessSummary, wording: ReadinessLayoutWording): SectionLayout {
+  const { overviewNoOpen, appliesTo } = wording
   const a = sources
   const out = new Builder()
   const printedAt = new Map<number, number>()
@@ -149,31 +161,57 @@ export function readinessLayout(sources: readonly PlacedSource[], summary: Readi
   overview.push(box('keep', header.map((i) => show(i, a[i].block.kind === 'heading' ? 'h1' : 'lead'))))
   if (declared.length > 0) overview.push(box('panel', declared.map((i) => show(i, a[i].block.kind === 'row' ? 'row' : 'h2'))))
   overview.push(box('keep', uHead.map((i) => show(i, a[i].block.kind === 'subheading' ? 'h2' : 'fine'))))
-  const mapRows: LayoutNode[] = []
-  for (const g of groups) for (const c of g.cs) {
-    const bs = cBlocks(c)
-    const ref = bs.find((i) => a[i].role === 'reference')!
-    const topic = bs.find((i) => a[i].role === 'topic')!
-    // Reading order: reference, topic, provider, then the open matters.
-    const refBox = box('map_ref', [copy(ref, 'label', 'map_ref_label'), copy(ref, 'value', 'map_ref_value')])
-    const topicBox = box('map_topic', [copy(topic, 'text', 'map_topic'), ...(g.subject !== null ? [copy(g.subject, 'text', 'map_provider')] : [])])
-    const open: LayoutNode[] = []
-    const entry = entries.get(c)
-    if (entry) {
-      const dependsOn = entry.find((i) => a[i].role === 'chrome')
-      if (dependsOn !== undefined) open.push(copy(dependsOn, 'text', 'map_label'))
-      for (const i of entry.filter((i) => a[i].role === 'condition')) open.push(copy(i, 'text', 'map_item'))
-    }
-    for (const L of lists) if (L.members.some((m) => m.c === c)) open.push(copy(L.label, 'text', 'map_item'))
-    if (open.length === 0) open.push(out.add({ kind: 'paragraph', text: overviewNoOpen, from: 'template' }, 'map_none'))
-    mapRows.push(box('map_row', [refBox, topicBox, box('map_open', open)], c))
+  // CR-PDF-REVIEW-2: an open fact is identified by the record's own fact type and tool; the considerations it is open for.
+  const factKey = (x: { fact: string; tool: string | null }) => `${x.fact}\u0000${x.tool ?? ''}`
+  const factConsiderations = new Map<string, number[]>()
+  for (const x of summary.open_items.unresolved_applicability) {
+    const list = factConsiderations.get(factKey(x)) ?? []
+    if (!list.includes(x.consideration)) list.push(x.consideration)
+    factConsiderations.set(factKey(x), list)
   }
-  if (mapRows.length > 0) overview.push(box('map', mapRows))
+  const mapNodes: LayoutNode[] = []
+  let mapRowCount = 0
+  for (const g of groups) {
+    // The group heading is placed first, so the printed order is the reading order.
+    const groupHead = g.subject !== null && g.cs.length > 0 ? copy(g.subject, 'text', 'map_group') : null
+    const mapRows: LayoutNode[] = []
+    for (const c of g.cs) {
+      const bs = cBlocks(c)
+      const ref = bs.find((i) => a[i].role === 'reference')!
+      const topic = bs.find((i) => a[i].role === 'topic')!
+      // Reading order: reference, topic, then the open matters. The subject heads the row's group (below), once.
+      const refBox = box('map_ref', [copy(ref, 'label', 'map_ref_label'), copy(ref, 'value', 'map_ref_value')])
+      const topicBox = box('map_topic', [copy(topic, 'text', 'map_topic')])
+      const open: LayoutNode[] = []
+      const entry = entries.get(c)
+      if (entry) {
+        const dependsOn = entry.find((i) => a[i].role === 'chrome')
+        if (dependsOn !== undefined) open.push(copy(dependsOn, 'text', 'map_label'))
+        // The renderer lists a consideration's open facts first, then its governed dependencies, one condition each.
+        const conditions = entry.filter((i) => a[i].role === 'condition')
+        const facts = summary.open_items.unresolved_applicability.filter((x) => x.consideration === c)
+        const deps = summary.open_items.dependencies.filter((x) => x.consideration === c)
+        if (conditions.length !== facts.length + deps.length) throw new ReadinessLayoutRefusal(`consideration ${c} conditions do not match its open items`)
+        conditions.forEach((i, k) => {
+          open.push(copy(i, 'text', 'map_item'))
+          const shared = k < facts.length ? factConsiderations.get(factKey(facts[k]))! : []
+          if (shared.length > 1) open.push(out.add({ kind: 'row', label: appliesTo, label_from: 'template', value: [...shared].sort((x, y) => x - y).join(', '), value_from: 'template' }, 'map_xref'))
+        })
+      }
+      for (const L of lists) if (L.members.some((m) => m.c === c)) open.push(copy(L.label, 'text', 'map_item'))
+      if (open.length === 0) open.push(out.add({ kind: 'paragraph', text: overviewNoOpen, from: 'template' }, 'map_none'))
+      mapRows.push(box('map_row', [refBox, topicBox, box('map_open', open)], c))
+    }
+    mapRowCount += mapRows.length
+    if (groupHead !== null) mapNodes.push(box('map_group', [groupHead, ...mapRows]))
+    else mapNodes.push(...mapRows)
+  }
+  if (mapRowCount > 0) overview.push(box('map', mapNodes))
   for (const L of lists.filter((x) => x.loose.length > 0)) overview.push(box('keep', [show(L.label, 'eyebrow'), ...L.loose.map((i) => show(i, 'bullet'))]))
   if (caveatPanel.length > 0) overview.push(box('panel', caveatPanel.map((i) => show(i, a[i].role === 'caveat' ? 'bullet' : a[i].block.kind === 'row' ? 'compact' : 'eyebrow'))))
 
   // ── B. Examine: guidance by provider, open matters beside each consideration ──
-  const guidance: LayoutNode[] = [box('keep', gChrome.map((i) => show(i, a[i].block.kind === 'subheading' ? 'h2' : 'fine')))]
+  const guidance: LayoutNode[] = [box('keep', gChrome.map((i) => show(i, a[i].block.kind === 'subheading' ? 'h2' : a[i].block.kind === 'bullet' ? 'bullet' : 'fine')))]
   const openFor = (c: number, ref: number, topic: number, subject: number | null): LayoutNode[] => {
     const nodes: LayoutNode[] = []
     const nameRows = (rows: number[]) => {
@@ -244,7 +282,21 @@ export function readinessLayout(sources: readonly PlacedSource[], summary: Readi
   }
 
   // ── Scope statements close the section ──
-  const scopeNodes = scope.map((i) => show(i, a[i].block.kind === 'subheading' ? 'h2' : 'fine'))
+  // CR-PDF-REVIEW-2: each scope heading travels with the short paragraph(s) under it as one unit (as headings do in the supporting
+  // record), so a heading never needs a fixed look-ahead and a pair that fits is never pushed to the next page.
+  const scopeNodes: LayoutNode[] = []
+  for (let k = 0; k < scope.length; k++) {
+    const i = scope[k]
+    if (a[i].block.kind !== 'subheading') { scopeNodes.push(show(i, 'fine')); continue }
+    const run = [show(i, 'h2_kept')]
+    let chars = 0
+    while (k + 1 < scope.length && a[scope[k + 1]].block.kind !== 'subheading' && run.length < 3 && chars < 400) {
+      const j = scope[++k]
+      chars += textsOf(a[j].block).join('').length
+      run.push(a[j].block.kind === 'row' ? show(j, 'row') : show(j, 'fine'))
+    }
+    scopeNodes.push(box('keep', run))
+  }
 
   // Every source block is printed exactly once or consolidated.
   const consolidatedSet = new Set(consolidated.map((x) => x.source))
@@ -269,10 +321,10 @@ function hintFor(b: LayoutBlock): LayoutHint {
  *   - `documents`: each document (from its subheading) is one bordered unit;
  *   - a heading run travels with up to two short intro paragraphs and the first content unit.
  */
-export function flowLayout(blocks: readonly LayoutBlock[], opts: { qa?: boolean; subRows?: ReadonlySet<string>; documents?: boolean; fine?: boolean } = {}): SectionLayout {
+export function flowLayout(blocks: readonly LayoutBlock[], opts: { qa?: boolean; subRows?: ReadonlySet<string>; documents?: boolean; fine?: boolean; compactRows?: boolean } = {}): SectionLayout {
   const out = new Builder()
   const isSub = (b: LayoutBlock | undefined) => !!b && b.kind === 'row' && !!opts.subRows?.has(b.label)
-  type Unit = { kind: 'heading' | 'para' | 'content'; size: number; node: LayoutNode; startsDocument: boolean }
+  type Unit = { kind: 'heading' | 'para' | 'content'; size: number; node: LayoutNode; startsDocument: boolean; head?: boolean }
   const units: Unit[] = []
   const size = (bs: readonly LayoutBlock[]) => bs.reduce((n, b) => n + textsOf(b).join('').length, 0)
   for (let i = 0; i < blocks.length; i++) {
@@ -291,7 +343,8 @@ export function flowLayout(blocks: readonly LayoutBlock[], opts: { qa?: boolean;
     } else if (b.kind === 'heading' || b.kind === 'subheading' || b.kind === 'label') {
       units.push({ kind: 'heading', size: size([b]), node: out.add(b, b.kind === 'heading' ? 'h1' : b.kind === 'subheading' ? 'h2' : 'eyebrow'), startsDocument: !!opts.documents && b.kind === 'subheading' })
     } else if (b.kind === 'paragraph') units.push({ kind: 'para', size: size([b]), node: out.add(b, opts.fine ? 'fine' : 'body'), startsDocument: false })
-    else units.push({ kind: 'content', size: size([b]), node: out.add(b, b.kind === 'bullet' ? 'bullet' : b.kind === 'row' && DIGEST.test(b.value) ? 'digest' : 'row'), startsDocument: false })
+    // CR-PDF-REVIEW-2: `compactRows` draws every row of the section alike (a row that opened a keep run was drawn larger).
+    else units.push({ kind: 'content', size: size([b]), node: out.add(b, b.kind === 'bullet' ? 'bullet' : opts.compactRows && b.kind === 'row' ? 'compact' : b.kind === 'row' && DIGEST.test(b.value) ? 'digest' : 'row'), startsDocument: false })
   }
   // Heading runs travel with their intro paragraphs and first content unit.
   const grouped: Unit[] = []
@@ -303,8 +356,24 @@ export function flowLayout(blocks: readonly LayoutBlock[], opts: { qa?: boolean;
     while (units[k]?.kind === 'para' && paras < 2 && units[k].size < 400) { run.push(units[k++]); paras++ }
     if (units[k]) run.push(units[k++])
     k--
-    grouped.push({ kind: 'content', size: run.reduce((n, u) => n + u.size, 0), node: box('keep', run.map((u) => u.node)), startsDocument: run[0].startsDocument })
+    grouped.push({ kind: 'content', size: run.reduce((n, u) => n + u.size, 0), node: box('keep', run.map((u) => u.node)), startsDocument: run[0].startsDocument, head: true })
   }
+  // CR-PDF-REVIEW-2 (widow control): the last WIDOW units of a run of content (up to the next heading run or the section's end)
+  // travel together when they are short, so a page never ends a run with a single stray row or bullet. Order is unchanged.
+  const WIDOW = 3
+  const WIDOW_CHARS = 650
+  const tailed: Unit[] = []
+  for (let k = 0; k < grouped.length; ) {
+    if (grouped[k].head || grouped[k].startsDocument) { tailed.push(grouped[k++]); continue }
+    const run: Unit[] = []
+    while (k < grouped.length && !grouped[k].head && !grouped[k].startsDocument) run.push(grouped[k++])
+    const tail = run.slice(-WIDOW)
+    if (run.length > WIDOW && tail.reduce((n, u) => n + u.size, 0) <= WIDOW_CHARS) {
+      tailed.push(...run.slice(0, -WIDOW), { kind: 'content', size: tail.reduce((n, u) => n + u.size, 0), node: box('keep', tail.map((u) => u.node)), startsDocument: false })
+    } else tailed.push(...run)
+  }
+  grouped.length = 0
+  grouped.push(...tailed)
   if (!opts.documents) return checked({ blocks: out.blocks, layout: grouped.map((u) => u.node) })
   // Documents: each document (from its subheading) is one unit.
   const layout: LayoutNode[] = []

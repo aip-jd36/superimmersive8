@@ -65,9 +65,23 @@ async function main() {
     type Exp = { text: string; kind: Block['kind'] }
     const expected: Exp[] = model.sections.flatMap((s) => s.blocks.flatMap((b): Exp[] => (b.kind === 'row' ? [{ text: b.label, kind: b.kind }, { text: b.value, kind: b.kind }] : [{ text: b.text, kind: b.kind }])))
     const exact = body.length === expected.length && expected.every((e, k) => norm(e.text) === norm(body[k].text))
-    const orphans = exact ? expected.flatMap((e, k) => ((e.kind === 'heading' || e.kind === 'subheading' || e.kind === 'label') && body[k + 1] && body[k + 1].page > body[k].page ? [`p${body[k].page}: ${e.text.slice(0, 50)}`] : [])) : ['(not checked: print mismatch)']
+    // CR-PDF-REVIEW-2: a label that is the ONLY content of its layout box heads nothing (e.g. the lone list label that is itself a
+    // consideration's open matter, deferred D5), so a page break after it orphans nothing. Every other heading/label is checked.
+    const standalone = new Set<number>()
+    let offset = 0
+    for (const s of model.sections) {
+      const startOf: number[] = []
+      s.blocks.forEach((b) => { startOf.push(offset); offset += b.kind === 'row' ? 2 : 1 })
+      const visit = (n: any) => {
+        if (n.kind !== 'box') return
+        if (n.children.length === 1 && n.children[0].kind === 'block' && s.blocks[n.children[0].index].kind === 'label') standalone.add(startOf[n.children[0].index])
+        n.children.forEach(visit)
+      }
+      ;(s.layout ?? []).forEach(visit)
+    }
+    const orphans = exact ? expected.flatMap((e, k) => ((e.kind === 'heading' || e.kind === 'subheading' || e.kind === 'label') && !standalone.has(k) && body[k + 1] && body[k + 1].page > body[k].page ? [`p${body[k].page}: ${e.text.slice(0, 50)}`] : [])) : ['(not checked: print mismatch)']
     const marking = ['stamp', 'record_id', 'footer'].every((k) => new Set(nodes.filter((n) => n.fixed && norm(n.text) === norm((proof.marking as any)[k])).map((n) => n.page)).size === pages)
-    report[name] = { schema: rec.record.schema_version, pages, exact_print: exact, printed: body.length, expected: expected.length, marking_every_page: marking, orphan_headings: orphans, oversize_warnings: warnings.filter((w) => /bigger than available page height/.test(w)).length }
+    report[name] = { schema: rec.record.schema_version, pages, exact_print: exact, printed: body.length, expected: expected.length, marking_every_page: marking, last_page_body_texts: body.filter((n) => n.page === pages).length, orphan_headings: orphans, oversize_warnings: warnings.filter((w) => /bigger than available page height/.test(w)).length }
     console.log(name.padEnd(30), JSON.stringify(report[name]))
   }
   writeFileSync(join(outDir, 'report.json'), JSON.stringify(report, null, 1))

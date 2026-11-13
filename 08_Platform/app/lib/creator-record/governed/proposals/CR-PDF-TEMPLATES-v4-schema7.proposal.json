@@ -1,5 +1,5 @@
 {
- "status": "PROPOSED — NOT APPROVED (CR-PDF-IMPL-1). Not registered. Requires founder, Living Knowledge governance and counsel approval and a wording/fingerprint freeze before registration.",
+ "status": "PROPOSED — NOT APPROVED (CR-PDF-IMPL-1, revised by CR-PDF-REVIEW-2). Not registered. Requires founder, Living Knowledge governance and counsel approval and a wording/fingerprint freeze before registration.",
  "schema": 7,
  "base": {
   "template_id": "si8/creator-record-v2-pdf-templates",
@@ -287,19 +287,28 @@
     "assurance_heading": "How this differs from a human-reviewed assessment",
     "assurance_text": "This record organises what the creator declared and what SI8’s published guidance says about it. It does not examine the evidence behind the answers, resolve open items or decide whether the video may be used commercially. SI8’s Commercial Assurance Assessment is a separate service in which a person at SI8 reviews a project and its evidence.",
     "limitations_heading": "6. Documents and limitations",
-    "overview_no_open": "No open item was identified for this consideration from what you told SI8. This does not mean nothing is open."
+    "overview_no_open": "No open item was identified for this consideration from what you told SI8. This does not mean nothing is open.",
+    "guidance_unidentified": "No tool- or service-specific guidance could be selected for these answers, because you did not identify the tool or service:",
+    "count_open_linked": {
+     "one": "{n} open item linked to considerations.",
+     "other": "{n} open items linked to considerations."
+    },
+    "count_not_sure": {
+     "one": "{n} answer you were not sure about.",
+     "other": "{n} answers you were not sure about."
+    }
    }
   }
  },
  "fingerprints": {
-  "pdf": "17923149c81f9f9be45eb51b3033aba5adcc081ef673fa4647fdf6da987f93f2",
+  "pdf": "162a00739b317793fbd79caffa22f98c45ae9e14850950ba9890e5a8dc6d3f9f",
   "summary": "2843199d69017bb61531cde7c91a3207f8270c1e218862c0c23e2b76f0b9c288",
-  "render": "e72529d37ecefb2d791f594b74c5406c376b075934554d9363ad3a040d50a1b2"
+  "render": "47422b9dc1bf09da520273ba0c5966b997ea6287d0ce691553d81dd31608bffa"
  },
  "proposed_approval": {
   "template_id": "si8/creator-record-v2-pdf-templates",
   "version": 4,
-  "fingerprint": "17923149c81f9f9be45eb51b3033aba5adcc081ef673fa4647fdf6da987f93f2",
+  "fingerprint": "162a00739b317793fbd79caffa22f98c45ae9e14850950ba9890e5a8dc6d3f9f",
   "record_schema": {
    "id": "si8/creator-record-v2-record",
    "version": 7

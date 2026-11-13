@@ -16,7 +16,7 @@ import { readinessRenderFingerprint } from '@/lib/creator-record/readiness-summa
 import { readinessTemplatesFingerprint } from '@/lib/creator-record/readiness-summary/summary'
 import { optionRTemplates } from './readiness-scenarios'
 
-export const PROPOSED_STATUS = 'PROPOSED — NOT APPROVED (CR-PDF-IMPL-1). Not registered. Requires founder, Living Knowledge governance and counsel approval and a wording/fingerprint freeze before registration.'
+export const PROPOSED_STATUS = 'PROPOSED — NOT APPROVED (CR-PDF-IMPL-1, revised by CR-PDF-REVIEW-2). Not registered. Requires founder, Living Knowledge governance and counsel approval and a wording/fingerprint freeze before registration.'
 export const PROPOSED_VERSIONS = { 7: { pdf: 4, summary: 1, render: 1 }, 8: { pdf: 5, summary: 1, render: 2 } } as const
 
 const clone = <T,>(x: T): T => JSON.parse(JSON.stringify(x))

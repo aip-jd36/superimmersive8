@@ -85,6 +85,11 @@ export const PROPOSED_RENDER_TEMPLATES: ReadinessRenderTemplates = {
   // N3: set per schema by the proposed template sets (`./readiness-proposed-templates`); this unnumbered value is a fixture default.
   limitations_heading: 'Limitations of this record',
   overview_no_open: 'No open item was identified for this consideration from what you told SI8. This does not mean nothing is open.',
+  // CR-PDF-REVIEW-2 — PROPOSED, NOT APPROVED. U1: subject answers that identify no tool or service. U2/U3: the About count of open
+  // items shown as its two parts (items linked to considerations; answers the creator was not sure about). Same total.
+  guidance_unidentified: 'No tool- or service-specific guidance could be selected for these answers, because you did not identify the tool or service:',
+  count_open_linked: { one: '{n} open item linked to considerations.', other: '{n} open items linked to considerations.' },
+  count_not_sure: { one: '{n} answer you were not sure about.', other: '{n} answers you were not sure about.' },
 }
 
 export const SYNTHETIC_SUMMARY_APPROVAL: ReadinessSummaryApproval = { template_id: PROPOSED_SUMMARY_TEMPLATES.template_id, version: 1, fingerprint: readinessTemplatesFingerprint(PROPOSED_SUMMARY_TEMPLATES), lifecycle: 'approved', authority: SYNTHETIC_PROOF_AUTHORITY, decision_date: '2026-11-12' }
