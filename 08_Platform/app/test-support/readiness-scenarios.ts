@@ -52,7 +52,8 @@ export const PROPOSED_RENDER_TEMPLATES: ReadinessRenderTemplates = {
   version: 1,
   summary_method: { ...READINESS_SUMMARY_METHOD },
   heading: 'Commercial-readiness considerations',
-  orientation: 'This section brings together what SI8’s published guidance says about the tools and services you named, and what this record does not establish. It does not weigh these points against each other or reach an overall conclusion, and it is not a decision about whether the video may be used commercially.',
+  // CR-PDF-RELEASE-FIX-1 (FZ-3, PROPOSED): neutral to how many considerations apply; assumes nothing was named.
+  orientation: 'This section brings together any of SI8’s published guidance that was selected from what you told SI8, what remains open, and what this record does not establish. It does not weigh these points against each other or reach an overall conclusion, and it is not a decision about whether the video may be used commercially.',
   declared_heading: V3.sections.open_items.what_you_told_us,
   guidance_heading: 'What SI8’s published guidance says',
   guidance_intro: V3.sections.guidance.intro,
@@ -77,11 +78,17 @@ export const PROPOSED_RENDER_TEMPLATES: ReadinessRenderTemplates = {
   unspecified_heading: V3.sections.open_items.unspecified_heading,
   not_sure_heading: V3.sections.open_items.not_sure_heading,
   not_established_heading: 'What this record does not establish',
-  guidance_empty: V3.sections.guidance.empty,
-  uncovered_intro: 'This record contains no SI8 guidance for these tools and services you named:',
+  // CR-PDF-RELEASE-FIX-1 (PROPOSED). FZ-2: replaces the guidance introduction when no consideration applies (the approved
+  // `sections.guidance.empty`, which says what SI8 has published, is not used by this layout). G4: singular and plural forms.
+  guidance_none_selected: 'No guidance was selected for this record.',
+  uncovered_intro: {
+    one: 'This record contains no SI8 guidance for this tool or service you named:',
+    other: 'This record contains no SI8 guidance for these tools and services you named:',
+  },
   rest_of_answers: 'The rest of your answers received no guidance in this record. That is not a finding about them: it neither suggests nor rules out commercial use, and it does not mean there is nothing to consider.',
   assurance_heading: 'How this differs from a human-reviewed assessment',
-  assurance_text: 'This record organises what the creator declared and what SI8’s published guidance says about it. It does not examine the evidence behind the answers, resolve open items or decide whether the video may be used commercially. SI8’s Commercial Assurance Assessment is a separate service in which a person at SI8 reviews a project and its evidence.',
+  // CR-PDF-RELEASE-FIX-1 (R3 / F2, PROPOSED): second person, as in the rest of the record.
+  assurance_text: 'This record organises what you declared and what SI8’s published guidance says about it. It does not examine the evidence behind your answers, resolve open items or decide whether your video may be used commercially. SI8’s Commercial Assurance Assessment is a separate service in which a person at SI8 reviews a project and its evidence.',
   // N3: set per schema by the proposed template sets (`./readiness-proposed-templates`); this unnumbered value is a fixture default.
   limitations_heading: 'Limitations of this record',
   overview_no_open: 'No open item was identified for this consideration from what you told SI8. This does not mean nothing is open.',
@@ -203,7 +210,6 @@ export function optionRTemplates(base: { templates: Record<string, unknown>; app
     topic_qualified_heading: O.topic_qualified_heading,
     unspecified_heading: O.unspecified_heading,
     not_sure_heading: O.not_sure_heading,
-    guidance_empty: G.empty,
   }
   // CR-PDF-DECISION-1: the reading-layout design never carries the integrated assessment (document readings are shown only in the
   // documents section). A set with both refuses; the base set's integrated-assessment wording is therefore not carried over.

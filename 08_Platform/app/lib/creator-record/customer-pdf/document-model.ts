@@ -37,6 +37,7 @@ import { CREATOR_RECORD_CONCLUSIONS } from '../contract/compose'
 import { isIsoDate } from '../contract/types'
 import { CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION, CUSTOMER_RECORD_SCHEMA_VERSION, declarationIncompatibilities, isUncertainValue, verifyCustomerRecord, type CustomerRecordV2 } from '../customer-record/record'
 import { COMPARISON_FIELDS, CREATOR_RESPONSE_CODES } from '../customer-record/examination-section'
+import { PERSISTED_COMPARISON_METHOD } from '../evidence/persisted-comparison'
 import { arr, fail, int, isPlainObject, nullable, obj, oneOf, opt, ProjectionRefusal, str, WITHHELD, type P } from '../record-core/projection'
 import { CUSTOMER_SUPPRESSED_OBSERVATION_FIELDS, EVIDENCE_CATEGORIES, EVIDENCE_MEDIA_TYPES } from '../evidence-intake/vocabulary'
 import { CONTENT_CLASSES, EXAMINATION_FAILURE_REASONS, EXAMINATION_LIMITATIONS, EXECUTOR_MODES, OBSERVATION_BASES, OBSERVATION_STATUSES, WORKFLOW_AUTHORIZATIONS } from '../examination/envelope'
@@ -296,7 +297,8 @@ export function buildCustomerDocument(input: CustomerDocumentInput): CustomerDoc
 }
 
 type ReadinessBlock = NonNullable<CustomerPdfTemplates['readiness_summary']>
-interface Readiness { summary: ReadinessSummary; rendered: RenderedReadinessSummary; block: ReadinessBlock }
+/** `comparison_method`: the record's comparison method identifier only (CR-PDF-RELEASE-FIX-1, FZ-4); its comparisons are never read. */
+interface Readiness { summary: ReadinessSummary; rendered: RenderedReadinessSummary; block: ReadinessBlock; comparison_method: string }
 
 /** CR-SUM-PDF-B1: the bounded summary and its rendering, under approvals derived from the (already checked) template approval. */
 function readinessOf(input: CustomerDocumentInput, block: ReadinessBlock, approval: PdfTemplateApproval): Readiness {
@@ -306,7 +308,8 @@ function readinessOf(input: CustomerDocumentInput, block: ReadinessBlock, approv
   try {
     const summary = buildReadinessSummary({ canonical: input.canonical, sha256: input.sha256, templates: summaryTemplates, approval: derived(summaryTemplates.template_id, summaryTemplates.version, readinessTemplatesFingerprint(summaryTemplates)) })
     const rendered = renderReadinessSummary(summary, renderTemplates, derived(renderTemplates.template_id, renderTemplates.version, readinessRenderFingerprint(renderTemplates)))
-    return { summary, rendered, block }
+    const comparison_method = canonicalJson((JSON.parse(input.canonical) as { comparison?: { method?: unknown } }).comparison?.method ?? null)
+    return { summary, rendered, block, comparison_method }
   } catch (err) {
     if (err instanceof ReadinessSummaryRefusal) throw new CustomerPdfRefusal('readiness_summary_refused', err.ref ? `${err.code}: ${err.ref}` : err.code)
     if (err instanceof ReadinessRenderRefusal) throw new CustomerPdfRefusal('readiness_render_refused', err.ref ? `${err.code}: ${err.ref}` : err.code)
@@ -729,6 +732,11 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
     // section, never inside the guidance. A template set that carries both the readiness block and the integrated assessment is
     // therefore refused (fail closed) rather than printed. The approved v3 set has no readiness block and is unaffected.
     if (integrated !== null || t.integrated_assessment !== undefined) throw new CustomerPdfRefusal('readiness_layout_refused', 'integrated assessment with the reading layout')
+    // CR-PDF-RELEASE-FIX-1 (FZ-4): this layout states that readings were not compared with the declarations. That is true of a
+    // record whose comparison method makes no determination (method v2, every result withheld). A record made under the earlier
+    // method can hold "appears consistent / appears to conflict" determinations, so it is refused (fail closed) rather than printed
+    // with a statement it would make false. Only the method identifier is read; the comparisons themselves stay unread.
+    if (examinationBearing && readiness!.comparison_method !== canonicalJson(PERSISTED_COMPARISON_METHOD)) throw new CustomerPdfRefusal('readiness_layout_refused', 'comparison method with determinations')
     const templateStrings = new Set<string>()
     const collectStrings = (v: unknown) => { if (typeof v === 'string') templateStrings.add(v); else if (v && typeof v === 'object') Object.values(v).forEach(collectStrings) }
     collectStrings(block)
@@ -810,12 +818,18 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
     const noGuidance = summary.groups.every((g) => g.considerations.length === 0)
     const opening = about.blocks[1] as { kind: string; text?: string } | undefined
     if (!opening || opening.kind !== 'paragraph' || opening.text !== S.about.intro[0]) throw new CustomerPdfRefusal('record_unsupported', 'about opening')
+    // CR-PDF-RELEASE-FIX-1 (FZ-1): the approved sentence describing "the guidance in section 2" is not printed when no consideration
+    // applies (there is no guidance to describe). Its disclaimers stay in "What SI8 did not do" (no legal advice; no decision about
+    // commercial use) and in the section 2 orientation.
+    const guidanceSentence = S.about.intro[examinationBearing ? 3 : 2]
+    const middle = about.blocks.slice(2, -1)
+    if (noGuidance && !middle.some((b) => (b as { text?: string }).text === guidanceSentence)) throw new CustomerPdfRefusal('record_unsupported', 'about guidance sentence')
     byId.set('about', {
       id: 'about',
       blocks: [
         about.blocks[0],
         noGuidance ? tpl(render.about_intro_no_guidance) : about.blocks[1],
-        ...about.blocks.slice(2, -1),
+        ...(noGuidance ? middle.filter((b) => (b as { text?: string }).text !== guidanceSentence) : middle),
         tpl(count(render.count_open_linked, openCount - notSure.length)),
         ...(notSure.length > 0 ? [tpl(count(render.count_not_sure, notSure.length))] : []),
       ],

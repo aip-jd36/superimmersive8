@@ -76,8 +76,14 @@ export interface ReadinessRenderTemplates {
   unspecified_heading: string
   not_sure_heading: string
   not_established_heading: string
-  guidance_empty: string
-  uncovered_intro: string
+  /**
+   * CR-PDF-RELEASE-FIX-1 (FZ-2): shown under the guidance heading INSTEAD of `guidance_intro` when no consideration applies. It
+   * describes only this record's selection state; it never says what SI8 has or has not published (the approved
+   * `sections.guidance.empty` sentence did, and is not used by this layout).
+   */
+  guidance_none_selected: string
+  /** CR-PDF-RELEASE-FIX-1 (G4): singular (one named subject without guidance) and plural forms. */
+  uncovered_intro: { one: string; other: string }
   rest_of_answers: string
   assurance_heading: string
   assurance_text: string
@@ -87,7 +93,7 @@ export interface ReadinessRenderTemplates {
   overview_no_open: string
   /**
    * CR-PDF-REVIEW-2 (U1): introduces the subject answers from which no tool or service can be identified ("Not sure"). Never
-   * the `guidance_empty` sentence, which speaks of tools and services the creator named. CR-PDF-DECISION-1: singular (`one`,
+   * the approved `sections.guidance.empty` sentence, which speaks of tools and services the creator named. CR-PDF-DECISION-1: singular (`one`,
    * a single answer) and plural (`other`) forms.
    */
   guidance_unidentified: { one: string; other: string }
@@ -147,7 +153,7 @@ export interface RenderedReadinessSummary {
 }
 
 const nonEmpty = (v: unknown): v is string => typeof v === 'string' && v.trim() !== ''
-const TEXT_KEYS = ['heading', 'orientation', 'declared_heading', 'guidance_heading', 'guidance_intro', 'item_limitation', 'dependency_told_label', 'dependency_nothing_told', 'dependency_evidence_label', 'conclusion_label', 'caveats_label', 'consideration_ref_label', 'caveat_applies_to_label', 'depends_on_label', 'unresolved_heading', 'unresolved_intro', 'unresolved_empty', 'dependency_status_label', 'dependency_sufficiency_label', 'topic_qualified_heading', 'unspecified_heading', 'not_sure_heading', 'not_established_heading', 'guidance_empty', 'uncovered_intro', 'rest_of_answers', 'assurance_heading', 'assurance_text', 'limitations_heading', 'overview_no_open', 'about_intro_no_guidance'] as const
+const TEXT_KEYS = ['heading', 'orientation', 'declared_heading', 'guidance_heading', 'guidance_intro', 'item_limitation', 'dependency_told_label', 'dependency_nothing_told', 'dependency_evidence_label', 'conclusion_label', 'caveats_label', 'consideration_ref_label', 'caveat_applies_to_label', 'depends_on_label', 'unresolved_heading', 'unresolved_intro', 'unresolved_empty', 'dependency_status_label', 'dependency_sufficiency_label', 'topic_qualified_heading', 'unspecified_heading', 'not_sure_heading', 'not_established_heading', 'guidance_none_selected', 'rest_of_answers', 'assurance_heading', 'assurance_text', 'limitations_heading', 'overview_no_open', 'about_intro_no_guidance'] as const
 /** Counts carry `{n}`; the unidentified-subject sentence has a singular and a plural form without a number. */
 const COUNT_KEYS = ['count_open_linked', 'count_not_sure'] as const
 
@@ -157,7 +163,7 @@ function checkTemplates(t: ReadinessRenderTemplates, a: ReadinessRenderApproval 
   if (fp !== a.fingerprint) throw new ReadinessRenderRefusal('templates_fingerprint_mismatch')
   for (const k of TEXT_KEYS) if (!nonEmpty(t[k])) throw new ReadinessRenderRefusal('templates_incomplete', k)
   for (const k of COUNT_KEYS) if (!t[k] || !nonEmpty(t[k].one) || !nonEmpty(t[k].other) || !t[k].one.includes('{n}') || !t[k].other.includes('{n}')) throw new ReadinessRenderRefusal('templates_incomplete', k)
-  if (!t.guidance_unidentified || !nonEmpty(t.guidance_unidentified.one) || !nonEmpty(t.guidance_unidentified.other)) throw new ReadinessRenderRefusal('templates_incomplete', 'guidance_unidentified')
+  for (const k of ['guidance_unidentified', 'uncovered_intro'] as const) if (!t[k] || !nonEmpty(t[k].one) || !nonEmpty(t[k].other)) throw new ReadinessRenderRefusal('templates_incomplete', k)
   return fp
 }
 
@@ -212,12 +218,13 @@ export function renderReadinessSummary(summary: ReadinessSummary, templates: Rea
 
   // What governed guidance says.
   r('guidance', 'subheading', 'chrome', T.guidance_heading)
-  r('guidance', 'paragraph', 'boundary', T.guidance_intro)
-  // CR-PDF-REVIEW-2: "no guidance for the tools and services you named" is said only when a named tool or service has none; an
-  // answer that identifies no tool or service ("Not sure") is introduced separately and is never treated as a named subject.
+  // CR-PDF-RELEASE-FIX-1 (FZ-2): the introduction describes considerations, so it is shown only when at least one applies.
+  // Otherwise one neutral sentence states the selection state; the subjects without guidance are listed once, under "What this
+  // record does not establish" (named) or below (unidentified). An answer that identifies no tool or service ("Not sure") is
+  // introduced separately and is never treated as a named subject (CR-PDF-REVIEW-2).
   const unidentified = summary.unidentified_subjects
   if (considerations.length === 0 && summary.uncovered_subjects.length === 0 && unidentified.length === 0) throw new ReadinessRenderRefusal('malformed_summary', 'no guidance and no subject')
-  if (considerations.length === 0 && summary.uncovered_subjects.length > 0) r('guidance', 'paragraph', 'boundary', T.guidance_empty)
+  r('guidance', 'paragraph', 'boundary', considerations.length > 0 ? T.guidance_intro : T.guidance_none_selected)
   if (unidentified.length > 0) {
     r('guidance', 'paragraph', 'boundary', unidentified.length === 1 ? T.guidance_unidentified.one : T.guidance_unidentified.other)
     for (const q of unidentified) s('guidance', 'bullet', 'unidentified', q.question)
@@ -326,7 +333,7 @@ export function renderReadinessSummary(summary: ReadinessSummary, templates: Rea
   // What Creator Record cannot establish.
   r('not_established', 'subheading', 'chrome', T.not_established_heading)
   if (summary.uncovered_subjects.length > 0) {
-    r('not_established', 'paragraph', 'boundary', T.uncovered_intro)
+    r('not_established', 'paragraph', 'boundary', summary.uncovered_subjects.length === 1 ? T.uncovered_intro.one : T.uncovered_intro.other)
     for (const u of summary.uncovered_subjects) row('not_established', 'uncovered', u.question, 'summary', u.answer, 'summary')
   }
   r('not_established', 'paragraph', 'boundary', T.rest_of_answers)

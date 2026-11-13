@@ -80,8 +80,8 @@ const RENDER_TEMPLATES: ReadinessRenderTemplates = {
   unspecified_heading: V3.sections.open_items.unspecified_heading, // v3
   not_sure_heading: V3.sections.open_items.not_sure_heading, // v3
   not_established_heading: 'What this record does not establish', // DRAFT
-  guidance_empty: V3.sections.guidance.empty, // v3
-  uncovered_intro: 'SI8 has no published guidance in this record for these tools and services the creator named:', // DRAFT (SUM-M2)
+  guidance_none_selected: '[TEST ONLY] no guidance selected for this record', // CR-PDF-RELEASE-FIX-1 (FZ-2)
+  uncovered_intro: { one: '[TEST ONLY] no guidance for this named subject:', other: 'SI8 has no published guidance in this record for these tools and services the creator named:' }, // DRAFT (SUM-M2); G4 forms
   rest_of_answers: 'The rest of the creator’s answers received no guidance in this record. That is not a finding about them: it neither suggests nor rules out commercial use, and it does not mean there is nothing to consider.', // DRAFT (SUM-M4)
   assurance_heading: 'How this differs from a human-reviewed assessment', // DRAFT (SUM-A1)
   assurance_text: 'This record organises what the creator declared and what SI8’s published guidance says about it. It does not examine the evidence behind the answers, resolve open items or decide whether the video may be used commercially. SI8’s Commercial Assurance Assessment is a separate service in which a person at SI8 reviews a project and its evidence.', // DRAFT (SUM-A2)

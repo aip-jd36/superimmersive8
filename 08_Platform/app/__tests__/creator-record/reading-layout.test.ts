@@ -76,8 +76,8 @@ describe('proposed template sets: stable, PROPOSED, built from the approved base
       const file = JSON.parse(readFileSync(join(APP, `lib/creator-record/governed/proposals/CR-PDF-TEMPLATES-v${s === 7 ? 4 : 5}-schema${s}.proposal.json`), 'utf8'))
       expect(canonicalJson(file)).toBe(canonicalJson(PROPOSED[s]))
     }
-    expect(PROPOSED[7].fingerprints).toEqual({ pdf: 'da993e4e93c462c930bf817271b029dda0f07a4af1af133ec1d9c0341a74bc0f', summary: '2843199d69017bb61531cde7c91a3207f8270c1e218862c0c23e2b76f0b9c288', render: '286b84c7d65dea9239cd840b74f5e7f0287ff77bddb60fd0093e16d80b6807f4' })
-    expect(PROPOSED[8].fingerprints).toEqual({ pdf: 'c6aa8eca13b62abf3a94185f9c68a9f286dce64054dc763a8061f119df648582', summary: '2843199d69017bb61531cde7c91a3207f8270c1e218862c0c23e2b76f0b9c288', render: '273a9dc16a0750109f45e2fab95033bef95a204c11b5fa28a4a995acb3a1b94e' })
+    expect(PROPOSED[7].fingerprints).toEqual({ pdf: 'd4ecf3f39487ed43ce6c5e621d988d6525b638c952a8c5ead01e0cc9b8504f7e', summary: '2843199d69017bb61531cde7c91a3207f8270c1e218862c0c23e2b76f0b9c288', render: 'eae3ef1684b51a4f2403796a56acf6f3306478cfa64c63fc9e8b7590c2d5535d' })
+    expect(PROPOSED[8].fingerprints).toEqual({ pdf: 'a27e23cdbc1b12c16330b9518bba210b218bb0e8807e53ac164d6673ec873408', summary: '2843199d69017bb61531cde7c91a3207f8270c1e218862c0c23e2b76f0b9c288', render: '23c13cc7b4fd7a0a0b78e5302bb1e08a0bcd84053925b177cebaf2f041d649fa' })
   })
   test('they are marked PROPOSED, pending, with no authority, and versions 4 (schema 7) and 5 (schema 8)', () => {
     for (const s of [7, 8] as const) {
@@ -87,7 +87,7 @@ describe('proposed template sets: stable, PROPOSED, built from the approved base
   })
   test('the selected wording is bound: G4, N4, N3 and the overview heading', () => {
     for (const s of [7, 8] as const) {
-      expect(R(s).uncovered_intro).toBe('This record contains no SI8 guidance for these tools and services you named:')
+      expect(R(s).uncovered_intro).toEqual({ one: 'This record contains no SI8 guidance for this tool or service you named:', other: 'This record contains no SI8 guidance for these tools and services you named:' }) // CR-PDF-RELEASE-FIX-1 (G4)
       expect(R(s).overview_no_open).toBe('No open item was identified for this consideration from what you told SI8. This does not mean nothing is open.')
       expect(R(s).unresolved_heading).toBe('Considerations and what remains open')
       expect(R(s).limitations_heading).toBe(s === 7 ? '6. Documents and limitations' : '7. Limitations of this record')
@@ -175,7 +175,7 @@ describe('the three-level layout, both schemas', () => {
       const sv = c.rec.record.schema_version as 7 | 8
       const sum = summaryOf(c.rec)
       const text = section(MODEL[c.name], 'readiness_summary').blocks
-      const at = text.findIndex((b) => b.kind === 'paragraph' && b.text === R(sv).uncovered_intro)
+      const at = text.findIndex((b) => b.kind === 'paragraph' && b.text === (sum.uncovered_subjects.length === 1 ? R(sv).uncovered_intro.one : R(sv).uncovered_intro.other))
       expect([c.name, at >= 0]).toEqual([c.name, sum.uncovered_subjects.length > 0])
       if (at >= 0) expect(text.slice(at + 1, at + 1 + sum.uncovered_subjects.length).map(textsOf)).toEqual(sum.uncovered_subjects.map((u) => [u.question, u.answer]))
       for (const u of sum.uncovered_subjects) expect(/not sure/i.test(u.answer)).toBe(false)

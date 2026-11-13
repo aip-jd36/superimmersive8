@@ -2,15 +2,15 @@
 
 /**
  * CR-V2-EXAM-INTEGRATION-X3 — the examination-bearing parts of a prepared version, exactly as the server recorded
- * them, kept visibly apart: OBSERVATIONS (never verified) with their LIMITATIONS, COMPARISONS (provisional, from this
- * version's declarations) and this version's CREATOR RESPONSES. Responding sends closed codes; the server records them
+ * them, kept visibly apart: OBSERVATIONS (never verified) with their LIMITATIONS and this version's CREATOR RESPONSES.
+ * CR-PDF-RELEASE-FIX-1: the derived COMPARISONS are no longer presented (readings stay apart from the declarations). Responding sends closed codes; the server records them
  * on a new version (nothing is kept in the browser as if it were recorded). Earlier responses are offered for explicit
  * re-affirmation only, unticked. Wording: DRAFT, not approved (see examination-ui.ts).
  */
 import { useState } from 'react'
 import type { PreparedView } from '@/lib/creator-record/customer-flow/service'
 import {
-  COMPARISON_LABELS, examText, OBSERVATION_STATUS_LABELS, RESPONSE_LABELS, chosenResponses, limitationText, targetKey, type ExaminationTextMode,
+  examText, OBSERVATION_STATUS_LABELS, RESPONSE_LABELS, chosenResponses, limitationText, targetKey, type ExaminationTextMode,
   type ResponseInput, type ResponseTarget,
 } from '@/lib/creator-record-flow/examination-ui'
 import { T } from '@/lib/creator-record/presentation/templates'
@@ -105,32 +105,19 @@ export function ExaminationReview({ view, busy, onRespond, textMode }: Examinati
           <ul className="list-disc pl-5 text-sm" style={{ color: MUTED }} data-limitations>
             {d.limitations.map((l) => <li key={l}>{limitationText(l)}</li>)}
           </ul>
+          {/* CR-PDF-RELEASE-FIX-1: a response this version holds about the plan or provider for this document stays visible (it is
+              the creator's own statement), without any comparison result. Existing strings only. */}
+          {e.responses.filter((r) => r.target.kind === 'comparison' && r.target.document_id === d.document_id).map((r) => (
+            <p key={targetKey(r.target)} className="mt-2 text-sm" style={{ color: MUTED }} data-recorded-field-response>
+              {r.target.kind === 'comparison' && r.target.field === 'provider' ? PANEL_TEXT.comparison_provider : PANEL_TEXT.comparison_plan}: {recordedNote(r.target)}
+            </p>
+          ))}
         </div>
       ))}
 
-      {e.comparisons.length > 0 && (
-        <div className="mb-6" data-comparisons>
-          <h3 className="text-sm font-semibold mb-1" style={{ color: INK }}>{EXAM_TEXT.comparisons_title}</h3>
-          <p className="text-sm mb-2" style={{ color: MUTED }}>{EXAM_TEXT.comparisons_intro}</p>
-          {e.comparisons.map((c) => (
-            <div key={`${c.tool_index}-${c.document_id}`} className="mb-3 text-sm">
-              <p style={{ color: INK }}>{fillReviewText(PANEL_TEXT.comparison_heading, { n: c.tool_index + 1, file: fileName(c.document_id) })}</p>
-              {(['provider', 'plan'] as const).map((field) => {
-                const t: ResponseTarget = { kind: 'comparison', tool_index: c.tool_index, document_id: c.document_id, field }
-                const declared = field === 'provider' ? c.declared.tool_id : c.declared.plan
-                return (
-                  <div key={field} className="ml-3 mt-1" data-comparison-field={field}>
-                    <span style={{ color: MUTED }}>{fillReviewText(PANEL_TEXT.comparison_declared, { field: field === 'provider' ? PANEL_TEXT.comparison_provider : PANEL_TEXT.comparison_plan, declared: declared ?? PANEL_TEXT.comparison_declared_nothing })}</span>
-                    <strong style={{ color: INK }}>{COMPARISON_LABELS[c[field].result] ?? c[field].result}</strong>
-                    <span className="ml-2">{select(t)}</span>
-                    {recordedNote(t)}
-                  </div>
-                )
-              })}
-            </div>
-          ))}
-        </div>
-      )}
+      {/* CR-PDF-RELEASE-FIX-1 (FZ-4): no comparison panel. Document readings are shown apart from what the creator declared and
+          from the guidance; the record's derived comparisons (method v2: every result withheld) are not presented. Responses to a
+          reading stay available above; earlier responses of any kind are offered below for re-affirmation, never deleted. */}
 
       {e.guidance.length > 0 && (
         <div className="mb-6" data-guidance-beside-documents>
@@ -164,7 +151,6 @@ export function ExaminationReview({ view, busy, onRespond, textMode }: Examinati
                         {fileName(d.document_id)} — {d.examination.status === 'examined' ? fillReviewText(d.examination.observation_ids.length === 1 ? EXAM_TEXT.guidance_examined_one : EXAM_TEXT.guidance_examined_other, { count: d.examination.observation_ids.length }) : EXAM_TEXT.guidance_not_examined}
                         {d.examination.status === 'examined' && <span className="ml-2 rounded border px-1 py-0.5" style={{ borderColor: '#d97706', color: '#92400e' }} data-not-verified>{EXAM_TEXT.not_verified}</span>}
                       </p>
-                      {d.comparison && <p>{fillReviewText(PANEL_TEXT.comparison_summary, { provider: COMPARISON_LABELS[d.comparison.provider.result] ?? d.comparison.provider.result, plan: COMPARISON_LABELS[d.comparison.plan.result] ?? d.comparison.plan.result })}</p>}
                     </div>
                   ))}
                   {g.documents.length > 0 && <p className="mt-1" style={{ color: MUTED }}>{EXAM_TEXT.guidance_document_effect}</p>}

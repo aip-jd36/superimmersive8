@@ -659,7 +659,11 @@ describe('rendering boundary', () => {
     const targets = new Set(walk(ROOT).flatMap(importsOf))
     expect(Array.from(targets).sort()).toEqual([
       // CR-V2-MVP-M3A: the examination envelope's closed codes and the response codes (schema 8), read-only vocabularies.
-      '../contract/compose', '../contract/types', '../contract/wording-lock', '../customer-record/examination-section', '../customer-record/record', '../evidence-intake/vocabulary', '../examination/envelope',
+      '../contract/compose', '../contract/types', '../contract/wording-lock', '../customer-record/examination-section', '../customer-record/record', '../evidence-intake/vocabulary',
+      // CR-PDF-RELEASE-FIX-1 (FZ-4): the comparison METHOD identifier only, so the reading layout can refuse a record whose comparisons
+      // can hold determinations. No comparison is read or computed.
+      '../evidence/persisted-comparison',
+      '../examination/envelope',
       // CR-V2-MVP-INTEGRATION-2: the pure integrated assessment (derived from the verified record) and its closed codes.
       '../integrated-assessment/assess', '../integrated-assessment/vocabulary', '../integration/objectives', '../live-examination/envelope',
       // CR-SUM-PDF-B1: the pure bounded readiness summary and its renderer (used only when a template set carries the

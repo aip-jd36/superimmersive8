@@ -1,5 +1,5 @@
 {
- "status": "PROPOSED — NOT APPROVED (CR-PDF-IMPL-1, revised by CR-PDF-REVIEW-2 and CR-PDF-DECISION-1). Not registered. Requires founder, Living Knowledge governance and counsel approval and a wording/fingerprint freeze before registration.",
+ "status": "PROPOSED — NOT APPROVED (CR-PDF-IMPL-1, revised by CR-PDF-REVIEW-2, CR-PDF-DECISION-1 and CR-PDF-RELEASE-FIX-1). Not registered. Requires founder, Living Knowledge governance and counsel approval and a wording/fingerprint freeze before registration.",
  "schema": 8,
  "base": {
   "template_id": "si8/creator-record-v2-pdf-templates",
@@ -396,7 +396,7 @@
      "version": 2
     },
     "heading": "2. Commercial-readiness considerations",
-    "orientation": "This section brings together what SI8’s published guidance says about the tools and services you named, and what this record does not establish. It does not weigh these points against each other or reach an overall conclusion, and it is not a decision about whether the video may be used commercially.",
+    "orientation": "This section brings together any of SI8’s published guidance that was selected from what you told SI8, what remains open, and what this record does not establish. It does not weigh these points against each other or reach an overall conclusion, and it is not a decision about whether the video may be used commercially.",
     "declared_heading": "What you told us",
     "guidance_heading": "What SI8’s published guidance says",
     "guidance_intro": "Guidance SI8 has published for Creator Records, selected from what you told SI8. Document readings in section 6 were not used to select it. Each consideration says why it was selected and what it depends on. A consideration is not a finding about your video.",
@@ -429,11 +429,14 @@
     "unspecified_heading": "Conditions this record does not identify",
     "not_sure_heading": "Answers you were not sure about",
     "not_established_heading": "What this record does not establish",
-    "guidance_empty": "SI8 has no published guidance for the tools and services you named. That is not a finding about them: it neither suggests nor rules out commercial use, and it does not mean there is nothing to consider.",
-    "uncovered_intro": "This record contains no SI8 guidance for these tools and services you named:",
+    "guidance_none_selected": "No guidance was selected for this record.",
+    "uncovered_intro": {
+     "one": "This record contains no SI8 guidance for this tool or service you named:",
+     "other": "This record contains no SI8 guidance for these tools and services you named:"
+    },
     "rest_of_answers": "The rest of your answers received no guidance in this record. That is not a finding about them: it neither suggests nor rules out commercial use, and it does not mean there is nothing to consider.",
     "assurance_heading": "How this differs from a human-reviewed assessment",
-    "assurance_text": "This record organises what the creator declared and what SI8’s published guidance says about it. It does not examine the evidence behind the answers, resolve open items or decide whether the video may be used commercially. SI8’s Commercial Assurance Assessment is a separate service in which a person at SI8 reviews a project and its evidence.",
+    "assurance_text": "This record organises what you declared and what SI8’s published guidance says about it. It does not examine the evidence behind your answers, resolve open items or decide whether your video may be used commercially. SI8’s Commercial Assurance Assessment is a separate service in which a person at SI8 reviews a project and its evidence.",
     "limitations_heading": "7. Limitations of this record",
     "overview_no_open": "No open item was identified for this consideration from what you told SI8. This does not mean nothing is open.",
     "guidance_unidentified": {
@@ -453,14 +456,14 @@
   }
  },
  "fingerprints": {
-  "pdf": "c6aa8eca13b62abf3a94185f9c68a9f286dce64054dc763a8061f119df648582",
+  "pdf": "a27e23cdbc1b12c16330b9518bba210b218bb0e8807e53ac164d6673ec873408",
   "summary": "2843199d69017bb61531cde7c91a3207f8270c1e218862c0c23e2b76f0b9c288",
-  "render": "273a9dc16a0750109f45e2fab95033bef95a204c11b5fa28a4a995acb3a1b94e"
+  "render": "23c13cc7b4fd7a0a0b78e5302bb1e08a0bcd84053925b177cebaf2f041d649fa"
  },
  "proposed_approval": {
   "template_id": "si8/creator-record-v2-pdf-templates",
   "version": 5,
-  "fingerprint": "c6aa8eca13b62abf3a94185f9c68a9f286dce64054dc763a8061f119df648582",
+  "fingerprint": "a27e23cdbc1b12c16330b9518bba210b218bb0e8807e53ac164d6673ec873408",
   "record_schema": {
    "id": "si8/creator-record-v2-record",
    "version": 8

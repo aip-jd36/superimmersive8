@@ -188,7 +188,7 @@ const templateSpec = obj({
       dependency_status_label: str, dependency_status_labels: exactLabels(['open']),
       dependency_sufficiency_label: str, dependency_sufficiency_labels: exactLabels(['not_assessed']),
       topic_qualified_heading: str, unspecified_heading: str, not_sure_heading: str,
-      not_established_heading: str, guidance_empty: str, uncovered_intro: str, rest_of_answers: str,
+      not_established_heading: str, guidance_none_selected: str, uncovered_intro: plural, rest_of_answers: str,
       assurance_heading: str, assurance_text: str,
       // CR-PDF-IMPL-1: the record-limitations heading (N3) and the overview row of a consideration with no open matter (N4).
       limitations_heading: str, overview_no_open: str,

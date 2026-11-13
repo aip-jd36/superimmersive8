@@ -105,11 +105,12 @@ describe('presentation: unverified observations, limitations, comparisons, versi
     expect(html).toContain('some_future_code')
   })
 
-  test('comparisons show the declaration compared and a provisional label', () => {
-    expect(html).toContain('you declared kling')
-    expect(html).toContain('you declared Pro')
-    expect(html).toContain(COMPARISON_LABELS.appears_consistent)
-    expect(html).toContain(COMPARISON_LABELS.appears_to_conflict)
+  test('CR-PDF-RELEASE-FIX-1 (FZ-4): derived comparisons are not presented; readings stay apart from the declarations', () => {
+    expect(html).not.toContain('data-comparisons')
+    expect(html).not.toContain('you declared kling')
+    expect(html).not.toContain('you declared Pro')
+    for (const label of Object.values(COMPARISON_LABELS)) expect(html).not.toContain(label)
+    expect(html).not.toContain(EXAM_TEXT.comparisons_title)
   })
 
   test('a recorded response shows the version it was given in', () => {
