@@ -267,27 +267,20 @@ describe('presentation', () => {
   const text = (h: string) => h.replace(/<[^>]+>/g, ' ').replace(/&#x27;/g, "'").replace(/\s+/g, ' ')
   const render = (view: PreparedView) => renderToStaticMarkup(<ExaminationReview view={view} busy={false} onRespond={() => undefined} />)
 
-  test('declarations, unverified observations and governed guidance are visibly separate, in existing wording', async () => {
+  test('CR-V2-MVP-RELEASE-GATE-1: the review screen shows no guidance beside the documents; the documents are still shown', async () => {
     const { view } = await prepared({ tools: [KLING] })
+    expect(view.examination!.guidance.length).toBeGreaterThan(0) // the view data is unchanged
     const html = render(view)
-    const member = html.slice(html.indexOf(`data-guidance-claim="${MEMBER}"`))
-    const card = text(member.slice(0, member.indexOf('</article>')))
-    expect(card).toContain(T.conclusion_label.relevant_applicability_unresolved)
-    expect(card).toContain(item(view, MEMBER).explanation)
-    expect(card).toContain(EXAM_TEXT.guidance_not_established_label)
-    expect(card).toContain(T.not_established_next_account('Kling', 'Member Account').replace(/\s+/g, ' '))
-    expect(card).toContain('synthetic-receipt.png')
-    expect(card).toContain(EXAM_TEXT.guidance_examined_other.replace('{count}', '10'))
-    expect(card).toContain(EXAM_TEXT.not_verified)
-    expect(card).toContain(EXAM_TEXT.guidance_document_effect)
-    expect(card).toContain(`Reference: ${MEMBER}`)
-    expect(html.indexOf('data-examined-document')).toBeLessThan(html.indexOf('data-guidance-beside-documents'))
-  })
-
-  test('a claim with no linked document says so', async () => {
-    const { view } = await prepared({ tools: [KLING], toolIndex: null })
-    expect(render(view)).toContain('data-guidance-no-document')
-    expect(text(render(view))).toContain(EXAM_TEXT.guidance_no_document)
+    expect(html).toContain('data-examined-document')
+    expect(html).toContain('synthetic-receipt.png')
+    expect(html).not.toContain('data-guidance-beside-documents')
+    expect(html).not.toContain('data-guidance-claim')
+    const t = text(html)
+    for (const g of view.examination!.guidance) {
+      expect(t).not.toContain(g.explanation)
+      expect(t).not.toContain(g.claim_id)
+    }
+    for (const k of ['guidance_title', 'guidance_documents_label', 'guidance_document_effect', 'guidance_no_document'] as const) expect(t).not.toContain(EXAM_TEXT[k])
   })
 
   test('no statement of clearance, verification or compliance is added', async () => {
