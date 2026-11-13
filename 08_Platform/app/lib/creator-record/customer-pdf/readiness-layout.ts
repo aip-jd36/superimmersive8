@@ -31,11 +31,14 @@ export type LayoutBlock =
   | { kind: 'heading' | 'subheading' | 'label' | 'paragraph' | 'bullet'; text: string; from: 'record' | 'issuance' | 'template' }
   | { kind: 'row'; label: string; label_from: 'record' | 'issuance' | 'template'; value: string; value_from: 'record' | 'issuance' | 'template' }
 
-/** A readiness block with the structure the renderer gave it; `integrated` = an approved integrated-assessment block. */
+/**
+ * A readiness block with the structure the renderer gave it. CR-PDF-DECISION-1: only renderer blocks; nothing derived from a
+ * document (no integrated assessment, reading, excerpt or relevance statement) can be placed in this section.
+ */
 export interface PlacedSource {
   block: LayoutBlock
-  section: RenderSection | 'integrated'
-  role: RenderRole | 'integrated'
+  section: RenderSection
+  role: RenderRole
   consideration?: number
   applies_to?: number[]
 }
@@ -46,7 +49,7 @@ export type LayoutHint =
   | 'map_provider' | 'map_label' | 'map_item' | 'map_xref' | 'map_group' | 'map_none' | 'body' | 'qa_question' | 'qa_answer' | 'reading' | 'reading_sub' | 'digest'
 export type LayoutBox =
   | 'identity' | 'overview' | 'panel' | 'map' | 'map_group' | 'map_row' | 'map_ref' | 'map_topic' | 'map_open' | 'guidance' | 'group' | 'consideration'
-  | 'consideration_head' | 'open' | 'dependency' | 'scope' | 'keep' | 'qa' | 'qa_answers' | 'reading' | 'document' | 'section' | 'inset'
+  | 'consideration_head' | 'open' | 'dependency' | 'scope' | 'keep' | 'qa' | 'qa_answers' | 'reading' | 'document' | 'section'
 export type LayoutNode = { kind: 'block'; index: number; hint: LayoutHint } | { kind: 'box'; box: LayoutBox; children: LayoutNode[]; consideration?: number }
 
 /** A readiness block not printed again, with the printed blocks that carry its exact strings. */
@@ -119,7 +122,7 @@ export function readinessLayout(sources: readonly PlacedSource[], summary: Readi
   const scope = idx((x) => x.section === 'not_established' || x.section === 'assurance')
   const gChrome = idx((x, i) => x.section === 'guidance' && x.consideration === undefined && x.role !== 'subject' && x.role !== 'caveat' && !(x.role === 'reference' && x.applies_to) && !isCaveatLabel(i))
   const caveatPanel = idx((x, i) => x.section === 'guidance' && (isCaveatLabel(i) || x.role === 'caveat' || (x.role === 'reference' && x.applies_to !== undefined)))
-  const cBlocks = (c: number) => idx((x) => (x.section === 'guidance' || x.section === 'integrated') && x.consideration === c && x.role !== 'caveat' && !(x.role === 'reference' && x.applies_to))
+  const cBlocks = (c: number) => idx((x) => x.section === 'guidance' && x.consideration === c && x.role !== 'caveat' && !(x.role === 'reference' && x.applies_to))
   const groups: { subject: number | null; cs: number[] }[] = []
   a.forEach((x, i) => {
     if (x.section !== 'guidance') return
@@ -240,10 +243,21 @@ export function readinessLayout(sources: readonly PlacedSource[], summary: Readi
       if (!m) continue
       if (m.rows.length !== 2) throw new ReadinessLayoutRefusal(`list entry ${c} must be its two name rows`)
       nameRows(m.rows)
+      // D5: the label is already shown above the note it belongs to; no standalone open box.
+      if (pairedList.get(c) === L) continue
       // The list label is shown under its first member; under any later member it is a navigation copy.
       nodes.push(box('open', [L.members[0].c === c ? show(L.label, 'eyebrow') : copy(L.label, 'text', 'eyebrow')], c))
     }
     return nodes
+  }
+  // CR-PDF-DECISION-1 (D5): a consideration that belongs to exactly one list (the summary's topic-qualified or unspecified list)
+  // and carries exactly one note has that list's note: the renderer prints the note exactly when the consideration is a member.
+  // Its list label then heads the note (explaining it) instead of standing alone in an open box. Any other case is unchanged.
+  const pairedList = new Map<number, (typeof lists)[number]>()
+  for (const c of considerations.map((x) => x.index)) {
+    const member = lists.filter((L) => L.members.some((m) => m.c === c))
+    const notes = cBlocks(c).filter((i) => a[i].role === 'note')
+    if (member.length === 1 && notes.length === 1) pairedList.set(c, member[0])
   }
   for (const g of groups) {
     const selections = g.cs.map(selectionOf)
@@ -265,12 +279,10 @@ export function readinessLayout(sources: readonly PlacedSource[], summary: Readi
         const i = bs[k]
         if (i === ref || i === topic || skip.has(i)) continue
         const x = a[i]
-        if (x.section === 'integrated') {
-          const run: LayoutNode[] = []
-          while (k < bs.length && a[bs[k]].section === 'integrated') { const j = bs[k++]; run.push(show(j, hintFor(a[j].block))) }
-          k--
-          // The approved integrated assessment can be long: a breakable inset, never an unbreakable panel.
-          body.push(box('inset', run))
+        // CR-PDF-DECISION-1 (D5): a list label that would stand alone heads the note that explains it instead (see `pairedList`).
+        const paired = pairedList.get(c)
+        if (x.role === 'note' && paired) {
+          body.push(box('keep', [paired.members[0].c === c ? show(paired.label, 'eyebrow') : copy(paired.label, 'text', 'eyebrow'), show(i, 'note')]))
           continue
         }
         const hint: LayoutHint = x.role === 'conclusion' ? 'conclusion' : x.role === 'framing' ? 'framing' : x.role === 'explanation' ? 'explanation' : x.role === 'boundary' ? 'fine' : x.role === 'note' ? 'note' : x.role === 'declaration' ? 'compact' : x.block.kind === 'label' ? 'eyebrow' : 'row'
@@ -303,15 +315,6 @@ export function readinessLayout(sources: readonly PlacedSource[], summary: Readi
   for (let i = 0; i < a.length; i++) if (printedAt.has(i) === consolidatedSet.has(i)) throw new ReadinessLayoutRefusal(`block ${i} ${printedAt.has(i) ? 'both printed and consolidated' : 'not placed'}`)
   const resolved: Consolidation[] = consolidated.map((x) => ({ ...x, texts: textsOf(a[x.source].block), same_as: x.same_as.map((s) => printedAt.get(s)!) }))
   return checked({ blocks: out.blocks, layout: [box('overview', overview), box('guidance', guidance), box('scope', scopeNodes)], consolidated: resolved })
-}
-
-function hintFor(b: LayoutBlock): LayoutHint {
-  if (b.kind === 'heading') return 'h1'
-  if (b.kind === 'subheading') return 'h2'
-  if (b.kind === 'label') return 'eyebrow'
-  if (b.kind === 'bullet') return 'bullet'
-  if (b.kind === 'paragraph') return 'body'
-  return b.kind === 'row' && DIGEST.test(b.value) ? 'digest' : 'row'
 }
 
 /**

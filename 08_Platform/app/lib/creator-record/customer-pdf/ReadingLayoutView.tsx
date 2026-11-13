@@ -74,7 +74,6 @@ export function readingStyles(fallback: string) {
     reading: { borderBottomWidth: 0.4, borderBottomColor: C.line, paddingBottom: 2 },
     readingValue: { flex: 1, fontSize: 9.6, fontFamily: BOLD, lineHeight: 1.4 },
     readingSub: { flexDirection: 'row', marginBottom: 1.5, paddingLeft: 175 },
-    inset: { borderLeftWidth: 1.5, borderLeftColor: C.accent, paddingLeft: 8, marginTop: 6 },
     document: { borderWidth: 0.75, borderColor: C.line, borderRadius: 3, padding: 10, marginBottom: 9 },
     section: { marginBottom: 12 },
   })

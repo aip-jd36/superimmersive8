@@ -87,7 +87,8 @@ const RENDER_TEMPLATES: ReadinessRenderTemplates = {
   assurance_text: 'This record organises what the creator declared and what SI8’s published guidance says about it. It does not examine the evidence behind the answers, resolve open items or decide whether the video may be used commercially. SI8’s Commercial Assurance Assessment is a separate service in which a person at SI8 reviews a project and its evidence.', // DRAFT (SUM-A2)
   limitations_heading: '[TEST ONLY] limitations heading',
   overview_no_open: '[TEST ONLY] no open item for this consideration',
-  guidance_unidentified: '[TEST ONLY] no tool-specific guidance: tool or service not identified',
+  guidance_unidentified: { one: '[TEST ONLY] no tool-specific guidance: tool or service not identified', other: '[TEST ONLY] no tool-specific guidance: tools or services not identified' },
+  about_intro_no_guidance: '[TEST ONLY] no guidance was selected',
   count_open_linked: { one: '[TEST ONLY] {n} linked open item.', other: '[TEST ONLY] {n} linked open items.' },
   count_not_sure: { one: '[TEST ONLY] {n} not-sure answer.', other: '[TEST ONLY] {n} not-sure answers.' },
 }

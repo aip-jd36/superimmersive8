@@ -725,24 +725,21 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
 
   function replaceWithReadiness(legacy: CustomerDocumentSection[]): CustomerDocumentSection[] {
     const { summary, rendered, block } = readiness!
+    // CR-PDF-DECISION-1 (founder direction): in the reading layout, automated document readings are shown only in the documents
+    // section, never inside the guidance. A template set that carries both the readiness block and the integrated assessment is
+    // therefore refused (fail closed) rather than printed. The approved v3 set has no readiness block and is unaffected.
+    if (integrated !== null || t.integrated_assessment !== undefined) throw new CustomerPdfRefusal('readiness_layout_refused', 'integrated assessment with the reading layout')
     const templateStrings = new Set<string>()
     const collectStrings = (v: unknown) => { if (typeof v === 'string') templateStrings.add(v); else if (v && typeof v === 'object') Object.values(v).forEach(collectStrings) }
     collectStrings(block)
     const origin = (text: string, source: 'summary' | 'render' | 'mechanical'): TextOrigin => (source === 'summary' && !templateStrings.has(text) ? 'record' : 'template')
-    const itemOf = new Map(summary.groups.flatMap((g) => g.considerations).map((c) => [c.index, items.find((i) => i.claim_id === c.claim_id)!]))
-    // Each rendered block keeps the structure the renderer gave it (section, role, consideration), for the layout only.
+    // Each rendered block keeps the structure the renderer gave it (section, role, consideration), for the layout only. Nothing
+    // derived from a document is placed here (CR-PDF-DECISION-1).
     const placed: PlacedSource[] = []
-    rendered.blocks.forEach((b, k) => {
+    rendered.blocks.forEach((b) => {
       const meta = { section: b.section, role: b.role, ...(b.consideration !== undefined ? { consideration: b.consideration } : {}), ...(b.applies_to ? { applies_to: b.applies_to } : {}) }
       if (b.kind === 'row') placed.push({ block: { kind: 'row', label: b.label, label_from: origin(b.label, b.label_source), value: b.value, value_from: origin(b.value, b.value_source) }, ...meta })
       else placed.push({ block: { kind: b.kind, text: b.text, from: origin(b.text, b.source) }, ...meta })
-      // The approved integrated assessment (schema 8) stays inside its own guidance item: after that consideration's last block.
-      const next = rendered.blocks[k + 1]
-      if (b.section === 'guidance' && b.consideration !== undefined && !(next && next.section === 'guidance' && next.consideration === b.consideration)) {
-        const item = itemOf.get(b.consideration)
-        if (!item) throw new CustomerPdfRefusal('readiness_render_refused', `consideration ${b.consideration}`)
-        for (const ib of integratedBlocks(item)) placed.push({ block: ib, section: 'integrated', role: 'integrated', consideration: b.consideration })
-      }
     })
     const render = block.render as ReadinessRenderTemplates
     let summaryLayout: ReturnType<typeof readinessLayout>
@@ -808,10 +805,17 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
     const openLine = count(S.about.counts.open_items, openCount)
     if (!about || about.blocks.length === 0 || (about.blocks[about.blocks.length - 1] as { text?: string }).text !== openLine) throw new CustomerPdfRefusal('record_unsupported', 'about counts')
     if (summary.open_items.not_sure.length !== notSure.length) throw new CustomerPdfRefusal('readiness_render_refused', 'not-sure count')
+    // CR-PDF-DECISION-1 (W1): when no consideration applies, the opening sentence does not speak of guidance "for the tools and
+    // services you named"; the proposed set's own opening replaces it. Otherwise the approved opening is kept.
+    const noGuidance = summary.groups.every((g) => g.considerations.length === 0)
+    const opening = about.blocks[1] as { kind: string; text?: string } | undefined
+    if (!opening || opening.kind !== 'paragraph' || opening.text !== S.about.intro[0]) throw new CustomerPdfRefusal('record_unsupported', 'about opening')
     byId.set('about', {
       id: 'about',
       blocks: [
-        ...about.blocks.slice(0, -1),
+        about.blocks[0],
+        noGuidance ? tpl(render.about_intro_no_guidance) : about.blocks[1],
+        ...about.blocks.slice(2, -1),
         tpl(count(render.count_open_linked, openCount - notSure.length)),
         ...(notSure.length > 0 ? [tpl(count(render.count_not_sure, notSure.length))] : []),
       ],

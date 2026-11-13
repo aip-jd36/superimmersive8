@@ -52,8 +52,8 @@ describe('U1: a tool or service that cannot be identified is never a named subje
     const t = texts(build(UNKNOWN), 'readiness_summary')
     expect(t).not.toContain(R.guidance_empty)
     expect(t).not.toContain(R.uncovered_intro)
-    expect(t).toContain(R.guidance_unidentified)
-    expect(after(t, R.guidance_unidentified)[0]).toBe('Which AI tool did you use?')
+    expect(t).toContain(R.guidance_unidentified.one)
+    expect(after(t, R.guidance_unidentified.one)[0]).toBe('Which AI tool did you use?')
     // Both uncertain answers are still listed under their own heading, unchanged.
     expect(after(t, R.not_sure_heading).slice(0, 2)).toEqual(['Which AI tool did you use?', 'Which plan were you on with this tool while you made the video?'])
     expect(s.open_items.not_sure.map((q) => q.q_id)).toEqual(['T1', 'T3'])
@@ -63,7 +63,7 @@ describe('U1: a tool or service that cannot be identified is never a named subje
     expect(s.unidentified_subjects).toEqual([])
     expect(s.uncovered_subjects.map((u) => u.answer)).toEqual(['Artlist', 'Getty Images'])
     const t = texts(build(NAMED_UNCOVERED), 'readiness_summary')
-    expect(t).not.toContain(R.guidance_unidentified)
+    expect(t).not.toContain(R.guidance_unidentified.one)
     expect(after(t, R.uncovered_intro).slice(0, 4)).toEqual(['Where did the music come from?', 'Artlist', 'Which stock service did the stock material come from?', 'Getty Images'])
   })
   test('mixed (an unidentified tool and a named service with no guidance): each statement says only what is true of its answers', () => {
@@ -74,7 +74,7 @@ describe('U1: a tool or service that cannot be identified is never a named subje
     const considerations = s.groups.flatMap((g) => g.considerations).length
     // "No published guidance for the tools and services you named" only when nothing was selected AND something was named.
     expect(t.includes(R.guidance_empty)).toBe(considerations === 0)
-    expect(after(t, R.guidance_unidentified)[0]).toBe('Which AI tool did you use?')
+    expect(after(t, R.guidance_unidentified.one)[0]).toBe('Which AI tool did you use?')
     expect(after(t, R.uncovered_intro).slice(0, 2)).toEqual(['Where did the music come from?', 'Artlist'])
     expect(t).not.toContain('Not sure')
   })
@@ -84,14 +84,14 @@ describe('U1: a tool or service that cannot be identified is never a named subje
     expect(s.unidentified_subjects.map((u) => u.q_id)).toEqual(['M1'])
     const t = texts(build(MUSIC_UNKNOWN), 'readiness_summary')
     expect(t).not.toContain(R.guidance_empty)
-    expect(after(t, R.guidance_unidentified)[0]).toBe('Where did the music come from?')
+    expect(after(t, R.guidance_unidentified.one)[0]).toBe('Where did the music come from?')
   })
   test('several tools: only the unidentified tool is listed; no provider is inferred for it', () => {
     const s = summaryOf(TWO_TOOLS)
     expect(s.unidentified_subjects.map((u) => [u.q_id, u.tool_index])).toEqual([['T1', 1]])
     expect(s.groups.map((g) => g.subject?.answer)).toEqual(['Runway'])
     const t = texts(build(TWO_TOOLS), 'readiness_summary')
-    expect(t.filter((x) => x === R.guidance_unidentified)).toHaveLength(1)
+    expect(t.filter((x) => x === R.guidance_unidentified.one)).toHaveLength(1)
     expect(t).not.toContain(R.guidance_empty)
   })
   test('render level: a named subject alone keeps the existing sentence; a summary with nothing to say refuses (fail closed)', () => {
@@ -101,7 +101,7 @@ describe('U1: a tool or service that cannot be identified is never a named subje
     const zero = { ...base, groups: [] }
     const namedOnly = blocksOf({ ...zero, unidentified_subjects: [] })
     expect(namedOnly).toContain(R.guidance_empty)
-    expect(namedOnly).not.toContain(R.guidance_unidentified)
+    expect(namedOnly).not.toContain(R.guidance_unidentified.one)
     expect(() => blocksOf({ ...zero, uncovered_subjects: [], unidentified_subjects: [] })).toThrow(ReadinessRenderRefusal)
   })
 })

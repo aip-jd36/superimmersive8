@@ -136,8 +136,22 @@ describe('coverage: every material element of the replaced sections is accounted
       const legacyStrings = sectionText(LEGACY[c.name], ['guidance', 'open_items'])
       const optionText = documentText(OPTION_R[c.name])
       const items: { claim_id: string }[] = JSON.parse(c.record.canonical).guidance.items
+      // CR-PDF-DECISION-1: the strings of the legacy integrated-assessment runs (heading to method line), which the reading layout
+      // deliberately does not print; the readings themselves stay in the documents section (asserted separately).
+      const ia = T.integrated_assessment
+      const iaRunStrings = new Set<string>()
+      if (ia) {
+        const g = LEGACY[c.name].sections.find((s) => s.id === 'guidance')!.blocks
+        let inRun = false
+        for (const b of g) {
+          if (b.kind === 'label' && b.text === ia.heading) inRun = true
+          if (inRun) for (const t of b.kind === 'row' ? [b.label, b.value] : [b.text]) iaRunStrings.add(t)
+          if (inRun && b.kind === 'paragraph' && b.text.startsWith(ia.method.split('{version}')[0])) inRun = false
+        }
+      }
       // Declared replacements: headings, numbering and navigation the summary replaces with its own structure.
       const replaced = (s: string): string | null => {
+        if (iaRunStrings.has(s)) return 'integrated assessment → not printed in the reading layout (CR-PDF-DECISION-1)'
         if (s === S.guidance.heading || s === S.open_items.heading) return 'section heading → summary headings'
         if (s === S.guidance.intro) return null // must be present (the summary reuses it)
         if (s === S.open_items.intro) return 'open-items intro → "What remains open" + the same second sentence'
@@ -170,20 +184,16 @@ describe('coverage: every material element of the replaced sections is accounted
       else expect(texts).toContain(T.sections.open_items.limitations_heading)
     }
   })
-  test('the approved integrated assessment stays inside its own consideration, exactly as the legacy PDF prints it', () => {
+  test('CR-PDF-DECISION-1: the legacy PDF keeps its integrated assessment; the reading layout prints none (readings stay in the documents section)', () => {
     const c = CASES.find((x) => x.name === 's8ia-linked-docs')!
     const ia = (legacyTemplateSet(c).templates as unknown as CustomerPdfTemplates).integrated_assessment!
     const legacyGuidance = LEGACY[c.name].sections.find((s) => s.id === 'guidance')!.blocks
-    const summary = OPTION_R[c.name].sections.find((s) => s.id === 'readiness_summary')!.blocks
-    const iaStarts = (bs: typeof summary) => bs.map((b, i) => (b.kind === 'label' && b.text === ia.heading ? i : -1)).filter((i) => i >= 0)
-    expect(iaStarts(summary).length).toBe(iaStarts(legacyGuidance).length)
-    expect(iaStarts(summary).length).toBeGreaterThan(0)
-    // Each legacy integrated-assessment block run reappears unchanged in the summary section.
-    const runs = (bs: typeof summary) => iaStarts(bs).map((start) => {
-      const end = bs.findIndex((b, i) => i > start && b.kind === 'paragraph' && b.text.startsWith(ia.method.split('{version}')[0]))
-      return canonicalJson(bs.slice(start, end + 1))
-    })
-    expect(runs(summary).sort()).toEqual(runs(legacyGuidance).sort())
+    expect(legacyGuidance.filter((b) => b.kind === 'label' && b.text === ia.heading).length).toBeGreaterThan(0)
+    const all = OPTION_R[c.name].sections.flatMap((s) => s.blocks)
+    expect(all.filter((b) => b.kind === 'label' && b.text === ia.heading)).toEqual([])
+    expect(all.filter((b) => b.kind === 'paragraph' && b.text.startsWith(ia.method.split('{version}')[0]))).toEqual([])
+    // The documents section is the legacy documents section, block for block.
+    expect(canonicalJson(OPTION_R[c.name].sections.find((s) => s.id === 'documents')!.blocks)).toBe(canonicalJson(LEGACY[c.name].sections.find((s) => s.id === 'documents')!.blocks))
   })
 })
 
@@ -218,7 +228,7 @@ describe('fail closed and isolation', () => {
     expect(b).not.toBe(a)
     expect(documentModelCanonical(build(r1, set7))).toBe(a)
   })
-  test('D10: outside the approved integrated assessment, the summary section carries no reading value or excerpt', () => {
+  test('D10: the summary section carries no reading value or excerpt (CR-PDF-DECISION-1: no integrated assessment in it)', () => {
     for (const c of CASES.filter((x) => x.record.record.schema_version === 8)) {
       const record = JSON.parse(c.record.canonical)
       const readings = new Set<string>()
@@ -226,14 +236,10 @@ describe('fail closed and isolation', () => {
       const declared = new Set<string>()
       const walk = (v: unknown) => { if (typeof v === 'string') declared.add(v); else if (v && typeof v === 'object') Object.values(v).forEach(walk) }
       walk(record.declarations)
-      const ia = (legacyTemplateSet(c).templates as unknown as CustomerPdfTemplates).integrated_assessment
       const blocks = OPTION_R[c.name].sections.find((s) => s.id === 'readiness_summary')!.blocks
-      let inIa = false
       for (const b of blocks) {
-        if (ia && b.kind === 'label' && b.text === ia.heading) inIa = true
         const texts = b.kind === 'row' ? [b.label, b.value] : [b.text]
-        if (!inIa) for (const t of texts) if (readings.has(t)) expect([c.name, t, declared.has(t)]).toEqual([c.name, t, true])
-        if (ia && b.kind === 'paragraph' && b.text.startsWith(ia.method.split('{version}')[0])) inIa = false
+        for (const t of texts) if (readings.has(t)) expect([c.name, t, declared.has(t)]).toEqual([c.name, t, true])
       }
     }
   })

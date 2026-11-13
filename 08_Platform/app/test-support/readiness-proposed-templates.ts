@@ -16,7 +16,7 @@ import { readinessRenderFingerprint } from '@/lib/creator-record/readiness-summa
 import { readinessTemplatesFingerprint } from '@/lib/creator-record/readiness-summary/summary'
 import { optionRTemplates } from './readiness-scenarios'
 
-export const PROPOSED_STATUS = 'PROPOSED — NOT APPROVED (CR-PDF-IMPL-1, revised by CR-PDF-REVIEW-2). Not registered. Requires founder, Living Knowledge governance and counsel approval and a wording/fingerprint freeze before registration.'
+export const PROPOSED_STATUS = 'PROPOSED — NOT APPROVED (CR-PDF-IMPL-1, revised by CR-PDF-REVIEW-2 and CR-PDF-DECISION-1). Not registered. Requires founder, Living Knowledge governance and counsel approval and a wording/fingerprint freeze before registration.'
 export const PROPOSED_VERSIONS = { 7: { pdf: 4, summary: 1, render: 1 }, 8: { pdf: 5, summary: 1, render: 2 } } as const
 
 const clone = <T,>(x: T): T => JSON.parse(JSON.stringify(x))
@@ -72,6 +72,17 @@ export function proposedTemplateSet(schema: 7 | 8): ProposedTemplateSet {
   edit(render, 'guidance_intro', 'An item is not a finding', 'A consideration is not a finding')
   if (schema === 8) edit(render, 'guidance_intro', 'in section 5', 'in section 6')
   render.limitations_heading = schema === 7 ? '6. Documents and limitations' : '7. Limitations of this record'
+  // ── CR-PDF-DECISION-1 (founder direction: document readings are shown separately from the guidance) ──
+  if (schema === 8) {
+    // The integrated assessment is not part of the proposed set: it is optional per template set, so leaving it out means it is
+    // never computed or printed for this set. The approved v3 set keeps it unchanged.
+    delete pdf.integrated_assessment
+    // W2/W3 (PROPOSED): neutral statements that readings were not compared with the declarations or the guidance.
+    edit(pdf, `${S}.not_done.lines[4]`, 'SI8 drew no conclusion from comparing your documents with your declarations.', 'SI8 did not compare your documents, or their readings, with what you told SI8 or with the guidance.')
+    edit(pdf, 'examination.intro[2]', 'Readings were not used to select or qualify the guidance in section 2.', 'Readings were not compared with what you told SI8, and were not used to select or qualify the guidance in section 2.')
+    // W1 (PROPOSED), schema 8 form.
+    render.about_intro_no_guidance = 'This Creator Record sets out what you told SI8 about your AI video and what any documents you added appear to show. None of the general educational guidance that SI8 has published was selected from what you told SI8.'
+  }
   const templates = { ...pdf, version: V.pdf, readiness_summary: { summary, render } }
   return {
     status: PROPOSED_STATUS,

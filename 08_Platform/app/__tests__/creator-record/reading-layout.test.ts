@@ -76,8 +76,8 @@ describe('proposed template sets: stable, PROPOSED, built from the approved base
       const file = JSON.parse(readFileSync(join(APP, `lib/creator-record/governed/proposals/CR-PDF-TEMPLATES-v${s === 7 ? 4 : 5}-schema${s}.proposal.json`), 'utf8'))
       expect(canonicalJson(file)).toBe(canonicalJson(PROPOSED[s]))
     }
-    expect(PROPOSED[7].fingerprints).toEqual({ pdf: '162a00739b317793fbd79caffa22f98c45ae9e14850950ba9890e5a8dc6d3f9f', summary: '2843199d69017bb61531cde7c91a3207f8270c1e218862c0c23e2b76f0b9c288', render: '47422b9dc1bf09da520273ba0c5966b997ea6287d0ce691553d81dd31608bffa' })
-    expect(PROPOSED[8].fingerprints).toEqual({ pdf: '476dfa664ed9bc2b5f060f43b61b24dff79752d45e971b139449d718b3c34c11', summary: '2843199d69017bb61531cde7c91a3207f8270c1e218862c0c23e2b76f0b9c288', render: 'b2a59233b4c7c8d8bd3da5d69dea9f1fd0066f6fb8cc3fcdd2d3bde20a9ae887' })
+    expect(PROPOSED[7].fingerprints).toEqual({ pdf: 'da993e4e93c462c930bf817271b029dda0f07a4af1af133ec1d9c0341a74bc0f', summary: '2843199d69017bb61531cde7c91a3207f8270c1e218862c0c23e2b76f0b9c288', render: '286b84c7d65dea9239cd840b74f5e7f0287ff77bddb60fd0093e16d80b6807f4' })
+    expect(PROPOSED[8].fingerprints).toEqual({ pdf: 'c6aa8eca13b62abf3a94185f9c68a9f286dce64054dc763a8061f119df648582', summary: '2843199d69017bb61531cde7c91a3207f8270c1e218862c0c23e2b76f0b9c288', render: '273a9dc16a0750109f45e2fab95033bef95a204c11b5fa28a4a995acb3a1b94e' })
   })
   test('they are marked PROPOSED, pending, with no authority, and versions 4 (schema 7) and 5 (schema 8)', () => {
     for (const s of [7, 8] as const) {
@@ -208,25 +208,56 @@ describe('the three-level layout, both schemas', () => {
       expect(text.some((t) => t.startsWith(S.open_items.affects.split('{items}')[0]))).toBe(false)
     }
   })
-  test('the approved integrated assessment (schema 8 v3) is printed exactly as the live approved PDF prints it: not expanded', () => {
+  test('CR-PDF-DECISION-1: the proposed schema 8 set carries no integrated assessment, and no integrated-assessment text is printed', () => {
+    expect((T(8) as unknown as Record<string, unknown>).integrated_assessment).toBeUndefined()
+    const v3 = approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }) as { templates: unknown; approval: any }
+    const ia = (v3.templates as CustomerPdfTemplates).integrated_assessment!
+    // Every distinct integrated-assessment string of the approved v3 wording that is not also used elsewhere in the proposed set.
+    const elsewhere = new Set<string>()
+    const collect = (v: unknown) => { if (typeof v === 'string') elsewhere.add(v); else if (v && typeof v === 'object') Object.values(v).forEach(collect) }
+    collect(T(8))
+    const iaStrings = new Set<string>()
+    const collectIa = (v: unknown) => { if (typeof v === 'string') { for (const part of v.split('\n\n')) iaStrings.add(part.split('{')[0]) } else if (v && typeof v === 'object') Object.values(v).forEach(collectIa) }
+    collectIa(ia)
+    const own = [...iaStrings].filter((x) => x.trim().length > 12 && ![...elsewhere].some((e) => e.includes(x)))
+    expect(own.length).toBeGreaterThan(5)
     for (const c of CASES.filter((x) => x.rec.record.schema_version === 8)) {
-      const v3 = approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }) as { templates: unknown; approval: any }
-      const live = buildCustomerDocument({ canonical: c.rec.canonical, sha256: c.rec.sha256, issued: ISSUED, templates: v3.templates, template_approval: v3.approval })
-      const ia = (v3.templates as CustomerPdfTemplates).integrated_assessment!
-      // The live guidance section: each integrated-assessment run starts at its heading and ends at its method line.
-      const g = live.sections.find((s) => s.id === 'guidance')!.blocks
-      const liveRuns: string[] = []
-      g.forEach((b, i) => {
-        if (b.kind !== 'label' || b.text !== ia.heading) return
-        const end = g.findIndex((x, j) => j > i && x.kind === 'paragraph' && x.text.startsWith(ia.method.split('{version}')[0]))
-        liveRuns.push(canonicalJson(g.slice(i, end + 1)))
-      })
-      const s = section(MODEL[c.name], 'readiness_summary')
-      const newRuns = boxes(s.layout!, 'inset').map((b) => canonicalJson(blockIndices([b]).map((i) => s.blocks[i])))
-      expect([c.name, newRuns]).toEqual([c.name, liveRuns])
+      const text = MODEL[c.name].sections.flatMap((s) => s.blocks.flatMap(textsOf))
+      for (const x of own) expect([c.name, x, text.some((t) => t.startsWith(x))]).toEqual([c.name, x, false])
     }
   })
-  test('D10: outside the documents section and the approved integrated assessment, no reading value or excerpt is printed', () => {
+  test('CR-PDF-DECISION-1: the approved v3 PDF still prints its integrated assessment inside the guidance, exactly as before', () => {
+    const v3 = approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }) as { templates: unknown; approval: any }
+    const ia = (v3.templates as CustomerPdfTemplates).integrated_assessment!
+    let runs = 0
+    for (const c of CASES.filter((x) => x.rec.record.schema_version === 8)) {
+      const live = buildCustomerDocument({ canonical: c.rec.canonical, sha256: c.rec.sha256, issued: ISSUED, templates: v3.templates, template_approval: v3.approval })
+      runs += live.sections.find((s) => s.id === 'guidance')!.blocks.filter((b) => b.kind === 'label' && b.text === ia.heading).length
+    }
+    expect(runs).toBeGreaterThan(0)
+  })
+  test('CR-PDF-DECISION-1: a reading-layout set that also carries the integrated assessment refuses (fail closed)', () => {
+    const v3 = approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }) as { templates: any; approval: any }
+    const both = syntheticallyApproved({ ...PROPOSED[8], templates: { ...PROPOSED[8].templates, integrated_assessment: v3.templates.integrated_assessment }, proposed_approval: PROPOSED[8].proposed_approval })
+    const fp = require('@/lib/creator-record/customer-pdf/templates').templateFingerprint(both.templates)
+    const c = CASES.find((x) => x.name === 's8-linked-docs')!
+    expect(() => buildCustomerDocument({ canonical: c.rec.canonical, sha256: c.rec.sha256, issued: ISSUED, templates: both.templates, template_approval: { ...both.approval, fingerprint: fp } })).toThrow(/readiness_layout_refused: integrated assessment with the reading layout/)
+  })
+  test('CR-PDF-DECISION-1: every authorized document reading is printed in the documents section, as the approved v3 PDF prints it', () => {
+    const v3 = approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }) as { templates: unknown; approval: any }
+    for (const c of CASES.filter((x) => x.rec.record.schema_version === 8)) {
+      const live = buildCustomerDocument({ canonical: c.rec.canonical, sha256: c.rec.sha256, issued: ISSUED, templates: v3.templates, template_approval: v3.approval })
+      const was = live.sections.find((s) => s.id === 'documents')!.blocks.map((b) => canonicalJson(b))
+      const now = section(MODEL[c.name], 'documents').blocks.map((b) => canonicalJson(b))
+      // Same blocks, except the section heading's number and the one proposed intro sentence (W3).
+      expect([c.name, now.length]).toEqual([c.name, was.length])
+      // The only differences: the section heading's number and the proposed W3 intro sentence; nothing else.
+      const E5 = T(8).examination as unknown as { heading: string; intro: string[] }
+      const changed = now.flatMap((b, i) => (b === was[i] ? [] : [textsOf(section(MODEL[c.name], 'documents').blocks[i]).join(' | ')]))
+      expect([c.name, changed]).toEqual([c.name, [E5.heading, E5.intro[2]]])
+    }
+  })
+  test('D10: no reading value or excerpt is printed outside the documents section (the guidance carries none)', () => {
     for (const c of CASES.filter((x) => x.rec.record.schema_version === 8)) {
       const record = JSON.parse(c.rec.canonical)
       const declared = new Set<string>()
@@ -234,12 +265,7 @@ describe('the three-level layout, both schemas', () => {
       walk(record.declarations)
       const readings = new Set<string>()
       for (const d of record.documents.items) if (d.examination !== 'not_examined') for (const o of d.examination.envelope.observations) for (const t of [o.value, o.excerpt]) if (typeof t === 'string' && !declared.has(t)) readings.add(t)
-      const s = section(MODEL[c.name], 'readiness_summary')
-      const iaIdx = new Set(boxes(s.layout!, 'inset').flatMap((b) => blockIndices([b])))
-      const outside = [
-        ...MODEL[c.name].sections.filter((x) => x.id !== 'documents' && x.id !== 'readiness_summary').flatMap((x) => x.blocks.flatMap(textsOf)),
-        ...s.blocks.filter((_, i) => !iaIdx.has(i)).flatMap(textsOf),
-      ]
+      const outside = MODEL[c.name].sections.filter((x) => x.id !== 'documents').flatMap((x) => x.blocks.flatMap(textsOf))
       expect([c.name, outside.filter((t) => readings.has(t))]).toEqual([c.name, []])
     }
   })

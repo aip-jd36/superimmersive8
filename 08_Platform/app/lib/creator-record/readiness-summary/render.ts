@@ -87,9 +87,15 @@ export interface ReadinessRenderTemplates {
   overview_no_open: string
   /**
    * CR-PDF-REVIEW-2 (U1): introduces the subject answers from which no tool or service can be identified ("Not sure"). Never
-   * the `guidance_empty` sentence, which speaks of tools and services the creator named.
+   * the `guidance_empty` sentence, which speaks of tools and services the creator named. CR-PDF-DECISION-1: singular (`one`,
+   * a single answer) and plural (`other`) forms.
    */
-  guidance_unidentified: string
+  guidance_unidentified: { one: string; other: string }
+  /**
+   * CR-PDF-DECISION-1 (W1): the About section's opening sentence for a record to which no consideration applies (replaces the
+   * approved opening, which speaks of guidance "for the tools and services you named"). Used by the document model only.
+   */
+  about_intro_no_guidance: string
   /**
    * CR-PDF-REVIEW-2 (U2, U3): the About counts of the three-level layout. The single approved "open items" count (which also
    * counts the answers the creator was not sure about) is shown as its two parts; the total is unchanged. `{n}` is the count.
@@ -141,15 +147,17 @@ export interface RenderedReadinessSummary {
 }
 
 const nonEmpty = (v: unknown): v is string => typeof v === 'string' && v.trim() !== ''
-const TEXT_KEYS = ['heading', 'orientation', 'declared_heading', 'guidance_heading', 'guidance_intro', 'item_limitation', 'dependency_told_label', 'dependency_nothing_told', 'dependency_evidence_label', 'conclusion_label', 'caveats_label', 'consideration_ref_label', 'caveat_applies_to_label', 'depends_on_label', 'unresolved_heading', 'unresolved_intro', 'unresolved_empty', 'dependency_status_label', 'dependency_sufficiency_label', 'topic_qualified_heading', 'unspecified_heading', 'not_sure_heading', 'not_established_heading', 'guidance_empty', 'uncovered_intro', 'rest_of_answers', 'assurance_heading', 'assurance_text', 'limitations_heading', 'overview_no_open', 'guidance_unidentified'] as const
-const PLURAL_KEYS = ['count_open_linked', 'count_not_sure'] as const
+const TEXT_KEYS = ['heading', 'orientation', 'declared_heading', 'guidance_heading', 'guidance_intro', 'item_limitation', 'dependency_told_label', 'dependency_nothing_told', 'dependency_evidence_label', 'conclusion_label', 'caveats_label', 'consideration_ref_label', 'caveat_applies_to_label', 'depends_on_label', 'unresolved_heading', 'unresolved_intro', 'unresolved_empty', 'dependency_status_label', 'dependency_sufficiency_label', 'topic_qualified_heading', 'unspecified_heading', 'not_sure_heading', 'not_established_heading', 'guidance_empty', 'uncovered_intro', 'rest_of_answers', 'assurance_heading', 'assurance_text', 'limitations_heading', 'overview_no_open', 'about_intro_no_guidance'] as const
+/** Counts carry `{n}`; the unidentified-subject sentence has a singular and a plural form without a number. */
+const COUNT_KEYS = ['count_open_linked', 'count_not_sure'] as const
 
 function checkTemplates(t: ReadinessRenderTemplates, a: ReadinessRenderApproval | null): string {
   if (!a || a.lifecycle !== 'approved' || !nonEmpty(a.authority) || !nonEmpty(a.decision_date) || a.template_id !== t.template_id || a.version !== t.version) throw new ReadinessRenderRefusal('templates_not_approved')
   const fp = readinessRenderFingerprint(t)
   if (fp !== a.fingerprint) throw new ReadinessRenderRefusal('templates_fingerprint_mismatch')
   for (const k of TEXT_KEYS) if (!nonEmpty(t[k])) throw new ReadinessRenderRefusal('templates_incomplete', k)
-  for (const k of PLURAL_KEYS) if (!t[k] || !nonEmpty(t[k].one) || !nonEmpty(t[k].other) || !t[k].one.includes('{n}') || !t[k].other.includes('{n}')) throw new ReadinessRenderRefusal('templates_incomplete', k)
+  for (const k of COUNT_KEYS) if (!t[k] || !nonEmpty(t[k].one) || !nonEmpty(t[k].other) || !t[k].one.includes('{n}') || !t[k].other.includes('{n}')) throw new ReadinessRenderRefusal('templates_incomplete', k)
+  if (!t.guidance_unidentified || !nonEmpty(t.guidance_unidentified.one) || !nonEmpty(t.guidance_unidentified.other)) throw new ReadinessRenderRefusal('templates_incomplete', 'guidance_unidentified')
   return fp
 }
 
@@ -211,7 +219,7 @@ export function renderReadinessSummary(summary: ReadinessSummary, templates: Rea
   if (considerations.length === 0 && summary.uncovered_subjects.length === 0 && unidentified.length === 0) throw new ReadinessRenderRefusal('malformed_summary', 'no guidance and no subject')
   if (considerations.length === 0 && summary.uncovered_subjects.length > 0) r('guidance', 'paragraph', 'boundary', T.guidance_empty)
   if (unidentified.length > 0) {
-    r('guidance', 'paragraph', 'boundary', T.guidance_unidentified)
+    r('guidance', 'paragraph', 'boundary', unidentified.length === 1 ? T.guidance_unidentified.one : T.guidance_unidentified.other)
     for (const q of unidentified) s('guidance', 'bullet', 'unidentified', q.question)
   }
   const framed = new Set<string>()

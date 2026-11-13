@@ -87,7 +87,13 @@ export const PROPOSED_RENDER_TEMPLATES: ReadinessRenderTemplates = {
   overview_no_open: 'No open item was identified for this consideration from what you told SI8. This does not mean nothing is open.',
   // CR-PDF-REVIEW-2 — PROPOSED, NOT APPROVED. U1: subject answers that identify no tool or service. U2/U3: the About count of open
   // items shown as its two parts (items linked to considerations; answers the creator was not sure about). Same total.
-  guidance_unidentified: 'No tool- or service-specific guidance could be selected for these answers, because you did not identify the tool or service:',
+  guidance_unidentified: {
+    one: 'No guidance specific to a tool or service could be selected for this answer, because you did not identify the tool or service:',
+    other: 'No guidance specific to a tool or service could be selected for these answers, because you did not identify the tools or services:',
+  },
+  // CR-PDF-DECISION-1 — PROPOSED, NOT APPROVED. W1: About opening when no consideration applies (schema 7 form; the proposed
+  // schema 8 set replaces it with its own form, see `./readiness-proposed-templates`).
+  about_intro_no_guidance: 'This Creator Record sets out what you told SI8 about your AI video. None of the general educational guidance that SI8 has published was selected from what you told SI8.',
   count_open_linked: { one: '{n} open item linked to considerations.', other: '{n} open items linked to considerations.' },
   count_not_sure: { one: '{n} answer you were not sure about.', other: '{n} answers you were not sure about.' },
 }
@@ -199,6 +205,9 @@ export function optionRTemplates(base: { templates: Record<string, unknown>; app
     not_sure_heading: O.not_sure_heading,
     guidance_empty: G.empty,
   }
+  // CR-PDF-DECISION-1: the reading-layout design never carries the integrated assessment (document readings are shown only in the
+  // documents section). A set with both refuses; the base set's integrated-assessment wording is therefore not carried over.
+  delete b.integrated_assessment
   const templates = { ...b, version: (b.version as number) + 100, readiness_summary: { summary: JSON.parse(JSON.stringify(summary)), render: JSON.parse(JSON.stringify(render)) } }
   return {
     templates,

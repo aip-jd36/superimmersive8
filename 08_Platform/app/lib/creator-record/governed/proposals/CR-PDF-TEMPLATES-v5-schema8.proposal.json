@@ -1,5 +1,5 @@
 {
- "status": "PROPOSED — NOT APPROVED (CR-PDF-IMPL-1, revised by CR-PDF-REVIEW-2). Not registered. Requires founder, Living Knowledge governance and counsel approval and a wording/fingerprint freeze before registration.",
+ "status": "PROPOSED — NOT APPROVED (CR-PDF-IMPL-1, revised by CR-PDF-REVIEW-2 and CR-PDF-DECISION-1). Not registered. Requires founder, Living Knowledge governance and counsel approval and a wording/fingerprint freeze before registration.",
  "schema": 8,
  "base": {
   "template_id": "si8/creator-record-v2-pdf-templates",
@@ -107,7 +107,7 @@
      "SI8 did not decide whether your video may be used commercially. This record is not a clearance.",
      "No person at SI8 reviewed your video, your answers, your documents or the readings of your documents.",
      "SI8 did not check that any document is genuine, complete or current, or that it belongs to you.",
-     "SI8 drew no conclusion from comparing your documents with your declarations.",
+     "SI8 did not compare your documents, or their readings, with what you told SI8 or with the guidance.",
      "This is not SI8’s human-reviewed Commercial Assurance Assessment."
     ]
    },
@@ -157,54 +157,6 @@
    "fingerprint_note": "A fingerprint identifies the exact file SI8 received. It does not show that the document is genuine, who made it, or when.",
    "examination": "Examination",
    "not_examined": "Not examined"
-  },
-  "integrated_assessment": {
-   "heading": "How your documents relate to this guidance",
-   "intro": "This section shows what you told us and what our automated examination found in documents linked to the AI tool you used.\n\nWhere document information is relevant to a condition in the guidance above, we explain why.\n\nThe automated examination does not independently confirm the information in your documents. Finding relevant information does not mean a condition has been satisfied. A document may still be useful even when this automated check cannot read information relevant to that condition.\n\nThe guidance above remains unchanged.",
-   "requirement": "Condition",
-   "unlabelled_requirement": "A condition this guidance depends on",
-   "you_told_us": "What you told us",
-   "nothing_told": "You did not give an answer for this.",
-   "standing": "Current position",
-   "standing_labels": {
-    "rests_on_declaration": "Based on your answer.",
-    "not_established": "Not established in this record. The guidance above stays conditional on it.",
-    "open": "Open."
-   },
-   "evidence_labels": {
-    "no_linked_document": "You did not link a document to this tool, so this rests on your answer alone.",
-    "not_read_from_documents": "SI8's automated examination does not read this from documents, so your documents were not used for it.",
-    "evidence_requirement_not_defined": "SI8 has not set out what document could show this, so your documents were not used for it. It remains open."
-   },
-   "document": "Document {n}",
-   "status_labels": {
-    "not_examined": "Not examined, so nothing from it was used.",
-    "creator_disputed": "You asked SI8 not to rely on this reading, so it has not been used.",
-    "cannot_establish": "No usable information for this condition was found in this document.",
-    "leaves_uncertainty": "What this document shows about this condition is unclear.",
-    "relevant_observation_unverified": "Contains information relevant to this condition."
-   },
-   "reason": "Detail",
-   "reason_labels": {
-    "not_examined": "The document was not examined.",
-    "creator_response": "Your response to this document's reading.",
-    "examination_failed": "The automated examination could not read the document.",
-    "reading_not_recoverable": "The stored reading could not be used exactly as recorded.",
-    "tool_link_not_established": "This record does not show which of your tools the document relates to for this condition.",
-    "not_a_billing_document": "The examination did not read it as a receipt or invoice.",
-    "document_illegible": "The examination could not read it clearly.",
-    "field_not_shown": "The examination did not find a plan name on it.",
-    "field_unreadable": "The examination found a plan name but could not read it.",
-    "field_ambiguous": "The examination could not tell which plan name it shows.",
-    "multiple_plans_shown": "The examination found more than one plan name.",
-    "plan_text_incomplete": "The plan name the examination found appears cut off.",
-    "field_present": "The examination found a plan name, and this condition depends on which plan you were on."
-   },
-   "appears_to_show": "Plan name read from the document",
-   "excerpt": "Text it was read from",
-   "your_response": "Your response",
-   "not_compared": "SI8 has not determined whether the information read from your documents matches what you told us. This section explains how the document observations relate to the conditions in the guidance above.",
-   "method": "Integrated assessment method, version {version}."
   },
   "document_type_labels": {
    "application/pdf": "PDF",
@@ -266,7 +218,7 @@
    "intro": [
     "For each document you added, this section shows what an automated reading reported it appears to show. Where you asked for it, the reading was made by an AI model.",
     "A reading is not something you told SI8, and no person checked it. It may be wrong or incomplete. It does not show that a document is genuine, that it belongs to you, or what rights it gives.",
-    "Readings were not used to select or qualify the guidance in section 2."
+    "Readings were not compared with what you told SI8, and were not used to select or qualify the guidance in section 2."
    ],
    "document_heading": "Document {n}",
    "status": "Examination",
@@ -484,7 +436,11 @@
     "assurance_text": "This record organises what the creator declared and what SI8’s published guidance says about it. It does not examine the evidence behind the answers, resolve open items or decide whether the video may be used commercially. SI8’s Commercial Assurance Assessment is a separate service in which a person at SI8 reviews a project and its evidence.",
     "limitations_heading": "7. Limitations of this record",
     "overview_no_open": "No open item was identified for this consideration from what you told SI8. This does not mean nothing is open.",
-    "guidance_unidentified": "No tool- or service-specific guidance could be selected for these answers, because you did not identify the tool or service:",
+    "guidance_unidentified": {
+     "one": "No guidance specific to a tool or service could be selected for this answer, because you did not identify the tool or service:",
+     "other": "No guidance specific to a tool or service could be selected for these answers, because you did not identify the tools or services:"
+    },
+    "about_intro_no_guidance": "This Creator Record sets out what you told SI8 about your AI video and what any documents you added appear to show. None of the general educational guidance that SI8 has published was selected from what you told SI8.",
     "count_open_linked": {
      "one": "{n} open item linked to considerations.",
      "other": "{n} open items linked to considerations."
@@ -497,14 +453,14 @@
   }
  },
  "fingerprints": {
-  "pdf": "476dfa664ed9bc2b5f060f43b61b24dff79752d45e971b139449d718b3c34c11",
+  "pdf": "c6aa8eca13b62abf3a94185f9c68a9f286dce64054dc763a8061f119df648582",
   "summary": "2843199d69017bb61531cde7c91a3207f8270c1e218862c0c23e2b76f0b9c288",
-  "render": "b2a59233b4c7c8d8bd3da5d69dea9f1fd0066f6fb8cc3fcdd2d3bde20a9ae887"
+  "render": "273a9dc16a0750109f45e2fab95033bef95a204c11b5fa28a4a995acb3a1b94e"
  },
  "proposed_approval": {
   "template_id": "si8/creator-record-v2-pdf-templates",
   "version": 5,
-  "fingerprint": "476dfa664ed9bc2b5f060f43b61b24dff79752d45e971b139449d718b3c34c11",
+  "fingerprint": "c6aa8eca13b62abf3a94185f9c68a9f286dce64054dc763a8061f119df648582",
   "record_schema": {
    "id": "si8/creator-record-v2-record",
    "version": 8
