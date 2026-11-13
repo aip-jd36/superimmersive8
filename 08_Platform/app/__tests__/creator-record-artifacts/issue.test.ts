@@ -6,7 +6,8 @@
  * issued rows, and storage that never overwrites (upsert: false).
  */
 
-import { issueCreatorRecordArtifact, sha256Hex, type ArtifactRow, type ArtifactTable, type IssueDeps, type ObjectStore } from '@/lib/creator-record-artifacts/issue'
+import { ArtifactGeneratorMismatchError, issueCreatorRecordArtifact, sha256Hex, type ArtifactRow, type ArtifactTable, type IssueDeps, type ObjectStore } from '@/lib/creator-record-artifacts/issue'
+import { rendererForFamily } from '@/lib/creator-record-artifacts/renderers'
 
 const SUB = '3f2a9c10-1111-4222-8333-444455556666'
 
@@ -278,5 +279,66 @@ describe('generator provenance (CR-PDF-CLAIMS-1C.1)', () => {
     expect(objects.objects.get(issued.storage_path)).toBe(bytes)
     expect(renders()).toBe(0)
     expect(objects.puts).toHaveLength(0)
+  })
+})
+
+describe('CR-V2-MVP-CUTOVER-PREP-1: no re-render under another generator (opt-in, v2 family)', () => {
+  const V2_OLD = 'creator-record-v2-pdf-v2'
+  const V2_NEW = 'creator-record-v2-pdf-v3'
+  const v2 = (render: () => Promise<Uint8Array>) => ({
+    family: 'creator_record_v2', generator_version: V2_NEW, rerenderOnlySameGenerator: true,
+    ownsGeneratorVersion: (version: string) => /^creator-record-v2-pdf-v[1-9][0-9]*$/.test(version), render,
+  })
+  const pending = (over: Partial<ArtifactRow> = {}): ArtifactRow => ({
+    id: 'art-v2', submission_id: SUB, record_id: 'CR-2026-3F2A9C10', attempt_id: '00000000-0000-4000-8000-0000000000bb',
+    storage_path: `${SUB}/00000000-0000-4000-8000-0000000000bb.pdf`, sha256: 'e'.repeat(64), byte_size: 10,
+    generator_version: V2_OLD, status: 'pending', uat: false, issued_at: null, ...over,
+  })
+
+  test('missing object recorded by the previous generator: refused; nothing rendered, stored, taken over or issued', async () => {
+    const { table, objects, deps } = setup()
+    let renders = 0
+    const before = pending()
+    table.rows.set(before.id, before)
+    await expect(issueCreatorRecordArtifact(SUB, deps({ renderer: v2(async () => { renders++; return new Uint8Array([1]) }) }))).rejects.toThrow(ArtifactGeneratorMismatchError)
+    expect(renders).toBe(0)
+    expect(objects.puts).toHaveLength(0)
+    expect(await table.find(SUB)).toEqual(before)
+  })
+
+  test('missing object recorded by the current generator: the normal takeover re-renders and issues', async () => {
+    const { table, deps } = setup()
+    let renders = 0
+    table.rows.set('art-v2', pending({ generator_version: V2_NEW }))
+    const r = await issueCreatorRecordArtifact(SUB, deps({ renderer: v2(async () => { renders++; return new TextEncoder().encode('%PDF v2 new') }) }))
+    expect(r.outcome).toBe('issued')
+    expect(renders).toBe(1)
+    expect((await table.find(SUB))!.generator_version).toBe(V2_NEW)
+  })
+
+  test('object present, recorded by the previous generator: its stored bytes are verified and issued, never re-rendered', async () => {
+    const { table, objects, deps } = setup()
+    let renders = 0
+    const bytes = new TextEncoder().encode('%PDF rendered before the cutover')
+    const row = pending({ sha256: sha256Hex(bytes), byte_size: bytes.byteLength })
+    table.rows.set(row.id, row)
+    objects.objects.set(row.storage_path, bytes)
+    const r = await issueCreatorRecordArtifact(SUB, deps({ renderer: v2(async () => { renders++; return new Uint8Array([1]) }) }))
+    expect(r.outcome).toBe('issued')
+    expect(renders).toBe(0)
+    expect((await table.find(SUB))!.generator_version).toBe(V2_OLD)
+  })
+
+  test('an issued artifact is untouched across the boundary', async () => {
+    const { table, deps } = setup()
+    const issued = pending({ status: 'issued', issued_at: '2026-11-10T00:00:00Z' })
+    table.rows.set(issued.id, issued)
+    expect((await issueCreatorRecordArtifact(SUB, deps({ renderer: v2(async () => new Uint8Array([1])) }))).outcome).toBe('already_issued')
+    expect(await table.find(SUB)).toEqual(issued)
+  })
+
+  test('the v2 production renderer opts in; the v1 renderer keeps its re-render-on-takeover behaviour', () => {
+    expect(rendererForFamily('creator_record_v2', 'enabled').rerenderOnlySameGenerator).toBe(true)
+    expect(rendererForFamily('creator_record_v1').rerenderOnlySameGenerator).toBeUndefined()
   })
 })

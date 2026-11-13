@@ -19,6 +19,8 @@
  *     (`./renderers`) and records its own generator version. A pending row is
  *     resumed only by a renderer of the family that recorded it; otherwise
  *     nothing is rendered, stored or issued (`ArtifactFamilyMismatchError`).
+ *   - CR-V2-MVP-CUTOVER-PREP-1: a renderer may require that a pending row with a missing object is re-rendered only by the
+ *     generator that recorded it (`rerenderOnlySameGenerator`); otherwise `ArtifactGeneratorMismatchError`, nothing changed.
  *   - CR-V2-MVP-ELIGIBILITY-1: a renderer may supply `authorize`, run immediately before any attempt is marked issued. If it
  *     throws, the row stays pending and the step stays incomplete.
  *
@@ -74,6 +76,13 @@ export interface IssueRenderer {
   render(recordId: string): Promise<Uint8Array>
   /** When present, throws unless the submission may be issued now. A resumed attempt renders nothing, so this is its only check. */
   authorize?(): Promise<void>
+  /**
+   * CR-V2-MVP-CUTOVER-PREP-1: when true, a pending row whose object never landed is re-rendered only by the generator that recorded it.
+   * A row recorded by another generator of the same family (for example before a template cutover) is refused instead
+   * (`ArtifactGeneratorMismatchError`): nothing is rendered, stored, taken over or issued, and the row stays pending for
+   * reconciliation. A pending row whose object exists is unaffected (its stored bytes are verified and issued, never re-rendered).
+   */
+  rerenderOnlySameGenerator?: boolean
 }
 
 export interface IssueDeps {
@@ -111,6 +120,16 @@ export class ArtifactFamilyMismatchError extends Error {
   }
 }
 
+/**
+ * CR-V2-MVP-CUTOVER-PREP-1: a pending row whose object is missing was recorded by a different generator of this family. Re-rendering it
+ * would silently issue the record under a different generator/template regime than the one it was recorded for. Nothing was changed.
+ */
+export class ArtifactGeneratorMismatchError extends Error {
+  constructor(readonly artifactId: string, readonly recordedGenerator: string) {
+    super('creator_record_artifact_generator_mismatch')
+  }
+}
+
 export async function issueCreatorRecordArtifact(submissionId: string, deps: IssueDeps): Promise<IssueResult> {
   const existing = await deps.artifacts.find(submissionId)
   if (existing?.status === 'issued') return { outcome: 'already_issued', artifact: existing }
@@ -139,6 +158,8 @@ async function resumePending(row: ArtifactRow, deps: IssueDeps): Promise<IssueRe
   const stored = await deps.objects.get(row.storage_path)
   if (stored) return verifyAndIssue(row, stored, deps)
 
+  // CR-V2-MVP-CUTOVER-PREP-1: never re-render a row under another generator than the one that recorded it (when the renderer opts in).
+  if (deps.renderer.rerenderOnlySameGenerator && row.generator_version !== deps.renderer.generator_version) throw new ArtifactGeneratorMismatchError(row.id, row.generator_version)
   // The pending attempt's object never landed: take over with a NEW attempt and path.
   const attemptId = deps.newAttemptId()
   const bytes = await deps.renderer.render(row.record_id)

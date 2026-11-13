@@ -49,6 +49,8 @@ export interface CreatorRecordRenderer {
   render(sub: FulfillmentSubmission, recordId: string, issuedAt: Date): Promise<Uint8Array>
   /** CR-V2-MVP-ELIGIBILITY-1: when present, throws unless this submission may be issued now. Run on every path, including a resumed attempt. */
   authorize?(sub: FulfillmentSubmission, issuedAt: Date): Promise<void>
+  /** CR-V2-MVP-CUTOVER-PREP-1: a missing-object pending row is re-rendered only by the generator that recorded it (see `./issue`). */
+  readonly rerenderOnlySameGenerator?: boolean
 }
 
 /** Every version the v1 renderer has recorded: legacy-creator-record-pdf-v1, -v2 and -v3 (current). */
@@ -73,6 +75,9 @@ const V2_RENDERER: CreatorRecordRenderer = Object.freeze({
   generator_version: CREATOR_RECORD_V2_GENERATOR_VERSION,
   ownsGeneratorVersion: (version: string) => V2_GENERATOR_VERSION.test(version),
   legacy_path_permitted: false,
+  // CR-V2-MVP-CUTOVER-PREP-1: across a template cutover (with a generator bump) a pending row is never silently re-rendered under the new
+  // templates; it is refused and left for reconciliation. The v1 family keeps its existing re-render-on-takeover behaviour.
+  rerenderOnlySameGenerator: true,
   // Loaded on first render only. Throws (nothing rendered or stored) unless the bound record verifies and is eligible.
   render: async (sub: FulfillmentSubmission, recordId: string, issuedAt: Date) =>
     (await import('@/lib/creator-record-flow/production')).renderCreatorRecordV2Pdf(
