@@ -81,6 +81,10 @@ export interface ReadinessRenderTemplates {
   rest_of_answers: string
   assurance_heading: string
   assurance_text: string
+  /** CR-PDF-IMPL-1 (N3): the record-limitations section heading of the three-level layout (numbered). */
+  limitations_heading: string
+  /** CR-PDF-IMPL-1 (N4): the overview row of a consideration the summary attaches no open matter to (never left blank). */
+  overview_no_open: string
 }
 
 export interface ReadinessRenderApproval {
@@ -126,7 +130,7 @@ export interface RenderedReadinessSummary {
 }
 
 const nonEmpty = (v: unknown): v is string => typeof v === 'string' && v.trim() !== ''
-const TEXT_KEYS = ['heading', 'orientation', 'declared_heading', 'guidance_heading', 'guidance_intro', 'item_limitation', 'dependency_told_label', 'dependency_nothing_told', 'dependency_evidence_label', 'conclusion_label', 'caveats_label', 'consideration_ref_label', 'caveat_applies_to_label', 'depends_on_label', 'unresolved_heading', 'unresolved_intro', 'unresolved_empty', 'dependency_status_label', 'dependency_sufficiency_label', 'topic_qualified_heading', 'unspecified_heading', 'not_sure_heading', 'not_established_heading', 'guidance_empty', 'uncovered_intro', 'rest_of_answers', 'assurance_heading', 'assurance_text'] as const
+const TEXT_KEYS = ['heading', 'orientation', 'declared_heading', 'guidance_heading', 'guidance_intro', 'item_limitation', 'dependency_told_label', 'dependency_nothing_told', 'dependency_evidence_label', 'conclusion_label', 'caveats_label', 'consideration_ref_label', 'caveat_applies_to_label', 'depends_on_label', 'unresolved_heading', 'unresolved_intro', 'unresolved_empty', 'dependency_status_label', 'dependency_sufficiency_label', 'topic_qualified_heading', 'unspecified_heading', 'not_sure_heading', 'not_established_heading', 'guidance_empty', 'uncovered_intro', 'rest_of_answers', 'assurance_heading', 'assurance_text', 'limitations_heading', 'overview_no_open'] as const
 
 function checkTemplates(t: ReadinessRenderTemplates, a: ReadinessRenderApproval | null): string {
   if (!a || a.lifecycle !== 'approved' || !nonEmpty(a.authority) || !nonEmpty(a.decision_date) || a.template_id !== t.template_id || a.version !== t.version) throw new ReadinessRenderRefusal('templates_not_approved')

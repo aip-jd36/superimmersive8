@@ -145,6 +145,8 @@ export function approvedPdfTemplates(
   if (!bundle) return { templates: null, approval: null }
   if (!recordSchema) return { templates: bundle.pdf_templates, approval: bundle.pdf_template_approval }
   const sets = [{ templates: bundle.pdf_templates, approval: bundle.pdf_template_approval }, ...(bundle.pdf_template_sets ?? [])]
-  const matching = sets.filter((t) => t.approval !== null && t.approval.record_schema?.id === recordSchema.id && t.approval.record_schema?.version === recordSchema.version)
+  // CR-PDF-IMPL-1: only an APPROVED set is active. A superseded, withdrawn or pending set may stay registered for audit without
+  // being selected; exactly one approved set per record schema is still required (none, or two, selects nothing: fail closed).
+  const matching = sets.filter((t) => t.approval !== null && t.approval.lifecycle === 'approved' && t.approval.record_schema?.id === recordSchema.id && t.approval.record_schema?.version === recordSchema.version)
   return matching.length === 1 ? { templates: matching[0].templates, approval: matching[0].approval } : { templates: null, approval: null }
 }

@@ -1,0 +1,312 @@
+{
+ "status": "PROPOSED — NOT APPROVED (CR-PDF-IMPL-1). Not registered. Requires founder, Living Knowledge governance and counsel approval and a wording/fingerprint freeze before registration.",
+ "schema": 7,
+ "base": {
+  "template_id": "si8/creator-record-v2-pdf-templates",
+  "version": 1,
+  "fingerprint": "c5fe2a21ec8a096c6abf7eccf0bd55f3103401e10a26512052e5d2ee15a11c6c"
+ },
+ "templates": {
+  "template_id": "si8/creator-record-v2-pdf-templates",
+  "version": 4,
+  "record_schema": {
+   "id": "si8/creator-record-v2-record",
+   "version": 7
+  },
+  "document_title": "SI8 Creator Record {record_id}",
+  "stamp": "SELF-DECLARED RECORD · EDUCATIONAL GUIDANCE · NOT LEGAL ADVICE · NOT A CLEARANCE",
+  "footer": "SI8 Creator Record {record_id} · Self-declared · Not legal advice · Not a clearance",
+  "page_label": "Page {page} of {pages}",
+  "sections": {
+   "about": {
+    "heading": "1. About this record",
+    "intro": [
+     "This Creator Record sets out what you told SI8 about your AI video, and general educational guidance that SI8 has published for the tools and services you named.",
+     "Everything in sections 3 to 5 is your own declaration, recorded as you gave it. No person at SI8 checked it.",
+     "The guidance in section 2 is educational. It describes providers’ own terms and policies as SI8 read them. It is not legal advice, and it does not say whether your video may be used commercially.",
+     "Section 2 also sets out what remains open and what this record does not establish. Section 6 sets out the record’s limitations, and section 7 lists what SI8 did not do."
+    ],
+    "counts": {
+     "answers": {
+      "one": "{n} answer recorded.",
+      "other": "{n} answers recorded."
+     },
+     "guidance": {
+      "one": "{n} consideration.",
+      "other": "{n} considerations."
+     },
+     "open_items": {
+      "one": "{n} open item.",
+      "other": "{n} open items."
+     }
+    }
+   },
+   "project": {
+    "heading": "3. Your video",
+    "intro": "What you told SI8 about the video, where you are based and where it will be shown.",
+    "empty": "You did not give any details here."
+   },
+   "tools": {
+    "heading": "4. Your AI tools",
+    "intro": "The AI tools you told SI8 you used, with the plan and dates you gave for each.",
+    "tool_heading": "Tool {n}",
+    "empty": "You did not name any tools."
+   },
+   "contribution": {
+    "heading": "5. What went into the video",
+    "intro": "What you told SI8 about real people, material from other sources and your own contribution.",
+    "empty": "You did not give any details here."
+   },
+   "guidance": {
+    "heading": "5. Educational guidance",
+    "intro": "Guidance SI8 has published for Creator Records, selected from what you told SI8. Each item says why it was selected and what it depends on. An item is not a finding about your video.",
+    "empty": "SI8 has no published guidance for the tools and services you named. That is not a finding about them: it neither suggests nor rules out commercial use, and it does not mean there is nothing to consider.",
+    "item_heading": "Item {index}: {subject}",
+    "subject_with_tool": "{topic} (tool {n})",
+    "conclusion": "How this relates to what you told us",
+    "item_limitation": "This is general educational guidance about the provider’s terms. It is not a determination about your video, your account or your use.",
+    "selected_because": "Selected because you told us",
+    "on_what_you_told_us": "Based on what you told us",
+    "depends_on": "Depends on",
+    "unspecified_condition": "A condition this record does not identify.",
+    "topic_level": "Other information in this record means this subject is shown as not established, even though this item’s own conditions are based on what you told us.",
+    "caveats": "Please note"
+   },
+   "open_items": {
+    "heading": "6. Open items",
+    "intro": "What this record does not establish. An open item is not a problem SI8 has found, and it is not resolved by anything in this record.",
+    "empty": "No open items were identified from what you told SI8. This does not mean nothing is open.",
+    "item_ref": "Item {index}",
+    "for_guidance": "Relates to",
+    "what_you_told_us": "What you told us",
+    "nothing_told": "You did not tell us about this.",
+    "evidence_note": "About evidence",
+    "status": "Status",
+    "sufficiency": "Sufficiency",
+    "not_established_heading": "Not established by this record",
+    "affects": "Affects items {items}",
+    "unspecified_heading": "Conditions this record does not identify",
+    "topic_qualified_heading": "Subjects shown as not established",
+    "not_sure_heading": "Answers you were not sure about",
+    "documents_heading": "Documents you added",
+    "documents_not_provided": "You did not add any documents.",
+    "limitations_heading": "Limitations of this record",
+    "limitations": [
+     "This record contains only what you told SI8. No person checked it against your video, your accounts or your documents.",
+     "Guidance reflects providers’ terms as SI8 last read them. Terms change.",
+     "Where you are based and where the video will be shown are recorded, but they do not change which guidance is shown.",
+     "Tools and services SI8 has no published guidance for are recorded as you gave them, without guidance. That says nothing about whether they may be used commercially."
+    ]
+   },
+   "not_done": {
+    "heading": "7. What SI8 did not do",
+    "lines": [
+     "SI8 did not give legal advice.",
+     "SI8 did not decide whether your video may be used commercially. This record is not a clearance.",
+     "No person at SI8 reviewed your video, your answers or your documents.",
+     "SI8 did not read or examine any document for this record.",
+     "SI8 did not check that any document is genuine, complete or current.",
+     "This is not SI8’s human-reviewed Commercial Assurance Assessment."
+    ]
+   },
+   "provenance": {
+    "heading": "8. How this record was made",
+    "acknowledgements_heading": "What you acknowledged",
+    "identity_heading": "This record",
+    "sources_heading": "Questions and wording used",
+    "publications_heading": "Guidance sources",
+    "labels": {
+     "record_id": "Record number",
+     "issued_on": "Issued on",
+     "prepared_ref": "Prepared record reference",
+     "record_version": "Declaration version",
+     "prepared_on": "Prepared on",
+     "captured_at": "Answers captured at",
+     "snapshot": "Answers fingerprint (SHA-256)",
+     "record_schema": "Record format",
+     "record_schema_version": "Record format version",
+     "builder": "Record builder",
+     "builder_version": "Record builder version",
+     "registry_version": "Question set version",
+     "ledger_version": "Guidance set version",
+     "wording": "Wording set",
+     "wording_version": "Wording version",
+     "wording_digest": "Wording fingerprint",
+     "questionnaire_contract": "Questionnaire",
+     "questionnaire_contract_version": "Questionnaire version",
+     "questionnaire_contract_ref": "Questionnaire reference",
+     "templates": "Document layout",
+     "templates_version": "Document layout version",
+     "templates_fingerprint": "Document layout fingerprint",
+     "publication_version": "Guidance entry version"
+    }
+   }
+  },
+  "documents": {
+   "intro": "Documents you added, listed as received. SI8 did not read or examine them for this record.",
+   "item_label": "File {n}",
+   "type": "File type",
+   "category": "Your description",
+   "tool": "Linked to",
+   "tool_value": "Tool {n}",
+   "size": "Size",
+   "size_value": "{bytes} bytes",
+   "fingerprint": "SHA-256 fingerprint",
+   "fingerprint_note": "A fingerprint identifies the exact file SI8 received. It does not show that the document is genuine, who made it, or when.",
+   "examination": "Examination",
+   "not_examined": "Not examined"
+  },
+  "document_type_labels": {
+   "application/pdf": "PDF",
+   "image/png": "PNG image",
+   "image/jpeg": "JPEG image"
+  },
+  "document_category_labels": {
+   "billing_receipt": "Receipt or invoice",
+   "licence": "Licence",
+   "provider_terms": "Provider terms",
+   "release_or_consent": "Release or consent",
+   "permission": "Permission",
+   "project_file": "Project file",
+   "other": "Other"
+  },
+  "question_sections": {
+   "P1": "project",
+   "P2": "project",
+   "P3": "project",
+   "F1": "project",
+   "F2": "project",
+   "F3": "project",
+   "L1": "contribution",
+   "M0": "contribution",
+   "M1": "contribution",
+   "M1X": "contribution",
+   "M2": "contribution",
+   "M3": "contribution",
+   "M3X": "contribution",
+   "M3D": "contribution",
+   "M4": "contribution",
+   "H1": "contribution",
+   "H2": "contribution"
+  },
+  "conclusion_labels": {
+   "relevant_on_declared_facts": "Relevant to what you told us",
+   "relevant_applicability_unresolved": "May be relevant: it depends on something this record does not establish"
+  },
+  "topic_labels": {
+   "commercial_use": "Commercial use of AI output",
+   "third_party_source_rights": "Material from other sources"
+  },
+  "fact_labels": {
+   "tool_plan_tier": "The plan you were on with this tool",
+   "tool_account_status": "Your account status with this tool",
+   "jurisdiction": "Where the terms are in force"
+  },
+  "not_sure_label": "Not sure",
+  "dependency_codes": {
+   "status": {
+    "open": "Open"
+   },
+   "sufficiency": {
+    "not_assessed": "Not assessed"
+   }
+  },
+  "readiness_summary": {
+   "summary": {
+    "template_id": "si8/creator-record-v2-readiness-summary-templates",
+    "version": 1,
+    "conclusion_labels": {
+     "relevant_on_declared_facts": "Relevant to what you told us",
+     "relevant_applicability_unresolved": "May be relevant: it depends on something this record does not establish"
+    },
+    "topic_labels": {
+     "commercial_use": "Commercial use of AI output",
+     "third_party_source_rights": "Material from other sources"
+    },
+    "topic_framing": {
+     "commercial_use": "The terms of an AI tool may contain conditions or restrictions on commercial use of its output.",
+     "third_party_source_rights": "Music, stock footage and other third-party material may be subject to licence conditions and other rights or permissions that this record does not establish."
+    },
+    "selected_because_label": "Selected because you told us",
+    "based_on_label": "Based on what you told us",
+    "subject_questions": [
+     "T1",
+     "T1X",
+     "M1",
+     "M1X",
+     "M3",
+     "M3X"
+    ],
+    "topic_qualified_note": "Other information in this record means this subject is shown as not established, even though this consideration’s own conditions are based on what you told us.",
+    "unspecified_condition_note": "A condition this record does not identify."
+   },
+   "render": {
+    "template_id": "si8/creator-record-v2-readiness-render-templates",
+    "version": 1,
+    "summary_method": {
+     "id": "si8/creator-record-v2-readiness-summary",
+     "version": 2
+    },
+    "heading": "2. Commercial-readiness considerations",
+    "orientation": "This section brings together what SI8’s published guidance says about the tools and services you named, and what this record does not establish. It does not weigh these points against each other or reach an overall conclusion, and it is not a decision about whether the video may be used commercially.",
+    "declared_heading": "What you told us",
+    "guidance_heading": "What SI8’s published guidance says",
+    "guidance_intro": "Guidance SI8 has published for Creator Records, selected from what you told SI8. Each consideration says why it was selected and what it depends on. A consideration is not a finding about your video.",
+    "item_limitation": "This is general educational guidance about the provider’s terms. It is not a determination about your video, your account or your use.",
+    "dependency_told_label": "What you told us",
+    "dependency_nothing_told": "You did not tell us about this.",
+    "dependency_evidence_label": "About evidence",
+    "conclusion_label": "How this relates to what you told us",
+    "caveats_label": "Please note",
+    "consideration_ref_label": "Consideration",
+    "caveat_applies_to_label": "Applies to considerations",
+    "depends_on_label": "Depends on",
+    "fact_labels": {
+     "tool_plan_tier": "The plan you were on with this tool",
+     "tool_account_status": "Your account status with this tool",
+     "jurisdiction": "Where the terms are in force"
+    },
+    "unresolved_heading": "Considerations and what remains open",
+    "unresolved_intro": "An open item is not a problem SI8 has found, and it is not resolved by anything in this record.",
+    "unresolved_empty": "No open items were identified from what you told SI8. This does not mean nothing is open.",
+    "dependency_status_label": "Status",
+    "dependency_status_labels": {
+     "open": "Open"
+    },
+    "dependency_sufficiency_label": "Sufficiency",
+    "dependency_sufficiency_labels": {
+     "not_assessed": "Not assessed"
+    },
+    "topic_qualified_heading": "Subjects shown as not established",
+    "unspecified_heading": "Conditions this record does not identify",
+    "not_sure_heading": "Answers you were not sure about",
+    "not_established_heading": "What this record does not establish",
+    "guidance_empty": "SI8 has no published guidance for the tools and services you named. That is not a finding about them: it neither suggests nor rules out commercial use, and it does not mean there is nothing to consider.",
+    "uncovered_intro": "This record contains no SI8 guidance for these tools and services you named:",
+    "rest_of_answers": "The rest of your answers received no guidance in this record. That is not a finding about them: it neither suggests nor rules out commercial use, and it does not mean there is nothing to consider.",
+    "assurance_heading": "How this differs from a human-reviewed assessment",
+    "assurance_text": "This record organises what the creator declared and what SI8’s published guidance says about it. It does not examine the evidence behind the answers, resolve open items or decide whether the video may be used commercially. SI8’s Commercial Assurance Assessment is a separate service in which a person at SI8 reviews a project and its evidence.",
+    "limitations_heading": "6. Documents and limitations",
+    "overview_no_open": "No open item was identified for this consideration from what you told SI8. This does not mean nothing is open."
+   }
+  }
+ },
+ "fingerprints": {
+  "pdf": "17923149c81f9f9be45eb51b3033aba5adcc081ef673fa4647fdf6da987f93f2",
+  "summary": "2843199d69017bb61531cde7c91a3207f8270c1e218862c0c23e2b76f0b9c288",
+  "render": "e72529d37ecefb2d791f594b74c5406c376b075934554d9363ad3a040d50a1b2"
+ },
+ "proposed_approval": {
+  "template_id": "si8/creator-record-v2-pdf-templates",
+  "version": 4,
+  "fingerprint": "17923149c81f9f9be45eb51b3033aba5adcc081ef673fa4647fdf6da987f93f2",
+  "record_schema": {
+   "id": "si8/creator-record-v2-record",
+   "version": 7
+  },
+  "lifecycle": "pending",
+  "authority": null,
+  "decision_date": null,
+  "review_ref": null
+ }
+}

@@ -85,6 +85,8 @@ const RENDER_TEMPLATES: ReadinessRenderTemplates = {
   rest_of_answers: 'The rest of the creator’s answers received no guidance in this record. That is not a finding about them: it neither suggests nor rules out commercial use, and it does not mean there is nothing to consider.', // DRAFT (SUM-M4)
   assurance_heading: 'How this differs from a human-reviewed assessment', // DRAFT (SUM-A1)
   assurance_text: 'This record organises what the creator declared and what SI8’s published guidance says about it. It does not examine the evidence behind the answers, resolve open items or decide whether the video may be used commercially. SI8’s Commercial Assurance Assessment is a separate service in which a person at SI8 reviews a project and its evidence.', // DRAFT (SUM-A2)
+  limitations_heading: '[TEST ONLY] limitations heading',
+  overview_no_open: '[TEST ONLY] no open item for this consideration',
 }
 const renderApprovalOf = (t: ReadinessRenderTemplates): ReadinessRenderApproval => ({ template_id: t.template_id, version: t.version, fingerprint: readinessRenderFingerprint(t), lifecycle: 'approved', authority: SYNTHETIC_APPROVAL_AUTHORITY, decision_date: '2026-11-12' })
 const RENDER_APPROVAL = renderApprovalOf(RENDER_TEMPLATES)
@@ -195,10 +197,12 @@ describe('the scenarios are what they claim to be (real records)', () => {
     expect(music.considerations[0].explanation).toBe(ARTLIST_APPROVED_COPY.explanation)
     expect(stock.considerations[0].explanation).toBe(ARTLIST_APPROVED_COPY.explanation)
   })
-  test('4: incomplete declarations: not-sure answers and an uncovered "Not sure" tool', () => {
+  test('4: incomplete declarations: not-sure answers; a "Not sure" tool is NOT an uncovered subject (CR-PDF-IMPL-1)', () => {
     const s = SUMMARIES['4-incomplete-declarations']
     expect(s.open_items.not_sure.length).toBeGreaterThanOrEqual(4)
-    expect(s.uncovered_subjects.some((u) => u.q_id === 'T1' && u.tool_index === 1)).toBe(true)
+    // "Not sure" is not a tool the creator named: it is listed only with the answers the creator was not sure about.
+    expect(s.uncovered_subjects.some((u) => u.q_id === 'T1' && u.tool_index === 1)).toBe(false)
+    expect(s.open_items.not_sure.some((n) => n.q_id === 'T1' && n.tool_index === 1)).toBe(true)
   })
   test('5: unresolved conditions, open dependencies and a topic-level cap', () => {
     const s = SUMMARIES['5-unresolved-and-topic-caps']
@@ -313,7 +317,7 @@ describe('fail closed', () => {
     expect(refusal(() => render(s(), incomplete, renderApprovalOf(incomplete)))).toBe('templates_incomplete')
   })
   test('a summary from another method version, an unlabelled fact or dependency code, or a malformed summary refuses', () => {
-    expect(refusal(() => render({ ...s(), method: { ...s().method, version: 2 } as never }))).toBe('summary_method_mismatch')
+    expect(refusal(() => render({ ...s(), method: { ...s().method, version: s().method.version + 1 } as never }))).toBe('summary_method_mismatch')
     const noFacts = { ...RENDER_TEMPLATES, fact_labels: {} }
     expect(refusal(() => render(s(), noFacts, renderApprovalOf(noFacts)))).toBe('unlabelled_fact')
     const noStatus = { ...RENDER_TEMPLATES, dependency_status_labels: {} }
@@ -341,7 +345,8 @@ describe('inactive', () => {
     const own = join(root, 'lib/creator-record/readiness-summary')
     // CR-SUM-PDF-B1: the customer document model is the one gated importer; the synthetic approval appears in no application file.
     const importers = files.filter((p) => !p.startsWith(own) && /from ['"][^'"]*readiness-summary/.test(readFileSync(p, 'utf8'))).map((p) => relative(root, p).split(sep).join('/'))
-    expect(importers).toEqual(['lib/creator-record/customer-pdf/document-model.ts'])
+    // CR-PDF-IMPL-1: the layout module reads the summary's types only.
+    expect(importers).toEqual(['lib/creator-record/customer-pdf/document-model.ts', 'lib/creator-record/customer-pdf/readiness-layout.ts'])
     expect(files.filter((p) => /SYNTHETIC TEST APPROVAL/.test(readFileSync(p, 'utf8')))).toEqual([])
   })
 })

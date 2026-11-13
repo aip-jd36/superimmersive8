@@ -144,6 +144,7 @@ describe('determinism, version isolation and test-only material', () => {
     const own = join(root, 'lib/creator-record/readiness-summary')
     // CR-SUM-PDF-B1: the customer document model is the one gated importer of the summary; nothing imports the test-side proof.
     const importers = files.filter((p) => !p.startsWith(own) && /from ['"][^'"]*(readiness-summary|readiness-pdf-proof|readiness-scenarios)/.test(readFileSync(p, 'utf8'))).map((p) => relative(root, p).split(sep).join('/'))
-    expect(importers).toEqual(['lib/creator-record/customer-pdf/document-model.ts'])
+    // CR-PDF-IMPL-1: the layout module reads the summary's types only.
+    expect(importers).toEqual(['lib/creator-record/customer-pdf/document-model.ts', 'lib/creator-record/customer-pdf/readiness-layout.ts'])
   })
 })

@@ -29,15 +29,15 @@ export const SYNTHETIC_PROOF_AUTHORITY = 'SYNTHETIC TEST APPROVAL — CR-SUM-PDF
 
 const V3 = (approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).templates as any)
 
-/** CR-STAGE1-APPROVAL-1 proposed summary set (draft fingerprint 20d844ad…). */
+/** Proposed summary set. CR-PDF-IMPL-1: wording as in CR-PDF-WORDING-2 / CR-PDF-APPROVAL-1 (R1, R2). PROPOSED, NOT APPROVED. */
 export const PROPOSED_SUMMARY_TEMPLATES: ReadinessSummaryTemplates = {
   template_id: 'si8/creator-record-v2-readiness-summary-templates',
   version: 1,
   conclusion_labels: { relevant_on_declared_facts: V3.conclusion_labels.relevant_on_declared_facts, relevant_applicability_unresolved: V3.conclusion_labels.relevant_applicability_unresolved },
   topic_labels: { commercial_use: V3.topic_labels.commercial_use, third_party_source_rights: V3.topic_labels.third_party_source_rights },
   topic_framing: {
-    commercial_use: 'An AI tool’s own terms set whether, and on which plans, what it generates may be used commercially.',
-    third_party_source_rights: 'When a video includes music or stock material from a library, that library’s license sets how the material may be used.',
+    commercial_use: 'The terms of an AI tool may contain conditions or restrictions on commercial use of its output.',
+    third_party_source_rights: 'Music, stock footage and other third-party material may be subject to licence conditions and other rights or permissions that this record does not establish.',
   },
   selected_because_label: V3.sections.guidance.selected_because,
   based_on_label: V3.sections.guidance.on_what_you_told_us,
@@ -46,13 +46,13 @@ export const PROPOSED_SUMMARY_TEMPLATES: ReadinessSummaryTemplates = {
   unspecified_condition_note: V3.sections.guidance.unspecified_condition,
 }
 
-/** CR-SUM-2C proposed render set (draft fingerprint 083ac093…). */
+/** Proposed render set. CR-PDF-IMPL-1: wording as in CR-PDF-WORDING-2 / CR-PDF-APPROVAL-1 (V1–V3, H1, G4, N3, N4). PROPOSED. */
 export const PROPOSED_RENDER_TEMPLATES: ReadinessRenderTemplates = {
   template_id: 'si8/creator-record-v2-readiness-render-templates',
   version: 1,
   summary_method: { ...READINESS_SUMMARY_METHOD },
   heading: 'Commercial-readiness considerations',
-  orientation: 'This section brings together what SI8’s published guidance says about the tools and services the creator named, and what this record does not establish. It does not weigh these points against each other or reach an overall conclusion, and it is not a decision about whether the video may be used commercially.',
+  orientation: 'This section brings together what SI8’s published guidance says about the tools and services you named, and what this record does not establish. It does not weigh these points against each other or reach an overall conclusion, and it is not a decision about whether the video may be used commercially.',
   declared_heading: V3.sections.open_items.what_you_told_us,
   guidance_heading: 'What SI8’s published guidance says',
   guidance_intro: V3.sections.guidance.intro,
@@ -66,7 +66,7 @@ export const PROPOSED_RENDER_TEMPLATES: ReadinessRenderTemplates = {
   caveat_applies_to_label: 'Applies to considerations',
   depends_on_label: V3.sections.guidance.depends_on,
   fact_labels: V3.fact_labels,
-  unresolved_heading: 'What remains open',
+  unresolved_heading: 'Considerations and what remains open',
   unresolved_intro: 'An open item is not a problem SI8 has found, and it is not resolved by anything in this record.',
   unresolved_empty: V3.sections.open_items.empty,
   dependency_status_label: V3.sections.open_items.status,
@@ -78,10 +78,13 @@ export const PROPOSED_RENDER_TEMPLATES: ReadinessRenderTemplates = {
   not_sure_heading: V3.sections.open_items.not_sure_heading,
   not_established_heading: 'What this record does not establish',
   guidance_empty: V3.sections.guidance.empty,
-  uncovered_intro: 'SI8 has no published guidance in this record for these tools and services the creator named:',
-  rest_of_answers: 'The rest of the creator’s answers received no guidance in this record. That is not a finding about them: it neither suggests nor rules out commercial use, and it does not mean there is nothing to consider.',
+  uncovered_intro: 'This record contains no SI8 guidance for these tools and services you named:',
+  rest_of_answers: 'The rest of your answers received no guidance in this record. That is not a finding about them: it neither suggests nor rules out commercial use, and it does not mean there is nothing to consider.',
   assurance_heading: 'How this differs from a human-reviewed assessment',
   assurance_text: 'This record organises what the creator declared and what SI8’s published guidance says about it. It does not examine the evidence behind the answers, resolve open items or decide whether the video may be used commercially. SI8’s Commercial Assurance Assessment is a separate service in which a person at SI8 reviews a project and its evidence.',
+  // N3: set per schema by the proposed template sets (`./readiness-proposed-templates`); this unnumbered value is a fixture default.
+  limitations_heading: 'Limitations of this record',
+  overview_no_open: 'No open item was identified for this consideration from what you told SI8. This does not mean nothing is open.',
 }
 
 export const SYNTHETIC_SUMMARY_APPROVAL: ReadinessSummaryApproval = { template_id: PROPOSED_SUMMARY_TEMPLATES.template_id, version: 1, fingerprint: readinessTemplatesFingerprint(PROPOSED_SUMMARY_TEMPLATES), lifecycle: 'approved', authority: SYNTHETIC_PROOF_AUTHORITY, decision_date: '2026-11-12' }

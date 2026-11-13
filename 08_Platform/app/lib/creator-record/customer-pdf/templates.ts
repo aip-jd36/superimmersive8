@@ -42,8 +42,9 @@ export const CUSTOMER_PDF_EXAMINATION_SECTIONS = ['about', 'project', 'tools', '
  * INSTEAD OF `guidance` and `open_items`, followed by `record_limitations` (the record-level content that section carried:
  * the document inventory of a schema 7 record and the record's limitations). Never both presentations in one document.
  */
-export const CUSTOMER_PDF_READINESS_SECTIONS = ['about', 'project', 'tools', 'contribution', 'readiness_summary', 'record_limitations', 'not_done', 'provenance'] as const
-export const CUSTOMER_PDF_READINESS_EXAMINATION_SECTIONS = ['about', 'project', 'tools', 'contribution', 'documents', 'readiness_summary', 'record_limitations', 'not_done', 'provenance'] as const
+// CR-PDF-IMPL-1: the three-level reading order (identity; about; the summary; then the supporting record).
+export const CUSTOMER_PDF_READINESS_SECTIONS = ['identity', 'about', 'readiness_summary', 'project', 'tools', 'contribution', 'record_limitations', 'not_done', 'provenance'] as const
+export const CUSTOMER_PDF_READINESS_EXAMINATION_SECTIONS = ['identity', 'about', 'readiness_summary', 'project', 'tools', 'contribution', 'documents', 'record_limitations', 'not_done', 'provenance'] as const
 export type CustomerPdfSectionId = (typeof CUSTOMER_PDF_EXAMINATION_SECTIONS)[number] | (typeof CUSTOMER_PDF_READINESS_SECTIONS)[number]
 /** The examination states a document can be in. `not_examined` is the record's own value; the other two are the envelope's outcome. */
 export const DOCUMENT_EXAMINATION_STATES = ['not_examined', 'examined', 'could_not_examine'] as const
@@ -189,6 +190,8 @@ const templateSpec = obj({
       topic_qualified_heading: str, unspecified_heading: str, not_sure_heading: str,
       not_established_heading: str, guidance_empty: str, uncovered_intro: str, rest_of_answers: str,
       assurance_heading: str, assurance_text: str,
+      // CR-PDF-IMPL-1: the record-limitations heading (N3) and the overview row of a consideration with no open matter (N4).
+      limitations_heading: str, overview_no_open: str,
     }),
   })),
   document_type_labels: exactLabels(EVIDENCE_MEDIA_TYPES),

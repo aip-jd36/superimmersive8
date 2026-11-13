@@ -20,6 +20,7 @@ import React from 'react'
 import { Document, Font, Page, StyleSheet, Text, View, renderToStream, type TextProps } from '@react-pdf/renderer'
 import { buildCustomerDocument, CustomerPdfRefusal, documentText, type Block, type CustomerDocumentInput, type CustomerDocumentModel } from './document-model'
 import { lineBreakOpportunities, pdfText, unsupportedCharacters } from './text-layout'
+import { ReadingSection, readingStyles } from './ReadingLayoutView'
 
 const FALLBACK_FONT = 'SI8 Customer Record Fallback'
 Font.register({ family: FALLBACK_FONT, src: path.join(process.cwd(), 'lib', 'creator-record', 'customer-pdf', 'fonts', 'NotoSansCJKtc-Regular.otf') })
@@ -114,6 +115,9 @@ export function groupHeadings(blocks: readonly Block[]): Block[][] {
   return groups
 }
 
+/** CR-PDF-IMPL-1: the reading-layout styles (same fonts: Helvetica with the bundled fallback). */
+const reading = readingStyles(FALLBACK_FONT)
+
 export function CustomerRecordPDF({ model }: { model: CustomerDocumentModel }) {
   const m = model.marking
   return (
@@ -125,7 +129,9 @@ export function CustomerRecordPDF({ model }: { model: CustomerDocumentModel }) {
           <Line style={s.headerId} text={m.record_id} />
         </View>
         <Line style={s.footerText} fixed text={m.footer} />
-        {model.sections.map((section) => (
+        {model.presentation
+          ? model.sections.map((section) => <ReadingSection key={section.id} section={section} s={reading} />)
+          : model.sections.map((section) => (
           <View key={section.id} style={s.section}>
             {groupHeadings(section.blocks).map((group, i) =>
               group.length === 1 ? (

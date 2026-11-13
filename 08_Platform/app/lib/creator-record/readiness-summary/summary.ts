@@ -41,7 +41,9 @@ import { CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION, CUSTOMER_RECORD_SCHEMA_VERS
 import { assessIntegrated } from '../integrated-assessment/assess'
 import { canonicalJson, sha256Hex } from '../record-core/canonical'
 
-export const READINESS_SUMMARY_METHOD = { id: 'si8/creator-record-v2-readiness-summary', version: 1 } as const
+// v2 (CR-PDF-IMPL-1): an answer holding an uncertain value ("Not sure") is never listed as an uncovered subject; it is listed
+// with the answers the creator was not sure about. Never issued at v1 (inert).
+export const READINESS_SUMMARY_METHOD = { id: 'si8/creator-record-v2-readiness-summary', version: 2 } as const
 
 /** The summary's wording. Every string here needs its own approval; none is approved today. */
 export interface ReadinessSummaryTemplates {
@@ -387,6 +389,8 @@ export function buildReadinessSummary(input: {
     if (tool === undefined) continue
     const at = answerAt.get(answerKey(o.question.q_id, tool))
     if (!at || uncovered_subjects.some((u) => u.q_id === at.answer.q_id && u.tool_index === at.answer.tool_index)) continue
+    // CR-PDF-IMPL-1: "Not sure" is not a tool or service the creator named; it stays only in `not_sure`.
+    if (at.answer.values.some(isUncertainValue)) continue
     // An answer is uncovered only if none of its observations is cited.
     const siblingCited = record.declarations.observations.some((x) => x.question.q_id === o.question.q_id && instanceToolIndex(x.instance) === tool && cited.has(x.observation_id))
     if (siblingCited) continue

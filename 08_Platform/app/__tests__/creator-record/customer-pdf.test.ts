@@ -666,7 +666,8 @@ describe('rendering boundary', () => {
       // readiness block; no approved set does). Their own imports are checked below.
       '../readiness-summary/render', '../readiness-summary/summary',
       '../record-core/canonical', '../record-core/projection',
-      './document-model', './templates', './text-layout', '@react-pdf/renderer', 'node:path', 'react',
+      // CR-PDF-IMPL-1: the three-level reading layout (pure) and its drawing.
+      './ReadingLayoutView', './document-model', './readiness-layout', './templates', './text-layout', '@react-pdf/renderer', 'node:path', 'react',
     ])
   })
 

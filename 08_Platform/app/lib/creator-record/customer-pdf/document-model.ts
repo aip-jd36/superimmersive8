@@ -42,9 +42,10 @@ import { CUSTOMER_SUPPRESSED_OBSERVATION_FIELDS, EVIDENCE_CATEGORIES, EVIDENCE_M
 import { CONTENT_CLASSES, EXAMINATION_FAILURE_REASONS, EXAMINATION_LIMITATIONS, EXECUTOR_MODES, OBSERVATION_BASES, OBSERVATION_STATUSES, WORKFLOW_AUTHORIZATIONS } from '../examination/envelope'
 import { LIVE_LIMITATIONS } from '../live-examination/envelope'
 import { canonicalJson } from '../record-core/canonical'
-import { checkTemplates, fill, type CustomerPdfSectionId, type CustomerPdfTemplates, type PdfTemplateApproval, type TemplateRefusalCode } from './templates'
+import { checkTemplates, CUSTOMER_PDF_READINESS_EXAMINATION_SECTIONS, CUSTOMER_PDF_READINESS_SECTIONS, fill, type CustomerPdfSectionId, type CustomerPdfTemplates, type PdfTemplateApproval, type TemplateRefusalCode } from './templates'
 import { buildReadinessSummary, readinessTemplatesFingerprint, ReadinessSummaryRefusal, type ReadinessSummary, type ReadinessSummaryTemplates } from '../readiness-summary/summary'
 import { readinessRenderFingerprint, renderReadinessSummary, ReadinessRenderRefusal, type ReadinessRenderTemplates, type RenderedReadinessSummary } from '../readiness-summary/render'
+import { flowLayout, readinessLayout, ReadinessLayoutRefusal, type Consolidation, type LayoutNode, type PlacedSource } from './readiness-layout'
 
 export type TextOrigin = 'record' | 'issuance' | 'template'
 
@@ -55,9 +56,18 @@ export type Block =
 export interface CustomerDocumentSection {
   id: CustomerPdfSectionId
   blocks: Block[]
+  /**
+   * CR-PDF-IMPL-1: present only in the three-level reading layout (a template set carrying the readiness block). How the
+   * section's blocks are grouped; it visits every block once, in order (`./readiness-layout`). Legacy sections have none.
+   */
+  layout?: LayoutNode[]
+  /** CR-PDF-IMPL-1: readiness blocks not printed again because the same strings, from the same source, are printed in place. */
+  consolidated?: Consolidation[]
 }
 
 export interface CustomerDocumentModel {
+  /** CR-PDF-IMPL-1: present only for the three-level reading layout. Legacy models have no such field. */
+  presentation?: typeof READING_HIERARCHY_PRESENTATION
   meta: { title: string; subject: string; creator: string; producer: string }
   marking: { stamp: string; record_id: string; footer: string; page_label: string }
   sections: CustomerDocumentSection[]
@@ -80,6 +90,9 @@ export interface CustomerDocumentInput {
   templates: unknown
   template_approval: PdfTemplateApproval | null
 }
+
+/** CR-PDF-IMPL-1: the presentation id of the three-level reading layout. */
+export const READING_HIERARCHY_PRESENTATION = 'si8/creator-record-v2-reading-hierarchy-v1' as const
 
 export class CustomerPdfRefusal extends Error {
   constructor(readonly code: string, readonly ref: string | null = null) {
@@ -705,8 +718,9 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
     },
   ]
 
-  // CR-SUM-PDF-B1 (Option R). Without the block, `sections` is returned exactly as composed above. With it, `guidance` and
-  // `open_items` are REPLACED (never kept alongside) by the consultative summary and by `record_limitations`.
+  // CR-SUM-PDF-B1 (Option R) / CR-PDF-IMPL-1. Without the block, `sections` is returned exactly as composed above. With it,
+  // `guidance` and `open_items` are REPLACED (never kept alongside) by the consultative summary and `record_limitations`, in the
+  // three-level reading order: identity, about, the summary, then the supporting record.
   const finalSections = readiness ? replaceWithReadiness(sections) : sections
 
   function replaceWithReadiness(legacy: CustomerDocumentSection[]): CustomerDocumentSection[] {
@@ -716,18 +730,28 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
     collectStrings(block)
     const origin = (text: string, source: 'summary' | 'render' | 'mechanical'): TextOrigin => (source === 'summary' && !templateStrings.has(text) ? 'record' : 'template')
     const itemOf = new Map(summary.groups.flatMap((g) => g.considerations).map((c) => [c.index, items.find((i) => i.claim_id === c.claim_id)!]))
-    const out: Block[] = []
+    // Each rendered block keeps the structure the renderer gave it (section, role, consideration), for the layout only.
+    const placed: PlacedSource[] = []
     rendered.blocks.forEach((b, k) => {
-      if (b.kind === 'row') out.push({ kind: 'row', label: b.label, label_from: origin(b.label, b.label_source), value: b.value, value_from: origin(b.value, b.value_source) })
-      else out.push({ kind: b.kind, text: b.text, from: origin(b.text, b.source) })
+      const meta = { section: b.section, role: b.role, ...(b.consideration !== undefined ? { consideration: b.consideration } : {}), ...(b.applies_to ? { applies_to: b.applies_to } : {}) }
+      if (b.kind === 'row') placed.push({ block: { kind: 'row', label: b.label, label_from: origin(b.label, b.label_source), value: b.value, value_from: origin(b.value, b.value_source) }, ...meta })
+      else placed.push({ block: { kind: b.kind, text: b.text, from: origin(b.text, b.source) }, ...meta })
       // The approved integrated assessment (schema 8) stays inside its own guidance item: after that consideration's last block.
       const next = rendered.blocks[k + 1]
       if (b.section === 'guidance' && b.consideration !== undefined && !(next && next.section === 'guidance' && next.consideration === b.consideration)) {
         const item = itemOf.get(b.consideration)
         if (!item) throw new CustomerPdfRefusal('readiness_render_refused', `consideration ${b.consideration}`)
-        out.push(...integratedBlocks(item))
+        for (const ib of integratedBlocks(item)) placed.push({ block: ib, section: 'integrated', role: 'integrated', consideration: b.consideration })
       }
     })
+    const render = block.render as ReadinessRenderTemplates
+    let summaryLayout: ReturnType<typeof readinessLayout>
+    try {
+      summaryLayout = readinessLayout(placed, summary, render.overview_no_open)
+    } catch (err) {
+      if (err instanceof ReadinessLayoutRefusal) throw new CustomerPdfRefusal('readiness_layout_refused', err.ref)
+      throw err
+    }
     // Record-level content the replaced open-items section carried: a schema 7 record's document inventory (a schema 8 record
     // keeps its own documents section) and the record's limitations, both exactly as the open-items section prints them.
     const limitations: Block[] = [
@@ -746,18 +770,50 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
                   tpl(t.documents.fingerprint_note),
                 ]),
           ]),
-      { kind: 'subheading', text: S.open_items.limitations_heading, from: 'template' },
+      // CR-PDF-IMPL-1 (N3): a schema 8 record's section heading replaces this subheading; every limitation is still printed.
+      ...(examinationBearing ? [] : [{ kind: 'subheading', text: S.open_items.limitations_heading, from: 'template' } as Block]),
       ...S.open_items.limitations.map((l): Block => ({ kind: 'bullet', text: l, from: 'template' })),
     ]
-    const result: CustomerDocumentSection[] = []
-    for (const s of legacy) {
-      if (s.id === 'guidance') result.push({ id: 'readiness_summary', blocks: out }, { id: 'record_limitations', blocks: limitations })
-      else if (s.id !== 'open_items') result.push(s)
+    const limitationsSection: Block[] = [heading(render.limitations_heading), ...limitations]
+
+    // Identity block: the document title and two provenance rows, all existing strings and the record's own identity.
+    const P = S.provenance.labels
+    const identityBlocks: Block[] = [
+      { kind: 'heading', text: fill(t.document_title, { record_id: issued.record_id }), from: 'template' },
+      row(P.record_id, issued.record_id, 'issuance'),
+      row(P.issued_on, issued.issued_on, 'issuance'),
+    ]
+    const identity: CustomerDocumentSection = {
+      id: 'identity', blocks: identityBlocks,
+      layout: [{ kind: 'box', box: 'identity', children: [{ kind: 'block', index: 0, hint: 'title' }, { kind: 'block', index: 1, hint: 'row' }, { kind: 'block', index: 2, hint: 'row' }] }],
     }
-    return result
+
+    // The supporting record: generic layouts (question/answer rows; document cards with reading groups; headings kept).
+    const E = t.examination
+    const readingSubRows = new Set<string>([E?.basis, E?.reading, E?.excerpt, E?.qualifier, E?.your_response, E?.comparison_response].filter((x): x is string => typeof x === 'string'))
+    const laidOut = (s: CustomerDocumentSection): CustomerDocumentSection => {
+      const l = flowLayout(s.blocks, {
+        qa: s.id === 'project' || s.id === 'tools' || s.id === 'contribution',
+        documents: s.id === 'documents',
+        subRows: s.id === 'documents' ? readingSubRows : undefined,
+        fine: s.id === 'not_done' || s.id === 'record_limitations',
+      })
+      return { id: s.id, blocks: l.blocks, layout: l.layout }
+    }
+    const byId = new Map(legacy.map((s) => [s.id as string, s]))
+    const order = examinationBearing ? CUSTOMER_PDF_READINESS_EXAMINATION_SECTIONS : CUSTOMER_PDF_READINESS_SECTIONS
+    return order.map((id): CustomerDocumentSection => {
+      if (id === 'identity') return identity
+      if (id === 'readiness_summary') return { id, blocks: summaryLayout.blocks as Block[], layout: summaryLayout.layout, consolidated: summaryLayout.consolidated }
+      if (id === 'record_limitations') return laidOut({ id, blocks: limitationsSection })
+      const s = byId.get(id)
+      if (!s) throw new CustomerPdfRefusal('record_unsupported', `section ${id}`)
+      return laidOut(s)
+    })
   }
 
   return {
+    ...(readiness ? { presentation: READING_HIERARCHY_PRESENTATION } : {}),
     meta: { title: fill(t.document_title, { record_id: issued.record_id }), subject: t.stamp, creator: `${t.template_id} v${t.version}`, producer: `${r.builder.id} v${r.builder.version}` },
     marking: { stamp: t.stamp, record_id: issued.record_id, footer: fill(t.footer, { record_id: issued.record_id }), page_label: t.page_label },
     sections: finalSections,

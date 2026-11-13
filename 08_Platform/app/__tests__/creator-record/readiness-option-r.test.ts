@@ -56,10 +56,12 @@ describe('Option R replaces, never duplicates', () => {
       expect(ids).not.toContain('open_items')
     }
   })
-  test('the unchanged sections (about, declarations, documents, not done, provenance) are identical to the legacy ones', () => {
+  test('the unchanged sections (about, declarations, documents, not done) print exactly the legacy blocks', () => {
+    // CR-PDF-IMPL-1: they now also carry a layout tree (grouping only); their printed blocks are unchanged.
+    const blocksOf = (m: CustomerDocumentModel, id: string) => canonicalJson(m.sections.find((s) => s.id === id)?.blocks ?? null)
     for (const c of CASES) {
       const keep = ['about', 'project', 'tools', 'contribution', 'documents', 'not_done']
-      for (const id of keep) expect([c.name, id, canonicalJson(OPTION_R[c.name].sections.find((s) => s.id === id) ?? null)]).toEqual([c.name, id, canonicalJson(LEGACY[c.name].sections.find((s) => s.id === id) ?? null)])
+      for (const id of keep) expect([c.name, id, blocksOf(OPTION_R[c.name], id)]).toEqual([c.name, id, blocksOf(LEGACY[c.name], id)])
     }
   })
   test('provenance is the legacy provenance, except that each publication is referenced by its consideration number', () => {
@@ -126,6 +128,8 @@ describe('coverage: every material element of the replaced sections is accounted
         if (s === S.open_items.not_established_heading) return 'fact grouping → the same fact label under each consideration'
         if (/^\d+(, \d+)*$/.test(s.replace(/^\D*/, '')) && s.startsWith(S.open_items.affects.split('{items}')[0])) return '"Affects items" → per-consideration "Depends on"'
         if (c.record.record.schema_version === 8 && (s === S.open_items.documents_heading || s === T.examination?.open_items_pointer)) return 'navigation to the documents section (kept as its own section)'
+        // CR-PDF-IMPL-1 (N3): in a schema 8 record the numbered section heading replaces this subheading (limitations all kept).
+        if (c.record.record.schema_version === 8 && s === S.open_items.limitations_heading) return 'limitations subheading → record-limitations section heading'
         return null
       }
       const unaccounted = legacyStrings.filter((s) => !optionText.includes(s) && replaced(s) === null)
@@ -140,7 +144,11 @@ describe('coverage: every material element of the replaced sections is accounted
       const lim = OPTION_R[c.name].sections.find((s) => s.id === 'record_limitations')!
       const texts = lim.blocks.map((b) => (b.kind === 'row' ? b.value : b.text))
       expect(texts.slice(-T.sections.open_items.limitations.length)).toEqual(T.sections.open_items.limitations)
-      expect(texts).toContain(T.sections.open_items.limitations_heading)
+      // CR-PDF-IMPL-1 (N3): the section opens with its own heading; a schema 8 record drops the now-redundant subheading.
+      const R = (optionR(c).templates as unknown as CustomerPdfTemplates).readiness_summary!.render as { limitations_heading: string }
+      expect(lim.blocks[0]).toEqual({ kind: 'heading', text: R.limitations_heading, from: 'template' })
+      if (c.record.record.schema_version === 8) expect(texts).not.toContain(T.sections.open_items.limitations_heading)
+      else expect(texts).toContain(T.sections.open_items.limitations_heading)
     }
   })
   test('the approved integrated assessment stays inside its own consideration, exactly as the legacy PDF prints it', () => {

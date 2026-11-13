@@ -305,7 +305,8 @@ describe('Artlist standalone: staged, inactive publication proposal', () => {
     // CR-SUM-PDF-B1 (Option R): the only application importer is the customer document model, behind the optional template
     // block that no approved template set carries. Nothing imports the proposals folder.
     const importers = files.filter((p) => p !== self && /from ['"][^'"]*(readiness-summary|governed\/proposals)/.test(readFileSync(p, 'utf8'))).map((p) => relative(root, p).split(sep).join('/'))
-    expect(importers).toEqual(['lib/creator-record/customer-pdf/document-model.ts'])
+    // CR-PDF-IMPL-1: the layout module reads the summary's types only.
+    expect(importers).toEqual(['lib/creator-record/customer-pdf/document-model.ts', 'lib/creator-record/customer-pdf/readiness-layout.ts'])
     expect(files.filter((p) => /governed\/proposals/.test(readFileSync(p, 'utf8')))).toEqual([])
   })
 
