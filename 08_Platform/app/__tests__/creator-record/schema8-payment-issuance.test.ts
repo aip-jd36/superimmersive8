@@ -510,7 +510,7 @@ describe('8. every commercial gate stays closed by default', () => {
   test('the support list is the approved R15 list, both stops are stopped, Production has the approved templates, and both live locks are false in source', () => {
     expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [{ id: 'si8/creator-record-v2-record', version: 7 }, { id: 'si8/creator-record-v2-record', version: 8 }], builders: [{ id: 'si8/creator-record-v2-record-builder', version: 5 }, { id: 'si8/creator-record-v2-record-builder', version: 7 }], examination_methods: [{ origin: 'live_model', provider: 'anthropic', model: 'claude-sonnet-5', profile: { id: 'receipt', version: 1, schema: 'receipt-extraction-v2', prompt: 'receipt-prompt-v2' } }] }) // R15 option (a), JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('enabled') // CR-V2-MVP-PROD-UAT-ACTIVATION-1
-    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open')
+    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
     expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).approval?.fingerprint).toBe('287de01d8dc365e4e7c62ab0ea25fdce0b824b26e31367560b85b2f9e779c1b5')
     expect(GOV.pdf_template_sets).toHaveLength(1)
     // The controls module is mocked in this file; the shipped source is read directly.

@@ -29,7 +29,9 @@ import { customerWordingIdentity } from '@/lib/creator-record-flow/customer-word
  * 'stopped' is the default; only a reviewed code change opens it for the invited pilot.
  * Issuance has its own, separate stop (`CREATOR_RECORD_V2_ISSUANCE`).
  */
-export const CREATOR_RECORD_V2_SUBMISSIONS: SubmissionsMode = 'open'
+// CR-V2-MVP-RELEASE-EXECUTION-1 (Build A): new v2 submissions and purchases paused for the drain before the template release;
+// issuance stays enabled so paid records complete. Build B reopens.
+export const CREATOR_RECORD_V2_SUBMISSIONS: SubmissionsMode = 'stopped'
 
 /** CR-V2-MVP-M4B — the bundle this running build may publish from, resolved from the environment now; null = none. */
 export function currentPublicationAuthority(env: Readonly<Record<string, string | undefined>> = process.env): PublicationAuthorityBundle | null {

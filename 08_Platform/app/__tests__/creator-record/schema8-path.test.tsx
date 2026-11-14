@@ -152,13 +152,13 @@ describe('E7: consent and AI-permission identifiers are bound to the approved pr
     for (const w of [AI_EXAMINATION_PERMISSION_DRAFT_VERSION, EVIDENCE_CONSENT_DRAFT_VERSION]) expect(AUTHORIZATION_VERSION_PATTERN.test(boundAuthorizationVersion(w, longest) as string)).toBe(true)
     expect(approvedPolicyVersions({ privacy: doc('p'.repeat(33)), terms: doc('terms-1') })).toBeNull()
     expect(approvedPolicyVersions({ privacy: doc('privacy-1'), terms: doc('terms-1') })).toEqual({ privacy: 'privacy-1', terms: 'terms-1' })
-    expect(approvedPolicyVersions()).toEqual({ privacy: 'privacy-2026-11-09', terms: 'terms-2026-11-09' })
+    expect(approvedPolicyVersions()).toEqual({ privacy: 'privacy-2026-11-09', terms: 'terms-2026-11-14' })
   })
 
   test('storage consent: the draft identifier until the policies are approved, then only the bound APPROVED wording', () => {
     expect(evidenceConsentVersion(null)).toBe(EVIDENCE_CONSENT_DRAFT_VERSION)
     // CR-V2-MVP-LEGAL-CONTENT-6: the shipped state binds the approved wording to the published policies.
-    expect(evidenceConsentVersion()).toBe('cr-v2-storage-consent-1__privacy-2026-11-09__terms-2026-11-09')
+    expect(evidenceConsentVersion()).toBe('cr-v2-storage-consent-1__privacy-2026-11-09__terms-2026-11-14')
     expect(evidenceConsentVersion(POLICIES, CONSENT_WORDING)).toBe('cr-v2-storage-consent-1__privacy-2026-12-01__terms-2026-12-01')
     expect(evidenceConsentVersion({ privacy: 'p'.repeat(32), terms: 't'.repeat(32) }, CONSENT_WORDING)).not.toBe(CONSENT_VERSION_UNBINDABLE)
   })
@@ -175,7 +175,7 @@ describe('E7: consent and AI-permission identifiers are bound to the approved pr
   test('AI permission: none until both the policies and the approved wording exist', () => {
     expect(aiExaminationPermissionVersion(null)).toBeNull()
     // CR-V2-MVP-LEGAL-CONTENT-6: the shipped state binds the approved permission wording (still not offered: the live locks are false).
-    expect(aiExaminationPermissionVersion()).toBe('cr-v2-ai-permission-1__privacy-2026-11-09__terms-2026-11-09')
+    expect(aiExaminationPermissionVersion()).toBe('cr-v2-ai-permission-1__privacy-2026-11-09__terms-2026-11-14')
     expect(AI_EXAMINATION_PERMISSION_APPROVED_WORDING).toEqual({ id: 'cr-v2-ai-permission-1', customer_wording_sha256: customerWordingIdentity().sha256 })
     expect(aiExaminationPermissionVersion(POLICIES, null)).toBeNull()
     expect(aiExaminationPermissionVersion(null, PERMISSION_WORDING)).toBeNull()

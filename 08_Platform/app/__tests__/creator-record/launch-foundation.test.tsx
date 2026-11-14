@@ -509,7 +509,7 @@ describe('privacy and terms: infrastructure only, nothing published until approv
   test('the founder-approved documents are published; a missing document still renders "not available yet"', () => {
     // CR-V2-MVP-LEGAL-CONTENT-6 (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109).
     expect(PRIVACY_NOTICE?.approval_reference).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109')
-    expect(TERMS_OF_SERVICE?.approval_reference).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109')
+    expect(TERMS_OF_SERVICE?.approval_reference).toBe('JD-CR-V2-MVP-RELEASE-AUTHORIZATION-1-20261114 terms') // CR-V2-MVP-RELEASE-AUTHORIZATION-1
     expect(legalPoliciesApproved()).toBe(true)
     const html = renderToStaticMarkup(<LegalDocumentPage doc={null} fallbackTitle="Privacy notice" />)
     expect(html).toContain('data-legal-unavailable')
@@ -541,7 +541,7 @@ describe('no commercial gate is opened', () => {
     expect(src('lib/creator-record/evidence-intake/contract.ts')).toMatch(/export const EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED: boolean = true/) // CR-V2-MVP-PROD-UAT-ACTIVATION-1
     expect(src('lib/creator-record/live-examination/controls.ts')).toMatch(/export const LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: boolean = true/)
     expect(src('lib/creator-record/live-examination/controls.ts')).toMatch(/export const CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD: boolean = true/)
-    expect(src('lib/creator-record/customer-flow/approved-inputs.ts')).toMatch(/CREATOR_RECORD_V2_SUBMISSIONS: SubmissionsMode = 'open'/)
+    expect(src('lib/creator-record/customer-flow/approved-inputs.ts')).toMatch(/CREATOR_RECORD_V2_SUBMISSIONS: SubmissionsMode = 'stopped'/)
     expect(src('lib/creator-record-artifacts/config.ts')).toMatch(/CREATOR_RECORD_V2_ISSUANCE: V2IssuanceMode = 'enabled'/)
   })
 })

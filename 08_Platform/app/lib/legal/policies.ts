@@ -82,9 +82,9 @@ export const PRIVACY_NOTICE: ApprovedLegalDocument | null = Object.freeze({
 })
 
 export const TERMS_OF_SERVICE: ApprovedLegalDocument | null = Object.freeze({
-  version: "terms-2026-11-09",
-  effective_date: "2026-11-09",
-  approval_reference: "JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109",
+  version: "terms-2026-11-14",
+  effective_date: "2026-11-14",
+  approval_reference: "JD-CR-V2-MVP-RELEASE-AUTHORIZATION-1-20261114 terms",
   title: "Creator Record Terms of Service",
   paragraphs: Object.freeze([
     "These Terms apply to Creator Record, the service at app.superimmersive8.com provided by PMF Strategy Inc., doing business as SuperImmersive 8 (\"SI8\", \"we\" or \"us\"). You agree to these Terms when you confirm them in the Creator Record questionnaire, and they apply to every Creator Record you prepare or buy. The Creator Record Privacy Notice explains how we handle personal information.",
@@ -96,9 +96,9 @@ export const TERMS_OF_SERVICE: ApprovedLegalDocument | null = Object.freeze({
     "3. Your answers and documents",
     "You confirm that what you tell SI8 is accurate to the best of your knowledge. Add only documents you are entitled to share, and remove details that are not needed, such as card numbers, home addresses and other people's personal information. SI8 does not check that any document is genuine, complete or current, or that it belongs to you.",
     "4. Automated readings",
-    "If you give permission, an AI model reads a document you choose and reports what it appears to show. Readings may be incomplete or wrong, and no person checks them. You can mark a reading as wrong before you buy; your response is printed beside it but does not change it. SI8 draws no conclusion from comparing your documents with your answers. Readings do not change your answers or the guidance.",
+    "If you give permission, an AI model reads a document you choose and reports what it appears to show. Readings may be incomplete or wrong, and no person checks them. You can mark a reading as wrong before you buy; your response is printed beside it but does not change it. Readings are not used to select or change the guidance, and they do not change your answers. SI8 does not decide whether a reading matches what you told SI8.",
     "5. Educational guidance",
-    "Guidance is available for Runway, Pika and Higgsfield only. It describes each provider's own published terms as SI8 last read them. Providers change their terms, and the terms that applied to your account when you made your video may differ. Guidance is general, is not a determination about your video, your account or your use, and does not show which plan applied to you. Other tools can be listed in your record but receive no guidance; that is not a finding about them.",
+    "Guidance is currently available for Runway and Higgsfield only, and the tools covered may change. It describes each provider's own published terms as SI8 last read them. Providers change their terms, and the terms that applied to your account when you made your video may differ. Guidance is general, is not a determination about your video, your account or your use, and does not show which plan applied to you. Other tools and services can be listed in your record but receive no guidance; that is not a finding about them.",
     "6. Price and payment",
     "A Creator Record costs US$29, paid once through Stripe when you buy it. Promotional codes may reduce the price. You review your record before you pay. Your order is confirmed only after Stripe confirms successful payment. If checkout is interrupted or a charge appears incorrect, contact SI8 so we can investigate.",
     "7. Issuing your record",

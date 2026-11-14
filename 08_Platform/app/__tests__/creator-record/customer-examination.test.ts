@@ -197,11 +197,11 @@ describe('route: no client authority, stopped in Production, replay only', () =>
   })
 
   test('the production wiring uses the code constants: submissions open (CR-V2-MVP-PROD-UAT-ACTIVATION-1), legacy live extraction locked off, replay-only core', async () => {
-    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open')
+    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
     expect(LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD).toBe(false)
     const { productionCustomerExaminationDeps } = await import('@/lib/creator-record-flow/examination-customer')
     const deps = productionCustomerExaminationDeps()
-    expect(deps.submissions).toBe('open')
+    expect(deps.submissions).toBe('stopped') // CR-V2-MVP-RELEASE-EXECUTION-1 (Build A pause)
     expect(await requestCustomerExamination({ ...deps, submissions: 'stopped' }, OWNER, randomUUID())).toEqual({ ok: false, status: 503, code: 'submissions_stopped' })
     const wiring = read('lib/creator-record-flow/examination-production.ts')
     expect(wiring).toMatch(/core: \{ fixtures: knownFixtureRegistry\(\), executor: replayExecutor\(\), profiles: defaultProfileRegistry\(\) \}/)
