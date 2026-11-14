@@ -506,6 +506,17 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
 
 **Do NOT** update `PRICING-STRATEGY-v3.0.md`, `TECHNICAL_ARCHITECTURE.md`, or any frozen/current PRD based on this workstream. Do NOT design or build a generalized API.
 
+### 3t. Creator Record V2 MVP — Released and Closed (Nov 14–15, 2026)
+- [x] Build A (`60b1d84d`, Nov 14): takeover guard, Terms `terms-2026-11-14` (§4/§5 revised, Pika removed) and a submissions pause; Production drain confirmed (Q3/Q4/Q5 = 0). Operator moved the AI-permission authority row to `…__terms-2026-11-14`.
+- [x] Build B (`0bec2dee`, Nov 14): PDF template sets v4 (schema 7) and v5 (schema 8) approved, v1/v3 superseded; generator `creator-record-v2-pdf-v3`; submissions reopened; tests equal to the 24/89 baseline. Rollback floor = Build A `60b1d84d`, never a pre-guard build.
+- [x] Production UAT CR-2026-7E82CA09 passed; PM/Architecture accepted the six-page PDF. Founder GO, milestone closed Nov 15, 2026.
+- Accepted qualifications:
+  - fresh AI examination under the new Terms was not exercised (a stored Nov 11 reading was reused; AI permission was renewed);
+  - checkout was shown with a 100% comp code only: every Production payment to date collected US$0.00;
+  - the UAT purchase carries `uat = false`, so exclude it from customer counts.
+- Retained: release risks F10/F11 (counsel waived; earlier consent/Terms usable) and deferred wording maintenance.
+- Details: `08_Platform/prds/PRD_CREATOR_RECORD_v2_MVP_SCOPE.md` §12 and `08_Platform/implementation/CR-V2-MVP-RELEASE-AUTHORIZATION-1-APPROVAL-RECORD.md`.
+
 ### 4. Legal Ops (Rights playbook → actual contracts)
 - [ ] Standard Production MSA + SOW
 - [ ] Creator contractor agreement (work-for-hire + confidentiality + IP assignment)
@@ -799,7 +810,8 @@ Traditional lawyers are conservative and don't trust automation — BUT they're 
 | **PRD: Public Catalog** | `08_Platform/prds/PRD_PUBLIC_CATALOG.md` | ACTIVE | Marketplace, licensing requests, Rights Verified badges |
 | **PRD: CaaS Website** | `08_Platform/prds/PRD_CAAS_WEBSITE.md` | ACTIVE | Homepage redesign for v4 model (How It Works, Pricing) |
 | PRD: RecordForm | `08_Platform/prds/PRD_RECORD_FORM.md` | SUPERSEDED | $29 Creator Record V1 — self-attested, 9 sections, automated flow (Mar 2026). Retired from new sales 2026-11-01 (CR-V2-CUTOVER-1); existing V1 records are still fulfilled and downloadable |
-| **Creator Record V2 — Approved MVP Scope** | `08_Platform/prds/PRD_CREATOR_RECORD_v2_MVP_SCOPE.md` | ACTIVE | **Controlling Creator Record V2 product direction (PM decision CR-V2-MVP-SCOPE-1, 2026-11-01):** a $29 AI-assisted Commercial Readiness Record with declarations, optional uploads, AI-assisted document examination, governed Living Knowledge guidance and a private PDF. Approves scope only, not wording, claims, templates, legal terms or Production activation. Lists implemented vs. missing capabilities (§5), outstanding approvals (§6) and superseded assumptions (§7). PRD v0.3 (`PRD_CREATOR_RECORD_v2_DRAFT.md`, unfrozen; branch `work/cr-option-c-oc0`) is historical design input only. |
+| **Creator Record V2 — Approved MVP Scope** | `08_Platform/prds/PRD_CREATOR_RECORD_v2_MVP_SCOPE.md` | ACTIVE | **Controlling Creator Record V2 product direction (PM decision CR-V2-MVP-SCOPE-1, 2026-11-01):** a $29 AI-assisted Commercial Readiness Record with declarations, optional uploads, AI-assisted document examination, governed Living Knowledge guidance and a private PDF. Approves scope only, not wording, claims, templates, legal terms or Production activation. Lists implemented vs. missing capabilities (§5), outstanding approvals (§6) and superseded assumptions (§7). PRD v0.3 (`PRD_CREATOR_RECORD_v2_DRAFT.md`, unfrozen; branch `work/cr-option-c-oc0`) is historical design input only. **MVP released 2026-11-14 (Build B `0bec2dee`) and closed 2026-11-15 by founder GO: §12** (UAT, qualifications, retained risks). |
+| **Creator Record V2 — Release Approval Record** | `08_Platform/implementation/CR-V2-MVP-RELEASE-AUTHORIZATION-1-APPROVAL-RECORD.md` | ACTIVE | Founder approvals F1–F11, LK governance determination (R1/R2/N4/G4/U1/W1), Terms §4/§5 text, template registration inputs, release execution evidence, accepted Q8/Q10 exceptions and release closure (Nov 14–15, 2026). |
 | **PRD: CertForm** | `08_Platform/prds/PRD_CERT_FORM.md` | ACTIVE | $499 SI8 Certified — 11 sections, human review, Risk Rating, reviewer checklist (Mar 2026) |
 | **PRD: Reviewer Workbook UI** | `08_Platform/prds/PRD_REVIEWER_WORKBOOK_UI.md` | ACTIVE | Admin tool replacing markdown workbook — 6-section guided assessment interface implementing Workbook Schema v0.1; route `/admin/submissions/[id]/review`; `.typ` report generation; `workbook_data` JSONB schema. Jul 2026. |
 | **PRD: Living Notebook** | `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` | ACTIVE — v1.0 architecture frozen | Spec for the four-document Living Notebook (Platform Rights Matrix / SI8 Positions / Edge Cases / Pending Questions) — markdown-first, git-native, companion to (not replacement for) the Reviewer Manual. Includes "Default State: Uncertainty" governance principle and Freeze Notice. Jul 30, 2026, revised Aug 1-2, 2026; Aug 5-6, 2026: added CRC-Eligible Governance (claim-level publication approval, `CRC-Eligible`/`CRC Publication Scope`/`CRC Decision Date`/`CRC Approver` fields on Platform Rights Matrix rows) and the Status convention (row-level Status vs. per-field sub-claim confidence, stated explicitly not implied). |
