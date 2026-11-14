@@ -16,6 +16,8 @@ Each of those still needs its own governance approval (see "Outstanding approval
 
 **Amended 2026-11-11** by founder decision CR-V2-MVP-PROVIDER-SCOPE-1: see **§10, MVP provider scope**. The MVP supports Higgsfield and Runway only; Pika is removed from new customer choices and from the active publication set, and Pika work is deferred until after the MVP.
 
+**Released and closed 2026-11-15** by founder decision (GO): the MVP development and release milestone is closed with Build B (`0bec2dee`) live in Production. See **§12, MVP release closure**. §5 and §6 below describe the state at their own dates and are kept as history.
+
 **Supersedes:**
 - every assumption that Creator Record V2's MVP is a declarations-only record;
 - implementation-phase scope reductions, which are now gaps, not scope (see "Implemented vs. approved scope");
@@ -331,3 +333,60 @@ This decision does **not** complete the MVP integrated-assessment requirement (�
 
 - Issued records verify and render exactly as issued (T1 v1 with Pika; T1 v2 with Kling or an unlisted tool), proven against reconstructions of both earlier approval states.
 - Records prepared but not issued under T1 v2 are refused at checkout and issuance, whatever tool they name, and must be prepared again. Before integration, confirm that Production holds no paid-but-unissued Creator Record V2.
+
+## 12. MVP release closure [DECISION, founder, 2026-11-15, CR-V2-MVP-RELEASE-EXECUTION-1]
+
+**Decision:** GO. The Creator Record V2 MVP development and release milestone is closed. Approvals, release exceptions and operator evidence: `08_Platform/implementation/CR-V2-MVP-RELEASE-AUTHORIZATION-1-APPROVAL-RECORD.md` (§5, §6).
+
+### 12.1 What is live in Production [FACT]
+
+- **Build B, `0bec2dee`** (deployed 2026-11-14, Vercel `si8-creator-portal`):
+  - PDF template set v4 for schema 7 (`d4ecf3f3…`) and v5 for schema 8 (`a27e23cd…`); v1 and v3 stay registered as superseded;
+  - generator `creator-record-v2-pdf-v3`;
+  - submissions open, issuance enabled;
+  - Terms `terms-2026-11-14` (§4/§5 revised);
+  - AI-permission authority `cr-v2-ai-permission-1__privacy-2026-11-09__terms-2026-11-14`.
+- **Build A, `60b1d84d`** (guard + Terms + submissions pause) is the rollback floor. Never roll back to a pre-guard build (`334d8d9f`, `678add4d` or earlier).
+- **Release validation:** `tsc` clean; customer-wording check passes; full Jest suite 24 suites / 89 tests failing, identical to the documented baseline, with no new failures (9,761 passed).
+
+### 12.2 Production UAT [FACT, 2026-11-14]
+
+**Record:** CR-2026-7E82CA09 (prepared record `PREP-10742325-219b-4fec-a9ef-1510f2b597a8`).
+
+- **Issuance:** exactly one artifact, `issued` at 16:00:15 UTC, generator `creator-record-v2-pdf-v3`, schema 8.
+- **Comparison:** method v2, every result `not_assessed / determination_withheld`.
+- **Guidance:** one item (`CLAIM-RUNWAY-COMMERCIAL-USE-001-v1`), selected from the declarations; readings are not a guidance input.
+- **Artifact:** sha256 `e38921286e477d574d8fa2d273a25225acd438758811854088fbf756e7ae16b9`, 28,342 bytes; the stored private object is present and its size matches.
+- **Payment:** one payment row; fulfilment, PDF and email completed.
+- **Review:** PM/Architecture reviewed the six-page PDF and accepted its content, presentation and customer-facing governance behaviour.
+- **Production state afterwards:**
+  - Q3/Q4/Q5 = 0;
+  - artifact immutability triggers enabled;
+  - the earlier issued records (CR-2026-719228D9 `-pdf-v1`, CR-2026-8D1022F5 `-pdf-v2`) unchanged;
+  - authority row aligned with the revised Terms.
+
+### 12.3 Qualifications [FACT; accepted by the founder]
+
+1. **Fresh AI examination under the revised Terms was not exercised.**
+   - The UAT record reused a stored live reading (attempt `4be776e0-…`, executed 2026-11-11 09:37:38 UTC, envelope `79118a472c3a…`). Production recorded no live attempt or reservation on or after 2026-11-14.
+   - Demonstrated instead:
+     - the reuse of a historical reading;
+     - the creator renewing AI permission under `…terms-2026-11-14` (2026-11-14 15:54:55 UTC) before preparing.
+   - The founder accepts this residual verification gap and requires no further UAT.
+2. **Checkout and fulfilment were shown through a complimentary purchase, not by collecting a nonzero payment.**
+   - The six payment rows Production holds (V1 and V2, 2026-10-21 to 2026-11-14) are all list price US$29.00 with a US$29.00 discount: US$0.00 collected.
+   - Stripe reports such $0 sessions as `payment_status = paid`. "Paid" in the verification reports means that Stripe status, never money received.
+   - **Reconciled figures:** six rows in total, five before the UAT. Three are V2 (CR-2026-719228D9, CR-2026-8D1022F5, CR-2026-7E82CA09, each accepted and completed). Three are V1: two accepted and completed, one rejected.
+3. **The internal UAT purchase is recorded with `uat = false`.**
+   - Reporting must exclude CR-2026-7E82CA09 (submission `7e82ca09-d081-4d34-acbc-73370def0ca5`) from customer counts.
+   - The issued record is immutable and is not modified.
+4. **Accepted release exceptions:** Q8/Q10 are three unpaid synthetic admin records, preserved. They are refused at checkout and issuance.
+5. **Release risks retained** (founder, 2026-11-14):
+   - documents stored under the earlier storage consent stay usable;
+   - creators who accepted the earlier Terms can buy without re-accepting;
+   - outside counsel review was waived for this MVP.
+6. **Deferred wording maintenance retained:**
+   - the `responses_intro` ("…or a comparison") Source Text change;
+   - the v1/v3 `guidance.empty` ambiguity;
+   - an automated check that no explanatory string names a tool or provider;
+   - the v2/v3 PDF wording inconsistencies (§7 "section 5" readings, §8 "comparing"), which affect issued historical templates only.

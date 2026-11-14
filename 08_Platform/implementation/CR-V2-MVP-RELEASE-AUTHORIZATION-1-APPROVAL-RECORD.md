@@ -90,3 +90,17 @@ The Privacy Notice and the consent and permission wording are unchanged.
 - They cannot be bought or issued: checkout and issuance refuse a record with synthetic authority (`eligibility.ts`, `synthetic_record`), stale references (`version_not_current`), and, for v5, a comparison method other than v2 (`document-model.ts`, `readiness_layout_refused`). Evidence: `commercial-eligibility.test.ts` §4, `reading-release-fix-1.test.ts`, `schema8-payment-issuance.test.ts` §2–4.
 
 **Build B**: this record, the v4/v5 registration with the §4 values, generator `creator-record-v2-pdf-v3`, submissions reopened, issuance enabled, the release test updates.
+
+## 6. Release closure (founder GO, 2026-11-15)
+
+The Creator Record V2 MVP development and release milestone is **closed**.
+- **Live:** Build B `0bec2dee`.
+- **Rollback floor:** Build A `60b1d84d`.
+- **Production UAT:** CR-2026-7E82CA09 passed, and PM/Architecture accepted the issued PDF.
+- **Full verification and qualifications:** `08_Platform/prds/PRD_CREATOR_RECORD_v2_MVP_SCOPE.md` §12.
+
+Qualifications, in brief:
+- **No fresh AI examination:** a fresh examination under the revised Terms was not exercised; the founder accepts the gap. The UAT shows a historical reading being reused and AI permission being renewed under the revised Terms.
+- **No nonzero payment:** checkout and fulfilment were shown through a complimentary purchase only. Every Production payment row to date is US$29.00 list price minus a US$29.00 discount, so US$0.00 has been collected.
+- **UAT flag:** the UAT purchase is recorded with `uat = false`. It is excluded from customer reporting by record id; the issued record is not modified.
+- **Still in force:** the accepted Q8/Q10 exceptions, the F10/F11 release risks and the deferred wording items (F9, §2 follow-ups).
