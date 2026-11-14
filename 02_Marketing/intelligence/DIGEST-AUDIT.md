@@ -8,6 +8,102 @@ This is an internal engineering/editorial record, not marketing content (see DIG
 
 ---
 
+## Week of November 13, 2026
+*Run: 2026-11-13 · 1 HIGH · 16 MONITOR · 10 OMIT · 48 excluded (below relevance floor) · 0 admission-capacity deferred · 75 total candidates*
+
+### Prioritized (reached bounded interpretation + priority)
+
+| Tier | Development | Cluster(s) | Sources | Rationale |
+|------|-------------|------------|---------|-----------|
+| OMIT | AI misinformation: Experts urge Nigerian firms to overhaul crisis management plans | litigation_commercial_media_core | 1 | Single unverified expert commentary with no specifics on incidents, regulatory drivers, or actual customer demand; insufficient substance to track as actionable intelligence. |
+| MONITOR | Publishers face Google AI ad labels in California, South Korea and Vietnam | regulation_policy_commercial_media | 1 | Multi-jurisdiction implementation by major platform signals potential regulatory trend or market expectation for AI disclosure, but unclear whether legally mandated or voluntary, preventing HIGH classification. |
+| HIGH | Fake content, false impression: Pennsylvania’s AI ad disclosure law takes effect December 21 | regulation_policy_commercial_media | 1 | Pennsylvania's mandatory December 21, 2026 AI ad disclosure law creates imminent compliance obligation for SI8's customer base in that state, directly generating near-term demand for Commercial Assurance verification. |
+| MONITOR | Elvis Presley Rights Owners Sue Suno Over AI Voice Cloning: ‘Elvis’ Identity Was Stolen’ | litigation_commercial_media_core | 5 | High-profile litigation testing ELVIS Act application to AI voice synthesis reveals real commercial-readiness risks customers face, but unresolved outcome and unclear precedential scope prevent definitive impact assessment. |
+| MONITOR | Eminem song publisher seeks $41M in copyright lawsuit vs. AI platform | litigation_commercial_media_core | 2 | Significant copyright-training-data lawsuit demonstrates customer risk in AI-generated media spaces, but unresolved litigation with uncertain legal standard does not yet establish new binding requirement. |
+| OMIT | Elvis AI Voice Lawsuit, Olivia Rodrigo’s ‘Take Me Home,’ BTS Song Case & More Top Music Law News | litigation_commercial_media_core | 1 | Source provides only headline references to cases with no substantive details, allegations, or outcomes; cannot assess materiality without case-specific information. |
+| MONITOR | Indiana journalist seeks class action status in lawsuit against Muck Rack for use of name, likeness in product sales | litigation_commercial_media_core, living_knowledge_domain_signals | 1 | Class-action allegation over name/likeness use in media tools raises potential provenance-consent expectations for SI8's scope, but unresolved litigation and narrow scope limit current materiality. |
+| MONITOR | Pennsylvania Enacts Artificial Intelligence Deceptive Advertising Act | regulation_policy_commercial_media | 1 | Pennsylvania's enacted AI deceptive advertising statute signals state-level regulatory movement directly relevant to SI8's assurance market, but absent statutory text details prevent assessment of scope and enforcement mechanism. |
+| OMIT | AI character animation and motion generation: Latest research and tools in 2026 | material_capability_changes | 1 | Article content is entirely unavailable; without knowing whether it reports incremental research, breakthroughs, or regulatory proposals, no materiality judgment can be made. |
+| MONITOR | I test RefVid: How well can I create advertising videos with a fixed product and consistent characters? | material_capability_changes | 1 | RefVid represents a concrete emerging tool for AI video consistency in advertising, relevant to SI8's potential customer workflows, but market adoption, failure modes, and regulatory context remain unverified. |
+| OMIT | Best AI Drama Generator Tools in 2026: Ranked for Short Dramas, Anime Episodes and Music Videos | material_capability_changes | 1 | Only headline and metadata provided; without the article's actual content, specific tools evaluated, or assessment methodologies, no substantive judgment of relevance to SI8's services can be made. |
+| OMIT | Kling AI Review 2026: Honest Testing, Pricing, Rights and Risks | provider_commercial_terms | 1 | Source is title-only with no article content; critical unknowns about Kling AI's specific risks, IP policies, or market differentiation prevent any materiality assessment. |
+| MONITOR | Brands Slash Content Production Time With Adobe AI Workflows | buyer_risk_governance_signals | 1 | Single unquantified claim about brands using Adobe AI workflows lacks corroboration and concrete evidence of downstream assurance demand, but signals potential market expansion if compliance concerns follow production acceleration. |
+| MONITOR | Adobe Puts Coworker in GenStudio to Oversee the Content Supply Chain | buyer_risk_governance_signals, commercial_adoption_validation | 3 | Adobe's autonomous Coworker integration into GenStudio raises genuine assurance questions about unsupervised agent workflows and compliance oversight, but material relevance depends on GenStudio adoption among SI8's actual customer base, which remains unconfirmed. |
+| MONITOR | The Internet Licensing Collective (ILC) Launches with Yahoo Scout as First Commercial Partner | provider_commercial_terms | 1 | ILC's launch could eventually affect SI8's content-licensing and compliance workflows, but the collective's governance, membership terms, scope, and market penetration remain entirely undefined. |
+| MONITOR | Non-EU advertisers face 3% EU fines for unlabelled AI deep fake ads | regulation_policy_commercial_media | 1 | If a binding EU enforcement mechanism exists for AI deepfake ad labelling, it would materially drive SI8's Commercial Assurance demand; however, the source leaves critical unknowns unresolved—whether this is enacted law, proposed rule, or platform policy—preventing HIGH classification. |
+| OMIT | Who answers for an AI journalist? | regulation_policy_commercial_media | 1 | Article title only without substantive content, claims, or specific regulatory/legal developments cannot support meaningful judgment of materiality to SI8's assurance workflows. |
+| MONITOR | Why Getty’s appeal won’t address all UK AI copyright questions | litigation_commercial_media_core, litigation_named_case_tracker | 5 | UK copyright litigation outcome remains unresolved and specific to one jurisdiction, limiting current materiality despite potential future impact on SI8's Living Knowledge and compliance surface for AI-generated imagery. |
+| OMIT | Ogilvy launches AI platform to protect talent rights | buyer_risk_governance_signals | 1 | Ogilvy platform launch lacks any substantive detail on functionality, scope, or deployment, making it impossible to assess whether it overlaps with, complements, or competes with SI8's offerings. |
+| MONITOR | A.I.-Generated Celebrity Ads Get an Assist From Terry Crews | commercial_adoption_validation, material_capability_changes | 2 | Ogilvy-CAA celebrity AI ad partnership signals commercial demand for SI8's Commercial Assurance use case but remains unresolved on consent models, scalability, and regulatory response. |
+| OMIT | Praxis-1 Is Now Available | provider_commercial_terms | 1 | Runway product announcement with no disclosed capabilities, pricing, or adoption trajectory cannot be assessed for materiality to SI8's customer workflows or competitive landscape. |
+| OMIT | How AI Is Transforming the Film Industry | material_capability_changes | 1 | General commentary article on AI in film lacks specific factual claims, regulatory actions, or case outcomes needed to assess relevance to SI8's assurance or compliance domain. |
+| MONITOR | Adobe and Disney Announce Multiyear AI Partnership to Build Custom Models for Theme Park Design and More | provider_commercial_terms | 1 | Adobe-Disney custom AI model partnership suggests potential enterprise demand for assurance services but remains unresolved on whether outputs require third-party compliance validation or are proprietary only. |
+| MONITOR | Announcing the CAI Ecosystem Explorer | provenance_authenticity_infrastructure | 1 | CAI Ecosystem Explorer announcement warrants tracking to determine whether it establishes competing or complementary authenticity standards, but the missing substantive details prevent current assessment of materiality to SI8's workflows. |
+| MONITOR | Pa. is taking aim at ‘AI slop’ in advertisements. Here’s what that means | regulation_policy_commercial_media | 1 | State-level regulatory interest in AI-generated advertising quality and disclosure is directionally relevant to SI8's Commercial Assurance positioning, but critical details on mechanism, scope, enforceability, and timeline remain entirely unspecified, precluding materiality assessment. |
+| MONITOR | Google Launches Gemini Omni 1.2 Flash With 15-Second AI Video Generation And 30% Lower Pricing | material_capability_changes | 1 | Faster and cheaper AI video generation may expand SI8's addressable market and compress compliance review windows, but this is a single product iteration from one vendor with unresolved questions about adoption, customer prioritization of speed over assurance, and regulatory counterbalancing. |
+| OMIT | How to Choose an AI Video Tool for Your Creative Projects | provider_commercial_terms | 1 | A consumer how-to guide on AI video tool selection lacks substantive content in the provided source, making it impossible to assess relevance to SI8's B2B compliance and commercial assurance workflows. |
+
+### Excluded -- below relevance floor (screened off-topic before interpretation)
+
+| Development | Cluster(s) | Sources | Max article score | Reason |
+|-------------|------------|---------|--------------------|--------|
+| Tiger Brokers tests agentic OOH media buying | buyer_risk_governance_signals | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| 10 best ChatGPT Ads agencies for international brands | commercial_adoption_validation | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| Casumo ad flagged by new ASA monitoring system gets banned | regulation_policy_commercial_media | 2 | 2 | excluded: below relevance floor (2 < 3) |
+| Four brands' ads banned by ASA over 'misleading' carbon neutral delivery claims | regulation_policy_commercial_media | 5 | 2 | excluded: below relevance floor (2 < 3) |
+| Zoho Rebuilds Campaigns Platform With Simpler Email and SMS, Native WhatsApp and AI Agent Workflows | buyer_risk_governance_signals | 1 | 2 | excluded: below relevance floor (2 < 3) |
+| CopilotKit Releases OpenBot 1.0: An MIT-Licensed, Self-Hostable AI Coworker With Built-In Governance | buyer_risk_governance_signals | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| FSC to overhaul financial firms' governance, seeks to block CEO self-renewals | buyer_risk_governance_signals | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| Colorado Joins Other State AI Leaders In Regulating The Use Of AI In Psychotherapy Services | regulation_policy_commercial_media | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| As the New Congress Turns to AI, it Must Finally Pass a Comprehensive Federal Privacy Law | living_knowledge_domain_signals | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| South Korea agrees to tighten rules for bank holding company CEOs — Korea Herald | buyer_risk_governance_signals | 3 | 1 | excluded: below relevance floor (1 < 3) |
+| Elvis and Eminem rights holders are suing Suno | litigation_commercial_media_core | 1 | 2 | excluded: below relevance floor (2 < 3) |
+| Suno Moves to Dismiss Jason Isbell's AI Music Lawsuit, Cites Free Speech | litigation_commercial_media_core | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| Dua Lipa ‘Levitating’ Copyright Infringement Lawsuit Suddenly Dismissed | litigation_commercial_media_core | 1 | 2 | excluded: below relevance floor (2 < 3) |
+| Suno: Lawsuits for voice cloning of Elvis and Eminem | litigation_commercial_media_core | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| AI platform reproduced Michigan music publishers' copyrighted works without authorization, lawsuit says | litigation_commercial_media_core | 1 | 2 | excluded: below relevance floor (2 < 3) |
+| Suno AI Music Review 2026: Can Artificial Intelligence Create Professional Songs and Music Videos? | material_capability_changes | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| Free AI video generator: 5 best tools for beginners | material_capability_changes | 1 | 2 | excluded: below relevance floor (2 < 3) |
+| Constant Contact Unveils Catalyst AI Agent for Small Businesses | buyer_risk_governance_signals | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| FTC aims to better fight scams | regulation_policy_commercial_media | 1 | 2 | excluded: below relevance floor (2 < 3) |
+| Hyland opens enterprise content to AI agents with OpenArch | buyer_risk_governance_signals | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| Expedient Expands Next-Generation AI CTRL Platform to Unify Enterprise AI Governance Across Models, Data and Agents | buyer_risk_governance_signals | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| WhiteMatter: $20 Million Series A To Expand Enterprise AI Agent Governance | buyer_risk_governance_signals | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| Unstructured Data Governance: A missing foundation for agentic AI at scale | buyer_risk_governance_signals | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| Congressional Democrats Push PRO Act as They Unveil Pro-Union Agenda for 2027 | living_knowledge_domain_signals | 1 | 2 | excluded: below relevance floor (2 < 3) |
+| Baidu Unveils Latest ERNIE Models Amid Broader Full-Stack AI Lineup, and Debuts Token Exchange to Power Intelligent Organizations | material_capability_changes | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| Client data is off limits for vendors' AI training by default, RIPD says | regulation_policy_commercial_media | 1 | 2 | excluded: below relevance floor (2 < 3) |
+| UnitedHealthcare expands Avery AI assistant to 21 mn health insurance plan members | buyer_risk_governance_signals | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| The AI Productivity Revolution: Why a "New Factory Building" Is Essential for Modern Business Growth | material_capability_changes | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| Sunbed advertisers barred from health and safety claims | regulation_policy_commercial_media | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| Pixometry adds verified image provenance and a new Photoshop plugin | regulation_policy_commercial_media | 1 | 2 | excluded: below relevance floor (2 < 3) |
+| Event in Review \| Political Advertising in the Midterm Election Cycle: AI, Influencers, Disclosures, and More | regulation_policy_commercial_media | 1 | 2 | excluded: below relevance floor (2 < 3) |
+| The Witcher 3 Devs Explain Using AI To Help With Geralt’s Polish Voice In Songs Of The Past: 'This Is One Of Those Ways Where You Can Use AI Ethically' | material_capability_changes | 1 | 2 | excluded: below relevance floor (2 < 3) |
+| Sitecore's MarketingIQ drafts fixes when ChatGPT or Gemini gets a brand wrong | buyer_risk_governance_signals | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| Your face, their fraud: The growing threat of ‘deepfake doctors’ | litigation_commercial_media_core | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| Will AI Replace Software Engineers? Rockstar Developer University Data Finds 70% Are Invisible | material_capability_changes | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| Zetrix AI Said It Will Withhold Dividend Payment Despite Withdrawal Of Legal Proceedings | buyer_risk_governance_signals | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| Budget 2026 opens the runway for private investment in Canadian airports \| Canada \| Global law firm | provider_commercial_terms | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| Data center insurance premiums forecast to reach $24.2 bn by 2030 as AI infrastructure risks expand | buyer_risk_governance_signals | 2 | 1 | excluded: below relevance floor (1 < 3) |
+| Cowbell launches standalone AI liability insurance for businesses deploying AI agents | buyer_risk_governance_signals | 1 | 2 | excluded: below relevance floor (2 < 3) |
+| Insurtech Ancep raises $8.5 mn to expand AI agents for commercial insurance brokers | buyer_risk_governance_signals | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| The 6X Formula for leveraging content marketing with AI | buyer_risk_governance_signals | 1 | 2 | excluded: below relevance floor (2 < 3) |
+| Congratulations, your brand says the same thing everywhere. Does anyone care? | buyer_risk_governance_signals | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| The Vogue Business AI Tracker | buyer_risk_governance_signals | 1 | 2 | excluded: below relevance floor (2 < 3) |
+| What Is ElevenLabs? The AI Voice Platform, Explained | material_capability_changes, provider_commercial_terms | 1 | 2 | excluded: below relevance floor (2 < 3) |
+| Election body airs deepfake warning | living_knowledge_domain_signals | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| From handoffs to intelligence: The context layer for AI-powered marketing | buyer_risk_governance_signals | 1 | 2 | excluded: below relevance floor (2 < 3) |
+| Get The Flock Out | buyer_risk_governance_signals | 1 | 1 | excluded: below relevance floor (1 < 3) |
+| FTC’s Dollar General Suit Confirms Affordability is on the Agenda (via Passle) | regulation_policy_commercial_media | 1 | 1 | excluded: below relevance floor (1 < 3) |
+
+### Executive Summary generated this run
+
+1. Pennsylvania has enacted an AI ad disclosure law effective December 21, 2026, requiring disclosure when advertisements are AI-generated or created to produce false impressions. (supports: e98f329b-a914-4e04-a027-25fbc96894ef)
+2. The Pennsylvania law's scope, definitions of 'AI-generated' and 'false impression,' enforcement mechanisms, and penalties remain unknown, creating operational uncertainty for compliance frameworks. (supports: e98f329b-a914-4e04-a027-25fbc96894ef)
+3. Pennsylvania's disclosure requirement may create prospective demand for SI8's Commercial Assurance product to verify compliance for brands and agencies creating or distributing commercial media in or targeting Pennsylvania. (supports: e98f329b-a914-4e04-a027-25fbc96894ef)
+
+---
+
 ## Week of November 10, 2026
 *Run: 2026-11-10 · 3 HIGH · 14 MONITOR · 9 OMIT · 22 excluded (below relevance floor) · 0 admission-capacity deferred · 48 total candidates*
 
