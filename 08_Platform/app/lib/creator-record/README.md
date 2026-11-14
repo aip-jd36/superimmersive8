@@ -1,6 +1,58 @@
-# lib/creator-record — receipt examination feasibility spike
+# lib/creator-record — Creator Record v2
 
-PRODUCT-A-MVP-SPIKE-1A. **Not wired into any customer surface.** Since
+## Current state: MVP released and closed (read this first)
+
+**This section governs.** Every later section is a milestone note written at the time of that milestone and kept as history. Where a later section says something is "empty", "stopped", "not approved", "locked", "local only" or "not wired", that describes its own milestone, not the code today.
+
+**Product, release and qualifications:**
+- `08_Platform/prds/PRD_CREATOR_RECORD_v2_MVP_SCOPE.md`: §12 covers the release closure, the UAT, the accepted qualifications and the deferred maintenance.
+- `08_Platform/implementation/CR-V2-MVP-RELEASE-AUTHORIZATION-1-APPROVAL-RECORD.md`: approvals, release exceptions and operator evidence.
+
+**Baseline.**
+- Production runs Build B `0bec2dee` (released 2026-11-14, milestone closed 2026-11-15).
+- The rollback floor is Build A `60b1d84d`. Never deploy a build without the takeover guard (`334d8d9f`, `678add4d` or earlier).
+
+**Switches and identities:**
+
+| Item | Value | Where |
+|---|---|---|
+| New submissions and purchases | `'open'` | `customer-flow/approved-inputs.ts` |
+| Issuance | `'enabled'` | `lib/creator-record-artifacts/config.ts` |
+| Generator | `creator-record-v2-pdf-v3` | `lib/creator-record-artifacts/renderers.ts` |
+| Issuable record schemas / builders | 7, 8 / 5, 7 | `customer-record/governance-state.ts` (`CURRENT_ISSUANCE_SUPPORT`) |
+| Issuable reading method | `live_model`, anthropic `claude-sonnet-5`, profile `receipt` v1 (`receipt-extraction-v2` / `receipt-prompt-v2`) | same |
+| Registry / ledger | `CR-V2-LAUNCH-REGISTRY-3` / `CR-V2-LAUNCH-LEDGER-3` | `governed/sources.ts` |
+| Published guidance | Runway and Higgsfield only. The Pika entry is withdrawn (LEDGER-3); Artlist is excluded | same |
+| Customer live examination | Enabled: both live-examination locks are `true` (`live-examination/controls.ts`), and real documents are accepted (`evidence-intake/contract.ts`). The admin prototype's own live path stays locked (`evidence/config.ts`) | |
+
+**PDF templates.**
+- `approvedPdfTemplates` selects exactly one `approved` set per schema:
+  - schema 7 → v4, `d4ecf3f39487ed43ce6c5e621d988d6525b638c952a8c5ead01e0cc9b8504f7e`;
+  - schema 8 → v5, `a27e23cdbc1b12c16330b9518bba210b218bb0e8807e53ac164d6673ec873408`.
+- Both use the three-level readiness layout (`customer-pdf/readiness-layout.ts`, `ReadingLayoutView.tsx`).
+- v1 (schema 7) and v3 (schema 8) stay registered as `superseded`, for audit only.
+- Issued PDFs are stored bytes and are never re-rendered.
+- Takeover guard (`b6889585`): a pending artifact whose object is missing is re-rendered only by the generator that recorded it; otherwise it is refused and reconciled by hand.
+
+**D10: readings, declarations and guidance stay independent.**
+- Guidance is selected from declarations alone. Documents and readings are never a guidance input (`customer-record/record.ts`).
+- Comparison method v2 records only `not_assessed` / `determination_withheld`.
+- The v4/v5 layout prints readings only in the documents section, as automated and unchecked. It refuses:
+  - an examination-bearing record whose comparison method is not v2;
+  - a template set that also carries `integrated_assessment` (`customer-pdf/document-model.ts`, `replaceWithReadiness`).
+- **Superseded design:** the per-item integrated assessment (`integrated-assessment/`, PRD §9) is still in the code, but only the superseded v3 set carries its block.
+- **Review screen:** the readings-versus-declarations comparison panel and the "Guidance beside your documents" panel were removed (`cddb70fc`, `7892a643`).
+
+**Terms, consent and AI permission.**
+- Terms `terms-2026-11-14` and Privacy Notice `privacy-2026-11-09` (`lib/legal/policies.ts`).
+- Storage-consent and AI-permission identifiers are `<wording>__privacy-2026-11-09__terms-2026-11-14` (`lib/creator-record-flow/authorization-versions.ts`).
+- The database accepts an AI-permission grant only for the identifier in `creator_record_v2_ai_permission_authority` (migration `20261113000000`).
+- That row is operator-maintained. Whenever the Terms or Privacy version changes, an operator replaces it by delete-and-insert; in-place updates are refused. Until then, AI examination fails closed.
+- Grants made under an earlier identifier stay as history and no longer permit examination.
+
+## Origin: receipt examination feasibility spike (PRODUCT-A-MVP-SPIKE-1A)
+
+PRODUCT-A-MVP-SPIKE-1A. **Not wired into any customer surface** (at that milestone). Since
 CR-V2-VERTICAL-SLICE-1 the only importers are the internal admin prototype
 (`/admin/creator-record-v2` + `POST /api/admin/creator-record-v2/draft`) and its
 two components, through an exact allowlist enforced by

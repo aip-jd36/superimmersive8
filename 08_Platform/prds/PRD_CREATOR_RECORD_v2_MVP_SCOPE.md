@@ -151,6 +151,13 @@ A positioning question that does not block implementation: **how the free CRC an
 
 **Decided by:** the founder (JD). This section governs the MVP wherever §3 or §8 differ; their text is kept above as history.
 
+> **SUPERSEDED for the released MVP (2026-11-14). Kept as history.**
+> - **What replaced it:** by founder direction (CR-PDF-DECISION-1, 2026-11-13; approvals F1–F4 in `08_Platform/implementation/CR-V2-MVP-RELEASE-AUTHORIZATION-1-APPROVAL-RECORD.md`), automated document readings are presented **separately** from commercial-readiness considerations and are never compared with declarations. This reverses §9.1's statement that a separate documents section is not sufficient.
+> - **In code:** the active template sets (v4 for schema 7, v5 for schema 8) carry no `integrated_assessment` block, and their layout refuses one.
+> - **Where it remains:** the per-item integrated assessment (§9.1, §9.3) survives only in superseded set v3, the schema 8 set used before the cutover.
+> - **What still applies:** §9.2's rationale, §9.4's exclusions and D10's display-only fallback (comparison method v2, withheld) still apply.
+> - **Current state:** §12 and `08_Platform/app/lib/creator-record/README.md` ("Current state").
+
 ### 9.1 Founder-approved MVP definition
 
 > "An integrated assessment of declarations and supporting documents against governed requirements."
@@ -346,6 +353,7 @@ This decision does **not** complete the MVP integrated-assessment requirement (�
   - submissions open, issuance enabled;
   - Terms `terms-2026-11-14` (§4/§5 revised);
   - AI-permission authority `cr-v2-ai-permission-1__privacy-2026-11-09__terms-2026-11-14`.
+- **Superseded design:** the §9 integrated assessment is no longer printed; readings appear separately (see the note under §9). Engineering current state: `08_Platform/app/lib/creator-record/README.md`.
 - **Build A, `60b1d84d`** (guard + Terms + submissions pause) is the rollback floor. Never roll back to a pre-guard build (`334d8d9f`, `678add4d` or earlier).
 - **Release validation:** `tsc` clean; customer-wording check passes; full Jest suite 24 suites / 89 tests failing, identical to the documented baseline, with no new failures (9,761 passed).
 

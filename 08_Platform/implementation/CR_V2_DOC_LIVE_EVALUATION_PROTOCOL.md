@@ -2,6 +2,8 @@
 
 **Status: PROPOSED. NOT AUTHORIZED. No real-document evaluation has been authorized, and nothing in this document has been run.**
 
+> **Context, 2026-11-15.** This status concerns only the operator-run evaluation described here. Customer live examination of real documents is a separate path: it is enabled in Production as part of the released Creator Record v2 MVP. See `08_Platform/app/lib/creator-record/README.md` ("Current state").
+
 It specifies a bounded first evaluation of the document examination on real documents, and lists what must be decided and built first. Approving this document does not authorize a run.
 
 Every limit below is labelled. **Implemented** means the code does it today, behind the disabled lock. **Proposed** means it does not exist yet, or has not been approved.

@@ -515,7 +515,7 @@ See: `PEER_REVIEW_SUMMARY_CAAS.md` for full synthesis
   - checkout was shown with a 100% comp code only: every Production payment to date collected US$0.00;
   - the UAT purchase carries `uat = false`, so exclude it from customer counts.
 - Retained: release risks F10/F11 (counsel waived; earlier consent/Terms usable) and deferred wording maintenance.
-- Details: `08_Platform/prds/PRD_CREATOR_RECORD_v2_MVP_SCOPE.md` §12 and `08_Platform/implementation/CR-V2-MVP-RELEASE-AUTHORIZATION-1-APPROVAL-RECORD.md`.
+- Details: `08_Platform/prds/PRD_CREATOR_RECORD_v2_MVP_SCOPE.md` §12 and `08_Platform/implementation/CR-V2-MVP-RELEASE-AUTHORIZATION-1-APPROVAL-RECORD.md`. Engineering entry point: `08_Platform/app/lib/creator-record/README.md` ("Current state"); the sections after it are historical milestone notes.
 
 ### 4. Legal Ops (Rights playbook → actual contracts)
 - [ ] Standard Production MSA + SOW
