@@ -9,6 +9,7 @@
 import type { PdfTemplateApproval } from '@/lib/creator-record/customer-pdf/templates'
 import { templateFingerprint } from '@/lib/creator-record/customer-pdf/templates'
 import { approvedPdfTemplates } from '@/lib/creator-record/customer-flow/approved-inputs'
+import { preCutoverLiveSet } from './registered-template-sets'
 import { CUSTOMER_RECORD_SCHEMA } from '@/lib/creator-record/customer-record/record'
 import { CREATOR_RECORD_GOVERNANCE_AUTHORITY as GOV } from '@/lib/creator-record/governed/sources'
 import { SYNTHETIC_TEST_EXAMINATION_PDF as EXAM_PDF } from '@/lib/creator-record/governed/synthetic-test-authority'
@@ -25,7 +26,8 @@ export interface LegacyCase {
 
 /** The existing template set a legacy case renders with (never modified). */
 export function legacyTemplateSet(c: Pick<LegacyCase, 'templates' | 'record'>): { templates: Record<string, unknown>; approval: PdfTemplateApproval } {
-  if (c.templates === 'live') return approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: c.record.record.schema_version }) as never
+  // CR-V2-MVP-APPROVAL-AND-RELEASE-1: 'live' is the set that was live when the baseline was captured (v1 / v3).
+  if (c.templates === 'live') return preCutoverLiveSet(c.record.record.schema_version as 7 | 8)
   if (c.templates === 'synthetic8') return { templates: EXAM_PDF.templates as Record<string, unknown>, approval: EXAM_PDF.approval as PdfTemplateApproval }
   const t = { ...JSON.parse(JSON.stringify(EXAM_PDF.templates)), integrated_assessment: JSON.parse(JSON.stringify(DRAFT_INTEGRATED_WORDING)) }
   return { templates: t, approval: { ...(EXAM_PDF.approval as PdfTemplateApproval), fingerprint: templateFingerprint(t) } }

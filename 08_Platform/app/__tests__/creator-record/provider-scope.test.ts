@@ -251,7 +251,8 @@ function previousInputs(at: 'v1' | 'v2'): ApprovedInputs {
   return prev
 }
 const renderText = (r: Extract<ReturnType<typeof build>, { ok: true }>, issued_on: string) => {
-  const pdf = approvedPdfTemplates(GOV)
+  // CR-V2-MVP-APPROVAL-AND-RELEASE-1: selected per record schema, as Production selects it (schema 7 → v4).
+  const pdf = approvedPdfTemplates(GOV, { id: 'si8/creator-record-v2-record', version: 7 })
   return documentText(buildCustomerDocument({ canonical: r.canonical, sha256: r.sha256, issued: { record_id: 'CR-2026-ABCDEF12', issued_on }, templates: pdf.templates, template_approval: pdf.approval })).join('\n')
 }
 

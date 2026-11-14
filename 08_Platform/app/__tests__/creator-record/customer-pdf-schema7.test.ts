@@ -247,7 +247,7 @@ describe('issuance consumes the PDF without weakening a safeguard', () => {
 
   test('commercial gates are all still closed', () => {
     expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [{ id: 'si8/creator-record-v2-record', version: 7 }, { id: 'si8/creator-record-v2-record', version: 8 }], builders: [{ id: 'si8/creator-record-v2-record-builder', version: 5 }, { id: 'si8/creator-record-v2-record-builder', version: 7 }], examination_methods: [{ origin: 'live_model', provider: 'anthropic', model: 'claude-sonnet-5', profile: { id: 'receipt', version: 1, schema: 'receipt-extraction-v2', prompt: 'receipt-prompt-v2' } }] }) // R15 option (a), JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110
-    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped') // CR-V2-MVP-PROD-UAT-ACTIVATION-1
+    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open') // CR-V2-MVP-PROD-UAT-ACTIVATION-1
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('enabled')
     // R9 (JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110): the approved schema 7 templates, exactly.
     expect(GOV.pdf_template_approval).toMatchObject({ version: 1, fingerprint: 'c5fe2a21ec8a096c6abf7eccf0bd55f3103401e10a26512052e5d2ee15a11c6c', record_schema: { version: 7 }, review_ref: 'JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110 R9' })

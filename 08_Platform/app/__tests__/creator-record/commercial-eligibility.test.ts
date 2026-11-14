@@ -428,7 +428,7 @@ describe('9: reading stays exactly as it was', () => {
 
 describe('10: the existing stops are all still in force', () => {
   test('submissions and issuance are stopped, and customer governance carries the approved wording and PDF templates', () => {
-    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped') // CR-V2-MVP-PROD-UAT-ACTIVATION-1
+    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open') // CR-V2-MVP-PROD-UAT-ACTIVATION-1
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('enabled')
     // Wording and contract: JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109. Templates (R9): JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110. Issuance stays stopped.
     // CR-V2-MVP-PROVIDER-SCOPE-2: the contract and wording approvals are now the provider-scope-2 versions (T1 v3, MVP tools only).

@@ -25,7 +25,7 @@ const read = (p: string) => readFileSync(join(__dirname, '..', '..', p), 'utf8')
 describe('launch configuration', () => {
   test('v1 new sales are retired; both v2 stops ship open for the controlled UAT (CR-V2-MVP-PROD-UAT-ACTIVATION-1)', () => {
     expect(CREATOR_RECORD_V1_NEW_SALES).toBe('retired')
-    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
+    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open')
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('enabled')
   })
 

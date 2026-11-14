@@ -578,6 +578,6 @@ describe('compatibility', () => {
     const inputs = approvedCustomerRecordInputs(g)
     const check = checkApprovedSources(inputs.sources, inputs.source_text, CLAIMS, AS_OF, SCHEMA)
     expect(check.ok).toBe(true)
-    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped') // CR-V2-MVP-PROD-UAT-ACTIVATION-1
+    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open') // CR-V2-MVP-PROD-UAT-ACTIVATION-1
   })
 })

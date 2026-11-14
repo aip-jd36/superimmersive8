@@ -207,7 +207,7 @@ describe('end to end with the shipped fixture', () => {
 
   test('both stops ship open for the controlled UAT (CR-V2-MVP-PROD-UAT-ACTIVATION-1); the stop still refuses v2 issuance when stopped', () => {
     // A record prepared under the synthetic authority stays ineligible under the genuine governance (publication-authority.test.ts).
-    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
+    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open')
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('enabled')
     expect(() => rendererForFamily('creator_record_v2', 'stopped')).toThrow(CreatorRecordIssuanceStoppedError)
   })

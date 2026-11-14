@@ -102,7 +102,7 @@ describe('the injected dependencies', () => {
     const r = await preparePrepared(adminFlow(m.store), ADMIN, { state: state() })
     if (!r.ok) throw new Error(JSON.stringify(r))
     // CR-V2-MVP-PROD-UAT-ACTIVATION-1: submissions ship open; the stopped half is pinned explicitly, the open half follows.
-    expect(productionFlowDeps().submissions).toBe('stopped') // CR-V2-MVP-RELEASE-EXECUTION-1 (Build A pause)
+    expect(productionFlowDeps().submissions).toBe('open')
     const customer: FlowDeps = { ...productionFlowDeps(), store: m.store, now: () => NOW, hasPilotAccess: async () => true, submissions: 'stopped' }
     expect(customer.syntheticUat).toBeUndefined()
     expect(await preparePrepared(customer, ADMIN, { state: state() })).toEqual({ ok: false, status: 503, code: 'submissions_stopped' })
@@ -120,7 +120,7 @@ describe('the injected dependencies', () => {
   })
 
   test('I20: the commercial locks are in the controlled-UAT launch state (CR-V2-MVP-PROD-UAT-ACTIVATION-1); the legacy extraction lock stays false', () => {
-    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
+    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open')
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('enabled')
     expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(true)
     expect(LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD).toBe(false)

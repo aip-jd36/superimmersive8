@@ -449,7 +449,8 @@ describe('5. unsupported templates → refusal', () => {
     expect(approvedPdfTemplates(SYN_AUTH)).toEqual({ templates: SYN_AUTH!.pdf_templates, approval: SYN_AUTH!.pdf_template_approval })
     expect(approvedPdfTemplates(SYN_AUTH, { id: CUSTOMER_RECORD_SCHEMA, version: 6 })).toEqual({ templates: null, approval: null })
     expect(approvedPdfTemplates(SYN_AUTH, { id: 'si8/other', version: 8 })).toEqual({ templates: null, approval: null })
-    expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).approval?.review_ref).toBe('JD-CR-V2-MVP-INTEGRATION-4-20261110')
+    // CR-V2-MVP-APPROVAL-AND-RELEASE-1: the governed schema 8 selection is v5 (v3 stays registered, superseded).
+    expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).approval).toMatchObject({ version: 5, lifecycle: 'approved' })
     expect(approvedPdfTemplates(null, { id: CUSTOMER_RECORD_SCHEMA, version: 8 })).toEqual({ templates: null, approval: null })
   })
 })
@@ -510,9 +511,10 @@ describe('8. every commercial gate stays closed by default', () => {
   test('the support list is the approved R15 list, both stops are stopped, Production has the approved templates, and both live locks are false in source', () => {
     expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [{ id: 'si8/creator-record-v2-record', version: 7 }, { id: 'si8/creator-record-v2-record', version: 8 }], builders: [{ id: 'si8/creator-record-v2-record-builder', version: 5 }, { id: 'si8/creator-record-v2-record-builder', version: 7 }], examination_methods: [{ origin: 'live_model', provider: 'anthropic', model: 'claude-sonnet-5', profile: { id: 'receipt', version: 1, schema: 'receipt-extraction-v2', prompt: 'receipt-prompt-v2' } }] }) // R15 option (a), JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('enabled') // CR-V2-MVP-PROD-UAT-ACTIVATION-1
-    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
-    expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).approval?.fingerprint).toBe('287de01d8dc365e4e7c62ab0ea25fdce0b824b26e31367560b85b2f9e779c1b5')
-    expect(GOV.pdf_template_sets).toHaveLength(1)
+    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open')
+    expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).approval?.fingerprint).toBe('a27e23cdbc1b12c16330b9518bba210b218bb0e8807e53ac164d6673ec873408') // v5
+    expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 7 }).approval?.fingerprint).toBe('d4ecf3f39487ed43ce6c5e621d988d6525b638c952a8c5ead01e0cc9b8504f7e') // v4
+    expect(GOV.pdf_template_sets).toHaveLength(3) // v3 (superseded), v4, v5
     // The controls module is mocked in this file; the shipped source is read directly.
     const controls = readFileSync(join(process.cwd(), 'lib', 'creator-record', 'live-examination', 'controls.ts'), 'utf8')
     expect(controls).toMatch(/export const LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD(: boolean)? = true/)

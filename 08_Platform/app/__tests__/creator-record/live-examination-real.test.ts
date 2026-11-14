@@ -352,7 +352,7 @@ describe('what stays closed', () => {
   const NEW = ['lib/creator-record/live-examination/controls.ts', 'lib/creator-record/live-examination/real-executor.ts', 'lib/creator-record/live-examination/document-access.ts', 'lib/creator-record/live-examination/evaluation.ts', 'lib/creator-record-flow/live-examination-production.ts']
 
   test('customer submissions and issuance ship open for the controlled UAT (CR-V2-MVP-PROD-UAT-ACTIVATION-1)', () => {
-    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
+    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open')
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('enabled')
   })
 

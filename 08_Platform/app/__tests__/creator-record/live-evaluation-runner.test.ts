@@ -213,6 +213,6 @@ describe('the pre-call input bound', () => {
 describe('closed gates', () => {
   test('the live lock is pinned false here; the legacy lock stays false; the other gates ship in the controlled-UAT launch state (CR-V2-MVP-PROD-UAT-ACTIVATION-1)', () => {
     expect([LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD, LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD, EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED]).toEqual([false, false, true])
-    expect([CREATOR_RECORD_V2_SUBMISSIONS, CREATOR_RECORD_V2_ISSUANCE]).toEqual(['stopped', 'enabled']) // CR-V2-MVP-RELEASE-EXECUTION-1 (Build A pause)
+    expect([CREATOR_RECORD_V2_SUBMISSIONS, CREATOR_RECORD_V2_ISSUANCE]).toEqual(['open', 'enabled'])
   })
 })

@@ -492,7 +492,7 @@ describe('no new reachable behaviour', () => {
 
   test('production launch controls are unchanged', () => {
     const read = (p: string) => readFileSync(path.join(APP_ROOT, p), 'utf8')
-    expect(read('lib/creator-record/customer-flow/approved-inputs.ts')).toContain("export const CREATOR_RECORD_V2_SUBMISSIONS: SubmissionsMode = 'stopped'") // CR-V2-MVP-PROD-UAT-ACTIVATION-1
+    expect(read('lib/creator-record/customer-flow/approved-inputs.ts')).toContain("export const CREATOR_RECORD_V2_SUBMISSIONS: SubmissionsMode = 'open'") // CR-V2-MVP-PROD-UAT-ACTIVATION-1
     expect(read('lib/creator-record-artifacts/config.ts')).toContain("export const CREATOR_RECORD_V2_ISSUANCE: V2IssuanceMode = 'enabled'")
     expect(read('lib/creator-record/evidence-intake/contract.ts')).toContain('export const EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED: boolean = true')
     expect(read('lib/creator-record/evidence/config.ts')).toContain('export const LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD: boolean = false')

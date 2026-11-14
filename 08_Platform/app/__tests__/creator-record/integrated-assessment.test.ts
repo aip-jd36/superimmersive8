@@ -4,6 +4,7 @@
  * Real schema 8 records (real builder, real replay examinations, synthetic test sources). The `integrated_assessment` wording
  * (`test-support/integrated-assessment-draft-wording.ts`) is a DRAFT for PM review, NOT APPROVED; it is used here under a synthetic test approval only. No database, model or network.
  */
+import { preCutoverLiveSet } from '@/test-support/registered-template-sets'
 import { buildCustomerDocument, CustomerPdfRefusal, type Block, type CustomerDocumentModel } from '@/lib/creator-record/customer-pdf/document-model'
 import { templateFingerprint, wordingLockViolations, type CustomerPdfTemplates, type PdfTemplateApproval } from '@/lib/creator-record/customer-pdf/templates'
 import { assessIntegrated, INTEGRATED_ASSESSMENT_METHOD, type IntegratedAssessmentInput } from '@/lib/creator-record/integrated-assessment/assess'
@@ -189,9 +190,11 @@ describe('customer PDF: integrated inside guidance, inactive until approved word
   })
 
   test('CR-V2-MVP-INTEGRATION-4: the governed schema 8 set (version 3) carries exactly the approved wording', () => {
-    expect(CREATOR_RECORD_PDF_TEMPLATE_SETS).toHaveLength(1)
-    const set = CREATOR_RECORD_PDF_TEMPLATE_SETS[0]
-    expect(set.approval).toMatchObject({ version: 3, record_schema: { version: 8 }, lifecycle: 'approved', review_ref: 'JD-CR-V2-MVP-INTEGRATION-4-20261110' })
+    // CR-V2-MVP-APPROVAL-AND-RELEASE-1: v3 stays registered and unchanged, superseded by v5 (rendered here as it was while live).
+    const registered = CREATOR_RECORD_PDF_TEMPLATE_SETS.filter((s) => s.approval.record_schema.version === 8 && s.approval.version === 3)
+    expect(registered).toHaveLength(1)
+    expect(registered[0].approval).toMatchObject({ version: 3, record_schema: { version: 8 }, lifecycle: 'superseded', review_ref: 'JD-CR-V2-MVP-INTEGRATION-4-20261110' })
+    const set = preCutoverLiveSet(8)
     expect((set.templates as Record<string, unknown>).integrated_assessment).toEqual(W)
     expect(templateFingerprint(set.templates)).toBe(set.approval.fingerprint)
     expect(W.not_compared).toBe('SI8 has not determined whether the information read from your documents matches what you told us. This section explains how the document observations relate to the conditions in the guidance above.')
@@ -307,7 +310,7 @@ describe('CR-V2-MVP-INTEGRATION-3: the proposed wording keeps the required disti
 
 /** The APPROVED Production schema 8 template set plus the DRAFT block, under a synthetic test approval of exactly that set. */
 function withProductionLabels(): { templates: unknown; approval: PdfTemplateApproval } {
-  const set = CREATOR_RECORD_PDF_TEMPLATE_SETS.find((x) => (x.templates as { record_schema: { version: number } }).record_schema.version === 8)!
+  const set = preCutoverLiveSet(8) // CR-V2-MVP-APPROVAL-AND-RELEASE-1: the v3 set, which carries the integrated assessment
   const t = clone(set.templates) as Record<string, unknown>
   t.integrated_assessment = clone(W)
   // The synthetic fixture's questions are the synthetic set's: map them exactly as the synthetic templates do.

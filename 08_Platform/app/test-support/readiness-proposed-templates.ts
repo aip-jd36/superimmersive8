@@ -15,6 +15,7 @@ import { CREATOR_RECORD_GOVERNANCE_AUTHORITY as GOV } from '@/lib/creator-record
 import { readinessRenderFingerprint } from '@/lib/creator-record/readiness-summary/render'
 import { readinessTemplatesFingerprint } from '@/lib/creator-record/readiness-summary/summary'
 import { optionRTemplates } from './readiness-scenarios'
+import { preCutoverLiveSet } from './registered-template-sets'
 
 export const PROPOSED_STATUS = 'PROPOSED — NOT APPROVED (CR-PDF-IMPL-1, revised by CR-PDF-REVIEW-2, CR-PDF-DECISION-1 and CR-PDF-RELEASE-FIX-1). Not registered. Requires founder, Living Knowledge governance and counsel approval and a wording/fingerprint freeze before registration.'
 export const PROPOSED_VERSIONS = { 7: { pdf: 4, summary: 1, render: 1 }, 8: { pdf: 5, summary: 1, render: 2 } } as const
@@ -39,7 +40,8 @@ export interface ProposedTemplateSet {
 }
 
 export function proposedTemplateSet(schema: 7 | 8): ProposedTemplateSet {
-  const base = approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: schema }) as { templates: any; approval: PdfTemplateApproval }
+  // CR-V2-MVP-APPROVAL-AND-RELEASE-1: the base is the registered v1 / v3 set, whichever set is selected now.
+  const base = preCutoverLiveSet(schema) as { templates: any; approval: PdfTemplateApproval }
   const V = PROPOSED_VERSIONS[schema]
   const draft = optionRTemplates(base, schema).templates.readiness_summary as { summary: any; render: any }
   const pdf = clone(base.templates)

@@ -13,6 +13,7 @@ import { CUSTOMER_RECORD_SCHEMA } from '@/lib/creator-record/customer-record/rec
 import { CREATOR_RECORD_GOVERNANCE_AUTHORITY as GOV } from '@/lib/creator-record/governed/sources'
 import { buildReadinessSummary, readinessTemplatesFingerprint, type ReadinessSummary } from '@/lib/creator-record/readiness-summary/summary'
 import { canonicalJson } from '@/lib/creator-record/record-core/canonical'
+import { CUTOVER_FINGERPRINTS, CUTOVER_VERSIONS, preCutoverLiveSet, PRE_CUTOVER_FINGERPRINTS, PRE_CUTOVER_VERSIONS, registeredPdfTemplateSet } from '@/test-support/registered-template-sets'
 import { legacyCases, type LegacyCase } from '@/test-support/readiness-legacy-cases'
 import { proposedTemplateSet, syntheticallyApproved, type ProposedTemplateSet } from '@/test-support/readiness-proposed-templates'
 import { liveRecord } from '@/test-support/readiness-scenarios'
@@ -48,13 +49,17 @@ beforeAll(async () => {
 })
 
 describe('Production issuance is unchanged before activation', () => {
-  test('the registered sets are still schema 7 v1 and schema 8 v3, unchanged, and neither carries the readiness block', () => {
-    const a7 = approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: 7 })
-    const a8 = approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: 8 })
-    expect([a7.approval?.version, a7.approval?.fingerprint]).toEqual([1, 'c5fe2a21ec8a096c6abf7eccf0bd55f3103401e10a26512052e5d2ee15a11c6c'])
-    expect([a8.approval?.version, a8.approval?.fingerprint]).toEqual([3, '287de01d8dc365e4e7c62ab0ea25fdce0b824b26e31367560b85b2f9e779c1b5'])
-    expect((a7.templates as CustomerPdfTemplates).readiness_summary).toBeUndefined()
-    expect((a8.templates as CustomerPdfTemplates).readiness_summary).toBeUndefined()
+  // CR-V2-MVP-APPROVAL-AND-RELEASE-1: after the cutover v4 / v5 are selected, v1 / v3 stay registered (superseded, unchanged).
+  test('the selected sets are v4 / v5 with exactly the proposal content; v1 / v3 stay registered, superseded and unchanged', () => {
+    for (const s of [7, 8] as const) {
+      const a = approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: s })
+      expect([a.approval?.version, a.approval?.fingerprint, a.approval?.lifecycle]).toEqual([CUTOVER_VERSIONS[s], CUTOVER_FINGERPRINTS[s], 'approved'])
+      expect(canonicalJson(a.templates)).toBe(canonicalJson(PROPOSED[s].templates))
+      const old = registeredPdfTemplateSet(s, PRE_CUTOVER_VERSIONS[s])
+      expect([old.approval.fingerprint, old.approval.lifecycle]).toEqual([PRE_CUTOVER_FINGERPRINTS[s], 'superseded'])
+      expect(require('@/lib/creator-record/customer-pdf/templates').templateFingerprint(old.templates)).toBe(PRE_CUTOVER_FINGERPRINTS[s])
+      expect((old.templates as unknown as CustomerPdfTemplates).readiness_summary).toBeUndefined()
+    }
   })
   test('active lookup: exactly one APPROVED set per schema; pending or superseded sets are never selected', () => {
     const g = GOV as any
@@ -64,9 +69,9 @@ describe('Production issuance is unchanged before activation', () => {
     // Two approved sets for one schema select nothing (fail closed), exactly as before.
     expect(approvedPdfTemplates(extra('approved') as never, { id: CUSTOMER_RECORD_SCHEMA, version: 7 }).approval).toBeNull()
   })
-  test('the proposal files are referenced by no application code and are not in the governance bundle', () => {
+  test('the proposal files are referenced by no application code (the registered v4 / v5 content is inlined, not imported)', () => {
     const src = readFileSync(join(APP, 'lib/creator-record/governed/sources.ts'), 'utf8')
-    expect(src).not.toMatch(/CR-PDF-TEMPLATES|readiness_summary/)
+    expect(src).not.toMatch(/proposals\/CR-PDF-TEMPLATES|\.proposal\.json/)
   })
 })
 
@@ -210,7 +215,7 @@ describe('the three-level layout, both schemas', () => {
   })
   test('CR-PDF-DECISION-1: the proposed schema 8 set carries no integrated assessment, and no integrated-assessment text is printed', () => {
     expect((T(8) as unknown as Record<string, unknown>).integrated_assessment).toBeUndefined()
-    const v3 = approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }) as { templates: unknown; approval: any }
+    const v3 = preCutoverLiveSet(8) as { templates: unknown; approval: any }
     const ia = (v3.templates as CustomerPdfTemplates).integrated_assessment!
     // Every distinct integrated-assessment string of the approved v3 wording that is not also used elsewhere in the proposed set.
     const elsewhere = new Set<string>()
@@ -227,7 +232,7 @@ describe('the three-level layout, both schemas', () => {
     }
   })
   test('CR-PDF-DECISION-1: the approved v3 PDF still prints its integrated assessment inside the guidance, exactly as before', () => {
-    const v3 = approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }) as { templates: unknown; approval: any }
+    const v3 = preCutoverLiveSet(8) as { templates: unknown; approval: any }
     const ia = (v3.templates as CustomerPdfTemplates).integrated_assessment!
     let runs = 0
     for (const c of CASES.filter((x) => x.rec.record.schema_version === 8)) {
@@ -237,14 +242,14 @@ describe('the three-level layout, both schemas', () => {
     expect(runs).toBeGreaterThan(0)
   })
   test('CR-PDF-DECISION-1: a reading-layout set that also carries the integrated assessment refuses (fail closed)', () => {
-    const v3 = approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }) as { templates: any; approval: any }
+    const v3 = preCutoverLiveSet(8) as { templates: any; approval: any }
     const both = syntheticallyApproved({ ...PROPOSED[8], templates: { ...PROPOSED[8].templates, integrated_assessment: v3.templates.integrated_assessment }, proposed_approval: PROPOSED[8].proposed_approval })
     const fp = require('@/lib/creator-record/customer-pdf/templates').templateFingerprint(both.templates)
     const c = CASES.find((x) => x.name === 's8-linked-docs')!
     expect(() => buildCustomerDocument({ canonical: c.rec.canonical, sha256: c.rec.sha256, issued: ISSUED, templates: both.templates, template_approval: { ...both.approval, fingerprint: fp } })).toThrow(/readiness_layout_refused: integrated assessment with the reading layout/)
   })
   test('CR-PDF-DECISION-1: every authorized document reading is printed in the documents section, as the approved v3 PDF prints it', () => {
-    const v3 = approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }) as { templates: unknown; approval: any }
+    const v3 = preCutoverLiveSet(8) as { templates: unknown; approval: any }
     for (const c of CASES.filter((x) => x.rec.record.schema_version === 8)) {
       const live = buildCustomerDocument({ canonical: c.rec.canonical, sha256: c.rec.sha256, issued: ISSUED, templates: v3.templates, template_approval: v3.approval })
       const was = live.sections.find((s) => s.id === 'documents')!.blocks.map((b) => canonicalJson(b))

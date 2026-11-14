@@ -528,7 +528,7 @@ describe('locks and boundaries', () => {
   })
 
   test('publication, payment and issuance locks are unchanged', () => {
-    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped') // CR-V2-MVP-PROD-UAT-ACTIVATION-1
+    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open') // CR-V2-MVP-PROD-UAT-ACTIVATION-1
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('enabled')
     expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(true)
   })

@@ -53,7 +53,7 @@ describe('both code locks are off in this build', () => {
 
   test('the other gates ship in the controlled-UAT launch state (CR-V2-MVP-PROD-UAT-ACTIVATION-1)', () => {
     expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(true)
-    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped')
+    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open')
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('enabled')
     expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [{ id: 'si8/creator-record-v2-record', version: 7 }, { id: 'si8/creator-record-v2-record', version: 8 }], builders: [{ id: 'si8/creator-record-v2-record-builder', version: 5 }, { id: 'si8/creator-record-v2-record-builder', version: 7 }], examination_methods: [{ origin: 'live_model', provider: 'anthropic', model: 'claude-sonnet-5', profile: { id: 'receipt', version: 1, schema: 'receipt-extraction-v2', prompt: 'receipt-prompt-v2' } }] }) // R15 option (a), JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110
   })

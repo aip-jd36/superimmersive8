@@ -300,8 +300,13 @@ describe('governance', () => {
 
   test('every commercial gate is still closed, and Production has the approved schema 8 templates', () => {
     expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [{ id: 'si8/creator-record-v2-record', version: 7 }, { id: 'si8/creator-record-v2-record', version: 8 }], builders: [{ id: 'si8/creator-record-v2-record-builder', version: 5 }, { id: 'si8/creator-record-v2-record-builder', version: 7 }], examination_methods: [{ origin: 'live_model', provider: 'anthropic', model: 'claude-sonnet-5', profile: { id: 'receipt', version: 1, schema: 'receipt-extraction-v2', prompt: 'receipt-prompt-v2' } }] }) // R15 option (a), JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110
-    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('stopped') // CR-V2-MVP-PROD-UAT-ACTIVATION-1
+    expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open') // CR-V2-MVP-PROD-UAT-ACTIVATION-1
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('enabled')
-    expect(GOV.pdf_template_sets?.map((s) => [s.approval.record_schema.version, s.approval.fingerprint, s.approval.review_ref])).toEqual([[8, '287de01d8dc365e4e7c62ab0ea25fdce0b824b26e31367560b85b2f9e779c1b5', 'JD-CR-V2-MVP-INTEGRATION-4-20261110']])
+    // CR-V2-MVP-APPROVAL-AND-RELEASE-1: v3 stays registered (superseded); v4 / v5 are the approved sets.
+    expect(GOV.pdf_template_sets?.map((s) => [s.approval.record_schema.version, s.approval.version, s.approval.fingerprint, s.approval.lifecycle])).toEqual([
+      [8, 3, '287de01d8dc365e4e7c62ab0ea25fdce0b824b26e31367560b85b2f9e779c1b5', 'superseded'],
+      [7, 4, 'd4ecf3f39487ed43ce6c5e621d988d6525b638c952a8c5ead01e0cc9b8504f7e', 'approved'],
+      [8, 5, 'a27e23cdbc1b12c16330b9518bba210b218bb0e8807e53ac164d6673ec873408', 'approved'],
+    ])
   })
 })

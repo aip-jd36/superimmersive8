@@ -14,6 +14,7 @@ import type { LayoutNode } from '@/lib/creator-record/customer-pdf/readiness-lay
 import type { CustomerPdfTemplates } from '@/lib/creator-record/customer-pdf/templates'
 import { CUSTOMER_RECORD_SCHEMA } from '@/lib/creator-record/customer-record/record'
 import { CREATOR_RECORD_GOVERNANCE_AUTHORITY as GOV } from '@/lib/creator-record/governed/sources'
+import { CUTOVER_FINGERPRINTS, CUTOVER_VERSIONS, preCutoverLiveSet, PRE_CUTOVER_FINGERPRINTS, PRE_CUTOVER_VERSIONS, registeredPdfTemplateSet } from '@/test-support/registered-template-sets'
 import { legacyCases } from '@/test-support/readiness-legacy-cases'
 import { proposedTemplateSet, syntheticallyApproved } from '@/test-support/readiness-proposed-templates'
 import { liveRecord } from '@/test-support/readiness-scenarios'
@@ -41,7 +42,7 @@ beforeAll(async () => {
 
 describe('separation: document readings never reach the guidance', () => {
   test('the readiness summary section has no reading, excerpt or document-relevance statement; the documents section has every reading', () => {
-    const v3 = approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).templates as CustomerPdfTemplates
+    const v3 = preCutoverLiveSet(8).templates as CustomerPdfTemplates
     const iaPhrases = [v3.integrated_assessment!.heading, v3.integrated_assessment!.status_labels.relevant_observation_unverified, v3.integrated_assessment!.not_compared]
     expect(S8.length).toBeGreaterThan(2)
     for (const c of S8) {
@@ -55,7 +56,7 @@ describe('separation: document readings never reach the guidance', () => {
       const summary = sectionTexts(m, 'readiness_summary')
       const documents = sectionTexts(m, 'documents')
       // Readings the approved v3 documents section prints verbatim (classification codes are printed as their labels).
-      const v3set = approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }) as { templates: unknown; approval: any }
+      const v3set = preCutoverLiveSet(8) as { templates: unknown; approval: any }
       const v3docs = buildCustomerDocument({ canonical: c.rec.canonical, sha256: c.rec.sha256, issued: ISSUED, templates: v3set.templates, template_approval: v3set.approval }).sections.find((s) => s.id === 'documents')!.blocks.flatMap(textsOf)
       const printed = readings.filter((r) => v3docs.includes(r))
       expect([c.name, printed.length > 0 || readings.length === 0]).toEqual([c.name, true])
@@ -78,7 +79,7 @@ describe('separation: document readings never reach the guidance', () => {
     }
   })
   test('W2: the "did not do" line no longer says SI8 drew conclusions from a comparison', () => {
-    const v3 = approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).templates as CustomerPdfTemplates
+    const v3 = preCutoverLiveSet(8).templates as CustomerPdfTemplates
     expect(v3.sections.not_done.lines[4]).toBe('SI8 drew no conclusion from comparing your documents with your declarations.') // approved v3: unchanged
     expect(T(8).sections.not_done.lines[4]).toBe('SI8 did not compare your documents, or their readings, with what you told SI8 or with the guidance.')
     for (const c of S8) expect(sectionTexts(build(c.rec), 'not_done')).toContain(T(8).sections.not_done.lines[4])

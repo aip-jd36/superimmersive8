@@ -24,10 +24,11 @@ import { readinessRenderFingerprint, type ReadinessRenderApproval, type Readines
 import { readinessTemplatesFingerprint, READINESS_SUMMARY_METHOD, type ReadinessSummaryApproval, type ReadinessSummaryTemplates } from '@/lib/creator-record/readiness-summary/summary'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { withQuestionnaireApproval } from './questionnaire-approval'
+import { preCutoverLiveSet } from './registered-template-sets'
 
 export const SYNTHETIC_PROOF_AUTHORITY = 'SYNTHETIC TEST APPROVAL — CR-SUM-PDF-A proof — NOT APPROVED WORDING'
 
-const V3 = (approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).templates as any)
+const V3 = (preCutoverLiveSet(8).templates as any) // CR-V2-MVP-APPROVAL-AND-RELEASE-1: the registered v3 set
 
 /** Proposed summary set. CR-PDF-IMPL-1: wording as in CR-PDF-WORDING-2 / CR-PDF-APPROVAL-1 (R1, R2). PROPOSED, NOT APPROVED. */
 export const PROPOSED_SUMMARY_TEMPLATES: ReadinessSummaryTemplates = {

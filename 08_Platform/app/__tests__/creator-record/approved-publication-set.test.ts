@@ -130,9 +130,15 @@ describe('the approved guidance ledger, PDF templates and issuance support', () 
     expect(Governed.CREATOR_RECORD_VERSIONS).toEqual({ registry: 'CR-V2-LAUNCH-REGISTRY-3', ledger: 'CR-V2-LAUNCH-LEDGER-3' })
   })
   test('R9/R10: both template sets carry their approved fingerprints, schemas and references', () => {
-    expect(Governed.CREATOR_RECORD_PDF_TEMPLATE_APPROVAL).toMatchObject({ version: 1, fingerprint: 'c5fe2a21ec8a096c6abf7eccf0bd55f3103401e10a26512052e5d2ee15a11c6c', record_schema: { version: 7 }, review_ref: `${REF2} R9` })
+    // CR-V2-MVP-APPROVAL-AND-RELEASE-1: v1 and v3 keep their approval record, now superseded; v4 / v5 are registered after them.
+    expect(Governed.CREATOR_RECORD_PDF_TEMPLATE_APPROVAL).toMatchObject({ version: 1, fingerprint: 'c5fe2a21ec8a096c6abf7eccf0bd55f3103401e10a26512052e5d2ee15a11c6c', record_schema: { version: 7 }, review_ref: `${REF2} R9`, lifecycle: 'superseded' })
     // CR-V2-MVP-INTEGRATION-4: the schema 8 set is version 3 = the R10 set plus the founder-approved integrated-assessment block.
-    expect(Governed.CREATOR_RECORD_PDF_TEMPLATE_SETS.map((s) => s.approval)).toEqual([expect.objectContaining({ version: 3, fingerprint: '287de01d8dc365e4e7c62ab0ea25fdce0b824b26e31367560b85b2f9e779c1b5', record_schema: { id: 'si8/creator-record-v2-record', version: 8 }, review_ref: 'JD-CR-V2-MVP-INTEGRATION-4-20261110' })])
+    const notBlank = expect.stringMatching(/\S/)
+    expect(Governed.CREATOR_RECORD_PDF_TEMPLATE_SETS.map((s) => s.approval)).toEqual([
+      expect.objectContaining({ version: 3, fingerprint: '287de01d8dc365e4e7c62ab0ea25fdce0b824b26e31367560b85b2f9e779c1b5', record_schema: { id: 'si8/creator-record-v2-record', version: 8 }, review_ref: 'JD-CR-V2-MVP-INTEGRATION-4-20261110', lifecycle: 'superseded' }),
+      expect.objectContaining({ version: 4, fingerprint: 'd4ecf3f39487ed43ce6c5e621d988d6525b638c952a8c5ead01e0cc9b8504f7e', record_schema: { id: 'si8/creator-record-v2-record', version: 7 }, lifecycle: 'approved', authority: notBlank, review_ref: notBlank }),
+      expect.objectContaining({ version: 5, fingerprint: 'a27e23cdbc1b12c16330b9518bba210b218bb0e8807e53ac164d6673ec873408', record_schema: { id: 'si8/creator-record-v2-record', version: 8 }, lifecycle: 'approved', authority: notBlank, review_ref: notBlank }),
+    ])
     expect(sha(JSON.stringify(sortDeep(Governed.CREATOR_RECORD_PDF_TEMPLATES)))).toBe('c5fe2a21ec8a096c6abf7eccf0bd55f3103401e10a26512052e5d2ee15a11c6c')
     expect(sha(JSON.stringify(sortDeep(Governed.CREATOR_RECORD_PDF_TEMPLATE_SETS[0].templates)))).toBe('287de01d8dc365e4e7c62ab0ea25fdce0b824b26e31367560b85b2f9e779c1b5')
     // Removing the block and restoring the set's own version reproduces the R10 approval exactly: nothing else in the set changed.

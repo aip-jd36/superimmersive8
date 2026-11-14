@@ -13,6 +13,7 @@ import { CREATOR_RECORD_GOVERNANCE_AUTHORITY as GOV } from '@/lib/creator-record
 import { SYNTHETIC_TEST_EXAMINATION_PDF as EXAM_PDF } from '@/lib/creator-record/governed/synthetic-test-authority'
 import { canonicalJson, sha256Hex } from '@/lib/creator-record/record-core/canonical'
 import { legacyCases, legacyTemplateSet, type LegacyCase } from '@/test-support/readiness-legacy-cases'
+import { CUTOVER_FINGERPRINTS, CUTOVER_VERSIONS, preCutoverLiveSet, PRE_CUTOVER_FINGERPRINTS, PRE_CUTOVER_VERSIONS, registeredPdfTemplateSet } from '@/test-support/registered-template-sets'
 import { liveRecord, optionRTemplates, PROPOSED_RENDER_TEMPLATES, PROPOSED_SUMMARY_TEMPLATES } from '@/test-support/readiness-scenarios'
 
 const ISSUED = { record_id: 'CR-2026-0000000B', issued_on: '2026-11-12' }
@@ -35,8 +36,16 @@ beforeAll(async () => {
 })
 
 describe('existing approved template sets keep their original behaviour', () => {
-  test('no approved template set carries the readiness block, so the live path can never select it', () => {
-    for (const v of [7, 8]) expect((approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: v }).templates as CustomerPdfTemplates).readiness_summary).toBeUndefined()
+  // CR-V2-MVP-APPROVAL-AND-RELEASE-1: after the cutover the selected sets are v4 / v5 (reading layout); the historical v1 / v3 sets
+  // stay registered, superseded and unchanged, and never carry the block.
+  test('the historical v1 / v3 sets carry no readiness block; the selected sets are the frozen v4 / v5 reading layout', () => {
+    for (const v of [7, 8] as const) {
+      expect((preCutoverLiveSet(v).templates as unknown as CustomerPdfTemplates).readiness_summary).toBeUndefined()
+      expect(registeredPdfTemplateSet(v, PRE_CUTOVER_VERSIONS[v]).approval).toMatchObject({ fingerprint: PRE_CUTOVER_FINGERPRINTS[v], lifecycle: 'superseded' })
+      const live = approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: v })
+      expect(live.approval).toMatchObject({ version: CUTOVER_VERSIONS[v], fingerprint: CUTOVER_FINGERPRINTS[v], lifecycle: 'approved' })
+      expect((live.templates as CustomerPdfTemplates).readiness_summary).toBeDefined()
+    }
   })
   test('legacy models are byte-identical to the baseline captured before the change (independent fixture)', () => {
     expect(Object.keys(BASELINE).sort()).toEqual(CASES.map((c) => c.name).sort())
