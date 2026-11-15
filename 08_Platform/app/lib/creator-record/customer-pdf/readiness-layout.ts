@@ -47,6 +47,8 @@ export type LayoutHint =
   | 'title' | 'h1' | 'lead' | 'h2' | 'h2_kept' | 'band' | 'reference' | 'topic' | 'provider' | 'eyebrow' | 'compact' | 'conclusion' | 'framing'
   | 'explanation' | 'fine' | 'note' | 'bullet' | 'row' | 'condition' | 'dep_title' | 'map_ref_label' | 'map_ref_value' | 'map_topic'
   | 'map_provider' | 'map_label' | 'map_item' | 'map_xref' | 'map_group' | 'map_none' | 'body' | 'qa_question' | 'qa_answer' | 'reading' | 'reading_sub' | 'digest'
+  // CR-DESIGN-2B: the declared-title copy and its question (identity), and the caveat pointer (C-3). Never produced for v1–v5 sets.
+  | 'hero' | 'hero_label' | 'pointer'
 export type LayoutBox =
   | 'identity' | 'overview' | 'panel' | 'map' | 'map_group' | 'map_row' | 'map_ref' | 'map_topic' | 'map_open' | 'guidance' | 'group' | 'consideration'
   | 'consideration_head' | 'open' | 'dependency' | 'scope' | 'keep' | 'qa' | 'qa_answers' | 'reading' | 'document' | 'section'
@@ -91,10 +93,24 @@ export interface ReadinessLayoutWording {
   overviewNoOpen: string
   /** The render set's `caveat_applies_to_label`, before a mechanical list of consideration numbers. */
   appliesTo: string
+  /**
+   * CR-DESIGN-2B (contract C5, founder FD-5). Absent or 'overview': the shared caveat panel is printed in the overview, exactly as
+   * before. 'group_end': the SAME panel (same blocks, printed once) is printed at the end of the provider group whose considerations
+   * it applies to, or after the last group when it applies across groups. Nothing else moves.
+   */
+  caveatPlacement?: 'overview' | 'group_end'
+  /**
+   * CR-DESIGN-2B (FD-6, C-3): with 'group_end' only, the template's navigational pointer, printed in each consideration the panel
+   * applies to (and only those), where the panel is printed below it. Never a copy of caveat text.
+   */
+  caveatsPointer?: string
 }
 
 export function readinessLayout(sources: readonly PlacedSource[], summary: ReadinessSummary, wording: ReadinessLayoutWording): SectionLayout {
   const { overviewNoOpen, appliesTo } = wording
+  const caveatPlacement = wording.caveatPlacement ?? 'overview'
+  if (caveatPlacement !== 'overview' && caveatPlacement !== 'group_end') throw new ReadinessLayoutRefusal(`caveat placement ${String(caveatPlacement)}`)
+  if (wording.caveatsPointer !== undefined && caveatPlacement !== 'group_end') throw new ReadinessLayoutRefusal('caveat pointer without group-end placement')
   const a = sources
   const out = new Builder()
   const printedAt = new Map<number, number>()
@@ -211,7 +227,13 @@ export function readinessLayout(sources: readonly PlacedSource[], summary: Readi
   }
   if (mapRowCount > 0) overview.push(box('map', mapNodes))
   for (const L of lists.filter((x) => x.loose.length > 0)) overview.push(box('keep', [show(L.label, 'eyebrow'), ...L.loose.map((i) => show(i, 'bullet'))]))
-  if (caveatPanel.length > 0) overview.push(box('panel', caveatPanel.map((i) => show(i, a[i].role === 'caveat' ? 'bullet' : a[i].block.kind === 'row' ? 'compact' : 'eyebrow'))))
+  const showCaveatPanel = (): LayoutNode => box('panel', caveatPanel.map((i) => show(i, a[i].role === 'caveat' ? 'bullet' : a[i].block.kind === 'row' ? 'compact' : 'eyebrow')))
+  if (caveatPanel.length > 0 && caveatPlacement === 'overview') overview.push(showCaveatPanel())
+  // CR-DESIGN-2B (C5): the considerations the panel applies to, from the renderer's own `applies_to` references (never by label).
+  const caveatTargets = new Set(caveatPanel.flatMap((i) => a[i].applies_to ?? []))
+  const panelGroup = caveatPlacement === 'group_end' && caveatPanel.length > 0 && caveatTargets.size > 0
+    ? groups.findIndex((g) => g.cs.length > 0 && [...caveatTargets].every((c) => g.cs.includes(c)))
+    : -1
 
   // ── B. Examine: guidance by provider, open matters beside each consideration ──
   const guidance: LayoutNode[] = [box('keep', gChrome.map((i) => show(i, a[i].block.kind === 'subheading' ? 'h2' : a[i].block.kind === 'bullet' ? 'bullet' : 'fine')))]
@@ -288,10 +310,16 @@ export function readinessLayout(sources: readonly PlacedSource[], summary: Readi
         const hint: LayoutHint = x.role === 'conclusion' ? 'conclusion' : x.role === 'framing' ? 'framing' : x.role === 'explanation' ? 'explanation' : x.role === 'boundary' ? 'fine' : x.role === 'note' ? 'note' : x.role === 'declaration' ? 'compact' : x.block.kind === 'label' ? 'eyebrow' : 'row'
         body.push(show(i, hint))
       }
+      // CR-DESIGN-2B (C-3): a navigational pointer, only in a consideration the shared panel applies to (the panel is printed below).
+      if (wording.caveatsPointer !== undefined && caveatTargets.has(c)) body.push(out.add({ kind: 'paragraph', text: wording.caveatsPointer, from: 'template' }, 'pointer'))
       groupNodes.push(box('consideration', [head, ...body, ...openFor(c, ref, topic, g.subject)], c))
     })
+    // CR-DESIGN-2B (C5): the panel closes the one provider group that holds every consideration it applies to.
+    if (panelGroup === groups.indexOf(g)) groupNodes.push(showCaveatPanel())
     guidance.push(box('group', groupNodes))
   }
+  // CR-DESIGN-2B (C5): a panel that applies across groups (or names no consideration) follows the last group.
+  if (caveatPlacement === 'group_end' && caveatPanel.length > 0 && panelGroup < 0) guidance.push(showCaveatPanel())
 
   // ── Scope statements close the section ──
   // CR-PDF-REVIEW-2: each scope heading travels with the short paragraph(s) under it as one unit (as headings do in the supporting

@@ -209,6 +209,17 @@ const templateSpec = obj({
     status: exactLabels(['open']),
     sufficiency: exactLabels(['not_assessed']),
   }),
+  /**
+   * CR-DESIGN-2B: the presentation this set is drawn with (`./presentation/institutional-trust`), bound by its fingerprint. Optional:
+   * a set without it (v1–v5) is drawn exactly as before. Only a set that also carries `readiness_summary` may carry it.
+   */
+  presentation: opt(obj({ contract: str, version: int, fingerprint: str })),
+  /**
+   * CR-DESIGN-2B (founder FD-6, PM/Architecture: navigational, not substantive): `contents_heading` heads the About paragraphs that
+   * describe the record's parts; `caveats_pointer` points from a consideration to the shared caveats printed below it. Only with
+   * `presentation`.
+   */
+  navigation: opt(obj({ contents_heading: str, caveats_pointer: str })),
 })
 
 export type CustomerPdfTemplates = ReturnType<typeof templateSpec>

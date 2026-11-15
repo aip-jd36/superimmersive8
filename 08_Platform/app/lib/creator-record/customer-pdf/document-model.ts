@@ -47,6 +47,7 @@ import { checkTemplates, CUSTOMER_PDF_READINESS_EXAMINATION_SECTIONS, CUSTOMER_P
 import { buildReadinessSummary, readinessTemplatesFingerprint, ReadinessSummaryRefusal, type ReadinessSummary, type ReadinessSummaryTemplates } from '../readiness-summary/summary'
 import { readinessRenderFingerprint, renderReadinessSummary, ReadinessRenderRefusal, type ReadinessRenderTemplates, type RenderedReadinessSummary } from '../readiness-summary/render'
 import { flowLayout, readinessLayout, ReadinessLayoutRefusal, type Consolidation, type LayoutNode, type PlacedSource } from './readiness-layout'
+import { presentationFingerprint, presentationFor, type PresentationConfig } from './presentation/institutional-trust'
 
 export type TextOrigin = 'record' | 'issuance' | 'template'
 
@@ -66,9 +67,19 @@ export interface CustomerDocumentSection {
   consolidated?: Consolidation[]
 }
 
+/**
+ * CR-DESIGN-2B: a block printed as a NAVIGATION COPY of another printed text (never a governed block printed twice): the declared title
+ * shown again in the identity block, or the template's caveat pointer. Tests tell these apart from substantive blocks.
+ */
+export interface NavigationCopy { section: CustomerPdfSectionId; index: number; of: 'declared_title' | 'declared_title_question' | 'navigation.caveats_pointer' }
+
 export interface CustomerDocumentModel {
   /** CR-PDF-IMPL-1: present only for the three-level reading layout. Legacy models have no such field. */
   presentation?: typeof READING_HIERARCHY_PRESENTATION
+  /** CR-DESIGN-2B: present only for a set that selects a presentation (v1-v5 have none): which one, bound by its fingerprint. */
+  design?: { contract: string; version: number; fingerprint: string }
+  /** CR-DESIGN-2B: every navigation copy in the model (present with `design` only). */
+  navigation_copies?: NavigationCopy[]
   meta: { title: string; subject: string; creator: string; producer: string }
   marking: { stamp: string; record_id: string; footer: string; page_label: string }
   sections: CustomerDocumentSection[]
@@ -248,7 +259,17 @@ type RecordView = Omit<ReturnType<typeof recordSpec>, 'documents' | 'comparison'
   creator_responses?: ReturnType<typeof examinationRecordSpec>['creator_responses']
 }
 
-export function buildCustomerDocument(input: CustomerDocumentInput): CustomerDocumentModel {
+/** The declared title's question. Its answer is shown again, verbatim, in the identity block of a presentation set (FD-4). */
+export const DECLARED_TITLE_QUESTION = 'P1'
+
+/**
+ * CR-DESIGN-2B: test seam only. `configOverride` is used IN PLACE OF the registered configuration after the reference has been
+ * checked against the registered one (a test passes an instrumented copy to prove every value is consumed). Never set in production.
+ */
+export interface CustomerDocumentOptions { configOverride?: PresentationConfig }
+interface Design { ref: { contract: string; version: number; fingerprint: string }; config: PresentationConfig; navigation: { contents_heading: string; caveats_pointer: string } | null }
+
+export function buildCustomerDocument(input: CustomerDocumentInput, options: CustomerDocumentOptions = {}): CustomerDocumentModel {
   // 1. The record first: nothing is read from a record that does not verify.
   const verified = verifyCustomerRecord(input.canonical, input.sha256)
   if (!verified.ok) throw new CustomerPdfRefusal('record_invalid', verified.reason)
@@ -285,10 +306,22 @@ export function buildCustomerDocument(input: CustomerDocumentInput): CustomerDoc
   // fallback to the legacy guidance and open-items presentation for a set that selects the summary.
   const readiness = t.readiness_summary ? readinessOf(input, t.readiness_summary, input.template_approval as PdfTemplateApproval) : null
 
+  // CR-DESIGN-2B: a set that selects a presentation names a REGISTERED one, by contract, version and fingerprint; anything else
+  // refuses. Only with the readiness block (the presentation draws its placement tree). No fallback to another presentation.
+  if (t.navigation && !t.presentation) throw new CustomerPdfRefusal('templates_presentation_invalid', 'navigation without presentation')
+  let design: Design | null = null
+  if (t.presentation) {
+    if (!readiness) throw new CustomerPdfRefusal('templates_presentation_invalid', 'presentation without the readiness block')
+    const registered = presentationFor(t.presentation)
+    if (!registered) throw new CustomerPdfRefusal('templates_presentation_unknown', `${t.presentation.contract}@${t.presentation.version}`)
+    if (presentationFingerprint(registered) !== t.presentation.fingerprint) throw new CustomerPdfRefusal('templates_presentation_mismatch')
+    design = { ref: { contract: t.presentation.contract, version: t.presentation.version, fingerprint: t.presentation.fingerprint }, config: options.configOverride ?? registered, navigation: t.navigation ?? null }
+  }
+
   try {
     // CR-V2-MVP-INTEGRATION-2: assessed from the full verified record (the projected view omits declaration targets).
     const integrated = examinationBearing && t.integrated_assessment ? assessIntegrated(verified.record) : null
-    return compose(r, issued, t, check.fingerprint, input.sha256, integrated, readiness)
+    return compose(r, issued, t, check.fingerprint, input.sha256, integrated, readiness, design)
   } catch (err) {
     if (err instanceof CustomerPdfRefusal) throw err
     // A template slot that does not match its values: the templates are unusable.
@@ -317,7 +350,8 @@ function readinessOf(input: CustomerDocumentInput, block: ReadinessBlock, approv
   }
 }
 
-function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: CustomerPdfTemplates, fingerprint: string, sha256: string, integrated: IntegratedAssessment | null, readiness: Readiness | null = null): CustomerDocumentModel {
+function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: CustomerPdfTemplates, fingerprint: string, sha256: string, integrated: IntegratedAssessment | null, readiness: Readiness | null = null, design: Design | null = null): CustomerDocumentModel {
+  const navigationCopies: NavigationCopy[] = []
   const tpl = (text: string): Block => ({ kind: 'paragraph', text, from: 'template' })
   const heading = (text: string): Block => ({ kind: 'heading', text, from: 'template' })
   const row = (label: string, value: string, value_from: TextOrigin = 'record'): Block => ({ kind: 'row', label, label_from: 'template', value, value_from })
@@ -752,7 +786,12 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
     const render = block.render as ReadinessRenderTemplates
     let summaryLayout: ReturnType<typeof readinessLayout>
     try {
-      summaryLayout = readinessLayout(placed, summary, { overviewNoOpen: render.overview_no_open, appliesTo: render.caveat_applies_to_label })
+      const placement = design ? design.config.layout.caveat_placement : undefined
+      summaryLayout = readinessLayout(placed, summary, {
+        overviewNoOpen: render.overview_no_open, appliesTo: render.caveat_applies_to_label,
+        ...(placement !== undefined ? { caveatPlacement: placement } : {}),
+        ...(placement === 'group_end' && design?.navigation ? { caveatsPointer: design.navigation.caveats_pointer } : {}),
+      })
     } catch (err) {
       if (err instanceof ReadinessLayoutRefusal) throw new CustomerPdfRefusal('readiness_layout_refused', err.ref)
       throw err
@@ -783,14 +822,23 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
 
     // Identity block: the document title and two provenance rows, all existing strings and the record's own identity.
     const P = S.provenance.labels
+    // CR-DESIGN-2B (FD-4): a presentation set shows the declared title again, verbatim and whole, with its own question, as a navigation
+    // copy of the declaration printed in section 3. Only a single printed answer is copied; otherwise nothing is added.
+    const titleAnswer = design ? single.find((a) => a.q_id === DECLARED_TITLE_QUESTION) : undefined
+    const titleValue = titleAnswer ? valueBlocks(titleAnswer) : []
+    const hero: Block[] = titleAnswer && titleValue.length === 1 && titleValue[0].kind === 'bullet' && titleValue[0].from === 'record'
+      ? [{ kind: 'label', text: titleAnswer.question, from: 'record' }, { kind: 'paragraph', text: titleValue[0].text, from: 'record' }]
+      : []
     const identityBlocks: Block[] = [
       { kind: 'heading', text: fill(t.document_title, { record_id: issued.record_id }), from: 'template' },
+      ...hero,
       row(P.record_id, issued.record_id, 'issuance'),
       row(P.issued_on, issued.issued_on, 'issuance'),
     ]
+    if (hero.length > 0) navigationCopies.push({ section: 'identity', index: 1, of: 'declared_title_question' }, { section: 'identity', index: 2, of: 'declared_title' })
     const identity: CustomerDocumentSection = {
       id: 'identity', blocks: identityBlocks,
-      layout: [{ kind: 'box', box: 'identity', children: [{ kind: 'block', index: 0, hint: 'title' }, { kind: 'block', index: 1, hint: 'row' }, { kind: 'block', index: 2, hint: 'row' }] }],
+      layout: [{ kind: 'box', box: 'identity', children: identityBlocks.map((_b, index): LayoutNode => ({ kind: 'block', index, hint: index === 0 ? 'title' : hero.length > 0 && index === 1 ? 'hero_label' : hero.length > 0 && index === 2 ? 'hero' : 'row' })) }],
     }
 
     // The supporting record: generic layouts (question/answer rows; document cards with reading groups; headings kept).
@@ -829,12 +877,16 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
       blocks: [
         about.blocks[0],
         noGuidance ? tpl(render.about_intro_no_guidance) : about.blocks[1],
+        // CR-DESIGN-2B (FD-6, C-1): the navigational heading over the paragraphs that describe the record's parts.
+        ...(design?.navigation ? [{ kind: 'label', text: design.navigation.contents_heading, from: 'template' } as Block] : []),
         ...(noGuidance ? middle.filter((b) => (b as { text?: string }).text !== guidanceSentence) : middle),
         tpl(count(render.count_open_linked, openCount - notSure.length)),
         ...(notSure.length > 0 ? [tpl(count(render.count_not_sure, notSure.length))] : []),
       ],
     })
     const order = examinationBearing ? CUSTOMER_PDF_READINESS_EXAMINATION_SECTIONS : CUSTOMER_PDF_READINESS_SECTIONS
+    const pointer = design?.navigation?.caveats_pointer
+    if (pointer !== undefined) summaryLayout.blocks.forEach((b, index) => { if (b.kind === 'paragraph' && b.from === 'template' && b.text === pointer) navigationCopies.push({ section: 'readiness_summary', index, of: 'navigation.caveats_pointer' }) })
     return order.map((id): CustomerDocumentSection => {
       if (id === 'identity') return identity
       if (id === 'readiness_summary') return { id, blocks: summaryLayout.blocks as Block[], layout: summaryLayout.layout, consolidated: summaryLayout.consolidated }
@@ -847,6 +899,7 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
 
   return {
     ...(readiness ? { presentation: READING_HIERARCHY_PRESENTATION } : {}),
+    ...(design ? { design: design.ref, navigation_copies: navigationCopies } : {}),
     meta: { title: fill(t.document_title, { record_id: issued.record_id }), subject: t.stamp, creator: `${t.template_id} v${t.version}`, producer: `${r.builder.id} v${r.builder.version}` },
     marking: { stamp: t.stamp, record_id: issued.record_id, footer: fill(t.footer, { record_id: issued.record_id }), page_label: t.page_label },
     sections: finalSections,

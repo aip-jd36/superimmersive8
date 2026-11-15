@@ -76,9 +76,14 @@ export function readingStyles(fallback: string) {
     readingSub: { flexDirection: 'row', marginBottom: 1.5, paddingLeft: 175 },
     document: { borderWidth: 0.75, borderColor: C.line, borderRadius: 3, padding: 10, marginBottom: 9 },
     section: { marginBottom: 12 },
+    // CR-DESIGN-2B hints. Never produced for a v1–v5 set; present so every style set has the same keys.
+    hero: { fontSize: 16, fontFamily: BOLD, color: C.ink, lineHeight: 1.25, marginBottom: 6 },
+    heroLabel: { fontSize: 8.4, fontFamily: REG, color: C.inkSoft, lineHeight: 1.4, marginBottom: 2 },
+    pointer: { fontSize: 8.4, fontFamily: ITAL, color: C.inkSoft, lineHeight: 1.4, marginTop: 3, marginBottom: 2 },
   })
 }
-type S = ReturnType<typeof readingStyles>
+export type ReadingStyles = ReturnType<typeof readingStyles>
+type S = ReadingStyles
 
 const T = ({ text, ...props }: { text: string } & Omit<TextProps, 'children' | 'hyphenationCallback'>) => (
   <Text {...props} hyphenationCallback={lineBreakOpportunities}>{pdfText(text)}</Text>
@@ -122,6 +127,9 @@ function Leaf({ b, hint, s }: { b: Block; hint: LayoutHint; s: S }) {
     case 'map_provider': return <T style={s.mapProvider} text={t} />
     case 'map_none': return <T style={s.mapNone} text={t} />
     case 'map_group': return <T style={s.mapGroup} text={t} minPresenceAhead={40} />
+    case 'hero': return <T style={s.hero} text={t} />
+    case 'hero_label': return <T style={s.heroLabel} text={t} />
+    case 'pointer': return <T style={s.pointer} text={t} />
     case 'qa_question': return <T style={s.qaQuestion} text={t} />
     case 'qa_answer': return <T style={s.qaAnswer} text={t} />
     case 'bullet': case 'condition': case 'map_item':
@@ -135,23 +143,40 @@ const sizeOf = (blocks: readonly Block[], n: LayoutNode): number => (n.kind === 
 const UNBREAKABLE = new Set(['keep', 'map_row', 'consideration_head', 'dependency', 'panel', 'qa', 'reading', 'identity'])
 const KEEP_CHARS = 650
 
-function Node({ n, blocks, s }: { n: LayoutNode; blocks: readonly Block[]; s: S }) {
+/**
+ * CR-DESIGN-2B: options of a presentation. Absent (every v1–v5 set): the layout below is exactly as before.
+ *   - `keepChars`: the size (characters) up to which a consideration is kept whole;
+ *   - `keepOpenWithBody` (contract C4): a consideration's open matters travel with the last block of its guidance when both fit
+ *     within `keepChars`, so they never start a page apart from it. Longer content breaks normally (nothing is clipped or forced).
+ */
+export interface ReadingOptions { keepChars: number; keepOpenWithBody: boolean; /** The style set inside the overview map (drawn on a solid ground). */ mapStyles?: ReadingStyles }
+
+function Node({ n, blocks, s, o }: { n: LayoutNode; blocks: readonly Block[]; s: S; o?: ReadingOptions }) {
   if (n.kind === 'block') return <Leaf b={blocks[n.index]} hint={n.hint} s={s} />
-  const kids = n.children.map((c, k) => <Node key={k} n={c} blocks={blocks} s={s} />)
+  const kids = n.children.map((c, k) => <Node key={k} n={c} blocks={blocks} s={s} o={o} />)
+  const keepChars = o ? o.keepChars : KEEP_CHARS
   switch (n.box) {
     case 'consideration': {
       // The head travels with up to two following simple blocks (never a box, which may be long); a short consideration stays whole.
       const [head, ...rest] = kids
       let keep = 0
       while (keep < 2 && n.children[1 + keep]?.kind === 'block') keep++
-      return <View style={s.consideration} wrap={sizeOf(blocks, n) > KEEP_CHARS}><View wrap={false}>{head}{rest.slice(0, keep)}</View>{rest.slice(keep)}</View>
+      const whole = sizeOf(blocks, n) > keepChars
+      if (o?.keepOpenWithBody) {
+        const firstOpen = n.children.findIndex((c) => c.kind === 'box' && c.box === 'open')
+        const tail = firstOpen - 1
+        if (firstOpen > 0 && tail > keep && n.children.slice(tail).reduce((x, c) => x + sizeOf(blocks, c), 0) <= keepChars) {
+          return <View style={s.consideration} wrap={whole}><View wrap={false}>{head}{rest.slice(0, keep)}</View>{kids.slice(1 + keep, tail)}<View wrap={false}>{kids.slice(tail)}</View></View>
+        }
+      }
+      return <View style={s.consideration} wrap={whole}><View wrap={false}>{head}{rest.slice(0, keep)}</View>{rest.slice(keep)}</View>
     }
     case 'group': {
       // A provider band (and any shared selection) never stands alone at a page foot: it travels with the first consideration
       // when that is short, otherwise with a minimum of space below it.
       const lead = n.children[1]?.kind === 'box' && n.children[1].box === 'keep' ? 2 : 1
       const first = n.children[lead]
-      const keepFirst = first !== undefined && sizeOf(blocks, first) <= KEEP_CHARS
+      const keepFirst = first !== undefined && sizeOf(blocks, first) <= keepChars
       const unit = keepFirst ? lead + 1 : lead
       return <View><View wrap={false} minPresenceAhead={keepFirst ? 0 : 140}>{kids.slice(0, unit)}</View>{kids.slice(unit)}</View>
     }
@@ -163,6 +188,7 @@ function Node({ n, blocks, s }: { n: LayoutNode; blocks: readonly Block[]; s: S 
     }
     // A document may hold many readings: always breakable (each reading group itself never splits).
     case 'document': return <View style={s.document}>{kids}</View>
+    case 'map': if (o?.mapStyles) { const m = o.mapStyles; return <View style={s.map}>{n.children.map((c, k) => <Node key={k} n={c} blocks={blocks} s={m} o={o} />)}</View> } return <View style={s.map}>{kids}</View>
     case 'map_row': return <View style={s.mapRow} wrap={false}>{kids}</View>
     // A subject group's heading travels with its first row; the group itself may break between rows.
     case 'map_group': return <View><View wrap={false}>{kids.slice(0, 2)}</View>{kids.slice(2)}</View>
@@ -180,11 +206,11 @@ function Node({ n, blocks, s }: { n: LayoutNode; blocks: readonly Block[]; s: S 
 }
 
 /** One section of the reading layout. */
-export function ReadingSection({ section, s }: { section: CustomerDocumentSection; s: S }) {
+export function ReadingSection({ section, s, o }: { section: CustomerDocumentSection; s: S; o?: ReadingOptions }) {
   if (!section.layout) throw new Error('creator_record_reading_layout_missing')
   return (
     <View style={s.section}>
-      {section.layout.map((n, k) => <Node key={k} n={n} blocks={section.blocks} s={s} />)}
+      {section.layout.map((n, k) => <Node key={k} n={n} blocks={section.blocks} s={s} o={o} />)}
     </View>
   )
 }

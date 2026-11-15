@@ -18,7 +18,9 @@
 import path from 'node:path'
 import React from 'react'
 import { Document, Font, Page, StyleSheet, Text, View, renderToStream, type TextProps } from '@react-pdf/renderer'
-import { buildCustomerDocument, CustomerPdfRefusal, documentText, type Block, type CustomerDocumentInput, type CustomerDocumentModel } from './document-model'
+import { buildCustomerDocument, CustomerPdfRefusal, documentText, type Block, type CustomerDocumentInput, type CustomerDocumentModel, type CustomerDocumentOptions } from './document-model'
+import { assertImplemented, InstitutionalTrustPDF, registerPresentationFonts } from './InstitutionalTrustPDF'
+import { presentationFor, type PresentationConfig } from './presentation/institutional-trust'
 import { lineBreakOpportunities, pdfText, unsupportedCharacters } from './text-layout'
 import { ReadingSection, readingStyles } from './ReadingLayoutView'
 
@@ -159,12 +161,31 @@ async function glyphCheck(fontFamily: string): Promise<(codePoint: number) => bo
 }
 
 /** Build the model (all checks) and render it. Throws `CustomerPdfRefusal` before any rendering. */
-export async function renderCustomerRecordPdf(input: CustomerDocumentInput): Promise<{ model: CustomerDocumentModel; bytes: Uint8Array }> {
-  const model = buildCustomerDocument(input)
+export async function renderCustomerRecordPdf(input: CustomerDocumentInput, options: CustomerDocumentOptions = {}): Promise<{ model: CustomerDocumentModel; bytes: Uint8Array }> {
+  const model = buildCustomerDocument(input, options)
+  // CR-DESIGN-2B: a model whose template set selects a presentation is drawn by that presentation (v1–v5 never do).
+  if (model.design) return renderPresentation(model, options.configOverride ?? presentationFor(model.design))
   const [latin, fallback] = await Promise.all([glyphCheck('Helvetica'), glyphCheck(FALLBACK_FONT)])
   const unsupported = unsupportedCharacters(documentText(model).join('\n'), (cp) => latin(cp) || fallback(cp))
   if (unsupported.length > 0) throw new CustomerPdfRefusal('text_unsupported', unsupported.join(', '))
   const stream = await renderToStream(<CustomerRecordPDF model={model} />)
+  const chunks: Buffer[] = []
+  for await (const chunk of stream) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+  return { model, bytes: new Uint8Array(Buffer.concat(chunks)) }
+}
+
+/**
+ * CR-DESIGN-2B: a character prints only if the fallback holds it, or if EVERY design face holds it (a character may appear in any
+ * family: title, body or identifier). Anything else refuses before layout, as the original renderer does.
+ */
+async function renderPresentation(model: CustomerDocumentModel, config: PresentationConfig | null): Promise<{ model: CustomerDocumentModel; bytes: Uint8Array }> {
+  if (!config || !model.design) throw new CustomerPdfRefusal('templates_presentation_unknown')
+  assertImplemented(config, model.design)
+  registerPresentationFonts(config)
+  const [display, body, mono, fallback] = await Promise.all([config.fonts.display.family, config.fonts.body.family, config.fonts.mono.family, config.fonts.fallback.family].map(glyphCheck))
+  const unsupported = unsupportedCharacters(documentText(model).join('\n'), (cp) => fallback(cp) || (display(cp) && body(cp) && mono(cp)))
+  if (unsupported.length > 0) throw new CustomerPdfRefusal('text_unsupported', unsupported.join(', '))
+  const stream = await renderToStream(<InstitutionalTrustPDF model={model} config={config} />)
   const chunks: Buffer[] = []
   for await (const chunk of stream) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
   return { model, bytes: new Uint8Array(Buffer.concat(chunks)) }
