@@ -1,0 +1,5 @@
+# PDFs must be preserved byte-for-byte. Git's auto-detection currently treats
+# every tracked PDF as binary, but it is a heuristic; with core.autocrlf=true a
+# PDF it misjudged as text would have its line endings rewritten.
+# `binary` = -text -diff -merge. Folder-level .gitattributes files still apply.
+*.pdf binary
