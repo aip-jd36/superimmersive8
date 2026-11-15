@@ -26,17 +26,17 @@ export const INSTITUTIONAL_TRUST_PRESENTATION = {
     display: {
       family: 'SI8 Fraunces',
       files: [
-        { weight: 400, file: 'Fraunces-400.ttf', sha256: 'efa6bb6e795c8ff7f69674b71efb6824d72893b53c5629811d4a1ce3bc51df29' },
-        { weight: 500, file: 'Fraunces-500.ttf', sha256: '726bfce627d1eb529e983d63baae0b16dc5ddeba3d805136d566ae06327ebe45' },
-        { weight: 600, file: 'Fraunces-600.ttf', sha256: '64e80815b7af64c81077938ada9708d17e3e90410adab4ea7dd50a9ec4c36ec7' },
+        { weight: 400, file: 'Fraunces-400.ttf', sha256: '0b3d42e2d14402bf4e6c82279ec574ab8dd10258d19954f62c83b63fc104d1e5' },
+        { weight: 500, file: 'Fraunces-500.ttf', sha256: '1ba7467be956072d05e4bcedce0ce6699d31a4b2f2bb0c0c9810656ea072236f' },
+        { weight: 600, file: 'Fraunces-600.ttf', sha256: '5155cd22252d428986d2bef321d3f43fd9bcadf8dd7cb331a24ab5649b358583' },
       ],
     },
     body: {
       family: 'SI8 Inter',
       files: [
-        { weight: 400, file: 'Inter-400.ttf', sha256: 'bb90224a429c2b4b3bbdd23cfbfb026aef03184510c8b91bd6cd1dc9d74e1345' },
-        { weight: 500, file: 'Inter-500.ttf', sha256: 'a83678b6efab5f4b7cd3a186ff736289561fb73033ee508a1ce64a2e6f42d7ad' },
-        { weight: 600, file: 'Inter-600.ttf', sha256: '7cb55bc09213c736107ba583363156691959c2829308974dfe0fb81205780179' },
+        { weight: 400, file: 'Inter-400.ttf', sha256: 'abfcc06b3303896ae13712cbd6fa15771ddcfe1b8b114e25e62b2f8209ac7f5b' },
+        { weight: 500, file: 'Inter-500.ttf', sha256: '5b796062cdb3fe8e69a8ad9d27687e168436df2c2ccc21c054d2d11e7eb81f80' },
+        { weight: 600, file: 'Inter-600.ttf', sha256: '2d7ceb708b63e14e641bd226a5818a6d5526a82325e057a62fbbd02463fc124d' },
       ],
     },
     mono: {

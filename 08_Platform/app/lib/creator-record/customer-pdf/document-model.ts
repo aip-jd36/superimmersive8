@@ -851,6 +851,7 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
         subRows: s.id === 'documents' ? readingSubRows : undefined,
         fine: s.id === 'not_done' || s.id === 'record_limitations',
         compactRows: s.id === 'provenance',
+        ...(design ? { headingNotContent: true } : {}),
       })
       return { id: s.id, blocks: l.blocks, layout: l.layout }
     }

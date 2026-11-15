@@ -672,7 +672,10 @@ describe('rendering boundary', () => {
       '../record-core/canonical', '../record-core/projection',
       // CR-PDF-IMPL-1: the three-level reading layout (pure) and its drawing.
       './ReadingLayoutView', './document-model', './readiness-layout', './templates', './text-layout', '@react-pdf/renderer', 'node:path', 'react',
-    ])
+      // CR-DESIGN-2B: the Institutional Trust presentation (configuration + drawing) and the canonical JSON its fingerprint uses;
+      // node:fs and node:crypto read and hash ONLY the pinned font files in ./fonts before they are registered.
+      '../../record-core/canonical', './InstitutionalTrustPDF', './presentation/institutional-trust', 'node:crypto', 'node:fs',
+    ].sort())
   })
 
   test('CR-SUM-PDF-B1: the readiness summary modules reach nothing beyond what the document model already reads', () => {

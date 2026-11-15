@@ -14,7 +14,7 @@ import { join } from 'node:path'
 import { Font, pdf } from '@react-pdf/renderer'
 import layoutDocument from '@react-pdf/layout'
 import { renderCustomerRecordPdf } from '@/lib/creator-record/customer-pdf/CustomerRecordPDF'
-import { buildCustomerDocument, type CustomerDocumentModel } from '@/lib/creator-record/customer-pdf/document-model'
+import { buildCustomerDocument, documentText, type CustomerDocumentModel } from '@/lib/creator-record/customer-pdf/document-model'
 import { InstitutionalTrustPDF, registerPresentationFonts } from '@/lib/creator-record/customer-pdf/InstitutionalTrustPDF'
 import { presentationFor } from '@/lib/creator-record/customer-pdf/presentation/institutional-trust'
 import { pdfText } from '@/lib/creator-record/customer-pdf/text-layout'
@@ -48,6 +48,8 @@ export async function renderReview(outDir: string): Promise<CaseReport[]> {
     const { model, bytes } = await renderCustomerRecordPdf(input)
     const file = `${c.id}-${c.title.split(/[ ,(]/)[0].toLowerCase()}-schema${c.schema}.pdf`.replace(/[^A-Za-z0-9._-]/g, '')
     writeFileSync(join(outDir, 'pdf', file), bytes)
+    // Every printed string, for the text-layer check (copy, search, assistive technology) done on the PDF bytes.
+    writeFileSync(join(outDir, 'pdf', file.replace(/\.pdf$/, '.texts.json')), JSON.stringify(documentText(model)))
     // The layout pass the PDF is written from.
     const config = presentationFor(model.design!)!
     registerPresentationFonts(config)
@@ -77,7 +79,11 @@ export async function renderReview(outDir: string): Promise<CaseReport[]> {
     const skip = new Set((model.navigation_copies ?? []).map((x) => `${x.section}:${x.index}`))
     const contents = (set.templates.navigation as { contents_heading: string }).contents_heading
     const mine = multiset(textsOf(model, skip).filter((t) => t !== contents))
-    const theirs = multiset(textsOf(legacy))
+    const theirs0 = multiset(textsOf(legacy))
+    // The printed template identity is expected to differ (v6/v7 and their fingerprints instead of v4/v5).
+    const own = model.identity.templates, base = legacy.identity.templates
+    for (const [x, y] of [[String(own.version), String(base.version)], [own.fingerprint, base.fingerprint]] as const) if (mine.get(x) && theirs0.get(y)) { mine.set(x, mine.get(x)! - 1); theirs0.set(y, theirs0.get(y)! - 1) }
+    const theirs = theirs0
     const extra = [...mine].filter(([t, n]) => (theirs.get(t) ?? 0) < n).map(([t]) => t.slice(0, 80))
     const missing = [...theirs].filter(([t, n]) => (mine.get(t) ?? 0) < n).map(([t]) => t.slice(0, 80))
     const r: CaseReport = {

@@ -10,6 +10,7 @@ import { createHash, randomUUID } from 'node:crypto'
 import { approvedCustomerRecordInputs } from '@/lib/creator-record/customer-flow/approved-inputs'
 import { examinationProjectionFor } from '@/lib/creator-record/customer-flow/examination'
 import { buildCustomerRecord } from '@/lib/creator-record/customer-record/record'
+import type { EvidenceCategory } from '@/lib/creator-record/evidence-intake/vocabulary'
 import { REPLAY_FIXTURES } from '@/lib/creator-record/evidence/replay-fixtures.data'
 import { CREATOR_RECORD_GOVERNANCE_AUTHORITY as GOV } from '@/lib/creator-record/governed/sources'
 import { examineCustomerDocumentLive, type CustomerLivePorts } from '@/lib/creator-record/live-examination/customer'
@@ -39,7 +40,7 @@ const RUNWAY = { T1: ['runway-gen3'], T3: ['Pro'], T4: ['October 2026'] }
 const HIGGSFIELD = { T1: ['higgsfield'], T3: ['Creator'], T4: ['October 2026'] }
 const BASE = { P3: ['own_channels', 'paid_advertising'], F1: ['TW'], F2: ['online_worldwide'], F3: ['US'], L1: ['no'], M0: ['none'], H1: ['edited'] }
 
-type Doc = { document_id: string; sha256: string; media_type: 'application/pdf'; byte_size: number; file_name: string; category: string; tool_index: number | null }
+type Doc = { document_id: string; sha256: string; media_type: 'application/pdf'; byte_size: number; file_name: string; category: EvidenceCategory; tool_index: number | null }
 
 /** One synthetic receipt PDF and a fake-model reading of it, through the real live entry point. `invalid` makes the reading fail. */
 async function liveReading(documentId: string, text: string, output: Record<string, unknown> | 'invalid'): Promise<{ attempt: CustomerLiveAttemptRow; bytes: Uint8Array }> {
@@ -116,7 +117,7 @@ async function record(id: string, answers: Record<string, string[]>, tools: Reco
   return { canonical: built.canonical, sha256: built.sha256 }
 }
 
-const docOf = (n: number, bytes: Uint8Array, file_name: string, tool_index: number | null, category = 'billing_receipt'): Doc => ({
+const docOf = (n: number, bytes: Uint8Array, file_name: string, tool_index: number | null, category: EvidenceCategory = 'billing_receipt'): Doc => ({
   document_id: `33333333-3333-4333-8333-3333333330${String(n).padStart(2, '0')}`, sha256: createHash('sha256').update(bytes).digest('hex'),
   media_type: 'application/pdf', byte_size: bytes.length, file_name, category, tool_index,
 })
@@ -166,10 +167,11 @@ export async function reviewCases(): Promise<ReviewCase[]> {
   const r10a = await liveReading('33333333-3333-4333-8333-333333333010', 'SYNTHETIC Runway receipt A', RUNWAY_READING)
   const r10b = await liveReading('33333333-3333-4333-8333-333333333011', 'SYNTHETIC unreadable file B', 'invalid')
   const r10c = await liveReading('33333333-3333-4333-8333-333333333012', 'SYNTHETIC Higgsfield invoice C', { ...RUNWAY_READING, issuer_name: { status: 'present', value: 'Higgsfield (synthetic)', evidence: 'Higgsfield (synthetic)' }, product_or_plan_name: { status: 'not_shown', value: null, evidence: null }, service_period_start: { status: 'not_shown', value: null, evidence: null }, service_period_end: { status: 'not_shown', value: null, evidence: null }, plan_candidates: [], readability: 'partially_legible', instruction_like_text_present: false })
-  add({ id: 'P10', title: 'Multiple documents: a reading, a failed reading, a partly legible reading, a document not examined', schema: 8, synthetic: ['answers', 'all four documents', 'fake-model readings'],
+  add({ id: 'P10', title: 'Multiple documents: a reading, a partly legible reading with fields not shown, and two documents not read (one after a failed attempt)', schema: 8, synthetic: ['answers', 'all four documents', 'fake-model readings'],
     record: await record('2B-P10', { ...BASE, P1: ['Multiple documents case (synthetic)'] }, [RUNWAY, HIGGSFIELD], { docs: [
       { doc: docOf(10, r10a.bytes, 'runway-receipt-A-synthetic.pdf', 0), reading: r10a.attempt },
-      { doc: docOf(11, r10b.bytes, 'unreadable-B-synthetic.pdf', 0), reading: r10b.attempt },
+      // A reading that failed is never carried into a record (`examinationProjectionFor`): the document is listed as not read.
+      { doc: docOf(11, r10b.bytes, 'unreadable-B-synthetic.pdf', 0) },
       { doc: docOf(12, r10c.bytes, 'higgsfield-invoice-C-synthetic.pdf', 1), reading: r10c.attempt },
       { doc: docOf(13, inv2, 'licence-D-synthetic.pdf', null, 'licence') },
     ] }) })
@@ -177,7 +179,7 @@ export async function reviewCases(): Promise<ReviewCase[]> {
   const longTitle = 'Urban Futures: A Long-Form Promotional Campaign Film for a Fictional Sustainable Lifestyle Brand — Director’s Extended Cut (Working Title, Subject to Change Before Final Delivery, Synthetic Review Fixture)'
   const r11 = await liveReading('33333333-3333-4333-8333-333333333014', 'SYNTHETIC long-name receipt', RUNWAY_READING)
   add({ id: 'P11', title: 'Long title, long multi-select answers, long file name, digests', schema: 8, synthetic: ['answers', 'document', 'fake-model reading'],
-    record: await record('2B-P11', { ...BASE, P1: [longTitle], P3: ['own_channels', 'paid_advertising'], F2: ['online_worldwide'], H1: ['edited'] }, [RUNWAY, HIGGSFIELD], { docs: [{ doc: docOf(14, r11.bytes, 'SI8-REVIEW-RUNWAY-2026-10-001_an-exceptionally-long-synthetic-file-name-for-wrapping-checks_final-final-v3_signed_copy.pdf', 0), reading: r11.attempt }] }) })
+    record: await record('2B-P11', { ...BASE, P1: [longTitle], P3: ['own_channels', 'paid_advertising'], F2: ['online_worldwide'], H1: ['edited'] }, [RUNWAY, HIGGSFIELD], { docs: [{ doc: docOf(14, r11.bytes, 'SI8-REVIEW-RUNWAY-2026-10-001_an-exceptionally-long-synthetic-file-name-for-wrapping-checks_final-final-v3_signed_co.pdf' /* exactly the maximum the intake accepts */, 0), reading: r11.attempt }] }) })
 
   add({ id: 'P12', title: 'International text in the title (Traditional Chinese, Japanese, Korean, Vietnamese)', schema: 7, synthetic: ['answers and title'],
     record: await record('2B-P12', { ...BASE, P1: ['城市未來：永續生活品牌宣傳片 — 都市の未来 — 도시의 미래 — Tương lai đô thị (synthetic)'] }, [RUNWAY]) })

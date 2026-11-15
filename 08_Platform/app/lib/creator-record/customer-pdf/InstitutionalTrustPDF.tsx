@@ -41,7 +41,15 @@ function verifiedSrc(file: string, sha256: string): string {
 }
 
 /** Registers the configuration's fonts, each verified against its pinned SHA-256 first. */
+const REGISTERED = new Set<string>()
 export function registerPresentationFonts(cfg: PresentationConfig): void {
+  // Every file is verified on every call; a family is registered with the library once per process (re-registering creates a new
+  // font source, and text laid out with one source must be embedded with the same one).
+  // The key is everything registration uses (family, weight, verified file), so a changed configuration is never served a stale font.
+  const files = [...(['display', 'body', 'mono'] as const).flatMap((r) => cfg.fonts[r].files.map((x) => `${cfg.fonts[r].family}:${x.weight}:${verifiedSrc(x.file, x.sha256)}`)), `${cfg.fonts.fallback.family}:${verifiedSrc(cfg.fonts.fallback.file, cfg.fonts.fallback.sha256)}`]
+  const key = files.join('|')
+  if (REGISTERED.has(key)) return
+  REGISTERED.add(key)
   for (const role of ['display', 'body', 'mono'] as const) {
     const f = cfg.fonts[role]
     Font.register({ family: f.family, fonts: f.files.map((x) => ({ src: verifiedSrc(x.file, x.sha256), fontWeight: x.weight })) })
@@ -103,8 +111,9 @@ export function presentationStyles(cfg: PresentationConfig, register: Register):
     note: { borderLeftWidth: 1.5, borderLeftColor: line, paddingLeft: 7, marginTop: 2, marginBottom: 3 },
     consideration: { marginTop: L.block_gap + 2, padding: L.card_padding, backgroundColor: c.paper_raised, borderWidth: 0.6, borderColor: line, borderRadius: L.radius },
     considerationHead: { flexDirection: 'row', alignItems: 'baseline', marginBottom: 3 },
-    refLabel: tx('reference', c.gold, { marginRight: 3 }),
-    refValue: tx('reference', c.gold, { marginRight: 9 }),
+    // Gold numerals on paper; on the navy index the same numerals use the on-navy colour (contrast).
+    refLabel: tx('reference', navy ? c.navy_on : c.gold, { marginRight: 3 }),
+    refValue: tx('reference', navy ? c.navy_on : c.gold, { marginRight: 9 }),
     topic: tx('topic', strong, { flex: 1 }),
     open: { backgroundColor: c.gold_note_bg, borderLeftWidth: 2, borderLeftColor: c.gold_note_border, paddingHorizontal: L.card_padding, paddingVertical: 6, marginTop: 5, marginBottom: 2 },
     dependency: { marginTop: 5, paddingTop: 4, borderTopWidth: 0.4, borderTopColor: c.gold_note_border },
@@ -130,7 +139,8 @@ export function presentationStyles(cfg: PresentationConfig, register: Register):
     qaAnswer: tx('value', ink, { marginBottom: 1 }),
     reading: { borderBottomWidth: 0.4, borderBottomColor: soft, paddingBottom: 2 },
     readingValue: tx('mono_value', ink, { flex: 1 }),
-    readingSub: { flexDirection: 'row', marginBottom: 1.5, paddingLeft: 175 },
+    // A reading's basis / source-text rows sit one indent under their value, so the text keeps a wide column (v5 indented a full label width).
+    readingSub: { flexDirection: 'row', marginBottom: 1.5, paddingLeft: 24 },
     document: { backgroundColor: c.cool_surface, borderWidth: 0.6, borderColor: c.cool_hairline, borderRadius: L.radius, padding: L.card_padding, marginBottom: L.block_gap + 1 },
     section: { marginBottom: L.section_gap },
     hero: tx('hero', strong, { marginBottom: 6 }),

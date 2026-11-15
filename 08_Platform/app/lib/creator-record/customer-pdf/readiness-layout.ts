@@ -352,7 +352,7 @@ export function readinessLayout(sources: readonly PlacedSource[], summary: Readi
  *   - `documents`: each document (from its subheading) is one bordered unit;
  *   - a heading run travels with up to two short intro paragraphs and the first content unit.
  */
-export function flowLayout(blocks: readonly LayoutBlock[], opts: { qa?: boolean; subRows?: ReadonlySet<string>; documents?: boolean; fine?: boolean; compactRows?: boolean } = {}): SectionLayout {
+export function flowLayout(blocks: readonly LayoutBlock[], opts: { qa?: boolean; subRows?: ReadonlySet<string>; documents?: boolean; fine?: boolean; compactRows?: boolean; /** CR-DESIGN-2B (presentation sets only): a heading run never takes the NEXT heading as its first content, so that heading stays with its own content. */ headingNotContent?: boolean } = {}): SectionLayout {
   const out = new Builder()
   const isSub = (b: LayoutBlock | undefined) => !!b && b.kind === 'row' && !!opts.subRows?.has(b.label)
   type Unit = { kind: 'heading' | 'para' | 'content'; size: number; node: LayoutNode; startsDocument: boolean; head?: boolean }
@@ -385,7 +385,7 @@ export function flowLayout(blocks: readonly LayoutBlock[], opts: { qa?: boolean;
     while (units[k]?.kind === 'heading') run.push(units[k++])
     let paras = 0
     while (units[k]?.kind === 'para' && paras < 2 && units[k].size < 400) { run.push(units[k++]); paras++ }
-    if (units[k]) run.push(units[k++])
+    if (units[k] && !(opts.headingNotContent && units[k].kind === 'heading')) run.push(units[k++])
     k--
     grouped.push({ kind: 'content', size: run.reduce((n, u) => n + u.size, 0), node: box('keep', run.map((u) => u.node)), startsDocument: run[0].startsDocument, head: true })
   }
