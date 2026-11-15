@@ -1,7 +1,7 @@
 ---
 title: SI8 Creator Record — Prospect Research Methodology and Operating Standard
 version: 0.2
-status: PROPOSED — incorporates operator policy decisions D1–D8 (2026-11-12); the standard as a whole still awaits formal adoption. Repository presence is not approval.
+status: SUPERSEDED by 03_Sales/validation/CR-PROSPECT-RESEARCH-STANDARD-v0.3.md (2026-11-15). Preserved unmodified below this header. Was PROPOSED — incorporated operator policy decisions D1–D8 (2026-11-12).
 supersedes: 03_Sales/validation/CR-PROSPECT-RESEARCH-STANDARD-v0.1.md
 as_of: 2026-11-12
 owner: SI8
