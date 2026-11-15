@@ -11,6 +11,11 @@
 
 This folder archives design material for discussion only. It is **not** an implementation specification, a template, approved wording or a release record. Production templates, renderer code and approved source wording live elsewhere (see [Authoritative documents](#authoritative-documents)) and are unchanged by this folder.
 
+## Later rounds
+
+- **Round 2 export package** (2026-11-15): [`round-2/`](round-2/README.md). PM/Architecture names Institutional Trust as the preferred visual direction; its wording, change register and synthetic examples are **not approved**.
+- **CR-DESIGN-2A** wording reconciliation and presentation contract (PROPOSED — NOT APPROVED): [`08_Platform/implementation/cr-design-2a/`](../../../implementation/cr-design-2a/README.md).
+
 ## Why this exploration exists
 
 The Creator Record v2 MVP is released and closed (Build B `0bec2dee`; rollback floor Build A `60b1d84d`). Before marketing the Creator Record actively, the founder started a separate design workstream. Its aims are to improve:
