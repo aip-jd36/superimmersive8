@@ -26,6 +26,8 @@ import { sessionUserId } from '@/lib/creator-record-flow/http'
 import { PAGE_TEXT } from '@/lib/creator-record-flow/wording'
 import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/config'
 import { CreatorRecordV2Client } from './CreatorRecordV2Client'
+// SI8-UX-2: Institutional Trust styling, scoped to the Creator Record client (`.cr-it`).
+import './institutional-trust.css'
 
 export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {

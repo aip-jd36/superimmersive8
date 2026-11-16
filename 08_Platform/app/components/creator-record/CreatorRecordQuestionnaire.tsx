@@ -26,16 +26,28 @@
  * document panel offers a choice from SI8's synthetic test set instead of a
  * file input. The observations shown come from the server; on submit the
  * caller sends only the chosen fixture id.
+ *
+ * SI8-UX-2 (presentation only):
+ *   - `stepped`: one governed section per step, in the governed order, then the acknowledgements (`questionnaire-steps`).
+ *     Questions, options, conditions, requirements and the one submission are unchanged; a step's own check is the same
+ *     `validateForm` result filtered to that step, and the server still validates everything. A server issue opens its step.
+ *   - each tool block has a STABLE key (`toolKeys`), so per-tool content keeps its own state when an earlier tool is removed.
+ *   - `onToolEvent` reports a tool removed, or a declared tool's identity changed in place (`toolIdentityChanged`: not a first
+ *     choice, never a plan or date change), so the caller can keep document links correct. `renderToolDocuments` and
+ *     `renderAfterTools` place the caller's document management in the tools step. `submitBlocked` holds the submission back.
+ *   Without these props the questionnaire is exactly the single page it was.
  */
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { loadQuestionRegistry, NOT_SURE, type RegistryInput } from '@/lib/creator-record/contract/question-registry'
 import type { ExaminedDocument, ExtractionMode, ToolDocument } from '@/lib/creator-record/evidence/document-observations'
 import { QUESTIONNAIRE_SECTION_ORDER, TOOL_QUESTION_ROLES } from '@/lib/creator-record/prototype/questionnaire-structure'
-import { applyMultiSelection, visibleQuestions, visibleToolQuestions, type CreatorRecordFormState, type FormConfig, type FormIssue, type QuestionPresentation } from '@/lib/creator-record/prototype/form'
+import { applyMultiSelection, validateForm, visibleQuestions, visibleToolQuestions, type CreatorRecordFormState, type FormConfig, type FormIssue, type QuestionPresentation } from '@/lib/creator-record/prototype/form'
 import { DocumentReviewPanel } from './DocumentReviewPanel'
 import { fillReviewText, PANEL_TEXT, QUESTIONNAIRE_CHROME } from '@/lib/creator-record-flow/wording'
 import { EXAM_TEXT } from '@/lib/creator-record-flow/examination-ui'
+import { toolIdentityChanged } from '@/lib/creator-record-flow/document-associations'
+import { ACKNOWLEDGEMENTS_STEP, firstStepWithIssues, issuesForStep, questionnaireSteps } from '@/lib/creator-record-flow/questionnaire-steps'
 import { LEGAL_PATHS } from '@/lib/legal/paths'
 
 export type ExamineResult = { ok: true; document: ExaminedDocument } | { ok: false; error: string }
@@ -44,6 +56,9 @@ export interface FixtureDocumentOption {
   label: string
   document: ExaminedDocument
 }
+
+/** SI8-UX-2: what happened to a tool block, by its position before the change. */
+export type ToolEvent = { kind: 'tool_removed'; index: number } | { kind: 'tool_identity_changed'; index: number }
 
 export interface QuestionnaireProps {
   registryInput: RegistryInput
@@ -63,6 +78,18 @@ export interface QuestionnaireProps {
   /** Synthetic test documents to choose from instead of uploading (public UAT harness). */
   fixtureDocuments?: readonly FixtureDocumentOption[]
   onSubmit: (state: CreatorRecordFormState, documents: ToolDocument[]) => void
+  /** SI8-UX-2: one section per step. */
+  stepped?: boolean
+  /** SI8-UX-2: the caller's content inside a tool block (its documents). `toolKey` is stable for the block's lifetime. */
+  renderToolDocuments?: (toolIndex: number, toolKey: string, toolCount: number) => ReactNode
+  /** SI8-UX-2: the caller's content after the tool blocks, in the tools step. */
+  renderAfterTools?: (toolCount: number) => ReactNode
+  /** SI8-UX-2: a tool block was removed, or its declared tool changed in place. */
+  onToolEvent?: (event: ToolEvent) => void
+  /** SI8-UX-2: the submission is held back (the caller shows why). */
+  submitBlocked?: boolean
+  /** SI8-UX-2: the step shown first (a section id or "acknowledgements"; default: the first step). Earlier steps count as reached. */
+  initialStep?: string
 }
 
 const EMPTY: CreatorRecordFormState = { answers: {}, tools: [{}], acknowledgements: {} }
@@ -73,9 +100,19 @@ const UNSURE = '__not_sure'
 // CR-V2-MVP-PROD-PREP-1: chrome wording lives in the customer wording set (`lib/creator-record-flow/wording`), text unchanged.
 const C = QUESTIONNAIRE_CHROME
 const ISSUE_TEXT: Readonly<Record<FormIssue['issue'], string>> = C.issues
+// SI8-UX-2: colours resolve to the Institutional Trust tokens inside `.cr-it`, and to the previous colours anywhere else.
+const INK = 'var(--cr-ink, #1a1918)'
+const MUTED = 'var(--cr-muted, #6b6560)'
+const ERROR = 'var(--cr-error, #b42318)'
+const ERROR_BG = 'var(--cr-error-bg, #FEF3F2)'
+const LINE = 'var(--cr-line, rgba(0,0,0,0.08))'
+const FIELD_LINE = 'var(--cr-line-strong, rgba(0,0,0,0.15))'
 
 const docsFrom = (tools: number, initial: readonly ToolDocument[] | undefined): (ToolDocument | null)[] =>
   Array.from({ length: tools }, (_, i) => initial?.find((d) => d.tool_index === i) ?? null)
+
+let toolKeySeq = 0
+const newToolKey = () => `tool-key-${++toolKeySeq}`
 
 export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
   const initial = props.initialState ?? EMPTY
@@ -85,6 +122,12 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
   const [consented, setConsented] = useState<boolean>((props.initialDocuments ?? []).length > 0)
   const [examining, setExamining] = useState<number | null>(null)
   const [docErrors, setDocErrors] = useState<Record<number, string>>({})
+  const [toolKeys, setToolKeys] = useState<string[]>(() => initial.tools.map(() => newToolKey()))
+  const initialStepIndex = props.initialStep ? Math.max(0, [...QUESTIONNAIRE_SECTION_ORDER, ACKNOWLEDGEMENTS_STEP].indexOf(props.initialStep as never)) : 0
+  const [stepIndex, setStepIndex] = useState(initialStepIndex)
+  const [reached, setReached] = useState(initialStepIndex)
+  const [localIssues, setLocalIssues] = useState<FormIssue[]>([])
+  const stepHeadingRef = useRef<HTMLHeadingElement>(null)
 
   const config: FormConfig = useMemo(() => {
     const r = loadQuestionRegistry(props.registryInput)
@@ -93,12 +136,51 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
   }, [props.registryInput, props.presentation, props.acknowledgements, props.maxTools])
 
   const shown = visibleQuestions(config, state.answers)
-  const issueFor = (q_id: string, tool_index: number | null) => props.issues.find((i) => i.q_id === q_id && i.tool_index === tool_index)
+  const stepped = props.stepped === true
+  const sectionsWithContent = new Set(QUESTIONNAIRE_SECTION_ORDER.filter((section) => shown.single.some((q) => props.presentation[q.q_id].section === section) || (section === 'tools' && shown.per_tool.length > 0)))
+  const steps = questionnaireSteps(sectionsWithContent)
+  const ackIds = config.acknowledgement_ids
+  const currentStep = steps[Math.min(stepIndex, steps.length - 1)]
+  const lastStep = stepIndex >= steps.length - 1
+  // A server issue list opens the earliest step it concerns (stepped mode). Local step checks are shown only on their own step.
+  const allIssues = stepped ? [...props.issues, ...localIssues.filter((l) => !props.issues.some((p) => p.q_id === l.q_id && p.tool_index === l.tool_index && p.issue === l.issue))] : props.issues
+  const displayedIssues = stepped ? issuesForStep(allIssues, currentStep, props.presentation, ackIds, steps) : props.issues
+  const issueFor = (q_id: string, tool_index: number | null) => displayedIssues.find((i) => i.q_id === q_id && i.tool_index === tool_index)
+
+  const goTo = (index: number) => {
+    const next = Math.max(0, Math.min(index, steps.length - 1))
+    setStepIndex(next)
+    setReached((r) => Math.max(r, next))
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0 })
+    // Focus the new step's heading so keyboard and screen-reader users land on it.
+    setTimeout(() => stepHeadingRef.current?.focus(), 0)
+  }
+
+  useEffect(() => {
+    if (!stepped || props.issues.length === 0) return
+    setLocalIssues([])
+    const first = firstStepWithIssues(props.issues, props.presentation, ackIds, steps)
+    if (first) goTo(steps.indexOf(first))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.issues])
+
+  const goNext = () => {
+    const stepIssues = issuesForStep(validateForm(config, state), currentStep, props.presentation, ackIds, steps)
+    if (stepIssues.length > 0) {
+      setLocalIssues(stepIssues)
+      setTimeout(() => stepHeadingRef.current?.focus(), 0)
+      return
+    }
+    setLocalIssues([])
+    goTo(stepIndex + 1)
+  }
 
   const setAnswer = (q_id: string, values: string[]) => setState((s) => ({ ...s, answers: { ...s.answers, [q_id]: values } }))
   const setDoc = (index: number, f: (d: ToolDocument | null) => ToolDocument | null) => setDocs((ds) => ds.map((d, i) => (i === index ? f(d) : d)))
 
   const setToolAnswer = (index: number, q_id: string, values: string[]) => {
+    // SI8-UX-2: a declared tool changed in place (not a first choice; never a plan or date answer).
+    if (q_id === ROLES.identity && toolIdentityChanged(state.tools[index]?.[ROLES.identity], values)) props.onToolEvent?.({ kind: 'tool_identity_changed', index })
     setState((s) => ({
       ...s,
       tools: s.tools.map((t, i) => {
@@ -148,7 +230,7 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
             aria-describedby={describedBy}
             aria-required={p.required}
             className={selectClass}
-            style={{ borderColor: 'rgba(0,0,0,0.15)' }}
+            style={{ borderColor: FIELD_LINE }}
             value={selectValue}
             onChange={(e) => {
               const next = e.target.value
@@ -178,7 +260,7 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
               aria-label={fillReviewText(C.plan_name_label, { n: tool_index + 1 })}
               aria-describedby={describedBy}
               className="w-full rounded-md border px-3 py-2 text-sm bg-white"
-              style={{ borderColor: 'rgba(0,0,0,0.15)' }}
+              style={{ borderColor: FIELD_LINE }}
               maxLength={500}
               value={v}
               onChange={(e) => onChange(e.target.value === '' ? [] : [e.target.value])}
@@ -188,13 +270,13 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
       )
     }
     return (
-      <fieldset key={key} id={id} className="mb-6" aria-invalid={!!issue} aria-describedby={describedBy} data-question-id={q_id}>
-        <legend id={`${id}-legend`} className="text-sm font-medium mb-1" style={{ color: '#1a1918' }}>
+      <fieldset key={key} id={id} className="mb-6 cr-field" aria-invalid={!!issue} aria-describedby={describedBy} data-question-id={q_id}>
+        <legend id={`${id}-legend`} className="text-sm font-medium mb-1 cr-legend" style={{ color: INK }}>
           {tool_index !== null && <span>{fillReviewText(C.tool_prefix, { n: tool_index + 1 })}</span>}
           {p.text}
-          <span className="ml-1 text-xs" style={{ color: '#6b6560' }}>{p.required ? C.required : C.optional}</span>
+          <span className="ml-1 text-xs cr-req" style={{ color: MUTED }}>{p.required ? C.required : C.optional}</span>
         </legend>
-        {p.help && <p id={`${id}-help`} className="text-xs mb-2" style={{ color: '#6b6560' }}>{p.help}</p>}
+        {p.help && <p id={`${id}-help`} className="text-xs mb-2 cr-help" style={{ color: MUTED }}>{p.help}</p>}
         {(p.input === 'text' || p.input === 'textarea') && (
           <div className="space-y-2">
             {p.input === 'text' ? (
@@ -205,7 +287,7 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
                 aria-describedby={describedBy}
                 aria-required={p.required}
                 className="w-full rounded-md border px-3 py-2 text-sm bg-white disabled:bg-gray-100"
-                style={{ borderColor: 'rgba(0,0,0,0.15)' }}
+                style={{ borderColor: FIELD_LINE }}
                 value={notSure ? '' : current[0] ?? ''}
                 disabled={notSure}
                 maxLength={500}
@@ -217,7 +299,7 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
                 aria-labelledby={`${id}-legend`}
                 aria-describedby={describedBy}
                 className="w-full rounded-md border px-3 py-2 text-sm bg-white"
-                style={{ borderColor: 'rgba(0,0,0,0.15)' }}
+                style={{ borderColor: FIELD_LINE }}
                 rows={3}
                 maxLength={500}
                 value={current[0] ?? ''}
@@ -225,7 +307,7 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
               />
             )}
             {p.allow_not_sure && (
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex items-center gap-2 text-sm cr-option">
                 <input type="checkbox" checked={notSure} onChange={(e) => onChange(e.target.checked ? [NOT_SURE] : [])} />
                 {C.not_sure}
               </label>
@@ -239,7 +321,7 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
             aria-describedby={describedBy}
             aria-required={p.required}
             className={selectClass}
-            style={{ borderColor: 'rgba(0,0,0,0.15)' }}
+            style={{ borderColor: FIELD_LINE }}
             value={current[0] ?? ''}
             onChange={(e) => onChange(e.target.value === '' ? [] : [e.target.value])}
           >
@@ -253,9 +335,9 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
         )}
         {p.input === 'plan' && renderPlan()}
         {p.input === 'single' && (
-          <div className="space-y-1">
+          <div className="space-y-1 cr-options">
             {options.map((o) => (
-              <label key={o} className="flex items-center gap-2 text-sm">
+              <label key={o} className="flex items-center gap-2 text-sm cr-option">
                 <input type="radio" name={key} checked={current[0] === o} onChange={() => onChange([o])} />
                 {p.option_labels[o] ?? o}
               </label>
@@ -263,9 +345,9 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
           </div>
         )}
         {p.input === 'multi' && (
-          <div className="space-y-1">
+          <div className="space-y-1 cr-options">
             {options.map((o) => (
-              <label key={o} className="flex items-center gap-2 text-sm">
+              <label key={o} className="flex items-center gap-2 text-sm cr-option">
                 <input
                   type="checkbox"
                   checked={current.includes(o)}
@@ -276,12 +358,12 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
             ))}
           </div>
         )}
-        {issue && <p id={`${id}-error`} className="text-xs mt-1 font-medium" style={{ color: '#b42318' }}>{C.error_prefix}{ISSUE_TEXT[issue.issue]}</p>}
+        {issue && <p id={`${id}-error`} className="text-xs mt-1 font-medium" style={{ color: ERROR }}>{C.error_prefix}{ISSUE_TEXT[issue.issue]}</p>}
       </fieldset>
     )
   }
 
-  const toolIssue = props.issues.find((i) => i.issue === 'no_tools' || i.issue === 'too_many_tools')
+  const toolIssue = displayedIssues.find((i) => i.issue === 'no_tools' || i.issue === 'too_many_tools')
 
   const issueLabel = (i: FormIssue) => {
     const text = i.q_id ? props.presentation[i.q_id]?.text ?? props.acknowledgements[i.q_id] ?? i.q_id : C.issue_tools_label
@@ -289,14 +371,17 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
   }
 
   const removeTool = (index: number) => {
+    props.onToolEvent?.({ kind: 'tool_removed', index })
     setState((s) => ({ ...s, tools: s.tools.filter((_, j) => j !== index) }))
     setDocs((ds) => ds.filter((_, j) => j !== index).map((d, j) => (d ? { ...d, tool_index: j } : d)))
     setAnotherPlan((a) => a.filter((_, j) => j !== index))
+    setToolKeys((k) => k.filter((_, j) => j !== index))
   }
   const addTool = () => {
     setState((s) => ({ ...s, tools: [...s.tools, {}] }))
     setDocs((ds) => [...ds, null])
     setAnotherPlan((a) => [...a, false])
+    setToolKeys((k) => [...k, newToolKey()])
   }
 
   const uploadsOffered = !!props.onExamine
@@ -306,114 +391,168 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
     setDoc(index, () => (f ? { tool_index: index, document: f.document } : null))
   }
 
+  const renderSection = (section: string) => {
+    const singles = shown.single.filter((q) => props.presentation[q.q_id].section === section)
+    const hasTools = section === 'tools' && shown.per_tool.length > 0
+    if (singles.length === 0 && !hasTools) return null
+    return (
+      <section key={section} aria-labelledby={`cr-section-${section}`} className="mb-8 rounded-lg border bg-white p-6 cr-card" style={{ borderColor: LINE }}>
+        <h2 id={`cr-section-${section}`} ref={stepped ? stepHeadingRef : undefined} tabIndex={stepped ? -1 : undefined} className="font-display text-lg font-semibold mb-4 cr-section-heading" style={{ color: INK }}>{props.sectionTitles[section] ?? section}</h2>
+        {singles.map((q) => field(q.q_id, state.answers[q.q_id], (v) => setAnswer(q.q_id, v), null, q.q_id))}
+        {hasTools && uploadsOffered && (
+          <div className="mb-6 rounded-md border p-3" style={{ borderColor: LINE }}>
+            <p className="text-sm font-medium">{C.documents_heading}</p>
+            <label className="flex items-start gap-2 text-sm mt-2">
+              <input type="checkbox" className="mt-1" checked={consented} onChange={(e) => setConsented(e.target.checked)} />
+              <span>
+                {C.synthetic_consent}
+                {props.examinationMode === 'live_model' ? C.synthetic_reading_on : C.synthetic_reading_off}
+              </span>
+            </label>
+          </div>
+        )}
+        {hasTools &&
+          state.tools.map((t, i) => (
+            <div key={toolKeys[i] ?? `tool-${i}`} role="group" aria-labelledby={`cr-tool-${i}`} className="mb-6 rounded-md border p-4 cr-tool" style={{ borderColor: LINE }} data-tool-block={i}>
+              <div className="flex items-center justify-between mb-3 cr-tool-head">
+                <h3 id={`cr-tool-${i}`} className="text-sm font-semibold cr-tool-heading">{fillReviewText(C.tool_heading, { n: i + 1 })}</h3>
+                {state.tools.length > 1 && (
+                  <button type="button" className="rounded-md border px-3 py-1 text-xs cr-btn cr-btn-ghost cr-btn-sm" onClick={() => removeTool(i)}>
+                    {fillReviewText(C.remove_tool, { n: i + 1 })}
+                  </button>
+                )}
+              </div>
+              {visibleToolQuestions(config, state.answers, t).map((q) => field(q.q_id, t[q.q_id], (v) => setToolAnswer(i, q.q_id, v), i, `${q.q_id}-${i}`, t))}
+              {(uploadsOffered || fixtureMode) && i < props.maxTools && (
+                <DocumentReviewPanel
+                  toolIndex={i}
+                  doc={docs[i] ?? null}
+                  fixtures={fixtureMode ? props.fixtureDocuments : undefined}
+                  onSelectFixture={(id) => selectFixture(i, id)}
+                  consented={consented}
+                  mode={props.examinationMode ?? 'fixture_replay'}
+                  examining={examining === i}
+                  error={docErrors[i] || null}
+                  onExamine={(file) => examine(i, file)}
+                  onRemove={() => setDoc(i, () => null)}
+                />
+              )}
+              {props.renderToolDocuments && i < props.maxTools && props.renderToolDocuments(i, toolKeys[i] ?? `tool-${i}`, state.tools.length)}
+            </div>
+          ))}
+        {hasTools && state.tools.length < props.maxTools && (
+          <button type="button" className="rounded-md border px-3 py-1.5 text-sm cr-btn cr-btn-ghost" onClick={addTool}>
+            {C.add_tool}
+          </button>
+        )}
+        {section === 'tools' && toolIssue && <p className="text-xs mt-1 font-medium" style={{ color: ERROR }}>{C.error_prefix}{ISSUE_TEXT[toolIssue.issue]}</p>}
+        {hasTools && props.renderAfterTools?.(state.tools.length)}
+      </section>
+    )
+  }
+
+  const acknowledgementsSection = (
+    <section aria-labelledby="cr-section-acknowledgements" className="mb-8 rounded-lg border bg-white p-6 cr-card" style={{ borderColor: LINE }}>
+      <h2 id="cr-section-acknowledgements" ref={stepped ? stepHeadingRef : undefined} tabIndex={stepped ? -1 : undefined} className="font-display text-lg font-semibold mb-4 cr-section-heading">{C.acknowledgements_heading}</h2>
+      {Object.entries(props.acknowledgements).map(([id, text]) => (
+        <label key={id} className="flex items-start gap-2 text-sm mb-3 cr-ack">
+          <input
+            type="checkbox"
+            className="mt-1"
+            checked={state.acknowledgements[id] === true}
+            onChange={(e) => setState((s) => ({ ...s, acknowledgements: { ...s.acknowledgements, [id]: e.target.checked } }))}
+          />
+          <span>
+            {text}
+            {issueFor(id, null) && <span className="block text-xs mt-1 font-medium" style={{ color: ERROR }}>{C.error_prefix}{ISSUE_TEXT.acknowledgement_required}</span>}
+          </span>
+        </label>
+      ))}
+      {/* CR-V2-MVP-LEGAL-CONTENT-6: the Terms and Privacy Notice A2 refers to, with the existing approved link wording. */}
+      <p className="text-xs cr-fine" style={{ color: MUTED }} data-legal-links>
+        {EXAM_TEXT.legal_links_intro} <a className="underline" href={LEGAL_PATHS.privacy} target="_blank" rel="noopener noreferrer">{EXAM_TEXT.privacy_link}</a>{PANEL_TEXT.legal_links_and}
+        <a className="underline" href={LEGAL_PATHS.terms} target="_blank" rel="noopener noreferrer">{EXAM_TEXT.terms_link}</a>.
+      </p>
+    </section>
+  )
+
+  const submitButton = (
+    <button
+      type="submit"
+      disabled={props.submitting || examining !== null || props.submitBlocked === true}
+      className="rounded-md px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50 cr-btn cr-btn-primary"
+      style={{ backgroundColor: 'var(--cr-navy, #1a1918)' }}
+    >
+      {props.submitting ? C.submitting : C.submit}
+    </button>
+  )
+
+  const issuesSummary = displayedIssues.length > 0 && (
+    <div role="alert" className="mb-6 rounded-lg border p-4 cr-issues" style={{ borderColor: ERROR, backgroundColor: ERROR_BG }}>
+      <h2 className="text-sm font-semibold" style={{ color: ERROR }}>{fillReviewText(C.issues_heading, { count: displayedIssues.length })}</h2>
+      <ul className="mt-2 list-disc pl-5 text-sm" style={{ color: ERROR }}>
+        {displayedIssues.map((i, n) => (
+          <li key={n}>{issueLabel(i)} — {ISSUE_TEXT[i.issue]}</li>
+        ))}
+      </ul>
+    </div>
+  )
+
+  if (!stepped) {
+    return (
+      <form
+        noValidate
+        aria-label={C.form_label}
+        onSubmit={(e) => {
+          e.preventDefault()
+          props.onSubmit(state, docs.filter((d): d is ToolDocument => d !== null))
+        }}
+      >
+        {issuesSummary}
+        {QUESTIONNAIRE_SECTION_ORDER.map((section) => renderSection(section))}
+        {acknowledgementsSection}
+        {submitButton}
+      </form>
+    )
+  }
+
+  const stepTitle = (s: string) => (s === ACKNOWLEDGEMENTS_STEP ? C.acknowledgements_heading : props.sectionTitles[s] ?? s)
+  const stepStatus = (i: number) => (stepIndex > i ? 'done' : stepIndex === i ? 'current' : 'todo')
+  const continueButton = <button type="button" className="cr-btn cr-btn-primary" onClick={goNext}>{C.continue}</button>
   return (
     <form
       noValidate
       aria-label={C.form_label}
+      className="cr-stepped"
       onSubmit={(e) => {
         e.preventDefault()
+        // Enter in a field on an earlier step moves on; only the last step submits.
+        if (!lastStep) { goNext(); return }
+        if (props.submitBlocked === true) return
         props.onSubmit(state, docs.filter((d): d is ToolDocument => d !== null))
       }}
+      data-step={currentStep}
     >
-      {props.issues.length > 0 && (
-        <div role="alert" className="mb-6 rounded-lg border p-4" style={{ borderColor: '#b42318', backgroundColor: '#FEF3F2' }}>
-          <h2 className="text-sm font-semibold" style={{ color: '#b42318' }}>{fillReviewText(C.issues_heading, { count: props.issues.length })}</h2>
-          <ul className="mt-2 list-disc pl-5 text-sm" style={{ color: '#b42318' }}>
-            {props.issues.map((i, n) => (
-              <li key={n}>{issueLabel(i)} — {ISSUE_TEXT[i.issue]}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-      {QUESTIONNAIRE_SECTION_ORDER.map((section) => {
-        const singles = shown.single.filter((q) => props.presentation[q.q_id].section === section)
-        const hasTools = section === 'tools' && shown.per_tool.length > 0
-        if (singles.length === 0 && !hasTools) return null
-        return (
-          <section key={section} aria-labelledby={`cr-section-${section}`} className="mb-8 rounded-lg border bg-white p-6" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
-            <h2 id={`cr-section-${section}`} className="font-display text-lg font-semibold mb-4" style={{ color: '#1a1918' }}>{props.sectionTitles[section] ?? section}</h2>
-            {singles.map((q) => field(q.q_id, state.answers[q.q_id], (v) => setAnswer(q.q_id, v), null, q.q_id))}
-            {hasTools && uploadsOffered && (
-              <div className="mb-6 rounded-md border p-3" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
-                <p className="text-sm font-medium">{C.documents_heading}</p>
-                <label className="flex items-start gap-2 text-sm mt-2">
-                  <input type="checkbox" className="mt-1" checked={consented} onChange={(e) => setConsented(e.target.checked)} />
-                  <span>
-                    {C.synthetic_consent}
-                    {props.examinationMode === 'live_model' ? C.synthetic_reading_on : C.synthetic_reading_off}
-                  </span>
-                </label>
-              </div>
-            )}
-            {hasTools &&
-              state.tools.map((t, i) => (
-                <div key={i} role="group" aria-labelledby={`cr-tool-${i}`} className="mb-6 rounded-md border p-4" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 id={`cr-tool-${i}`} className="text-sm font-semibold">{fillReviewText(C.tool_heading, { n: i + 1 })}</h3>
-                    {state.tools.length > 1 && (
-                      <button type="button" className="rounded-md border px-3 py-1 text-xs" onClick={() => removeTool(i)}>
-                        {fillReviewText(C.remove_tool, { n: i + 1 })}
-                      </button>
-                    )}
-                  </div>
-                  {visibleToolQuestions(config, state.answers, t).map((q) => field(q.q_id, t[q.q_id], (v) => setToolAnswer(i, q.q_id, v), i, `${q.q_id}-${i}`, t))}
-                  {(uploadsOffered || fixtureMode) && i < props.maxTools && (
-                    <DocumentReviewPanel
-                      toolIndex={i}
-                      doc={docs[i] ?? null}
-                      fixtures={fixtureMode ? props.fixtureDocuments : undefined}
-                      onSelectFixture={(id) => selectFixture(i, id)}
-                      consented={consented}
-                      mode={props.examinationMode ?? 'fixture_replay'}
-                      examining={examining === i}
-                      error={docErrors[i] || null}
-                      onExamine={(file) => examine(i, file)}
-                      onRemove={() => setDoc(i, () => null)}
-                    />
-                  )}
-                </div>
-              ))}
-            {hasTools && state.tools.length < props.maxTools && (
-              <button type="button" className="rounded-md border px-3 py-1.5 text-sm" onClick={addTool}>
-                {C.add_tool}
+      <nav aria-label={C.steps_label} className="cr-steps">
+        <p className="cr-step-status" aria-live="polite">{fillReviewText(C.step_status, { n: stepIndex + 1, total: steps.length })}</p>
+        <ol className="cr-step-list">
+          {steps.map((s, i) => (
+            <li key={s} className={`cr-step cr-step-${stepStatus(i)}`} data-step-status={stepStatus(i)}>
+              <button type="button" className="cr-step-button" aria-current={i === stepIndex ? 'step' : undefined} disabled={i > reached} onClick={() => { setLocalIssues([]); goTo(i) }}>
+                <span className="cr-step-bar" aria-hidden="true" />
+                <span className="cr-step-label">{stepTitle(s)}</span>
               </button>
-            )}
-            {section === 'tools' && toolIssue && <p className="text-xs mt-1 font-medium" style={{ color: '#b42318' }}>{C.error_prefix}{ISSUE_TEXT[toolIssue.issue]}</p>}
-          </section>
-        )
-      })}
-
-      <section aria-labelledby="cr-section-acknowledgements" className="mb-8 rounded-lg border bg-white p-6" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
-        <h2 id="cr-section-acknowledgements" className="font-display text-lg font-semibold mb-4">{C.acknowledgements_heading}</h2>
-        {Object.entries(props.acknowledgements).map(([id, text]) => (
-          <label key={id} className="flex items-start gap-2 text-sm mb-3">
-            <input
-              type="checkbox"
-              className="mt-1"
-              checked={state.acknowledgements[id] === true}
-              onChange={(e) => setState((s) => ({ ...s, acknowledgements: { ...s.acknowledgements, [id]: e.target.checked } }))}
-            />
-            <span>
-              {text}
-              {issueFor(id, null) && <span className="block text-xs mt-1 font-medium" style={{ color: '#b42318' }}>{C.error_prefix}{ISSUE_TEXT.acknowledgement_required}</span>}
-            </span>
-          </label>
-        ))}
-        {/* CR-V2-MVP-LEGAL-CONTENT-6: the Terms and Privacy Notice A2 refers to, with the existing approved link wording. */}
-        <p className="text-xs" style={{ color: '#6b6560' }} data-legal-links>
-          {EXAM_TEXT.legal_links_intro} <a className="underline" href={LEGAL_PATHS.privacy} target="_blank" rel="noopener noreferrer">{EXAM_TEXT.privacy_link}</a>{PANEL_TEXT.legal_links_and}
-          <a className="underline" href={LEGAL_PATHS.terms} target="_blank" rel="noopener noreferrer">{EXAM_TEXT.terms_link}</a>.
-        </p>
-      </section>
-
-      <button
-        type="submit"
-        disabled={props.submitting || examining !== null}
-        className="rounded-md px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
-        style={{ backgroundColor: '#1a1918' }}
-      >
-        {props.submitting ? C.submitting : C.submit}
-      </button>
+            </li>
+          ))}
+        </ol>
+      </nav>
+      {issuesSummary}
+      {currentStep === ACKNOWLEDGEMENTS_STEP ? acknowledgementsSection : renderSection(currentStep)}
+      {lastStep && props.submitBlocked === true && <p className="cr-notice mb-4" role="alert" data-submit-blocked>{C.submit_blocked}</p>}
+      <div className="cr-step-actions">
+        {stepIndex > 0 && <button type="button" className="cr-btn cr-btn-ghost" onClick={() => { setLocalIssues([]); goTo(stepIndex - 1) }}>{C.back}</button>}
+        {lastStep ? submitButton : continueButton}
+      </div>
     </form>
   )
 }

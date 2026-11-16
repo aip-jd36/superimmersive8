@@ -23,21 +23,24 @@
  * are reported, and only a new explicit submit sends anything. A response is never turned into a correction: it names its own
  * version's contract, and if refused it stays refused until the creator chooses "Correct my answers".
  */
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useReducer, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { CreatorRecordQuestionnaire, type QuestionnaireProps } from '@/components/creator-record/CreatorRecordQuestionnaire'
+import { CreatorRecordQuestionnaire, type QuestionnaireProps, type ToolEvent } from '@/components/creator-record/CreatorRecordQuestionnaire'
 import type { CreatorRecordFormState, FormIssue } from '@/lib/creator-record/prototype/form'
 import { CUSTOMER_SECTION_TITLES } from '@/lib/creator-record/prototype/questionnaire-structure'
 import type { PreparedView } from '@/lib/creator-record/customer-flow/service'
 import { PAGE_TEXT, QUESTIONNAIRE_CHROME, V2_REVIEW_PAGE, fillReviewText } from '@/lib/creator-record-flow/wording'
-import { EvidencePanel } from '@/components/creator-record/EvidencePanel'
+import { RecordDocuments, ToolDocuments, type DocumentsContext } from '@/components/creator-record/ToolDocuments'
+import { useCreatorRecordDocuments } from '@/components/creator-record/useCreatorRecordDocuments'
 import { ExaminationReview } from '@/components/creator-record/ExaminationReview'
-import { SYNTHETIC_UAT_NOTICE, attachmentsOf, preparedBody, type Attachment, type ResponseInput } from '@/lib/creator-record-flow/examination-ui'
+import { SYNTHETIC_UAT_NOTICE, attachmentsOf, preparedBody, type ResponseInput } from '@/lib/creator-record-flow/examination-ui'
+import { associationReducer, EMPTY_ASSOCIATIONS, serializeAttachments, unresolvedDocuments } from '@/lib/creator-record-flow/document-associations'
 import { carryAnswersToContract, contractProvenanceOf, RECOVERY_TEXT, type ContractProvenance, type QuestionnaireDefinition, type QuestionnaireRecovery } from '@/lib/creator-record-flow/questionnaire-recovery'
 
-const INK = '#1a1918'
-const MUTED = '#6b6560'
-const LINE = '#e5e2dc'
+// SI8-UX-2: colours resolve to the Institutional Trust tokens inside `.cr-it` (`./institutional-trust.css`).
+const INK = 'var(--cr-ink, #1a1918)'
+const MUTED = 'var(--cr-muted, #6b6560)'
+const LINE = 'var(--cr-line, #e5e2dc)'
 const FAILED = V2_REVIEW_PAGE.failed
 const buttonClass = 'rounded-md border px-4 py-2 text-sm font-medium bg-white disabled:opacity-50'
 const primaryClass = 'rounded-md px-4 py-2 text-sm font-medium text-white disabled:opacity-50'
@@ -73,8 +76,15 @@ export function CreatorRecordV2Client(props: Props) {
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [formKey, setFormKey] = useState(0)
-  const [attachments, setAttachments] = useState<Attachment[]>([])
+  // SI8-UX-2: the version's document links, kept correct through tool removal and in-place tool changes (`document-associations`).
+  const [associations, dispatchAssociation] = useReducer(associationReducer, EMPTY_ASSOCIATIONS)
   const [includeExaminations, setIncludeExaminations] = useState(false)
+  const documents = useCreatorRecordDocuments({
+    enabled: props.examination !== undefined,
+    apiBase,
+    consentVersion: props.examination?.consentVersion ?? '',
+    ...(props.examination?.aiPermissionVersion ? { aiPermissionVersion: props.examination.aiPermissionVersion } : {}),
+  })
   // The questionnaire actually on screen, and the digest that identifies it.
   const [displayed, setDisplayed] = useState(() => ({ sha256: props.questionnaireContractSha256, definition: definitionOf(props) }))
   // CR-V2-DECL-1B-2: the server said this questionnaire is out of date. The form is withdrawn until the update has arrived.
@@ -93,7 +103,8 @@ export function CreatorRecordV2Client(props: Props) {
     setLastState(carried.state)
     setRecovery(carried.recovery)
     setEarlierAnswers(null)
-    if (carried.state) setAttachments((list) => list.filter((a) => a.tool_index === null || a.tool_index < carried.state!.tools.length))
+    // SI8-UX-2: a document whose tool no longer exists is not silently dropped or moved: it needs the creator's choice.
+    if (carried.state) dispatchAssociation({ kind: 'tools_truncated', count: carried.state.tools.length })
     setIssues([])
     setError(null)
     setQuestionnaireChanged(false)
@@ -133,13 +144,20 @@ export function CreatorRecordV2Client(props: Props) {
   }
 
   async function submit(state: CreatorRecordFormState) {
+    // SI8-UX-2: never prepare a version while a document link waits for the creator's choice (the button is disabled too).
+    const serialized = props.examination ? serializeAttachments(associations, state.tools.length) : null
+    if (serialized && !serialized.ok) {
+      setLastState(state)
+      setError(QUESTIONNAIRE_CHROME.submit_blocked)
+      return
+    }
     setBusy(true)
     setError(null)
     setIssues([])
     setLastState(state)
     try {
-      const r = await post(props.examination
-        ? preparedBody({ state, contractSha256: displayed.sha256, draftId: view?.draft_id ?? null, attachments, includeExaminations })
+      const r = await post(props.examination && serialized?.ok
+        ? preparedBody({ state, contractSha256: displayed.sha256, draftId: view?.draft_id ?? null, attachments: serialized.attachments, includeExaminations })
         : { state, questionnaire_contract_sha256: displayed.sha256, ...(view ? { draft_id: view.draft_id } : {}) })
       if (r.code === 'questionnaire_changed') {
         setQuestionnaireChanged(true)
@@ -211,7 +229,13 @@ export function CreatorRecordV2Client(props: Props) {
     setRecovery(null)
     setError(null)
     if (props.examination) {
-      setAttachments(attachmentsOf(view))
+      dispatchAssociation({ kind: 'reset', attachments: attachmentsOf(view) })
+      // SI8-UX-2: answers not filled in (another questionnaire) start with one empty tool, so links to the version's other tools need a choice.
+      // The one empty tool is not the version's tool 1 either, so its documents need a choice too.
+      if (!sameQuestionnaire) {
+        dispatchAssociation({ kind: 'tools_truncated', count: 1 })
+        dispatchAssociation({ kind: 'tool_identity_changed', index: 0 })
+      }
       setIncludeExaminations(view.examination !== undefined)
     }
     setMode('form')
@@ -231,7 +255,7 @@ export function CreatorRecordV2Client(props: Props) {
     const single = view.declarations.answers.filter((a) => a.tool_index === null)
     const tools = Array.from(new Set(view.declarations.answers.filter((a) => a.tool_index !== null).map((a) => a.tool_index as number))).sort((a, b) => a - b)
     return (
-      <div>
+      <div className="cr-it">
         {uatNotice}
         <h1 className="font-display text-2xl font-bold mb-2" style={{ color: INK }}>{V2_REVIEW_PAGE.heading}</h1>
         <p className="text-sm mb-6" style={{ color: MUTED }}>{fillReviewText(V2_REVIEW_PAGE.intro, { version: view.version })}</p>
@@ -296,7 +320,7 @@ export function CreatorRecordV2Client(props: Props) {
 
   if (questionnaireChanged) {
     return (
-      <div>
+      <div className="cr-it">
         {uatNotice}
         <div role="alert" className="rounded-lg border p-6" style={{ borderColor: '#b42318', backgroundColor: '#FEF3F2' }} data-questionnaire-changed>
           <h1 className="font-display text-xl font-bold mb-2" style={{ color: INK }}>{RECOVERY_TEXT.changed_heading}</h1>
@@ -311,7 +335,7 @@ export function CreatorRecordV2Client(props: Props) {
   }
 
   return (
-    <div>
+    <div className="cr-it">
       {uatNotice}
       <h1 className="font-display text-2xl font-bold mb-2" style={{ color: INK }}>{PAGE_TEXT.title}</h1>
       <p className="text-sm mb-8" style={{ color: MUTED }}>
@@ -363,19 +387,27 @@ export function CreatorRecordV2Client(props: Props) {
         submitting={busy}
         issues={issues}
         onSubmit={(state) => submit(state)}
+        stepped
+        onToolEvent={(e: ToolEvent) => dispatchAssociation(e)}
+        submitBlocked={props.examination !== undefined && unresolvedDocuments(associations).length > 0}
+        {...(props.examination
+          ? {
+              renderToolDocuments: (i: number, toolKey: string, toolCount: number) => <ToolDocuments key={toolKey} ctx={documentsContext(toolCount)} toolIndex={i} />,
+              renderAfterTools: (toolCount: number) => <RecordDocuments ctx={documentsContext(toolCount)} includeExaminations={includeExaminations} onIncludeExaminationsChange={setIncludeExaminations} />,
+            }
+          : {})}
       />
-      {props.examination && (
-        <EvidencePanel
-          consentVersion={props.examination.consentVersion}
-          {...(props.examination.aiPermissionVersion ? { aiPermissionVersion: props.examination.aiPermissionVersion } : {})}
-          apiBase={apiBase}
-          maxTools={props.maxTools}
-          attachments={attachments}
-          onAttachmentsChange={setAttachments}
-          includeExaminations={includeExaminations}
-          onIncludeExaminationsChange={setIncludeExaminations}
-        />
-      )}
     </div>
   )
+
+  function documentsContext(toolCount: number): DocumentsContext {
+    return {
+      state: associations,
+      dispatch: dispatchAssociation,
+      docs: documents,
+      toolCount,
+      textMode: props.examination?.aiPermissionVersion ? 'live' : 'replay',
+      aiPermissionRequired: typeof props.examination?.aiPermissionVersion === 'string',
+    }
+  }
 }

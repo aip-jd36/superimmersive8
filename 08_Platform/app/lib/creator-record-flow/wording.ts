@@ -200,6 +200,12 @@ export const QUESTIONNAIRE_CHROME = {
   synthetic_reading_off: ' Automated reading is turned off: only SI8’s own synthetic test documents can be described, from recorded test data, and no AI model is used.',
   submit: 'Prepare draft record',
   submitting: 'Preparing draft…',
+  // SI8-UX-2 — PROPOSED, pending founder wording approval (not approved): step navigation for the multi-step questionnaire.
+  step_status: 'Step {n} of {total}',
+  steps_label: 'Questionnaire steps',
+  back: 'Back',
+  continue: 'Continue',
+  submit_blocked: 'Some documents need a choice before you can continue. Go to “The AI tools you used” to choose what to do with each one.',
 } as const
 
 /** Document and examination panels (`components/creator-record/{DocumentReviewPanel,EvidencePanel,ExaminationReview}.tsx`). */
@@ -232,6 +238,16 @@ export const PANEL_TEXT = {
   legal_links_and: ' and ',
   kind: 'Kind',
   comparison_summary: 'Provider: {provider}. Plan: {plan}.',
+  // SI8-UX-2 — PROPOSED, pending founder wording approval (not approved): document management inside each tool's section.
+  add_new_document: 'Add a new document',
+  choose_existing: 'Choose a document you have already added',
+  add_existing: 'Add to this tool',
+  already_in_version: 'This document is already in this version. You can change where it is linked where it is listed.',
+  close: 'Close',
+  unlinked_heading: 'Documents not linked to a tool',
+  needs_choice_heading: 'Documents that need a choice',
+  needs_choice_removed: 'The tool this document was linked to was removed. Choose a tool for it, leave it not linked, or take it out of this version.',
+  needs_choice_changed: 'You changed the AI tool this document is linked to. Choose a tool for it again, leave it not linked, or take it out of this version.',
 } as const
 
 /** The customer page title (`app/creator-record/page.tsx`). */

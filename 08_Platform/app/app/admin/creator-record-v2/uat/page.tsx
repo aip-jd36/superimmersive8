@@ -7,6 +7,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { CreatorRecordV2Client } from '@/app/creator-record/CreatorRecordV2Client'
+// SI8-UX-2: the same scoped Creator Record styling as the customer page.
+import '@/app/creator-record/institutional-trust.css'
 import { getPrepared, type PreparedView } from '@/lib/creator-record/customer-flow/service'
 import { syntheticUatInputs } from '@/lib/creator-record/customer-flow/synthetic-uat'
 import { checkApprovedSources } from '@/lib/creator-record/customer-record/sources'

@@ -26,6 +26,9 @@ const GUARDED = [
   { file: 'components/creator-record/EvidencePanel.tsx' },
   { file: 'components/creator-record/ExaminationReview.tsx' },
   { file: 'components/creator-record/ConsentWithdrawalControl.tsx' },
+  // SI8-UX-2: document management inside each tool's section, and the shared document state it uses.
+  { file: 'components/creator-record/ToolDocuments.tsx' },
+  { file: 'components/creator-record/useCreatorRecordDocuments.ts' },
   { file: 'app/creator-record/CreatorRecordV2Client.tsx' },
   { file: 'app/creator-record/page.tsx' },
   { file: 'lib/emails.ts', region: { from: 'export async function sendCreatorRecordV2ReadyPaymentEmail', to: '\n}\n' } },
