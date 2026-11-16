@@ -29,7 +29,7 @@ throughout. Follows the CR-DESIGN-2D pattern (D1 pause → drain gate → D2 rel
 | Storage access | `creator-records`, `documents` and `creator-record-evidence` buckets private (public: only catalog thumbnails and videos, unrelated) |
 | Invitation-only | `creator_record_v2_pilot_access`: 1 row, the admin; 0 non-admin |
 | Live gates (anonymous HTTP) | `/creator-record` → 307 to login; `/auth/signup` 200; evidence API 401; PDF download API 401 |
-| Release switches | `CREATOR_RECORD_V2_SUBMISSIONS='open'`, `CREATOR_RECORD_V2_ISSUANCE='enabled'`, `CREATOR_RECORD_ARTIFACT_ROLLOUT='all'`, as confirmed by the operator at CR-DESIGN-2D. **Not re-verified** (no Vercel environment access from this session); the operator must confirm at cutover. |
+| Release switches | **Code constants, not Vercel environment settings** (correction, SI8-UX-2-R3): `CREATOR_RECORD_V2_SUBMISSIONS='open'` (`lib/creator-record/customer-flow/approved-inputs.ts`), `CREATOR_RECORD_V2_ISSUANCE='enabled'` and `CREATOR_RECORD_ARTIFACT_ROLLOUT='all'` (`lib/creator-record-artifacts/config.ts`). They change only by a commit and a deployment, as at CR-DESIGN-2D (D1 `59f3ee26`). The operator confirms the Vercel project settings and that no environment override is in place. |
 
 **Recovery path for existing unpaid preparations.** Nothing is deleted, rewritten or regenerated:
 
@@ -48,11 +48,12 @@ throughout. Follows the CR-DESIGN-2D pattern (D1 pause → drain gate → D2 rel
 1. Release authorization recorded.
 2. Rebase `work/si8-ux-2` onto `origin/main`, then re-run tests, build and browser harness on the rebased commit (expected: baseline
    24/89, build exit 0, 113/113).
-3. Operator confirms the Vercel switches and that Production is `Ck2KQgd9…`.
+3. Operator confirms the Vercel project settings (no environment override; region and memory as at CR-DESIGN-2D) and that Production is `Ck2KQgd9…`.
 
 ### R1 — Pause
-1. Operator sets `CREATOR_RECORD_V2_SUBMISSIONS='stopped'` and redeploys the **current** commit (as CR-DESIGN-2D D1). This stops
-   preparation, uploads, examination and purchase; downloads continue.
+1. Commit `CREATOR_RECORD_V2_SUBMISSIONS='stopped'` on top of the current `main` (nothing else) and push; Vercel deploys it (as
+   CR-DESIGN-2D D1 `59f3ee26`). This stops preparation, uploads, examination and purchase binding (503 `submissions_stopped`);
+   issuance stays `'enabled'`, so paid records still drain, and downloads continue.
 
 ### R2 — Drain gate (read-only, must all hold)
 - 0 paid-unissued v2 orders;
@@ -63,10 +64,12 @@ throughout. Follows the CR-DESIGN-2D pattern (D1 pause → drain gate → D2 rel
 - invitation list unchanged.
 
 ### R3 — Release
-1. Push the rebased candidate to `main` (fast-forward; no force).
+1. Push the rebased candidate on top of the pause commit to `main` (fast-forward; no force). It does not touch the switch, so it
+   deploys still paused.
 2. Vercel builds; `next build` runs the wording guard.
-3. Confirm the deployment succeeded.
-4. Keep `SUBMISSIONS='stopped'` until the UAT passes.
+3. Cutover checks: deployment identity and readiness while paused.
+4. Reopen for the admin UAT with a one-line commit restoring `CREATOR_RECORD_V2_SUBMISSIONS='open'` (no admin bypass: the
+   invitation list, which holds only the admin, is the only access path). The final tree equals the verified candidate.
 
 ### R4 — Admin-only Production UAT
 
@@ -88,8 +91,8 @@ Reopen only when all hold:
 - historical downloads verified;
 - the permission authority row unchanged.
 
-Then the operator sets `CREATOR_RECORD_V2_SUBMISSIONS='open'` and redeploys. **The invitation gate is unchanged** (public access is
-CR-PUBLIC-1, separately).
+Submissions are already `'open'` from the R3 reopen (invitation-only). If the UAT fails, restore `'stopped'` by commit and
+investigate. **The invitation gate is unchanged** (public access is CR-PUBLIC-1, separately).
 
 ## Rollback
 
