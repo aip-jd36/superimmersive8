@@ -1,16 +1,17 @@
 # lib/creator-record — Creator Record v2
 
-## Current state: MVP released and closed (read this first)
+## Current state: MVP released and closed; Institutional Trust PDF released (read this first)
 
 **This section governs.** Every later section is a milestone note written at the time of that milestone and kept as history. Where a later section says something is "empty", "stopped", "not approved", "locked", "local only" or "not wired", that describes its own milestone, not the code today.
 
 **Product, release and qualifications:**
 - `08_Platform/prds/PRD_CREATOR_RECORD_v2_MVP_SCOPE.md`: §12 covers the release closure, the UAT, the accepted qualifications and the deferred maintenance.
 - `08_Platform/implementation/CR-V2-MVP-RELEASE-AUTHORIZATION-1-APPROVAL-RECORD.md`: approvals, release exceptions and operator evidence.
+- `08_Platform/implementation/cr-design-2c/` (CR-DESIGN-2C/2D, 2026-11-16): the Institutional Trust customer PDF. `04-CR-DESIGN-2D-RELEASE-AUTHORIZATION-RECORD.md` holds the founder authorization, release identities, Production UAT and closure; `01-ACCEPTANCE-RECORD.md` the accepted implementation; `03-CR-DESIGN-2D-RELEASE-PLAN.md` the release and rollback plan.
 
 **Baseline.**
-- Production runs Build B `0bec2dee` (released 2026-11-14, milestone closed 2026-11-15).
-- The rollback floor is Build A `60b1d84d`. Never deploy a build without the takeover guard (`334d8d9f`, `678add4d` or earlier).
+- Production runs the CR-DESIGN-2D release `f97429a4` (released 2026-11-16, closed 2026-11-16 after Production UAT). Build B `0bec2dee` was the MVP release (2026-11-14). Later documentation-only commits do not change the application.
+- Rollback targets for CR-DESIGN-2D: the D1 pause `59f3ee26`, or the pre-release `4c88a8a4` (application identical to Build B). The rollback floor stays Build A `60b1d84d`. Never deploy a build without the takeover guard (`334d8d9f`, `678add4d` or earlier).
 
 **Switches and identities:**
 
@@ -18,7 +19,7 @@
 |---|---|---|
 | New submissions and purchases | `'open'` | `customer-flow/approved-inputs.ts` |
 | Issuance | `'enabled'` | `lib/creator-record-artifacts/config.ts` |
-| Generator | `creator-record-v2-pdf-v3` | `lib/creator-record-artifacts/renderers.ts` |
+| Generator | `creator-record-v2-pdf-v4` (CR-DESIGN-2D; `-pdf-v1`…`-v3` artifacts stay recognised) | `lib/creator-record-artifacts/renderers.ts` |
 | Issuable record schemas / builders | 7, 8 / 5, 7 | `customer-record/governance-state.ts` (`CURRENT_ISSUANCE_SUPPORT`) |
 | Issuable reading method | `live_model`, anthropic `claude-sonnet-5`, profile `receipt` v1 (`receipt-extraction-v2` / `receipt-prompt-v2`) | same |
 | Registry / ledger | `CR-V2-LAUNCH-REGISTRY-3` / `CR-V2-LAUNCH-LEDGER-3` | `governed/sources.ts` |
@@ -26,18 +27,19 @@
 | Customer live examination | Enabled: both live-examination locks are `true` (`live-examination/controls.ts`), and real documents are accepted (`evidence-intake/contract.ts`). The admin prototype's own live path stays locked (`evidence/config.ts`) | |
 
 **PDF templates.**
-- `approvedPdfTemplates` selects exactly one `approved` set per schema:
-  - schema 7 → v4, `d4ecf3f39487ed43ce6c5e621d988d6525b638c952a8c5ead01e0cc9b8504f7e`;
-  - schema 8 → v5, `a27e23cdbc1b12c16330b9518bba210b218bb0e8807e53ac164d6673ec873408`.
-- Both use the three-level readiness layout (`customer-pdf/readiness-layout.ts`, `ReadingLayoutView.tsx`).
-- v1 (schema 7) and v3 (schema 8) stay registered as `superseded`, for audit only.
+- `approvedPdfTemplates` selects exactly one `approved` set per schema (CR-DESIGN-2D, 2026-11-16):
+  - schema 7 → v6, `a0cd0c248ce270d2826712910aa606579ce429f7923b051d68a0502c5305f476`;
+  - schema 8 → v7, `5d7ccfc8ce824e57f6e904d51f1027b59e43ab250a7f4895b0f804debe1761ab`.
+- v6/v7 are v4/v5 verbatim plus `version`, `navigation` ("What this record contains"; "See 'Please note' below.") and `presentation`: the Institutional Trust presentation contract `si8/creator-record-pdf-presentation` v1, `aa50507b4f76e8168744d88645220735e8b7820577e7be72e19c83dbedc017db` (`customer-pdf/presentation/institutional-trust.ts`, drawn by `InstitutionalTrustPDF.tsx`; hash-pinned fonts in `customer-pdf/fonts/`). Presentation renders are serialised per process with glyph-character priming and a fail-closed 30 s hold (`presentation/render-queue.ts`, `render_queue_hold_expired`).
+- All use the three-level readiness layout (`customer-pdf/readiness-layout.ts`, `ReadingLayoutView.tsx`).
+- v4 (schema 7) and v5 (schema 8) stay registered as `superseded` since CR-DESIGN-2D, as do v1 (schema 7) and v3 (schema 8); for audit only.
 - Issued PDFs are stored bytes and are never re-rendered.
 - Takeover guard (`b6889585`): a pending artifact whose object is missing is re-rendered only by the generator that recorded it; otherwise it is refused and reconciled by hand.
 
 **D10: readings, declarations and guidance stay independent.**
 - Guidance is selected from declarations alone. Documents and readings are never a guidance input (`customer-record/record.ts`).
 - Comparison method v2 records only `not_assessed` / `determination_withheld`.
-- The v4/v5 layout prints readings only in the documents section, as automated and unchecked. It refuses:
+- The v4/v5 layout, and v6/v7 on their separate reading-register pages, print readings only in the documents section, as automated and unchecked. It refuses:
   - an examination-bearing record whose comparison method is not v2;
   - a template set that also carries `integrated_assessment` (`customer-pdf/document-model.ts`, `replaceWithReadiness`).
 - **Superseded design:** the per-item integrated assessment (`integrated-assessment/`, PRD §9) is still in the code, but only the superseded v3 set carries its block.

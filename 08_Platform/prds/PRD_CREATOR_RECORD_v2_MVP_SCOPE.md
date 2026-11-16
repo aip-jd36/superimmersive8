@@ -376,6 +376,7 @@ This decision does **not** complete the MVP integrated-assessment requirement (�
 ### 12.3 Qualifications [FACT; accepted by the founder]
 
 1. **Fresh AI examination under the revised Terms was not exercised.**
+   - **Closed 2026-11-16 by the CR-DESIGN-2D Production UAT** (CR-2026-AA5D2711): a fresh live examination (attempt `52733653…`, executed 06:05:56 UTC) ran under the current AI-permission authority and reached the issued record. Evidence: `08_Platform/implementation/cr-design-2c/04-CR-DESIGN-2D-RELEASE-AUTHORIZATION-RECORD.md` §9. The text below is kept as written at the MVP closure.
    - The UAT record reused a stored live reading (attempt `4be776e0-…`, executed 2026-11-11 09:37:38 UTC, envelope `79118a472c3a…`). Production recorded no live attempt or reservation on or after 2026-11-14.
    - Demonstrated instead:
      - the reuse of a historical reading;

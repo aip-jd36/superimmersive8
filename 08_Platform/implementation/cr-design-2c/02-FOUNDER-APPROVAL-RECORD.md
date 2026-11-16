@@ -1,5 +1,7 @@
 # CR-DESIGN-2C — Founder approval record (Institutional Trust customer PDF)
 
+> **Decided 2026-11-16.** The founder's decisions on F-2C-1 to F-2C-7 were given in the CR-DESIGN-2D release authorization and are recorded in `04-CR-DESIGN-2D-RELEASE-AUTHORIZATION-RECORD.md` §1: F-2C-1, F-2C-2, F-2C-5 and F-2C-6 approved; F-2C-3 and F-2C-4 accepted; F-2C-7 (physical print verification) deferred, recorded as not performed and not passed. The blank fields below are the prepared form, kept as it was presented.
+
 **Status: PREPARED FOR THE FOUNDER — NOT YET DECIDED.**
 
 - Every decision field below is blank until the founder completes it. Nothing here is an approval until then.
