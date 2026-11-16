@@ -237,5 +237,24 @@ describe('runPaymentFulfillment — Creator Record v2', () => {
     expect(calls).toContain('send:cr')
     expect(deps.sendCreatorRecordV2Email).not.toHaveBeenCalled()
   })
+
+  // CR-DESIGN-2C: an expired presentation render ('render_queue_hold_expired') is an ordinary PDF failure: nothing issued, no email,
+  // the step stays pending for the retry, and the next run completes with exactly one PDF and one email.
+  it('an expired render fails closed and is retried: no email, no duplicate PDF, then completes', async () => {
+    const { deps, row, calls } = setup({ product: 'v2' })
+    ;(deps.generateCreatorRecordPdf as jest.Mock).mockImplementationOnce(async () => { throw new Error('render_queue_hold_expired') })
+    const first = await runPaymentFulfillment('cs_v2', deps)
+    expect(first.status).toBe('failed')
+    expect(first.reason).toMatch(/render_queue_hold_expired/)
+    expect(row.pdf).toBe('pending')
+    expect(calls).toEqual([])
+    expect(deps.alert).not.toHaveBeenCalled()
+    expect(deps.sendCreatorRecordV2Email).not.toHaveBeenCalled()
+    const second = await runPaymentFulfillment('cs_v2', deps)
+    expect(second.status).toBe('completed')
+    expect(calls).toEqual(['generate', 'pdf:completed', 'email:sending', 'send:cr-v2', 'email:accepted'])
+    expect(deps.generateCreatorRecordPdf).toHaveBeenCalledTimes(2)
+    expect(deps.sendCreatorRecordV2Email).toHaveBeenCalledTimes(1)
+  })
 })
 

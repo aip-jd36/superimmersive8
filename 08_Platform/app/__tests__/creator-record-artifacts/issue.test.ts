@@ -8,6 +8,8 @@
 
 import { ArtifactGeneratorMismatchError, issueCreatorRecordArtifact, sha256Hex, type ArtifactRow, type ArtifactTable, type IssueDeps, type ObjectStore } from '@/lib/creator-record-artifacts/issue'
 import { rendererForFamily } from '@/lib/creator-record-artifacts/renderers'
+import { RenderQueueHoldExpiredError } from '@/lib/creator-record/customer-pdf/presentation/render-queue'
+import { deliverCreatorRecordPdf } from '@/lib/creator-record-artifacts/deliver'
 
 const SUB = '3f2a9c10-1111-4222-8333-444455556666'
 
@@ -340,5 +342,52 @@ describe('CR-V2-MVP-CUTOVER-PREP-1: no re-render under another generator (opt-in
   test('the v2 production renderer opts in; the v1 renderer keeps its re-render-on-takeover behaviour', () => {
     expect(rendererForFamily('creator_record_v2', 'enabled').rerenderOnlySameGenerator).toBe(true)
     expect(rendererForFamily('creator_record_v1').rerenderOnlySameGenerator).toBeUndefined()
+  })
+})
+
+/**
+ * CR-DESIGN-2C: an expired presentation render (`render_queue_hold_expired`, `customer-pdf/presentation/render-queue.ts`) reaches the
+ * issuance boundary as a rejected render. Nothing of it is stored or issued, so nothing can be delivered; the retry issues exactly one
+ * artifact.
+ */
+describe('expired render (render_queue_hold_expired)', () => {
+  const expiredRenderer = (base: IssueDeps['renderer']): IssueDeps['renderer'] => ({ ...base, render: async () => { throw new RenderQueueHoldExpiredError() } })
+  // Customer delivery over the same fake table and storage (the owner asking for the PDF).
+  const deliverFrom = (table: FakeTable, objects: FakeObjects) => deliverCreatorRecordPdf(SUB, {
+    currentUserId: async () => 'owner', submissionOwner: async () => 'owner', isAdmin: async () => false,
+    findArtifact: (id) => table.find(id), getObject: (path) => objects.get(path),
+    legacyReferences: async () => [], getLegacyObject: async () => null, log: () => undefined,
+  })
+
+  test('first attempt: no row, no object, nothing issued; the retry issues exactly one artifact', async () => {
+    const { table, objects, deps } = setup()
+    await expect(issueCreatorRecordArtifact(SUB, deps({ renderer: expiredRenderer(deps().renderer) }))).rejects.toThrow('render_queue_hold_expired')
+    expect(table.rows.size).toBe(0)
+    expect(objects.puts).toHaveLength(0)
+    expect(objects.objects.size).toBe(0)
+    expect((await deliverFrom(table, objects)).status).not.toBe(200)
+    const r = await issueCreatorRecordArtifact(SUB, deps())
+    expect(r.outcome).toBe('issued')
+    expect(table.rows.size).toBe(1)
+    expect(objects.objects.size).toBe(1)
+    expect((await deliverFrom(table, objects)).status).toBe(200)
+  })
+
+  test('pending takeover: the pending row is left exactly as it was, nothing stored; the retry takes over and issues once', async () => {
+    const { table, objects, deps } = setup()
+    objects.failPutOnce = true
+    await expect(issueCreatorRecordArtifact(SUB, deps())).rejects.toThrow('upload 503')
+    const pending = (await table.find(SUB))!
+    const putsBefore = objects.puts.length
+    await expect(issueCreatorRecordArtifact(SUB, deps({ renderer: expiredRenderer(deps().renderer) }))).rejects.toThrow('render_queue_hold_expired')
+    expect(await table.find(SUB)).toEqual(pending)
+    expect(objects.puts).toHaveLength(putsBefore)
+    expect(objects.objects.size).toBe(0)
+    expect((await deliverFrom(table, objects)).status).toBe(409) // still processing: no PDF reaches the customer
+    const r = await issueCreatorRecordArtifact(SUB, deps())
+    expect(r.outcome).toBe('issued')
+    expect(table.rows.size).toBe(1)
+    expect(objects.objects.size).toBe(1)
+    expect((await deliverFrom(table, objects)).status).toBe(200)
   })
 })

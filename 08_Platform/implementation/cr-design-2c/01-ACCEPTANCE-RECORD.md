@@ -32,6 +32,9 @@ All four are off `origin/main` `4c88a8a4`, which has not moved since. The review
 | `customer-pdf.test.ts` | Boundary allowlist entry for the queue module |
 | `test-support/cr-design-2b/perf-check.tsx` | Performance observation (§3) |
 | `test-support/cr-design-2b/fingerprint-check.ts` | Fingerprint verification (§2) |
+| `render-queue.ts` (follow-up) | Expired renders fail closed (`render_queue_hold_expired`), §4 |
+| `test-support/cr-design-2b/queue-overlap.tsx` | Real-render timeout-overlap scenarios, §4 |
+| `issue.test.ts`, `run-payment-fulfillment.test.ts` | Expired render at the issuance and fulfilment boundaries, §4 |
 
 None of these changes rendering output: the fingerprints and the reviewed PDFs are unchanged (§2).
 
@@ -97,13 +100,22 @@ A model with a presentation is never drawn by the legacy component, and no other
 **Failure releases the queue.** Before 2C, a rejected render already released the next one. A render that **never settled** would have held the queue for the life of a reused server instance, making every later issuance on that instance wait until its own 60 s timeout. That is "blocking indefinitely", so it is corrected:
 
 - **Mechanism.** `presentation/render-queue.ts` releases the next render when the previous one settles (resolves, rejects or throws synchronously), **or after `PRESENTATION_RENDER_HOLD_MS` = 30 s, whichever is first.** The hold timer is `unref`'d, so it never keeps a process alive.
-- **Trade-off.** A render that finishes after its 30 s hold could, in principle, have its own text layer affected by the next document's priming, and only for characters that share a glyph. Its drawing and the next document are unaffected. 30 s is about 80× the slowest observed render.
-- **Tests** (`cr-design-2b.test.ts`, "presentation render queue"):
-  - one render at a time, in arrival order;
-  - a rejected and a synchronously thrown render release the next one at once, and their errors reach their callers;
-  - a never-settling render releases the next after the hold;
-  - the hold is below 60 s;
-  - the single-entry-point static check.
+- **Correction (CR-DESIGN-2C follow-up, PM/Architecture-accepted).** The first version of this section was wrong to say only that a late render's own text layer "could be affected". A render cannot be cancelled. When its hold expires it keeps running, and before the correction its late bytes could still reach artifact storage and issuance (between 30 s and the 60 s route limit) with a text layer written after the next render had changed shared glyph state.
+- **Expiry, fail closed.** A render whose hold expires is now marked expired. If it later succeeds, its caller receives `RenderQueueHoldExpiredError` (`render_queue_hold_expired`) instead of its bytes, so expired bytes are never returned, stored, issued or delivered. A render that fails after its hold still reports its own error, and a render that settles within its hold is unaffected.
+- **Issuance boundary** (`issue.ts`, unchanged). The render happens before the pending row is inserted (first attempt) and before a takeover (resume). A rejected render therefore writes no row, no object and no issued status, and leaves an existing pending row exactly as it was. Delivery serves only issued rows whose bytes match their recorded SHA-256.
+- **Retry, unchanged.** The fulfilment runner records `pdf_generation_error:render_queue_hold_expired`, keeps the PDF step pending, sends no email, and the next run (sweep or admin reconcile) issues exactly one artifact and one email. The runner has no payment-provider access, so there is no charge, refund or other payment side effect.
+- **Isolation of the next render, established.** `test-support/cr-design-2b/queue-overlap.tsx` runs controlled overlaps with real PDF rendering and synthetic records whose characters share glyphs (Inter Δ/∆ and Ω/Ω; a Noto fallback pair):
+  - S1: the expired render draws after the next one completed;
+  - S2 and S3: the expired render draws completely between the next render's priming and its drawing.
+
+  In every case the next render's PDF text layer is exact and its caller receives it, while the expired render's caller receives `render_queue_hold_expired`. The withheld late PDF of the Inter pair does have a wrong text layer, which confirms the hazard the expiry closes.
+
+  Why the next render is safe: a render changes glyph characters only while priming, at its own start. An expired render that is still running only lays out and writes its own document. It can create component glyph objects with no character, but only for glyphs the next document does not print, since those are primed and cached first.
+- **Tests:**
+  - `cr-design-2b.test.ts`, "presentation render queue": one render at a time, in arrival order; a rejected and a synchronously thrown render release the next one at once, with their errors reaching their callers; a never-settling render releases the next after the hold; **a success after the hold is rejected with `render_queue_hold_expired`; a failure after the hold keeps its own error; an on-time render is unaffected (value and error)**; the hold is below 60 s; the single-entry-point static check.
+  - "timeout overlap" (the real-render scenarios above).
+  - `issue.test.ts`, "expired render": the first attempt and the pending takeover store and issue nothing, delivery returns no PDF (409 while pending), and the retry issues exactly one artifact, which is then delivered.
+  - `run-payment-fulfillment.test.ts`: an expired render fails closed, with no email and no alert, and is retried to completion with no duplicate.
 - **Glyph isolation regression** (R2, re-run): 10 sequential and 10 concurrent renders keep exact Unicode text; the uncorrected control fails as required.
 
 ## 5. Unchanged MVP boundaries (task 7)
@@ -155,6 +167,7 @@ The MVP product boundary (PRD MVP scope §12) is unchanged. D10 is preserved: re
 | `next build` | **exit 0** |
 | Font tracing | all 9 font files traced and present for each of the four issuing routes (`/api/webhooks/stripe`, `/api/internal/payment-fulfillments/sweep`, `/api/admin/payments/[sessionId]/reconcile`, `/api/admin/submissions/[id]/generate-creator-record`) |
 | Full regression suite | **24 failing suites / 89 failing tests**, the same failing set as the recorded baseline (compared test by test; no new failures, none fixed); 9,801 passing (+5 for the new queue tests) |
+| After the expiry follow-up | `next build` **exit 0**, fonts traced as above; affected suites (CR-DESIGN-2B, customer PDF, artifacts, fulfilment) 20 suites / 503 tests passing; full suite again **24 / 89, identical to the baseline**, 9,811 passing; v6, v7 and presentation fingerprints **unchanged** (recomputed) |
 
 ## 7. Known limitations and deferred items (carried into the founder record)
 

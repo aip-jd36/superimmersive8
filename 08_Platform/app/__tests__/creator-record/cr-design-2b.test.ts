@@ -14,7 +14,7 @@ import { approvedPdfTemplates } from '@/lib/creator-record/customer-flow/approve
 import { buildCustomerDocument, CustomerPdfRefusal, type CustomerDocumentModel } from '@/lib/creator-record/customer-pdf/document-model'
 import { INSTITUTIONAL_TRUST_PRESENTATION, presentationFingerprint, type PresentationConfig } from '@/lib/creator-record/customer-pdf/presentation/institutional-trust'
 import { templateFingerprint } from '@/lib/creator-record/customer-pdf/templates'
-import { createRenderQueue, PRESENTATION_RENDER_HOLD_MS } from '@/lib/creator-record/customer-pdf/presentation/render-queue'
+import { createRenderQueue, PRESENTATION_RENDER_HOLD_MS, RenderQueueHoldExpiredError } from '@/lib/creator-record/customer-pdf/presentation/render-queue'
 import { CREATOR_RECORD_V2_GENERATOR_VERSION } from '@/lib/creator-record-artifacts/renderers'
 import { CUTOVER_VERSIONS, registeredPdfTemplateSet } from '@/test-support/registered-template-sets'
 import { CAVEATS_POINTER, CONTENTS_HEADING, proposalDiff, proposalFileContent, readProposal, syntheticallyApproved2B } from '@/test-support/cr-design-2b/proposed-sets'
@@ -269,6 +269,25 @@ describe('presentation render queue', () => {
     expect(waited).toBeGreaterThanOrEqual(90)
     expect(waited).toBeLessThan(2_000)
   })
+  test('a render that succeeds after its hold expired is rejected with render_queue_hold_expired, never returned', async () => {
+    const q = createRenderQueue(50)
+    const late = q.run(async () => { await delay(200); return new Uint8Array([1, 2, 3]) })
+    const next = q.run(async () => 'next')
+    await expect(late).rejects.toBeInstanceOf(RenderQueueHoldExpiredError)
+    await expect(late).rejects.toThrow('render_queue_hold_expired')
+    await expect(next).resolves.toBe('next')
+  })
+  test('a render that fails after its hold expired still reports its own error', async () => {
+    const q = createRenderQueue(50)
+    const late = q.run(async () => { await delay(200); throw new Error('font_fingerprint_mismatch') })
+    await expect(late).rejects.toThrow('font_fingerprint_mismatch')
+  })
+  test('a render that settles within its hold is unaffected (value and error)', async () => {
+    const q = createRenderQueue(500)
+    await expect(q.run(async () => { await delay(20); return 'on time' })).resolves.toBe('on time')
+    await expect(q.run(async () => { await delay(20); throw new Error('text_unsupported') })).rejects.toThrow('text_unsupported')
+    expect(q.depth).toBe(0)
+  })
   test('the process queue is bounded below the issuing routes\' 60 s limit', () => {
     expect(PRESENTATION_RENDER_HOLD_MS).toBeGreaterThan(0)
     expect(PRESENTATION_RENDER_HOLD_MS).toBeLessThan(60_000)
@@ -289,6 +308,48 @@ describe('presentation render queue', () => {
     const { execFileSync: run } = require('node:child_process') as typeof import('node:child_process')
     const hits = run('git', ['grep', '--untracked', '-l', '-E', "from ['\"][^'\"]*InstitutionalTrustPDF['\"]", '--', 'lib', 'app', 'components'], { cwd: join(__dirname, '../..'), encoding: 'utf8' }).split('\n').filter(Boolean)
     expect(hits).toEqual(['lib/creator-record/customer-pdf/CustomerRecordPDF.tsx'])
+  })
+})
+
+/**
+ * CR-DESIGN-2C: controlled timeout overlap with REAL PDF rendering (`test-support/cr-design-2b/queue-overlap.tsx`). An expired render
+ * keeps running and touches the shared font state after the next render has primed; the next render's text layer stays exact, and
+ * the expired render's result never reaches its caller.
+ */
+describe('timeout overlap: an expired render cannot reach its caller or corrupt the next render', () => {
+  type Pdf = { scenario: string; doc: string; role: string; ok: boolean; failures: string[] }
+  let ov: { timeline: Record<string, string[]>; pdfs: Pdf[]; error?: string }
+  beforeAll(() => {
+    const dir = mkdtempSync(join(tmpdir(), 'cr-design-2c-overlap-'))
+    ov = JSON.parse(execFileSync(process.execPath, [join(process.cwd(), 'node_modules', 'tsx', 'dist', 'cli.mjs'), '--tsconfig', 'tsconfig.json', join('test-support', 'cr-design-2b', 'queue-overlap.tsx'), dir], { cwd: process.cwd(), encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }))
+  })
+  test('the overlap actually happened: the expired render drew after the next render had primed', () => {
+    expect(ov.error).toBeUndefined()
+    for (const [s, first, next] of [['S2', 'A', 'B'], ['S3', 'C', 'D']]) {
+      const t = ov.timeline[s]
+      expect(t.indexOf(`${first} draws`)).toBeGreaterThan(t.indexOf(`${next} primed`))
+      expect(t.indexOf(`${first} draws`)).toBeLessThan(t.indexOf(`${next} draws`))
+    }
+    expect(ov.timeline.S1.indexOf('A draws')).toBeGreaterThan(ov.timeline.S1.indexOf('B drawn'))
+  })
+  test('the next render\'s PDF text layer is exact in every scenario, and its caller receives it', () => {
+    const next = ov.pdfs.filter((p) => p.role === 'next')
+    expect(next.map((p) => `${p.scenario}${p.doc}`).sort()).toEqual(['S1B', 'S2B', 'S3D'])
+    expect(next.flatMap((p) => p.failures.map((f) => `${p.scenario} ${f}`))).toEqual([])
+    expect(ov.timeline.S1).toContain('B caller: resolved')
+    expect(ov.timeline.S2).toContain('B caller: resolved')
+    expect(ov.timeline.S3).toContain('D caller: resolved')
+  })
+  test('the expired render\'s caller receives render_queue_hold_expired; a late failure keeps its own error', () => {
+    expect(ov.timeline.S1).toContain('A caller: render_queue_hold_expired')
+    expect(ov.timeline.S2).toContain('A caller: render_queue_hold_expired')
+    expect(ov.timeline.S3).toContain('C caller: render_queue_hold_expired')
+    expect(ov.timeline.S4).toEqual(['failing caller: render failed late', 'next caller: resolved'])
+  })
+  test('the hazard is real: the withheld late PDF of the Inter pair has a wrong text layer', () => {
+    const lateA = ov.pdfs.filter((p) => p.role === 'late-raw' && p.doc === 'A')
+    expect(lateA.length).toBeGreaterThan(0)
+    expect(lateA.every((p) => !p.ok)).toBe(true)
   })
 })
 

@@ -73,7 +73,11 @@ Decision: ☐ Accept as deferred ☐ Do not accept  Founder: ________  Date: ___
 
 Redesigned PDFs render one at a time per server process (text-layer isolation).
 - A failed render releases the next one at once.
-- A render that never finishes releases it after 30 seconds, so issuance can never be blocked for good.
+- A render that has not finished after 30 seconds releases the next one, so issuance can never be blocked for good. Its PDF is never used: the render cannot be stopped, but if it finishes late its result is discarded as an error (`render_queue_hold_expired`).
+- Nothing is stored, issued, emailed or delivered from a late render. The order stays pending and is retried as usual (sweep or admin reconcile), producing exactly one PDF. No payment is affected.
+- Tested with real PDF rendering: a late render running alongside the next one does not change the next PDF's text.
+
+*Corrected in CR-DESIGN-2C. The first version of this item did not say that a late render's PDF could still have been issued; that path is now closed.*
 
 Measured cost: about 0.2–0.4 s per PDF locally; 13 simultaneous requests complete in about 3 s.
 
