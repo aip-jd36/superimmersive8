@@ -19,7 +19,7 @@ import path from 'node:path'
 import React from 'react'
 import { Document, Font, Page, StyleSheet, Text, View, renderToStream, type TextProps } from '@react-pdf/renderer'
 import { buildCustomerDocument, CustomerPdfRefusal, documentText, type Block, type CustomerDocumentInput, type CustomerDocumentModel, type CustomerDocumentOptions } from './document-model'
-import { assertImplemented, InstitutionalTrustPDF, primeGlyphCharacters, registerPresentationFonts } from './InstitutionalTrustPDF'
+import { assertImplemented, InstitutionalTrustPDF, primeGlyphCharacters, registerPresentationFonts, withPresentationFonts } from './InstitutionalTrustPDF'
 import { presentationFor, type PresentationConfig } from './presentation/institutional-trust'
 import { lineBreakOpportunities, pdfText, unsupportedCharacters } from './text-layout'
 import { ReadingSection, readingStyles } from './ReadingLayoutView'
@@ -185,9 +185,12 @@ async function renderPresentation(model: CustomerDocumentModel, config: Presenta
   const [display, body, mono, fallback] = await Promise.all([config.fonts.display.family, config.fonts.body.family, config.fonts.mono.family, config.fonts.fallback.family].map(glyphCheck))
   const unsupported = unsupportedCharacters(documentText(model).join('\n'), (cp) => fallback(cp) || (display(cp) && body(cp) && mono(cp)))
   if (unsupported.length > 0) throw new CustomerPdfRefusal('text_unsupported', unsupported.join(', '))
-  await primeGlyphCharacters(config, [...documentText(model), model.marking.page_label, '0123456789'])
-  const stream = await renderToStream(<InstitutionalTrustPDF model={model} config={config} />)
-  const chunks: Buffer[] = []
-  for await (const chunk of stream) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
-  return { model, bytes: new Uint8Array(Buffer.concat(chunks)) }
+  // Priming, layout and writing happen as one exclusive step, so no other render can change the glyphs' characters in between.
+  return withPresentationFonts(async () => {
+    await primeGlyphCharacters(config, [...documentText(model), model.marking.page_label, '0123456789'])
+    const stream = await renderToStream(<InstitutionalTrustPDF model={model} config={config} />)
+    const chunks: Buffer[] = []
+    for await (const chunk of stream) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+    return { model, bytes: new Uint8Array(Buffer.concat(chunks)) }
+  })
 }

@@ -189,3 +189,6 @@ export async function reviewCases(): Promise<ReviewCase[]> {
 
   return cases
 }
+
+/** CR-DESIGN-2B-R2 — TEST ONLY: a schema 7 record whose declared title is the given SYNTHETIC text (glyph-isolation regression). */
+export const titledRecord = (id: string, title: string) => record(id, { ...BASE, P1: [title] }, [RUNWAY])

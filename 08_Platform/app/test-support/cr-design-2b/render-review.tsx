@@ -17,7 +17,7 @@ import layoutDocument from '@react-pdf/layout'
 import { renderCustomerRecordPdf } from '@/lib/creator-record/customer-pdf/CustomerRecordPDF'
 import { buildCustomerDocument, documentText, type CustomerDocumentModel } from '@/lib/creator-record/customer-pdf/document-model'
 import { InstitutionalTrustPDF, registerPresentationFonts } from '@/lib/creator-record/customer-pdf/InstitutionalTrustPDF'
-import { presentationFor } from '@/lib/creator-record/customer-pdf/presentation/institutional-trust'
+import { presentationFor, type PresentationConfig } from '@/lib/creator-record/customer-pdf/presentation/institutional-trust'
 import { pdfText } from '@/lib/creator-record/customer-pdf/text-layout'
 import { registeredPdfTemplateSet, CUTOVER_VERSIONS } from '@/test-support/registered-template-sets'
 import { syntheticallyApproved2B } from './proposed-sets'
@@ -48,6 +48,37 @@ export function verifyPdfBytes(expectFiles: string[]): BytesReport[] {
   return JSON.parse(outText) as BytesReport[]
 }
 
+/** Every printed string in print order, as the presentation prints it: the identity block, the page-1 disclosure, then the rest. */
+export function printedStrings(model: CustomerDocumentModel): string[] {
+  const identityCount = model.sections[0].id === 'identity' ? model.sections[0].blocks.reduce((n, b) => n + (b.kind === 'row' ? 2 : 1), 0) : 0
+  const flat = textsOf(model)
+  return [...flat.slice(0, identityCount), model.marking.stamp, ...flat.slice(identityCount)]
+}
+
+/**
+ * Writes the byte-level verifier's expectations (`./verify_pdf_bytes.py`) next to a PDF and returns their path. The reserved bands
+ * come from the configuration, never from a layout pass: the running header sits above `padding_top - 12`, the running footer below
+ * `page height - padding_bottom + 8`.
+ */
+export function writeExpectations(model: CustomerDocumentModel, config: PresentationConfig, pdfPath: string): string {
+  const H = 841.89, W = 595.28
+  const expected = printedStrings(model)
+  const tokens = new Set<string>()
+  for (const t of expected) for (const w of pdfText(t).split(/\s+/)) {
+    // Search probes: every word with a non-ASCII character (curly apostrophes, accents), and pairs of CJK characters.
+    if (!/[^ -~]/.test(w)) continue
+    const bare = w.replace(/^[("'‘“]+|[)"'.,:;!?’”]+$/gu, '')
+    if (/[　-鿿가-힯]/u.test(bare)) { for (let k = 0; k + 2 <= bare.length; k += 4) tokens.add(bare.slice(k, k + 2)) } else if (bare.length >= 3) tokens.add(bare)
+  }
+  const expectFile = pdfPath.replace(/\.pdf$/, '.expect.json')
+  writeFileSync(expectFile, JSON.stringify({
+    pdf: pdfPath, header: model.marking.footer, stamp: model.marking.stamp, page_label: model.marking.page_label, strings: expected, probes: [...tokens].sort(),
+    content_top: config.page.padding_top, content_bottom: H - config.page.padding_bottom, content_left: config.page.padding_x, content_right: W - config.page.padding_x,
+    header_bottom: config.page.padding_top - 12, footer_top: H - config.page.padding_bottom + 8, background: { warm: config.colors.paper, reading: config.colors.cool_ground },
+  }))
+  return expectFile
+}
+
 export async function renderReview(outDir: string): Promise<CaseReport[]> {
   mkdirSync(join(outDir, 'pdf'), { recursive: true })
   const cases = await reviewCases()
@@ -73,8 +104,7 @@ export async function renderReview(outDir: string): Promise<CaseReport[]> {
     laid.children.forEach((p: any, i: number) => walk(p, i + 1, false, nodes))
     const pages = laid.children.length
     const identityCount = model.sections[0].id === 'identity' ? model.sections[0].blocks.reduce((n, b) => n + (b.kind === 'row' ? 2 : 1), 0) : 0
-    const flat = textsOf(model)
-    const expected = [...flat.slice(0, identityCount), model.marking.stamp, ...flat.slice(identityCount)]
+    const expected = printedStrings(model)
     const expectedAt = (k: number): string | undefined => expected[k]
     // A text that continues onto the next page is laid out as two nodes; join consecutive nodes that together make the next expected string.
     const raw = nodes.filter((n) => !n.fixed && n.text !== '•')
@@ -108,22 +138,7 @@ export async function renderReview(outDir: string): Promise<CaseReport[]> {
     const theirs = theirs0
     const extra = [...mine].filter(([t, n]) => (theirs.get(t) ?? 0) < n).map(([t]) => t.slice(0, 80))
     const missing = [...theirs].filter(([t, n]) => (mine.get(t) ?? 0) < n).map(([t]) => t.slice(0, 80))
-    // The byte-level verifier's expectations (`./verify_pdf_bytes.py`). The reserved bands come from the configuration, never from
-    // the layout pass: the running header sits above `padding_top - 12`, the running footer below `page height - padding_bottom + 8`.
-    const H = 841.89, W = 595.28
-    const tokens = new Set<string>()
-    for (const t of expected) for (const w of pdfText(t).split(/\s+/)) {
-      // Search probes: every word with a non-ASCII character (curly apostrophes, accents), and pairs of CJK characters.
-      if (!/[^\x20-\x7e]/.test(w)) continue
-      const bare = w.replace(/^[("'‘“]+|[)"'.,:;!?’”]+$/gu, '')
-      if (/[　-鿿가-힯]/u.test(bare)) { for (let k = 0; k + 2 <= bare.length; k += 4) tokens.add(bare.slice(k, k + 2)) } else if (bare.length >= 3) tokens.add(bare)
-    }
-    const expectFile = join(outDir, 'pdf', file.replace(/\.pdf$/, '.expect.json'))
-    writeFileSync(expectFile, JSON.stringify({
-      pdf: join(outDir, 'pdf', file), header: model.marking.footer, stamp: model.marking.stamp, page_label: model.marking.page_label, strings: expected, probes: [...tokens].sort(),
-      content_top: config.page.padding_top, content_bottom: H - config.page.padding_bottom, content_left: config.page.padding_x, content_right: W - config.page.padding_x,
-      header_bottom: config.page.padding_top - 12, footer_top: H - config.page.padding_bottom + 8, background: { warm: config.colors.paper, reading: config.colors.cool_ground },
-    }))
+    const expectFile = writeExpectations(model, config, join(outDir, 'pdf', file))
     expectFiles.push(expectFile)
     const r: CaseReport = {
       id: c.id, title: c.title, schema: c.schema, synthetic: c.synthetic, file, sha256: createHash('sha256').update(bytes).digest('hex'), bytes: bytes.length, pages,

@@ -61,34 +61,59 @@ interface LoadedGlyph { id: number; codePoints: number[] }
 interface LoadedFont { hasGlyphForCodePoint(cp: number): boolean; glyphForCodePoint(cp: number): LoadedGlyph }
 
 /**
- * CR-DESIGN-2B-R1 (text layer): makes sure every glyph this document prints carries the character it prints.
+ * CR-DESIGN-2B-R1/R2 (text layer): every glyph this document prints carries, while it is written, the character this document prints
+ * with it.
  *
- * fontkit keeps ONE glyph object per glyph id for the life of the process. When a PDF is written, the TrueType subset decodes
- * composite glyphs and creates their component glyphs with no character (Inter's ” and ‚ are built from ’). A later text that
- * prints ’ then receives that cached glyph, so @react-pdf/pdfkit writes an empty ToUnicode entry for it and the word cannot be
- * found, copied or read aloud correctly (the "curly-apostrophe" defect; it depended on what the process had rendered before).
- * Before layout, each printed character's glyph in every registered face is looked up; a glyph left without its character is
- * given it. Nothing about the drawing changes: same glyph, same font, same text; only the text layer is corrected.
- * Returns the number of glyphs repaired (for tests).
+ * fontkit keeps ONE glyph object per glyph id for the life of the process, and @react-pdf/pdfkit writes each glyph's ToUnicode entry
+ * from that object's characters. Two things therefore leak from one render into the next:
+ *   - R1: the TrueType subset creates the COMPONENTS of composite glyphs with no character (Inter's ” and ‚ are built from ’), so a
+ *     later ’ had an empty ToUnicode entry;
+ *   - R2: a font may draw several characters with one glyph (Inter: ’ U+2019 and ʼ U+02BC; Noto: space and no-break space, …). The
+ *     first character ever laid out with that glyph in the process was written for all later ones.
+ * Before layout, each printed character's glyph in every presentation face is given that character. Renders are serialised
+ * (`withPresentationFonts`), so no other document can change the glyphs between this one's priming and its writing. The
+ * presentation faces, including its own fallback family, are used by no other renderer.
+ *
+ * One limit remains, inside a single document: when it prints two characters that share one glyph in the same face, the PDF can name
+ * only one of them for that glyph (one ToUnicode entry per glyph). The character the document prints most often is kept (so a rare
+ * character in a declaration never changes how approved wording reads), and the other is reported in `conflicts`; the drawing is
+ * unaffected. Returns what changed (for tests).
  */
-export async function primeGlyphCharacters(cfg: PresentationConfig, texts: readonly string[]): Promise<number> {
-  const codePoints = [...new Set(texts.flatMap((t) => [...pdfText(t)].map((ch) => ch.codePointAt(0) as number)))]
+export async function primeGlyphCharacters(cfg: PresentationConfig, texts: readonly string[]): Promise<{ assigned: number; conflicts: string[] }> {
+  const counts = new Map<number, number>()
+  for (const t of texts) for (const ch of pdfText(t)) { const cp = ch.codePointAt(0) as number; counts.set(cp, (counts.get(cp) ?? 0) + 1) }
+  // Most frequent first; ties in first-printed order (Map keeps insertion order and the sort is stable).
+  const codePoints = [...counts.keys()].sort((x, y) => counts.get(y)! - counts.get(x)!)
   const faces = [
     ...(['display', 'body', 'mono'] as const).flatMap((r) => cfg.fonts[r].files.map((f) => ({ fontFamily: cfg.fonts[r].family, fontWeight: f.weight }))),
     { fontFamily: cfg.fonts.fallback.family },
   ]
-  let repaired = 0
+  let assigned = 0
+  const conflicts: string[] = []
+  const hex = (cp: number) => `U+${cp.toString(16).toUpperCase().padStart(4, '0')}`
   for (const face of faces) {
     await Font.load(face)
     const font = Font.getFont(face)?.data as unknown as LoadedFont | undefined
     if (!font) throw new PresentationRefusal(`font_not_loaded:${face.fontFamily}`)
+    const owner = new Map<number, number>()
     for (const cp of codePoints) {
       if (!font.hasGlyphForCodePoint(cp)) continue
       const glyph = font.glyphForCodePoint(cp)
-      if (glyph.codePoints.length === 0) { glyph.codePoints = [cp]; repaired++ }
+      const first = owner.get(glyph.id)
+      if (first !== undefined) { if (first !== cp) conflicts.push(`${face.fontFamily}${'fontWeight' in face ? ` ${face.fontWeight}` : ''}: ${hex(cp)} shares a glyph with ${hex(first)}`); continue }
+      owner.set(glyph.id, cp)
+      if (glyph.codePoints.length !== 1 || glyph.codePoints[0] !== cp) { glyph.codePoints = [cp]; assigned++ }
     }
   }
-  return repaired
+  return { assigned, conflicts }
+}
+
+/** Presentation renders, one at a time per process (see `primeGlyphCharacters`). */
+let presentationQueue: Promise<unknown> = Promise.resolve()
+export function withPresentationFonts<T>(work: () => Promise<T>): Promise<T> {
+  const run = presentationQueue.then(work, work)
+  presentationQueue = run.catch(() => undefined)
+  return run
 }
 
 /** The renderer refuses a configuration it does not implement. */

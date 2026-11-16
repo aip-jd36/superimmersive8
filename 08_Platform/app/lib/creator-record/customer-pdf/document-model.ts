@@ -791,6 +791,7 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
         overviewNoOpen: render.overview_no_open, appliesTo: render.caveat_applies_to_label,
         ...(placement !== undefined ? { caveatPlacement: placement } : {}),
         ...(placement === 'group_end' && design?.navigation ? { caveatsPointer: design.navigation.caveats_pointer } : {}),
+        ...(design ? { declaredPlacement: design.config.layout.declared_placement } : {}),
       })
     } catch (err) {
       if (err instanceof ReadinessLayoutRefusal) throw new CustomerPdfRefusal('readiness_layout_refused', err.ref)

@@ -76,3 +76,24 @@ See §7 of the implementation report (limitations of automated visual verificati
   - a wrong stamp;
   - a sentence the record does not contain.
 - The reserved bands come from the configuration, never from the layout pass.
+
+## 7. R2 addendum: the R1 apostrophe correction was incomplete (found and fixed in R2)
+
+While adding the requested regression coverage across sequential and concurrent rendering, R2 found two remaining text-layer hazards in the R1 correction. Both come from the same process-wide glyph cache.
+
+1. **Shared glyphs.** A font may draw several characters with one glyph. In Inter, ’ U+2019 and ʼ U+02BC are one glyph, as are Δ/∆ and Ω/Ω. Noto Sans CJK has 443 such groups, for example space and no-break space, or 〈 U+3008 and 〈 U+2329. The first character ever laid out with that glyph in the process was written into every later PDF's text layer. R1 repaired only glyphs with no character, so one record could still set another record's text layer (for example a ∆ that extracts as Δ). R2 reproduces this in a control: drawn without the correction straight after record A, record B's ∆ title extracts as A's characters.
+2. **Shared fallback object.** The presentation registered its fallback under the legacy renderer's family name. The library resolves weight 400 to the first registered source, so both renderers shared one Noto font object, while bold fallback text used a second object that R1 never primed.
+
+**Fix.**
+- **Per-document mapping.** Before layout, each printed character's glyph in every presentation face is given that character, overwriting whatever another document left (not only filling empty entries).
+- **One render at a time.** Presentation renders are serialised in the process (`withPresentationFonts`), so nothing can change the glyphs between one document's priming and its writing.
+- **Own fallback family.** The presentation has its own fallback family (`SI8 Presentation Fallback`) and shares no font object with the legacy renderer. Legacy v4/v5 output is unchanged (re-rendered and compared).
+
+**Remaining limit (inside one document).** When one document prints two characters that share a glyph in the same face, the PDF can name only one character for that glyph (one ToUnicode entry per glyph). The character printed most often is kept, so approved wording keeps its ’ when a declaration contains ʼ. The other is reported (`conflicts`), and the drawing is unaffected. Removing this limit would need per-span ActualText, which is outside the current rendering stack.
+
+**Regression.** `test-support/cr-design-2b/glyph-isolation.tsx`:
+- 10 sequential and 10 concurrent renders of synthetic records built to share glyphs, each checked from its bytes for exact Unicode text;
+- the uncorrected control, which must fail;
+- the within-document conflict report.
+
+**Follow-up outside this scope (Production, pre-existing, not changed).** The legacy v4/v5 renderer prints Latin text in Helvetica, a standard font that does not go through fontkit. Characters Helvetica lacks are printed from the Noto fallback, which is exposed to the same shared-glyph behaviour, for example U+2003 em space and U+3000 ideographic space. It is rare, but it is real. Correcting it would change the Production renderer, so it is recorded here, not fixed.

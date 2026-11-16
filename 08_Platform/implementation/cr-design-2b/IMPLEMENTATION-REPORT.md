@@ -1,165 +1,144 @@
-# CR-DESIGN-2B — Institutional Trust presentation: implementation report (revised for R1)
+# CR-DESIGN-2B — Institutional Trust presentation: implementation report (revised for R2)
 
 **Status: LOCAL AND INERT — NOT RELEASED, NOT APPROVED.**
 
 - Branch `work/cr-design-2b` (local only; not pushed or merged).
 - Production template approvals (v4/v5), the generator (`creator-record-v2-pdf-v3`) and every issuance path are unchanged.
-- v6/v7 stay **pending**.
-- Awaiting PM/Architecture and founder visual and engineering acceptance. Template approval and release are separate decisions (CR-DESIGN-2C).
+- v6/v7 stay **pending and unregistered**.
+- Awaiting founder and PM/Architecture approval of the final review package. Template approval and release are separate decisions (CR-DESIGN-2C).
 
 **Authority.**
-- Founder decisions FD-1–FD-12 and the PM/Architecture clarifications of the 2B authorisation (2026-11-15), against `08_Platform/implementation/cr-design-2a/`.
-- The PM/Architecture review decision **CR-DESIGN-2B-R1** (2026-11-16): direction and architecture accepted; final acceptance withheld pending the corrections below.
-
-**R1 in one paragraph.** The 2B package was defective in ways its tests did not see:
-- no running footer and no page numbers on any page;
-- overlapping content on P11 page 1;
-- content running into the footer band and a broken index break on P5;
-- a process-dependent apostrophe text-layer fault.
-
-The 2B tests read a separate layout pass, not the PDF. R1 found each root cause on the bytes and fixed it narrowly in the presentation renderer, with no change to the stack, wording, schemas or v1–v5 drawing. It moved every decisive check onto the PDF bytes, including negative controls. Root causes: **`R1-ROOT-CAUSES.md`**.
+- Founder decisions FD-1–FD-12 and the 2B clarifications (2026-11-15).
+- PM/Architecture review **CR-DESIGN-2B-R1** (2026-11-16).
+- PM/Architecture instruction **CR-DESIGN-2B-R2** (2026-11-16), received from the founder for execution. It covers:
+  - acceptance of P1 and P3 together for the P3 criterion;
+  - acceptance of P10 as the customer-path behaviour for unsuccessful readings;
+  - approval to move the "What you told us" panel below the guidance index;
+  - final polish.
 
 ## 1. What was built
 
 | Area | Change | Where |
 |---|---|---|
-| Presentation configuration | Data-only contract `si8/creator-record-pdf-presentation` v1 covering: A4 geometry, tokens, type scale, hash-pinned fonts, chrome (which approved strings run where), registers and layout rules. **R1 changes:** `type.page_label` has no line height; new `layout.label_width`, `sub_indent`, `count_gap`, `index_lead_presence` and `hero_steps`. Fingerprint `75048e7ecaf8c2a7517f6e7aaadbbb7ded3fc7cd64d06f878ffc6a1aca075be7` (2B: `5e050fc1…`) | `lib/creator-record/customer-pdf/presentation/institutional-trust.ts` |
-| Fonts | Unchanged from 2B: static Fraunces and Inter instanced reproducibly from `google/fonts@cc39c4c2`, IBM Plex Mono, OFL licences, Noto Sans CJK TC fallback | `customer-pdf/fonts/` |
-| Template contract | Optional `presentation` and `navigation` fields (v1–v5 do not carry them) | `customer-pdf/templates.ts` |
-| Document model | 2B as before, plus R1: the approved counts close "About" as one `counts` box (same blocks, strings and order; presentation sets only) | `customer-pdf/document-model.ts`, `readiness-layout.ts` (`compactCounts`) |
-| Drawing | Running header = approved `footer`; running footer = approved `stamp`, both complete on every page; stamp again on page 1 (FD-3); navy index; reading-register pages. **R1 changes:** page label as its own fixed text; guarded boxes; cards and the index open with an unbreakable unit; index as a flat run of row units; heading before the index travels with it; adaptive hero size; compact counts row; reading sub-rows aligned to the value column; glyph characters primed before layout | `customer-pdf/InstitutionalTrustPDF.tsx`, `ReadingLayoutView.tsx`, `CustomerRecordPDF.tsx` |
-| Proposed templates | **v6** (schema 7) `a38ac64f83e0e9fbc7734784060f3d71b9bed51b98190f5c041164cd51fb4e8d`; **v7** (schema 8) `9810d5c94c6a5719905874e1ac29c661118cecab6996ea678fd5f5ff7b0719f0`. Still v4/v5 verbatim plus `version`, `presentation` and `navigation` only. They changed only because the presentation fingerprint changed. Lifecycle `pending`, no authority, registered nowhere | `governed/proposals/CR-PDF-TEMPLATES-v{6,7}-*.proposal.json` |
+| Presentation configuration | Data-only contract `si8/creator-record-pdf-presentation` v1: A4 geometry, tokens, type scale, hash-pinned fonts, chrome, registers and layout rules. **R2 changes:** `layout.declared_placement: 'after_index'`; the fallback family renamed to `SI8 Presentation Fallback` (own family, §3). Fingerprint `aa50507b4f76e8168744d88645220735e8b7820577e7be72e19c83dbedc017db` (R1 `75048e7e…`, 2B `5e050fc1…`) | `lib/creator-record/customer-pdf/presentation/institutional-trust.ts` |
+| Placement | 2B: C5 caveat placement, C-3 pointer, C-1 heading, declared-title copy. R1: compact counts. **R2:** the same "What you told us" panel is placed after the guidance index and its open-matter lists when there is an index, and stays at the start of the overview when there is none (`declaredPlacement`). Same blocks, printed once; v1–v5 untouched | `customer-pdf/readiness-layout.ts`, `document-model.ts` |
+| Drawing | 2B and R1 as reported (complete chrome on every page, guarded boxes, unbreakable opening units, index row units, adaptive hero, counts row, aligned reading sub-rows). **R2:** glyph characters assigned per document; presentation renders serialised | `customer-pdf/InstitutionalTrustPDF.tsx`, `ReadingLayoutView.tsx`, `CustomerRecordPDF.tsx` |
+| Proposed templates | **v6** (schema 7) `a0cd0c248ce270d2826712910aa606579ce429f7923b051d68a0502c5305f476`; **v7** (schema 8) `5d7ccfc8ce824e57f6e904d51f1027b59e43ab250a7f4895b0f804debe1761ab`. Still v4/v5 verbatim plus `version`, `presentation` and `navigation` only; changed only through the presentation fingerprint. Lifecycle `pending`, authority `null`, registered nowhere (`governed/sources.ts` does not reference them) | `governed/proposals/CR-PDF-TEMPLATES-v{6,7}-*.proposal.json` |
 
-## 2. R1 corrections (requirement → result)
+## 2. R2 scope (requirement → result)
 
-| R1 requirement | Result (verified on the PDF bytes, all 13 cases) |
+| R2 requirement | Result |
 |---|---|
-| Complete stamp and footer on every page | Both are extractable on all 80 pages, inside their reserved bands |
-| Accurate visible page numbering | "Page N of M" is extractable and correct on every page, in the footer band; no other page number appears |
-| No overlapping, clipped or obscured content | No overlapping text lines; no text covered by a later-drawn shape; no text off the page |
-| Content kept out of the reserved regions | No glyph outside the content region; at 2× raster, the bands hold only the page ground |
-| No inappropriate splitting of navigation rows | Each index row is unbreakable; a subject heading travels with its first row; the heading run before the index travels with it |
-| Curly-apostrophe search and extraction | Every word containing a non-ASCII character is found by PDF search, and every printed string extracts in order. Approved wording is unchanged |
-| First-page guidance visibility | Page 1 gains space from the compact counts row (about 30 pt) and the adaptive hero (P11: 5 title lines become 4). See §5 for the placement evaluation |
-| Compact counts | One counts row (same approved sentences) instead of three or four paragraphs |
-| Adaptive title typography | 25 pt; 21 pt from 64 characters; 17.5 pt from 120 (CJK counted twice) |
-| Index pagination | Breaks only between rows; never starts as an empty strip at a page foot |
-| Whitespace | No empty index strip. Remaining items are listed in §6 |
-| Reading detail rows | Sub-row labels are indented; values align with the reading's value column |
+| 1. "What you told us" below the guidance index | Done in every case with an index (11 of 13). P8 and P9 have neither an index nor this panel. The introductory disclosures, approved wording, applicability qualifications and consideration order are unchanged; the block multiset equals v4/v5. Test: panel after index (v6/v7), before it (v4/v5) |
+| 2. Guidance index on page 1 for ordinary records | **On page 1 in every schema 7 case with an index (P1, P2, P5, P6, P7, P12, P13)**; it now starts directly after the section 2 introduction. Not forced for the schema 8 records with document readings (P3, P4, P10, P11): their "About" section carries the reading paragraph and leaves 77–130 pt against the ~130 pt the heading and first index row need, so the index starts at the top of page 2 |
+| 3. Avoidable whitespace | Reviewed; see §5. Page totals 80 → 79 (P5 6 → 5, P13 8 → 7, P3 7 → 8). No pagination logic added |
+| 4. Glyph-character regression, sequential and concurrent | Added, and it found the R1 correction incomplete; fixed (§3). 10 sequential and 10 concurrent renders in one process keep exact Unicode text; the uncorrected control fails as it must |
+| 5. Repeat all checks | All repeated and passing (§8) |
+| 6. Final package | `C:\Users\User\SI8-review\cr-design-2b-r2-2026-11-16\` and its ZIP |
 
-## 3. Clarifications 1–7 (2B, re-verified)
+## 3. Glyph-character correction, completed in R2
 
-1. **Caveat relocation:** C5 only. The block multiset, consolidations and consideration order are identical to v4/v5.
-2. **Long content** breaks between parts or lines. Nothing is clipped, and no view is oversized (react-pdf warnings: 0).
-3. **D10** is unchanged. Readings print only in section 6; the `readiness_layout_refused` guards still refuse.
-4. **Navigation copies** are recorded and excluded exactly. The counts row changes placement only, not blocks.
-5. **Configuration consumed:** all 181 leaves are read while building and rendering (tracked across P4, P5, P10 and P11).
-6. **Not reachable from Production:** `approvedPdfTemplates` returns v4/v5, `sources.ts` does not reference v6/v7, and the generator is unchanged.
-7. **Drain gate:** untouched.
+Details are in `R1-ROOT-CAUSES.md` §7. In short, the process-wide glyph cache had two more effects:
+
+- **Shared glyphs.** A font may draw several characters with one glyph (Inter: ’ and ʼ, Δ and ∆, Ω and Ω; Noto: 443 groups). The first character laid out in the process was written into every later PDF's text layer.
+- **Shared fallback object.** The presentation's fallback shared the legacy renderer's font object.
+
+Fixes:
+- Each document now assigns its own characters to the glyphs it prints.
+- Presentation renders are serialised.
+- The presentation has its own fallback family.
+
+**Remaining limit, inside one document only.** Two characters that share a glyph cannot both be named in the PDF's text layer. The more frequent one is kept (approved wording keeps its ’), the other is reported, and the drawing is unaffected.
+
+**Out of scope.** A pre-existing follow-up for the legacy Production renderer's Noto fallback is recorded, not changed.
 
 ## 4. Review PDFs (generated by the real renderer)
 
-**Location:** `C:\Users\User\SI8-review\cr-design-2b-r1-2026-11-16\`
+**Location:** `C:\Users\User\SI8-review\cr-design-2b-r2-2026-11-16\`
 
 | Item | Contents |
 |---|---|
-| `pdf/` | 13 PDFs, each with its printed strings (`.texts.json`) and byte-check expectations (`.expect.json`) |
-| `png/` | Every page in colour and greyscale, 110 dpi |
-| `current-v4-v5-for-comparison/` | The same records rendered with today's v4/v5 templates |
+| `pdf/` | 13 PDFs, each with `.texts.json` and `.expect.json` |
+| `png/` | Colour and greyscale, 110 dpi |
+| `current-v4-v5-for-comparison/` | The same records under today's v4/v5 sets |
 | `report.json`, `acceptance-checks.json` | Byte-check and acceptance results |
-| `negative/` | The deliberately broken controls |
-| Documentation | Package README, root causes and this report |
+| `negative/` | Negative controls |
+| `glyph-isolation/` and `glyph-isolation.json` | Sequential, concurrent and control renders with their byte checks |
+| Documentation | README, root causes and this report |
 
-The 2B folders are superseded.
+Earlier 2B and R1 folders are superseded.
 
-| Case | Content | Schema | Pages (2B → R1) |
-|---|---|---|---|
-| P1 | No documents, Runway guidance | 7 | 5 → 5 |
-| P2 | Documents inventoried, not examined | 7 | 5 → 5 |
-| P3 | One reading and one document not read (substitute, §8) | 8 | 8 → 7 |
-| P4 | Reading with plan-name qualifier, AI-addressed text, creator response | 8 | 8 → 8 |
-| P5 | Runway + Higgsfield; shared caveats | 7 | 5 → 6 |
-| P6 | Unresolved applicability | 7 | 5 → 5 |
-| P7 | Uncovered source (Artlist) | 7 | 5 → 5 |
-| P8 | Unidentified provider | 7 | 4 → 4 |
-| P9 | Zero selected guidance | 7 | 4 → 4 |
-| P10 | Four documents (two read, one not read after a failed attempt, one not read) | 8 | 10 → 10 |
-| P11 | Long title, maximum-length file name, digests | 8 | 8 → 8 |
-| P12 | Traditional Chinese, Japanese, Korean and Vietnamese title | 7 | 5 → 5 |
-| P13 | Topic-qualified subject, unspecified conditions | 7 | 8 → 8 |
-
-P5 gained a page because its index now moves whole to page 2 with its heading, instead of overflowing page 1 into the footer band.
+| Case | Content | Schema | Pages (R1 → R2) | Index starts on |
+|---|---|---|---|---|
+| P1 | No documents, Runway guidance | 7 | 5 → 5 | page 1 |
+| P2 | Documents inventoried, not examined | 7 | 5 → 5 | page 1 |
+| P3 | One reading and one document not read | 8 | 7 → 8 | page 2 |
+| P4 | Reading with plan-name qualifier, AI-addressed text, creator response | 8 | 8 → 8 | page 2 |
+| P5 | Runway + Higgsfield; shared caveats | 7 | 6 → 5 | page 1 (second row on page 2) |
+| P6 | Unresolved applicability | 7 | 5 → 5 | page 1 |
+| P7 | Uncovered source (Artlist) | 7 | 5 → 5 | page 1 |
+| P8 | Unidentified provider (no index) | 7 | 4 → 4 | — |
+| P9 | Zero selected guidance (no index) | 7 | 4 → 4 | — |
+| P10 | Four documents | 8 | 10 → 10 | page 2 |
+| P11 | Long title, long file name, digests | 8 | 8 → 8 | page 2 |
+| P12 | Traditional Chinese, Japanese, Korean, Vietnamese title | 7 | 5 → 5 | page 1 |
+| P13 | Topic-qualified subject, unspecified conditions | 7 | 8 → 7 | page 1 |
 
 **Every case:**
-- exact print;
-- complete footer and stamp on every page;
-- correct page labels;
+- exact print; complete footer and stamp, and correct page labels, on every page;
 - no orphan headings and no oversized views;
 - same blocks as v4/v5;
-- byte check passed.
+- PDF-bytes check passed (disclosures, numbering, bounds, overlap, obscured text, reserved bands, in-order text, search).
 
-**Approved v4/v5 output is unchanged.** I re-rendered all 13 records with today's v4/v5 sets on this code and compared each page's raster and extracted text with the 2B comparison PDFs:
-- 9 schema-7 records are identical;
-- 4 schema-8 records differ only on the "Answers fingerprint" line, a value the synthetic fixture regenerates on each build.
+**Approved v4/v5 output is unchanged.** I re-rendered all 13 and compared every page's raster and text with the R1 comparison PDFs:
+- 9 are identical;
+- 4 differ only on the "Answers fingerprint" line, a value the synthetic fixture regenerates on each build.
 
-## 5. Placement evaluation (R1 §3)
+## 5. Whitespace review
 
-**Question asked:** can an approved placement adjustment bring the guidance overview earlier without weakening disclosures or separating qualifications?
+- **Improved by the panel move:**
+  - P5 and P13 each lose a page;
+  - page 1 now ends with the guidance index instead of a part-empty page.
+- **P3 gains a page.** Its index cannot fit on page 1 either way, and with the panel now following the index on page 2, section 5 no longer fits before the reading register. That register must start its own page, so section 5 sits alone on page 4. Keeping the panel above the index only when the index misses page 1 would be pagination-dependent logic, which R2 excludes.
+- **Declaration spillover pages before the reading register** (P3 and P4 page 4: section 5 alone) follow from preserving the separate reading register. The previous page ends with 14–38 pt free, and section 5 needs about 170 pt. No straightforward change removes them without compressing type or adding pagination logic.
+- **Final pages** (for example P1 page 5, the end of "How this record was made") are the record's natural end.
+- **Split cards** still end at the page foot (@react-pdf split behaviour), as reported in R1.
 
-**Measurement:**
-- The index with its heading needs about 140 pt for one row.
-- Single-consideration records (P1, P2, P7) leave 116 pt on page 1 after "What you told us".
+## 6. Limitations of automated visual verification
 
-**Options:**
-- **Closing the gap by compressing page 1.** This would mean tightening the identity block or the page-1 disclosure panel. Not done: it would weaken the disclosures.
-- **Moving the "What you told us" panel below the index.** The index would then fit on page 1 in those records. This is a change to approved placement, so it is **not implemented** and is offered for decision.
-- **Moving the index above "About this record".** Rejected: the disclosures that frame the guidance would come after it.
+- **Geometry, not quality.** Text checks see text lines and glyph boxes, not visual quality. Lines that only touch are tolerated, and a partly covered glyph is caught only if its centre is covered.
+- **Reserved bands only.** The raster check covers the reserved header and footer bands. It cannot judge balance, whitespace or hierarchy.
+- **Search scope.** Search probes are words with non-ASCII characters and CJK pairs. Pure-ASCII words are covered by the in-order text check.
+- **One reader, no tagging.** The checks use one reader (MuPDF). Other viewers and screen readers were not tested, and the PDF is not tagged (PDF/UA out of scope).
+- **Isolation coverage.** The isolation regression covers the shared-glyph pairs chosen for it and the composite hazard. It shows the mechanism is controlled; it cannot enumerate every character pair a creator might type.
 
-## 6. Visual notes for the reviewers
+## 7. Physical print checks requiring operator action
 
-- When a long card continues on the next page, its first part is drawn to the page foot. That is @react-pdf's split behaviour, so a card can end in up to about 40 pt of empty card. There is no "(continued)" header (deferred, as in 2B).
-- P10: Document 4 moves to its own page (it needs about 174 pt; about 90 pt remain). The reading-register section then ends and the warm register resumes on a new page, as designed.
-- The CJK title prints in the fallback face beside Fraunces (expected).
+Print on A4, and on US Letter with "fit to page":
+1. **Footer and stamp.** They print legibly (7.4–7.5 pt) and are not cut off by the printer's margin. The footer sits 20 pt (about 7 mm) from the page edge.
+2. **Navy index.** It prints solid without banding, and its light text stays readable, including the index now on page 1.
+3. **Light backgrounds.** The cool reading-register ground and the warm paper ground print as intended or drop out cleanly.
+4. **Greyscale printing.** The accents, open-matter boxes and caveat panels stay distinguishable.
+5. **CJK and Vietnamese title (P12).** It prints with all marks.
 
-## 7. Limitations of automated visual verification
-
-- **Geometry, not quality.**
-  - Text checks see text lines and their glyph boxes (font ascent and descent), not how the text looks.
-  - Lines that only touch are tolerated, and a partly covered glyph is caught only if its centre is covered.
-- **Reserved bands only.** The raster check is limited to the reserved header and footer bands. It cannot judge balance, whitespace, hierarchy or whether a page looks finished.
-- **Search scope.** Search probes are words containing non-ASCII characters and CJK pairs. Pure-ASCII words are covered by the in-order text check, not by search.
-- **One reader.** The checks use one reader (MuPDF). Other viewers' text extraction and copy behaviour (Acrobat, Preview, Chrome) and screen readers were not tested. The PDF is not tagged (PDF/UA remains out of scope).
-- **No print check.** On-screen rendering does not verify print. See §9.
-
-## 8. P3 and failed-reading fixtures, reconciled with the acceptance criteria (`cr-design-2a/05`, §2)
-
-- **P3** was specified as "Schema 8, no documents". That state cannot be produced: a record without a reading is always schema 7. The schema 8 "no documents" wording is therefore covered by the schema 7 cases:
-  - P1 prints "You did not add any documents.";
-  - P3 is the nearest real schema 8 record (one reading, one document not read).
-
-  No impossible state was fabricated to satisfy the criterion. **Decision requested:** accept P1 together with P3 as meeting the P3 criterion.
-- **P10** was specified to include "one that could not be read (failure label)". A failed live reading is never carried into an issued record, so its failure label cannot print. P10 shows such a document as "Not examined". The failure label is printed only for replayed readings, which the customer path does not produce. No such record was fabricated. **Decision requested:** accept P10 as meeting this criterion, or remove the failure-label sub-criterion.
-
-## 9. Physical print checks requiring operator action
-
-These need a person and a printer, ideally on A4 and on US Letter with "fit to page":
-1. **Footer and stamp.** The footer and stamp print legibly (7.4–7.5 pt) and are not cut off by the printer's unprintable margin. The footer sits 20 pt (about 7 mm) from the page edge.
-2. **Navy index.** It prints solid without banding, and its light text stays readable. Also check toner use.
-3. **Light backgrounds.** The cool reading-register ground and the warm paper ground either print as intended or drop out cleanly; text on both stays readable.
-4. **Greyscale printing.** The gold and navy accents, the open-matter boxes and the caveat panels stay distinguishable.
-5. **CJK and Vietnamese title (P12).** It prints with all marks intact.
-
-## 10. Build and test results
+## 8. Build and test results
 
 | Check | Result |
 |---|---|
-| `__tests__/creator-record/cr-design-2b.test.ts` | **30 tests**, all passing |
-| R1 additions to that file | byte-level checks for every case, search probes, the negative controls, the compact-counts placement |
-| `customer-pdf.test.ts` | passing |
-| Full suite | **24 failing suites / 89 failing tests**, the same failing set as the recorded baseline (compared test by test; no new failures); 9,791 passing |
+| `__tests__/creator-record/cr-design-2b.test.ts` | all passing |
+| R2 additions to that file | panel-after-index placement; glyph isolation: sequential, concurrent, uncorrected control, within-document conflict report |
+| PDF-related suites (`cr-design-2b`, `customer-pdf`, `customer-pdf-schema8`, `readiness-summary`) | 165 tests passing |
+| Full suite | **24 failing suites / 89 failing tests**, the same failing set as the recorded baseline (compared test by test; no new failures); 9,796 passing |
 | `tsc --noEmit` | clean |
 | `scripts/customer-wording-check.js` | exit 0 |
-| `next build` | **exit 0**, run with inert placeholder environment values, as before; a build without them fails on an unrelated route's Supabase client |
+| `next build` | **exit 0** (inert placeholder environment values, as before) |
 | Font packaging and tracing | all 9 font files are traced and present for each of the four issuing routes |
+| Byte-level checks (13 cases) | passing |
+| Negative controls (intrusion, wrong page count, wrong stamp, missing text) | all rejected by the verifier |
+| Configuration consumption | all 182 configuration leaves read |
+| Refusals | the font-hash and `text_unsupported` refusals still refuse |
 
-The byte checks need Python 3 with PyMuPDF (`verify_pdf_bytes.py`). A local build is not a deployment.
+## 9. Acceptance-criteria reconciliation (decided in R2)
+
+- **P3.** P1 and P3 together satisfy the revised P3 criterion: a schema 8 record without documents cannot exist.
+- **P10.** P10 represents the customer-path behaviour for unsuccessful readings: shown as "Not examined". The replay-only failure-label path and its protections are unchanged.

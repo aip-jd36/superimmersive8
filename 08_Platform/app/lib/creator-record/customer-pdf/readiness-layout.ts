@@ -107,6 +107,12 @@ export interface ReadinessLayoutWording {
    * applies to (and only those), where the panel is printed below it. Never a copy of caveat text.
    */
   caveatsPointer?: string
+  /**
+   * CR-DESIGN-2B-R2 (PM/founder decision, 2026-11-16). Absent or 'before_index': the "What you told us" panel opens the overview,
+   * exactly as before. 'after_index': the SAME panel (same blocks, printed once) follows the guidance index and its open-matter
+   * lists, when there is an index; with no index it stays where it was. Nothing else moves.
+   */
+  declaredPlacement?: 'before_index' | 'after_index'
 }
 
 export function readinessLayout(sources: readonly PlacedSource[], summary: ReadinessSummary, wording: ReadinessLayoutWording): SectionLayout {
@@ -114,6 +120,8 @@ export function readinessLayout(sources: readonly PlacedSource[], summary: Readi
   const caveatPlacement = wording.caveatPlacement ?? 'overview'
   if (caveatPlacement !== 'overview' && caveatPlacement !== 'group_end') throw new ReadinessLayoutRefusal(`caveat placement ${String(caveatPlacement)}`)
   if (wording.caveatsPointer !== undefined && caveatPlacement !== 'group_end') throw new ReadinessLayoutRefusal('caveat pointer without group-end placement')
+  const declaredPlacement = wording.declaredPlacement ?? 'before_index'
+  if (declaredPlacement !== 'before_index' && declaredPlacement !== 'after_index') throw new ReadinessLayoutRefusal(`declared placement ${String(declaredPlacement)}`)
   const a = sources
   const out = new Builder()
   const printedAt = new Map<number, number>()
@@ -181,7 +189,10 @@ export function readinessLayout(sources: readonly PlacedSource[], summary: Readi
   // ── A. Understand: overview ──
   const overview: LayoutNode[] = []
   overview.push(box('keep', header.map((i) => show(i, a[i].block.kind === 'heading' ? 'h1' : 'lead'))))
-  if (declared.length > 0) overview.push(box('panel', declared.map((i) => show(i, a[i].block.kind === 'row' ? 'row' : 'h2'))))
+  // Blocks are printed in the order they are placed, so the panel is placed (not only pushed) where it prints.
+  const showDeclared = (): LayoutNode => box('panel', declared.map((i) => show(i, a[i].block.kind === 'row' ? 'row' : 'h2')))
+  const declaredAfterIndex = declaredPlacement === 'after_index' && groups.some((g) => g.cs.length > 0)
+  if (declared.length > 0 && !declaredAfterIndex) overview.push(showDeclared())
   overview.push(box('keep', uHead.map((i) => show(i, a[i].block.kind === 'subheading' ? 'h2' : 'fine'))))
   // CR-PDF-REVIEW-2: an open fact is identified by the record's own fact type and tool; the considerations it is open for.
   const factKey = (x: { fact: string; tool: string | null }) => `${x.fact}\u0000${x.tool ?? ''}`
@@ -230,6 +241,7 @@ export function readinessLayout(sources: readonly PlacedSource[], summary: Readi
   }
   if (mapRowCount > 0) overview.push(box('map', mapNodes))
   for (const L of lists.filter((x) => x.loose.length > 0)) overview.push(box('keep', [show(L.label, 'eyebrow'), ...L.loose.map((i) => show(i, 'bullet'))]))
+  if (declared.length > 0 && declaredAfterIndex) overview.push(showDeclared())
   const showCaveatPanel = (): LayoutNode => box('panel', caveatPanel.map((i) => show(i, a[i].role === 'caveat' ? 'bullet' : a[i].block.kind === 'row' ? 'compact' : 'eyebrow')))
   if (caveatPanel.length > 0 && caveatPlacement === 'overview') overview.push(showCaveatPanel())
   // CR-DESIGN-2B (C5): the considerations the panel applies to, from the renderer's own `applies_to` references (never by label).

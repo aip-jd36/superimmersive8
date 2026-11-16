@@ -212,10 +212,57 @@ describe('rendered with the real entry point (clarifications 2 and 5)', () => {
     expect(out.reports.reduce((n, r) => n + r.bytes_check!.probes_checked, 0)).toBeGreaterThan(13)
     expect(out.reports.find((r) => r.id === 'P12')!.bytes_check!.probes_checked).toBeGreaterThan(5)
   })
+  test('R2: the "What you told us" panel follows the guidance index where there is one, and keeps its place where there is none', () => {
+    for (const c of CASES) {
+      const m = model(c)
+      const r = m.sections.find((s) => s.id === 'readiness_summary')!
+      const panel = r.layout!.findIndex((n) => n.kind === 'box' && n.box === 'panel' && n.children[0]?.kind === 'block' && (r.blocks[n.children[0].index] as { text?: string }).text === 'What you told us')
+      const index = r.layout!.findIndex((n) => n.kind === 'box' && n.box === 'map')
+      if (panel < 0) continue
+      if (index >= 0) expect([c.id, panel > index]).toEqual([c.id, true])
+      const legacy = model(c, approvedSet(c.schema)).sections.find((s) => s.id === 'readiness_summary')!
+      const legacyPanel = legacy.layout!.findIndex((n) => n.kind === 'box' && n.box === 'panel')
+      const legacyIndex = legacy.layout!.findIndex((n) => n.kind === 'box' && n.box === 'map')
+      if (legacyIndex >= 0) expect(legacyPanel).toBeLessThan(legacyIndex)
+    }
+  })
   test('the byte verifier detects intrusion into the reserved bands, a wrong page count, a wrong disclosure and missing text', () => {
     expect(out.negative.intrusion.join('\n')).toMatch(/outside the content region|non-background pixels/)
     expect(out.negative.wrong_page_count.join('\n')).toMatch(/page label 'Page 1 of 99' not found/)
     expect(out.negative.wrong_stamp.join('\n')).toMatch(/running stamp not extractable/)
     expect(out.negative.wrong_text.join('\n')).toMatch(/printed strings not extractable/)
+  })
+})
+
+/**
+ * CR-DESIGN-2B-R2: the glyph-character correction across sequential and concurrent generation in one process. Synthetic records share
+ * glyphs (Inter Δ/∆, Ω/Ω; Noto 〈/〈); every PDF's exact Unicode text is checked from its bytes.
+ */
+describe('text layer: one record never contaminates another (sequential and concurrent, one process)', () => {
+  type Render = { run: string; record: string; ok: boolean; failures: string[]; title_in_model: boolean }
+  let iso: { titles: Record<string, string>; renders: Render[]; conflict: { assigned: number; conflicts: string[] }; error?: string }
+  beforeAll(() => {
+    const dir = mkdtempSync(join(tmpdir(), 'cr-design-2b-iso-'))
+    iso = JSON.parse(execFileSync(process.execPath, [join(process.cwd(), 'node_modules', 'tsx', 'dist', 'cli.mjs'), '--tsconfig', 'tsconfig.json', join('test-support', 'cr-design-2b', 'glyph-isolation.tsx'), dir], { cwd: process.cwd(), encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }))
+  })
+  test('every record keeps its exact Unicode text, rendered one after another', () => {
+    const seq = iso.renders.filter((r) => r.run === 'sequential')
+    expect(seq.length).toBe(10)
+    expect(seq.every((r) => r.title_in_model)).toBe(true)
+    expect(seq.flatMap((r) => r.failures.map((f) => `${r.record} ${f}`))).toEqual([])
+  })
+  test('every record keeps its exact Unicode text, rendered concurrently', () => {
+    const conc = iso.renders.filter((r) => r.run === 'concurrent')
+    expect(conc.length).toBe(10)
+    expect(conc.flatMap((r) => r.failures.map((f) => `${r.record} ${f}`))).toEqual([])
+  })
+  test('control: drawn without the correction, a record takes the previous record\'s characters (the check sees it)', () => {
+    const control = iso.renders.filter((r) => r.run === 'control-uncorrected')
+    expect(control).toHaveLength(1)
+    expect(control[0].ok).toBe(false)
+    expect(control[0].failures.join('\n')).toContain(iso.titles.B)
+  })
+  test('within one document, two characters sharing a glyph are reported; approved wording keeps its character', () => {
+    expect(iso.conflict.conflicts).toContain('SI8 Inter 400: U+02BC shares a glyph with U+2019')
   })
 })

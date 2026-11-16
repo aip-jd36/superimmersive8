@@ -46,8 +46,11 @@ export const INSTITUTIONAL_TRUST_PRESENTATION = {
         { weight: 500, file: 'IBMPlexMono-500.ttf', sha256: 'a9b4c49bb299e05b5f6c481e7fb5e78943d2793249a0c8874ab574a2d1ea6755' },
       ],
     },
-    /** Every family stack ends with this font: characters the design faces lack (CJK, kana, Hangul, …) print from it. */
-    fallback: { family: 'SI8 Customer Record Fallback', file: 'NotoSansCJKtc-Regular.otf', sha256: 'dce08bd4fd91aa8aa76ed8fea4b694c2dfb8550f67871e326843212ddbeb88b4' },
+    /**
+     * Every family stack ends with this font: characters the design faces lack (CJK, kana, Hangul, …) print from it. Its own family
+     * name (R2): the legacy renderer's fallback family is never shared, so the two renderers never share font objects.
+     */
+    fallback: { family: 'SI8 Presentation Fallback', file: 'NotoSansCJKtc-Regular.otf', sha256: 'dce08bd4fd91aa8aa76ed8fea4b694c2dfb8550f67871e326843212ddbeb88b4' },
   },
   colors: {
     paper: '#F7F5EF', paper_raised: '#FDFCF9', ink: '#1C1C1E', ink_strong: '#182C48', ink_secondary: '#3c434e', ink_muted: '#565f6b', ink_fine: '#5f6670',
@@ -95,6 +98,8 @@ export const INSTITUTIONAL_TRUST_PRESENTATION = {
   layout: {
     /** CR-DESIGN-2A contract C5: the shared caveat panel sits at the end of the provider group it applies to. */
     caveat_placement: 'group_end',
+    /** CR-DESIGN-2B-R2 (approved 2026-11-16): the "What you told us" panel follows the guidance index (where there is one). */
+    declared_placement: 'after_index',
     /** A consideration at most this long (characters) is kept whole on one page; a longer one breaks between its parts. */
     consideration_keep_chars: 650,
     /** C4: a consideration's open matters never start a page apart from the end of its guidance. */
