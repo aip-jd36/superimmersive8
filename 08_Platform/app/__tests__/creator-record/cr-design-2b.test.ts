@@ -14,6 +14,7 @@ import { approvedPdfTemplates } from '@/lib/creator-record/customer-flow/approve
 import { buildCustomerDocument, CustomerPdfRefusal, type CustomerDocumentModel } from '@/lib/creator-record/customer-pdf/document-model'
 import { INSTITUTIONAL_TRUST_PRESENTATION, presentationFingerprint, type PresentationConfig } from '@/lib/creator-record/customer-pdf/presentation/institutional-trust'
 import { templateFingerprint } from '@/lib/creator-record/customer-pdf/templates'
+import { createRenderQueue, PRESENTATION_RENDER_HOLD_MS } from '@/lib/creator-record/customer-pdf/presentation/render-queue'
 import { CREATOR_RECORD_V2_GENERATOR_VERSION } from '@/lib/creator-record-artifacts/renderers'
 import { CUTOVER_VERSIONS, registeredPdfTemplateSet } from '@/test-support/registered-template-sets'
 import { CAVEATS_POINTER, CONTENTS_HEADING, proposalDiff, proposalFileContent, readProposal, syntheticallyApproved2B } from '@/test-support/cr-design-2b/proposed-sets'
@@ -231,6 +232,63 @@ describe('rendered with the real entry point (clarifications 2 and 5)', () => {
     expect(out.negative.wrong_page_count.join('\n')).toMatch(/page label 'Page 1 of 99' not found/)
     expect(out.negative.wrong_stamp.join('\n')).toMatch(/running stamp not extractable/)
     expect(out.negative.wrong_text.join('\n')).toMatch(/printed strings not extractable/)
+  })
+})
+
+/** CR-DESIGN-2C (task 4): presentation renders are serialised, and nothing can hold the queue for good. */
+describe('presentation render queue', () => {
+  const delay = (ms: number) => new Promise((r) => setTimeout(r, ms))
+  test('runs one render at a time, in arrival order', async () => {
+    const q = createRenderQueue(10_000)
+    const log: string[] = []
+    let active = 0
+    let maxActive = 0
+    const job = (id: string, ms: number) => q.run(async () => { active++; maxActive = Math.max(maxActive, active); log.push(`start ${id}`); await delay(ms); log.push(`end ${id}`); active--; return id })
+    expect(await Promise.all([job('a', 30), job('b', 5), job('c', 15)])).toEqual(['a', 'b', 'c'])
+    expect(maxActive).toBe(1)
+    expect(log).toEqual(['start a', 'end a', 'start b', 'end b', 'start c', 'end c'])
+    expect(q.depth).toBe(0)
+  })
+  test('a failed render (rejected or thrown) releases the next one at once, and its error reaches its caller', async () => {
+    const q = createRenderQueue(10_000)
+    const rejected = q.run(async () => { throw new Error('render failed') })
+    const thrown = q.run((() => { throw new Error('thrown synchronously') }) as () => Promise<never>)
+    const t0 = Date.now()
+    const next = q.run(async () => 'next')
+    await expect(rejected).rejects.toThrow('render failed')
+    await expect(thrown).rejects.toThrow('thrown synchronously')
+    await expect(next).resolves.toBe('next')
+    expect(Date.now() - t0).toBeLessThan(1_000)
+  })
+  test('a render that never settles releases the next one after the hold, not never', async () => {
+    const q = createRenderQueue(100)
+    void q.run(() => new Promise<never>(() => {}))
+    const t0 = Date.now()
+    await expect(q.run(async () => 'after hold')).resolves.toBe('after hold')
+    const waited = Date.now() - t0
+    expect(waited).toBeGreaterThanOrEqual(90)
+    expect(waited).toBeLessThan(2_000)
+  })
+  test('the process queue is bounded below the issuing routes\' 60 s limit', () => {
+    expect(PRESENTATION_RENDER_HOLD_MS).toBeGreaterThan(0)
+    expect(PRESENTATION_RENDER_HOLD_MS).toBeLessThan(60_000)
+  })
+  test('every redesigned render goes through the serialised, primed path (single entry point)', () => {
+    const dir = join(__dirname, '../../lib/creator-record/customer-pdf')
+    const entry = readFileSync(join(dir, 'CustomerRecordPDF.tsx'), 'utf8')
+    // The presentation component is drawn in exactly one place, inside `withPresentationFonts`, after `primeGlyphCharacters`.
+    const draws = entry.match(/<InstitutionalTrustPDF\b/g) ?? []
+    expect(draws).toHaveLength(1)
+    const body = entry.slice(entry.indexOf('async function renderPresentation'))
+    expect(body.indexOf('withPresentationFonts(')).toBeGreaterThan(-1)
+    expect(body.indexOf('withPresentationFonts(')).toBeLessThan(body.indexOf('primeGlyphCharacters('))
+    expect(body.indexOf('primeGlyphCharacters(')).toBeLessThan(body.indexOf('<InstitutionalTrustPDF'))
+    // A model with a presentation is never drawn by the legacy component.
+    expect(entry).toMatch(/if \(model\.design\) return renderPresentation\(/)
+    // No other application module imports the presentation renderer.
+    const { execFileSync: run } = require('node:child_process') as typeof import('node:child_process')
+    const hits = run('git', ['grep', '--untracked', '-l', '-E', "from ['\"][^'\"]*InstitutionalTrustPDF['\"]", '--', 'lib', 'app', 'components'], { cwd: join(__dirname, '../..'), encoding: 'utf8' }).split('\n').filter(Boolean)
+    expect(hits).toEqual(['lib/creator-record/customer-pdf/CustomerRecordPDF.tsx'])
   })
 })
 

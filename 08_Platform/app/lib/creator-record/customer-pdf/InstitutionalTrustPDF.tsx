@@ -17,6 +17,7 @@ import React from 'react'
 import { Document, Font, Page, StyleSheet, Text, View, type TextProps } from '@react-pdf/renderer'
 import type { CustomerDocumentModel, CustomerDocumentSection } from './document-model'
 import type { PresentationConfig } from './presentation/institutional-trust'
+import { presentationRenderQueue } from './presentation/render-queue'
 import { ReadingSection, type ReadingOptions, type ReadingStyles } from './ReadingLayoutView'
 import { lineBreakOpportunities, pdfText } from './text-layout'
 
@@ -108,12 +109,12 @@ export async function primeGlyphCharacters(cfg: PresentationConfig, texts: reado
   return { assigned, conflicts }
 }
 
-/** Presentation renders, one at a time per process (see `primeGlyphCharacters`). */
-let presentationQueue: Promise<unknown> = Promise.resolve()
+/**
+ * Presentation renders, one at a time per process (see `primeGlyphCharacters`). A failed render releases the next one at once; a
+ * render that never settles releases it after `PRESENTATION_RENDER_HOLD_MS` (`./presentation/render-queue`).
+ */
 export function withPresentationFonts<T>(work: () => Promise<T>): Promise<T> {
-  const run = presentationQueue.then(work, work)
-  presentationQueue = run.catch(() => undefined)
-  return run
+  return presentationRenderQueue.run(work)
 }
 
 /** The renderer refuses a configuration it does not implement. */

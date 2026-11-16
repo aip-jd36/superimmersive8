@@ -675,6 +675,8 @@ describe('rendering boundary', () => {
       // CR-DESIGN-2B: the Institutional Trust presentation (configuration + drawing) and the canonical JSON its fingerprint uses;
       // node:fs and node:crypto read and hash ONLY the pinned font files in ./fonts before they are registered.
       '../../record-core/canonical', './InstitutionalTrustPDF', './presentation/institutional-trust', 'node:crypto', 'node:fs',
+      // CR-DESIGN-2C: the pure render queue that serialises presentation renders (no imports of its own).
+      './presentation/render-queue',
     ].sort())
   })
 
