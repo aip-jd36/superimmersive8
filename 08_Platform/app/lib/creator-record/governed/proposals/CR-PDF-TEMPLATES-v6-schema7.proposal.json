@@ -6,14 +6,14 @@
     "version": 4,
     "fingerprint": "d4ecf3f39487ed43ce6c5e621d988d6525b638c952a8c5ead01e0cc9b8504f7e"
   },
-  "presentation_fingerprint": "5e050fc17ccadf60c28f5a823c60c1e14db05e0b48dcd6fc24854317bc7b5e95",
+  "presentation_fingerprint": "75048e7ecaf8c2a7517f6e7aaadbbb7ded3fc7cd64d06f878ffc6a1aca075be7",
   "fingerprints": {
-    "pdf": "2628a37a98a76b7c1ccb5793dee2fa3ac0e061e6e9c730690fb792800cfda07d"
+    "pdf": "a38ac64f83e0e9fbc7734784060f3d71b9bed51b98190f5c041164cd51fb4e8d"
   },
   "proposed_approval": {
     "template_id": "si8/creator-record-v2-pdf-templates",
     "version": 6,
-    "fingerprint": "2628a37a98a76b7c1ccb5793dee2fa3ac0e061e6e9c730690fb792800cfda07d",
+    "fingerprint": "a38ac64f83e0e9fbc7734784060f3d71b9bed51b98190f5c041164cd51fb4e8d",
     "record_schema": {
       "id": "si8/creator-record-v2-record",
       "version": 7
@@ -326,7 +326,7 @@
     "presentation": {
       "contract": "si8/creator-record-pdf-presentation",
       "version": 1,
-      "fingerprint": "5e050fc17ccadf60c28f5a823c60c1e14db05e0b48dcd6fc24854317bc7b5e95"
+      "fingerprint": "75048e7ecaf8c2a7517f6e7aaadbbb7ded3fc7cd64d06f878ffc6a1aca075be7"
     },
     "navigation": {
       "contents_heading": "What this record contains",

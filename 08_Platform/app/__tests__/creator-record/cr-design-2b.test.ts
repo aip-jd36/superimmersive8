@@ -157,6 +157,20 @@ describe('placement (clarifications 1, 3, 4)', () => {
       expect(INSTITUTIONAL_TRUST_PRESENTATION.registers.reading_sections).toEqual(['documents'])
     }
   })
+  test('R1 compact counts: the approved count sentences close "About" as one counts row, same strings and order as v4/v5', () => {
+    for (const c of CASES) {
+      const m = model(c)
+      const about = m.sections.find((s) => s.id === 'about')!
+      const counts = about.layout!.filter((n) => n.kind === 'box' && n.box === 'counts')
+      expect(counts).toHaveLength(1)
+      const idx = (counts[0] as { children: { index: number; hint: string }[] }).children
+      expect(idx.every((k) => k.hint === 'count')).toBe(true)
+      expect(idx.map((k) => k.index)).toEqual(Array.from({ length: idx.length }, (_, i) => about.blocks.length - idx.length + i))
+      const legacyAbout = texts(model(c, approvedSet(c.schema)), 'about')
+      const countTexts = idx.map((k) => (about.blocks[k.index] as { text: string }).text)
+      expect(legacyAbout.slice(-countTexts.length)).toEqual(countTexts)
+    }
+  })
   test('D10 guards still refuse (integrated assessment with the reading layout)', () => {
     const c = caseOf('P4')
     expect(() => model(c, changed(8, (t) => { t.integrated_assessment = registeredPdfTemplateSet(8, 3).templates.integrated_assessment }))).toThrow(/readiness_layout_refused|templates_/)
@@ -165,7 +179,7 @@ describe('placement (clarifications 1, 3, 4)', () => {
 
 /** Rendering checks run with tsx (react-pdf does not load under Jest), as `customer-pdf-render-input.tsx` does. */
 describe('rendered with the real entry point (clarifications 2 and 5)', () => {
-  let out: { reports: CaseReport[]; unread: string[]; leaves: number; font_tamper: string; glyph: string }
+  let out: { reports: CaseReport[]; unread: string[]; leaves: number; font_tamper: string; glyph: string; negative: Record<'intrusion' | 'wrong_page_count' | 'wrong_stamp' | 'wrong_text', string[]> }
   beforeAll(() => {
     const dir = mkdtempSync(join(tmpdir(), 'cr-design-2b-'))
     out = JSON.parse(execFileSync(process.execPath, [join(process.cwd(), 'node_modules', 'tsx', 'dist', 'cli.mjs'), '--tsconfig', 'tsconfig.json', join('test-support', 'cr-design-2b', 'render-checks.tsx'), dir], { cwd: process.cwd(), encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }))
@@ -184,4 +198,24 @@ describe('rendered with the real entry point (clarifications 2 and 5)', () => {
   })
   test('a font whose bytes do not match the configuration refuses before rendering', () => expect(out.font_tamper).toMatch('font_fingerprint_mismatch'))
   test('text no font can print refuses (text_unsupported), as before', () => expect(out.glyph).toMatch('text_unsupported'))
+
+  // CR-DESIGN-2B-R1: the decisive checks read the PDF BYTES (PyMuPDF, `verify_pdf_bytes.py`), not the model or a layout pass. The
+  // thirteen cases render one after another in one process, as a server does (the apostrophe defect depended on render history).
+  test('PDF bytes: disclosures, page numbers, bounds, overlap, obscured text, reserved bands, text and search — every case', () => {
+    expect(out.reports.flatMap((r) => (r.bytes_check?.failures ?? ['no byte check']).map((f) => `${r.id} ${f}`))).toEqual([])
+    for (const r of out.reports) {
+      expect(r.bytes_check!.pages).toBe(r.pages)
+      expect(r.bytes_check!.strings_checked).toBeGreaterThan(50)
+    }
+  })
+  test('PDF bytes: curly apostrophes and international text are searchable (probes exist and are found)', () => {
+    expect(out.reports.reduce((n, r) => n + r.bytes_check!.probes_checked, 0)).toBeGreaterThan(13)
+    expect(out.reports.find((r) => r.id === 'P12')!.bytes_check!.probes_checked).toBeGreaterThan(5)
+  })
+  test('the byte verifier detects intrusion into the reserved bands, a wrong page count, a wrong disclosure and missing text', () => {
+    expect(out.negative.intrusion.join('\n')).toMatch(/outside the content region|non-background pixels/)
+    expect(out.negative.wrong_page_count.join('\n')).toMatch(/page label 'Page 1 of 99' not found/)
+    expect(out.negative.wrong_stamp.join('\n')).toMatch(/running stamp not extractable/)
+    expect(out.negative.wrong_text.join('\n')).toMatch(/printed strings not extractable/)
+  })
 })

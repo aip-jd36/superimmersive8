@@ -80,6 +80,10 @@ export function readingStyles(fallback: string) {
     hero: { fontSize: 16, fontFamily: BOLD, color: C.ink, lineHeight: 1.25, marginBottom: 6 },
     heroLabel: { fontSize: 8.4, fontFamily: REG, color: C.inkSoft, lineHeight: 1.4, marginBottom: 2 },
     pointer: { fontSize: 8.4, fontFamily: ITAL, color: C.inkSoft, lineHeight: 1.4, marginTop: 3, marginBottom: 2 },
+    // CR-DESIGN-2B-R1 hints (never produced for v1–v5): compact counts; a reading sub-row's label (same as `compactLabel` here).
+    counts: { flexDirection: 'row', flexWrap: 'wrap' },
+    count: { fontSize: 10, fontFamily: REG, lineHeight: 1.5, color: C.ink, marginRight: 12 },
+    readingSubLabel: { width: 175, paddingRight: 10, fontSize: 8.4, fontFamily: REG, color: C.muted, lineHeight: 1.4 },
   })
 }
 export type ReadingStyles = ReturnType<typeof readingStyles>
@@ -91,7 +95,7 @@ const T = ({ text, ...props }: { text: string } & Omit<TextProps, 'children' | '
 const DIGEST = /^[0-9a-f]{64}$/
 const textsOf = (b: Block) => (b.kind === 'row' ? [b.label, b.value] : [b.text])
 
-function Leaf({ b, hint, s }: { b: Block; hint: LayoutHint; s: S }) {
+function Leaf({ b, hint, s, o }: { b: Block; hint: LayoutHint; s: S; o?: ReadingOptions }) {
   if (b.kind === 'row') {
     if (hint === 'reference') return <><T style={s.refLabel} text={b.label} /><T style={s.refValue} text={b.value} /></>
     if (hint === 'map_xref') return <View style={s.mapXref} wrap={false}><T style={s.mapXrefLabel} text={b.label} /><T style={s.mapXrefValue} text={b.value} /></View>
@@ -100,7 +104,7 @@ function Leaf({ b, hint, s }: { b: Block; hint: LayoutHint; s: S }) {
     const value = DIGEST.test(b.value) ? s.digest : hint === 'conclusion' ? s.conclusionValue : hint === 'reading' ? s.readingValue : compact ? s.compactValue : s.rowValue
     return (
       <View style={style} wrap={false}>
-        <T style={compact || hint === 'conclusion' ? s.compactLabel : s.rowLabel} text={b.label} />
+        <T style={hint === 'reading_sub' && o ? s.readingSubLabel : compact || hint === 'conclusion' ? s.compactLabel : s.rowLabel} text={b.label} />
         <T style={value} text={b.value} />
       </View>
     )
@@ -127,7 +131,8 @@ function Leaf({ b, hint, s }: { b: Block; hint: LayoutHint; s: S }) {
     case 'map_provider': return <T style={s.mapProvider} text={t} />
     case 'map_none': return <T style={s.mapNone} text={t} />
     case 'map_group': return <T style={s.mapGroup} text={t} minPresenceAhead={40} />
-    case 'hero': return <T style={s.hero} text={t} />
+    case 'hero': { const scaled = o?.heroStyle?.(t); return <T style={scaled ? [s.hero, scaled] : s.hero} text={t} /> }
+    case 'count': return <T style={s.count} text={t} />
     case 'hero_label': return <T style={s.heroLabel} text={t} />
     case 'pointer': return <T style={s.pointer} text={t} />
     case 'qa_question': return <T style={s.qaQuestion} text={t} />
@@ -149,11 +154,41 @@ const KEEP_CHARS = 650
  *   - `keepOpenWithBody` (contract C4): a consideration's open matters travel with the last block of its guidance when both fit
  *     within `keepChars`, so they never start a page apart from it. Longer content breaks normally (nothing is clipped or forced).
  */
-export interface ReadingOptions { keepChars: number; keepOpenWithBody: boolean; /** The style set inside the overview map (drawn on a solid ground). */ mapStyles?: ReadingStyles }
+export interface ReadingOptions {
+  keepChars: number
+  keepOpenWithBody: boolean
+  /** The style set inside the overview map (drawn on a solid ground). */
+  mapStyles?: ReadingStyles
+  /** CR-DESIGN-2B-R1: a smaller size for a long declared title (adaptive hero), or undefined for the configured size. */
+  heroStyle?: (text: string) => { fontSize: number } | undefined
+  /** CR-DESIGN-2B-R1: space (points) the heading run before the guidance index keeps below it for the index's first row. */
+  indexLeadPresence?: number
+}
 
-function Node({ n, blocks, s, o }: { n: LayoutNode; blocks: readonly Block[]; s: S; o?: ReadingOptions }) {
-  if (n.kind === 'block') return <Leaf b={blocks[n.index]} hint={n.hint} s={s} />
-  const kids = n.children.map((c, k) => <Node key={k} n={c} blocks={blocks} s={s} o={o} />)
+/**
+ * CR-DESIGN-2B-R1: a box as the presentation draws it. @react-pdf/layout (4.4.2, `splitNodes`) keeps a whole box on the current
+ * page, overflowing it, when the box's first child cannot fit and nothing precedes the box AT ITS OWN NESTING LEVEL (a rule meant
+ * for the top of an empty page, applied at every level). The squeezed box then draws into the footer band and over its own
+ * lines (P11 page 1). A zero-height first sibling inside a plain wrapper means something always precedes the box, so the box moves
+ * to the next page whole instead; the wrapper has no padding, border or background, so nothing of it shows where it splits.
+ * Presentation only: v1–v5 are drawn without it, exactly as before.
+ */
+const Guarded = ({ children, presenceAhead }: { children: React.ReactNode; presenceAhead?: number }) => (
+  <View {...(presenceAhead ? { minPresenceAhead: presenceAhead } : {})}><View style={{ height: 0 }} />{children}</View>
+)
+
+/** Boxes whose children are laid out in a row: a wrapper around a child would take over its flex width, so they are not guarded. */
+const ROW_BOXES = new Set(['map_row', 'qa', 'consideration_head'])
+
+function Node({ n, blocks, s, o, inRow, next }: { n: LayoutNode; blocks: readonly Block[]; s: S; o?: ReadingOptions; inRow?: boolean; next?: LayoutNode }) {
+  if (n.kind === 'block') return <Leaf b={blocks[n.index]} hint={n.hint} s={s} o={o} />
+  // Presentation: the heading run just before the guidance index needs room for the index's first row below it, or it moves with it.
+  const lead = o?.indexLeadPresence && n.box === 'keep' && next?.kind === 'box' && next.box === 'map' ? o.indexLeadPresence : undefined
+  return o && !inRow ? <Guarded presenceAhead={lead}><Box n={n} blocks={blocks} s={s} o={o} /></Guarded> : <Box n={n} blocks={blocks} s={s} o={o} />
+}
+
+function Box({ n, blocks, s, o }: { n: Extract<LayoutNode, { kind: 'box' }>; blocks: readonly Block[]; s: S; o?: ReadingOptions }) {
+  const kids = n.children.map((c, k) => <Node key={k} n={c} blocks={blocks} s={s} o={o} inRow={ROW_BOXES.has(n.box)} next={n.children[k + 1]} />)
   const keepChars = o ? o.keepChars : KEEP_CHARS
   switch (n.box) {
     case 'consideration': {
@@ -187,8 +222,24 @@ function Node({ n, blocks, s, o }: { n: LayoutNode; blocks: readonly Block[]; s:
       return <View style={s.open} wrap={false}>{kids}</View>
     }
     // A document may hold many readings: always breakable (each reading group itself never splits).
-    case 'document': return <View style={s.document}>{kids}</View>
-    case 'map': if (o?.mapStyles) { const m = o.mapStyles; return <View style={s.map}>{n.children.map((c, k) => <Node key={k} n={c} blocks={blocks} s={m} o={o} />)}</View> } return <View style={s.map}>{kids}</View>
+    // Presentation: a card opens with an unbreakable unit (its heading and first row), so it either starts on a page with content
+    // or moves whole; a breakable first child would leave the card's empty top on the page before (CR-DESIGN-2B-R1).
+    case 'document': return o ? <View style={s.document}><View wrap={false}>{kids.slice(0, 2)}</View>{kids.slice(2)}</View> : <View style={s.document}>{kids}</View>
+    case 'map': {
+      if (!o?.mapStyles) return <View style={s.map}>{kids}</View>
+      // Presentation: the index is a flat run of unbreakable units — a subject heading with its first row, then each further row —
+      // so a page break falls only between rows, never inside one, and the index never starts as an empty strip at a page foot.
+      const m = o.mapStyles
+      const units: React.ReactNode[] = []
+      n.children.forEach((c, k) => {
+        if (c.kind === 'box' && c.box === 'map_group') {
+          const [head, ...rows] = c.children
+          units.push(<View key={`${k}`} wrap={false}><Node n={head} blocks={blocks} s={m} o={o} inRow />{rows.length > 0 ? <Node n={rows[0]} blocks={blocks} s={m} o={o} inRow /> : null}</View>)
+          rows.slice(1).forEach((r, j) => units.push(<Node key={`${k}.${j}`} n={r} blocks={blocks} s={m} o={o} inRow />))
+        } else units.push(<View key={`${k}`} wrap={false}><Node n={c} blocks={blocks} s={m} o={o} inRow /></View>)
+      })
+      return <View style={s.map}>{units}</View>
+    }
     case 'map_row': return <View style={s.mapRow} wrap={false}>{kids}</View>
     // A subject group's heading travels with its first row; the group itself may break between rows.
     case 'map_group': return <View><View wrap={false}>{kids.slice(0, 2)}</View>{kids.slice(2)}</View>
@@ -198,6 +249,7 @@ function Node({ n, blocks, s, o }: { n: LayoutNode; blocks: readonly Block[]; s:
     case 'consideration_head': return <View style={s.considerationHead} wrap={false}>{kids}</View>
     case 'qa': return <View style={s.qa} wrap={false}>{kids}</View>
     case 'qa_answers': return <View style={s.qaAnswers}>{kids}</View>
+    case 'counts': return <View style={s.counts} wrap={false}>{kids}</View>
     default: {
       const style = (s as Record<string, object>)[n.box] ?? {}
       return <View style={style as never} wrap={!UNBREAKABLE.has(n.box)}>{kids}</View>
@@ -208,9 +260,10 @@ function Node({ n, blocks, s, o }: { n: LayoutNode; blocks: readonly Block[]; s:
 /** One section of the reading layout. */
 export function ReadingSection({ section, s, o }: { section: CustomerDocumentSection; s: S; o?: ReadingOptions }) {
   if (!section.layout) throw new Error('creator_record_reading_layout_missing')
-  return (
+  const view = (
     <View style={s.section}>
-      {section.layout.map((n, k) => <Node key={k} n={n} blocks={section.blocks} s={s} o={o} />)}
+      {section.layout.map((n, k) => <Node key={k} n={n} blocks={section.blocks} s={s} o={o} next={section.layout![k + 1]} />)}
     </View>
   )
+  return o ? <Guarded>{view}</Guarded> : view
 }

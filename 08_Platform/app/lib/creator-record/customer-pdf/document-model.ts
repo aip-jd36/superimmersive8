@@ -46,7 +46,7 @@ import { canonicalJson } from '../record-core/canonical'
 import { checkTemplates, CUSTOMER_PDF_READINESS_EXAMINATION_SECTIONS, CUSTOMER_PDF_READINESS_SECTIONS, fill, type CustomerPdfSectionId, type CustomerPdfTemplates, type PdfTemplateApproval, type TemplateRefusalCode } from './templates'
 import { buildReadinessSummary, readinessTemplatesFingerprint, ReadinessSummaryRefusal, type ReadinessSummary, type ReadinessSummaryTemplates } from '../readiness-summary/summary'
 import { readinessRenderFingerprint, renderReadinessSummary, ReadinessRenderRefusal, type ReadinessRenderTemplates, type RenderedReadinessSummary } from '../readiness-summary/render'
-import { flowLayout, readinessLayout, ReadinessLayoutRefusal, type Consolidation, type LayoutNode, type PlacedSource } from './readiness-layout'
+import { compactCounts, flowLayout, readinessLayout, ReadinessLayoutRefusal, type Consolidation, type LayoutNode, type PlacedSource } from './readiness-layout'
 import { presentationFingerprint, presentationFor, type PresentationConfig } from './presentation/institutional-trust'
 
 export type TextOrigin = 'record' | 'issuance' | 'template'
@@ -894,6 +894,17 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
       if (id === 'record_limitations') return laidOut({ id, blocks: limitationsSection })
       const s = byId.get(id)
       if (!s) throw new CustomerPdfRefusal('record_unsupported', `section ${id}`)
+      // CR-DESIGN-2B-R1: the approved counts (answers, considerations, open items linked, and "not sure" when present) close the
+      // "About" section; a presentation draws them as one compact row.
+      if (id === 'about' && design) {
+        const l = laidOut(s)
+        const counts = [count(S.about.counts.answers, r.declarations.answers.length), count(S.about.counts.guidance, r.guidance.items.length), count(render.count_open_linked, openCount - notSure.length), ...(notSure.length > 0 ? [count(render.count_not_sure, notSure.length)] : [])]
+        const tail = l.blocks.slice(-counts.length) as { text?: string }[]
+        const contiguous = tail.every((b, k) => b.text === counts[k])
+        if (!contiguous) throw new CustomerPdfRefusal('record_unsupported', 'about counts')
+        const c = compactCounts({ blocks: l.blocks, layout: l.layout ?? [] }, counts.length)
+        return { ...l, layout: c.layout }
+      }
       return laidOut(s)
     })
   }

@@ -11,6 +11,7 @@ import React from 'react'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { join } from 'node:path'
+import { execFileSync } from 'node:child_process'
 import { Font, pdf } from '@react-pdf/renderer'
 import layoutDocument from '@react-pdf/layout'
 import { renderCustomerRecordPdf } from '@/lib/creator-record/customer-pdf/CustomerRecordPDF'
@@ -36,12 +37,22 @@ export interface CaseReport {
   id: string; title: string; schema: number; synthetic: string[]; file: string; sha256: string; bytes: number; pages: number
   exact_print: boolean; chrome_every_page: boolean; page_labels_ok: boolean; orphan_headings: string[]; oversize_warnings: number
   same_blocks_as_approved_set: boolean; navigation_copies: number; extra_vs_approved: string[]; missing_vs_approved: string[]
+  bytes_check?: BytesReport
+}
+export interface BytesReport { pdf: string; pages: number; failures: string[]; strings_checked: number; probes_checked: number; ok: boolean }
+
+/** Runs `./verify_pdf_bytes.py` (Python 3 with PyMuPDF, required). */
+export function verifyPdfBytes(expectFiles: string[]): BytesReport[] {
+  const py = process.env.PYTHON ?? 'python'
+  const outText = execFileSync(py, ['-I', join(__dirname, 'verify_pdf_bytes.py'), ...expectFiles], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
+  return JSON.parse(outText) as BytesReport[]
 }
 
 export async function renderReview(outDir: string): Promise<CaseReport[]> {
   mkdirSync(join(outDir, 'pdf'), { recursive: true })
   const cases = await reviewCases()
   const out: CaseReport[] = []
+  const expectFiles: string[] = []
   for (const c of cases) {
     const set = syntheticallyApproved2B(c.schema)
     const input = { canonical: c.record.canonical, sha256: c.record.sha256, issued: { record_id: 'CR-2026-2B0000' + c.id.replace('P', '').padStart(2, '0'), issued_on: '2026-11-15' }, templates: set.templates, template_approval: set.approval }
@@ -61,10 +72,21 @@ export async function renderReview(outDir: string): Promise<CaseReport[]> {
     const nodes: Laid[] = []
     laid.children.forEach((p: any, i: number) => walk(p, i + 1, false, nodes))
     const pages = laid.children.length
-    const body = nodes.filter((n) => !n.fixed && n.text !== '•')
     const identityCount = model.sections[0].id === 'identity' ? model.sections[0].blocks.reduce((n, b) => n + (b.kind === 'row' ? 2 : 1), 0) : 0
     const flat = textsOf(model)
     const expected = [...flat.slice(0, identityCount), model.marking.stamp, ...flat.slice(identityCount)]
+    const expectedAt = (k: number): string | undefined => expected[k]
+    // A text that continues onto the next page is laid out as two nodes; join consecutive nodes that together make the next expected string.
+    const raw = nodes.filter((n) => !n.fixed && n.text !== '•')
+    const body: Laid[] = []
+    for (const n of raw) {
+      const prev = body[body.length - 1]
+      const want = prev ? expectedAt(body.length - 1) : undefined
+      if (prev && want !== undefined && norm(prev.text) !== norm(want) && norm(want).startsWith(norm(prev.text + n.text)) && n.page === prev.page + 1) prev.text += n.text
+      else body.push({ ...n })
+    }
+
+
     const exact = body.length === expected.length && expected.every((e, k) => norm(e) === norm(body[k].text))
     // Orphans: a heading/label whose following body text starts on a later page (a label alone in its box excepted, as before).
     const kinds = [...model.sections.flatMap((s) => s.blocks.flatMap((b) => (b.kind === 'row' ? ['row', 'row'] : [b.kind])))]
@@ -86,6 +108,23 @@ export async function renderReview(outDir: string): Promise<CaseReport[]> {
     const theirs = theirs0
     const extra = [...mine].filter(([t, n]) => (theirs.get(t) ?? 0) < n).map(([t]) => t.slice(0, 80))
     const missing = [...theirs].filter(([t, n]) => (mine.get(t) ?? 0) < n).map(([t]) => t.slice(0, 80))
+    // The byte-level verifier's expectations (`./verify_pdf_bytes.py`). The reserved bands come from the configuration, never from
+    // the layout pass: the running header sits above `padding_top - 12`, the running footer below `page height - padding_bottom + 8`.
+    const H = 841.89, W = 595.28
+    const tokens = new Set<string>()
+    for (const t of expected) for (const w of pdfText(t).split(/\s+/)) {
+      // Search probes: every word with a non-ASCII character (curly apostrophes, accents), and pairs of CJK characters.
+      if (!/[^\x20-\x7e]/.test(w)) continue
+      const bare = w.replace(/^[("'‘“]+|[)"'.,:;!?’”]+$/gu, '')
+      if (/[　-鿿가-힯]/u.test(bare)) { for (let k = 0; k + 2 <= bare.length; k += 4) tokens.add(bare.slice(k, k + 2)) } else if (bare.length >= 3) tokens.add(bare)
+    }
+    const expectFile = join(outDir, 'pdf', file.replace(/\.pdf$/, '.expect.json'))
+    writeFileSync(expectFile, JSON.stringify({
+      pdf: join(outDir, 'pdf', file), header: model.marking.footer, stamp: model.marking.stamp, page_label: model.marking.page_label, strings: expected, probes: [...tokens].sort(),
+      content_top: config.page.padding_top, content_bottom: H - config.page.padding_bottom, content_left: config.page.padding_x, content_right: W - config.page.padding_x,
+      header_bottom: config.page.padding_top - 12, footer_top: H - config.page.padding_bottom + 8, background: { warm: config.colors.paper, reading: config.colors.cool_ground },
+    }))
+    expectFiles.push(expectFile)
     const r: CaseReport = {
       id: c.id, title: c.title, schema: c.schema, synthetic: c.synthetic, file, sha256: createHash('sha256').update(bytes).digest('hex'), bytes: bytes.length, pages,
       exact_print: exact, chrome_every_page: chrome, page_labels_ok: labels, orphan_headings: orphans, oversize_warnings: warnings.filter((w) => /bigger than available page height/.test(w)).length,
@@ -94,6 +133,9 @@ export async function renderReview(outDir: string): Promise<CaseReport[]> {
     out.push(r)
     console.log(c.id.padEnd(4), `pages=${pages}`, `exact=${exact}`, `chrome=${chrome}`, `labels=${labels}`, `orphans=${orphans.length}`, `oversize=${r.oversize_warnings}`, `same=${r.same_blocks_as_approved_set}`)
   }
+  // The decisive checks: the PDF bytes as a reader sees them.
+  const bytesReports = verifyPdfBytes(expectFiles)
+  out.forEach((r, i) => { r.bytes_check = bytesReports[i]; console.log(r.id.padEnd(4), `bytes ok=${bytesReports[i].ok}`, ...bytesReports[i].failures.slice(0, 6)) })
   writeFileSync(join(outDir, 'report.json'), JSON.stringify(out, null, 1))
   return out
 }

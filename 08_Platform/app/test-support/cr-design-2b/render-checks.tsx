@@ -10,7 +10,9 @@ import { renderCustomerRecordPdf } from '@/lib/creator-record/customer-pdf/Custo
 import { INSTITUTIONAL_TRUST_PRESENTATION, type PresentationConfig } from '@/lib/creator-record/customer-pdf/presentation/institutional-trust'
 import { templateFingerprint } from '@/lib/creator-record/customer-pdf/templates'
 import { syntheticallyApproved2B } from './proposed-sets'
-import { renderReview } from './render-review'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { renderReview, verifyPdfBytes } from './render-review'
 import { reviewCases, type ReviewCase } from './review-fixtures'
 
 const issued = (c: ReviewCase) => ({ record_id: 'CR-2026-2B0000' + c.id.replace('P', '').padStart(2, '0'), issued_on: '2026-11-15' })
@@ -37,7 +39,7 @@ async function main(outDir: string) {
   const walk = (v: unknown, p: string) => (v && typeof v === 'object' ? Object.entries(v).forEach(([k, x]) => walk(x, p ? `${p}.${k}` : k)) : leaves.push(p))
   walk(INSTITUTIONAL_TRUST_PRESENTATION, '')
   const tracked = track(INSTITUTIONAL_TRUST_PRESENTATION, '') as PresentationConfig
-  for (const id of ['P4', 'P5', 'P10']) await renderCustomerRecordPdf(input(caseOf(id)), { configOverride: tracked })
+  for (const id of ['P4', 'P5', 'P10', 'P11']) await renderCustomerRecordPdf(input(caseOf(id)), { configOverride: tracked })
   const unread = leaves.filter((l) => !read.has(l))
 
   const bad = JSON.parse(JSON.stringify(INSTITUTIONAL_TRUST_PRESENTATION)) as PresentationConfig
@@ -48,8 +50,28 @@ async function main(outDir: string) {
   t.navigation.contents_heading = 'What this record contains \u{1F600}'
   const glyph = await refusal(renderCustomerRecordPdf(input(caseOf('P1'), t)))
 
+  // The byte verifier must see real defects (negative controls). A deliberately broken layout — content allowed into the reserved
+  // header and footer bands — and deliberately wrong expectations, each checked against the real configuration's expectations.
+  mkdirSync(join(outDir, 'negative'), { recursive: true })
+  const p11 = reports.find((r) => r.id === 'P11')!
+  const expectP11 = JSON.parse(readFileSync(join(outDir, 'pdf', p11.file.replace(/\.pdf$/, '.expect.json')), 'utf8'))
+  const squeezed = JSON.parse(JSON.stringify(INSTITUTIONAL_TRUST_PRESENTATION)) as PresentationConfig
+  ;(squeezed.page as { padding_top: number }).padding_top = 30
+  ;(squeezed.page as { padding_bottom: number }).padding_bottom = 18
+  const broken = await renderCustomerRecordPdf(input(caseOf('P11')), { configOverride: squeezed })
+  const brokenPdf = join(outDir, 'negative', 'P11-intrusion.pdf')
+  writeFileSync(brokenPdf, broken.bytes)
+  const variants: Record<string, unknown> = {
+    intrusion: { ...expectP11, pdf: brokenPdf },
+    wrong_page_count: { ...expectP11, page_label: 'Page {page} of 99' },
+    wrong_stamp: { ...expectP11, stamp: expectP11.stamp + ' X' },
+    wrong_text: { ...expectP11, strings: [...expectP11.strings, 'A sentence this record does not contain'] },
+  }
+  const files = Object.entries(variants).map(([k, v]) => { const f = join(outDir, 'negative', `${k}.expect.json`); writeFileSync(f, JSON.stringify(v)); return f })
+  const negative = Object.fromEntries(Object.keys(variants).map((k, i) => [k, verifyPdfBytes([files[i]])[0].failures]))
+
   console.log = log
-  process.stdout.write(JSON.stringify({ reports, unread, leaves: leaves.length, font_tamper, glyph }))
+  process.stdout.write(JSON.stringify({ reports, unread, leaves: leaves.length, font_tamper, glyph, negative }))
 }
 
 main(process.argv[2]).catch((e) => { process.stdout.write(JSON.stringify({ error: String(e) })); process.exit(1) })

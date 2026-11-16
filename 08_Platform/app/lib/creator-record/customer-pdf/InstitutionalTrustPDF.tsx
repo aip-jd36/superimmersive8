@@ -57,6 +57,40 @@ export function registerPresentationFonts(cfg: PresentationConfig): void {
   Font.register({ family: cfg.fonts.fallback.family, src: verifiedSrc(cfg.fonts.fallback.file, cfg.fonts.fallback.sha256) })
 }
 
+interface LoadedGlyph { id: number; codePoints: number[] }
+interface LoadedFont { hasGlyphForCodePoint(cp: number): boolean; glyphForCodePoint(cp: number): LoadedGlyph }
+
+/**
+ * CR-DESIGN-2B-R1 (text layer): makes sure every glyph this document prints carries the character it prints.
+ *
+ * fontkit keeps ONE glyph object per glyph id for the life of the process. When a PDF is written, the TrueType subset decodes
+ * composite glyphs and creates their component glyphs with no character (Inter's ” and ‚ are built from ’). A later text that
+ * prints ’ then receives that cached glyph, so @react-pdf/pdfkit writes an empty ToUnicode entry for it and the word cannot be
+ * found, copied or read aloud correctly (the "curly-apostrophe" defect; it depended on what the process had rendered before).
+ * Before layout, each printed character's glyph in every registered face is looked up; a glyph left without its character is
+ * given it. Nothing about the drawing changes: same glyph, same font, same text; only the text layer is corrected.
+ * Returns the number of glyphs repaired (for tests).
+ */
+export async function primeGlyphCharacters(cfg: PresentationConfig, texts: readonly string[]): Promise<number> {
+  const codePoints = [...new Set(texts.flatMap((t) => [...pdfText(t)].map((ch) => ch.codePointAt(0) as number)))]
+  const faces = [
+    ...(['display', 'body', 'mono'] as const).flatMap((r) => cfg.fonts[r].files.map((f) => ({ fontFamily: cfg.fonts[r].family, fontWeight: f.weight }))),
+    { fontFamily: cfg.fonts.fallback.family },
+  ]
+  let repaired = 0
+  for (const face of faces) {
+    await Font.load(face)
+    const font = Font.getFont(face)?.data as unknown as LoadedFont | undefined
+    if (!font) throw new PresentationRefusal(`font_not_loaded:${face.fontFamily}`)
+    for (const cp of codePoints) {
+      if (!font.hasGlyphForCodePoint(cp)) continue
+      const glyph = font.glyphForCodePoint(cp)
+      if (glyph.codePoints.length === 0) { glyph.codePoints = [cp]; repaired++ }
+    }
+  }
+  return repaired
+}
+
 /** The renderer refuses a configuration it does not implement. */
 export function assertImplemented(cfg: PresentationConfig, design: NonNullable<CustomerDocumentModel['design']>): void {
   if (cfg.renderer.id !== 'si8/creator-record-v2-pdf-presentation' || cfg.renderer.implementation !== 'institutional-trust' || cfg.renderer.version !== 1) throw new PresentationRefusal('renderer_not_implemented')
@@ -97,10 +131,10 @@ export function presentationStyles(cfg: PresentationConfig, register: Register):
     framing: tx('body', second, { marginBottom: 4 }),
     fine: tx('fine', second, { marginBottom: 3 }),
     row: { flexDirection: 'row', paddingVertical: 2.5, borderBottomWidth: 0.4, borderBottomColor: soft },
-    rowLabel: tx('label', second, { width: 175, paddingRight: 10 }),
+    rowLabel: tx('label', second, { width: L.label_width, paddingRight: 10 }),
     rowValue: tx(reading ? 'mono_value' : 'value', ink, { flex: 1 }),
     compact: { flexDirection: 'row', marginBottom: 1.5 },
-    compactLabel: tx('label', muted, { width: 175, paddingRight: 10 }),
+    compactLabel: tx('label', muted, { width: L.label_width, paddingRight: 10 }),
     compactValue: tx('value', ink, { flex: 1 }),
     conclusionValue: tx('strong', ink, { flex: 1 }),
     digest: tx('digest', second, { flex: 1, paddingTop: 1 }),
@@ -140,12 +174,16 @@ export function presentationStyles(cfg: PresentationConfig, register: Register):
     reading: { borderBottomWidth: 0.4, borderBottomColor: soft, paddingBottom: 2 },
     readingValue: tx('mono_value', ink, { flex: 1 }),
     // A reading's basis / source-text rows sit one indent under their value, so the text keeps a wide column (v5 indented a full label width).
-    readingSub: { flexDirection: 'row', marginBottom: 1.5, paddingLeft: 24 },
+    readingSub: { flexDirection: 'row', marginBottom: 1.5, paddingLeft: L.sub_indent },
     document: { backgroundColor: c.cool_surface, borderWidth: 0.6, borderColor: c.cool_hairline, borderRadius: L.radius, padding: L.card_padding, marginBottom: L.block_gap + 1 },
     section: { marginBottom: L.section_gap },
     hero: tx('hero', strong, { marginBottom: 6 }),
     heroLabel: tx('hero_label', muted, { marginTop: 4, marginBottom: 2 }),
     pointer: tx('fine', second, { marginTop: 3, marginBottom: 2 }),
+    counts: { flexDirection: 'row', flexWrap: 'wrap', marginTop: L.block_gap, paddingTop: 6, borderTopWidth: 0.4, borderTopColor: line },
+    count: tx('value', ink, { marginRight: L.count_gap, marginBottom: 3, paddingLeft: 6, borderLeftWidth: L.rule_accent_width * 0.8, borderLeftColor: accent }),
+    // A reading's basis / source-text rows: indented label, value aligned with the reading's own value column.
+    readingSubLabel: tx('label', muted, { width: L.label_width - L.sub_indent, paddingRight: 10 }),
   }) as unknown as ReadingStyles
 }
 
@@ -186,9 +224,18 @@ export function InstitutionalTrustPDF({ model, config }: { model: CustomerDocume
   const warm = presentationStyles(config, 'warm')
   const reading = presentationStyles(config, 'reading')
   const navy = presentationStyles(config, 'navy')
-  const opts = (s: ReadingStyles): ReadingOptions => ({ keepChars: config.layout.consideration_keep_chars, keepOpenWithBody: config.layout.keep_open_with_body, mapStyles: s === warm ? navy : undefined })
+  // Adaptive hero: a long declared title steps down to a smaller configured size. Width is counted in em-like units (a CJK, kana or
+  // Hangul character counts twice), so a short CJK title is not shrunk and a long Latin one is.
+  const heroWidth = (t: string) => [...t].reduce((n, ch) => n + (/[⺀-鿿가-힯豈-﫿＀-￯]/u.test(ch) ? 2 : 1), 0)
+  const heroSteps = config.layout.hero_steps.map((x) => ({ min: x.min_width, size: x.size })).sort((a, b) => b.min - a.min)
+  const heroStyle = (t: string) => {
+    const w = heroWidth(t)
+    const step = heroSteps.find((x) => w >= x.min)
+    return step ? { fontSize: step.size } : undefined
+  }
+  const opts = (s: ReadingStyles): ReadingOptions => ({ keepChars: config.layout.consideration_keep_chars, keepOpenWithBody: config.layout.keep_open_with_body, mapStyles: s === warm ? navy : undefined, heroStyle, indexLeadPresence: config.layout.index_lead_presence })
   const chrome = (k: 'running_header' | 'running_stamp' | 'page_label' | 'first_page_stamp', color: string) => ({
-    fontFamily: fam(ty[k].family), fontSize: ty[k].size, fontWeight: ty[k].weight, lineHeight: ty[k].line_height,
+    fontFamily: fam(ty[k].family), fontSize: ty[k].size, fontWeight: ty[k].weight, ...('line_height' in ty[k] ? { lineHeight: (ty[k] as { line_height: number }).line_height } : {}),
     ...('letter_spacing' in ty[k] ? { letterSpacing: (ty[k] as { letter_spacing: number }).letter_spacing } : {}), color,
   })
   return (
@@ -203,10 +250,13 @@ export function InstitutionalTrustPDF({ model, config }: { model: CustomerDocume
             <View fixed style={{ position: 'absolute', top: P.masthead_top, left: P.padding_x, right: P.padding_x, borderBottomWidth: config.chrome.rule_width, borderBottomColor: rule, paddingBottom: 4 }}>
               <T style={chrome('running_header', fine)} text={header} />
             </View>
-            <View fixed style={{ position: 'absolute', bottom: P.footer_bottom, left: P.padding_x, right: P.padding_x, flexDirection: 'row', borderTopWidth: config.chrome.rule_width * 0.6, borderTopColor: isReading ? c.cool_hairline : c.hairline, paddingTop: 4 }}>
-              <T style={{ ...chrome('running_stamp', fine), flex: 1, paddingRight: 10 }} text={footer} />
-              <Text style={{ ...chrome('page_label', fine), width: P.page_label_width, textAlign: 'right' }} render={({ pageNumber, totalPages }) => m.page_label.replace('{page}', String(pageNumber)).replace('{pages}', String(totalPages))} />
+            {/* The running footer and the page label are separate fixed elements. A render-prop text inside a flex row (or with a
+                line height) is measured by @react-pdf before its content exists and grows to ~213,000 pt, which pushes the whole row
+                off the page (CR-DESIGN-2B-R1 root cause 1; the same library behaviour the legacy renderer's page label avoids). */}
+            <View fixed style={{ position: 'absolute', bottom: P.footer_bottom, left: P.padding_x, right: P.padding_x, borderTopWidth: config.chrome.rule_width * 0.6, borderTopColor: isReading ? c.cool_hairline : c.hairline, paddingTop: 4, paddingRight: P.page_label_width }}>
+              <T style={chrome('running_stamp', fine)} text={footer} />
             </View>
+            <Text fixed style={{ ...chrome('page_label', fine), position: 'absolute', bottom: P.footer_bottom, right: P.padding_x, width: P.page_label_width, textAlign: 'right' }} render={({ pageNumber, totalPages }) => m.page_label.replace('{page}', String(pageNumber)).replace('{pages}', String(totalPages))} />
             {run.sections.map((section) => (
               <React.Fragment key={section.id}>
                 <ReadingSection section={section} s={s} o={opts(s)} />

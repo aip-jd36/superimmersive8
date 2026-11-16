@@ -77,7 +77,8 @@ export const INSTITUTIONAL_TRUST_PRESENTATION = {
     digest: { family: 'mono', size: 7.2, weight: 400, line_height: 1.4 },
     running_header: { family: 'body', size: 7.4, weight: 500, line_height: 1.3, letter_spacing: 0.3 },
     running_stamp: { family: 'body', size: 7.5, weight: 500, line_height: 1.35, letter_spacing: 0.2 },
-    page_label: { family: 'mono', size: 7.4, weight: 400, line_height: 1.3 },
+    /** No line height: a render-prop text with one is mis-measured by @react-pdf and leaves the page. */
+    page_label: { family: 'mono', size: 7.4, weight: 400 },
     first_page_stamp: { family: 'body', size: 9, weight: 600, line_height: 1.45, letter_spacing: 0.4 },
   },
   chrome: {
@@ -103,6 +104,18 @@ export const INSTITUTIONAL_TRUST_PRESENTATION = {
     card_padding: 10,
     rule_accent_width: 2.5,
     radius: 2,
+    /** Label column width of a two-column row (points); a reading's sub-rows indent their label by `sub_indent` within it. */
+    label_width: 175,
+    sub_indent: 24,
+    /** Room (points) kept below the heading run that introduces the guidance index, for the index's first row; else both move on. */
+    index_lead_presence: 80,
+    /** Gap between the compact counts. */
+    count_gap: 14,
+    /** CR-DESIGN-2B-R1 adaptive hero: from `min_width` (characters; CJK counted twice) the declared title uses `size` (points). */
+    hero_steps: [
+      { min_width: 64, size: 21 },
+      { min_width: 120, size: 17.5 },
+    ],
   },
 } as const
 

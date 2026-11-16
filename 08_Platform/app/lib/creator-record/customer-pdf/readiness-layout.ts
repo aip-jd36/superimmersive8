@@ -49,9 +49,12 @@ export type LayoutHint =
   | 'map_provider' | 'map_label' | 'map_item' | 'map_xref' | 'map_group' | 'map_none' | 'body' | 'qa_question' | 'qa_answer' | 'reading' | 'reading_sub' | 'digest'
   // CR-DESIGN-2B: the declared-title copy and its question (identity), and the caveat pointer (C-3). Never produced for v1–v5 sets.
   | 'hero' | 'hero_label' | 'pointer'
+  // CR-DESIGN-2B-R1: one approved count, in the compact counts row (presentation sets only).
+  | 'count'
 export type LayoutBox =
   | 'identity' | 'overview' | 'panel' | 'map' | 'map_group' | 'map_row' | 'map_ref' | 'map_topic' | 'map_open' | 'guidance' | 'group' | 'consideration'
   | 'consideration_head' | 'open' | 'dependency' | 'scope' | 'keep' | 'qa' | 'qa_answers' | 'reading' | 'document' | 'section'
+  | 'counts'
 export type LayoutNode = { kind: 'block'; index: number; hint: LayoutHint } | { kind: 'box'; box: LayoutBox; children: LayoutNode[]; consideration?: number }
 
 /** A readiness block not printed again, with the printed blocks that carry its exact strings. */
@@ -423,6 +426,22 @@ export function layoutOrder(nodes: readonly LayoutNode[]): number[] {
 }
 
 /** The tree must visit every printed block exactly once, in printed order: what is read is what is printed. */
+/**
+ * CR-DESIGN-2B-R1 (presentation sets only): the section's last `count` blocks — the approved count sentences — are drawn as one
+ * compact row instead of a stack of paragraphs. Same blocks, same strings, same order; only their placement box changes.
+ */
+export function compactCounts(l: SectionLayout, count: number): SectionLayout {
+  const first = l.blocks.length - count
+  if (count < 1 || first < 0) throw new ReadinessLayoutRefusal('counts out of range')
+  const strip = (ns: LayoutNode[]): LayoutNode[] => ns.flatMap((n): LayoutNode[] => {
+    if (n.kind === 'block') return n.index >= first ? [] : [n]
+    const children = strip(n.children)
+    return children.length === 0 ? [] : [{ ...n, children }]
+  })
+  const counts: LayoutNode = box('counts', Array.from({ length: count }, (_, k) => ({ kind: 'block', index: first + k, hint: 'count' })))
+  return checked({ ...l, layout: [...strip(l.layout), counts] })
+}
+
 function checked(l: SectionLayout): SectionLayout {
   const order = layoutOrder(l.layout)
   if (order.length !== l.blocks.length || order.some((v, i) => v !== i)) throw new ReadinessLayoutRefusal('layout order differs from the printed order')
