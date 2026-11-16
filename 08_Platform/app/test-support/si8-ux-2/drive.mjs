@@ -238,6 +238,22 @@ async function pathB(width, tag) {
   return d('return __drv.requests()')
 }
 
+// Path C (asynchronous): an examination that completes after the document was re-linked and an earlier tool removed must not
+// change the link (examination results only update the examination state). SI8-UX-2 acceptance evidence; no screenshot.
+async function pathC(width, tag) {
+  await load(width)
+  await fillFirstTwoSteps()
+  await d(`await __drv.select('T1', 'runway-gen3', 0); await __drv.plan(0, 'Pro'); await __drv.text('T4', 'October 2026', 0); await __drv.click('Add another tool'); await __drv.select('T1', 'higgsfield', 1); await __drv.select('T3', '__not_sure', 1); await __drv.text('T4', 'October 2026', 1)`)
+  await d(`await __drv.click('Choose a document you have already added', __drv.toolDocs(1)); await __drv.pick(1, '${PREV_HIGGS}')`)
+  // Hold the examination response for 2.5 s inside the page, then re-link and remove a tool while it is pending.
+  await js(`const f = window.fetch; window.fetch = async (u, i) => { if ((typeof u === 'string' ? u : u.url).endsWith('/examination')) await new Promise((r) => setTimeout(r, 2500)); return f(u, i) }; return true`)
+  await d(`await __drv.permit('${PREV_HIGGS}'); const b = [...document.querySelector('li[data-document="${PREV_HIGGS}"]').querySelectorAll('button')].find((x) => x.textContent.trim() === 'Read with AI'); b.click(); await __drv.tick(150)`)
+  await d(`await __drv.link('${PREV_HIGGS}', 'unlinked'); await __drv.click('Remove tool 1'); await __drv.tick(3200)`)
+  const s = await d('return __drv.docState()')
+  const read = (await d(`return document.querySelector('li[data-document="${PREV_HIGGS}"]')?.textContent ?? ''`)).includes('Read.')
+  check(`${tag} C: an examination completing after re-linking and a tool removal leaves the creator's link unchanged`, s.length === 1 && s[0].where === 'unlinked' && s[0].link === 'unlinked' && s[0].pending === null && read, s)
+}
+
 try {
   await connect()
   await send('Page.enable'); await send('Runtime.enable')
@@ -246,6 +262,7 @@ try {
   logs.desktopB = await pathB(1280, 'desktop')
   logs.mobileA = await pathA(390, 'mobile')
   logs.mobileB = await pathB(390, 'mobile')
+  await pathC(1280, 'desktop')
   writeFileSync(join(evidenceDir, 'request-log.json'), JSON.stringify(logs, null, 2))
   writeFileSync(join(evidenceDir, 'checks.json'), JSON.stringify(checks, null, 2))
   const failed = checks.filter((c) => !c.ok)
