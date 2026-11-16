@@ -13,7 +13,7 @@ import { CUSTOMER_RECORD_SCHEMA } from '@/lib/creator-record/customer-record/rec
 import { CREATOR_RECORD_GOVERNANCE_AUTHORITY as GOV } from '@/lib/creator-record/governed/sources'
 import { buildReadinessSummary, readinessTemplatesFingerprint, type ReadinessSummary } from '@/lib/creator-record/readiness-summary/summary'
 import { canonicalJson } from '@/lib/creator-record/record-core/canonical'
-import { CUTOVER_FINGERPRINTS, CUTOVER_VERSIONS, preCutoverLiveSet, PRE_CUTOVER_FINGERPRINTS, PRE_CUTOVER_VERSIONS, registeredPdfTemplateSet } from '@/test-support/registered-template-sets'
+import { CUTOVER_FINGERPRINTS, CUTOVER_VERSIONS, DESIGN_CUTOVER_FINGERPRINTS, DESIGN_CUTOVER_VERSIONS, preCutoverLiveSet, PRE_CUTOVER_FINGERPRINTS, PRE_CUTOVER_VERSIONS, registeredPdfTemplateSet } from '@/test-support/registered-template-sets'
 import { legacyCases, type LegacyCase } from '@/test-support/readiness-legacy-cases'
 import { proposedTemplateSet, syntheticallyApproved, type ProposedTemplateSet } from '@/test-support/readiness-proposed-templates'
 import { liveRecord } from '@/test-support/readiness-scenarios'
@@ -53,8 +53,11 @@ describe('Production issuance is unchanged before activation', () => {
   test('the selected sets are v4 / v5 with exactly the proposal content; v1 / v3 stay registered, superseded and unchanged', () => {
     for (const s of [7, 8] as const) {
       const a = approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: s })
-      expect([a.approval?.version, a.approval?.fingerprint, a.approval?.lifecycle]).toEqual([CUTOVER_VERSIONS[s], CUTOVER_FINGERPRINTS[s], 'approved'])
-      expect(canonicalJson(a.templates)).toBe(canonicalJson(PROPOSED[s].templates))
+      // CR-DESIGN-2D: v6 / v7 are selected; v4 / v5 (exactly the proposal content) stay registered, superseded and unchanged.
+      expect([a.approval?.version, a.approval?.fingerprint, a.approval?.lifecycle]).toEqual([DESIGN_CUTOVER_VERSIONS[s], DESIGN_CUTOVER_FINGERPRINTS[s], 'approved'])
+      const v45 = registeredPdfTemplateSet(s, CUTOVER_VERSIONS[s])
+      expect([v45.approval.fingerprint, v45.approval.lifecycle]).toEqual([CUTOVER_FINGERPRINTS[s], 'superseded'])
+      expect(canonicalJson(v45.templates)).toBe(canonicalJson(PROPOSED[s].templates))
       const old = registeredPdfTemplateSet(s, PRE_CUTOVER_VERSIONS[s])
       expect([old.approval.fingerprint, old.approval.lifecycle]).toEqual([PRE_CUTOVER_FINGERPRINTS[s], 'superseded'])
       expect(require('@/lib/creator-record/customer-pdf/templates').templateFingerprint(old.templates)).toBe(PRE_CUTOVER_FINGERPRINTS[s])

@@ -7,7 +7,7 @@
  */
 import { performance } from 'node:perf_hooks'
 import { renderCustomerRecordPdf } from '@/lib/creator-record/customer-pdf/CustomerRecordPDF'
-import { CUTOVER_VERSIONS, registeredPdfTemplateSet } from '@/test-support/registered-template-sets'
+import { cutoverLiveSet } from '@/test-support/registered-template-sets'
 import { syntheticallyApproved2B } from './proposed-sets'
 import { reviewCases, type ReviewCase } from './review-fixtures'
 
@@ -24,7 +24,7 @@ async function main() {
   console.log = () => {}
   const cases = await reviewCases()
   const input = (c: ReviewCase, legacy = false) => {
-    const set = legacy ? registeredPdfTemplateSet(c.schema, CUTOVER_VERSIONS[c.schema]) : syntheticallyApproved2B(c.schema)
+    const set = legacy ? cutoverLiveSet(c.schema) : syntheticallyApproved2B(c.schema)
     return { canonical: c.record.canonical, sha256: c.record.sha256, issued: { record_id: 'CR-2026-2C0000' + c.id.replace('P', '').padStart(2, '0'), issued_on: '2026-11-16' }, templates: set.templates, template_approval: set.approval }
   }
   gc()

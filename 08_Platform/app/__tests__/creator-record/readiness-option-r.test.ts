@@ -13,7 +13,7 @@ import { CREATOR_RECORD_GOVERNANCE_AUTHORITY as GOV } from '@/lib/creator-record
 import { SYNTHETIC_TEST_EXAMINATION_PDF as EXAM_PDF } from '@/lib/creator-record/governed/synthetic-test-authority'
 import { canonicalJson, sha256Hex } from '@/lib/creator-record/record-core/canonical'
 import { legacyCases, legacyTemplateSet, type LegacyCase } from '@/test-support/readiness-legacy-cases'
-import { CUTOVER_FINGERPRINTS, CUTOVER_VERSIONS, preCutoverLiveSet, PRE_CUTOVER_FINGERPRINTS, PRE_CUTOVER_VERSIONS, registeredPdfTemplateSet } from '@/test-support/registered-template-sets'
+import { CUTOVER_FINGERPRINTS, CUTOVER_VERSIONS, DESIGN_CUTOVER_FINGERPRINTS, DESIGN_CUTOVER_VERSIONS, preCutoverLiveSet, PRE_CUTOVER_FINGERPRINTS, PRE_CUTOVER_VERSIONS, registeredPdfTemplateSet } from '@/test-support/registered-template-sets'
 import { liveRecord, optionRTemplates, PROPOSED_RENDER_TEMPLATES, PROPOSED_SUMMARY_TEMPLATES } from '@/test-support/readiness-scenarios'
 
 const ISSUED = { record_id: 'CR-2026-0000000B', issued_on: '2026-11-12' }
@@ -43,7 +43,9 @@ describe('existing approved template sets keep their original behaviour', () => 
       expect((preCutoverLiveSet(v).templates as unknown as CustomerPdfTemplates).readiness_summary).toBeUndefined()
       expect(registeredPdfTemplateSet(v, PRE_CUTOVER_VERSIONS[v]).approval).toMatchObject({ fingerprint: PRE_CUTOVER_FINGERPRINTS[v], lifecycle: 'superseded' })
       const live = approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: v })
-      expect(live.approval).toMatchObject({ version: CUTOVER_VERSIONS[v], fingerprint: CUTOVER_FINGERPRINTS[v], lifecycle: 'approved' })
+      // CR-DESIGN-2D: the selected sets are v6 / v7 (the same reading layout, Institutional Trust presentation); v4 / v5 superseded.
+      expect(live.approval).toMatchObject({ version: DESIGN_CUTOVER_VERSIONS[v], fingerprint: DESIGN_CUTOVER_FINGERPRINTS[v], lifecycle: 'approved' })
+      expect(registeredPdfTemplateSet(v, CUTOVER_VERSIONS[v]).approval).toMatchObject({ fingerprint: CUTOVER_FINGERPRINTS[v], lifecycle: 'superseded' })
       expect((live.templates as CustomerPdfTemplates).readiness_summary).toBeDefined()
     }
   })

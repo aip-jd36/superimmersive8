@@ -19,7 +19,7 @@ import { buildCustomerDocument, documentText, type CustomerDocumentModel } from 
 import { InstitutionalTrustPDF, registerPresentationFonts } from '@/lib/creator-record/customer-pdf/InstitutionalTrustPDF'
 import { presentationFor, type PresentationConfig } from '@/lib/creator-record/customer-pdf/presentation/institutional-trust'
 import { pdfText } from '@/lib/creator-record/customer-pdf/text-layout'
-import { registeredPdfTemplateSet, CUTOVER_VERSIONS } from '@/test-support/registered-template-sets'
+import { cutoverLiveSet } from '@/test-support/registered-template-sets'
 import { syntheticallyApproved2B } from './proposed-sets'
 import { reviewCases } from './review-fixtures'
 
@@ -126,7 +126,7 @@ export async function renderReview(outDir: string): Promise<CaseReport[]> {
     const chrome = fixedOn(model.marking.stamp) && fixedOn(model.marking.footer)
     const labels = Array.from({ length: pages }, (_, i) => nodes.some((n) => n.fixed && n.page === i + 1 && n.text === `Page ${i + 1} of ${pages}`)).every(Boolean)
     // Same record under the approved v4/v5 set: same printed blocks, apart from the navigation copies and the two navigational strings.
-    const approved = registeredPdfTemplateSet(c.schema, CUTOVER_VERSIONS[c.schema])
+    const approved = cutoverLiveSet(c.schema)
     const legacy = buildCustomerDocument({ ...input, templates: approved.templates, template_approval: approved.approval })
     const skip = new Set((model.navigation_copies ?? []).map((x) => `${x.section}:${x.index}`))
     const contents = (set.templates.navigation as { contents_heading: string }).contents_heading

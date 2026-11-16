@@ -136,8 +136,11 @@ describe('the approved guidance ledger, PDF templates and issuance support', () 
     const notBlank = expect.stringMatching(/\S/)
     expect(Governed.CREATOR_RECORD_PDF_TEMPLATE_SETS.map((s) => s.approval)).toEqual([
       expect.objectContaining({ version: 3, fingerprint: '287de01d8dc365e4e7c62ab0ea25fdce0b824b26e31367560b85b2f9e779c1b5', record_schema: { id: 'si8/creator-record-v2-record', version: 8 }, review_ref: 'JD-CR-V2-MVP-INTEGRATION-4-20261110', lifecycle: 'superseded' }),
-      expect.objectContaining({ version: 4, fingerprint: 'd4ecf3f39487ed43ce6c5e621d988d6525b638c952a8c5ead01e0cc9b8504f7e', record_schema: { id: 'si8/creator-record-v2-record', version: 7 }, lifecycle: 'approved', authority: notBlank, review_ref: notBlank }),
-      expect.objectContaining({ version: 5, fingerprint: 'a27e23cdbc1b12c16330b9518bba210b218bb0e8807e53ac164d6673ec873408', record_schema: { id: 'si8/creator-record-v2-record', version: 8 }, lifecycle: 'approved', authority: notBlank, review_ref: notBlank }),
+      // CR-DESIGN-2D: v4 / v5 stay registered, superseded and unchanged; v6 / v7 (Institutional Trust) are the approved sets.
+      expect.objectContaining({ version: 4, fingerprint: 'd4ecf3f39487ed43ce6c5e621d988d6525b638c952a8c5ead01e0cc9b8504f7e', record_schema: { id: 'si8/creator-record-v2-record', version: 7 }, lifecycle: 'superseded', authority: notBlank, review_ref: notBlank }),
+      expect.objectContaining({ version: 5, fingerprint: 'a27e23cdbc1b12c16330b9518bba210b218bb0e8807e53ac164d6673ec873408', record_schema: { id: 'si8/creator-record-v2-record', version: 8 }, lifecycle: 'superseded', authority: notBlank, review_ref: notBlank }),
+      expect.objectContaining({ version: 6, fingerprint: 'a0cd0c248ce270d2826712910aa606579ce429f7923b051d68a0502c5305f476', record_schema: { id: 'si8/creator-record-v2-record', version: 7 }, lifecycle: 'approved', authority: notBlank, decision_date: '2026-11-16', review_ref: expect.stringMatching(/^CR-DESIGN-2D-RELEASE-AUTHORIZATION-20261116 v6;/) }),
+      expect.objectContaining({ version: 7, fingerprint: '5d7ccfc8ce824e57f6e904d51f1027b59e43ab250a7f4895b0f804debe1761ab', record_schema: { id: 'si8/creator-record-v2-record', version: 8 }, lifecycle: 'approved', authority: notBlank, decision_date: '2026-11-16', review_ref: expect.stringMatching(/^CR-DESIGN-2D-RELEASE-AUTHORIZATION-20261116 v7;/) }),
     ])
     expect(sha(JSON.stringify(sortDeep(Governed.CREATOR_RECORD_PDF_TEMPLATES)))).toBe('c5fe2a21ec8a096c6abf7eccf0bd55f3103401e10a26512052e5d2ee15a11c6c')
     expect(sha(JSON.stringify(sortDeep(Governed.CREATOR_RECORD_PDF_TEMPLATE_SETS[0].templates)))).toBe('287de01d8dc365e4e7c62ab0ea25fdce0b824b26e31367560b85b2f9e779c1b5')

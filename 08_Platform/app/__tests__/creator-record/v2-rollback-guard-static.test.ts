@@ -29,6 +29,7 @@ describe('v2 rollback guard (static)', () => {
     expect(renderers).toContain('const V2_GENERATOR_VERSION = /^creator-record-v2-pdf-v[1-9][0-9]*$/')
     // CR-V2-ISSUER-DISPLAY-1: v2 (no issuer row). Artifacts issued as v1 still match the database guard and the renderer's pattern.
     // CR-V2-MVP-APPROVAL-AND-RELEASE-1: v3 (reading-layout templates v4 / v5). Artifacts issued as v1 or v2 still match the guard.
-    expect(renderers).toContain("export const CREATOR_RECORD_V2_GENERATOR_VERSION = 'creator-record-v2-pdf-v3'")
+    // CR-DESIGN-2D: v4 (Institutional Trust templates v6 / v7). Artifacts issued as v1, v2 or v3 still match the guard.
+    expect(renderers).toContain("export const CREATOR_RECORD_V2_GENERATOR_VERSION = 'creator-record-v2-pdf-v4'")
   })
 })

@@ -516,7 +516,7 @@ describe('CR-V2-MVP-PROD-PREP-1: no unapproved or stale content reaches a prepar
     // issuance support (R15) are not, so nothing can be issued.
     const G = CREATOR_RECORD_GOVERNANCE_AUTHORITY
     // CR-V2-MVP-PROVIDER-SCOPE-1: four ledger entries (Pika baseline v1 superseded by its v2 withdrawal); wording and contract approvals re-versioned.
-    expect([G.registry_input.questions.length, G.publication_ledger.length, G.pdf_template_sets?.length]).toEqual([21, 4, 3]) // CR-V2-MVP-APPROVAL-AND-RELEASE-1: v3 (superseded), v4, v5
+    expect([G.registry_input.questions.length, G.publication_ledger.length, G.pdf_template_sets?.length]).toEqual([21, 4, 5]) // CR-V2-MVP-APPROVAL-AND-RELEASE-1: v3 (superseded), v4, v5; CR-DESIGN-2D: v4 / v5 superseded, v6, v7
     expect([G.source_text_approval?.review_ref, G.source_text_examination_approval?.review_ref, G.questionnaire_approval?.review_ref]).toEqual(['JD-CR-V2-MVP-PROVIDER-SCOPE-2-20261111 schema 7', 'JD-CR-V2-MVP-PROVIDER-SCOPE-2-20261111 schema 8', 'JD-CR-V2-MVP-PROVIDER-SCOPE-2-20261111'])
     expect([G.pdf_template_approval?.review_ref, G.pdf_template_sets?.[0].approval.review_ref]).toEqual(['JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110 R9', 'JD-CR-V2-MVP-INTEGRATION-4-20261110'])
     expect([EVIDENCE_CONSENT_APPROVED_WORDING?.id, AI_EXAMINATION_PERMISSION_APPROVED_WORDING?.id]).toEqual(['cr-v2-storage-consent-1', 'cr-v2-ai-permission-1'])

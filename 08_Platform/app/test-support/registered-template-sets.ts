@@ -16,6 +16,13 @@ export const PRE_CUTOVER_FINGERPRINTS = { 7: 'c5fe2a21ec8a096c6abf7eccf0bd55f310
 export const CUTOVER_VERSIONS = { 7: 4, 8: 5 } as const
 export const CUTOVER_FINGERPRINTS = { 7: 'd4ecf3f39487ed43ce6c5e621d988d6525b638c952a8c5ead01e0cc9b8504f7e', 8: 'a27e23cdbc1b12c16330b9518bba210b218bb0e8807e53ac164d6673ec873408' } as const
 
+/**
+ * CR-DESIGN-2D: the Institutional Trust sets the second cutover registers (founder release authorization, 2026-11-16). After it,
+ * v4 / v5 stay registered, superseded and unchanged, exactly as v1 / v3 did after the first cutover.
+ */
+export const DESIGN_CUTOVER_VERSIONS = { 7: 6, 8: 7 } as const
+export const DESIGN_CUTOVER_FINGERPRINTS = { 7: 'a0cd0c248ce270d2826712910aa606579ce429f7923b051d68a0502c5305f476', 8: '5d7ccfc8ce824e57f6e904d51f1027b59e43ab250a7f4895b0f804debe1761ab' } as const
+
 type TemplateSet = { templates: Record<string, unknown>; approval: PdfTemplateApproval }
 
 /** Exactly one registered set for this schema and version (throws otherwise). */
@@ -32,5 +39,14 @@ export function registeredPdfTemplateSet(schema: 7 | 8, version: number): Templa
  */
 export function preCutoverLiveSet(schema: 7 | 8): TemplateSet {
   const s = registeredPdfTemplateSet(schema, PRE_CUTOVER_VERSIONS[schema])
+  return { templates: s.templates, approval: { ...s.approval, lifecycle: 'approved' } }
+}
+
+/**
+ * CR-DESIGN-2D: the reading-layout set that was live before the second cutover (schema 7 v4 / schema 8 v5), as it rendered while it
+ * was the approved set. Used to prove historical rendering is unchanged and as the base the Institutional Trust sets are compared to.
+ */
+export function cutoverLiveSet(schema: 7 | 8): TemplateSet {
+  const s = registeredPdfTemplateSet(schema, CUTOVER_VERSIONS[schema])
   return { templates: s.templates, approval: { ...s.approval, lifecycle: 'approved' } }
 }

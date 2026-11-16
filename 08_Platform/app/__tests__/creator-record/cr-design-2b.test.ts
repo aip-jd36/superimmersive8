@@ -16,7 +16,7 @@ import { INSTITUTIONAL_TRUST_PRESENTATION, presentationFingerprint, type Present
 import { templateFingerprint } from '@/lib/creator-record/customer-pdf/templates'
 import { createRenderQueue, PRESENTATION_RENDER_HOLD_MS, RenderQueueHoldExpiredError } from '@/lib/creator-record/customer-pdf/presentation/render-queue'
 import { CREATOR_RECORD_V2_GENERATOR_VERSION } from '@/lib/creator-record-artifacts/renderers'
-import { CUTOVER_VERSIONS, registeredPdfTemplateSet } from '@/test-support/registered-template-sets'
+import { CUTOVER_VERSIONS, cutoverLiveSet, DESIGN_CUTOVER_FINGERPRINTS, DESIGN_CUTOVER_VERSIONS, registeredPdfTemplateSet } from '@/test-support/registered-template-sets'
 import { CAVEATS_POINTER, CONTENTS_HEADING, proposalDiff, proposalFileContent, readProposal, syntheticallyApproved2B } from '@/test-support/cr-design-2b/proposed-sets'
 import { reviewCases, type ReviewCase } from '@/test-support/cr-design-2b/review-fixtures'
 import type { CaseReport } from '@/test-support/cr-design-2b/render-review'
@@ -29,7 +29,8 @@ const caseOf = (id: string) => CASES.find((c) => c.id === id)!
 function model(c: ReviewCase, set: { templates: unknown; approval: unknown } = syntheticallyApproved2B(c.schema), options = {}): CustomerDocumentModel {
   return buildCustomerDocument({ canonical: c.record.canonical, sha256: c.record.sha256, issued: issued(c), templates: set.templates, template_approval: set.approval as never }, options)
 }
-const approvedSet = (schema: 7 | 8) => registeredPdfTemplateSet(schema, CUTOVER_VERSIONS[schema])
+/** The v4 / v5 reading-layout sets as they rendered while approved (superseded since CR-DESIGN-2D), the base v6 / v7 are compared to. */
+const approvedSet = (schema: 7 | 8) => cutoverLiveSet(schema)
 const texts = (m: CustomerDocumentModel, id: string) => m.sections.find((s) => s.id === id)!.blocks.flatMap((b) => (b.kind === 'row' ? [b.label, b.value] : [b.text]))
 /** A synthetically approved copy of a proposed set after `f` changes it (the approval follows the changed fingerprint). */
 function changed(schema: 7 | 8, f: (t: Record<string, any>) => void) {
@@ -53,16 +54,16 @@ describe('proposals: v4/v5 carried verbatim, pending, registered nowhere (clarif
   test.each([7, 8] as const)('schema %s: the committed proposal is exactly what the builder produces', (schema) => {
     expect(readProposal(schema)).toEqual(JSON.parse(JSON.stringify(proposalFileContent(schema))))
   })
-  test('Production selects v4 / v5, no set carrying a presentation, and the generator is unchanged', () => {
+  // CR-DESIGN-2D (founder release authorization, 2026-11-16): v6 / v7 are registered approved with exactly the proposal content; the
+  // proposal files themselves stay as committed (pending), and v4 / v5 stay registered, superseded and unchanged.
+  test('Production selects the released v6 / v7 (exactly the proposals), v4 / v5 superseded, generator -pdf-v4', () => {
     for (const schema of [7, 8] as const) {
       const a = approvedPdfTemplates(undefined, { id: 'si8/creator-record-v2-record', version: schema })
-      expect(a.approval?.version).toBe(CUTOVER_VERSIONS[schema])
-      expect((a.templates as Record<string, unknown>).presentation).toBeUndefined()
-      expect((a.templates as Record<string, unknown>).navigation).toBeUndefined()
+      expect([a.approval?.version, a.approval?.fingerprint, a.approval?.lifecycle]).toEqual([DESIGN_CUTOVER_VERSIONS[schema], DESIGN_CUTOVER_FINGERPRINTS[schema], 'approved'])
+      expect(JSON.stringify(a.templates)).toBe(JSON.stringify(readProposal(schema).templates))
+      expect(registeredPdfTemplateSet(schema, CUTOVER_VERSIONS[schema]).approval.lifecycle).toBe('superseded')
     }
-    const sources = readFileSync(join(__dirname, '../../lib/creator-record/governed/sources.ts'), 'utf8')
-    expect(sources).not.toMatch(/v6-schema7|v7-schema8|si8\/creator-record-pdf-presentation/)
-    expect(CREATOR_RECORD_V2_GENERATOR_VERSION).toBe('creator-record-v2-pdf-v3')
+    expect(CREATOR_RECORD_V2_GENERATOR_VERSION).toBe('creator-record-v2-pdf-v4')
   })
   test('the proposed set cannot render without an approval (as pending)', () => {
     const p = readProposal(8)

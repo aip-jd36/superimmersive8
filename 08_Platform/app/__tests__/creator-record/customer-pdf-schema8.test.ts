@@ -305,8 +305,11 @@ describe('governance', () => {
     // CR-V2-MVP-APPROVAL-AND-RELEASE-1: v3 stays registered (superseded); v4 / v5 are the approved sets.
     expect(GOV.pdf_template_sets?.map((s) => [s.approval.record_schema.version, s.approval.version, s.approval.fingerprint, s.approval.lifecycle])).toEqual([
       [8, 3, '287de01d8dc365e4e7c62ab0ea25fdce0b824b26e31367560b85b2f9e779c1b5', 'superseded'],
-      [7, 4, 'd4ecf3f39487ed43ce6c5e621d988d6525b638c952a8c5ead01e0cc9b8504f7e', 'approved'],
-      [8, 5, 'a27e23cdbc1b12c16330b9518bba210b218bb0e8807e53ac164d6673ec873408', 'approved'],
+      // CR-DESIGN-2D: v4 / v5 superseded (unchanged); v6 / v7 approved.
+      [7, 4, 'd4ecf3f39487ed43ce6c5e621d988d6525b638c952a8c5ead01e0cc9b8504f7e', 'superseded'],
+      [8, 5, 'a27e23cdbc1b12c16330b9518bba210b218bb0e8807e53ac164d6673ec873408', 'superseded'],
+      [7, 6, 'a0cd0c248ce270d2826712910aa606579ce429f7923b051d68a0502c5305f476', 'approved'],
+      [8, 7, '5d7ccfc8ce824e57f6e904d51f1027b59e43ab250a7f4895b0f804debe1761ab', 'approved'],
     ])
   })
 })
