@@ -58,7 +58,13 @@ export interface FixtureDocumentOption {
 }
 
 /** SI8-UX-2: what happened to a tool block, by its position before the change. */
-export type ToolEvent = { kind: 'tool_removed'; index: number } | { kind: 'tool_identity_changed'; index: number }
+export type ToolEvent =
+  | { kind: 'tool_removed'; index: number }
+  | { kind: 'tool_identity_changed'; index: number }
+  /** SI8-UX-2-R1: a tool block was added at the end, with its stable key. */
+  | { kind: 'tool_added'; key: string }
+  /** SI8-UX-2-R1: the tool blocks' stable keys, in order, when the questionnaire mounts. */
+  | { kind: 'tools_sync'; keys: string[] }
 
 export interface QuestionnaireProps {
   registryInput: RegistryInput
@@ -88,6 +94,8 @@ export interface QuestionnaireProps {
   onToolEvent?: (event: ToolEvent) => void
   /** SI8-UX-2: the submission is held back (the caller shows why). */
   submitBlocked?: boolean
+  /** SI8-UX-2-R1: why it is held back (a string from the customer wording set); default: documents need a choice. */
+  submitBlockedMessage?: string
   /** SI8-UX-2: the step shown first (a section id or "acknowledgements"; default: the first step). Earlier steps count as reached. */
   initialStep?: string
 }
@@ -128,6 +136,12 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
   const [reached, setReached] = useState(initialStepIndex)
   const [localIssues, setLocalIssues] = useState<FormIssue[]>([])
   const stepHeadingRef = useRef<HTMLHeadingElement>(null)
+  // SI8-UX-2-R1: the caller mirrors the tool blocks by key (to resolve uploads that finish after the tools changed).
+  useEffect(() => {
+    props.onToolEvent?.({ kind: 'tools_sync', keys: toolKeys })
+    // Mount only: later changes are reported as they happen (added, removed, identity changed).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const config: FormConfig = useMemo(() => {
     const r = loadQuestionRegistry(props.registryInput)
@@ -381,7 +395,9 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
     setState((s) => ({ ...s, tools: [...s.tools, {}] }))
     setDocs((ds) => [...ds, null])
     setAnotherPlan((a) => [...a, false])
-    setToolKeys((k) => [...k, newToolKey()])
+    const key = newToolKey()
+    setToolKeys((k) => [...k, key])
+    props.onToolEvent?.({ kind: 'tool_added', key })
   }
 
   const uploadsOffered = !!props.onExamine
@@ -548,7 +564,7 @@ export function CreatorRecordQuestionnaire(props: QuestionnaireProps) {
       </nav>
       {issuesSummary}
       {currentStep === ACKNOWLEDGEMENTS_STEP ? acknowledgementsSection : renderSection(currentStep)}
-      {lastStep && props.submitBlocked === true && <p className="cr-notice mb-4" role="alert" data-submit-blocked>{C.submit_blocked}</p>}
+      {lastStep && props.submitBlocked === true && <p className="cr-notice mb-4" role="alert" data-submit-blocked>{props.submitBlockedMessage ?? C.submit_blocked}</p>}
       <div className="cr-step-actions">
         {stepIndex > 0 && <button type="button" className="cr-btn cr-btn-ghost" onClick={() => { setLocalIssues([]); goTo(stepIndex - 1) }}>{C.back}</button>}
         {lastStep ? submitButton : continueButton}

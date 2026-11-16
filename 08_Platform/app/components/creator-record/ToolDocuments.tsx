@@ -16,15 +16,20 @@
  */
 import { useState } from 'react'
 import { examText, EVIDENCE_CATEGORIES, EVIDENCE_CATEGORY_DEFAULT, type Attachment, type ExaminationTextMode } from '@/lib/creator-record-flow/examination-ui'
-import { attachmentsForTool, unlinkedAttachments, type AssociationEvent, type AssociationState, type LinkChoice } from '@/lib/creator-record-flow/document-associations'
+import { attachmentsForTool, outOfRangeDocuments, unlinkedAttachments, uploadOrigin, type AssociationEvent, type AssociationState, type LinkChoice } from '@/lib/creator-record-flow/document-associations'
 import { EVIDENCE_MAX_PER_RECORD, EVIDENCE_MAX_PER_TOOL } from '@/lib/creator-record/evidence-intake/vocabulary'
 import { LEGAL_PATHS } from '@/lib/legal/paths'
 import { EVIDENCE_MESSAGES, fillReviewText, PANEL_TEXT, QUESTIONNAIRE_CHROME } from '@/lib/creator-record-flow/wording'
 import type { CreatorRecordDocuments } from './useCreatorRecordDocuments'
 
 export interface DocumentsContext {
+  /** The links as of this render. */
   state: AssociationState
+  /** SI8-UX-2-R1: the LATEST links, for an operation that finishes after this render (never a render-time copy). */
+  current(): AssociationState
   dispatch(event: AssociationEvent): void
+  /** SI8-UX-2-R1: runs an upload while counting it as in flight (preparation waits for it). */
+  trackUpload<T>(op: () => Promise<T>): Promise<T>
   docs: CreatorRecordDocuments
   toolCount: number
   textMode: ExaminationTextMode
@@ -42,11 +47,12 @@ function choiceOf(value: string): LinkChoice | null {
 }
 
 /** One document in this version: its link, its type and its optional examination. Never what it appears to show. */
-function DocumentRow({ ctx, attachment }: { ctx: DocumentsContext; attachment: Attachment }) {
+function DocumentRow({ ctx, attachment, outOfRange = false }: { ctx: DocumentsContext; attachment: Attachment; outOfRange?: boolean }) {
   const T = examText(ctx.textMode)
   const [permitted, setPermitted] = useState(false)
   const stored = ctx.docs.documents.find((d) => d.id === attachment.document_id)
-  const pending = ctx.state.pending[attachment.document_id]
+  // SI8-UX-2-R1: a link outside the declared tools (defensive; none should arise) is shown as needing a choice, never hidden.
+  const pending = ctx.state.pending[attachment.document_id] ?? (outOfRange ? 'tool_removed' : undefined)
   const ex = ctx.docs.examination[attachment.document_id] ?? { kind: 'idle' }
   const id = `cr-doc-${attachment.document_id}`
   const blockedByPermission = ctx.aiPermissionRequired && !permitted
@@ -108,7 +114,7 @@ function DocumentRow({ ctx, attachment }: { ctx: DocumentsContext; attachment: A
 }
 
 /** Inside one declared tool's section: its documents, adding a new one, or choosing one already added. */
-export function ToolDocuments({ ctx, toolIndex }: { ctx: DocumentsContext; toolIndex: number }) {
+export function ToolDocuments({ ctx, toolIndex, toolKey }: { ctx: DocumentsContext; toolIndex: number; toolKey: string }) {
   const T = examText(ctx.textMode)
   const [mode, setMode] = useState<'idle' | 'upload' | 'pick'>('idle')
   const [file, setFile] = useState<File | null>(null)
@@ -126,12 +132,15 @@ export function ToolDocuments({ ctx, toolIndex }: { ctx: DocumentsContext; toolI
     if (!file || !consent) return
     setBusy(true)
     setMessage(null)
-    const r = await ctx.docs.upload(file)
+    // SI8-UX-2-R1: remember WHICH tool block (stable key) and which identity of it the upload began in — never its position.
+    const origin = uploadOrigin(ctx.current(), toolKey)
+    const r = await ctx.trackUpload(() => ctx.docs.upload(file))
     setBusy(false)
     if (!r.ok) { setMessage({ kind: 'error', text: r.error }); return }
-    // The same file added again is the same stored document: if it is already in this version it stays where it is.
-    if (inVersion.has(r.document.id)) setMessage({ kind: 'info', text: PANEL_TEXT.already_in_version })
-    else ctx.dispatch({ kind: 'add', document_id: r.document.id, category: EVIDENCE_CATEGORY_DEFAULT, tool_index: toolIndex })
+    // Resolved against the links as they are NOW. The same file added again is the same stored document: if it is already in
+    // this version (anywhere), nothing moves and no choice is overridden.
+    if (ctx.current().attachments.some((a) => a.document_id === r.document.id)) setMessage({ kind: 'info', text: PANEL_TEXT.already_in_version })
+    else ctx.dispatch({ kind: 'upload_completed', document_id: r.document.id, category: EVIDENCE_CATEGORY_DEFAULT, origin })
     close()
   }
 
@@ -188,7 +197,9 @@ export function ToolDocuments({ ctx, toolIndex }: { ctx: DocumentsContext; toolI
 export function RecordDocuments({ ctx, includeExaminations, onIncludeExaminationsChange }: { ctx: DocumentsContext; includeExaminations: boolean; onIncludeExaminationsChange(next: boolean): void }) {
   const T = examText(ctx.textMode)
   const unlinked = unlinkedAttachments(ctx.state)
-  const needsChoice = unlinked.filter((a) => ctx.state.pending[a.document_id] !== undefined)
+  // SI8-UX-2-R1: every document that is not on a declared tool is listed here, so none is ever invisible.
+  const outside = new Set(outOfRangeDocuments(ctx.state, ctx.toolCount))
+  const needsChoice = [...unlinked.filter((a) => ctx.state.pending[a.document_id] !== undefined), ...ctx.state.attachments.filter((a) => outside.has(a.document_id))]
   const plain = unlinked.filter((a) => ctx.state.pending[a.document_id] === undefined)
   return (
     <section className="cr-record-docs" aria-labelledby="cr-record-docs-title" data-record-documents>
@@ -197,7 +208,7 @@ export function RecordDocuments({ ctx, includeExaminations, onIncludeExamination
       {needsChoice.length > 0 && (
         <div className="cr-needs-choice" role="group" aria-labelledby="cr-needs-choice-title" data-needs-choice-group>
           <h4 id="cr-needs-choice-title" className="cr-tool-docs-heading">{PANEL_TEXT.needs_choice_heading}</h4>
-          <ul className="cr-doc-list">{needsChoice.map((a) => <DocumentRow key={a.document_id} ctx={ctx} attachment={a} />)}</ul>
+          <ul className="cr-doc-list">{needsChoice.map((a) => <DocumentRow key={a.document_id} ctx={ctx} attachment={a} outOfRange={outside.has(a.document_id)} />)}</ul>
         </div>
       )}
       {plain.length > 0 && (

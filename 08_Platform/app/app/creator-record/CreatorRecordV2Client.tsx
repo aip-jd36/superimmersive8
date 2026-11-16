@@ -23,18 +23,18 @@
  * are reported, and only a new explicit submit sends anything. A response is never turned into a correction: it names its own
  * version's contract, and if refused it stays refused until the creator chooses "Correct my answers".
  */
-import { useEffect, useReducer, useState, useTransition } from 'react'
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { CreatorRecordQuestionnaire, type QuestionnaireProps, type ToolEvent } from '@/components/creator-record/CreatorRecordQuestionnaire'
 import type { CreatorRecordFormState, FormIssue } from '@/lib/creator-record/prototype/form'
 import { CUSTOMER_SECTION_TITLES } from '@/lib/creator-record/prototype/questionnaire-structure'
 import type { PreparedView } from '@/lib/creator-record/customer-flow/service'
-import { PAGE_TEXT, QUESTIONNAIRE_CHROME, V2_REVIEW_PAGE, fillReviewText } from '@/lib/creator-record-flow/wording'
+import { EVIDENCE_MESSAGES, PAGE_TEXT, QUESTIONNAIRE_CHROME, V2_REVIEW_PAGE, fillReviewText } from '@/lib/creator-record-flow/wording'
 import { RecordDocuments, ToolDocuments, type DocumentsContext } from '@/components/creator-record/ToolDocuments'
 import { useCreatorRecordDocuments } from '@/components/creator-record/useCreatorRecordDocuments'
 import { ExaminationReview } from '@/components/creator-record/ExaminationReview'
 import { SYNTHETIC_UAT_NOTICE, attachmentsOf, preparedBody, type ResponseInput } from '@/lib/creator-record-flow/examination-ui'
-import { associationReducer, EMPTY_ASSOCIATIONS, serializeAttachments, unresolvedDocuments } from '@/lib/creator-record-flow/document-associations'
+import { associationReducer, EMPTY_ASSOCIATIONS, outOfRangeDocuments, serializeAttachments, unresolvedDocuments, type AssociationEvent, type AssociationState } from '@/lib/creator-record-flow/document-associations'
 import { carryAnswersToContract, contractProvenanceOf, RECOVERY_TEXT, type ContractProvenance, type QuestionnaireDefinition, type QuestionnaireRecovery } from '@/lib/creator-record-flow/questionnaire-recovery'
 
 // SI8-UX-2: colours resolve to the Institutional Trust tokens inside `.cr-it` (`./institutional-trust.css`).
@@ -77,7 +77,21 @@ export function CreatorRecordV2Client(props: Props) {
   const [busy, setBusy] = useState(false)
   const [formKey, setFormKey] = useState(0)
   // SI8-UX-2: the version's document links, kept correct through tool removal and in-place tool changes (`document-associations`).
-  const [associations, dispatchAssociation] = useReducer(associationReducer, EMPTY_ASSOCIATIONS)
+  // SI8-UX-2-R1: a synchronous store. An operation that finishes later (an upload) dispatches against the LATEST links, never a
+  // copy taken when it began, and can read them (`current`) without waiting for a render.
+  const associationsRef = useRef<AssociationState>(EMPTY_ASSOCIATIONS)
+  const [associations, setAssociations] = useState<AssociationState>(EMPTY_ASSOCIATIONS)
+  const dispatchAssociation = useCallback((e: AssociationEvent) => {
+    associationsRef.current = associationReducer(associationsRef.current, e)
+    setAssociations(associationsRef.current)
+  }, [])
+  // SI8-UX-2-R1: uploads still in flight. Preparation waits for them, so a pending upload can never change the documents of a
+  // version after it was prepared, or be left out of it unnoticed.
+  const [uploadsInFlight, setUploadsInFlight] = useState(0)
+  const trackUpload = useCallback(async <T,>(op: () => Promise<T>): Promise<T> => {
+    setUploadsInFlight((n) => n + 1)
+    try { return await op() } finally { setUploadsInFlight((n) => n - 1) }
+  }, [])
   const [includeExaminations, setIncludeExaminations] = useState(false)
   const documents = useCreatorRecordDocuments({
     enabled: props.examination !== undefined,
@@ -145,7 +159,12 @@ export function CreatorRecordV2Client(props: Props) {
 
   async function submit(state: CreatorRecordFormState) {
     // SI8-UX-2: never prepare a version while a document link waits for the creator's choice (the button is disabled too).
-    const serialized = props.examination ? serializeAttachments(associations, state.tools.length) : null
+    if (props.examination && uploadsInFlight > 0) {
+      setLastState(state)
+      setError(EVIDENCE_MESSAGES.upload_in_progress)
+      return
+    }
+    const serialized = props.examination ? serializeAttachments(associationsRef.current, state.tools.length) : null
     if (serialized && !serialized.ok) {
       setLastState(state)
       setError(QUESTIONNAIRE_CHROME.submit_blocked)
@@ -334,6 +353,9 @@ export function CreatorRecordV2Client(props: Props) {
     )
   }
 
+  // SI8-UX-2-R1: preparation waits while any document needs a choice, any link is outside the declared tools, or an upload is in flight.
+  const documentsBlock = props.examination !== undefined && (unresolvedDocuments(associations).length > 0 || (associations.tools !== undefined && outOfRangeDocuments(associations, associations.tools.length).length > 0))
+  const uploadBlock = props.examination !== undefined && uploadsInFlight > 0
   return (
     <div className="cr-it">
       {uatNotice}
@@ -389,10 +411,11 @@ export function CreatorRecordV2Client(props: Props) {
         onSubmit={(state) => submit(state)}
         stepped
         onToolEvent={(e: ToolEvent) => dispatchAssociation(e)}
-        submitBlocked={props.examination !== undefined && unresolvedDocuments(associations).length > 0}
+        submitBlocked={documentsBlock || uploadBlock}
+        submitBlockedMessage={documentsBlock ? QUESTIONNAIRE_CHROME.submit_blocked : EVIDENCE_MESSAGES.upload_in_progress}
         {...(props.examination
           ? {
-              renderToolDocuments: (i: number, toolKey: string, toolCount: number) => <ToolDocuments key={toolKey} ctx={documentsContext(toolCount)} toolIndex={i} />,
+              renderToolDocuments: (i: number, toolKey: string, toolCount: number) => <ToolDocuments key={toolKey} ctx={documentsContext(toolCount)} toolIndex={i} toolKey={toolKey} />,
               renderAfterTools: (toolCount: number) => <RecordDocuments ctx={documentsContext(toolCount)} includeExaminations={includeExaminations} onIncludeExaminationsChange={setIncludeExaminations} />,
             }
           : {})}
@@ -403,7 +426,9 @@ export function CreatorRecordV2Client(props: Props) {
   function documentsContext(toolCount: number): DocumentsContext {
     return {
       state: associations,
+      current: () => associationsRef.current,
       dispatch: dispatchAssociation,
+      trackUpload,
       docs: documents,
       toolCount,
       textMode: props.examination?.aiPermissionVersion ? 'live' : 'replay',

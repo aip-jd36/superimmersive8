@@ -254,6 +254,89 @@ async function pathC(width, tag) {
   check(`${tag} C: an examination completing after re-linking and a tool removal leaves the creator's link unchanged`, s.length === 1 && s[0].where === 'unlinked' && s[0].link === 'unlinked' && s[0].pending === null && read, s)
 }
 
+// Path D (SI8-UX-2-R1, asynchronous upload association): uploads held in flight inside the page while the creator edits the tools.
+// Each completed upload must land on the tool block it began in (by stable key), need a choice if that block was removed, need
+// reconfirmation if its tool changed, never move an existing document, never be invisible, and preparation must wait for it.
+const HOLD = (ms) => js(`const f = window.fetch; window.fetch = async (u, i) => { const p = typeof u === 'string' ? u : u.url; if (p === '/api/creator-record-v2/evidence' && (i?.method ?? 'GET') === 'POST') await new Promise((r) => setTimeout(r, ${ms})); return f(u, i) }; return true`)
+async function oneTool(t1 = 'runway-gen3') { await fillFirstTwoSteps(); await d(`await __drv.select('T1', '${t1}', 0); await __drv.plan(0, 'Pro'); await __drv.text('T4', 'October 2026', 0)`) }
+async function addTool(i, t1) { await d(`await __drv.click('Add another tool'); await __drv.select('T1', '${t1}', ${i}); await __drv.select('T3', '__not_sure', ${i}); await __drv.text('T4', 'October 2026', ${i})`) }
+async function beginUpload(tool, name) { await d(`await __drv.click('Add a new document', __drv.toolDocs(${tool})); await __drv.upload(${tool}, '${name}'); const b = [...__drv.toolDocs(${tool}).querySelectorAll('button')].find((x) => x.textContent.trim() === 'Add document'); b.click(); await __drv.tick(100)`) }
+const wait = (ms) => d(`await __drv.tick(${ms}); return true`)
+// Every visible document row (by file name), and where it is: a tool section, "needs a choice", or "not linked".
+async function stateOf(name) {
+  const rows = await d(`return [...document.querySelectorAll('li[data-document]')].map((li) => ({ name: li.querySelector('.cr-doc-name')?.textContent, pending: li.getAttribute('data-pending'), link: li.querySelector('select').value, where: li.closest('[data-tool-documents]')?.getAttribute('data-tool-documents') ?? (li.closest('[data-needs-choice-group]') ? 'needs-choice' : li.closest('[data-unlinked-group]') ? 'unlinked' : '?') }))`)
+  return { row: rows.find((r) => r.name === name) ?? null, rows }
+}
+async function pathD(width, tag) {
+  const H = 2500, SETTLE = 3200
+  // R1: upload in tool 2; tool 1 removed meanwhile.
+  await load(width); await oneTool(); await addTool(1, 'higgsfield'); await HOLD(H)
+  await beginUpload(1, 'SYNTHETIC-D-R1.pdf'); await d(`await __drv.click('Remove tool 1')`); await wait(SETTLE)
+  let r = await stateOf('SYNTHETIC-D-R1.pdf')
+  check(`${tag} D/R1: upload finishing after an EARLIER tool was removed lands on its own tool (now tool 1), visible`, r.row && r.row.where === '0' && r.row.link === '0' && r.row.pending === null, r)
+  await shot(`${tag}-D1-R1-upload-after-earlier-tool-removed`)
+  // R2: upload in tool 2; tool 2 itself removed meanwhile (three tools).
+  await load(width); await oneTool(); await addTool(1, 'higgsfield'); await addTool(2, 'runway-gen3'); await HOLD(H)
+  await beginUpload(1, 'SYNTHETIC-D-R2.pdf'); await d(`await __drv.click('Remove tool 2')`); await wait(SETTLE)
+  r = await stateOf('SYNTHETIC-D-R2.pdf')
+  check(`${tag} D/R2: upload finishing after ITS OWN tool was removed is never linked to another tool; it needs a choice`, r.row && r.row.where === 'needs-choice' && r.row.pending === 'tool_removed' && r.row.link === '', r)
+  await shot(`${tag}-D2-R2-upload-after-own-tool-removed`)
+  // R3: upload in tool 1; its tool changed meanwhile.
+  await load(width); await oneTool(); await addTool(1, 'higgsfield'); await HOLD(H)
+  await beginUpload(0, 'SYNTHETIC-D-R3.pdf'); await d(`await __drv.select('T1', 'higgsfield', 0)`); await wait(SETTLE)
+  r = await stateOf('SYNTHETIC-D-R3.pdf')
+  check(`${tag} D/R3: upload finishing after its tool changed needs reconfirmation`, r.row && r.row.where === '0' && r.row.pending === 'tool_changed', r)
+  await shot(`${tag}-D3-R3-upload-after-tool-changed`)
+  // R5: tool 2 changed twice, then tool 1 removed, while tool 2's upload was in flight.
+  await load(width); await oneTool(); await addTool(1, 'higgsfield'); await HOLD(H)
+  await beginUpload(1, 'SYNTHETIC-D-R5.pdf'); await d(`await __drv.select('T1', 'runway-gen3', 1); await __drv.select('T1', 'not_sure', 1); await __drv.click('Remove tool 1')`); await wait(SETTLE)
+  r = await stateOf('SYNTHETIC-D-R5.pdf')
+  check(`${tag} D/R5: repeated changes and a removal while in flight: visible on its own tool, needing reconfirmation`, r.row && r.row.where === '0' && r.row.pending === 'tool_changed', r)
+  await shot(`${tag}-D4-R5-repeated-changes-and-removal`)
+  // Away and back: changing the tool and then back still needs reconfirmation.
+  await load(width); await oneTool(); await HOLD(H)
+  await beginUpload(0, 'SYNTHETIC-D-away-back.pdf'); await d(`await __drv.select('T1', 'higgsfield', 0); await __drv.select('T1', 'runway-gen3', 0)`); await wait(SETTLE)
+  r = await stateOf('SYNTHETIC-D-away-back.pdf')
+  check(`${tag} D: changing the tool away and back while in flight still needs reconfirmation`, r.row && r.row.where === '0' && r.row.pending === 'tool_changed', r)
+  // Multiple concurrent uploads, a middle tool removed meanwhile.
+  await load(width); await oneTool(); await addTool(1, 'higgsfield'); await addTool(2, 'runway-gen3'); await HOLD(H)
+  await beginUpload(0, 'SYNTHETIC-D-multi-1.pdf'); await beginUpload(2, 'SYNTHETIC-D-multi-3.pdf'); await d(`await __drv.click('Remove tool 2')`); await wait(SETTLE + 600)
+  const m1 = await stateOf('SYNTHETIC-D-multi-1.pdf'); const m3 = await stateOf('SYNTHETIC-D-multi-3.pdf')
+  check(`${tag} D: two concurrent uploads each land on their own tool after a middle tool is removed`, m1.row?.where === '0' && m1.row?.pending === null && m3.row?.where === '1' && m3.row?.pending === null, { m1: m1.row, m3: m3.row })
+  // Duplicate added elsewhere while pending: the same file uploaded in tool 1 while the creator adds that stored document to tool 2.
+  await load(width); await oneTool(); await addTool(1, 'higgsfield'); await HOLD(H)
+  await beginUpload(0, 'SYNTHETIC-runway-receipt-2026-10.pdf')
+  await d(`await __drv.click('Choose a document you have already added', __drv.toolDocs(1)); await __drv.pick(1, '${PREV_RUNWAY}')`); await wait(SETTLE)
+  const dup = await d('return __drv.docState()')
+  const dupMsg = (await d(`return __drv.toolDocs(0).textContent`)).includes('This document is already in this version')
+  check(`${tag} D: a duplicate finishing after the same document was added elsewhere does not move it; the existing notice is shown`, dup.length === 1 && dup[0].id === PREV_RUNWAY && dup[0].where === '1' && dupMsg, { dup, dupMsg })
+  // Removal and re-creation with the same provider: the upload is not linked to the new block.
+  await load(width); await oneTool(); await addTool(1, 'higgsfield'); await HOLD(H)
+  await beginUpload(1, 'SYNTHETIC-D-recreate.pdf'); await d(`await __drv.click('Remove tool 2')`); await addTool(1, 'higgsfield'); await wait(SETTLE)
+  r = await stateOf('SYNTHETIC-D-recreate.pdf')
+  check(`${tag} D: a tool removed and re-created with the same provider does not receive the in-flight upload`, r.row && r.row.where === 'needs-choice' && r.row.pending === 'tool_removed', r)
+  // Explicit choices while an upload is pending are kept.
+  await load(width); await oneTool(); await addTool(1, 'higgsfield')
+  await d(`await __drv.click('Choose a document you have already added', __drv.toolDocs(1)); await __drv.pick(1, '${PREV_HIGGS}')`)
+  await HOLD(H); await beginUpload(0, 'SYNTHETIC-D-explicit.pdf'); await d(`await __drv.link('${PREV_HIGGS}', 'unlinked')`); await wait(SETTLE)
+  const ex = await stateOf('SYNTHETIC-D-explicit.pdf'); const prev = (await d('return __drv.docState()')).find((x) => x.id === PREV_HIGGS)
+  check(`${tag} D: a choice made while an upload is pending is kept, and the upload lands on its own tool`, prev?.where === 'unlinked' && prev?.pending === null && ex.row?.where === '0' && ex.row?.pending === null, { prev, upload: ex.row })
+  // Preparation waits for an upload in flight, then sends the intended references.
+  await load(width); await oneTool(); await HOLD(5000); await beginUpload(0, 'SYNTHETIC-D-prepare.pdf')
+  await finishAfterTools(); await d(`await __drv.ack()`)
+  const blocked = await d(`return __drv.disabled('Prepare draft record')`)
+  const notice = (await d(`return document.querySelector('[data-submit-blocked]')?.textContent ?? ''`)) === 'This file is still being added. Try again in a moment.'
+  const sentWhileBlocked = (await d('return __drv.requests()')).filter((q) => q.path === '/api/creator-record-v2/prepared').length
+  await shot(`${tag}-D5-prepare-waits-for-upload`)
+  check(`${tag} D: preparation is blocked, with the existing "still being added" notice, while an upload is in flight`, blocked === true && notice && sentWhileBlocked === 0, { blocked, notice, sentWhileBlocked })
+  await wait(5600)
+  check(`${tag} D: once the upload finishes, preparation is available again`, (await d(`return __drv.disabled('Prepare draft record')`)) === false)
+  await d(`await __drv.click('Prepare draft record'); await __drv.tick(600)`)
+  const prep = (await d('return __drv.requests()')).filter((q) => q.path === '/api/creator-record-v2/prepared')
+  const docs = prep[0]?.body?.documents ?? []
+  check(`${tag} D: the prepared references include the finished upload on its own tool (existing contract)`, prep.length === 1 && docs.length === 1 && docs[0].tool_index === 0 && Object.keys(docs[0]).sort().join(',') === 'category,document_id,tool_index', docs)
+}
+
 try {
   await connect()
   await send('Page.enable'); await send('Runtime.enable')
@@ -263,6 +346,8 @@ try {
   logs.mobileA = await pathA(390, 'mobile')
   logs.mobileB = await pathB(390, 'mobile')
   await pathC(1280, 'desktop')
+  await pathD(1280, 'desktop')
+  await pathD(390, 'mobile')
   writeFileSync(join(evidenceDir, 'request-log.json'), JSON.stringify(logs, null, 2))
   writeFileSync(join(evidenceDir, 'checks.json'), JSON.stringify(checks, null, 2))
   const failed = checks.filter((c) => !c.ok)

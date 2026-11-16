@@ -20,19 +20,46 @@ import type { Attachment } from './examination-ui'
 
 export type PendingReason = 'tool_removed' | 'tool_changed'
 
+/**
+ * SI8-UX-2-R1: one declared tool block, by its STABLE key (the questionnaire's, never reused) and its identity generation (bumped on
+ * every in-place identity change, never reset, so changing away and back still counts as a change).
+ */
+export interface ToolSlot { key: string; generation: number }
+
+/** SI8-UX-2-R1: where an upload began — the tool block's key and its identity generation at that moment. */
+export interface UploadOrigin { key: string; generation: number }
+
 export interface AssociationState {
   /** The documents in this version, in the order they were added. `tool_index` is always within the declared tools, or null. */
   attachments: Attachment[]
   /** Documents whose link the creator must confirm, and why. Every key is a document in `attachments`. */
   pending: Readonly<Record<string, PendingReason>>
+  /**
+   * SI8-UX-2-R1: the declared tool blocks in order, mirrored from the questionnaire (`tools_sync`, `tool_added`, `tool_removed`,
+   * `tool_identity_changed`). Absent when not known (then links are kept exactly as given and only `serializeAttachments` checks
+   * their range). When present, an `add` outside the declared tools becomes "needs a choice" instead of an invisible link, and an
+   * upload completion is resolved against it.
+   */
+  tools?: ToolSlot[]
 }
 
 /** Where a creator puts a document: a tool (by position), not linked to a tool, or out of this version. */
 export type LinkChoice = { kind: 'tool'; tool_index: number } | { kind: 'unlinked' } | { kind: 'exclude' }
 
 export type AssociationEvent =
+  /** SI8-UX-2-R1: the questionnaire's tool blocks, by key, in order (its mount). Generations are kept for keys already known. */
+  | { kind: 'tools_sync'; keys: string[] }
+  /** SI8-UX-2-R1: a tool block was added at the end. */
+  | { kind: 'tool_added'; key: string }
   | { kind: 'tool_removed'; index: number }
   | { kind: 'tool_identity_changed'; index: number }
+  /**
+   * SI8-UX-2-R1: an upload that began in the tool block `origin` finished. Resolved against the CURRENT state, never the position
+   * the block had when the upload began: unchanged block → linked to its current position; block removed → not linked, needs a
+   * choice; block's identity changed since (generation differs) → linked to its current position, needs reconfirmation. A document
+   * already in the version is never moved or re-flagged (a newer explicit choice always wins).
+   */
+  | { kind: 'upload_completed'; document_id: string; category: string; origin: UploadOrigin }
   /** The declared tools became fewer than before by a means other than removing one (a questionnaire update). */
   | { kind: 'tools_truncated'; count: number }
   | { kind: 'add'; document_id: string; category: string; tool_index: number | null }
@@ -56,8 +83,27 @@ export function toolIdentityChanged(previous: readonly string[] | undefined, nex
   return before !== '' && before !== after
 }
 
+/** The same state with the given attachments and pending choices, keeping the tool mirror (if known). */
+const next = (state: AssociationState, attachments: Attachment[], pending: Readonly<Record<string, PendingReason>>, tools: ToolSlot[] | undefined = state.tools): AssociationState =>
+  tools ? { attachments, pending, tools } : { attachments, pending }
+
+/** Adds one document not yet in the version. With a known tool mirror, a link outside the declared tools needs a choice instead. */
+function addDocument(state: AssociationState, document_id: string, category: string, tool_index: number | null, reason: PendingReason | null): AssociationState {
+  if (state.attachments.some((a) => a.document_id === document_id)) return state
+  const outOfRange = state.tools !== undefined && tool_index !== null && (tool_index < 0 || tool_index >= state.tools.length)
+  const link = outOfRange ? null : tool_index
+  const why: PendingReason | null = outOfRange ? 'tool_removed' : reason
+  return next(state, [...state.attachments, { document_id, category, tool_index: link }], why ? { ...state.pending, [document_id]: why } : state.pending)
+}
+
 export function associationReducer(state: AssociationState, event: AssociationEvent): AssociationState {
   switch (event.kind) {
+    case 'tools_sync': {
+      const known = new Map((state.tools ?? []).map((t) => [t.key, t.generation]))
+      return next(state, state.attachments, state.pending, event.keys.map((key) => ({ key, generation: known.get(key) ?? 0 })))
+    }
+    case 'tool_added':
+      return state.tools ? next(state, state.attachments, state.pending, [...state.tools, { key: event.key, generation: 0 }]) : state
     case 'tool_removed': {
       const k = event.index
       const pending: Record<string, PendingReason> = { ...state.pending }
@@ -67,7 +113,7 @@ export function associationReducer(state: AssociationState, event: AssociationEv
         pending[a.document_id] = 'tool_removed'
         return { ...a, tool_index: null }
       })
-      return { attachments, pending }
+      return next(state, attachments, pending, state.tools?.filter((_, i) => i !== k))
     }
     case 'tool_identity_changed': {
       const pending: Record<string, PendingReason> = { ...state.pending }
@@ -75,7 +121,8 @@ export function associationReducer(state: AssociationState, event: AssociationEv
         // A document whose tool was already removed keeps that reason; its link is null, so it is never matched here.
         if (a.tool_index === event.index && pending[a.document_id] !== 'tool_removed') pending[a.document_id] = 'tool_changed'
       }
-      return { attachments: state.attachments, pending }
+      // The generation only ever grows, so changing away and back is still a change for an upload that began before either.
+      return next(state, state.attachments, pending, state.tools?.map((t, i) => (i === event.index ? { ...t, generation: t.generation + 1 } : t)))
     }
     case 'tools_truncated': {
       const pending: Record<string, PendingReason> = { ...state.pending }
@@ -84,25 +131,40 @@ export function associationReducer(state: AssociationState, event: AssociationEv
         pending[a.document_id] = 'tool_removed'
         return { ...a, tool_index: null }
       })
-      return { attachments, pending }
+      return next(state, attachments, pending, state.tools?.slice(0, event.count))
     }
-    case 'add': {
+    case 'add':
       // Already in this version: nothing moves. The creator changes its link explicitly where it is shown.
-      if (state.attachments.some((a) => a.document_id === event.document_id)) return state
-      return { attachments: [...state.attachments, { document_id: event.document_id, category: event.category, tool_index: event.tool_index }], pending: state.pending }
+      return addDocument(state, event.document_id, event.category, event.tool_index, null)
+    case 'upload_completed': {
+      // Resolved against the current tool blocks; without a known mirror nothing can be resolved, so the creator chooses.
+      const at = state.tools ? state.tools.findIndex((t) => t.key === event.origin.key) : -1
+      if (at < 0) return addDocument(state, event.document_id, event.category, null, 'tool_removed')
+      const changed = state.tools![at].generation !== event.origin.generation
+      return addDocument(state, event.document_id, event.category, at, changed ? 'tool_changed' : null)
     }
     case 'choose': {
       if (!state.attachments.some((a) => a.document_id === event.document_id)) return state
       const pending = withoutKey(state.pending, event.document_id)
-      if (event.choice.kind === 'exclude') return { attachments: state.attachments.filter((a) => a.document_id !== event.document_id), pending }
+      if (event.choice.kind === 'exclude') return next(state, state.attachments.filter((a) => a.document_id !== event.document_id), pending)
       const tool_index = event.choice.kind === 'tool' ? event.choice.tool_index : null
-      return { attachments: state.attachments.map((a) => (a.document_id === event.document_id ? { ...a, tool_index } : a)), pending }
+      return next(state, state.attachments.map((a) => (a.document_id === event.document_id ? { ...a, tool_index } : a)), pending)
     }
     case 'set_category':
-      return { attachments: state.attachments.map((a) => (a.document_id === event.document_id ? { ...a, category: event.category } : a)), pending: state.pending }
+      return next(state, state.attachments.map((a) => (a.document_id === event.document_id ? { ...a, category: event.category } : a)), state.pending)
     case 'reset':
-      return { attachments: event.attachments.map((a) => ({ ...a })), pending: {} }
+      return next(state, event.attachments.map((a) => ({ ...a })), {})
   }
+}
+
+/** SI8-UX-2-R1: where an upload starting now in the tool block `key` began (its current identity generation). */
+export function uploadOrigin(state: AssociationState, key: string): UploadOrigin {
+  return { key, generation: state.tools?.find((t) => t.key === key)?.generation ?? 0 }
+}
+
+/** SI8-UX-2-R1: documents whose link points outside the declared tools (defensive: none can arise through the events above). */
+export function outOfRangeDocuments(state: AssociationState, toolCount: number): string[] {
+  return state.attachments.filter((a) => a.tool_index !== null && (a.tool_index < 0 || a.tool_index >= toolCount)).map((a) => a.document_id)
 }
 
 /** Documents still waiting for the creator's choice, in the order they were added. */

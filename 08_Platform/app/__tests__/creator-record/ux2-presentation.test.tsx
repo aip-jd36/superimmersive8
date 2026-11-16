@@ -52,7 +52,8 @@ function ctx(events: AssociationEvent[], o: { toolCount?: number; examined?: str
     upload: async () => ({ ok: false, error: 'x' }), examine: async () => undefined,
     examination: Object.fromEntries((o.examined ?? []).map((id) => [id, { kind: 'done', result: 'existing' } as const])),
   }
-  return { state: events.reduce(associationReducer, EMPTY_ASSOCIATIONS), dispatch: () => undefined, docs, toolCount: o.toolCount ?? 2, textMode: o.live === false ? 'replay' : 'live', aiPermissionRequired: o.live !== false }
+  const state = events.reduce(associationReducer, EMPTY_ASSOCIATIONS)
+  return { state, current: () => state, dispatch: () => undefined, trackUpload: (op) => op(), docs, toolCount: o.toolCount ?? 2, textMode: o.live === false ? 'replay' : 'live', aiPermissionRequired: o.live !== false }
 }
 const add = (n: number, tool_index: number | null): AssociationEvent => ({ kind: 'add', document_id: D(n), category: 'billing_receipt', tool_index })
 
@@ -90,7 +91,7 @@ describe('stepped questionnaire', () => {
 
   test('the tools step hosts the caller\'s documents inside each tool block', () => {
     const c = ctx([add(1, 0)])
-    const html = questionnaire({ stepped: true, initialStep: 'tools', renderToolDocuments: (i: number) => <ToolDocuments ctx={c} toolIndex={i} /> })
+    const html = questionnaire({ stepped: true, initialStep: 'tools', renderToolDocuments: (i: number) => <ToolDocuments ctx={c} toolIndex={i} toolKey={`k-${i}`} /> })
     expect(html).toMatch(/data-tool-block="0"[\s\S]*data-tool-documents="0"/)
     expect(text(html)).toContain('ux2-synthetic-receipt-1.pdf')
   })
@@ -100,7 +101,7 @@ describe('documents in the tool section (D10: no reading content)', () => {
   const ALL_READING_LABELS = [...Object.values(COMPARISON_LABELS), ...Object.values(OBSERVATION_STATUS_LABELS), EXAM_TEXT.findings_title, EXAM_TEXT.comparisons_title, EXAM_TEXT.limitations_title, PANEL_TEXT.table_appears, PANEL_TEXT.comparison_provider + ':', ...Object.values(RESPONSE_LABELS)]
 
   test('an examined document shows only that it was read; no value, comparison, verification or correction is rendered', () => {
-    const html = renderToStaticMarkup(<ToolDocuments ctx={ctx([add(1, 0), add(2, 0)], { examined: [D(1)] })} toolIndex={0} />)
+    const html = renderToStaticMarkup(<ToolDocuments ctx={ctx([add(1, 0), add(2, 0)], { examined: [D(1)] })} toolIndex={0} toolKey={`k-${0}`} />)
     const t = text(html)
     expect(t).toContain(EXAM_LIVE_TEXT.examined)
     for (const label of ALL_READING_LABELS) expect(t).not.toContain(label)
@@ -108,7 +109,7 @@ describe('documents in the tool section (D10: no reading content)', () => {
   })
 
   test('storage consent and AI permission are separate statements with the approved wording, and nothing is pre-ticked', () => {
-    const html = renderToStaticMarkup(<ToolDocuments ctx={ctx([add(2, 0)])} toolIndex={0} />)
+    const html = renderToStaticMarkup(<ToolDocuments ctx={ctx([add(2, 0)])} toolIndex={0} toolKey={`k-${0}`} />)
     const t = text(html)
     expect(t).toContain(EXAM_TEXT.ai_permission_label)
     expect(html).not.toMatch(/checked=""/)
@@ -119,13 +120,13 @@ describe('documents in the tool section (D10: no reading content)', () => {
   })
 
   test('without a live examination no AI permission statement is shown and the replay wording applies', () => {
-    const t = text(renderToStaticMarkup(<ToolDocuments ctx={ctx([add(2, 0)], { live: false })} toolIndex={0} />))
+    const t = text(renderToStaticMarkup(<ToolDocuments ctx={ctx([add(2, 0)], { live: false })} toolIndex={0} toolKey={`k-${0}`} />))
     expect(t).not.toContain(EXAM_TEXT.ai_permission_label)
     expect(t).toContain(EXAM_TEXT.examine)
   })
 
   test('a document whose tool changed shows the notice and no pre-selected link', () => {
-    const html = renderToStaticMarkup(<ToolDocuments ctx={ctx([add(1, 0), { kind: 'tool_identity_changed', index: 0 }])} toolIndex={0} />)
+    const html = renderToStaticMarkup(<ToolDocuments ctx={ctx([add(1, 0), { kind: 'tool_identity_changed', index: 0 }])} toolIndex={0} toolKey={`k-${0}`} />)
     expect(text(html)).toContain(PANEL_TEXT.needs_choice_changed)
     expect(html).toMatch(/<option value="" selected="">Choose…<\/option>/)
   })
@@ -166,8 +167,12 @@ describe('contracts the page keeps', () => {
   })
 
   test('preparation is never sent while a document needs a choice', () => {
-    expect(client).toContain('serializeAttachments(associations, state.tools.length)')
-    expect(client).toMatch(/submitBlocked=\{props\.examination !== undefined && unresolvedDocuments\(associations\)\.length > 0\}/)
+    expect(client).toContain('serializeAttachments(associationsRef.current, state.tools.length)')
+    // SI8-UX-2-R1: blocked while a choice is open, a link is outside the declared tools, or an upload is still in flight.
+    expect(client).toContain('const documentsBlock = props.examination !== undefined && (unresolvedDocuments(associations).length > 0 || (associations.tools !== undefined && outOfRangeDocuments(associations, associations.tools.length).length > 0))')
+    expect(client).toContain('const uploadBlock = props.examination !== undefined && uploadsInFlight > 0')
+    expect(client).toContain('submitBlocked={documentsBlock || uploadBlock}')
+    expect(client).toContain('if (props.examination && uploadsInFlight > 0) {')
   })
 
   test('the wording guard covers the new components and passes', () => {
