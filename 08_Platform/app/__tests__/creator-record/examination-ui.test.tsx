@@ -172,7 +172,10 @@ describe('client and page boundaries', () => {
 
   test('without examination: the plain prepare body, no panel, no review', () => {
     expect(client).toContain(": { state, questionnaire_contract_sha256: displayed.sha256, ...(view ? { draft_id: view.draft_id } : {}) })")
-    expect(client).toMatch(/\{props\.examination && \(\s*<EvidencePanel/)
+    // SI8-UX-2: documents are managed inside the tool sections; without examination none of it is rendered, and nothing is listed.
+    expect(client).toMatch(/\{\.\.\.\(props\.examination\s*\?\s*\{\s*renderToolDocuments:/)
+    expect(client).toContain('enabled: props.examination !== undefined')
+    expect(client).not.toContain('<EvidencePanel')
     expect(client).toContain('{view.examination && <ExaminationReview')
   })
 

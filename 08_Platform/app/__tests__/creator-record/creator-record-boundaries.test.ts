@@ -223,6 +223,7 @@ describe('lib/creator-record boundaries', () => {
       'components/creator-record/DocumentReviewPanel.tsx',
       'components/creator-record/DraftRecordView.tsx',
       'components/creator-record/ExaminationReview.tsx', // CR-V2-EXAM-INTEGRATION-X3: the prepared view's type only
+      'components/creator-record/ToolDocuments.tsx', // SI8-UX-2: the evidence vocabulary limits (constants only, no imports)
       'lib/creator-record-flow/admin-uat.ts', // Permanent admin-only UAT: the injected dependencies
       'lib/creator-record-flow/authorization-versions.ts', // CR-V2-SCHEMA8-PATH-1 (E7): consent and permission identifiers bound to the approved policy versions
       'lib/creator-record-flow/customer-live-production.ts', // CR-V2-MVP-M2A: customer live examination ports (the entry point's refusal map and port types); loaded on demand only while both code locks are true
@@ -238,6 +239,7 @@ describe('lib/creator-record boundaries', () => {
       'lib/creator-record-flow/live-offer.ts', // CR-V2-MVP-LAUNCH-FOUNDATION-1: whether a new live examination may be offered (the locks and the approved legal documents only)
       'lib/creator-record-flow/production.ts',
       'lib/creator-record-flow/questionnaire-recovery.ts', // CR-V2-DECL-1B-2: browser helper (types only)
+      'lib/creator-record-flow/questionnaire-steps.ts', // SI8-UX-2: browser helper (the section order constant; form types only)
       'lib/creator-record-flow/retention-http.ts', // CR-V2-MVP-RETENTION-M1A: retention route helpers (fixed codes)
       'lib/creator-record-flow/retention-production.ts', // CR-V2-MVP-RETENTION-M1A: retention ports (database functions of 20261111000000)
       'lib/creator-record-flow/route-handlers.ts', // request parsing shared by the customer and admin UAT routes
@@ -282,6 +284,12 @@ describe('lib/creator-record boundaries', () => {
       // CR-V2-DECL-1B-2: pure recovery after a questionnaire change (types only at compile time).
       '@/lib/creator-record-flow/questionnaire-recovery',
       '@/lib/creator-record/evidence-intake/vocabulary',
+      // SI8-UX-2: the multi-step questionnaire and in-section document management. Pure helpers and client components whose own
+      // runtime imports are checked below like every other browser file.
+      '@/lib/creator-record-flow/questionnaire-steps',
+      '@/lib/creator-record-flow/document-associations',
+      '@/components/creator-record/ToolDocuments',
+      '@/components/creator-record/useCreatorRecordDocuments',
     ]
     expect(staticImports(readFileSync(path.join(APP_ROOT, 'lib/creator-record/evidence-intake/vocabulary.ts'), 'utf8'))).toEqual([])
     expect(runtimeImports(readFileSync(path.join(APP_ROOT, 'lib/creator-record-flow/examination-ui.ts'), 'utf8'))).toEqual(['@/lib/creator-record/evidence-intake/vocabulary'])
@@ -296,6 +304,10 @@ describe('lib/creator-record boundaries', () => {
       'components/creator-record/EvidencePanel.tsx',
       'components/creator-record/ExaminationReview.tsx',
       'lib/creator-record-flow/examination-ui.ts',
+      'lib/creator-record-flow/questionnaire-steps.ts',
+      'lib/creator-record-flow/document-associations.ts',
+      'components/creator-record/ToolDocuments.tsx',
+      'components/creator-record/useCreatorRecordDocuments.ts',
     ]) {
       const src = readFileSync(path.join(APP_ROOT, f), 'utf8')
       const runtime = runtimeImports(src).filter((i) => i.includes('creator-record'))
