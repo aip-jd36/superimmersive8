@@ -509,7 +509,7 @@ describe('locks and boundaries', () => {
   test('the customer governance bundle carries the founder-approved contract, and it matches exactly', () => {
     // CR-V2-MVP-LEGAL-CONTENT-6 (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109): the approval names the exact contract the code computes.
     // CR-V2-MVP-PROVIDER-SCOPE-2: contract version 3 (T1 v3, only Higgsfield, Runway and Not sure).
-    expect(GOV.questionnaire_approval).toMatchObject({ contract_version: 3, contract_sha256: expect.stringMatching(/^[0-9a-f]{64}$/), review_ref: 'JD-CR-V2-MVP-PROVIDER-SCOPE-2-20261111', lifecycle: 'approved' })
+    expect(GOV.questionnaire_approval).toMatchObject({ contract_version: 4, contract_sha256: expect.stringMatching(/^[0-9a-f]{64}$/), review_ref: 'JD-SI8-UX-2-R2-20261116', lifecycle: 'approved' })
     expect(GOV.registry_input.questions).toHaveLength(21)
     const i = approvedCustomerRecordInputs(GOV)
     expect(gate(i.sources, V5, i.source_text)).toEqual([])
@@ -524,7 +524,7 @@ describe('locks and boundaries', () => {
   })
 
   test('production resolves to the governance bundle and its founder-approved questionnaire contract', () => {
-    expect(currentPublicationAuthority({ VERCEL_ENV: 'production' })?.questionnaire_approval?.review_ref).toBe('JD-CR-V2-MVP-PROVIDER-SCOPE-2-20261111')
+    expect(currentPublicationAuthority({ VERCEL_ENV: 'production' })?.questionnaire_approval?.review_ref).toBe('JD-SI8-UX-2-R2-20261116')
   })
 
   test('publication, payment and issuance locks are unchanged', () => {

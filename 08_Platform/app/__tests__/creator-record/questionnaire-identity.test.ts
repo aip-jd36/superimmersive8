@@ -584,18 +584,18 @@ describe('locks: PDF and issuance stay closed for schemas 7 and 8', () => {
     expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(true)
     // CR-V2-MVP-LEGAL-CONTENT-6: customer governance carries the founder-approved content; the stops above stay in force.
     // CR-V2-MVP-PROVIDER-SCOPE-1: provider-scope versions of the contract and wording approvals.
-    expect(GOV.questionnaire_approval?.review_ref).toBe('JD-CR-V2-MVP-PROVIDER-SCOPE-2-20261111')
-    expect(GOV.source_text_approval?.review_ref).toBe('JD-CR-V2-MVP-PROVIDER-SCOPE-2-20261111 schema 7')
+    expect(GOV.questionnaire_approval?.review_ref).toBe('JD-SI8-UX-2-R2-20261116')
+    expect(GOV.source_text_approval?.review_ref).toBe('JD-SI8-UX-2-R2-20261116 schema 7')
     expect(GOV.registry_input.questions).toHaveLength(21)
-    expect(currentPublicationAuthority({})?.questionnaire_approval?.review_ref).toBe('JD-CR-V2-MVP-PROVIDER-SCOPE-2-20261111')
+    expect(currentPublicationAuthority({})?.questionnaire_approval?.review_ref).toBe('JD-SI8-UX-2-R2-20261116')
     expect(approvedGovernanceSnapshot(asOf, CLAIMS, null).authorities.question).toEqual({ status: 'unavailable' })
   })
 
   // CR-V2-MVP-PROD-PREP-1: re-pinned once, because the Source Text content now names the customer wording set.
   test('the synthetic contract and wording digests did not move', () => {
     const i = syntheticUatInputs()
-    expect(i.sources.questionnaire_approval!.contract_sha256).toBe('d34bc6ce2ee5410ce10d16d049c9d94e320b0a321603dcce5a0d01175a518b26')
-    expect(i.source_text!.approval!.content_sha256).toBe('260391e7d6ad73482bb877639db1e84e40c96ec68b35128850634be42e08dd6e')
+    expect(i.sources.questionnaire_approval!.contract_sha256).toBe('4cbb9463ae4e5fed42217f9afa8df368f7ffbfefc19ae99e1711d3d5460b92a5')
+    expect(i.source_text!.approval!.content_sha256).toBe('366f8ca7903e11c4042716078cdb73fe220a6e3512d46815b12376ae1375cd4c')
     expect(i.source_text!.approval!.record_schema.version).toBe(7)
     expect(i.source_text_examination!.approval!.record_schema.version).toBe(8)
   })

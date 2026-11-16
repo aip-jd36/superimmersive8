@@ -67,6 +67,17 @@ const PROVIDER_SCOPE_2_APPROVAL: GovernanceApproval = Object.freeze({
   decision_date: PROVIDER_SCOPE_DECISION_DATE,
   review_ref: CREATOR_RECORD_PROVIDER_SCOPE_2_APPROVAL_REF,
 }) as GovernanceApproval
+// ── SI8-UX-2-R2 (founder decision, JD, 2026-11-16) ──
+// Approves, without modification, the 14 SI8-UX-2 customer strings (multi-step navigation and in-section document management,
+// `lib/creator-record-flow/wording.ts`), reuse of the existing pending-upload message beside the submit button, the Institutional
+// Trust direction for the questionnaire and supporting-document experience, and the SI8-UX-2-R1 asynchronous association
+// correction. Question text, option labels, section titles and order, acknowledgements, storage consent, AI permission and the
+// released PDF text are unchanged. Approved identities: customer wording d9ab1ccb43e8e983c997d9a80e12aae208f90123a4c3ea02b9cc780c1b2ff070,
+// Source Text 8af542da3e6c48c78df8854f78f0da628db22c7035801859913f7b19a427107d, questionnaire contract
+// 6c95569de6093999997c2d17cd64d82b66eae56014c0e4423ae084296bdf45e8. Record: 08_Platform/implementation/si8-ux-2/02-SI8-UX-2-R2-FOUNDER-AUTHORIZATION-RECORD.md.
+export const CREATOR_RECORD_UX2_WORDING_APPROVAL_REF = 'JD-SI8-UX-2-R2-20261116'
+const UX2_DECISION_DATE = '2026-11-16'
+
 /** The only tools a new Creator Record offers (CR-V2-MVP-PROVIDER-SCOPE-2). */
 export const CREATOR_RECORD_MVP_TOOL_IDS: readonly string[] = Object.freeze(['higgsfield', 'runway-gen3'])
 /** Registered tools that new Creator Records do not offer as a choice: every registered tool outside the MVP set. */
@@ -298,8 +309,8 @@ export const CREATOR_RECORD_MAX_TOOLS = 3
  * Pinned digests, computed by the code from the approved content above and the customer wording set. A mismatch means
  * approved content changed: preparation, checkout and issuance then refuse.
  */
-export const CREATOR_RECORD_SOURCE_TEXT_SHA256 = '7798a482cbb31772bce7819e503e5b065ac657a8ae2537faf69e494b6efdfbd9'
-export const CREATOR_RECORD_QUESTIONNAIRE_CONTRACT_SHA256 = 'b398b0136f806278311d12a00a1faed54f8a1cef455910f67359ac48130abc95'
+export const CREATOR_RECORD_SOURCE_TEXT_SHA256 = '8af542da3e6c48c78df8854f78f0da628db22c7035801859913f7b19a427107d'
+export const CREATOR_RECORD_QUESTIONNAIRE_CONTRACT_SHA256 = '6c95569de6093999997c2d17cd64d82b66eae56014c0e4423ae084296bdf45e8'
 
 const sourceTextApproval = (version: number, recordSchemaVersion: number, reviewRef: string, decisionDate: string = LAUNCH_DECISION_DATE): SourceTextApproval => Object.freeze({
   source_id: 'si8/creator-record-v2-source-text',
@@ -317,25 +328,27 @@ const sourceTextApproval = (version: number, recordSchemaVersion: number, review
  * The Source Text Approval covering the wording above, for the declarations record (schema 7). Versions 3 (schema 7) and 4
  * (schema 8) approved the launch wording with Pika in T1; versions 5 and 6 approved the same wording without it
  * (CR-V2-MVP-PROVIDER-SCOPE-1). Versions 7 (schema 7) and 8 (schema 8) approve T1 v3: only Higgsfield, Runway and "Not sure",
- * and the shortened T1 help text (CR-V2-MVP-PROVIDER-SCOPE-2). Nothing else in the wording changed.
+ * and the shortened T1 help text (CR-V2-MVP-PROVIDER-SCOPE-2). Versions 9 (schema 7) and 10 (schema 8) approve the same wording
+ * plus the 14 SI8-UX-2 customer strings in the customer wording set (SI8-UX-2-R2); nothing else in the wording changed.
  */
-export const CREATOR_RECORD_SOURCE_TEXT_APPROVAL: SourceTextApproval | null = sourceTextApproval(7, 7, `${CREATOR_RECORD_PROVIDER_SCOPE_2_APPROVAL_REF} schema 7`, PROVIDER_SCOPE_DECISION_DATE)
+export const CREATOR_RECORD_SOURCE_TEXT_APPROVAL: SourceTextApproval | null = sourceTextApproval(9, 7, `${CREATOR_RECORD_UX2_WORDING_APPROVAL_REF} schema 7`, UX2_DECISION_DATE)
 
 /** CR-V2-SCHEMA8-PATH-1: the distinct approval of the same wording for the examination-bearing record (schema 8). */
-export const CREATOR_RECORD_EXAMINATION_SOURCE_TEXT_APPROVAL: SourceTextApproval | null = sourceTextApproval(8, 8, `${CREATOR_RECORD_PROVIDER_SCOPE_2_APPROVAL_REF} schema 8`, PROVIDER_SCOPE_DECISION_DATE)
+export const CREATOR_RECORD_EXAMINATION_SOURCE_TEXT_APPROVAL: SourceTextApproval | null = sourceTextApproval(10, 8, `${CREATOR_RECORD_UX2_WORDING_APPROVAL_REF} schema 8`, UX2_DECISION_DATE)
 
 /**
  * The approval of the exact questionnaire contract (R1; version 2 = R1 with T1 v2, CR-V2-MVP-PROVIDER-SCOPE-1; version 3 = R1
- * with T1 v3, CR-V2-MVP-PROVIDER-SCOPE-2).
+ * with T1 v3, CR-V2-MVP-PROVIDER-SCOPE-2; version 4 = version 3 under the SI8-UX-2 wording digest, SI8-UX-2-R2: the questions,
+ * options, conditions, sections and rules are unchanged, only the wording digest the contract names changed).
  */
 export const CREATOR_RECORD_QUESTIONNAIRE_APPROVAL: QuestionnaireContractApproval | null = Object.freeze({
   contract_id: 'si8/creator-record-v2-questionnaire-contract',
-  contract_version: 3,
+  contract_version: 4,
   contract_sha256: CREATOR_RECORD_QUESTIONNAIRE_CONTRACT_SHA256,
   lifecycle: 'approved',
   authority: LAUNCH_AUTHORITY,
-  decision_date: PROVIDER_SCOPE_DECISION_DATE,
-  review_ref: CREATOR_RECORD_PROVIDER_SCOPE_2_APPROVAL_REF,
+  decision_date: UX2_DECISION_DATE,
+  review_ref: CREATOR_RECORD_UX2_WORDING_APPROVAL_REF,
 }) as QuestionnaireContractApproval
 
 // CR-V2-MVP-M3: the customer PDF template set and its approval (`../customer-pdf/templates`). Rendering

@@ -69,8 +69,11 @@ export interface ApprovedAuthorizationWording {
   customer_wording_sha256: string
 }
 // CR-V2-MVP-LEGAL-CONTENT-6: founder-approved (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109, R6), naming the approved customer wording set.
-export const EVIDENCE_CONSENT_APPROVED_WORDING: ApprovedAuthorizationWording | null = Object.freeze({ id: 'cr-v2-storage-consent-1', customer_wording_sha256: 'be6e06e826cff62c0d3b8838c10d73464c78f6b5c719a4cde75822ac031a01ec' })
-export const AI_EXAMINATION_PERMISSION_APPROVED_WORDING: ApprovedAuthorizationWording | null = Object.freeze({ id: 'cr-v2-ai-permission-1', customer_wording_sha256: 'be6e06e826cff62c0d3b8838c10d73464c78f6b5c719a4cde75822ac031a01ec' })
+// SI8-UX-2-R2 (JD-SI8-UX-2-R2-20261116): the same ids and the same consent and permission wording, now naming the customer wording
+// set that adds the 14 founder-approved SI8-UX-2 strings. The ids are kept, so the consent identifier and the AI-permission version
+// string (`{id}__{privacy}__{terms}`) are unchanged, and the database permission authority and existing grants are unaffected.
+export const EVIDENCE_CONSENT_APPROVED_WORDING: ApprovedAuthorizationWording | null = Object.freeze({ id: 'cr-v2-storage-consent-1', customer_wording_sha256: 'd9ab1ccb43e8e983c997d9a80e12aae208f90123a4c3ea02b9cc780c1b2ff070' })
+export const AI_EXAMINATION_PERMISSION_APPROVED_WORDING: ApprovedAuthorizationWording | null = Object.freeze({ id: 'cr-v2-ai-permission-1', customer_wording_sha256: 'd9ab1ccb43e8e983c997d9a80e12aae208f90123a4c3ea02b9cc780c1b2ff070' })
 
 /** Shown nowhere and accepted nowhere: what the flow uses when no consent can be bound. The intake refuses it in every mode. */
 export const CONSENT_VERSION_UNBINDABLE = 'consent-version-unavailable'

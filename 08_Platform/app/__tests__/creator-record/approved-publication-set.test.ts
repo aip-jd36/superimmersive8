@@ -85,7 +85,8 @@ describe('R6 consent and AI permission, and the R11 customer wording set', () =>
     expect(sha(packetJson(r6))).toBe('dd4ee378b2f85efd96c3a05b70302c76925ee4a748bf84b55166527cb26041c4')
     const identity = customerWordingIdentity().sha256
     expect([EVIDENCE_CONSENT_APPROVED_WORDING!.customer_wording_sha256, AI_EXAMINATION_PERMISSION_APPROVED_WORDING!.customer_wording_sha256]).toEqual([identity, identity])
-    expect(identity).toBe('be6e06e826cff62c0d3b8838c10d73464c78f6b5c719a4cde75822ac031a01ec')
+    // SI8-UX-2-R2: the customer wording set with the 14 founder-approved SI8-UX-2 strings (was be6e06e8…, R11).
+    expect(identity).toBe('d9ab1ccb43e8e983c997d9a80e12aae208f90123a4c3ea02b9cc780c1b2ff070')
   })
   test('R11: the app renders the approved 452-string customer wording set (45 replacements, 407 unchanged)', () => {
     const flat: string[] = []
@@ -94,7 +95,7 @@ describe('R6 consent and AI permission, and the R11 customer wording set', () =>
       else if (v && typeof v === 'object') for (const x of Object.values(v)) walk(x)
     }
     walk(CUSTOMER_WORDING_SOURCES)
-    expect(flat).toHaveLength(452)
+    expect(flat).toHaveLength(466) // SI8-UX-2-R2: 452 + the 14 founder-approved SI8-UX-2 strings
   })
 })
 

@@ -28,7 +28,7 @@ import { questionnaireContract } from '@/lib/creator-record/customer-record/ques
 import { loadQuestionRegistry } from '@/lib/creator-record/contract/question-registry'
 import {
   CREATOR_RECORD_EXCLUDED_TOOL_IDS, CREATOR_RECORD_GOVERNANCE_AUTHORITY as GOV, CREATOR_RECORD_LAUNCH_APPROVAL_REF, CREATOR_RECORD_MVP_TOOL_IDS,
-  CREATOR_RECORD_PRESENTATION, CREATOR_RECORD_PROVIDER_SCOPE_APPROVAL_REF, CREATOR_RECORD_PUBLICATION_LEDGER, CREATOR_RECORD_REGISTRY_INPUT,
+  CREATOR_RECORD_PRESENTATION, CREATOR_RECORD_PROVIDER_SCOPE_APPROVAL_REF, CREATOR_RECORD_PROVIDER_SCOPE_2_APPROVAL_REF, CREATOR_RECORD_PUBLICATION_LEDGER, CREATOR_RECORD_REGISTRY_INPUT,
 } from '@/lib/creator-record/governed/sources'
 import { CANONICAL_TOOL_ID_LIST, TOOL_OPTION_CODES, TOOL_OPTION_LABELS } from '@/lib/creator-record/identity/selectable-identities'
 import { TOPIC_CLAIMS_FIXTURE as CLAIMS } from '@/lib/retrieval-engine/topic-claims-fixture'
@@ -212,16 +212,22 @@ describe('server-side enforcement (prepare service, Production inputs)', () => {
 /**
  * The governed sources exactly as approved before CR-V2-MVP-PROVIDER-SCOPE-2. 'v1': T1 v1 offering every tool (Pika included),
  * the LEDGER-2 entries, REGISTRY-1 and the version 3 Source Text and version 1 contract approvals. 'v2': T1 v2 offering every
- * tool but Pika, LEDGER-3, REGISTRY-2 and the version 5 Source Text and version 2 contract approvals. Each reconstruction is
- * proven faithful by reproducing both pinned digests of its approvals.
+ * tool but Pika, LEDGER-3, REGISTRY-2 and the version 5 Source Text and version 2 contract approvals. 'v3' (SI8-UX-2-R2): the
+ * current questionnaire (T1 v3, REGISTRY-3, LEDGER-3) with the version 7 Source Text and version 3 contract approvals of
+ * CR-V2-MVP-PROVIDER-SCOPE-2, under which every record issued before SI8-UX-2 was made. All three were approved under the
+ * customer wording set identity they named, be6e06e8… (before the 14 SI8-UX-2 strings), so each reconstruction carries it. Each
+ * reconstruction is proven faithful by reproducing both pinned digests of its approvals.
  */
+const PRE_UX2_CUSTOMER_WORDING = { set_id: 'si8/creator-record-v2-customer-wording', version: 2, sha256: 'be6e06e826cff62c0d3b8838c10d73464c78f6b5c719a4cde75822ac031a01ec' } as const
 const R2_T1_HELP = 'Choose it from the list. If it is not listed, choose “My tool isn’t listed” and type its name. You can add up to 3 tools.'
 const PREVIOUS = {
   v1: { sourceText: '0947f3d27e82e2bf9f509668a309baefb53caf3977f7d885edfe7ed56084d967', contract: '7b63a6d98ebe1a4b02d43091135f8c58ac59e295c1f6a5b80d8e28702ec808be' },
   v2: { sourceText: '06fc6f6d6a103450c149b57a0edf03cbd210ebc30a56989c98a3bf3d39930277', contract: '69d32b7df61ddade4f006be12c2a371a9cd7c9d6f0db80d6420850689eb27868' },
+  v3: { sourceText: '7798a482cbb31772bce7819e503e5b065ac657a8ae2537faf69e494b6efdfbd9', contract: 'b398b0136f806278311d12a00a1faed54f8a1cef455910f67359ac48130abc95' },
 } as const
-function previousInputs(at: 'v1' | 'v2'): ApprovedInputs {
+function previousInputs(at: 'v1' | 'v2' | 'v3'): ApprovedInputs {
   const prev = clone(CURRENT) as ApprovedInputs
+  ;(prev.sources as unknown as { customer_wording: unknown }).customer_wording = PRE_UX2_CUSTOMER_WORDING
   const s = prev.sources as unknown as {
     registry_input: typeof CREATOR_RECORD_REGISTRY_INPUT; presentation: typeof CREATOR_RECORD_PRESENTATION; ledger: typeof CREATOR_RECORD_PUBLICATION_LEDGER
     versions: { registry: string; ledger: string }; questionnaire_approval: Record<string, unknown>
@@ -229,8 +235,16 @@ function previousInputs(at: 'v1' | 'v2'): ApprovedInputs {
   const authority = 'JD, for PMF Strategy Inc. d/b/a SuperImmersive 8'
   const approval = at === 'v1'
     ? { status: 'approved', approver: authority, decision_date: '2026-11-09', review_ref: CREATOR_RECORD_LAUNCH_APPROVAL_REF }
-    : { status: 'approved', approver: authority, decision_date: '2026-11-11', review_ref: CREATOR_RECORD_PROVIDER_SCOPE_APPROVAL_REF }
-  const version = at === 'v1' ? 1 : 2
+    : at === 'v2'
+      ? { status: 'approved', approver: authority, decision_date: '2026-11-11', review_ref: CREATOR_RECORD_PROVIDER_SCOPE_APPROVAL_REF }
+      : { status: 'approved', approver: authority, decision_date: '2026-11-11', review_ref: CREATOR_RECORD_PROVIDER_SCOPE_2_APPROVAL_REF }
+  const version = at === 'v1' ? 1 : at === 'v2' ? 2 : 3
+  if (at === 'v3') {
+    // The current questionnaire as approved by CR-V2-MVP-PROVIDER-SCOPE-2: only the wording approvals and identity differ.
+    prev.source_text = { approval: { ...(prev.source_text!.approval as SourceTextApproval), version: 7, content_sha256: PREVIOUS.v3.sourceText, decision_date: approval.decision_date, review_ref: `${approval.review_ref} schema 7` }, acknowledgements: prev.source_text!.acknowledgements }
+    s.questionnaire_approval = { ...s.questionnaire_approval, contract_version: 3, contract_sha256: PREVIOUS.v3.contract, decision_date: approval.decision_date, review_ref: approval.review_ref }
+    return prev
+  }
   const offered = (code: string) => at === 'v1' || code !== 'pika'
   const t1 = s.registry_input.questions.find((q) => q.q_id === 'T1')!
   Object.assign(t1, { version, options: TOOL_OPTION_CODES.filter(offered), approval })
@@ -259,8 +273,9 @@ const renderText = (r: Extract<ReturnType<typeof build>, { ok: true }>, issued_o
 describe('historical record compatibility', () => {
   const V1 = previousInputs('v1')
   const V2 = previousInputs('v2')
+  const V3 = previousInputs('v3')
 
-  test.each([['v1', V1], ['v2', V2]] as const)('the reconstruction of the %s approvals is exact (both pinned digests reproduce)', (at, inputs) => {
+  test.each([['v1', V1], ['v2', V2], ['v3', V3]] as const)('the reconstruction of the %s approvals is exact (both pinned digests reproduce)', (at, inputs) => {
     const reg = loadQuestionRegistry(inputs.sources.registry_input)
     if (!reg.ok) throw new Error(`${at} registry does not load`)
     const st = sourceTextDigest(sourceTextContent(inputs.sources, reg.registry, inputs.source_text!.acknowledgements))
@@ -281,6 +296,18 @@ describe('historical record compatibility', () => {
     expect(text).toContain('Pika')
   })
 
+  test('SI8-UX-2-R2: Runway and Higgsfield records prepared under the superseded v3 approvals (pre-UX-2 wording) still verify and render', () => {
+    for (const t of ['runway-gen3', 'higgsfield']) {
+      const r = build(state(tool(t)), V3, '2026-11-16')
+      if (!r.ok) throw new Error(`v3 build failed: ${JSON.stringify(r).slice(0, 300)}`)
+      expect(r.record.sources).toMatchObject({ registry_version: 'CR-V2-LAUNCH-REGISTRY-3', ledger_version: 'CR-V2-LAUNCH-LEDGER-3' })
+      expect(r.record.sources.questionnaire_contract).toMatchObject({ contract_version: 3, contract_sha256: PREVIOUS.v3.contract })
+      expect(verifyCustomerRecord(r.canonical, r.sha256).ok).toBe(true)
+      expect(declarationIncompatibilities(r.record)).toEqual([])
+      expect(renderText(r, '2026-11-16')).toContain(t === 'higgsfield' ? 'Higgsfield' : 'Runway')
+    }
+  })
+
   test('a Kling record and an unlisted-tool record prepared under T1 v2 still verify and render their own declarations', () => {
     const kling = build(state(tool('kling')), V2, '2026-11-11')
     const unlisted = build(state(tool('other_tool', { T1X: ['Acme Video'] })), V2, '2026-11-11')
@@ -296,7 +323,7 @@ describe('historical record compatibility', () => {
     expect(renderText(unlisted, '2026-11-11')).toContain('Acme Video')
   })
 
-  test.each([['v1', V1], ['v2', V2]] as const)('a record cannot be prepared again under the current approvals with the %s wording approval', (_, inputs) => {
+  test.each([['v1', V1], ['v2', V2], ['v3', V3]] as const)('a record cannot be prepared again under the current approvals with the %s wording approval', (_, inputs) => {
     const mixed = clone(CURRENT) as ApprovedInputs
     mixed.source_text = inputs.source_text
     expect(build(state(tool('runway-gen3')), mixed).ok).toBe(false)

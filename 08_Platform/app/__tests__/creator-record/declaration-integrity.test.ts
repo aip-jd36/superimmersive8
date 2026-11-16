@@ -556,7 +556,7 @@ describe('guidance is unchanged by removing the two mappings', () => {
 describe('compatibility', () => {
   // CR-V2-MVP-PROD-PREP-1: re-pinned once, because the Source Text content now names the customer wording set.
   test('synthetic pinned digests are unchanged, and still match the wording and templates', () => {
-    expect(SYNTHETIC_SOURCE_TEXT_SHA256).toBe('260391e7d6ad73482bb877639db1e84e40c96ec68b35128850634be42e08dd6e')
+    expect(SYNTHETIC_SOURCE_TEXT_SHA256).toBe('366f8ca7903e11c4042716078cdb73fe220a6e3512d46815b12376ae1375cd4c')
     expect(SYNTHETIC_PDF_TEMPLATES_FINGERPRINT).toBe('19857320de6f205f3c56d899beb5f05cf8b1359e3e6035dc32be123880458ec2')
     const reg = loadQuestionRegistry(SYN.registry_input)
     if (!reg.ok) throw new Error('registry')
@@ -573,7 +573,7 @@ describe('compatibility', () => {
     expect(Object.keys(g.presentation)).toHaveLength(21)
     // CR-V2-MVP-PROVIDER-SCOPE-1: the Pika baseline is withdrawn (v1 superseded by a v2 'No' entry); only Runway and Higgsfield are current.
     expect(g.publication_ledger.filter((e) => e.superseded_by === null && e.creator_record_eligible === 'Yes').map((e) => e.claim_id).sort()).toEqual(['CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1'])
-    expect(g.source_text_approval?.review_ref).toBe('JD-CR-V2-MVP-PROVIDER-SCOPE-2-20261111 schema 7')
+    expect(g.source_text_approval?.review_ref).toBe('JD-SI8-UX-2-R2-20261116 schema 7')
     expect(resolvePublicationAuthority({})).toEqual({ ok: true, mode: 'governance' })
     const inputs = approvedCustomerRecordInputs(g)
     const check = checkApprovedSources(inputs.sources, inputs.source_text, CLAIMS, AS_OF, SCHEMA)

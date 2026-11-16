@@ -200,7 +200,7 @@ export const QUESTIONNAIRE_CHROME = {
   synthetic_reading_off: ' Automated reading is turned off: only SI8’s own synthetic test documents can be described, from recorded test data, and no AI model is used.',
   submit: 'Prepare draft record',
   submitting: 'Preparing draft…',
-  // SI8-UX-2 — PROPOSED, pending founder wording approval (not approved): step navigation for the multi-step questionnaire.
+  // SI8-UX-2 — founder-approved without modification (JD-SI8-UX-2-R2-20261116): step navigation for the multi-step questionnaire.
   step_status: 'Step {n} of {total}',
   steps_label: 'Questionnaire steps',
   back: 'Back',
@@ -238,7 +238,7 @@ export const PANEL_TEXT = {
   legal_links_and: ' and ',
   kind: 'Kind',
   comparison_summary: 'Provider: {provider}. Plan: {plan}.',
-  // SI8-UX-2 — PROPOSED, pending founder wording approval (not approved): document management inside each tool's section.
+  // SI8-UX-2 — founder-approved without modification (JD-SI8-UX-2-R2-20261116): document management inside each tool's section.
   add_new_document: 'Add a new document',
   choose_existing: 'Choose a document you have already added',
   add_existing: 'Add to this tool',
