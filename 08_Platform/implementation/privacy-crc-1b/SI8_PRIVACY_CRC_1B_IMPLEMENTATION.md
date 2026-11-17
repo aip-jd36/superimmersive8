@@ -42,6 +42,10 @@ reference in one reviewed change. The link, the page and v2 then switch on toget
 
 ## Workstream B — raw-IP retention
 
+> **Not in the notice release (SI8-PRIVACY-CRC-6).** The notice was released to `main` from `release/si8-privacy-crc-notice`,
+> which leaves out every Workstream B file (workflow, internal route, runner, migration `20261118000000`, preview SQL and their
+> tests). They remain on `work/si8-privacy-crc-1b` for a separately authorized release.
+
 **Scheduler verification (B1).**
 
 - **Existing pattern (chosen):** GitHub Actions workflows call bearer-protected internal routes (`payment-fulfillment-sweep.yml`
