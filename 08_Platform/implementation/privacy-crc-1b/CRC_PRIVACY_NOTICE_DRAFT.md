@@ -2,6 +2,10 @@
 
 **Status: DRAFT — NOT APPROVED — NOT FOR PUBLICATION.** SI8-PRIVACY-CRC-1B, 2026-11-17.
 
+**Superseded by SI8-PRIVACY-CRC-3:** the current proposal is `08_Platform/app/lib/legal/crc-privacy-notice-proposed.ts`
+(English and Traditional Chinese), reviewed in `08_Platform/implementation/privacy-crc-3/SI8_PRIVACY_CRC_3_FOUNDER_REVIEW.md`. This
+file is kept as the 1B record.
+
 This text is not used by the application. The app's notice slot (`08_Platform/app/lib/legal/crc-privacy-notice.ts`,
 `CRC_PRIVACY_NOTICE`) is `null`, so `/crc/privacy` shows "This document is not available yet." and the results gate shows no link.
 Publishing means copying the approved text into that slot, with a version identifier, effective date and approval reference, in

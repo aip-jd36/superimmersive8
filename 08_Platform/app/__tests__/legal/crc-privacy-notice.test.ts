@@ -1,12 +1,18 @@
 /**
- * SI8-PRIVACY-CRC-1B — the CRC privacy-notice publication gate, the results-gate link and the disclosure version.
+ * SI8-PRIVACY-CRC-1B / CRC-3 — the CRC privacy-notice publication gate (English + Traditional Chinese), the /crc/privacy
+ * language selection, the results-gate link and the disclosure version.
  * Nothing here publishes anything: CRC_PRIVACY_NOTICE is null, so the link is hidden and captures keep recording v1.
  */
 import { readFileSync } from 'fs'
 import path from 'path'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { CRC_PRIVACY_NOTICE, CRC_PRIVACY_PATH, crcPrivacyNoticePublished, isCompleteLegalDocument } from '@/lib/legal/crc-privacy-notice'
+import {
+  CRC_NOTICE_LOCALES, CRC_PRIVACY_NOTICE, CRC_PRIVACY_PATH, crcPrivacyNoticeHref, crcPrivacyNoticeIn, crcPrivacyNoticePublished,
+  isCompleteCrcPrivacyNotice, isCompleteLegalDocument, parseCrcNoticeLocale, type CrcPrivacyNotice,
+} from '@/lib/legal/crc-privacy-notice'
+import { CRC_LOCALES } from '@/components/crc/crc-locale'
+import { CrcPrivacyNoticeView } from '@/components/crc/CrcPrivacyNoticeView'
 import { legalPageContent, PRIVACY_NOTICE, LEGAL_PATHS, type ApprovedLegalDocument } from '@/lib/legal/policies'
 import { resultsGateDisclosure, RESULTS_GATE_NOTICE_V2 } from '@/lib/crc-engine/results-gate-disclosure'
 import { CRC_CONFIG } from '@/lib/crc-engine/config'
@@ -18,13 +24,22 @@ import CrcPrivacyPage, { metadata } from '@/app/crc/privacy/page'
 const APP = path.join(__dirname, '..', '..')
 const src = (p: string) => readFileSync(path.join(APP, p), 'utf8')
 
-// A synthetic, obviously-not-real document used only to exercise the published branch.
-const SAMPLE: ApprovedLegalDocument = {
+// Synthetic, obviously-not-real documents used only to exercise the published branch.
+const SAMPLE_DOC: ApprovedLegalDocument = {
   version: 'crc-privacy-test-1',
   effective_date: '2099-01-01',
   approval_reference: 'TEST-ONLY',
   title: 'Test notice',
   paragraphs: ['Test paragraph.'],
+}
+const SAMPLE: CrcPrivacyNotice = {
+  version: 'crc-privacy-test-1',
+  effective_date: '2099-01-01',
+  approval_reference: 'TEST-ONLY',
+  text: {
+    en: { title: 'Test notice', paragraphs: ['Test paragraph EN.', 'Second EN.'] },
+    'zh-TW': { title: '測試聲明', paragraphs: ['測試段落。', '第二段。'] },
+  },
 }
 
 describe('publication gate', () => {
@@ -35,17 +50,43 @@ describe('publication gate', () => {
 
   test('completeness rule agrees with the Creator Record legal-page rule', () => {
     const cases: (ApprovedLegalDocument | null)[] = [
-      null, SAMPLE,
-      { ...SAMPLE, version: 'X' }, { ...SAMPLE, version: 'UPPER-case' }, { ...SAMPLE, effective_date: '2099-1-1' },
-      { ...SAMPLE, approval_reference: '  ' }, { ...SAMPLE, title: '' }, { ...SAMPLE, paragraphs: [] }, { ...SAMPLE, paragraphs: ['ok', ' '] },
+      null, SAMPLE_DOC,
+      { ...SAMPLE_DOC, version: 'X' }, { ...SAMPLE_DOC, version: 'UPPER-case' }, { ...SAMPLE_DOC, effective_date: '2099-1-1' },
+      { ...SAMPLE_DOC, approval_reference: '  ' }, { ...SAMPLE_DOC, title: '' }, { ...SAMPLE_DOC, paragraphs: [] },
+      { ...SAMPLE_DOC, paragraphs: ['ok', ' '] },
     ]
     for (const c of cases) expect(isCompleteLegalDocument(c)).toBe(legalPageContent(c).available)
   })
 
-  test('/crc/privacy shows the fixed unavailable notice and is not indexed', () => {
-    const html = renderToStaticMarkup(createElement(CrcPrivacyPage))
-    expect(html).toContain('data-legal-unavailable')
-    expect(html).toContain('This document is not available yet.')
+  test('a notice is published only when complete in BOTH languages, with matching paragraph counts (fail closed)', () => {
+    expect(isCompleteCrcPrivacyNotice(SAMPLE)).toBe(true)
+    const cases: unknown[] = [
+      { ...SAMPLE, text: { en: SAMPLE.text.en } },
+      { ...SAMPLE, text: { ...SAMPLE.text, 'zh-TW': { title: '', paragraphs: ['x', 'y'] } } },
+      { ...SAMPLE, text: { ...SAMPLE.text, 'zh-TW': { title: '測試', paragraphs: ['只有一段'] } } },
+      { ...SAMPLE, approval_reference: '' },
+      { ...SAMPLE, effective_date: '' },
+      { ...SAMPLE, version: 'Bad Version' },
+    ]
+    for (const c of cases) expect(crcPrivacyNoticePublished(c as CrcPrivacyNotice)).toBe(false)
+  })
+
+  test('each language view agrees with the shared legal-page rule', () => {
+    for (const l of CRC_NOTICE_LOCALES) {
+      const doc = crcPrivacyNoticeIn(SAMPLE, l)
+      expect(legalPageContent(doc).available).toBe(true)
+      expect(doc).toEqual({ version: SAMPLE.version, effective_date: SAMPLE.effective_date, approval_reference: SAMPLE.approval_reference, ...SAMPLE.text[l] })
+    }
+  })
+
+  test('/crc/privacy shows the fixed unavailable notice in every language, offers no selector and is not indexed', () => {
+    for (const searchParams of [undefined, {}, { lang: 'en' }, { lang: 'zh-TW' }, { lang: 'fr' }]) {
+      const html = renderToStaticMarkup(createElement(CrcPrivacyPage, { searchParams }))
+      expect(html).toContain('data-legal-unavailable')
+      expect(html).not.toContain('data-crc-privacy-languages')
+    }
+    expect(renderToStaticMarkup(createElement(CrcPrivacyPage, {}))).toContain('This document is not available yet.')
+    expect(renderToStaticMarkup(createElement(CrcPrivacyPage, { searchParams: { lang: 'zh-TW' } }))).toContain('本文件尚未提供。')
     expect(metadata.robots).toEqual({ index: false, follow: false })
   })
 
@@ -67,6 +108,49 @@ describe('publication gate', () => {
   })
 })
 
+describe('/crc/privacy language selection (published branch, synthetic notice)', () => {
+  test('notice languages are exactly the CRC UI languages', () => {
+    expect([...CRC_NOTICE_LOCALES]).toEqual([...CRC_LOCALES])
+  })
+
+  test('?lang= selects zh-TW only on an exact match; everything else is English', () => {
+    expect(parseCrcNoticeLocale('zh-TW')).toBe('zh-TW')
+    expect(parseCrcNoticeLocale(['zh-TW', 'en'])).toBe('zh-TW')
+    for (const v of [undefined, '', 'en', 'zh-tw', 'zh', 'ZH-TW', ' zh-TW', 'fr', 42, null, ['fr']]) expect(parseCrcNoticeLocale(v)).toBe('en')
+    expect(crcPrivacyNoticeHref('en')).toBe('/crc/privacy')
+    expect(crcPrivacyNoticeHref('zh-TW')).toBe('/crc/privacy?lang=zh-TW')
+  })
+
+  test('English: English text under lang="en"; the selector marks English current and links to both languages', () => {
+    const html = renderToStaticMarkup(createElement(CrcPrivacyNoticeView, { notice: SAMPLE, locale: 'en' }))
+    expect(html).toMatch(/<main[^>]*lang="en"/)
+    expect(html).toContain('>Test notice</h1>')
+    expect(html).toContain('Version crc-privacy-test-1 · Effective 2099-01-01')
+    expect(html).not.toContain('測試段落')
+    expect(html).toContain('<nav aria-label="Language / 語言"')
+    expect(html).toMatch(/<a href="\/crc\/privacy" hrefLang="en" lang="en" aria-current="page"[^>]*>English<\/a>/)
+    expect(html).toMatch(/<a href="\/crc\/privacy\?lang=zh-TW" hrefLang="zh-TW" lang="zh-TW" class="[^"]*">繁體中文<\/a>/)
+    expect(html).not.toContain('TEST-ONLY')
+  })
+
+  test('Traditional Chinese: Chinese text under lang="zh-TW", localized meta line, Chinese marked current', () => {
+    const html = renderToStaticMarkup(createElement(CrcPrivacyNoticeView, { notice: SAMPLE, locale: 'zh-TW' }))
+    expect(html).toMatch(/<main[^>]*lang="zh-TW"/)
+    expect(html).toContain('測試聲明')
+    expect(html).toContain('版本 crc-privacy-test-1 · 生效日期 2099-01-01')
+    expect(html).not.toContain('Test paragraph EN.')
+    expect(html).toMatch(/hrefLang="zh-TW" lang="zh-TW" aria-current="page"/)
+  })
+
+  test('an incomplete notice renders none of its text and no selector, in either language', () => {
+    for (const locale of CRC_NOTICE_LOCALES) {
+      const html = renderToStaticMarkup(createElement(CrcPrivacyNoticeView, { notice: { ...SAMPLE, approval_reference: '' }, locale }))
+      expect(html).toContain('data-legal-unavailable')
+      expect(html).not.toMatch(/Test paragraph|測試段落|data-crc-privacy-languages/)
+    }
+  })
+})
+
 describe('results-gate link', () => {
   test('hidden while the notice is unpublished (EN and zh-TW)', () => {
     expect(renderToStaticMarkup(createElement(ResultsGatePrivacyLink, { locale: 'en' }))).toBe('')
@@ -79,12 +163,19 @@ describe('results-gate link', () => {
     expect(html).toContain('target="_blank"')
     expect(html).toContain('rel="noopener noreferrer"')
     expect(html).toContain('Commercial Readiness Check Privacy Notice')
+    expect(html).toContain('hrefLang="en"')
+  })
+
+  test('hidden for a notice missing a language, even with everything else approved', () => {
+    const onlyEn = { ...SAMPLE, text: { en: SAMPLE.text.en } } as unknown as CrcPrivacyNotice
+    expect(renderToStaticMarkup(createElement(ResultsGatePrivacyLink, { locale: 'en', doc: onlyEn }))).toBe('')
   })
 
   test('once published: zh-TW wording', () => {
     const html = renderToStaticMarkup(createElement(ResultsGatePrivacyLink, { locale: 'zh-TW', doc: SAMPLE }))
     expect(html).toContain('商業就緒度檢查隱私權聲明')
-    expect(html).toContain('href="/crc/privacy"')
+    expect(html).toContain('href="/crc/privacy?lang=zh-TW"')
+    expect(html).toContain('hrefLang="zh-TW"')
   })
 
   test('the Commercial Assurance follow-up sentence and the rest of the gate copy are unchanged, EN and zh-TW', () => {
@@ -117,6 +208,12 @@ describe('disclosure version (provenance: __tests__/crc-engine/results-gate-disc
     expect(resultsGateDisclosure(SAMPLE)).toEqual({ showPrivacyLink: true, version: 'results-gate-v2' })
   })
 
+  test('a notice missing a language is not published: no link, and the gate still reports results-gate-v1', () => {
+    const onlyEn = { ...SAMPLE, text: { en: SAMPLE.text.en } } as unknown as CrcPrivacyNotice
+    expect(resultsGateDisclosure(onlyEn)).toEqual({ showPrivacyLink: false, version: 'results-gate-v1' })
+    expect(resultsGateDisclosure({ ...SAMPLE, approval_reference: '' })).toEqual({ showPrivacyLink: false, version: 'results-gate-v1' })
+  })
+
   test('the link component re-checks publication itself', () => {
     expect(src('components/crc/ResultsGatePrivacyLink.tsx')).toContain('if (!crcPrivacyNoticePublished(doc)) return null')
   })
@@ -135,7 +232,7 @@ describe('publication safety', () => {
   const served = ['app', 'components', 'lib', 'public'].flatMap((d) => walk(path.join(APP, d)))
 
   test('the notice slot is literally null in source: no text has been placed in it', () => {
-    expect(src('lib/legal/crc-privacy-notice.ts')).toMatch(/export const CRC_PRIVACY_NOTICE: ApprovedLegalDocument \| null = null\n/)
+    expect(src('lib/legal/crc-privacy-notice.ts')).toMatch(/export const CRC_PRIVACY_NOTICE: CrcPrivacyNotice \| null = null\n/)
   })
 
   test('the draft sits outside the application and is never imported or copied into served code', () => {

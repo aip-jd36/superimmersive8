@@ -4,7 +4,8 @@
  *
  *   results-gate-v1  the gate as launched 2026-08-14: heading, value proposition, field, button and the Commercial Assurance
  *                    follow-up sentence. No privacy link.
- *   results-gate-v2  the same copy, the follow-up sentence verbatim, plus the link to the published CRC privacy notice.
+ *   results-gate-v2  the same copy, the follow-up sentence verbatim, plus the link to the published CRC privacy notice
+ *                    (English and Traditional Chinese, SI8-PRIVACY-CRC-3; the link opens the visitor's CRC language).
  *
  * WHO DECIDES. The gate that renders the link also reports, with the email submission, the version it rendered
  * (`resultsGateDisclosureVersion`). Both come from `resultsGateDisclosure()` evaluated once in the visitor's own page build, so the
@@ -21,8 +22,7 @@
  *
  * Client-safe: no server config, no policy text.
  */
-import { crcPrivacyNoticePublished } from '@/lib/legal/crc-privacy-notice'
-import type { ApprovedLegalDocument } from '@/lib/legal/policies'
+import { crcPrivacyNoticePublished, type CrcPrivacyNotice } from '@/lib/legal/crc-privacy-notice'
 
 export const RESULTS_GATE_NOTICE_V1 = 'results-gate-v1'
 export const RESULTS_GATE_NOTICE_V2 = 'results-gate-v2'
@@ -35,7 +35,7 @@ export interface ResultsGateDisclosure {
 }
 
 /** What this page build renders under the gate, and the version that rendering is. One decision for both. */
-export function resultsGateDisclosure(doc?: ApprovedLegalDocument | null): ResultsGateDisclosure {
+export function resultsGateDisclosure(doc?: CrcPrivacyNotice | null): ResultsGateDisclosure {
   const showPrivacyLink = doc === undefined ? crcPrivacyNoticePublished() : crcPrivacyNoticePublished(doc)
   return { showPrivacyLink, version: showPrivacyLink ? RESULTS_GATE_NOTICE_V2 : RESULTS_GATE_NOTICE_V1 }
 }
