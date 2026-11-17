@@ -119,7 +119,7 @@ modified.
 
 | Path | Record | Submission | Checkout | Collected |
 |---|---|---|---|---|
-| A | CR-2026-32D43FC8 | `32d43fc8-3db2-44cf-aaad-92e20b730af5` | 100% complimentary code | US$0.00 |
+| A | CR-2026-32D43FC8 | `32d43fc8-3db2-44cf-aaad-92e20b730af5` | 100% complimentary code (name not recorded); session `cs_live_bglx5jcxXfXF7jDDRp37n34lhQY9kqFJ0VTn3Gz7tnEBRmuPkny4LqsAgB` | US$0.00 |
 | B | CR-2026-1E1AED2D | `1e1aed2d-b5b6-47b2-854b-05d06a198bbd` | `COMP-JD2` (operator-confirmed); session `cs_live_bcAp7ijxAufFo6kV5SHdZ839t8qxdunP9UESNupwcm7Qt7kHctczuV5pcy` | US$0.00 |
 
 **These purchases do not validate nonzero payment collection.** Every Production payment to date collected US$0.00.
