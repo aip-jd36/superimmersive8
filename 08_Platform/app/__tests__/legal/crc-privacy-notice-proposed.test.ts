@@ -31,21 +31,28 @@ const walk = (dir: string): string[] =>
     return statSync(full).isDirectory() ? walk(full) : [full]
   })
 
-describe('approved notice: placed in the slot, not published until its effective date is set', () => {
-  test('the slot carries the approved copy unchanged, the approval reference, and a PENDING effective date', () => {
+describe('approved notice: in the slot and published with the authorized effective date', () => {
+  test('the slot carries the approved copy unchanged, the approval reference, and effective date 2026-11-17', () => {
     expect(CRC_PRIVACY_NOTICE_APPROVAL_REFERENCE).toBe('SI8-PRIVACY-CRC-5-20261117')
-    expect(CRC_PRIVACY_NOTICE_EFFECTIVE_DATE).toBe('')
-    expect(CRC_PRIVACY_NOTICE).toEqual({ ...P, effective_date: '', approval_reference: 'SI8-PRIVACY-CRC-5-20261117' })
+    expect(CRC_PRIVACY_NOTICE_EFFECTIVE_DATE).toBe('2026-11-17')
+    expect(CRC_PRIVACY_NOTICE).toEqual({ ...P, effective_date: '2026-11-17', approval_reference: 'SI8-PRIVACY-CRC-5-20261117' })
     expect(CRC_PRIVACY_NOTICE!.version).toBe('crc-privacy-2026-11-17')
     expect(CRC_PRIVACY_NOTICE!.text).toBe(P.text)
   })
 
-  test('without the effective date nothing publishes: no notice, no link, the gate reports results-gate-v1', () => {
-    expect(isCompleteCrcPrivacyNotice(CRC_PRIVACY_NOTICE)).toBe(false)
-    expect(crcPrivacyNoticePublished()).toBe(false)
-    expect(resultsGateDisclosure()).toEqual({ showPrivacyLink: false, version: 'results-gate-v1' })
-    expect(renderToStaticMarkup(createElement(ResultsGatePrivacyLink, { locale: 'en' }))).toBe('')
-    expect(renderToStaticMarkup(createElement(ResultsGatePrivacyLink, { locale: 'zh-TW' }))).toBe('')
+  test('published: complete in both languages, the gate shows the link and reports results-gate-v2', () => {
+    expect(isCompleteCrcPrivacyNotice(CRC_PRIVACY_NOTICE)).toBe(true)
+    expect(crcPrivacyNoticePublished()).toBe(true)
+    expect(resultsGateDisclosure()).toEqual({ showPrivacyLink: true, version: 'results-gate-v2' })
+    expect(renderToStaticMarkup(createElement(ResultsGatePrivacyLink, { locale: 'en' }))).toContain('href="/crc/privacy"')
+    expect(renderToStaticMarkup(createElement(ResultsGatePrivacyLink, { locale: 'zh-TW' }))).toContain('href="/crc/privacy?lang=zh-TW"')
+  })
+
+  test('without the effective date nothing publishes: no link, the gate reports results-gate-v1', () => {
+    const undated = { ...CRC_PRIVACY_NOTICE!, effective_date: '' }
+    expect(crcPrivacyNoticePublished(undated)).toBe(false)
+    expect(resultsGateDisclosure(undated)).toEqual({ showPrivacyLink: false, version: 'results-gate-v1' })
+    expect(renderToStaticMarkup(createElement(ResultsGatePrivacyLink, { locale: 'en', doc: undated }))).toBe('')
   })
 
   test('a malformed effective date also keeps it unpublished', () => {

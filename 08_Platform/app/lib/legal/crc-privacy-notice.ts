@@ -7,16 +7,13 @@
  * is not published at all.
  *
  * STATE (SI8-PRIVACY-CRC-5): the copy in `./crc-privacy-notice-proposed.ts` (version crc-privacy-2026-11-17, English and
- * Traditional Chinese) is founder-approved, reference SI8-PRIVACY-CRC-5-20261117, and is placed in the slot below. Its
- * EFFECTIVE DATE IS PENDING: it must be the actual Production publication date, which is not known yet. While it is '':
- *   - /crc/privacy shows the fixed "This document is not available yet." page (noindex) in every language;
- *   - the results gate shows NO privacy link (`crcPrivacyNoticePublished()` is false);
- *   - the gate reports, and captures record, `results-gate-v1` (see `lib/crc-engine/results-gate-disclosure.ts`).
- * Deploying this file in this state changes nothing a CRC visitor sees or what CRC records.
- *
- * To publish, in the Production release change (and only with Production release authorization): set
- * CRC_PRIVACY_NOTICE_EFFECTIVE_DATE to the publication date (YYYY-MM-DD). Text, version and approval reference stay as they
- * are. The link, both language pages and gate version v2 then switch on together.
+ * Traditional Chinese) is founder-approved, reference SI8-PRIVACY-CRC-5-20261117, and is placed in the slot below.
+ * PUBLISHED (SI8-PRIVACY-CRC-6, founder-authorized Production release): effective date 2026-11-17. So:
+ *   - /crc/privacy (English) and /crc/privacy?lang=zh-TW (Traditional Chinese) show the notice, indexed, with a selector;
+ *   - the results gate shows the privacy link in the visitor's CRC language;
+ *   - the gate reports, and captures record, `results-gate-v2` (see `lib/crc-engine/results-gate-disclosure.ts`).
+ * Setting CRC_PRIVACY_NOTICE_EFFECTIVE_DATE back to '' unpublishes all three together. A new text or version needs a new
+ * approval and a new effective date.
  *
  * Client-safe by design: this module is imported by the /crc client page, so it deliberately does not import
  * `./policies` (which carries the Creator Record notice and terms text) except for a type. The per-language completeness rule
@@ -50,10 +47,10 @@ export interface CrcPrivacyNotice {
 export const CRC_PRIVACY_NOTICE_APPROVAL_REFERENCE = 'SI8-PRIVACY-CRC-5-20261117'
 
 /**
- * PENDING. The actual Production publication date (YYYY-MM-DD), set only in the Production release change. While empty the
- * notice is not published anywhere (fail closed).
+ * The Production publication date (YYYY-MM-DD), founder-authorized in SI8-PRIVACY-CRC-6. Empty or malformed means the notice
+ * is not published anywhere (fail closed).
  */
-export const CRC_PRIVACY_NOTICE_EFFECTIVE_DATE: string = ''
+export const CRC_PRIVACY_NOTICE_EFFECTIVE_DATE: string = '2026-11-17'
 
 export const CRC_PRIVACY_NOTICE: CrcPrivacyNotice | null = Object.freeze({
   ...CRC_PRIVACY_NOTICE_PROPOSED,
