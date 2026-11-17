@@ -1,0 +1,15 @@
+{
+  "origin": "https://www.superimmersive8.com",
+  "outDir": "07_Website",
+  "crcUrl": "https://app.superimmersive8.com/crc",
+  "signInUrl": "https://app.superimmersive8.com/auth/login",
+  "pendingRoutes": ["/creator-record", "/commercial-assurance", "/pricing", "/enterprise", "/contact"],
+  "allowedExternal": [
+    "https://app.superimmersive8.com/crc",
+    "https://app.superimmersive8.com/auth/login",
+    "https://fonts.googleapis.com",
+    "https://fonts.gstatic.com",
+    "https://www.superimmersive8.com",
+    "https://www.superimmersive8.com/og-image.png"
+  ]
+}
