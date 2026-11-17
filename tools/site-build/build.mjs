@@ -8,7 +8,8 @@
 //
 // Page sources: pages/*.html, each starting with <!--page {json} --> (route, pageId, title, ogTitle, description).
 // Shared partials: partials/head.html, header.html, footer.html. Placeholders: {{name}}, {{CRC_URL}}, {{SIGNIN_URL}},
-// and {{current:/route}} (becomes aria-current="page" on the matching nav link). Output is deterministic: LF, no timestamps.
+// {{current:/route}} (becomes aria-current="page" on the matching nav link), and the price placeholders from
+// site.config.json "prices" (the single source for displayed prices). Output is deterministic: LF, no timestamps.
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -36,6 +37,7 @@ function render(file) {
     title: esc(meta.title), ogTitle: esc(meta.ogTitle), description: esc(meta.description),
     canonical: meta.route === '/' ? config.origin : config.origin + meta.route,
     CRC_URL: config.crcUrl, SIGNIN_URL: config.signInUrl,
+    ...Object.fromEntries(Object.entries(config.prices ?? {}).filter(([k]) => !k.startsWith('_'))),
   }
   const fill = (t) => t
     .replace(/\{\{current:([^}]+)\}\}/g, (_, r) => (r === meta.route ? ' aria-current="page" class="active"' : ''))
