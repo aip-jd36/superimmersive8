@@ -1,7 +1,8 @@
 # Legacy website retirement — 2026-11-17
 
-**Status:** implemented and checked locally; **not pushed, not deployed.** Production still serves the legacy pages until a
-separately authorized release.
+**Status:** **released to Production 2026-11-17** (`main` = `9c724e8751361a91dd7cc83d00a1a6ef3712babd`, fast-forward from
+`fe0cfbf5`). Production behaviour observed after release is in "Production verification" below; it differs from the local
+pattern test for trailing-slash paths.
 
 ## Authorization
 
@@ -15,8 +16,9 @@ Founder instruction "SI8 — Legacy Website Retirement v2" (2026-11-17), which:
 
 ## Retired routes (marketing site, `www.superimmersive8.com`)
 
-Each directory below now returns **HTTP 410 Gone**. The bare path, the trailing-slash form, `index.html` and every file beneath it
-are covered.
+The six route prefixes below are retired: their files are no longer deployed. The intended response was **HTTP 410 Gone**. In
+Production, the tested paths without a trailing slash return 410 and the tested trailing-slash paths return 404 (see
+"Production verification").
 
 | Route prefix | What was served | Files removed from `07_Website/` |
 |---|---|---|
@@ -61,15 +63,15 @@ changed.
 | Check | Result |
 |---|---|
 | No HTML left under the six retired prefixes; remaining HTML in `07_Website/` is `index.html` and `sample/index.html` | PASS (`git ls-files`) |
-| Rewrite patterns: 31 retired variants match (bare, trailing slash, `index.html`, nested subpages, snapshot and archive files); 16 current paths do not (`/`, `/index.html`, `/favicon.svg`, `/og-image.png`, `/sample`, `/styles.css`, `/api/*`, `/record`, `/certify`, `/catalog`, look-alikes such as `/pricingx`, `/zhx`) | PASS (Next.js's bundled `path-to-regexp`, the syntax Vercel's `source` uses) |
+| Rewrite patterns (local prediction): 31 retired variants matched (bare, trailing slash, `index.html`, nested subpages, snapshot and archive files); 16 current paths did not (`/`, `/index.html`, `/favicon.svg`, `/og-image.png`, `/sample`, `/styles.css`, `/api/*`, `/record`, `/certify`, `/catalog`, look-alikes such as `/pricingx`, `/zhx`) | Local test only (Next.js's bundled `path-to-regexp`). **Not borne out on Vercel for trailing-slash paths**, which return 404 in Production |
 | `api/gone.js` returns 410, body `410 Gone`, `noindex` | PASS (Node, mock response) |
 | No app source links to a retired route | PASS (`git grep`) |
 | Creator app type-check and production build | PASS: `tsc --noEmit` exit 0; `next build` exit 0 with placeholder environment values. In the built `/showcase` page: no retired links; nav keeps the logo, Showcase, Login and Get Verified |
 | Homepage file unchanged; no change to Creator Record, CRC, payments, GA4 or access controls | PASS (diff limited to the files listed below) |
-| **Route behaviour on Vercel itself** | **NOT RUN.** The Vercel CLI here has no credentials, so `vercel dev` could not run. Confirm on a Preview deployment before Production (below). |
+| Route behaviour on Vercel before release | **NOT RUN.** The Vercel CLI here has no credentials, and the Preview deployments are behind Vercel Authentication. The founder accepted releasing without Preview route testing. |
 
-If a rewrite did not match on Vercel, the path would return 404 rather than 410. The legacy content would still not be served,
-because the files are gone.
+Where a rewrite does not match on Vercel, the path returns 404 rather than 410. That is what Production shows for trailing-slash
+paths; no legacy content is served either way, because the files are no longer deployed.
 
 ## Remaining public legacy routes (outside this scope)
 
@@ -80,12 +82,45 @@ because the files are gone.
 
 ## Deployment
 
-Two Vercel projects deploy from `main`. Both would redeploy on a push:
-- **`superimmersive8` (marketing site, root `07_Website/`):** the retirement takes effect.
-- **`si8-creator-portal` (creator app):** the Showcase navigation change takes effect.
+Released 2026-11-17 under the founder's Production release authorization, without authenticated Preview route testing (accepted).
+`main` fast-forwarded `fe0cfbf5` → `9c724e87`, no force. All three Vercel projects that deploy from this repository built
+successfully on Preview and Production:
 
-**Before Production:** push the branch (not `main`) to get Preview deployments for both projects. On the marketing preview, check:
-- a sample of retired variants returns 410;
-- `/`, `/favicon.svg`, `/sample` and the form functions still work.
+| Project | Production deployment | Previous Production deployment (rollback target) |
+|---|---|---|
+| `superimmersive8` (marketing site, `07_Website/`) | `superimmersive8-drua0ukss` | `superimmersive8-2tgkoqfy9` |
+| `si8-creator-portal` (creator app) | `si8-creator-portal-1xm25lxoz` | `si8-creator-portal-1y8gmzs5d` |
+| `superimmersive8-crm` (CRM dashboard, root `03_Sales/crm-deploy`) | `superimmersive8-k9smjobjx` | `superimmersive8-1phed0gjf` |
 
-Check that the Showcase preview renders. Then fast-forward `main`.
+The release changes no file the CRM project builds from or reads.
+
+## Production verification (2026-11-17, public domains, non-destructive GET/HEAD requests)
+
+Only the paths listed were tested; other URL variants were not.
+
+| Result | Paths tested |
+|---|---|
+| **410** `410 Gone`, `X-Robots-Tag: noindex` (16) | `/pricing`, `/pricing/index.html`, `/how-it-works`, `/how-it-works/index.html`, `/rights-verified`, `/rights-verified/playbook/index.html`, `/zh`, `/zh/index.html`, `/_archive`, `/_archive/pricing.html`, `/_archive/index-zh.html`, `/_archive/README.md`, `/_versions`, `/_versions/README.md`, `/_versions/v5-2026-07-12/how-it-works/index.html`, `/_versions/v4-2026-07-12/zh/rights-verified/playbook/index.html` |
+| **404** Vercel "page could not be found" (11) | `/pricing/`, `/how-it-works/`, `/rights-verified/`, `/rights-verified/chain-of-title/`, `/zh/`, `/zh/pricing/`, `/zh/how-it-works/`, `/zh/rights-verified/playbook/`, `/_archive/`, `/_versions/`, `/_versions/v4-2026-07-12/pricing/` |
+
+No tested path served legacy HTML.
+
+Unchanged:
+- **Marketing site:** `/` (byte-identical to `07_Website/index.html`), `/index.html`, `/favicon.svg`, `/og-image.png`, `/sample` and
+  `/styles.css` return 200. The form endpoints `/api/contact-form`, `/api/formspree-to-kit` and `/api/submit` return 405 to a GET,
+  as before; nothing was submitted.
+- **Creator app:**
+  - `/showcase` returns 200 with no links to retired pages, and Login and Get Verified are present;
+  - `/crc` returns 200;
+  - `/creator-record` redirects to sign-in, and `/auth/login` returns 200;
+  - Creator Record stays invitation-only: `creator_record_v2_pilot_access` still has 1 row.
+
+## Unresolved observations (not release failures)
+
+1. **CRM runtime not verified.** Its Production build succeeded. The deployment URL is behind Vercel Authentication, so the
+   dashboard was not opened. Someone signed in to Vercel should open it once.
+2. **Showcase catalog is empty.** `app.superimmersive8.com/api/catalog` returns `{"entries":[]}`, while the database holds one
+   approved submission with an opt-in. This release did not change the catalog API or its query, and the state before release was
+   not captured, so whether this is a pre-existing visibility setting or something else is undetermined.
+3. **Optional 410 consistency.** Trailing-slash forms return 404, not 410. Making them 410 would need further rules and a check on
+   Production, under its own authorization.
