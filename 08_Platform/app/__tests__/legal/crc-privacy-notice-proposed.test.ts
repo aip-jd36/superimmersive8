@@ -7,7 +7,7 @@
  * it makes no legal-compliance claims; and the code behaviours it describes are still true (tripwires: if one fails, the notice
  * text must be revised before release).
  */
-import { readFileSync, readdirSync, statSync } from 'fs'
+import { existsSync, readFileSync, readdirSync, statSync } from 'fs'
 import path from 'path'
 import { CRC_PRIVACY_NOTICE_PROPOSED as P } from '@/lib/legal/crc-privacy-notice-proposed'
 import {
@@ -243,10 +243,9 @@ describe('proposed notice: the behaviours it describes are still true', () => {
     expect(emails).toMatch(/approximateCountry\?: string \| null/)
   })
 
-  test('the raw-IP clearing is still gated off by default (the notice says nothing is deleted automatically)', () => {
-    expect(readFileSync(path.join(APP, '..', '..', '.github', 'workflows', 'crc-raw-ip-retention.yml'), 'utf8')).toContain(
-      'if: needs.gate.outputs.enabled == \'true\'',
-    )
+  test('no raw-IP clearing is active: its workflow is absent, or present and gated off (the notice says nothing is deleted automatically)', () => {
+    const wf = path.join(APP, '..', '..', '.github', 'workflows', 'crc-raw-ip-retention.yml')
+    if (existsSync(wf)) expect(readFileSync(wf, 'utf8')).toContain("if: needs.gate.outputs.enabled == 'true'")
   })
 
   test('there is no automatic CRC deletion path in the application', () => {
