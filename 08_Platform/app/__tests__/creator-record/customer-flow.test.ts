@@ -20,6 +20,7 @@ import {
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
 import { namingCurrentContract } from '@/test-support/questionnaire-approval'
+import { createCreatorRecordAccessCheck, creatorRecordAccessMode } from '@/lib/creator-record-flow/access-policy'
 
 const preparePrepared = namingCurrentContract(prepareAsSent)
 
@@ -140,6 +141,25 @@ describe('pilot controls', () => {
     const v = okView(await preparePrepared(open, OWNER, { state: state() }))
     expect(await reviewPrepared(d, OWNER, v.id)).toEqual({ ok: false, status: 403, code: 'not_invited' })
     expect(d.mem.calls.review).toBe(0)
+  })
+
+  // CR-PUBLIC-1: the access policy, as the production ports bind it.
+  test('CR-PUBLIC-1 default (invitation) policy: an uninvited creator is still refused', async () => {
+    const d = deps({ hasPilotAccess: createCreatorRecordAccessCheck(creatorRecordAccessMode(), async () => false) })
+    expect(await preparePrepared(d, OWNER, { state: state() })).toEqual({ ok: false, status: 403, code: 'not_invited' })
+    expect(d.mem.calls.insert).toBe(0)
+  })
+
+  test('CR-PUBLIC-1 public policy (simulated): an uninvited creator may prepare and review; ownership still holds', async () => {
+    const STRANGER = '33333333-3333-4333-8333-333333333333'
+    const d = deps({ hasPilotAccess: createCreatorRecordAccessCheck('public', async () => false) })
+    const v = okView(await preparePrepared(d, STRANGER, { state: state() }))
+    expect((await reviewPrepared(d, STRANGER, v.id)).ok).toBe(true)
+    expect(await getPrepared(d, OWNER, v.id)).toEqual({ ok: false, status: 404, code: 'not_found' })
+    expect(await reviewPrepared(d, OWNER, v.id)).toEqual({ ok: false, status: 404, code: 'not_found' })
+    expect(await preparePrepared(d, OWNER, { state: state(), draft_id: v.draft_id })).toEqual({ ok: false, status: 404, code: 'not_found' })
+    // public mode does not open a stopped flow
+    expect(await preparePrepared(deps({ submissions: 'stopped', hasPilotAccess: createCreatorRecordAccessCheck('public', async () => false) }), STRANGER, { state: state() })).toEqual({ ok: false, status: 503, code: 'submissions_stopped' })
   })
 })
 

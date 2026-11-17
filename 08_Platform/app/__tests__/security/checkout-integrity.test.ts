@@ -104,6 +104,21 @@ describe('tier, price and email come from the persisted submission', () => {
     expect(getListPriceCents).toHaveBeenCalledWith('si8_certified')
   })
 
+  // CR-PUBLIC-1: a client cannot apply or pre-fill a discount. Codes are entered only on Stripe's own checkout page, which
+  // validates them against the codes in the Stripe account; the ledger then re-checks list price, discount and total.
+  it('body discount, coupon or promotion-code fields are ignored: no discount is ever passed to Stripe', async () => {
+    standard(row({ tier: 'si8_certified' }))
+    const res = await POST(req({ submissionId: SUB_ID, discounts: [{ coupon: 'FREE100' }], promotion_code: 'promo_x', coupon: 'FREE100', allow_promotion_codes: false, amount_total: 0 }))
+    expect(res.status).toBe(200)
+    const [params] = create.mock.calls[0]
+    expect(params).not.toHaveProperty('discounts')
+    expect(params).not.toHaveProperty('promotion_code')
+    expect(params).not.toHaveProperty('coupon')
+    expect(params.allow_promotion_codes).toBe(true)
+    expect(params.line_items[0].price_data.unit_amount).toBe(49900)
+    expect(JSON.stringify(params)).not.toMatch(/FREE100|promo_x/)
+  })
+
   // The legacy `certified` tier no longer checks out (CR-CERTIFIED-PATH-1B, below); its price stays in the
   // database price function so a session created earlier still settles.
   it.each([['si8_certified', 49900]])('%s → %i cents', async (tier, cents) => {

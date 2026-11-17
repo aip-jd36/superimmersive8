@@ -22,6 +22,7 @@ import {
 } from '@/lib/creator-record/customer-flow/examination'
 import { CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flow/approved-inputs'
 import { LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD } from '@/lib/creator-record/evidence/config'
+import { createCreatorRecordAccessCheck, creatorRecordAccessMode } from '@/lib/creator-record-flow/access-policy'
 
 jest.mock('@/lib/supabase/admin', () => ({ supabaseAdmin: {} }))
 jest.mock('@/lib/supabase/server', () => ({ createClient: () => ({}) }))
@@ -88,6 +89,28 @@ describe('request: gates, ownership and the unchanged adapter', () => {
     expect(await requestCustomerExamination(w.deps, OWNER, w.doc.id)).toEqual({ ok: false, status: 403, code: 'not_invited' })
     expect(await customerExaminationHistory(w.deps, OWNER, w.doc.id)).toEqual({ ok: false, status: 403, code: 'not_invited' })
     expect(w.calls).toEqual([])
+  })
+
+  test('CR-PUBLIC-1: refused under the default (invitation) policy; the public policy (simulated) proceeds past the gate but keeps ownership', async () => {
+    const refused = world()
+    refused.deps.hasPilotAccess = createCreatorRecordAccessCheck(creatorRecordAccessMode(), async () => false)
+    expect(await requestCustomerExamination(refused.deps, OWNER, refused.doc.id)).toEqual({ ok: false, status: 403, code: 'not_invited' })
+    expect(refused.calls).toEqual([])
+
+    const pub = world()
+    pub.deps.hasPilotAccess = createCreatorRecordAccessCheck('public', async () => false)
+    const r = await requestCustomerExamination(pub.deps, OWNER, pub.doc.id)
+    expect(r).not.toMatchObject({ code: 'not_invited' })
+    expect(pub.calls.length).toBeGreaterThan(0)
+
+    const foreign = world({ doc: { user_id: OTHER } })
+    foreign.deps.hasPilotAccess = createCreatorRecordAccessCheck('public', async () => false)
+    expect(await requestCustomerExamination(foreign.deps, OWNER, foreign.doc.id)).toEqual({ ok: false, status: 404, code: 'not_found' })
+    expect(await customerExaminationHistory(foreign.deps, OWNER, foreign.doc.id)).toEqual({ ok: false, status: 404, code: 'not_found' })
+
+    const stopped = world({ submissions: 'stopped' })
+    stopped.deps.hasPilotAccess = createCreatorRecordAccessCheck('public', async () => false)
+    expect(await requestCustomerExamination(stopped.deps, OWNER, stopped.doc.id)).toEqual({ ok: false, status: 503, code: 'submissions_stopped' })
   })
 
   test('another creator’s document, a missing one and a malformed id are the same 404; nothing is logged or read', async () => {

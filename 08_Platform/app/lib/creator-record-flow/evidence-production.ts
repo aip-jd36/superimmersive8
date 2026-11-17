@@ -17,7 +17,7 @@ import { approvedStorageConsentIdentifier, EVIDENCE_BUCKET, EVIDENCE_INTAKE_REAL
 import type { EvidenceDeps, EvidenceObjects, EvidenceRow, EvidenceStore, NewEvidenceRow } from '@/lib/creator-record/evidence-intake/service'
 import { legalPoliciesApproved } from '@/lib/legal/policies'
 import { evidenceConsentVersion } from './authorization-versions'
-import { hasPilotAccess } from './pilot-access'
+import { hasCreatorRecordAccess } from './pilot-access'
 
 export const EVIDENCE_TABLE = 'creator_record_v2_documents'
 export const EVIDENCE_ACCESS_LOG_TABLE = 'creator_record_v2_evidence_access_log'
@@ -121,7 +121,7 @@ export const evidenceObjects: EvidenceObjects = {
 export function productionEvidenceDeps(): EvidenceDeps {
   return {
     submissions: CREATOR_RECORD_V2_SUBMISSIONS,
-    hasPilotAccess,
+    hasPilotAccess: hasCreatorRecordAccess, // CR-PUBLIC-1: the access policy (invitation by default)
     // CR-V2-MVP-LAUNCH-FOUNDATION-1: real documents also need the approved privacy notice and terms (fail closed while absent).
     // CR-V2-APPROVAL-AUTHORITY-FIX-1: and only with a current, approved storage-consent identifier to record (the service checks it too).
     realDocumentsPermitted: EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED && legalPoliciesApproved() && approvedStorageConsentIdentifier(evidenceConsentVersion()),

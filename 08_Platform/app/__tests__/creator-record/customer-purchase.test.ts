@@ -45,6 +45,7 @@ import * as production from '@/lib/creator-record-flow/production'
 import type { FulfillmentSubmission } from '@/lib/payments/repository'
 import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
 import { COMMERCIAL_SUPPORT_UNDER_TEST } from '@/test-support/commercial-support'
+import { createCreatorRecordAccessCheck, creatorRecordAccessMode } from '@/lib/creator-record-flow/access-policy'
 
 const buildCustomerRecord = buildCurrentRecord
 
@@ -176,6 +177,33 @@ describe('startPurchase', () => {
     expect(await startPurchase(w.deps, OWNER, row.id)).toEqual({ ok: false, status, code })
     expect(w.calls.bind).toBe(0)
     expect(w.subs.size).toBe(0)
+  })
+
+  test('CR-PUBLIC-1 default (invitation) policy refuses an uninvited creator before any binding', async () => {
+    const w = world({ hasPilotAccess: createCreatorRecordAccessCheck(creatorRecordAccessMode(), async () => false) })
+    const row = w.add(preparedRow())
+    expect(await startPurchase(w.deps, OWNER, row.id)).toEqual({ ok: false, status: 403, code: 'not_invited' })
+    expect(w.calls.bind).toBe(0)
+  })
+
+  test('CR-PUBLIC-1 public policy (simulated): an uninvited owner may purchase and check out; every other gate still applies', async () => {
+    const w = world({ hasPilotAccess: createCreatorRecordAccessCheck('public', async () => false) })
+    const row = w.add(preparedRow())
+    const a = await startPurchase(w.deps, OWNER, row.id)
+    expect(a).toEqual({ ok: true, submission_id: expect.any(String) })
+    const sub = Array.from(w.subs.values())[0]
+    expect(await checkV2Checkout(w.deps, OWNER, sub)).toEqual({ ok: true, sha256: row.sha256, record_ref: row.record_ref })
+    expect(await checkV2Checkout(w.deps, OTHER, sub)).toEqual({ ok: false, status: 404, code: 'not_found' })
+    for (const [over, status, code] of [
+      [{ issuance: 'stopped' as const }, 503, 'issuance_stopped'],
+      [{ submissions: 'stopped' as const }, 503, 'submissions_stopped'],
+      [{ legalPoliciesApproved: () => false }, 503, 'unavailable'],
+      [{ governance: withdrawn() }, 409, 'ineligible'],
+    ] as const) {
+      const g = world({ hasPilotAccess: createCreatorRecordAccessCheck('public', async () => false), ...(over as object) } as Partial<PurchaseDeps>)
+      const r = g.add(preparedRow())
+      expect(await startPurchase(g.deps, OWNER, r.id)).toEqual({ ok: false, status, code })
+    }
   })
 
   test('another creator, a missing or malformed id are indistinguishable', async () => {

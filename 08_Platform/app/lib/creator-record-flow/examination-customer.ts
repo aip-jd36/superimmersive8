@@ -19,7 +19,7 @@ import { productionExaminationDeps } from '@/lib/creator-record-flow/examination
 import { aiExaminationPermissionVersion } from './authorization-versions'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { customerLiveEnabledInThisBuild, customerLiveOffered } from './live-offer'
-import { hasPilotAccess } from './pilot-access'
+import { hasCreatorRecordAccess } from './pilot-access'
 import { NO_STORE } from './http'
 import { EXAMINATION_MESSAGES } from './wording'
 
@@ -67,7 +67,7 @@ export function productionCustomerExaminationDeps(): CustomerExaminationDeps {
   const permission = aiExaminationPermissionVersion()
   return {
     submissions: CREATOR_RECORD_V2_SUBMISSIONS,
-    hasPilotAccess,
+    hasPilotAccess: hasCreatorRecordAccess, // CR-PUBLIC-1: the access policy (invitation by default)
     adapter: productionExaminationDeps(),
     log: (event, detail) => console.warn(`[creator-record-v2/examination] ${event}`, detail),
     now: () => new Date(),

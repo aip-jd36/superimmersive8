@@ -16,6 +16,7 @@ import {
   type EvidenceDeps, type EvidenceObjects, type EvidenceRow, type EvidenceStore,
 } from '@/lib/creator-record/evidence-intake/service'
 import { EVIDENCE_MAX_BYTES, EVIDENCE_MAX_PER_RECORD, EVIDENCE_MAX_PER_TOOL } from '@/lib/creator-record/evidence-intake/vocabulary'
+import { createCreatorRecordAccessCheck, creatorRecordAccessMode } from '@/lib/creator-record-flow/access-policy'
 
 // ── Synthetic test files ──
 const enc = (s: string) => new TextEncoder().encode(s)
@@ -231,6 +232,15 @@ describe('intake gates', () => {
 
   test('an uninvited creator is refused', async () => {
     expect(await upload(deps({ hasPilotAccess: async () => false }))).toMatchObject({ status: 403, code: 'not_invited' })
+  })
+
+  test('CR-PUBLIC-1: refused under the default (invitation) policy; under the public policy (simulated) the upload proceeds, privately', async () => {
+    expect(await upload(deps({ hasPilotAccess: createCreatorRecordAccessCheck(creatorRecordAccessMode(), async () => false) }))).toMatchObject({ status: 403, code: 'not_invited' })
+    const d = deps({ hasPilotAccess: createCreatorRecordAccessCheck('public', async () => false) })
+    expect((await upload(d)).ok).toBe(true)
+    expect((await listEvidence(d, USER) as { documents: unknown[] }).documents).toHaveLength(1)
+    expect((await listEvidence(d, OTHER) as { documents: unknown[] }).documents).toHaveLength(0)
+    expect(await upload(deps({ submissions: 'stopped', hasPilotAccess: createCreatorRecordAccessCheck('public', async () => false) }))).toMatchObject({ status: 503, code: 'submissions_stopped' })
   })
 
   test('consent must be given (the draft identifier) and is recorded on the document', async () => {

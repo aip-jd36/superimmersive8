@@ -18,6 +18,7 @@
 | Item | Value | Where |
 |---|---|---|
 | New submissions and purchases | `'open'` | `customer-flow/approved-inputs.ts` |
+| Who may use it (CR-PUBLIC-1) | `'invitation'` (invited creators only; `'public'` = any signed-in creator, not authorized) | `lib/creator-record-flow/access-policy.ts` `CREATOR_RECORD_V2_ACCESS`, bound as `hasCreatorRecordAccess` by every production port. Activation: `08_Platform/implementation/cr-public-1/` |
 | Issuance | `'enabled'` | `lib/creator-record-artifacts/config.ts` |
 | Generator | `creator-record-v2-pdf-v4` (CR-DESIGN-2D; `-pdf-v1`…`-v3` artifacts stay recognised) | `lib/creator-record-artifacts/renderers.ts` |
 | Issuable record schemas / builders | 7, 8 / 5, 7 | `customer-record/governance-state.ts` (`CURRENT_ISSUANCE_SUPPORT`) |

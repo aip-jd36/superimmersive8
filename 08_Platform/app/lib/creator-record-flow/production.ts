@@ -15,7 +15,7 @@ import { approvedCustomerRecordInputs, approvedGovernanceSnapshot, approvedPdfTe
 import { legalPoliciesApproved } from '@/lib/legal/policies'
 import { authorizeV2Issuance, purchaseOfferable, renderV2ForIssuance, type BindReason, type CheckoutSubmission, type PurchaseDeps, type V2IssuanceDeps } from '@/lib/creator-record/customer-flow/purchase'
 import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/config'
-import { hasPilotAccess, PILOT_ACCESS_TABLE } from './pilot-access'
+import { hasCreatorRecordAccess, hasPilotAccess, PILOT_ACCESS_TABLE } from './pilot-access'
 import { evidenceObjects, evidenceStore } from './evidence-production'
 import { productionExaminationProjections, productionReadingsIntact } from '@/lib/creator-record-flow/examination-customer'
 import { verifyEvidenceIntact, type EvidenceIntegrity } from '@/lib/creator-record/evidence-intake/service'
@@ -110,7 +110,7 @@ export async function bindPreparedToSubmission(p: { preparedId: string; userId: 
 export function productionFlowDeps(): FlowDeps {
   return {
     submissions: CREATOR_RECORD_V2_SUBMISSIONS,
-    hasPilotAccess,
+    hasPilotAccess: hasCreatorRecordAccess, // CR-PUBLIC-1: the access policy (invitation by default)
     store: preparedStore,
     inputs: () => approvedCustomerRecordInputs(),
     topicClaims: TOPIC_CLAIMS_FIXTURE,
@@ -131,7 +131,7 @@ export function productionPurchaseDeps(): PurchaseDeps {
   return {
     submissions: CREATOR_RECORD_V2_SUBMISSIONS,
     issuance: CREATOR_RECORD_V2_ISSUANCE,
-    hasPilotAccess,
+    hasPilotAccess: hasCreatorRecordAccess, // CR-PUBLIC-1: the access policy (invitation by default)
     getPrepared: (id) => preparedStore.get(id),
     latestVersion: (draftId) => preparedStore.latestVersion(draftId),
     boundTo: preparedBoundTo,
