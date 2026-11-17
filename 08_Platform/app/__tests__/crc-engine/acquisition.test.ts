@@ -148,7 +148,7 @@ describe('parseRequest -- acquisition is not an action field', () => {
   })
 
   test('email and resend requests are unaffected -- acquisition never attaches to them', () => {
-    expect(parseRequest({ email: 'A@B.co', acquisition: ALL_FIVE })).toEqual({ kind: 'email', email: 'a@b.co', restart: false })
+    expect(parseRequest({ email: 'A@B.co', acquisition: ALL_FIVE })).toEqual({ kind: 'email', email: 'a@b.co', restart: false, disclosureVersion: 'results-gate-v1' })
     expect(parseRequest({ resendResultEmail: true, acquisition: ALL_FIVE })).toEqual({ kind: 'resend_result_email', restart: false })
   })
 

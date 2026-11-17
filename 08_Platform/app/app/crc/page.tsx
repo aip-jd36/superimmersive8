@@ -47,6 +47,7 @@ import { CrcAssuranceBridge } from '@/components/crc/CrcAssuranceBridge'
 import { CrcZhLocaleNotice } from '@/components/crc/CrcZhLocaleNotice'
 import { shouldSubmitOnEnter } from '@/components/crc/ime-safe-enter'
 import { ResultsGatePrivacyLink } from '@/components/crc/ResultsGatePrivacyLink'
+import { resultsGateDisclosure } from '@/lib/crc-engine/results-gate-disclosure'
 import {
   formatWaitIndicatorLocalized,
   getRateLimitMessageLocalized,
@@ -377,7 +378,7 @@ function CrcPageContent() {
   }
 
   /** Shared by both an ordinary gate submission and a corrected email -- the server distinguishes them by whether the address differs from the session's current target, not by request shape. */
-  async function submitResultsEmail(requestBody: { email: string } | { resendResultEmail: true }) {
+  async function submitResultsEmail(requestBody: { email: string; resultsGateDisclosureVersion: string } | { resendResultEmail: true }) {
     setResultsEmailSubmitting(true)
     setResultsEmailError('')
     let res: Response
@@ -414,7 +415,7 @@ function CrcPageContent() {
   function handleResultsEmailSubmit() {
     const trimmed = resultsEmailInput.trim()
     if (!trimmed || resultsEmailSubmitting) return
-    submitResultsEmail({ email: trimmed })
+    submitResultsEmail({ email: trimmed, resultsGateDisclosureVersion: gateDisclosure.version })
   }
 
   function handleResendResultEmail() {
@@ -527,6 +528,8 @@ function CrcPageContent() {
 
   const confirmationCopy = resultsEmail?.masked_email ? buildConfirmationCopyLocalized(locale, resultsEmail.masked_email) : null
   const resultsGateCopy = getResultsGateCopyLocalized(locale)
+  // SI8-PRIVACY-CRC-1C: one decision for what the gate renders and the version reported with the email it requests.
+  const gateDisclosure = resultsGateDisclosure()
 
   return (
     <div className="crc-shell min-h-screen bg-background px-4 py-8">
@@ -672,7 +675,7 @@ function CrcPageContent() {
                           {resultsGateCopy.buttonText}
                         </Button>
                         <p className="text-xs text-muted-foreground">{resultsGateCopy.disclosure}</p>
-                        <ResultsGatePrivacyLink locale={locale} />
+                        {gateDisclosure.showPrivacyLink && <ResultsGatePrivacyLink locale={locale} />}
                       </div>
                     </div>
                   )}

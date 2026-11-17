@@ -48,7 +48,7 @@ import { saveCrcSessionEmail } from './supabase-session-store'
 import { maskEmail, type ResultsEmailClaimReason } from './results-gate-copy'
 import { logPilotEvent } from './pilot-events'
 import { CRC_CONFIG } from './config'
-import { currentCaptureNoticeVersion } from './results-gate-notice'
+import type { ResultsGateDisclosureVersion } from './results-gate-disclosure'
 import { createResultsEmailArtifact, findMostRecentResultsEmailArtifactId, recordResultsEmailDeliveryAttempt } from './results-email-artifacts'
 
 export type DeliveryResult =
@@ -64,6 +64,12 @@ export interface DeliverParams {
   sessionId: string
   email: string
   isExplicitResend: boolean
+  /**
+   * SI8-PRIVACY-CRC-1C: the disclosure version the visitor's gate rendered for this email submission (parsed and validated by
+   * api-contract.ts). Omitted for an explicit resend, which renders no gate: the column then keeps the value recorded when the
+   * email was requested. Never derived here from the server's own published policy.
+   */
+  captureNoticeVersion?: ResultsGateDisclosureVersion
   structuredUnderstanding: StructuredUnderstanding
   matrix: MatrixRow[]
   /**
@@ -101,10 +107,12 @@ export async function deliverCrcResultsEmail(client: SupabaseClient, params: Del
     // as-is, just triggered from this new point in the flow instead of the
     // retired mid-conversation gate.
     await saveCrcSessionEmail(client, params.sessionId, params.email)
-    await client
-      .from('crc_sessions')
-      .update({ capture_notice_version: currentCaptureNoticeVersion() })
-      .eq('id', params.sessionId)
+    if (params.captureNoticeVersion !== undefined) {
+      await client
+        .from('crc_sessions')
+        .update({ capture_notice_version: params.captureNoticeVersion })
+        .eq('id', params.sessionId)
+    }
   } catch (err) {
     console.error('[results-email-delivery] lead persistence failed, send blocked', err)
     return { kind: 'lead_persistence_failed' }

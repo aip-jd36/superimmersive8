@@ -22,6 +22,7 @@ import type { SessionCreationRateResult, BurstResult } from './abuse-prevention'
 import { validateGuidedEntryRequest, type RawGuidedEntryInit } from './guided-entry-init'
 import type { GuidedEntrySelection } from '@/types/guided-entry'
 import { ACQUISITION_PARAM_KEYS, sanitizeAcquisition, type CrcAcquisition } from './acquisition'
+import { parseResultsGateDisclosureVersion, type ResultsGateDisclosureVersion } from './results-gate-disclosure'
 
 /**
  * The two rate-limit reasons a client can ever actually receive (CRC
@@ -51,6 +52,11 @@ export interface TurnRequestBody {
    */
   email?: unknown
   resendResultEmail?: unknown
+  /**
+   * SI8-PRIVACY-CRC-1C: the results-gate disclosure version the visitor's gate rendered, sent with `email` only. Not one of the
+   * mutually-exclusive action fields (excluded from `providedCount`). See results-gate-disclosure.ts for the provenance rules.
+   */
+  resultsGateDisclosureVersion?: unknown
   /**
    * Guided Entry Foundation (GE-1). Mutually exclusive with every other
    * field on this body, same as message/declineAction/email/
@@ -85,7 +91,7 @@ export interface TurnRequestBody {
 export type ParsedRequest =
   | { kind: 'message'; text: string; restart: boolean; acquisition?: CrcAcquisition }
   | { kind: 'decline'; action: DeclineAction; restart: boolean; acquisition?: CrcAcquisition }
-  | { kind: 'email'; email: string; restart: false }
+  | { kind: 'email'; email: string; restart: false; disclosureVersion: ResultsGateDisclosureVersion }
   | { kind: 'resend_result_email'; restart: false }
   /**
    * Guided Entry Foundation (GE-1). `restart: false` always -- a guided
@@ -118,6 +124,9 @@ export function parseRequest(body: TurnRequestBody): ParsedRequest | { error: st
   if (providedCount > 1) {
     return { error: 'Provide exactly one of message, declineAction, email, resendResultEmail, or guidedInit.' }
   }
+  if (body.resultsGateDisclosureVersion !== undefined && !hasEmail) {
+    return { error: 'resultsGateDisclosureVersion is only accepted with email.' }
+  }
 
   if (hasGuidedInit) {
     const raw = body.guidedInit as Partial<RawGuidedEntryInit>
@@ -141,7 +150,12 @@ export function parseRequest(body: TurnRequestBody): ParsedRequest | { error: st
     if (!EMAIL_FORMAT.test(trimmed)) {
       return { error: 'email must be a valid email address.' }
     }
-    return { kind: 'email', email: trimmed, restart: false }
+    // SI8-PRIVACY-CRC-1C: fail closed on an unsupported disclosure version -- nothing is persisted or sent.
+    const disclosure = parseResultsGateDisclosureVersion(body.resultsGateDisclosureVersion)
+    if (!disclosure.ok) {
+      return { error: 'resultsGateDisclosureVersion is not supported.' }
+    }
+    return { kind: 'email', email: trimmed, restart: false, disclosureVersion: disclosure.version }
   }
   if (hasResend) {
     return { kind: 'resend_result_email', restart: false }

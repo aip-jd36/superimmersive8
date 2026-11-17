@@ -8,7 +8,7 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { CRC_PRIVACY_NOTICE, CRC_PRIVACY_PATH, crcPrivacyNoticePublished, isCompleteLegalDocument } from '@/lib/legal/crc-privacy-notice'
 import { legalPageContent, PRIVACY_NOTICE, LEGAL_PATHS, type ApprovedLegalDocument } from '@/lib/legal/policies'
-import { currentCaptureNoticeVersion, RESULTS_GATE_NOTICE_V2 } from '@/lib/crc-engine/results-gate-notice'
+import { resultsGateDisclosure, RESULTS_GATE_NOTICE_V2 } from '@/lib/crc-engine/results-gate-disclosure'
 import { CRC_CONFIG } from '@/lib/crc-engine/config'
 import { RESULTS_GATE_COPY } from '@/lib/crc-engine/results-gate-copy'
 import { getResultsGateCopyLocalized } from '@/components/crc/crc-ui-copy'
@@ -101,25 +101,64 @@ describe('results-gate link', () => {
 
   test('the gate renders the link right after the follow-up sentence', () => {
     const page = src('app/crc/page.tsx').replace(/\r\n/g, '\n')
-    expect(page).toMatch(/\{resultsGateCopy\.disclosure\}<\/p>\n\s*<ResultsGatePrivacyLink locale=\{locale\} \/>/)
+    expect(page).toMatch(/\{resultsGateCopy\.disclosure\}<\/p>\n\s*\{gateDisclosure\.showPrivacyLink && <ResultsGatePrivacyLink locale=\{locale\} \/>\}/)
   })
 })
 
-describe('disclosure version', () => {
-  test('unpublished: new captures keep recording results-gate-v1', () => {
+describe('disclosure version (provenance: __tests__/crc-engine/results-gate-disclosure-provenance.test.ts)', () => {
+  test('unpublished: the gate renders no link and reports results-gate-v1', () => {
     expect(CRC_CONFIG.captureNoticeVersion).toBe('results-gate-v1')
-    expect(currentCaptureNoticeVersion()).toBe('results-gate-v1')
-    expect(currentCaptureNoticeVersion(null)).toBe('results-gate-v1')
+    expect(resultsGateDisclosure()).toEqual({ showPrivacyLink: false, version: 'results-gate-v1' })
+    expect(resultsGateDisclosure(null)).toEqual({ showPrivacyLink: false, version: 'results-gate-v1' })
   })
 
-  test('published (link displayed): results-gate-v2', () => {
+  test('published: the gate renders the link and reports results-gate-v2', () => {
     expect(RESULTS_GATE_NOTICE_V2).toBe('results-gate-v2')
-    expect(currentCaptureNoticeVersion(SAMPLE)).toBe('results-gate-v2')
+    expect(resultsGateDisclosure(SAMPLE)).toEqual({ showPrivacyLink: true, version: 'results-gate-v2' })
   })
 
-  test('link display and recorded version use the same check', () => {
-    expect(src('components/crc/ResultsGatePrivacyLink.tsx')).toContain('crcPrivacyNoticePublished(doc)')
-    expect(src('lib/crc-engine/results-gate-notice.ts')).toContain('crcPrivacyNoticePublished')
-    expect(src('lib/crc-engine/results-email-delivery.ts')).toContain('capture_notice_version: currentCaptureNoticeVersion()')
+  test('the link component re-checks publication itself', () => {
+    expect(src('components/crc/ResultsGatePrivacyLink.tsx')).toContain('if (!crcPrivacyNoticePublished(doc)) return null')
+  })
+})
+
+// SI8-PRIVACY-CRC-1C — publication safety: nothing unapproved can reach a visitor.
+describe('publication safety', () => {
+  const DRAFT_REL = path.join('..', 'implementation', 'privacy-crc-1b', 'CRC_PRIVACY_NOTICE_DRAFT.md')
+  const draft = src(DRAFT_REL).replace(/\r\n/g, '\n')
+  const { readdirSync, statSync } = jest.requireActual('fs') as typeof import('fs')
+  const walk = (dir: string): string[] =>
+    readdirSync(dir).flatMap((n) => {
+      const full = path.join(dir, n)
+      return statSync(full).isDirectory() ? walk(full) : [full]
+    })
+  const served = ['app', 'components', 'lib', 'public'].flatMap((d) => walk(path.join(APP, d)))
+
+  test('the notice slot is literally null in source: no text has been placed in it', () => {
+    expect(src('lib/legal/crc-privacy-notice.ts')).toMatch(/export const CRC_PRIVACY_NOTICE: ApprovedLegalDocument \| null = null\n/)
+  })
+
+  test('the draft sits outside the application and is never imported or copied into served code', () => {
+    expect(path.resolve(APP, DRAFT_REL).startsWith(APP + path.sep)).toBe(false)
+    expect(draft).toContain('**Status: DRAFT — NOT APPROVED — NOT FOR PUBLICATION.**')
+    const marker = 'This notice explains how SI8 handles personal information in the Commercial Readiness Check'
+    for (const f of served) {
+      if (!/\.(tsx?|jsx?|mdx?|json|html|txt)$/.test(f)) continue
+      const text = readFileSync(f, 'utf8')
+      expect({ f, hit: text.includes(marker) || /CRC_PRIVACY_NOTICE_DRAFT\.md['"`]/.test(text) }).toEqual({ f, hit: false })
+    }
+    expect(served.some((f) => f.startsWith(path.join(APP, 'public')) && /crc/i.test(path.basename(f)) && /privacy/i.test(path.basename(f)))).toBe(false)
+  })
+
+  test('/crc/privacy renders no draft content, only the fixed unavailable notice', () => {
+    const html = renderToStaticMarkup(createElement(CrcPrivacyPage))
+    expect(html).not.toMatch(/UNRESOLVED|Anthropic|Resend|30 days|Commercial Assurance/)
+  })
+
+  test('the draft never states the 30-day cleanup as active: every mention is inside an UNRESOLVED marker', () => {
+    expect(draft).toMatch(/30 days/)
+    const outsideMarkers = draft.replace(/\[UNRESOLVED[^\]]*\]/g, '')
+    expect(outsideMarkers).not.toMatch(/30[- ]day|30 days|thirty days/i)
+    expect(draft).toMatch(/\[UNRESOLVED: state "cleared after 30 days" only once the 30-day\s+clearing is running in Production/)
   })
 })

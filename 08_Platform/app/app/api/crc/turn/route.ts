@@ -511,6 +511,8 @@ export async function POST(request: NextRequest) {
         sessionId: token,
         email: targetEmail,
         isExplicitResend: parsed.kind === 'resend_result_email',
+        // SI8-PRIVACY-CRC-1C: the disclosure the visitor's gate rendered; resends render no gate and record nothing.
+        captureNoticeVersion: parsed.kind === 'email' ? parsed.disclosureVersion : undefined,
         structuredUnderstanding: engineState.structured_understanding,
         matrix: MATRIX_FIXTURE,
         topicClaims: TOPIC_CLAIMS_FIXTURE,

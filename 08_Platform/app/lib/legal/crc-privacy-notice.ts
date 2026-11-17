@@ -4,7 +4,7 @@
  * PUBLICATION GATE. No CRC notice text is approved, so the slot below is `null`. While it is null:
  *   - /crc/privacy shows the fixed "This document is not available yet." page (noindex);
  *   - the results gate shows NO privacy link (`crcPrivacyNoticePublished()` is false);
- *   - new email captures keep recording `results-gate-v1` (see `lib/crc-engine/results-gate-notice.ts`).
+ *   - the gate reports, and captures record, `results-gate-v1` (see `lib/crc-engine/results-gate-disclosure.ts`).
  * Deploying this file in this state changes nothing a CRC visitor sees or what CRC records.
  *
  * To publish: replace the slot with the approved text, its version identifier, its approval reference and the date it takes

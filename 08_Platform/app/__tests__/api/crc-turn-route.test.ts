@@ -65,7 +65,8 @@ describe('parseRequest', () => {
   // belonged to -- there is no more "pending message" to decline.
 
   test('a valid email is parsed as kind: email, trimmed and lowercased', () => {
-    expect(parseRequest({ email: '  JD@Example.com  ' })).toEqual({ kind: 'email', email: 'jd@example.com', restart: false })
+    // SI8-PRIVACY-CRC-1C: no disclosure version reported = a page build that only ever rendered the v1 gate.
+    expect(parseRequest({ email: '  JD@Example.com  ' })).toEqual({ kind: 'email', email: 'jd@example.com', restart: false, disclosureVersion: 'results-gate-v1' })
   })
 
   test('a malformed email is rejected with a specific error, not silently accepted', () => {

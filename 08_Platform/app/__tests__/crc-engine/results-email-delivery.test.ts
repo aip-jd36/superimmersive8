@@ -96,14 +96,18 @@ beforeEach(() => {
 })
 
 describe('deliverCrcResultsEmail', () => {
-  // SI8-PRIVACY-CRC-1B: while the CRC privacy notice is unpublished the gate shows no privacy link, so a capture still
-  // records the launched disclosure version, results-gate-v1 (v2 only once the link is displayed).
-  test('records capture_notice_version results-gate-v1 while the CRC privacy notice is unpublished', async () => {
+  // SI8-PRIVACY-CRC-1C: capture_notice_version is the disclosure the visitor's gate rendered, passed in by the route; without
+  // one (an explicit resend renders no gate) the column is not written.
+  test('records the captureNoticeVersion it is given, and writes nothing without one', async () => {
     mockSend.mockResolvedValue({ status: 'accepted', providerId: 'resend-123' })
-    const { client, updates } = fakeClient({ claim: { claimed: true, reason: null } })
-    await deliverCrcResultsEmail(client, BASE_PARAMS)
-    const noticeWrites = updates.filter((u) => u.table === 'crc_sessions' && 'capture_notice_version' in (u.payload as object))
-    expect(noticeWrites).toEqual([{ table: 'crc_sessions', payload: { capture_notice_version: 'results-gate-v1' } }])
+    const notice = (updates: { table: string; payload: unknown }[]) =>
+      updates.filter((u) => u.table === 'crc_sessions' && 'capture_notice_version' in (u.payload as object))
+    const withVersion = fakeClient({ claim: { claimed: true, reason: null } })
+    await deliverCrcResultsEmail(withVersion.client, { ...BASE_PARAMS, captureNoticeVersion: 'results-gate-v1' })
+    expect(notice(withVersion.updates)).toEqual([{ table: 'crc_sessions', payload: { capture_notice_version: 'results-gate-v1' } }])
+    const without = fakeClient({ claim: { claimed: true, reason: null } })
+    await deliverCrcResultsEmail(without.client, BASE_PARAMS)
+    expect(notice(without.updates)).toEqual([])
   })
 
   // PM case G: DB failure before send -> result remains gated (never
