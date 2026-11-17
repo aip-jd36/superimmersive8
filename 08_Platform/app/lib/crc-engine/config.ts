@@ -82,7 +82,11 @@ export const CRC_CONFIG = {
    */
   resultsGateLaunchedAt: '2026-08-14T15:15:00.000Z',
 
-  /** Bumped whenever the results-gate copy (teaser/gate/confirmation text) changes. */
+  /**
+   * Bumped whenever the results-gate copy (teaser/gate/confirmation text) changes. This is the version recorded while the CRC
+   * privacy notice is unpublished; once it is published (and the gate shows its link) captures record `results-gate-v2` instead
+   * (SI8-PRIVACY-CRC-1B, `results-gate-notice.ts`).
+   */
   captureNoticeVersion: 'results-gate-v1',
 
   /** Bumped whenever the emailed-results template structure/copy changes. */

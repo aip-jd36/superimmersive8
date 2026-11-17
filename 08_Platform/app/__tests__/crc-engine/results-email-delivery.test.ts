@@ -47,6 +47,7 @@ function fakeClient(opts: {
   recordError?: unknown
 }) {
   const rpcCalls: { fn: string; args: unknown }[] = []
+  const updates: { table: string; payload: unknown }[] = []
   const client = {
     rpc: jest.fn((fn: string, args: unknown) => {
       rpcCalls.push({ fn, args })
@@ -62,13 +63,16 @@ function fakeClient(opts: {
       return Promise.resolve({ data: null, error: { message: `unexpected rpc ${fn}` } })
     }),
     from: jest.fn((table: string) => ({
-      update: jest.fn(() => ({
-        eq: jest.fn(async () => ({ error: table === 'crc_sessions' ? (opts.linkError ?? opts.emailUpdateError ?? null) : null })),
-      })),
+      update: jest.fn((payload: unknown) => {
+        updates.push({ table, payload })
+        return {
+          eq: jest.fn(async () => ({ error: table === 'crc_sessions' ? (opts.linkError ?? opts.emailUpdateError ?? null) : null })),
+        }
+      }),
       insert: jest.fn(async () => ({ error: null })),
     })),
   }
-  return { client: client as any, rpcCalls }
+  return { client: client as any, rpcCalls, updates }
 }
 
 const BASE_PARAMS = {
@@ -92,6 +96,16 @@ beforeEach(() => {
 })
 
 describe('deliverCrcResultsEmail', () => {
+  // SI8-PRIVACY-CRC-1B: while the CRC privacy notice is unpublished the gate shows no privacy link, so a capture still
+  // records the launched disclosure version, results-gate-v1 (v2 only once the link is displayed).
+  test('records capture_notice_version results-gate-v1 while the CRC privacy notice is unpublished', async () => {
+    mockSend.mockResolvedValue({ status: 'accepted', providerId: 'resend-123' })
+    const { client, updates } = fakeClient({ claim: { claimed: true, reason: null } })
+    await deliverCrcResultsEmail(client, BASE_PARAMS)
+    const noticeWrites = updates.filter((u) => u.table === 'crc_sessions' && 'capture_notice_version' in (u.payload as object))
+    expect(noticeWrites).toEqual([{ table: 'crc_sessions', payload: { capture_notice_version: 'results-gate-v1' } }])
+  })
+
   // PM case G: DB failure before send -> result remains gated (never
   // reaches the point of computing/sending real content).
   // PM case F: DB failure before send -> Resend is NOT called.

@@ -46,6 +46,7 @@ import {
   buildConfirmationCopy as buildConfirmationCopyEn,
   getResultsEmailErrorMessage as getResultsEmailErrorMessageEn,
   RESULTS_GATE_COPY as RESULTS_GATE_COPY_EN,
+  RESULTS_GATE_PRIVACY_LINK_COPY as RESULTS_GATE_PRIVACY_LINK_COPY_EN,
   type TeaserCopy,
   type ConfirmationCopy,
   type ResultsEmailClaimReason,
@@ -388,6 +389,22 @@ export function getResultsGateCopyLocalized(locale: CrcLocale): ResultsGateCopy 
     fieldLabel: '電子郵件地址',
     buttonText: '將結果寄給我',
     disclosure: 'SI8 也可能會就商業保證評估（Commercial Assurance）相關資訊與您聯繫。',
+  }
+}
+
+export interface ResultsGatePrivacyLinkCopy {
+  prefix: string
+  linkText: string
+  suffix: string
+}
+
+/** SI8-PRIVACY-CRC-1B — DRAFT wording (see RESULTS_GATE_PRIVACY_LINK_COPY); zh-TW translation needs the same approval. */
+export function getResultsGatePrivacyLinkCopyLocalized(locale: CrcLocale): ResultsGatePrivacyLinkCopy {
+  if (locale !== 'zh-TW') return RESULTS_GATE_PRIVACY_LINK_COPY_EN
+  return {
+    prefix: '請參閱',
+    linkText: '商業就緒度檢查隱私權聲明',
+    suffix: '。',
   }
 }
 

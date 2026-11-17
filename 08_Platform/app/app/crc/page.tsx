@@ -46,6 +46,7 @@ import { CrcIdentityMark } from '@/components/crc/CrcIdentityMark'
 import { CrcAssuranceBridge } from '@/components/crc/CrcAssuranceBridge'
 import { CrcZhLocaleNotice } from '@/components/crc/CrcZhLocaleNotice'
 import { shouldSubmitOnEnter } from '@/components/crc/ime-safe-enter'
+import { ResultsGatePrivacyLink } from '@/components/crc/ResultsGatePrivacyLink'
 import {
   formatWaitIndicatorLocalized,
   getRateLimitMessageLocalized,
@@ -671,6 +672,7 @@ function CrcPageContent() {
                           {resultsGateCopy.buttonText}
                         </Button>
                         <p className="text-xs text-muted-foreground">{resultsGateCopy.disclosure}</p>
+                        <ResultsGatePrivacyLink locale={locale} />
                       </div>
                     </div>
                   )}

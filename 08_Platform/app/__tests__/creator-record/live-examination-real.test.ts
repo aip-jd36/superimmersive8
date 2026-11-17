@@ -403,7 +403,10 @@ describe('what stays closed', () => {
     const dir = path.join(root, 'supabase', 'migrations')
     const names = readdirSync(dir).sort()
     // CR-V2-MVP-RETENTION-M1A follows them: it adds a consent guard trigger only and replaces no examination function.
-    expect(names.slice(-5)).toEqual(['20261108000000_creator_record_v2_live_examination_foundation.sql', '20261110000000_creator_record_v2_customer_live_examination.sql', '20261111000000_creator_record_v2_retention_m1a.sql', '20261112000000_creator_record_v2_ai_examination_permission.sql', '20261113000000_creator_record_v2_ai_permission_current_version.sql'])
+    // SI8-PRIVACY-CRC-1B (20261118): the CRC raw-IP retention function only; it touches no Creator Record object.
+    expect(names.slice(-5)).toEqual(['20261110000000_creator_record_v2_customer_live_examination.sql', '20261111000000_creator_record_v2_retention_m1a.sql', '20261112000000_creator_record_v2_ai_examination_permission.sql', '20261113000000_creator_record_v2_ai_permission_current_version.sql', '20261118000000_crc_pilot_events_raw_ip_retention.sql'])
+    expect(readFileSync(path.join(dir, '20261118000000_crc_pilot_events_raw_ip_retention.sql'), 'utf8')).not.toMatch(/creator_record|payment_fulfillments/)
+    names.pop()
     // CR-V2-SCHEMA8-PATH-1 (20261113): replaces the permission grant and guard only; no examination function, no attempts constraint.
     const currentVersion = readFileSync(path.join(dir, names[names.length - 1]), 'utf8')
     expect(currentVersion).not.toMatch(/CREATE OR REPLACE FUNCTION public.creator_record_v2_(record|reserve|settle)_[a-z_]*examination|DROP CONSTRAINT[^;]*live_examination_attempts|ALTER TABLE public.creator_record_v2_live_examination_attempts/)

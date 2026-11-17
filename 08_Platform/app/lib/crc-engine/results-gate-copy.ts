@@ -40,6 +40,17 @@ export const RESULTS_GATE_COPY = {
 } as const
 
 /**
+ * SI8-PRIVACY-CRC-1B — the privacy-notice link shown under the gate's disclosure line. DRAFT WORDING, NOT APPROVED: it renders
+ * only once the CRC privacy notice is published (`crcPrivacyNoticePublished()`), and its wording is approved with that notice.
+ * Kept separate from RESULTS_GATE_COPY so the approved-verbatim gate copy, including the follow-up sentence, is untouched.
+ */
+export const RESULTS_GATE_PRIVACY_LINK_COPY = {
+  prefix: 'Read the ',
+  linkText: 'Commercial Readiness Check Privacy Notice',
+  suffix: '.',
+} as const
+
+/**
  * Fixed single-character-plus-three-dots mask, regardless of local-part
  * length -- matches the approved illustration ("j•••@company.com")
  * exactly, and as a side effect never leaks the true length of the local

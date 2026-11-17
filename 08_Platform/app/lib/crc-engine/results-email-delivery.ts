@@ -48,6 +48,7 @@ import { saveCrcSessionEmail } from './supabase-session-store'
 import { maskEmail, type ResultsEmailClaimReason } from './results-gate-copy'
 import { logPilotEvent } from './pilot-events'
 import { CRC_CONFIG } from './config'
+import { currentCaptureNoticeVersion } from './results-gate-notice'
 import { createResultsEmailArtifact, findMostRecentResultsEmailArtifactId, recordResultsEmailDeliveryAttempt } from './results-email-artifacts'
 
 export type DeliveryResult =
@@ -102,7 +103,7 @@ export async function deliverCrcResultsEmail(client: SupabaseClient, params: Del
     await saveCrcSessionEmail(client, params.sessionId, params.email)
     await client
       .from('crc_sessions')
-      .update({ capture_notice_version: CRC_CONFIG.captureNoticeVersion })
+      .update({ capture_notice_version: currentCaptureNoticeVersion() })
       .eq('id', params.sessionId)
   } catch (err) {
     console.error('[results-email-delivery] lead persistence failed, send blocked', err)
