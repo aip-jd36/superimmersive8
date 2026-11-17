@@ -5,7 +5,7 @@
 // Exits 1 if any check fails.
 import { spawn } from 'node:child_process'
 import { createServer } from 'node:http'
-import { readFileSync, existsSync, statSync, mkdirSync, writeFileSync, mkdtempSync } from 'node:fs'
+import { readFileSync, existsSync, statSync, mkdirSync, writeFileSync, mkdtempSync, readdirSync } from 'node:fs'
 import { join, resolve, extname, dirname } from 'node:path'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
@@ -70,17 +70,24 @@ async function open(url, w = 1440, h = 900) {
   await send('Page.navigate', { url }); await sleep(900); await ev('document.fonts.ready.then(()=>true)')
 }
 
-// 1. Layout and header across widths
+// Pages: every generated page (routes read from the page sources)
+const ROUTES = readdirSync(join(HERE, 'pages')).filter((f) => f.endsWith('.html')).map((f) => JSON.parse(readFileSync(join(HERE, 'pages', f), 'utf8').match(/^<!--page\s*([\s\S]*?)-->/)[1]).route).sort()
+
+// 1. Layout and header across widths, on every page
 const widths = [360, 390, 600, 601, 900, 901, 1024, 1180, 1181, 1280, 1366, 1440, 1920]
 const layout = []
-for (const w of widths) {
-  await open(`${BASE}/`, w, 900)
-  layout.push({ w, ...(await ev(`(()=>{const row=document.querySelector('.nav-row');const items=[...document.querySelectorAll('.nav-links a,.nav-right .link,.nav-right .btn')].filter(e=>e.offsetParent);
-    const hero=document.querySelector('.hero .hero-cta .btn-primary').getBoundingClientRect();
-    return {pageOverflow:document.documentElement.scrollWidth>innerWidth,rowOverflow:row.scrollWidth>row.clientWidth,wrapped:items.filter(e=>e.getBoundingClientRect().height>44).map(e=>e.textContent.trim()),
-      menuButton:getComputedStyle(document.getElementById('burger')).display!=='none',ctaBottom:Math.round(hero.bottom),h1Lines:Math.round(document.querySelector('h1').getBoundingClientRect().height/parseFloat(getComputedStyle(document.querySelector('h1')).lineHeight))}})()`)) })
+for (const route of ROUTES) for (const w of widths) {
+  await open(`${BASE}${route}`, w, 900)
+  layout.push({ route, w, ...(await ev(`(()=>{const row=document.querySelector('.nav-row');const items=[...document.querySelectorAll('.nav-links a,.nav-right .link,.nav-right .btn')].filter(e=>e.offsetParent);
+    const heroEl=document.querySelector('.hero .hero-cta .btn-primary'); const hero=heroEl?heroEl.getBoundingClientRect():{bottom:null};
+    const wide=[...document.querySelectorAll('main *')].filter(e=>e.offsetParent&&e.getBoundingClientRect().right>innerWidth+0.5&&!e.closest('[style*="overflow-x:auto"]')).length;
+    return {pageOverflow:document.documentElement.scrollWidth>innerWidth,rowOverflow:row.scrollWidth>row.clientWidth,wideElements:wide,wrapped:items.filter(e=>e.getBoundingClientRect().height>44).map(e=>e.textContent.trim()),
+      menuButton:getComputedStyle(document.getElementById('burger')).display!=='none',ctaBottom:hero.bottom==null?null:Math.round(hero.bottom),h1Lines:Math.round(document.querySelector('h1').getBoundingClientRect().height/parseFloat(getComputedStyle(document.querySelector('h1')).lineHeight)),
+      h1:document.querySelectorAll('h1').length,main:document.querySelectorAll('main#main').length,current:[...document.querySelectorAll('.nav-links a[aria-current="page"]')].map(a=>a.getAttribute('href'))}})()`)) })
 }
-check('no overflow or wrapping 360-1920px', layout.every((l) => !l.pageOverflow && !l.rowOverflow && l.wrapped.length === 0), layout)
+check(`no overflow or wrapping 360-1920px on ${ROUTES.length} page(s)`, layout.every((l) => !l.pageOverflow && !l.rowOverflow && l.wideElements === 0 && l.wrapped.length === 0), layout.filter((l) => l.pageOverflow || l.rowOverflow || l.wideElements || l.wrapped.length))
+check('one h1 and one main landmark per page', layout.every((l) => l.h1 === 1 && l.main === 1), layout.filter((l) => l.h1 !== 1 || l.main !== 1))
+check('current page marked in the main nav (aria-current)', layout.every((l) => (['/creator-record', '/commercial-assurance', '/pricing', '/enterprise'].includes(l.route) ? l.current.length === 1 && l.current[0] === l.route : l.current.length === 0)), [...new Set(layout.map((l) => l.route + ':' + l.current.join(',')))])
 check('full nav from 1181px, menu at 1180px and below', layout.every((l) => l.menuButton === (l.w <= 1180)), layout.map((l) => [l.w, l.menuButton]))
 
 // 2. Keyboard and mobile menu
@@ -94,6 +101,15 @@ const menu = await ev(`(async()=>{const b=document.getElementById('burger');cons
 check('mobile menu opens, lists every destination, closes on Escape with focus returned', menu.openAfterClick && menu.ariaOpen === 'true' && menu.itemsVisible && menu.items.length === 7 && menu.closedAfterEscape && menu.ariaClosed === 'false' && menu.focusReturned, menu)
 const focusables = await ev(`[...document.querySelectorAll('a[href],button')].filter(e=>!e.hasAttribute('disabled')&&e.tabIndex>=0).length`)
 check('all links and buttons are keyboard-focusable elements', focusables > 0 && (await ev(`[...document.querySelectorAll('[onclick],[data-go]')].length`)) === 0, { focusables })
+
+// 2b. No purchase, sign-up or payment journey linked from any page
+const purchase = []
+for (const route of ROUTES) {
+  await open(`${BASE}${route}`)
+  const hrefs = await ev(`[...document.querySelectorAll('a[href]')].map(a=>a.getAttribute('href'))`)
+  purchase.push(...hrefs.filter((h) => /auth\/signup|signup|register|checkout|stripe\.com|\/pay\b|\/record$|\/certify/i.test(h)).map((h) => `${route}: ${h}`))
+}
+check('no link to sign-up, checkout or payment', purchase.length === 0, purchase)
 
 // 3. Local resources load; no JavaScript exceptions
 requests.length = 0
@@ -131,9 +147,10 @@ check('no JavaScript exceptions', exceptions.length === 0, exceptions)
 // Screenshots
 if (shotDir) {
   mkdirSync(shotDir, { recursive: true })
-  for (const [name, w, h, scale] of [['desktop-home', 1440, 900, 1], ['mobile-home', 390, 844, 2]]) {
+  for (const route of ROUTES) for (const [kind, w, h, scale] of [['desktop', 1440, 900, 1], ['mobile', 390, 844, 2]]) {
+    const name = `${kind}-${route === '/' ? 'home' : route.replace(/^\//, '')}`
     await send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: scale, mobile: w < 600 })
-    await send('Page.navigate', { url: 'about:blank' }); await sleep(150); await send('Page.navigate', { url: `${BASE}/` }); await sleep(1200); await ev('document.fonts.ready.then(()=>true)')
+    await send('Page.navigate', { url: 'about:blank' }); await sleep(150); await send('Page.navigate', { url: `${BASE}${route}` }); await sleep(1200); await ev('document.fonts.ready.then(()=>true)')
     const H = await ev('document.documentElement.scrollHeight')
     const shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true, clip: { x: 0, y: 0, width: w, height: H, scale: 1 } })
     writeFileSync(join(shotDir, `${name}.png`), Buffer.from(shot.data, 'base64'))
@@ -142,5 +159,5 @@ if (shotDir) {
 
 sock.close(); chrome.kill(); server.close()
 for (const r of results) console.log(`${r.ok ? 'PASS' : 'FAIL'}  ${r.name}${r.ok ? '' : '  ' + JSON.stringify(r.detail)}`)
-console.log(JSON.stringify({ layout: layout.map((l) => ({ w: l.w, ctaBottom: l.ctaBottom, h1Lines: l.h1Lines })), gaLocal, gaProd, crc, statuses }))
+console.log(JSON.stringify({ routes: ROUTES, homeHero: layout.filter((l) => l.route === '/').map((l) => ({ w: l.w, ctaBottom: l.ctaBottom, h1Lines: l.h1Lines })), gaLocal, gaProd, crc, statuses }))
 process.exit(results.every((r) => r.ok) ? 0 : 1)

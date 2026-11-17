@@ -38,14 +38,6 @@
   ],
   "rewrites": [
     {
-      "source": "/pricing",
-      "destination": "/api/gone"
-    },
-    {
-      "source": "/pricing/:path*",
-      "destination": "/api/gone"
-    },
-    {
       "source": "/how-it-works",
       "destination": "/api/gone"
     },

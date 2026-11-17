@@ -10,7 +10,7 @@ see "Release rule" below.
 ## Layout
 | Path | What |
 |---|---|
-| `site.config.json` | Origin, CRC and sign-in URLs, pages not yet built (`pendingRoutes`), allowed external destinations |
+| `site.config.json` | Origin, CRC and sign-in URLs, pages not yet built (`pendingRoutes`), allowed external destinations, and `prices`: the single source for every displayed price (`{{PRICE_CR}}`, `{{PRICE_CA_FROM}}`, `{{PRICE_CA_QUALIFICATION}}`) |
 | `partials/head.html`, `header.html`, `footer.html` | Shared markup. Placeholders: `{{title}}`, `{{ogTitle}}`, `{{description}}`, `{{canonical}}`, `{{CRC_URL}}`, `{{SIGNIN_URL}}`, `{{current:/route}}` |
 | `pages/*.html` | One file per page: a `<!--page {json} -->` header (`route`, `pageId`, `title`, `ogTitle`, `description`) followed by the page's sections |
 | `build.mjs` | The generator and its checks |
@@ -27,6 +27,9 @@ node tools/site-build/browser-check.mjs [shotDir]  # browser checks (needs Chrom
 ```
 Edit `pages/` or `partials/`, run the generator, and commit sources and output together.
 
+**Creator Record calls to action** read "Request access" and lead to `/contact?inquiry=general` while Creator Record is
+invitation-only; no page links to sign-up, checkout or payment (checked by `browser-check.mjs`).
+
 ## Behaviour in `site.js`
 - **Analytics:** GA4 `G-628BLE9N15` loads only on `www.superimmersive8.com` and `superimmersive8.com`. On localhost, Vercel
   previews and any other host there is no script, no `dataLayer` and no request. `book_call_click` on Calendly links is kept
@@ -36,8 +39,7 @@ Edit `pages/` or `partials/`, run the generator, and commit sources and output t
 - **Mobile menu:** button with `aria-expanded`; Escape closes it and returns focus.
 
 ## Release rule
-`pendingRoutes` lists navigation destinations not built yet (`/creator-record`, `/commercial-assurance`, `/pricing`,
-`/enterprise`, `/contact`). The navigation keeps its final links; `--links` reports them as pending, and `--links --release`
+`pendingRoutes` lists navigation destinations not built yet (`/enterprise`, `/contact`). The navigation keeps its final links; `--links` reports them as pending, and `--links --release`
 fails until the list is empty. Do not merge to `main` (which deploys to Production) while it fails. Publication also depends
 on the open gates recorded with the design freeze: prices against Pricing Strategy v3.0, brand and founder claims, contact
 delivery and privacy, the synthetic sample, and Creator Record's invitation-only status.

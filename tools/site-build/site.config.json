@@ -3,7 +3,13 @@
   "outDir": "07_Website",
   "crcUrl": "https://app.superimmersive8.com/crc",
   "signInUrl": "https://app.superimmersive8.com/auth/login",
-  "pendingRoutes": ["/creator-record", "/commercial-assurance", "/pricing", "/enterprise", "/contact"],
+  "pendingRoutes": ["/enterprise", "/contact"],
+  "prices": {
+    "_note": "Approved design representations (Round 2 design freeze). Not yet approved for public publication; see the publication gates.",
+    "PRICE_CR": "$29",
+    "PRICE_CA_FROM": "$499",
+    "PRICE_CA_QUALIFICATION": "Starting at $499. Final pricing depends on project scope and is confirmed before proceeding."
+  },
   "allowedExternal": [
     "https://app.superimmersive8.com/crc",
     "https://app.superimmersive8.com/auth/login",
