@@ -1,5 +1,7 @@
 # SI8-PRIVACY-CRC-3 — CRC privacy notice: founder copy review
 
+Revised in SI8-PRIVACY-CRC-4 (final copy revisions): sections 9, 12, 13 and 14.
+
 **Status: PROPOSED — NOT APPROVED — NOT PUBLISHED.** Branch `work/si8-privacy-crc-1b`, local only. Nothing is pushed,
 merged or deployed.
 
@@ -23,13 +25,14 @@ release it. Production release needs separate authorization; see the release che
 
 ## Factual limitations you should know before approving
 
-1. **Retention is stated as it is today.** CRC deletes nothing automatically. The 12-month period and the 30-day raw-IP
-   clearing are described as plans, not in effect. When either goes live, the notice must change under a new version in the
-   same release.
+1. **Retention is stated as it is today.** CRC deletes nothing automatically, including IP addresses recorded on usage
+   limits. Planned periods (12 months, 30-day IP clearing) are not mentioned; the notice says SI8 is reviewing its retention
+   practices and will update the notice when they change. When any limit goes live, including the IP clearing, the notice must
+   change under a new version in the same release.
 2. **"Ask us not to contact you" and privacy requests are manual.** There is no suppression list or request tool. You will be
    handling these by hand from `jd@superimmersive8.com`, and SI8 must actually stop follow-up for anyone who asks.
-3. **Google Analytics loads without consent.** The notice says so plainly and points to browser controls. There is no in-site
-   way to decline.
+3. **Google Analytics loads when a visitor opens CRC.** The notice says so, says CRC provides no setting to turn it off, and
+   points to browser controls. It does not suggest any consent or opt-out mechanism, because none exists.
 4. **Not verified, so not claimed:**
    - how long Anthropic, Resend, Vercel, Supabase, Google and Calendly keep information;
    - whether Resend tracks opens or clicks (a dashboard setting);
@@ -44,11 +47,16 @@ release it. Production release needs separate authorization; see the release che
 8. **Wording carried over from the live gate.** The Chinese gate sentence renders "Commercial Assurance" as 商業保證評估.
    - That sentence is preserved verbatim and quoted in section 7.
    - Elsewhere the notice uses 商業保證 for the service and 商業保證評估（Commercial Assurance Assessment）for the assessment.
-9. **Your statements of practice.** "We do not sell your personal information" and "if they differ, the English version applies"
-   are commitments you are making, not facts the code proves.
+9. **"We do not sell your personal information" (section 10) needs your explicit confirmation before publication.** It is a
+   commitment you are making, not a fact the code proves. The statement that the English version prevails has been removed;
+   the two languages are written to have the same meaning.
 10. **The Chinese text is a careful machine-assisted translation, not reviewed by a professional translator.** A native
     Traditional Chinese reader should check it before approval.
 11. **No external legal review was commissioned (your decision).** The notice makes no compliance claims and names no laws.
+12. **Requests (section 13).** SI8 reviews each request individually. Some records may need to be kept (assessment records,
+    security and access records, records of emails sent), and SI8 commits to telling the requester what was kept and why. That
+    explanation is a commitment you will have to honour by hand. "SI8's research records" is no longer listed as kept: if a
+    deletion request covers a visitor's wording held in research records, you need to decide case by case.
 
 ## Evidence for each section (repository facts)
 
@@ -65,15 +73,16 @@ release it. Production release needs separate authorization; see the release che
 | 7 | Follow-up sentence, verbatim | `lib/crc-engine/results-gate-copy.ts`, `components/crc/crc-ui-copy.ts` |
 | 8 | Link only on a signed-in, verified-email-matching request; reviewer access recorded | `lib/crc-assurance-handoff/capabilities/email-correlation.ts`, `crc_context_access_events` |
 | 9 | GA on all portal pages, no consent step; `crc_session` httpOnly, 7 days; language kept in local storage | `app/layout.tsx`, `lib/analytics/ga-snippet.ts`, `app/api/crc/turn/route.ts`, `components/crc/crc-locale.ts` |
-| 12 | No automatic deletion; raw-IP clearing gated off | no delete path in `app/` or `lib/`; `.github/workflows/crc-raw-ip-retention.yml` |
+| 12 | No automatic deletion, including rate-limit IP addresses; raw-IP clearing gated off | no delete path in `app/` or `lib/`; `.github/workflows/crc-raw-ip-retention.yml` |
 
 `__tests__/legal/crc-privacy-notice-proposed.test.ts` re-checks the code behaviours behind §2, §5, §6, §9 and §12. If one
 changes, that test fails and the notice must be revised before release.
 
 ## Release checklist (in order; each step needs its own go-ahead)
 
-1. **Copy approval (founder).** Approve both language texts as they appear below, or send changes. Record an approval
-   reference (for example `JD-SI8-PRIVACY-CRC-3-YYYYMMDD`) and the effective date.
+1. **Copy approval (founder).** Approve both language texts as they appear below, or send changes. Explicitly confirm "We do
+   not sell your personal information". Record an approval reference (for example `JD-SI8-PRIVACY-CRC-4-YYYYMMDD`) and the
+   effective date.
 2. **Native Chinese read-through** of the Traditional Chinese text; apply any corrections before approval.
 3. **One reviewed release change (engineering, local):**
    - In `lib/legal/crc-privacy-notice.ts`, set
@@ -91,7 +100,8 @@ changes, that test fails and the notice must be revised before release.
 6. **Keep the notice true:**
    - when the raw-IP clearing is activated, or a retention period is introduced, or any described behaviour changes, publish a
      new version in the same release;
-   - honour "do not contact" and access, correction and deletion requests by hand.
+   - honour "do not contact" and access, correction and deletion requests by hand, telling each requester what was kept and
+     why.
 
 The raw-IP clearing has its own sequence (migration, secret, founder authorization of the first run) and is independent of
 this release.
@@ -156,7 +166,7 @@ If you request a Commercial Assurance Assessment while signed in to your SI8 acc
 
 #### 9. Analytics and cookies
 
-CRC pages use Google Analytics to understand how the site is used. Google Analytics uses cookies or similar technologies and collects technical information about your device and browser and how you use the pages. It loads when you open CRC: CRC does not currently ask for your consent first or offer a setting to turn it off. You can block or delete cookies in your browser, or use a browser extension that blocks analytics.
+CRC pages use Google Analytics to understand how the site is used. Google Analytics loads when you open CRC and uses cookies or similar technologies to collect technical information about your device, your browser and how you use the pages. CRC does not provide a setting to turn it off. You can block analytics or cookies through your browser settings or a browser extension.
 
 CRC also sets its own cookie, crc_session, which keeps your place in the conversation. Scripts on the page cannot read it, and it expires after 7 days. CRC remembers the language you choose in your browser's storage.
 
@@ -177,25 +187,23 @@ SI8 and its service providers may store and process information in countries oth
 
 #### 12. How long we keep information
 
-CRC does not currently delete information automatically. We keep conversations, derived information, email addresses, feedback, campaign information, results emails and technical records until they are deleted, for example after a request under section 13.
+CRC does not currently delete information automatically. We keep conversations, derived information, email addresses, feedback, campaign information, results emails, technical records and security records, including IP addresses recorded when a usage limit is triggered, until they are deleted, for example after a request under section 13.
 
-We plan to adopt a retention period of 12 months after your last CRC activity. That period is not in effect yet. We will update this notice when it is.
-
-IP addresses recorded when a usage limit is triggered: we plan to clear these after 30 days. That clearing is not running yet, so these addresses are currently kept until they are deleted.
+We are reviewing our retention practices and may introduce additional retention limits. We will update this notice when those practices change.
 
 Copies of information may remain in our service providers' systems and backups, and notification emails remain in SI8's email inbox, until they are deleted or expire.
 
 #### 13. Access, correction and deletion
 
-You can ask to access, correct or delete personal information from your CRC sessions by emailing jd@superimmersive8.com. We handle these requests manually and may ask you to confirm that you control the email address involved.
+You can ask to access, correct or delete personal information from your CRC sessions by emailing jd@superimmersive8.com. We review each request individually and may ask you to confirm that you control the email address involved.
 
-What we can remove depends on the request and on what SI8 needs to keep. Information that has become part of a Commercial Assurance Assessment, SI8's research records, security and access records, and records of emails sent to you may be kept. We will tell you what we did and whether any information was not removed.
+Some records may need to be kept, for example information that has become part of a Commercial Assurance Assessment, security and access records, and records of emails sent to you. If we keep any information, we will tell you what we kept and why.
 
 Depending on where you live, you may have other rights over your personal information. To ask about them, email jd@superimmersive8.com.
 
 #### 14. Changes to this notice
 
-We may update this notice. Each version has its own version identifier and effective date. The English and Traditional Chinese versions of this notice are meant to say the same thing; if they differ, the English version applies.
+We may update this notice. Each version has its own version identifier and effective date.
 
 #### 15. Contact
 
@@ -260,7 +268,7 @@ SI8 也會自動寄送通知電子郵件給自己：在 CRC 工作階段開始�
 
 #### 9. 分析工具與 Cookie
 
-CRC 頁面使用 Google Analytics 了解網站的使用情形。Google Analytics 會使用 Cookie 或類似技術，蒐集您的裝置、瀏覽器以及您如何使用頁面等技術資訊。您開啟 CRC 時它就會載入：CRC 目前不會事先徵求您的同意，也沒有提供關閉它的設定。您可以在瀏覽器中封鎖或刪除 Cookie，或使用可封鎖分析工具的瀏覽器擴充功能。
+CRC 頁面使用 Google Analytics 了解網站的使用情形。您開啟 CRC 時，Google Analytics 就會載入，並使用 Cookie 或類似技術蒐集您的裝置、瀏覽器以及您如何使用頁面等技術資訊。CRC 沒有提供關閉它的設定。您可以透過瀏覽器設定或瀏覽器擴充功能封鎖分析工具或 Cookie。
 
 CRC 也會設定自己的 Cookie「crc_session」，用來記住您在對話中的進度。頁面上的程式無法讀取此 Cookie，且會在 7 天後失效。CRC 會在您瀏覽器的儲存空間中記住您選擇的語言。
 
@@ -281,25 +289,23 @@ SI8 及其服務供應商可能在您居住國家以外的地區（包括美國�
 
 #### 12. 資料保存期間
 
-CRC 目前不會自動刪除資料。對話內容、整理出的資訊、電子郵件地址、意見回饋、來源資訊、結果電子郵件及技術紀錄，都會保存到被刪除為止，例如在您依第 13 節提出要求之後。
+CRC 目前不會自動刪除資料。對話內容、整理出的資訊、電子郵件地址、意見回饋、來源資訊、結果電子郵件、技術紀錄及安全紀錄（包括觸發使用限制時記錄的 IP 位址），都會保存到被刪除為止，例如在您依第 13 節提出要求之後。
 
-我們計畫採用「自您最後一次使用 CRC 起 12 個月」的保存期間。此期間尚未生效。生效時，我們會更新本聲明。
-
-觸發使用限制時記錄的 IP 位址：我們計畫在 30 天後清除。此清除作業尚未開始執行，因此這些位址目前會保存到被刪除為止。
+我們正在檢討資料保存做法，並可能訂定其他保存期限。相關做法變更時，我們會更新本聲明。
 
 資料副本可能保留在服務供應商的系統及備份中，通知電子郵件也會保留在 SI8 的電子郵件信箱中，直到被刪除或到期為止。
 
 #### 13. 查詢、更正及刪除
 
-您可以寄信至 jd@superimmersive8.com，要求查詢、更正或刪除您 CRC 工作階段中的個人資料。我們以人工方式處理這類要求，並可能請您確認您能使用相關的電子郵件地址。
+您可以寄信至 jd@superimmersive8.com，要求查詢、更正或刪除您 CRC 工作階段中的個人資料。我們會逐一審查每項要求，並可能請您確認您能使用相關的電子郵件地址。
 
-可刪除的範圍取決於要求的內容，以及 SI8 需要保留的資料。已成為商業保證評估一部分的資料、SI8 的研究紀錄、安全與存取紀錄，以及寄給您的電子郵件紀錄可能會被保留。我們會告知您處理的結果，以及是否有任何資料未被刪除。
+部分紀錄可能需要保留，例如已成為商業保證評估一部分的資料、安全與存取紀錄，以及寄給您的電子郵件紀錄。若我們保留任何資料，會告知您保留了哪些資料及原因。
 
 依您居住地的不同，您可能對您的個人資料享有其他權利。如需詢問，請寄信至 jd@superimmersive8.com。
 
 #### 14. 本聲明的變更
 
-我們可能會更新本聲明。每個版本都有各自的版本識別碼及生效日期。本聲明的英文版與繁體中文版內容應一致；如有不一致，以英文版為準。
+我們可能會更新本聲明。每個版本都有各自的版本識別碼及生效日期。
 
 #### 15. 聯絡方式
 
