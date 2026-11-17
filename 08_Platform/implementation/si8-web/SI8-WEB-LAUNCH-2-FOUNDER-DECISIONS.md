@@ -6,6 +6,12 @@
 The design reference is the Round 2 design freeze (2026-11-17), held privately outside this repository
 (`SI8-private-evidence/digital-experience/2026-11-17-round-2-design-freeze/`). Its frozen copy is unchanged by this record.
 
+> **Amended by SI8-WEB-LAUNCH-3A (2026-11-17): Creator Record will launch as a public, self-service $29 product.** The
+> invitation-only restriction below (under "What these decisions do not authorize") is **superseded as the intended launch
+> state** and kept as history. See "Amendment SI8-WEB-LAUNCH-3A" at the end of this record. Until public access is actually
+> released, the site keeps the "Request access" calls to action: no link may point to registration or checkout that is not yet
+> open.
+
 ## Approved for website publication
 
 | # | Decision | Applies to |
@@ -20,8 +26,9 @@ The design reference is the Round 2 design freeze (2026-11-17), held privately o
 ## What these decisions do not authorize
 
 **Publication approval is not product or commercial authorization.**
-- **Creator Record stays invitation-only.** These decisions don't authorize public checkout, registration, payment or general
-  availability. Every Creator Record call to action reads "Request access" and leads to
+- **Creator Record stays invitation-only.** *(Historical, as decided in SI8-WEB-LAUNCH-2; superseded as the launch state by
+  SI8-WEB-LAUNCH-3A. It still describes Production until public access is released.)* These decisions don't authorize public
+  checkout, registration, payment or general availability. Every Creator Record call to action reads "Request access" and leads to
   `/contact?inquiry=creator_record_access`, an enquiry, not account creation. No page links to sign-up, checkout or payment;
   `tools/site-build/browser-check.mjs` checks this.
 - **No pricing change.** Showing the prices doesn't change `PRICING-STRATEGY-v3.0.md`, the "From $499" scoping practice, or how
@@ -85,3 +92,23 @@ None of these change frozen copy. They are functional text the freeze did not co
 
 - Website Privacy Notice draft: `WEBSITE_PRIVACY_NOTICE_DRAFT.md` (this folder).
 - Generator, release rule and commands: `tools/site-build/README.md`.
+
+## Amendment SI8-WEB-LAUNCH-3A — public Creator Record (2026-11-17)
+
+**Founder decision:** Creator Record is to be publicly available as a $29 self-service product. Any visitor can create an
+account, create a Creator Record, pay and access the purchased record. Invitation-only access is no longer the intended launch
+state.
+
+**What changes now:** the direction only. The SI8-WEB-LAUNCH-2 invitation-only decision above is kept as the historical
+record.
+
+**What does not change yet:**
+- Public registration and checkout are not activated in this milestone.
+- Production stays invitation-only: `creator_record_v2_pilot_access`, enforced in the application.
+- The website keeps "Request access".
+
+**Activation is a separate, authorized release.** Its readiness, blockers and sequence are in
+`SI8-WEB-LAUNCH-3A-CREATOR-RECORD-PUBLIC-LAUNCH-READINESS.md` (this folder). The planned website call-to-action changes are listed
+there and are made only when public access is released and verified.
+
+Decisions 1–6 above are unchanged.

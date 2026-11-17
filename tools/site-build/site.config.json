@@ -19,7 +19,7 @@
     "mailingListOptIn": false
   },
   "prices": {
-    "_note": "Founder-approved for website publication (SI8-WEB-LAUNCH-2). Publication approval only: it does not open Creator Record checkout, registration or general availability.",
+    "_note": "Founder-approved for website publication (SI8-WEB-LAUNCH-2). Showing a price opens nothing: public Creator Record self-service is the approved direction (SI8-WEB-LAUNCH-3A) but is not yet released.",
     "PRICE_CR": "$29",
     "PRICE_CA_FROM": "$499",
     "PRICE_CA_QUALIFICATION": "Starting at $499. Final pricing depends on project scope and is confirmed before proceeding."

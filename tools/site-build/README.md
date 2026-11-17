@@ -29,8 +29,11 @@ node --test tools/site-build/tests/contact-form.test.mjs   # contact endpoint un
 Edit `pages/` or `partials/`, run the generator, and commit sources and output together.
 
 **Creator Record calls to action** read "Request access" and lead to `/contact?inquiry=creator_record_access` while Creator
-Record is invitation-only (an inquiry only, not account creation or access approval); no page links to sign-up, checkout or
-payment (checked by `browser-check.mjs`).
+Record is invitation-only in Production (an inquiry only, not account creation or access approval); no page links to sign-up,
+checkout or payment (checked by `browser-check.mjs`). The founder has since chosen a public self-service launch
+(SI8-WEB-LAUNCH-3A). The call-to-action changes for that launch are planned in
+`08_Platform/implementation/si8-web/SI8-WEB-LAUNCH-3A-CREATOR-RECORD-PUBLIC-LAUNCH-READINESS.md`, and are made only once public
+access is released and verified.
 
 **Contact page:** `?inquiry=` preselects the inquiry type only if it equals an existing option value (`assurance`,
 `enterprise`, `creator_record_access`, `general`); anything else selects `general`. The value is never written into the page.
