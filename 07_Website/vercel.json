@@ -35,5 +35,55 @@
       "destination": "https://app.superimmersive8.com/auth/login",
       "permanent": false
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/pricing",
+      "destination": "/api/gone"
+    },
+    {
+      "source": "/pricing/:path*",
+      "destination": "/api/gone"
+    },
+    {
+      "source": "/how-it-works",
+      "destination": "/api/gone"
+    },
+    {
+      "source": "/how-it-works/:path*",
+      "destination": "/api/gone"
+    },
+    {
+      "source": "/rights-verified",
+      "destination": "/api/gone"
+    },
+    {
+      "source": "/rights-verified/:path*",
+      "destination": "/api/gone"
+    },
+    {
+      "source": "/zh",
+      "destination": "/api/gone"
+    },
+    {
+      "source": "/zh/:path*",
+      "destination": "/api/gone"
+    },
+    {
+      "source": "/_archive",
+      "destination": "/api/gone"
+    },
+    {
+      "source": "/_archive/:path*",
+      "destination": "/api/gone"
+    },
+    {
+      "source": "/_versions",
+      "destination": "/api/gone"
+    },
+    {
+      "source": "/_versions/:path*",
+      "destination": "/api/gone"
+    }
   ]
 }

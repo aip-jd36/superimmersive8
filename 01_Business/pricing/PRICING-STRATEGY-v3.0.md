@@ -70,6 +70,7 @@ Three motions, not one product with tiers:
 **Website pricing (decided 2026-07-19 — Opus's "middle path," operationalized):**
 - No pricing link in primary nav or anywhere in the cold-visitor path.
 - A pricing page exists and is published, but **unlisted** — reachable only via direct link, shared manually the moment a prospect asks about cost before booking a call.
+  - **Superseded 2026-11-17 (founder decision):** the old unlisted `/pricing` page is no longer shared with prospects and is retired from the website (HTTP 410; `08_Platform/implementation/LEGACY_WEBSITE_RETIREMENT_2026-11-17.md`). There is no public pricing page. The pricing decisions in this document are unchanged.
 - This satisfies both halves of the "middle path" principle: doesn't erode the not-price-led institutional positioning for cold traffic, but doesn't gatekeep price behind a mandatory sales call either — if someone asks, they get an instant answer.
 - **No trigger threshold is defined for moving to full publication.** This was explicitly left open (2026-07-19) — revisit only if/when call data makes a clear case either way, not on a schedule.
 
