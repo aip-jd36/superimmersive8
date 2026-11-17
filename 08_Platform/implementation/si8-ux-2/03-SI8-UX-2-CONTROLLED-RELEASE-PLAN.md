@@ -108,3 +108,30 @@ investigate. **The invitation gate is unchanged** (public access is CR-PUBLIC-1,
 ## Not part of this release
 
 Public access (CR-PUBLIC-1), the dashboard and marketing redesign, PDF templates or generator, pricing.
+
+## UAT records: exclusion from customer and commercial metrics (recorded 2026-11-17)
+
+**The SI8-UX-2 Production UAT purchases are operator UAT records**, made by the admin account with synthetic project data and
+100% complimentary codes. They **must be excluded from customer and commercial traction metrics by record ID**, following the
+MVP and CR-DESIGN-2D precedent (`CR-V2-MVP-RELEASE-AUTHORIZATION-1-APPROVAL-RECORD.md`, "UAT flag";
+`cr-design-2c/04-CR-DESIGN-2D-RELEASE-AUTHORIZATION-RECORD.md` §9). As before, their `uat` column is `false`; the records are not
+modified.
+
+| Path | Record | Submission | Checkout | Collected |
+|---|---|---|---|---|
+| A | CR-2026-32D43FC8 | `32d43fc8-3db2-44cf-aaad-92e20b730af5` | 100% complimentary code | US$0.00 |
+| B | CR-2026-1E1AED2D | `1e1aed2d-b5b6-47b2-854b-05d06a198bbd` | `COMP-JD2` (operator-confirmed); session `cs_live_bcAp7ijxAufFo6kV5SHdZ839t8qxdunP9UESNupwcm7Qt7kHctczuV5pcy` | US$0.00 |
+
+**These purchases do not validate nonzero payment collection.** Every Production payment to date collected US$0.00.
+
+**Where they can still appear (no automated exclusion exists):**
+- **Admin dashboard** (`/admin`): submission counts include them.
+- **Admin users page** (`/admin/users`): submission counts include them; the revenue column adds US$0.00.
+- **Admin payments page** (`/admin/payments`): listed, at US$0.00.
+- **GA4:** the Stripe webhook sends one server-side `purchase` event per accepted payment (`app/api/webhooks/stripe/route.ts`,
+  value `amount_total` = 0, `transaction_id` = the Checkout session id) when `GA4_API_SECRET` is configured. Such an event is
+  counted by `tools/daily-digest/digest.py` and `tools/gtm-report/report.py`. The GA4 internal-IP filter does not apply to
+  server-sent events.
+
+Subtract these record IDs (and, for GA4, their Checkout session ids) when reporting customer counts, conversions or sales.
+
