@@ -70,6 +70,15 @@
     menu.addEventListener('click', function (e) { if (e.target.closest('a')) setOpen(false); });
   }
 
-  function init() { forwardCrcAttribution(); trackBookCall(); mobileMenu(); }
+  /* ---- Contact: preselect the inquiry type from ?inquiry=, only if it matches an existing option ---- */
+  function preselectInquiry() {
+    var select = document.getElementById('inquiry-type');
+    if (!select) return;
+    var requested = new URLSearchParams(window.location.search).get('inquiry');
+    var allowed = Array.prototype.map.call(select.options, function (o) { return o.value; });
+    select.value = requested && allowed.indexOf(requested) !== -1 ? requested : 'general';
+  }
+
+  function init() { forwardCrcAttribution(); trackBookCall(); mobileMenu(); preselectInquiry(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();

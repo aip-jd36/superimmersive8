@@ -111,6 +111,31 @@ for (const route of ROUTES) {
 }
 check('no link to sign-up, checkout or payment', purchase.length === 0, purchase)
 
+// 2c. Contact: inquiry preselection is validated; the inactive form sends nothing
+if (ROUTES.includes('/contact')) {
+  const cases = [['assurance', 'assurance'], ['enterprise', 'enterprise'], ['creator_record_access', 'creator_record_access'], ['general', 'general'],
+    ['unknown-value', 'general'], ['', 'general'], ['ASSURANCE', 'general'], ['"><img src=x onerror=window.__si8pwned=1>', 'general']]
+  const got = []
+  for (const [value, expected] of cases) {
+    await open(`${BASE}/contact?inquiry=${encodeURIComponent(value)}`)
+    got.push({ value, expected, selected: await ev(`document.getElementById('inquiry-type').value`), pwned: await ev('window.__si8pwned === 1'), injectedImgs: await ev(`document.querySelectorAll('img[src="x"]').length`) })
+  }
+  await open(`${BASE}/contact`)
+  got.push({ value: '(none)', expected: 'general', selected: await ev(`document.getElementById('inquiry-type').value`), pwned: false, injectedImgs: 0 })
+  check('inquiry preselection: valid values selected, anything else falls back to general, nothing injected', got.every((g) => g.selected === g.expected && !g.pwned && g.injectedImgs === 0), got)
+
+  requests.length = 0
+  const inactive = await ev(`(async()=>{const btn=[...document.querySelectorAll('#contact-card button')]; const forms=document.querySelectorAll('form').length;
+    document.getElementById('contact-name').value='Test'; document.getElementById('contact-email').value='test@example.com';
+    btn.forEach(b=>b.click()); const e=document.getElementById('contact-email'); e.focus();
+    e.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true})); await new Promise(r=>setTimeout(r,400));
+    return {forms, buttons:btn.length, allDisabled:btn.every(b=>b.disabled), describedBy:btn.map(b=>b.getAttribute('aria-describedby')), status:(document.getElementById('contact-status')||{}).textContent, url:location.href}})()`)
+  await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 }); await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 }); await sleep(400)
+  inactive.requestsAfter = requests.filter((u) => !/fonts\.(googleapis|gstatic)\.com/.test(u))
+  inactive.urlAfter = await ev('location.href')
+  check('contact form inactive: no <form>, Send disabled and explained, no request or navigation on interaction', inactive.forms === 0 && inactive.buttons === 1 && inactive.allDisabled && inactive.describedBy[0] === 'contact-status' && /Not yet available/.test(inactive.status) && inactive.requestsAfter.length === 0 && inactive.urlAfter === inactive.url, inactive)
+}
+
 // 3. Local resources load; no JavaScript exceptions
 requests.length = 0
 await open(`${BASE}/`)

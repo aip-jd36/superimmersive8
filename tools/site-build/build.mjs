@@ -81,7 +81,10 @@ if (args.has('--links')) {
   console.log(`external destinations: ${[...external].sort().join(', ')}`)
   if (pendingUsed.size) console.log(`${release ? 'FAIL' : 'PENDING'}: not yet built: ${[...pendingUsed].sort().join(', ')}`)
   for (const x of problems) console.log(`FAIL: ${x}`)
-  const failed = problems.length > 0 || (release && pendingUsed.size > 0)
+  // Release blockers: conditions a link check cannot see (e.g. a form without a verified backend).
+  const blockers = config.releaseBlockers ?? []
+  for (const b of blockers) console.log(`${release ? 'FAIL' : 'BLOCKER'}: release blocked by "${b.id}": ${b.reason}`)
+  const failed = problems.length > 0 || (release && (pendingUsed.size > 0 || blockers.length > 0))
   console.log(failed ? 'LINKS: FAIL' : `LINKS: OK${pendingUsed.size ? ' (pending routes allowed outside --release)' : ''}`)
   process.exit(failed ? 1 : 0)
 }

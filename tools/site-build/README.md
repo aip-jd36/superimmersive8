@@ -27,8 +27,13 @@ node tools/site-build/browser-check.mjs [shotDir]  # browser checks (needs Chrom
 ```
 Edit `pages/` or `partials/`, run the generator, and commit sources and output together.
 
-**Creator Record calls to action** read "Request access" and lead to `/contact?inquiry=general` while Creator Record is
-invitation-only; no page links to sign-up, checkout or payment (checked by `browser-check.mjs`).
+**Creator Record calls to action** read "Request access" and lead to `/contact?inquiry=creator_record_access` while Creator
+Record is invitation-only (an inquiry only, not account creation or access approval); no page links to sign-up, checkout or
+payment (checked by `browser-check.mjs`).
+
+**Contact page:** `?inquiry=` preselects the inquiry type only if it equals an existing option value (`assurance`,
+`enterprise`, `creator_record_access`, `general`); anything else selects `general`. The value is never written into the page.
+The page has no `<form>` and its Send button is disabled with an explanation: nothing is submitted until IMPL-3b.
 
 ## Behaviour in `site.js`
 - **Analytics:** GA4 `G-628BLE9N15` loads only on `www.superimmersive8.com` and `superimmersive8.com`. On localhost, Vercel
@@ -37,9 +42,11 @@ invitation-only; no page links to sign-up, checkout or payment (checked by `brow
 - **CRC attribution:** links to `https://app.superimmersive8.com/crc` receive only `utm_source`, `utm_medium`,
   `utm_campaign`, `utm_content` and `ref` from the page URL (unchanged from the v5 homepage).
 - **Mobile menu:** button with `aria-expanded`; Escape closes it and returns focus.
+- **Contact inquiry preselection:** see above.
 
 ## Release rule
-`pendingRoutes` lists navigation destinations not built yet (`/enterprise`, `/contact`). The navigation keeps its final links; `--links` reports them as pending, and `--links --release`
-fails until the list is empty. Do not merge to `main` (which deploys to Production) while it fails. Publication also depends
+`pendingRoutes` lists navigation destinations not built yet (currently none). `releaseBlockers` lists conditions a link
+check cannot see; `contact-form-operation` stays until IMPL-3b verifies the contact form. `--links --release` fails while
+either list is non-empty. Do not merge to `main` (which deploys to Production) while it fails. Publication also depends
 on the open gates recorded with the design freeze: prices against Pricing Strategy v3.0, brand and founder claims, contact
 delivery and privacy, the synthetic sample, and Creator Record's invitation-only status.

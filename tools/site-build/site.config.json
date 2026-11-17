@@ -3,7 +3,13 @@
   "outDir": "07_Website",
   "crcUrl": "https://app.superimmersive8.com/crc",
   "signInUrl": "https://app.superimmersive8.com/auth/login",
-  "pendingRoutes": ["/enterprise", "/contact"],
+  "pendingRoutes": [],
+  "releaseBlockers": [
+    {
+      "id": "contact-form-operation",
+      "reason": "The /contact form has no backend: sending is disabled (development state). IMPL-3b must implement and verify delivery, sender, privacy notice and subscription handling before release. Remove this entry only after that verification."
+    }
+  ],
   "prices": {
     "_note": "Approved design representations (Round 2 design freeze). Not yet approved for public publication; see the publication gates.",
     "PRICE_CR": "$29",
@@ -13,6 +19,7 @@
   "allowedExternal": [
     "https://app.superimmersive8.com/crc",
     "https://app.superimmersive8.com/auth/login",
+    "https://calendly.com/aipenguins/superimmersive8",
     "https://fonts.googleapis.com",
     "https://fonts.gstatic.com",
     "https://www.superimmersive8.com",
