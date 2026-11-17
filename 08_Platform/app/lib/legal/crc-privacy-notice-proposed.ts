@@ -1,24 +1,24 @@
 /**
- * SI8-PRIVACY-CRC-3 — PROPOSED Commercial Readiness Check privacy notice, English and Traditional Chinese. NOT APPROVED.
+ * SI8-PRIVACY-CRC-3/4 — Commercial Readiness Check privacy notice copy, English and Traditional Chinese.
  *
- * This text is a proposal for founder copy approval. Nothing in the application imports this module (checked by
- * `__tests__/legal/crc-privacy-notice-proposed.test.ts`), so it is never served. It is deliberately incomplete:
- * `effective_date` and `approval_reference` are empty, so `isCompleteCrcPrivacyNotice()` rejects it and it cannot be published
- * by accident even if it were wired in.
+ * COPY APPROVED by the founder, reference SI8-PRIVACY-CRC-5-20261117 (SI8-PRIVACY-CRC-5, 2026-11-17), including the
+ * commitment "We do not sell your personal information". Any change to the text or version needs a new approval.
+ *
+ * Only `./crc-privacy-notice.ts` imports this module (checked by `__tests__/legal/crc-privacy-notice-proposed.test.ts`). It
+ * carries no effective date and no approval reference of its own: the slot in `./crc-privacy-notice.ts` adds the approval
+ * reference and the effective date, and the notice is published only once that date is set.
  *
  * Every statement describes CRC as it behaves at branch `work/si8-privacy-crc-1b` (`ef2ae803` and later); the evidence for each
  * section is in 08_Platform/implementation/privacy-crc-3/SI8_PRIVACY_CRC_3_FOUNDER_REVIEW.md. Retention statements describe the
  * current practice only (no automatic deletion); planned periods are deliberately not stated (SI8-PRIVACY-CRC-4). When any
  * retention limit, including the raw-IP clearing, goes live, this text must change, under a new version, in the same release.
- * "We do not sell your personal information" (section 10) is a proposed founder commitment that needs explicit confirmation
- * before publication.
+ * "We do not sell your personal information" (section 10) was explicitly confirmed by the founder (SI8-PRIVACY-CRC-5).
  *
  * Both languages must keep the same number of paragraphs in the same order (tested). The Commercial Assurance follow-up
  * sentence is quoted verbatim from the results gate in each language (tested).
  *
- * To publish (after founder approval, in one reviewed change): in `./crc-privacy-notice.ts`, set
- *   CRC_PRIVACY_NOTICE = Object.freeze({ ...CRC_PRIVACY_NOTICE_PROPOSED, effective_date: 'YYYY-MM-DD', approval_reference: '…' })
- * keeping the text and version exactly as approved.
+ * To publish: set CRC_PRIVACY_NOTICE_EFFECTIVE_DATE in `./crc-privacy-notice.ts` to the Production publication date, in the
+ * Production release change.
  */
 import type { CrcPrivacyNotice } from './crc-privacy-notice'
 

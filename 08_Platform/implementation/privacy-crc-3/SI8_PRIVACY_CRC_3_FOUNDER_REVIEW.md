@@ -2,19 +2,30 @@
 
 Revised in SI8-PRIVACY-CRC-4 (final copy revisions): sections 9, 12, 13 and 14.
 
-**Status: PROPOSED — NOT APPROVED — NOT PUBLISHED.** Branch `work/si8-privacy-crc-1b`, local only. Nothing is pushed,
-merged or deployed.
+**Status: COPY APPROVED — EFFECTIVE DATE PENDING — NOT PUBLISHED.** Branch `work/si8-privacy-crc-1b`, local only. Nothing is
+pushed, merged or deployed.
 
-You are asked to approve, change or reject the notice text below, in English and Traditional Chinese. Approving the copy does not
-release it. Production release needs separate authorization; see the release checklist.
+## Approval record (SI8-PRIVACY-CRC-5)
+
+- **Approval reference:** `SI8-PRIVACY-CRC-5-20261117`, recorded 2026-11-17.
+- **Approved:** version `crc-privacy-2026-11-17`, English and Traditional Chinese, exactly as below (SI8-PRIVACY-CRC-4 text).
+  No further copy revisions.
+- **Founder confirmations:** SI8 does not sell users' personal information. Privacy contact `jd@superimmersive8.com`.
+- **Not authorized:** Production deployment.
+- **Effective date:** pending. It must be the actual Production publication date. Until it is set
+  (`CRC_PRIVACY_NOTICE_EFFECTIVE_DATE` in `08_Platform/app/lib/legal/crc-privacy-notice.ts`), the notice is not published: no
+  page, no gate link, and captures keep recording `results-gate-v1`.
+
+Any change to the text or version needs a new approval.
 
 ## What is built
 
 - **One bilingual notice, one version.** The proposed text lives in `08_Platform/app/lib/legal/crc-privacy-notice-proposed.ts`
   (version `crc-privacy-2026-11-17`). Nothing in the application imports it. It has no effective date and no approval
   reference, so it cannot be published as it stands.
-- **The slot stays empty.** `CRC_PRIVACY_NOTICE` in `lib/legal/crc-privacy-notice.ts` is still `null`. A notice is published
-  only when it is complete in both languages.
+- **The approved notice is in the slot** (`CRC_PRIVACY_NOTICE` in `lib/legal/crc-privacy-notice.ts`) with the approval
+  reference and an empty effective date. A notice is published only when it is complete in both languages, including a valid
+  effective date.
 - **`/crc/privacy`:** English by default, Traditional Chinese at `/crc/privacy?lang=zh-TW`. Once published, each language
   renders under its own `lang` attribute, with a language selector (links with `hreflang`, the current language marked
   `aria-current`). Until then every language shows "not available yet", has no selector and is not indexed.
@@ -80,16 +91,12 @@ changes, that test fails and the notice must be revised before release.
 
 ## Release checklist (in order; each step needs its own go-ahead)
 
-1. **Copy approval (founder).** Approve both language texts as they appear below, or send changes. Explicitly confirm "We do
-   not sell your personal information". Record an approval reference (for example `JD-SI8-PRIVACY-CRC-4-YYYYMMDD`) and the
-   effective date.
-2. **Native Chinese read-through** of the Traditional Chinese text; apply any corrections before approval.
-3. **One reviewed release change (engineering, local):**
-   - In `lib/legal/crc-privacy-notice.ts`, set
-     `CRC_PRIVACY_NOTICE = Object.freeze({ ...CRC_PRIVACY_NOTICE_PROPOSED, effective_date, approval_reference })`, with the text
-     and version unchanged.
-   - Update the tests that assert the slot is `null`.
-   - Run `tsc`, the targeted tests and `next build`.
+1. ~~Copy approval (founder).~~ Done: `SI8-PRIVACY-CRC-5-20261117`, including the "do not sell" confirmation.
+2. **Native Chinese read-through:** not recorded as done. Any correction it produces is a copy change and needs a new approval.
+3. **Release change (engineering), made only once Production release is authorized and the publication date is known:**
+   - set `CRC_PRIVACY_NOTICE_EFFECTIVE_DATE` to that date (YYYY-MM-DD), with the text, version and approval reference unchanged;
+   - update the two tests that assert the date is empty;
+   - run `tsc`, the targeted tests and `next build`.
 4. **Production release authorization (founder, separate).** Merge and deploy. Nothing else is needed: no migration, no secret,
    no environment change.
 5. **After deploy, check:**

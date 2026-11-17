@@ -43,8 +43,8 @@ const SAMPLE: CrcPrivacyNotice = {
 }
 
 describe('publication gate', () => {
-  test('no CRC notice is approved: the slot is null and nothing is published', () => {
-    expect(CRC_PRIVACY_NOTICE).toBeNull()
+  test('the approved notice has no effective date yet, so nothing is published', () => {
+    expect(CRC_PRIVACY_NOTICE?.effective_date).toBe('')
     expect(crcPrivacyNoticePublished()).toBe(false)
   })
 
@@ -231,8 +231,8 @@ describe('publication safety', () => {
     })
   const served = ['app', 'components', 'lib', 'public'].flatMap((d) => walk(path.join(APP, d)))
 
-  test('the notice slot is literally null in source: no text has been placed in it', () => {
-    expect(src('lib/legal/crc-privacy-notice.ts')).toMatch(/export const CRC_PRIVACY_NOTICE: CrcPrivacyNotice \| null = null\n/)
+  test('the effective date is literally empty in source: the approved notice has not been published', () => {
+    expect(src('lib/legal/crc-privacy-notice.ts').replace(/\r\n/g, '\n')).toMatch(/export const CRC_PRIVACY_NOTICE_EFFECTIVE_DATE: string = ''\n/)
   })
 
   test('the draft sits outside the application and is never imported or copied into served code', () => {

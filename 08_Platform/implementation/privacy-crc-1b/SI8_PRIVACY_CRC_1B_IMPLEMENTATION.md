@@ -7,7 +7,7 @@ deployed, or applied to any database. **Implemented code is not approved public 
 
 | Piece | State in this branch | Effect if deployed as is |
 |---|---|---|
-| CRC privacy notice slot `CRC_PRIVACY_NOTICE` (`lib/legal/crc-privacy-notice.ts`) | `null`, so no notice is approved | none: `/crc/privacy` shows "This document is not available yet." (noindex) |
+| CRC privacy notice slot `CRC_PRIVACY_NOTICE` (`lib/legal/crc-privacy-notice.ts`) | approved bilingual copy (`SI8-PRIVACY-CRC-5-20261117`), effective date pending (CRC-5) | none until the date is set: `/crc/privacy` shows "This document is not available yet." (noindex) |
 | Results-gate privacy link (`components/crc/ResultsGatePrivacyLink.tsx`) | renders only when the notice is published | none: no link is shown |
 | Disclosure version (`lib/crc-engine/results-gate-disclosure.ts`, SI8-PRIVACY-CRC-1C) | the page reports the version its gate rendered; the server records it | none: the gate renders v1 and reports `results-gate-v1` |
 | Raw-IP retention function (migration `20261118000000`) | file only | none: Vercel does not apply migrations |

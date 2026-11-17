@@ -1,7 +1,8 @@
 /**
- * SI8-PRIVACY-CRC-3 — the PROPOSED CRC privacy notice (English + Traditional Chinese). Not approved, not published.
+ * SI8-PRIVACY-CRC-3/4/5 — the CRC privacy notice copy (English + Traditional Chinese). Copy approved
+ * (SI8-PRIVACY-CRC-5-20261117); not published until its effective date is set.
  *
- * Checks: it cannot be published as it stands; nothing in the application imports it; both languages have the same structure;
+ * Checks: it cannot be published without the effective date; only the notice slot imports it; both languages have the same structure;
  * it quotes the unchanged Commercial Assurance follow-up sentence; its retention statements describe the current practice only;
  * it makes no legal-compliance claims; and the code behaviours it describes are still true (tripwires: if one fails, the notice
  * text must be revised before release).
@@ -9,7 +10,11 @@
 import { readFileSync, readdirSync, statSync } from 'fs'
 import path from 'path'
 import { CRC_PRIVACY_NOTICE_PROPOSED as P } from '@/lib/legal/crc-privacy-notice-proposed'
-import { CRC_NOTICE_LOCALES, CRC_PRIVACY_NOTICE, isCompleteCrcPrivacyNotice } from '@/lib/legal/crc-privacy-notice'
+import {
+  CRC_NOTICE_LOCALES, CRC_PRIVACY_NOTICE, CRC_PRIVACY_NOTICE_APPROVAL_REFERENCE, CRC_PRIVACY_NOTICE_EFFECTIVE_DATE, crcPrivacyNoticePublished,
+  isCompleteCrcPrivacyNotice,
+} from '@/lib/legal/crc-privacy-notice'
+import { resultsGateDisclosure } from '@/lib/crc-engine/results-gate-disclosure'
 import { RESULTS_GATE_COPY } from '@/lib/crc-engine/results-gate-copy'
 import { getResultsGateCopyLocalized } from '@/components/crc/crc-ui-copy'
 import { createElement } from 'react'
@@ -26,27 +31,50 @@ const walk = (dir: string): string[] =>
     return statSync(full).isDirectory() ? walk(full) : [full]
   })
 
-describe('proposed notice: cannot be published as it stands', () => {
-  test('the slot is still null and the proposal lacks an effective date and approval reference', () => {
-    expect(CRC_PRIVACY_NOTICE).toBeNull()
+describe('approved notice: placed in the slot, not published until its effective date is set', () => {
+  test('the slot carries the approved copy unchanged, the approval reference, and a PENDING effective date', () => {
+    expect(CRC_PRIVACY_NOTICE_APPROVAL_REFERENCE).toBe('SI8-PRIVACY-CRC-5-20261117')
+    expect(CRC_PRIVACY_NOTICE_EFFECTIVE_DATE).toBe('')
+    expect(CRC_PRIVACY_NOTICE).toEqual({ ...P, effective_date: '', approval_reference: 'SI8-PRIVACY-CRC-5-20261117' })
+    expect(CRC_PRIVACY_NOTICE!.version).toBe('crc-privacy-2026-11-17')
+    expect(CRC_PRIVACY_NOTICE!.text).toBe(P.text)
+  })
+
+  test('without the effective date nothing publishes: no notice, no link, the gate reports results-gate-v1', () => {
+    expect(isCompleteCrcPrivacyNotice(CRC_PRIVACY_NOTICE)).toBe(false)
+    expect(crcPrivacyNoticePublished()).toBe(false)
+    expect(resultsGateDisclosure()).toEqual({ showPrivacyLink: false, version: 'results-gate-v1' })
+    expect(renderToStaticMarkup(createElement(ResultsGatePrivacyLink, { locale: 'en' }))).toBe('')
+    expect(renderToStaticMarkup(createElement(ResultsGatePrivacyLink, { locale: 'zh-TW' }))).toBe('')
+  })
+
+  test('a malformed effective date also keeps it unpublished', () => {
+    for (const effective_date of ['2026-11-1', '20261117', 'TBD', ' ', '2026/11/17']) {
+      expect(crcPrivacyNoticePublished({ ...CRC_PRIVACY_NOTICE!, effective_date })).toBe(false)
+    }
+  })
+
+  test('the copy module carries no date or approval of its own (the slot supplies both)', () => {
     expect(P.effective_date).toBe('')
     expect(P.approval_reference).toBe('')
     expect(isCompleteCrcPrivacyNotice(P)).toBe(false)
   })
 
-  test('once dated and approved it would be complete in both languages', () => {
-    expect(isCompleteCrcPrivacyNotice({ ...P, effective_date: '2099-01-01', approval_reference: 'TEST-ONLY' })).toBe(true)
+  test('with an effective date the approved notice is complete in both languages, and the gate reports results-gate-v2', () => {
+    const dated = { ...CRC_PRIVACY_NOTICE!, effective_date: '2099-01-01' }
+    expect(isCompleteCrcPrivacyNotice(dated)).toBe(true)
+    expect(resultsGateDisclosure(dated)).toEqual({ showPrivacyLink: true, version: 'results-gate-v2' })
   })
 
-  test('nothing in the application imports it (only tests do)', () => {
+  test('only the notice slot imports the copy module', () => {
     const served = ['app', 'components', 'lib'].flatMap((d) => walk(path.join(APP, d))).filter((f) => /\.(tsx?|jsx?)$/.test(f))
     const importers = served.filter((f) => /(from|import|require)\s*\(?\s*['"][^'"]*crc-privacy-notice-proposed['"]/.test(readFileSync(f, 'utf8')))
-    expect(importers.map((f) => path.relative(APP, f))).toEqual([])
+    expect(importers.map((f) => path.relative(APP, f).split(path.sep).join('/'))).toEqual(['lib/legal/crc-privacy-notice.ts'])
   })
 })
 
-describe('proposed notice: as it would render once approved (simulated approval, test only)', () => {
-  const approved = { ...P, effective_date: '2099-01-01', approval_reference: 'TEST-ONLY' }
+describe('approved notice: as it renders once its effective date is set (test date only)', () => {
+  const approved = { ...CRC_PRIVACY_NOTICE!, effective_date: '2099-01-01' }
 
   test('each language renders its own full text, headings included, under its own lang attribute', () => {
     for (const locale of CRC_NOTICE_LOCALES) {
@@ -57,6 +85,18 @@ describe('proposed notice: as it would render once approved (simulated approval,
       expect(html).not.toContain('data-legal-unavailable')
       expect((html.match(/<p class="text-gray-800 mb-4 whitespace-pre-line">/g) ?? []).length).toBe(P.text[locale].paragraphs.length)
     }
+  })
+
+  test('the language selector: both languages linked, current one marked, other one plain link', () => {
+    const en = renderToStaticMarkup(createElement(CrcPrivacyNoticeView, { notice: approved, locale: 'en' }))
+    expect(en).toMatch(/<a href="\/crc\/privacy" hrefLang="en" lang="en" aria-current="page"[^>]*>English<\/a>/)
+    expect(en).toMatch(/<a href="\/crc\/privacy\?lang=zh-TW" hrefLang="zh-TW" lang="zh-TW" class="[^"]*">繁體中文<\/a>/)
+    const zh = renderToStaticMarkup(createElement(CrcPrivacyNoticeView, { notice: approved, locale: 'zh-TW' }))
+    expect(zh).toMatch(/hrefLang="zh-TW" lang="zh-TW" aria-current="page"[^>]*>繁體中文<\/a>/)
+    expect(zh).toMatch(/<a href="\/crc\/privacy" hrefLang="en" lang="en" class="[^"]*">English<\/a>/)
+    expect(zh).toContain('版本 crc-privacy-2026-11-17 · 生效日期 2099-01-01')
+    expect(en).toContain('Version crc-privacy-2026-11-17 · Effective 2099-01-01')
+    expect(en + zh).not.toContain('SI8-PRIVACY-CRC-5-20261117') // the approval reference is never shown to visitors
   })
 
   test('the gate link points to the notice in the visitor language', () => {
