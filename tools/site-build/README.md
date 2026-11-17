@@ -23,7 +23,8 @@ node tools/site-build/build.mjs                    # regenerate pages
 node tools/site-build/build.mjs --check            # fail if committed pages are stale
 node tools/site-build/build.mjs --links            # link check; pending routes reported, allowed
 node tools/site-build/build.mjs --links --release  # release link check; pending routes fail
-node tools/site-build/browser-check.mjs [shotDir]  # browser checks (needs Chrome)
+node tools/site-build/browser-check.mjs [shotDir]  # browser checks (needs Chrome); runs the real contact endpoint, delivery mocked
+node --test tools/site-build/tests/contact-form.test.mjs   # contact endpoint unit tests (all external calls mocked)
 ```
 Edit `pages/` or `partials/`, run the generator, and commit sources and output together.
 
@@ -33,7 +34,20 @@ payment (checked by `browser-check.mjs`).
 
 **Contact page:** `?inquiry=` preselects the inquiry type only if it equals an existing option value (`assurance`,
 `enterprise`, `creator_record_access`, `general`); anything else selects `general`. The value is never written into the page.
-The page has no `<form>` and its Send button is disabled with an explanation: nothing is submitted until IMPL-3b.
+
+**Contact form (SI8-WEB-LAUNCH-2).** The page posts JSON to `/api/contact-form` (`07_Website/api/contact-form.js`).
+- **Server:**
+  - off unless the marketing project has `CONTACT_FORM_ENABLED=true` and `RESEND_API_KEY` (503 otherwise);
+  - accepts only SI8 origins (plus `CONTACT_FORM_EXTRA_ORIGINS`, for example a preview) and bodies of at most 8 KB;
+  - validates every field;
+  - refuses bots (hidden field `website`, minimum 3 s fill time) and limits each connection to 5 per 10 minutes, keeping a
+    one-way IP hash in memory only;
+  - emails the enquiry from `noreply@superimmersive8.com` to `jd@superimmersive8.com`, with reply-to set to the visitor;
+  - logs outcome codes only.
+- **Mailing list:** only when the visitor ticks the separate box **and** `KIT_OPT_IN_ENABLED=true`, `KIT_API_SECRET` and
+  `KIT_OPT_IN_TAG_ID` are set. The box renders only if `site.config.json` `contactForm.mailingListOptIn` is `true` (currently
+  `false`).
+- **Founder decisions and the privacy draft:** `08_Platform/implementation/si8-web/`.
 
 ## Behaviour in `site.js`
 - **Analytics:** GA4 `G-628BLE9N15` loads only on `www.superimmersive8.com` and `superimmersive8.com`. On localhost, Vercel
@@ -42,11 +56,15 @@ The page has no `<form>` and its Send button is disabled with an explanation: no
 - **CRC attribution:** links to `https://app.superimmersive8.com/crc` receive only `utm_source`, `utm_medium`,
   `utm_campaign`, `utm_content` and `ref` from the page URL (unchanged from the v5 homepage).
 - **Mobile menu:** button with `aria-expanded`; Escape closes it and returns focus.
-- **Contact inquiry preselection:** see above.
+- **Contact inquiry preselection and contact form:** see above.
 
 ## Release rule
-`pendingRoutes` lists navigation destinations not built yet (currently none). `releaseBlockers` lists conditions a link
-check cannot see; `contact-form-operation` stays until IMPL-3b verifies the contact form. `--links --release` fails while
-either list is non-empty. Do not merge to `main` (which deploys to Production) while it fails. Publication also depends
-on the open gates recorded with the design freeze: prices against Pricing Strategy v3.0, brand and founder claims, contact
-delivery and privacy, the synthetic sample, and Creator Record's invitation-only status.
+`pendingRoutes` lists navigation destinations not built yet (currently `/privacy`, the Website Privacy Notice draft).
+`releaseBlockers` lists conditions a link check cannot see:
+- `website-privacy-notice`: the notice is not approved;
+- `contact-form-production-config`: Production configuration and a real end-to-end delivery are not confirmed.
+
+`--links --release` fails while either list is non-empty. Do not merge to `main` (which deploys to Production) while it fails.
+The founder's publication decisions (tagline, footer, prices, sample placeholder, founder claims, Kit consent, working form)
+are recorded in `08_Platform/implementation/si8-web/SI8-WEB-LAUNCH-2-FOUNDER-DECISIONS.md`. They do not open Creator Record
+checkout, registration or general availability.

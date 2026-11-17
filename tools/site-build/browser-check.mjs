@@ -9,6 +9,7 @@ import { readFileSync, existsSync, statSync, mkdirSync, writeFileSync, mkdtempSy
 import { join, resolve, extname, dirname } from 'node:path'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
+import { createHandler, createRateLimiter } from '../../07_Website/api/contact-form.js'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const SITE = resolve(HERE, '..', '..', '07_Website')
@@ -26,7 +27,24 @@ function localFile(urlPath) {
   if (existsSync(join(f, 'index.html'))) return join(f, 'index.html')
   return null
 }
+// The real contact endpoint, with delivery and Kit mocked: nothing leaves this machine.
+const contact = { mode: 'ok', calls: [] }
+const contactHandler = createHandler({
+  env: { CONTACT_FORM_ENABLED: 'true', RESEND_API_KEY: 're_test_only', get CONTACT_FORM_EXTRA_ORIGINS() { return BASE } },
+  fetchImpl: async (url, init) => { contact.calls.push({ url, body: JSON.parse(init.body) }); return { ok: contact.mode === 'ok' } },
+  limiter: createRateLimiter({ max: 2 }), // the 3rd real submission in this run is refused
+  log: () => {},
+})
 const server = createServer((req, res) => {
+  if (req.url.split('?')[0] === '/api/contact-form') {
+    let raw = ''
+    req.on('data', (c) => { raw += c })
+    req.on('end', () => {
+      const adapter = { status(c) { res.statusCode = c; return this }, json(p) { res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(p)); return this } }
+      contactHandler({ method: req.method, headers: req.headers, body: raw }, adapter)
+    })
+    return
+  }
   const f = localFile(req.url)
   if (!f) { res.writeHead(404); res.end('not found'); return }
   res.writeHead(200, { 'Content-Type': TYPES[extname(f)] ?? 'application/octet-stream' }); res.end(readFileSync(f))
@@ -124,16 +142,52 @@ if (ROUTES.includes('/contact')) {
   got.push({ value: '(none)', expected: 'general', selected: await ev(`document.getElementById('inquiry-type').value`), pwned: false, injectedImgs: 0 })
   check('inquiry preselection: valid values selected, anything else falls back to general, nothing injected', got.every((g) => g.selected === g.expected && !g.pwned && g.injectedImgs === 0), got)
 
-  requests.length = 0
-  const inactive = await ev(`(async()=>{const btn=[...document.querySelectorAll('#contact-card button')]; const forms=document.querySelectorAll('form').length;
-    document.getElementById('contact-name').value='Test'; document.getElementById('contact-email').value='test@example.com';
-    btn.forEach(b=>b.click()); const e=document.getElementById('contact-email'); e.focus();
-    e.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true})); await new Promise(r=>setTimeout(r,400));
-    return {forms, buttons:btn.length, allDisabled:btn.every(b=>b.disabled), describedBy:btn.map(b=>b.getAttribute('aria-describedby')), status:(document.getElementById('contact-status')||{}).textContent, url:location.href}})()`)
-  await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 }); await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 }); await sleep(400)
-  inactive.requestsAfter = requests.filter((u) => !/fonts\.(googleapis|gstatic)\.com/.test(u))
-  inactive.urlAfter = await ev('location.href')
-  check('contact form inactive: no <form>, Send disabled and explained, no request or navigation on interaction', inactive.forms === 0 && inactive.buttons === 1 && inactive.allDisabled && inactive.describedBy[0] === 'contact-status' && /Not yet available/.test(inactive.status) && inactive.requestsAfter.length === 0 && inactive.urlAfter === inactive.url, inactive)
+  // Live form: client validation, accessible states, real endpoint with mocked delivery
+  const fill = (v) => `(()=>{const set=(id,x)=>{document.getElementById(id).value=x};set('contact-name',${JSON.stringify(v.name)});set('contact-email',${JSON.stringify(v.email)});set('contact-description',${JSON.stringify(v.description)});document.getElementById('inquiry-type').value=${JSON.stringify(v.inquiry)};return true})()`
+  const submit = `(async()=>{document.querySelector('#contact-card button[type="submit"]').click();await new Promise(r=>setTimeout(r,600));return true})()`
+  const state = `({formHidden:document.getElementById('contact-card').hidden,sentVisible:!document.getElementById('contact-sent').hidden,focus:document.activeElement&&(document.activeElement.id||document.activeElement.tagName),
+    statusRole:document.getElementById('contact-status').getAttribute('role'),status:document.getElementById('contact-status').textContent,statusLinks:[...document.querySelectorAll('#contact-status a')].map(a=>a.getAttribute('href')),
+    invalid:[...document.querySelectorAll('#contact-card [aria-invalid="true"]')].map(e=>e.id),errorsShown:[...document.querySelectorAll('#contact-card .field-error')].filter(e=>!e.hidden).map(e=>e.id),buttonDisabled:document.querySelector('#contact-card button[type="submit"]').disabled})`
+  const GOOD = { name: 'Browser Check', email: 'check@example.test', description: 'Automated browser check. Delivery is mocked.', inquiry: 'enterprise' }
+
+  await open(`${BASE}/contact`)
+  const structure = await ev(`(()=>{const f=document.getElementById('contact-card');const hp=document.getElementById('contact-website');
+    return {isForm:f.tagName==='FORM',action:f.getAttribute('action'),novalidate:f.hasAttribute('novalidate'),labelled:['contact-name','contact-email','inquiry-type','contact-description'].every(id=>document.querySelector('label[for="'+id+'"]')),
+      required:['contact-name','contact-email','contact-description'].every(id=>document.getElementById(id).required),describedBy:['contact-name','contact-email','contact-description'].every(id=>document.getElementById(id).getAttribute('aria-describedby')===id+'-error'),
+      honeypotHidden:hp.tabIndex===-1&&hp.closest('[aria-hidden="true"]')!==null&&hp.getBoundingClientRect().right<0,sendEnabled:!document.querySelector('#contact-card button[type="submit"]').disabled,
+      statusLive:document.getElementById('contact-status').getAttribute('aria-live'),optInBox:!!document.getElementById('contact-mailing-list'),privacyLinks:[...document.querySelectorAll('a[href="/privacy"]')].length}})()`)
+  check('contact form: labelled fields, required marks, error links, hidden honeypot, live status, Send enabled, no mailing-list box', structure.isForm && structure.action === '/api/contact-form' && structure.novalidate && structure.labelled && structure.required && structure.describedBy && structure.honeypotHidden && structure.sendEnabled && structure.statusLive === 'polite' && !structure.optInBox && structure.privacyLinks === 2, structure)
+
+  contact.calls.length = 0
+  await ev(submit)
+  const empty = await ev(state)
+  await ev(fill({ ...GOOD, email: 'not-an-email' })); await ev(submit)
+  const badEmail = await ev(state)
+  check('missing fields and invalid email: errors shown, first invalid field focused, nothing sent', empty.invalid.join() === 'contact-name,contact-email,contact-description' && empty.errorsShown.length === 3 && empty.focus === 'contact-name' && badEmail.invalid.join() === 'contact-email' && badEmail.focus === 'contact-email' && contact.calls.length === 0, { empty, badEmail })
+
+  await open(`${BASE}/contact?inquiry=enterprise`); contact.calls.length = 0; contact.mode = 'ok'
+  await ev(fill(GOOD)); await sleep(3200); await ev(submit)
+  const ok = await ev(state)
+  const sentMail = contact.calls[0] && contact.calls[0].body
+  check('valid enquiry: delivered once (mocked) from SI8 to SI8, success shown and focused, no Kit call', ok.formHidden && ok.sentVisible && ok.focus === 'H2' && contact.calls.length === 1 && contact.calls[0].url === 'https://api.resend.com/emails' && sentMail.from === 'SI8 Website <noreply@superimmersive8.com>' && sentMail.reply_to === 'check@example.test' && /Inquiry type: Enterprise \/ Platform/.test(sentMail.text) && /Mailing list: not requested/.test(sentMail.text), { ok, calls: contact.calls.map((c) => c.url) })
+
+  await open(`${BASE}/contact`); contact.calls.length = 0; contact.mode = 'fail'
+  await ev(fill(GOOD)); await sleep(3200); await ev(submit)
+  const failed = await ev(state)
+  contact.mode = 'ok'
+  check('delivery failure: alert with email and booking fallback, form kept, Send re-enabled', !failed.formHidden && !failed.sentVisible && failed.statusRole === 'alert' && /could not be sent/.test(failed.status) && /jd@superimmersive8\.com/.test(failed.status) && failed.statusLinks.includes('https://calendly.com/aipenguins/superimmersive8') && !failed.buttonDisabled, failed)
+
+  await open(`${BASE}/contact`); await ev(fill(GOOD)); await sleep(3200); await ev(submit)
+  const limited = await ev(state)
+  check('rate limit: a further submission from the same connection is refused with an explanation', limited.statusRole === 'alert' && /Too many messages/.test(limited.status) && !limited.sentVisible, limited)
+
+  await open(`${BASE}/contact`); await ev(fill(GOOD)); await ev(`document.getElementById('contact-website').value='http://bot.example'`); contact.calls.length = 0
+  await sleep(3200); await ev(submit)
+  check('honeypot: a filled hidden field sends nothing', contact.calls.length === 0, contact.calls)
+
+  const privacy = { status: (await fetch(`${BASE}/privacy`)).status, footerLinks: 0 }
+  await open(`${BASE}/`); privacy.footerLinks = await ev(`document.querySelectorAll('footer a[href="/privacy"]').length`)
+  check('Website Privacy Notice: linked from the footer, not published (draft /privacy not served)', privacy.status === 404 && privacy.footerLinks === 1, privacy)
 }
 
 // 3. Local resources load; no JavaScript exceptions

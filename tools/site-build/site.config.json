@@ -3,15 +3,23 @@
   "outDir": "07_Website",
   "crcUrl": "https://app.superimmersive8.com/crc",
   "signInUrl": "https://app.superimmersive8.com/auth/login",
-  "pendingRoutes": [],
+  "pendingRoutes": ["/privacy"],
   "releaseBlockers": [
     {
-      "id": "contact-form-operation",
-      "reason": "The /contact form has no backend: sending is disabled (development state). IMPL-3b must implement and verify delivery, sender, privacy notice and subscription handling before release. Remove this entry only after that verification."
+      "id": "website-privacy-notice",
+      "reason": "The Website Privacy Notice is a draft awaiting founder approval (08_Platform/implementation/si8-web/WEBSITE_PRIVACY_NOTICE_DRAFT.md). /privacy is not built. Publish it as an approved page with a version and effective date, then remove this entry and \"/privacy\" from pendingRoutes."
+    },
+    {
+      "id": "contact-form-production-config",
+      "reason": "The contact form works only when the marketing-site Vercel project has CONTACT_FORM_ENABLED=true and a RESEND_API_KEY that can send from noreply@superimmersive8.com. Remove this entry only after that configuration is confirmed and one real enquiry has been delivered end to end."
     }
   ],
+  "contactForm": {
+    "_note": "mailingListOptIn renders the optional, unticked Kit checkbox. Keep false until its wording and the Kit tag/sequence are approved, and KIT_OPT_IN_ENABLED, KIT_API_SECRET and KIT_OPT_IN_TAG_ID are set; the server ignores the box otherwise.",
+    "mailingListOptIn": false
+  },
   "prices": {
-    "_note": "Approved design representations (Round 2 design freeze). Not yet approved for public publication; see the publication gates.",
+    "_note": "Founder-approved for website publication (SI8-WEB-LAUNCH-2). Publication approval only: it does not open Creator Record checkout, registration or general availability.",
     "PRICE_CR": "$29",
     "PRICE_CA_FROM": "$499",
     "PRICE_CA_QUALIFICATION": "Starting at $499. Final pricing depends on project scope and is confirmed before proceeding."

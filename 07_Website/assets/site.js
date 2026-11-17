@@ -79,6 +79,92 @@
     select.value = requested && allowed.indexOf(requested) !== -1 ? requested : 'general';
   }
 
-  function init() { forwardCrcAttribution(); trackBookCall(); mobileMenu(); preselectInquiry(); }
+  /* ---- Contact form (SI8-WEB-LAUNCH-2): validate, POST JSON to /api/contact-form, announce the outcome ---- */
+  var CONTACT_FALLBACK = 'You can also email jd@superimmersive8.com or ';
+  var CONTACT_ERRORS = {
+    rate_limited: 'Too many messages have been sent from this connection. Please try again later.',
+    retry: 'Please wait a few seconds and send again.',
+    invalid_fields: 'Please check the highlighted fields.',
+    not_configured: 'Online sending is not available right now.',
+    generic: 'Your message could not be sent. Please try again.'
+  };
+  var EMAIL_PATTERN = /^[^\s@<>()[\]\\,;:"]+@[^\s@<>()[\]\\,;:"]+\.[^\s@<>()[\]\\,;:"]{2,}$/;
+
+  function contactForm() {
+    var form = document.getElementById('contact-card');
+    if (!form || form.tagName !== 'FORM') return;
+    var loadedAt = Date.now();
+    var status = document.getElementById('contact-status');
+    var sent = document.getElementById('contact-sent');
+    var button = form.querySelector('button[type="submit"]');
+    var fields = {
+      name: { el: document.getElementById('contact-name'), ok: function (v) { return v.length > 0 && v.length <= 120; } },
+      email: { el: document.getElementById('contact-email'), ok: function (v) { return v.length <= 254 && EMAIL_PATTERN.test(v); } },
+      description: { el: document.getElementById('contact-description'), ok: function (v) { return v.length > 0 && v.length <= 4000; } }
+    };
+    function mark(name, invalid) {
+      var f = fields[name];
+      if (!f) return;
+      f.el.setAttribute('aria-invalid', invalid ? 'true' : 'false');
+      var err = document.getElementById(f.el.id + '-error');
+      if (err) err.hidden = !invalid;
+    }
+    function showStatus(message, isError) {
+      status.textContent = '';
+      status.setAttribute('role', isError ? 'alert' : 'status');
+      status.appendChild(document.createTextNode(message + (isError ? ' ' + CONTACT_FALLBACK : '')));
+      if (isError) {
+        var a = document.createElement('a');
+        a.href = 'https://calendly.com/aipenguins/superimmersive8';
+        a.textContent = 'book a call';
+        status.appendChild(a);
+        status.appendChild(document.createTextNode('.'));
+      }
+    }
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var values = {};
+      var firstInvalid = null;
+      Object.keys(fields).forEach(function (name) {
+        var v = fields[name].el.value.trim();
+        values[name] = v;
+        var bad = !fields[name].ok(v);
+        mark(name, bad);
+        if (bad && !firstInvalid) firstInvalid = fields[name].el;
+      });
+      if (firstInvalid) { showStatus(CONTACT_ERRORS.invalid_fields, false); firstInvalid.focus(); return; }
+      var optIn = document.getElementById('contact-mailing-list');
+      var payload = {
+        name: values.name,
+        email: values.email,
+        inquiry: document.getElementById('inquiry-type').value,
+        description: values.description,
+        mailingList: !!(optIn && optIn.checked),
+        website: document.getElementById('contact-website').value,
+        formLoadedAt: loadedAt
+      };
+      button.disabled = true;
+      button.setAttribute('aria-busy', 'true');
+      showStatus('Sending…', false);
+      fetch(form.getAttribute('action'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+        .then(function (res) { return res.json().catch(function () { return {}; }).then(function (data) { return { ok: res.ok && data.ok === true, data: data }; }); })
+        .then(function (r) {
+          if (r.ok) {
+            form.hidden = true;
+            sent.hidden = false;
+            var heading = sent.querySelector('h2');
+            if (heading) heading.focus();
+            return;
+          }
+          var code = r.data && r.data.code;
+          if (code === 'invalid_fields' && r.data.fields) r.data.fields.forEach(function (n) { mark(n, true); });
+          showStatus(CONTACT_ERRORS[code] || CONTACT_ERRORS.generic, true);
+        })
+        .catch(function () { showStatus(CONTACT_ERRORS.generic, true); })
+        .then(function () { button.disabled = false; button.removeAttribute('aria-busy'); });
+    });
+  }
+
+  function init() { forwardCrcAttribution(); trackBookCall(); mobileMenu(); preselectInquiry(); contactForm(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();

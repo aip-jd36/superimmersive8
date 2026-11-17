@@ -197,3 +197,12 @@ footer a:focus-visible,.bg-navy a:focus-visible{outline-color:#fff}
 .hamburger[aria-expanded="true"]{background:var(--raised)}
 .btn{text-align:center} /* links styled as buttons centre wrapped labels, as <button> does */
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+/* SI8-WEB-LAUNCH-2 contact form */
+[hidden]{display:none!important}
+.hp-field{position:absolute!important;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
+.field-error{margin:6px 0 0;font-size:13px;color:#9b2c2c}
+#contact-card [aria-invalid="true"]{border-color:#9b2c2c!important}
+#contact-card input:focus-visible,#contact-card select:focus-visible,#contact-card textarea:focus-visible{outline:2px solid var(--navy);outline-offset:1px}
+.optin{display:flex;gap:10px;align-items:flex-start;line-height:1.45}
+.optin input{margin-top:3px;flex:none}
+#contact-sent h2:focus{outline:none}
