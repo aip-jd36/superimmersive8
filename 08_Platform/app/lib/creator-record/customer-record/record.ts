@@ -46,7 +46,7 @@
 
 import { CREATOR_RECORD_CONCLUSIONS, biRankForStatus, type GuidanceItem } from '../contract/compose'
 import { loadQuestionRegistry, type RegistryInput } from '../contract/question-registry'
-import { authorizePublication } from '../contract/publication-ledger'
+import { authorizePublication, isQuestionScoped, selectionContextFor } from '../contract/publication-ledger'
 import type { DeclaredObservation, RecordContext } from '../contract/provenance'
 import { isIsoDate } from '../contract/types'
 import type { CreatorRecordSources } from '../prototype/build-draft'
@@ -422,9 +422,15 @@ export function buildCustomerRecord(input: CustomerRecordInput): CustomerRecordR
     }
     const claim = claims.get(item.claim_id)
     if (!claim) throw new CustomerRecordInvariantError(`guidance for an unknown claim ${item.claim_id}`)
-    const auth = authorizePublication(input.sources.ledger, claim, input.as_of)
+    const auth = authorizePublication(input.sources.ledger, claim, input.as_of, selectionContextFor(item.selection_basis, (o) => observationById.get(o)?.question.q_id))
     if (!auth.authorized) throw new CustomerRecordInvariantError(`guidance not authorized for ${item.claim_id}: ${auth.reason}`)
     const entry = auth.entry
+    // CR-DOC-READER-EXT-1 (A): a question-scoped item's selection basis cites only declarations answering its questions.
+    if (isQuestionScoped(entry)) {
+      for (const sc of item.selection_basis.scopes) for (const o of sc.observation_ids) {
+        if (!(entry.selection_questions as readonly string[]).includes(observationById.get(o)?.question.q_id as string)) throw new CustomerRecordInvariantError(`selection basis for ${item.claim_id} cites a declaration outside its selection questions`)
+      }
+    }
     const pub = item.provenance.publication
     if (pub.entry_id !== entry.entry_id || pub.version !== entry.version) throw new CustomerRecordInvariantError(`publication provenance mismatch for ${item.claim_id}`)
     if (item.explanation !== entry.explanation) throw new CustomerRecordInvariantError(`explanation is not the approved ledger text for ${item.claim_id}`)

@@ -36,6 +36,13 @@ export interface PublicationLedgerEntry {
   decision_date: IsoDate | null
   refresh_by: IsoDate | null
   superseded_by: string | null
+  /**
+   * CR-DOC-READER-EXT-1 (A): OPTIONAL question-scoped publication. When present, the claim may be published only when its
+   * selection basis cites at least one declaration answering one of these questions (for example music claims from M1 only,
+   * stock claims from M3 only), and the published selection basis is narrowed to those declarations. Absent: no restriction,
+   * exactly as before. Present but empty or malformed: refused (fail closed). Generic: no provider is named here.
+   */
+  selection_questions?: readonly string[]
 }
 
 export const PUBLICATION_REFUSAL_REASONS = [
@@ -53,6 +60,8 @@ export const PUBLICATION_REFUSAL_REASONS = [
   // CRV2-IA-4A (replaces `jurisdiction_scoped_guidance_disabled`): a jurisdiction-scoped claim's entry must use a policy that
   // requires applicability to be met. `met_or_unresolved` would let guidance about a place the creator did not choose through.
   'jurisdiction_scoped_requires_met_policy',
+  // CR-DOC-READER-EXT-1 (A): the entry is question-scoped and the claim was not selected through any of its questions.
+  'selection_question_not_authorized',
 ] as const
 export type PublicationRefusalReason = (typeof PUBLICATION_REFUSAL_REASONS)[number]
 
@@ -74,7 +83,52 @@ export function isJurisdictionScoped(claim: ClaimDescriptor): boolean {
   return all.some((r) => r.fact === 'jurisdiction')
 }
 
-export function authorizePublication(ledger: readonly PublicationLedgerEntry[], claim: ClaimDescriptor, asOf: IsoDate): PublicationAuthorization {
+/**
+ * CR-DOC-READER-EXT-1 (A): the questions of the declarations cited by a selection basis. `questionOf` resolves an observation
+ * id to its question id from the caller's own declarations; an id it cannot resolve contributes nothing (fail closed).
+ */
+export interface SelectionContext {
+  question_ids: readonly string[]
+}
+
+export function selectionContextFor(basis: { scopes: readonly { observation_ids: readonly string[] }[] } | undefined, questionOf: (observationId: string) => string | undefined): SelectionContext {
+  const ids = new Set<string>()
+  for (const sc of basis?.scopes ?? []) for (const o of sc.observation_ids) {
+    const q = questionOf(o)
+    if (typeof q === 'string' && q !== '') ids.add(q)
+  }
+  return { question_ids: Array.from(ids).sort() }
+}
+
+/** True when the entry restricts publication to declarations answering particular questions. */
+export function isQuestionScoped(entry: PublicationLedgerEntry): boolean {
+  return entry.selection_questions !== undefined
+}
+
+/**
+ * CR-DOC-READER-EXT-1 (A): narrows a selection basis to the declarations answering an entry's selection questions. Identity for
+ * an entry without `selection_questions`. A matched id survives only if a remaining declaration contributed it; a scope left
+ * with nothing returns null (the caller refuses).
+ */
+export function narrowSelectionBasis<S extends { scope: string; matched_ids: string[]; observation_ids: string[] }>(
+  entry: PublicationLedgerEntry,
+  basis: { scopes: S[] },
+  questionOf: (observationId: string) => string | undefined,
+  idOf: (observationId: string) => string | null | undefined,
+): { scopes: S[] } | null {
+  if (!isQuestionScoped(entry)) return basis
+  const allowed = new Set(entry.selection_questions)
+  const scopes: S[] = []
+  for (const sc of basis.scopes) {
+    const observation_ids = sc.observation_ids.filter((o) => allowed.has(questionOf(o) as string))
+    const matched_ids = sc.matched_ids.filter((id) => observation_ids.some((o) => idOf(o) === id))
+    if (observation_ids.length === 0 || matched_ids.length === 0) return null
+    scopes.push({ ...sc, matched_ids, observation_ids })
+  }
+  return { scopes }
+}
+
+export function authorizePublication(ledger: readonly PublicationLedgerEntry[], claim: ClaimDescriptor, asOf: IsoDate, selection?: SelectionContext): PublicationAuthorization {
   if (!isIsoDate(asOf)) throw new Error('as_of must be YYYY-MM-DD')
   const refuse = (reason: PublicationRefusalReason): PublicationAuthorization => ({ authorized: false, reason })
 
@@ -97,5 +151,11 @@ export function authorizePublication(ledger: readonly PublicationLedgerEntry[], 
   // configuration only; the facts check (jurisdiction requirement actually met) runs before Bounded Interpretation in the
   // integration layer, independent of what any entry says.
   if (isJurisdictionScoped(claim) && !JURISDICTION_SCOPED_POLICIES.includes(e.applicability_policy)) return refuse('jurisdiction_scoped_requires_met_policy')
+  // CR-DOC-READER-EXT-1 (A): question-scoped entries. Checked last, so every earlier refusal keeps its reason.
+  if (isQuestionScoped(e)) {
+    const qs = e.selection_questions
+    if (!Array.isArray(qs) || qs.length === 0 || qs.some((q) => typeof q !== 'string' || q === '')) return refuse('selection_question_not_authorized')
+    if (!selection || !selection.question_ids.some((q) => qs.includes(q))) return refuse('selection_question_not_authorized')
+  }
   return { authorized: true, entry: e }
 }

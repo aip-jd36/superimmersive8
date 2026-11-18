@@ -22,7 +22,7 @@
 import type { BoundedInterpretation, InterpretationStatus } from '@/lib/bounded-interpretation/types'
 import type { ApplicabilityRequirement } from '@/lib/retrieval-engine/types'
 import { buildDependencyRows, type DependencyRow } from './dependency-rows'
-import { authorizePublication, type ClaimDescriptor, type PublicationLedgerEntry, type PublicationRefusalReason } from './publication-ledger'
+import { selectionContextFor, authorizePublication, type ClaimDescriptor, type PublicationLedgerEntry, type PublicationRefusalReason } from './publication-ledger'
 import { activeObservations, type DeclaredObservation } from './provenance'
 import type { IsoDate } from './types'
 
@@ -160,6 +160,8 @@ export function composeGuidance(input: CompositionInput): Composition {
   const items: GuidanceItem[] = []
   const omissions: Omission[] = []
   const active = activeObservations(input.observations)
+  // CR-DOC-READER-EXT-1 (A): question of each declaration, for question-scoped ledger entries.
+  const questionOfObservation = new Map(input.observations.map((o) => [o.observation_id, o.question.q_id]))
 
   // 1. Collect citations per claim, with provenance checks per objective.
   const citations = new Map<string, Citation[]>()
@@ -206,7 +208,7 @@ export function composeGuidance(input: CompositionInput): Composition {
       omit('bi_permits_nothing')
       continue
     }
-    const auth = authorizePublication(input.ledger, selected.claim, input.as_of)
+    const auth = authorizePublication(input.ledger, selected.claim, input.as_of, selectionContextFor(selected.selection_basis, (o) => questionOfObservation.get(o)))
     if (!auth.authorized) {
       omit(auth.reason)
       continue

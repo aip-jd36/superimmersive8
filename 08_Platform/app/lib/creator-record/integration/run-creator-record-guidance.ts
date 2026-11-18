@@ -32,7 +32,7 @@ import type { ReviewerLkClaim, ReviewerLkWithheld } from '@/lib/reviewer-lk/type
 import { composeGuidance, type Composition, type ObjectiveEvaluation, type ScopeSelectionBasis, type SelectedClaim, type SelectionBasis } from '../contract/compose'
 import type { DeclaredObservation } from '../contract/provenance'
 import type { ObjectiveFactAuthorization } from '../contract/objective-fact-authorization'
-import { authorizePublication, isJurisdictionScoped, type PublicationLedgerEntry, type PublicationRefusalReason } from '../contract/publication-ledger'
+import { authorizePublication, isJurisdictionScoped, isQuestionScoped, narrowSelectionBasis, selectionContextFor, type PublicationLedgerEntry, type PublicationRefusalReason } from '../contract/publication-ledger'
 import type { IsoDate } from '../contract/types'
 import { buildCreatorRecordFacts, type CreatorRecordFactsBundle } from './facts'
 import { CREATOR_RECORD_OBJECTIVES, objectiveToBiIntent, type CreatorRecordObjectiveDefinition } from './objectives'
@@ -114,7 +114,7 @@ export function selectionBasisFor(claim: TopicClaim, facts: CreatorRecordFactsBu
   return { scopes }
 }
 
-function toSelected(claim: ReviewerLkClaim, governed: TopicClaim, facts: CreatorRecordFactsBundle): SelectedClaim {
+function toSelected(claim: ReviewerLkClaim, governed: TopicClaim, facts: CreatorRecordFactsBundle, selectionBasis?: SelectionBasis): SelectedClaim {
   const requirements = [...governed.applicability_requirements, ...(governed.applicability_any_of ?? []).flat()]
   // Only declarations that actually reached the evaluator, bound to the requirement's own tool.
   const declared_basis = facts.provenance.plans
@@ -125,13 +125,19 @@ function toSelected(claim: ReviewerLkClaim, governed: TopicClaim, facts: Creator
     applicability_status: claim.applicability_status as 'met' | 'unresolved',
     applicability_material_unresolved: [...claim.applicability_material_unresolved],
     declared_basis,
-    selection_basis: selectionBasisFor(governed, facts),
+    selection_basis: selectionBasis ?? selectionBasisFor(governed, facts),
   }
 }
 
 export function runCreatorRecordGuidance(input: CreatorRecordGuidanceInput): CreatorRecordGuidanceResult {
   const facts = buildCreatorRecordFacts(input.observations, input.topicClaims)
   const governedById = new Map(input.topicClaims.map((c) => [c.claim_id, c]))
+  // CR-DOC-READER-EXT-1 (A): each declaration's question, and the identity it contributed, for question-scoped entries.
+  const questionOf = new Map(input.observations.map((o) => [o.observation_id, o.question.q_id]))
+  const contributedId = new Map<string, string | null>([
+    ...facts.provenance.tools.map((t): [string, string | null] => [t.observation_id, t.tool_id]),
+    ...facts.provenance.providers.map((p): [string, string | null] => [p.observation_id, p.provider_id]),
+  ])
   const traces: ObjectiveTrace[] = []
   const evaluations: ObjectiveEvaluation[] = []
   const gaps: GovernanceGap[] = []
@@ -169,7 +175,17 @@ export function runCreatorRecordGuidance(input: CreatorRecordGuidanceInput): Cre
         continue
       }
       const governed = governedById.get(claim.claim_id)
-      const auth = governed ? authorizePublication(input.ledger, governed, input.as_of) : null
+      let auth = governed ? authorizePublication(input.ledger, governed, input.as_of) : null
+      // CR-DOC-READER-EXT-1 (A): a question-scoped entry is authorized only with the questions its selection actually cites.
+      let narrowed: SelectionBasis | undefined
+      if (governed && auth && !auth.authorized && auth.reason === 'selection_question_not_authorized') {
+        const basis = selectionBasisFor(governed, facts)
+        auth = authorizePublication(input.ledger, governed, input.as_of, selectionContextFor(basis, (o) => questionOf.get(o)))
+        if (auth.authorized && isQuestionScoped(auth.entry)) {
+          narrowed = narrowSelectionBasis(auth.entry, basis, (o) => questionOf.get(o), (o) => contributedId.get(o)) ?? undefined
+          if (!narrowed) auth = { authorized: false, reason: 'selection_question_not_authorized' }
+        }
+      }
       if (!governed || !auth || !auth.authorized) {
         refuse(claim.claim_id, !governed ? 'claim_metadata_missing' : (auth as { reason: PublicationRefusalReason }).reason)
         continue
@@ -181,7 +197,7 @@ export function runCreatorRecordGuidance(input: CreatorRecordGuidanceInput): Cre
         continue
       }
       fedReviewer.push(claim)
-      fed.push(toSelected(claim, governed, facts))
+      fed.push(toSelected(claim, governed, facts, narrowed))
     }
 
     let interpretation = null
