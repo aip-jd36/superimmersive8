@@ -1,6 +1,8 @@
 # Creator Record Terms of Service — public-access revision (DRAFT)
 
-**Status: DRAFT — NOT APPROVED — NOT PUBLISHED.** CR-PUBLIC-1, 2026-11-18.
+**Status: DRAFT — NOT APPROVED — NOT PUBLISHED.** CR-PUBLIC-1, 2026-11-18. **§2 wording approved by the founder in CR-PUBLIC-2A
+(2026-11-18).** The document as a whole is still unpublished, and its version identifier, effective date and approval reference
+are assigned at release.
 
 - **Base:** the published Terms `terms-2026-11-14` (`08_Platform/app/lib/legal/policies.ts`, approval
   `JD-CR-V2-MVP-RELEASE-AUTHORIZATION-1-20261114 terms`). Nothing in the application uses this draft.
@@ -16,14 +18,15 @@ verbatim.
 | | Text |
 |---|---|
 | Published (`terms-2026-11-14`) | ~~Creator Record is currently available by invitation only.~~ |
-| Proposed | **Anyone who creates an SI8 account can prepare and buy a Creator Record.** |
+| Approved (CR-PUBLIC-2A) | **Creator Record is available to registered SI8 users, subject to these Terms and applicable eligibility, payment, and service requirements.** |
 
 The rest of §2 is unchanged: "You must be at least 18 years old. Individuals and businesses may both buy Creator Records; if
 you use it for a business, you confirm that you may accept these Terms for it. You are responsible for keeping your sign-in
 details secure and for activity under your account."
 
-**Why this wording:**
-- It states availability only. It adds no service level, guarantee or new commercial promise.
+**About the approved wording:**
+- It states availability, conditioned on these Terms and on existing eligibility, payment and service requirements. It adds no
+  service level, guarantee or new commercial promise.
 - The age, business-use and account-security conditions that follow it still apply to everyone.
 - §6 (US$29 through Stripe, promotional codes may reduce the price, order confirmed on Stripe's confirmation) and §8 (refunds)
   already describe self-service and are unchanged, as decided (existing discount policy retained).
@@ -44,7 +47,7 @@ Creator Record is self-declared and automated. No person at SI8 reviews your vid
 
 2. Who can use Creator Record
 
-**Anyone who creates an SI8 account can prepare and buy a Creator Record.** You must be at least 18 years old. Individuals and businesses may both buy Creator Records; if you use it for a business, you confirm that you may accept these Terms for it. You are responsible for keeping your sign-in details secure and for activity under your account.
+**Creator Record is available to registered SI8 users, subject to these Terms and applicable eligibility, payment, and service requirements.** You must be at least 18 years old. Individuals and businesses may both buy Creator Records; if you use it for a business, you confirm that you may accept these Terms for it. You are responsible for keeping your sign-in details secure and for activity under your account.
 
 3. Your answers and documents
 

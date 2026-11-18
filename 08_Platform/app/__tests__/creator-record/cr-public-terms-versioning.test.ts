@@ -45,10 +45,12 @@ describe('a new Terms version rotates both identifiers (why the authority row mu
 })
 
 describe('the founder-review draft', () => {
-  test('exists, changes only the §2 availability sentence, and is marked not approved', () => {
+  test('exists, changes only the §2 availability sentence, and is marked unpublished, with the approved §2 sentence', () => {
     const d = readFileSync(DRAFT, 'utf8')
     expect(d).toContain('**Status: DRAFT — NOT APPROVED — NOT PUBLISHED.**')
     expect(d).toContain(`~~${INVITATION}~~`)
+    // CR-PUBLIC-2A: the founder-approved §2 sentence, verbatim
+    expect(d).toContain('Creator Record is available to registered SI8 users, subject to these Terms and applicable eligibility, payment, and service requirements.')
     // every other published paragraph is carried over verbatim
     for (const [i, p] of (TERMS_OF_SERVICE?.paragraphs ?? []).entries()) {
       if (i === 5) continue
