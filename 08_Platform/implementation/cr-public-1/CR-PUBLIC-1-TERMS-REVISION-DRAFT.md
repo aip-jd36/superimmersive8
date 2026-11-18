@@ -1,5 +1,8 @@
 # Creator Record Terms of Service — public-access revision (DRAFT)
 
+> **Published 2026-11-18 as `terms-2026-11-18`** (CR-PUBLIC-LAUNCH; see `CR-PUBLIC-LAUNCH-CLOSURE-RECORD.md`). This file is
+> kept as the review record.
+
 **Status: DRAFT — NOT APPROVED — NOT PUBLISHED.** CR-PUBLIC-1, 2026-11-18. **§2 wording approved by the founder in CR-PUBLIC-2A
 (2026-11-18).** The document as a whole is still unpublished, and its version identifier, effective date and approval reference
 are assigned at release.

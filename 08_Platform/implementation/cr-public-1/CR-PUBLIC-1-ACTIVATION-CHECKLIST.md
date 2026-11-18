@@ -1,5 +1,10 @@
 # CR-PUBLIC-1 — Creator Record public self-service: Production activation checklist
 
+> **COMPLETE — founder accepted (2026-11-18).** The launch was executed as one coordinated release (`ece9b196`); the
+> rows below are the historical plan. Production state, smoke evidence and accepted residual risks:
+> `CR-PUBLIC-LAUNCH-CLOSURE-RECORD.md`.
+
+
 **Status:** preparation only (2026-11-18; updated by CR-PUBLIC-2A, whose detailed plans are in `CR-PUBLIC-2A-PRODUCTION-UAT-READINESS.md`). Nothing below has been done. Each numbered step is a separate Production action that
 needs its own authorization.
 
