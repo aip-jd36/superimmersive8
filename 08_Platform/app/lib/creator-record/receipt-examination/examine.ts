@@ -51,10 +51,15 @@ export interface ExaminationUsage {
   latency_ms: number
 }
 
-export type ExaminationOutcome =
+/**
+ * CR-DOC-READER-EXT-1 (B): the outcome for any reading contract's extraction type. Type-only generalisation: the receipt
+ * outcome below is exactly `ExaminationOutcomeOf<ReceiptExtraction>`, so nothing about the receipt engine changes at runtime.
+ */
+export type ExaminationOutcome = ExaminationOutcomeOf<ReceiptExtraction>
+export type ExaminationOutcomeOf<T> =
   | {
       status: 'examined'
-      extraction: ReceiptExtraction
+      extraction: T
       detected_media_type: ReceiptMediaType
       usage: ExaminationUsage
       schema_version: string
@@ -82,11 +87,12 @@ export function detectMediaType(bytes: Uint8Array): ReceiptMediaType | null {
  * CRV2-IA-4D2: which reading contract the engine validates against. Defaults to v2 (the only contract any active profile uses);
  * the v3 contract is used only by the inactive receipt profile v2. Input checks, retry and failure reasons are the same.
  */
-export interface ReceiptReadingContract {
+export interface ReadingContract<T> {
   schema_version: string
   prompt_version: string
-  validate: (raw: unknown) => ReceiptExtraction | null
+  validate: (raw: unknown) => T | null
 }
+export type ReceiptReadingContract = ReadingContract<ReceiptExtraction>
 
 export const RECEIPT_READING_CONTRACT_V2: ReceiptReadingContract = {
   schema_version: RECEIPT_EXTRACTION_SCHEMA_VERSION,
@@ -101,11 +107,20 @@ export interface ExamineDeps {
 }
 
 export async function examineReceiptDocument(bytes: Uint8Array, deps: ExamineDeps): Promise<ExaminationOutcome> {
+  return examineWithContract(bytes, { callModel: deps.callModel, now: deps.now, contract: deps.contract ?? RECEIPT_READING_CONTRACT_V2 })
+}
+
+/**
+ * CR-DOC-READER-EXT-1 (B): the same engine for any reading contract — the same byte-sniffed input checks, the same two-attempt
+ * rule, the same fixed failure reasons and a non-repairing validator supplied by the contract. Receipts call it through
+ * `examineReceiptDocument` above with their own contract, exactly as before.
+ */
+export async function examineWithContract<T>(bytes: Uint8Array, deps: { callModel: ReceiptModelCaller; now?: () => number; contract: ReadingContract<T> }): Promise<ExaminationOutcomeOf<T>> {
   const now = deps.now ?? (() => Date.now())
   const usage: ExaminationUsage = { attempts: 0, input_tokens: 0, output_tokens: 0, latency_ms: 0 }
-  const contract = deps.contract ?? RECEIPT_READING_CONTRACT_V2
+  const contract = deps.contract
   const versions = { schema_version: contract.schema_version, prompt_version: contract.prompt_version }
-  const fail = (reason: CouldNotExamineReason, media: ReceiptMediaType | null): ExaminationOutcome => ({
+  const fail = (reason: CouldNotExamineReason, media: ReceiptMediaType | null): ExaminationOutcomeOf<T> => ({
     status: 'could_not_examine',
     reason,
     detected_media_type: media,
