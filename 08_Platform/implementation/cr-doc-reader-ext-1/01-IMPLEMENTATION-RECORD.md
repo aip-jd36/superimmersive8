@@ -53,3 +53,16 @@ vocabulary; v2 has its own vocabulary and the licence profile uses only existing
 5. Counsel review of all customer text.
 6. Evaluation spend for the licence profile, then its registration (live registry, issuance support) and the examination-request
    contract change.
+
+## CR-DOC-READER-EXT-2 (2026-11-18): PDF and routing, still inactive
+
+- **Routing** (`77a275d1`): the customer examination service routes by an optional declared category before any permission is
+  recorded or document read. No category (every request the client and HTTP route make) keeps the receipt profile; licence and
+  permission are refused while inactive; release, project file, other and unknown are refused. The live registry still holds the
+  receipt profile alone. An inactive live licence profile exists for mock tests only (no real model caller).
+- **PDF** (this commit): the template contract accepts an optional, separately keyed `integrated_assessment_v2` block, printed in
+  the documents section of the reading layout and refused without it; the v1 refusal (CR-PDF-DECISION-1) is unchanged. Candidate
+  set v8 (`test-support/doc-reader-ext-2-template.ts`, pending, fingerprint `351843de…ca73`) adds licence labels, the v2 block and one
+  revised `not_done` line. No registered set changed.
+- **Governance package:** `02-GOVERNANCE-APPROVAL-PACKAGE.md` (decisions D1–D5, nothing approved).
+- **Still not built:** a live licence model caller and its paid evaluation; registration, selection and activation; releases.

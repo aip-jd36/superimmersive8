@@ -33,6 +33,7 @@
  */
 
 import { assessIntegrated, type IntegratedAssessment } from '../integrated-assessment/assess'
+import { assessIntegratedV2, type IntegratedAssessmentInputV2, type IntegratedAssessmentV2 } from '../integrated-assessment/assess-v2'
 import { CREATOR_RECORD_CONCLUSIONS } from '../contract/compose'
 import { isIsoDate } from '../contract/types'
 import { CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION, CUSTOMER_RECORD_SCHEMA_VERSION, declarationIncompatibilities, isUncertainValue, verifyCustomerRecord, type CustomerRecordV2 } from '../customer-record/record'
@@ -321,7 +322,10 @@ export function buildCustomerDocument(input: CustomerDocumentInput, options: Cus
   try {
     // CR-V2-MVP-INTEGRATION-2: assessed from the full verified record (the projected view omits declaration targets).
     const integrated = examinationBearing && t.integrated_assessment ? assessIntegrated(verified.record) : null
-    return compose(r, issued, t, check.fingerprint, input.sha256, integrated, readiness, design)
+    // CR-DOC-READER-EXT-2: method v2 only for a set that carries its block, and only in the reading layout (fail closed otherwise).
+    if (t.integrated_assessment_v2 && !readiness) throw new CustomerPdfRefusal('readiness_layout_refused', 'integrated assessment v2 without the reading layout')
+    const integratedV2 = examinationBearing && t.integrated_assessment_v2 ? assessIntegratedV2(verified.record as unknown as IntegratedAssessmentInputV2) : null
+    return compose(r, issued, t, check.fingerprint, input.sha256, integrated, readiness, design, integratedV2)
   } catch (err) {
     if (err instanceof CustomerPdfRefusal) throw err
     // A template slot that does not match its values: the templates are unusable.
@@ -350,7 +354,7 @@ function readinessOf(input: CustomerDocumentInput, block: ReadinessBlock, approv
   }
 }
 
-function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: CustomerPdfTemplates, fingerprint: string, sha256: string, integrated: IntegratedAssessment | null, readiness: Readiness | null = null, design: Design | null = null): CustomerDocumentModel {
+function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: CustomerPdfTemplates, fingerprint: string, sha256: string, integrated: IntegratedAssessment | null, readiness: Readiness | null = null, design: Design | null = null, integratedV2: IntegratedAssessmentV2 | null = null): CustomerDocumentModel {
   const navigationCopies: NavigationCopy[] = []
   const tpl = (text: string): Block => ({ kind: 'paragraph', text, from: 'template' })
   const heading = (text: string): Block => ({ kind: 'heading', text, from: 'template' })
@@ -459,6 +463,44 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
   // CR-V2-MVP-M3A: what each document appears to show, printed apart from the declarations and from guidance. Every code is mapped
   // to an approved label (an unlabelled field, qualifier or classification refuses); values and excerpts are the examination's own,
   // verbatim. Every creator response is printed exactly once, under the document it concerns, or the record refuses.
+  // CR-DOC-READER-EXT-2: integrated assessment v2, in the documents section, after what each document appears to show (the reading
+  // itself, printed above). For each governed point it relates documents to, it prints separately whether the document was read and
+  // how it relates to the point, says the link is only the document type the creator chose, and that the point stays open. Only the
+  // points v2 relates are printed; conclusions are never printed here and nothing here changes them.
+  const IA2 = examinationBearing ? t.integrated_assessment_v2 : undefined
+  const integratedV2Blocks = (): Block[] => {
+    if (!IA2 || !integratedV2) return []
+    const docNumber = new Map(r.documents.items.map((d, n) => [d.document_id, n + 1]))
+    const docById = new Map(r.documents.items.map((d) => [d.document_id, d]))
+    const out: Block[] = []
+    for (const item of integratedV2.items) {
+      for (const q of item.requirements) {
+        if (q.requirement.kind !== 'dependency' || (q.evidence !== 'documents_considered' && q.evidence !== 'no_linked_document')) continue
+        out.push(q.requirement.label !== null ? row(IA2.point, q.requirement.label, 'record') : row(IA2.point, IA2.unlabelled_point, 'template'))
+        if (q.evidence === 'no_linked_document') out.push(tpl(IA2.no_document))
+        for (const d of q.documents as { document_id: string; status: string; reason: string; observed: { value: string; excerpt: string | null } | null; responses: string[] }[]) {
+          const n = docNumber.get(d.document_id)
+          const doc = docById.get(d.document_id)
+          if (n === undefined || !doc) throw new CustomerPdfRefusal('record_unsupported', `integrated assessment v2 document ${d.document_id}`)
+          const e = doc.examination
+          const reading = e === 'not_examined' ? 'not_read' : e.envelope.outcome.status === 'examined' ? 'read' : 'could_not_read'
+          out.push({ kind: 'subheading', text: fill(IA2.document, { n }), from: 'template' })
+          out.push(row(IA2.reading, IA2.reading_labels[reading], 'template'))
+          out.push(row(IA2.link, IA2.status_labels[d.status as keyof typeof IA2.status_labels], 'template'), row(IA2.reason, IA2.reason_labels[d.reason as keyof typeof IA2.reason_labels], 'template'))
+          if (d.observed) {
+            out.push(row(IA2.appears_to_show, d.observed.value))
+            if (d.observed.excerpt !== null) out.push(row(IA2.excerpt, d.observed.excerpt))
+            out.push(tpl(IA2.association))
+          }
+          for (const code of d.responses) out.push(row(IA2.your_response, t.examination!.response_labels[code as keyof NonNullable<typeof t.examination>['response_labels']], 'template'))
+        }
+        out.push(tpl(IA2.open_point))
+      }
+    }
+    if (out.length === 0) return []
+    return [{ kind: 'label', text: IA2.heading, from: 'template' }, tpl(IA2.intro), ...out, tpl(fill(IA2.method, { version: integratedV2.method.version }))]
+  }
+
   const documentsSection = (): CustomerDocumentSection => {
     const X = t.examination!
     const labelled = (labels: Record<string, string>, key: string, code: string): string => {
@@ -533,6 +575,7 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
       blocks.push(row(X.profile, fill(X.profile_value, { id: env.profile.id, version: env.profile.version }), 'template'))
     })
     if (printed !== responses.length) throw new CustomerPdfRefusal('record_unsupported', 'creator response without its document')
+    blocks.push(...integratedV2Blocks())
     if (r.documents.items.length > 0) blocks.push(tpl(t.documents.fingerprint_note))
     blocks.push(tpl(X.comparison_note))
     return { id: 'documents', blocks }

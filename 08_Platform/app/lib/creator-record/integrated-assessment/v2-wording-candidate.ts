@@ -15,7 +15,7 @@ export const V2_WORDING_CANDIDATE_STATUS = 'DRAFT — NOT APPROVED, NOT REGISTER
 
 export const V2_WORDING_CANDIDATE = Object.freeze({
   heading: 'How your documents relate to this consideration',
-  intro: 'An AI model read the documents you added. What follows is what a document appears to show. No person at SI8 checked it, and it was not compared with your answers.',
+  intro: 'The documents you added were read automatically, as described above. What follows is how a reading may relate to a point in the guidance. No person at SI8 checked it, and it was not compared with your answers.',
   association: 'This document is listed here because of the document type you chose for it. SI8 did not check that it comes from this service, concerns your material or relates to this video.',
   open_dependency: 'This point remains open. A document reading does not settle it, and does not show that you hold the rights or permission you need.',
   no_document: 'You did not add a document of this type.',

@@ -29,6 +29,7 @@ import { CONTENT_CLASSES, EXAMINATION_FAILURE_REASONS, EXAMINATION_LIMITATIONS, 
 import { COMPARISON_FIELDS, CREATOR_RESPONSE_CODES } from '../customer-record/examination-section'
 import { LIVE_LIMITATIONS } from '../live-examination/envelope'
 import { DOCUMENT_EVIDENCE_REASONS, DOCUMENT_EVIDENCE_STATUSES, REQUIREMENT_EVIDENCE, REQUIREMENT_STANDINGS } from '../integrated-assessment/vocabulary'
+import { DEPENDENCY_DOCUMENT_REASONS, DEPENDENCY_DOCUMENT_STATUSES } from '../integrated-assessment/vocabulary-v2'
 
 export const CUSTOMER_PDF_TEMPLATE_ID = 'si8/creator-record-v2-pdf-templates'
 export const CUSTOMER_PDF_SECTIONS = ['about', 'project', 'tools', 'contribution', 'guidance', 'open_items', 'not_done', 'provenance'] as const
@@ -165,6 +166,18 @@ const templateSpec = obj({
     document: str, status_labels: exactLabels(DOCUMENT_EVIDENCE_STATUSES), reason: str, reason_labels: exactLabels(DOCUMENT_EVIDENCE_REASONS),
     appears_to_show: str, excerpt: str, your_response: str,
     not_compared: str, method: str,
+  })),
+  /**
+   * CR-DOC-READER-EXT-2: integrated assessment method v2 (Path 1), printed in the DOCUMENTS section of the reading layout, after
+   * what each document appears to show. Optional and separately keyed: v1's block above keeps its labels, and the reading layout
+   * still refuses v1. Only a set that also carries `readiness_summary` may carry it (checked by the document model). Every v2
+   * status and reason needs an exact label; there is no label meaning satisfied, sufficient or matched.
+   */
+  integrated_assessment_v2: opt(obj({
+    heading: str, intro: str, association: str, open_point: str, point: str, unlabelled_point: str, no_document: str,
+    document: str, reading: str, reading_labels: exactLabels(['read', 'not_read', 'could_not_read']),
+    link: str, status_labels: exactLabels(DEPENDENCY_DOCUMENT_STATUSES), reason: str, reason_labels: exactLabels(DEPENDENCY_DOCUMENT_REASONS),
+    appears_to_show: str, excerpt: str, your_response: str, method: str,
   })),
   /**
    * CR-SUM-PDF-B1 (Option R): the consultative summary's wording (`../readiness-summary/summary` and `./render` template sets).

@@ -666,6 +666,9 @@ describe('rendering boundary', () => {
       '../examination/envelope',
       // CR-V2-MVP-INTEGRATION-2: the pure integrated assessment (derived from the verified record) and its closed codes.
       '../integrated-assessment/assess', '../integrated-assessment/vocabulary', '../integration/objectives', '../live-examination/envelope',
+      // CR-DOC-READER-EXT-2: integrated assessment v2 (pure, derived from the verified record) and its closed codes; used only by a set
+      // that carries `integrated_assessment_v2` (none is registered).
+      '../integrated-assessment/assess-v2', '../integrated-assessment/vocabulary-v2',
       // CR-SUM-PDF-B1: the pure bounded readiness summary and its renderer (used only when a template set carries the
       // readiness block; no approved set does). Their own imports are checked below.
       '../readiness-summary/render', '../readiness-summary/summary',
