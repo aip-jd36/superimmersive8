@@ -195,6 +195,17 @@ if (ROUTES.includes('/contact')) {
   check('Website Privacy Notice: not published and not linked (draft /privacy not served)', privacy.status === 404 && privacy.footerLinks === 0, privacy)
 }
 
+// 2d. Creator Record sample previews: real images (no placeholders), loaded at phone width after scrolling, labelled, with alt text
+const samples = []
+for (const route of ['/', '/creator-record']) {
+  await open(`${BASE}${route}`, 390, 844)
+  samples.push({ route, ...(await ev(`(async()=>{for(let y=0;y<document.documentElement.scrollHeight;y+=600){scrollTo(0,y);await new Promise(r=>setTimeout(r,120))}
+    await new Promise(r=>setTimeout(r,800));const imgs=[...document.querySelectorAll('img[src*="/assets/samples/"]')];
+    return {count:imgs.length,loaded:imgs.filter(i=>i.complete&&i.naturalWidth>0).length,alt:imgs.every(i=>/Illustrative sample/.test(i.alt)),
+      placeholders:document.querySelectorAll('.pdf-ph').length,label:/Illustrative sample — fictional project/.test(document.body.innerText)}})()`)) })
+}
+check('Creator Record sample previews: all images load at 390px, alt text and sample label present, no placeholders', samples.every((x) => x.count >= 3 && x.loaded === x.count && x.alt && x.placeholders === 0 && x.label), samples)
+
 // 3. Local resources load; no JavaScript exceptions
 requests.length = 0
 await open(`${BASE}/`)
