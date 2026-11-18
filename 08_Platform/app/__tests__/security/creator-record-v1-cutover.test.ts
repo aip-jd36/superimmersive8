@@ -61,7 +61,11 @@ describe('v1 entry points lead to the v2 entry point', () => {
     expect(page).toContain("{ href: '/creator-record', label: V2_DASHBOARD.entry_label }")
     expect(V2_DASHBOARD.entry_label).toBe('Creator Record')
     expect(page).not.toMatch(/<Link href="\/record">/)
-    expect(read('app/dashboard/layout.tsx')).toContain("href={CREATOR_RECORD_V1_NEW_SALES === 'open' ? '/record' : '/creator-record'}")
+    // SI8-APP-UX-FLOW-2 (founder decision): the header's "Submit New" link is removed. The header must never link to the v1
+    // form; the dashboard's Creator Record entry (above) remains the only way in.
+    const layout = read('app/dashboard/layout.tsx')
+    expect(layout).not.toMatch(/['"]\/record['"]|Submit New</)
+    expect(page).toContain('<Link href={CREATOR_RECORD_ENTRY.href}>Create a record</Link>')
   })
 
   test('sign-up never sends a new customer to the v1 form or shows it as the product', () => {

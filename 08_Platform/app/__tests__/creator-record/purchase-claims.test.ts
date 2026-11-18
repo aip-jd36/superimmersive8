@@ -64,9 +64,15 @@ describe('Commercial Assurance purchase naming', () => {
   const dashboard = read('app/dashboard/page.tsx')
   const modal = read('components/AddToolModal.tsx')
 
-  test('the purchase page, review summary and dashboard entry links use one product name', () => {
+  test('the purchase page and review summary use one product name; the dashboard card names the same product', () => {
     expect(certify.split(NAME).length - 1).toBe(2)
-    expect(dashboard.split(`<Link href="/certify">${NAME}</Link>`).length - 1).toBe(2)
+    // SI8-APP-UX-FLOW-2 (founder decision): the dashboard presents Commercial Assurance as a product card. It must name the
+    // purchase page's product and price, link only to /certify, and never say "from" a price.
+    const CARD = "const COMMERCIAL_ASSURANCE_CARD = { name: 'Commercial Assurance Assessment', price: '$499', href: '/certify', cta: 'Explore assessment' } as const"
+    expect(dashboard.split(CARD).length - 1).toBe(1)
+    expect(NAME).toBe('SI8 Commercial Assurance Assessment — $499')
+    expect(dashboard.split('<Link href={COMMERCIAL_ASSURANCE_CARD.href}>{COMMERCIAL_ASSURANCE_CARD.cta}</Link>').length - 1).toBe(1)
+    expect(dashboard).not.toMatch(/href="\/certify"|from \$\d|From \$\d/)
     expect(certify).toContain('COMMERCIAL ASSURANCE')
     expect(certify).toContain('Human review of submitted project information and supporting evidence')
     expect(certify).toContain('<strong>Commercial Assurance Assessment requirement:</strong>')

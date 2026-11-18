@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { CREATOR_RECORD_V1_NEW_SALES } from '@/lib/submissions/build-intake-insert'
 import { Button } from '@/components/ui/button'
 import { Fraunces, IBM_Plex_Mono } from 'next/font/google'
 
@@ -56,13 +55,7 @@ export default async function DashboardLayout({
                 >
                   Dashboard
                 </Link>
-                <Link
-                  href={CREATOR_RECORD_V1_NEW_SALES === 'open' ? '/record' : '/creator-record'}
-                  className="px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-secondary"
-                  style={{ color: 'var(--si8-deep)' }}
-                >
-                  Submit New
-                </Link>
+                {/* SI8-APP-UX-FLOW-2: "Submit New" removed; new work starts from the dashboard's product cards. */}
                 {/* CATALOG DISABLED: Showcase nav link hidden until catalog phase reactivated
                 <Link href="/showcase" className="px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-secondary" style={{ color: '#52504A' }}>
                   Showcase
