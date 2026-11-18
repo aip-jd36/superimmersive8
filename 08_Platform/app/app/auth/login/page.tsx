@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 import { Turnstile } from '@marsidev/react-turnstile'
+import { safeRedirectPath } from '@/lib/auth/safe-redirect'
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -61,7 +62,8 @@ export default function LoginPage() {
 
       if (authError) throw authError
 
-      const destination = nextPath && nextPath.startsWith('/') ? nextPath : '/dashboard'
+      // CR-PUBLIC-2A-FINAL: same-origin, application-relative only (no "//host", backslash or encoded bypass).
+      const destination = safeRedirectPath(nextPath)
       router.push(destination)
       router.refresh()
     } catch (err: any) {

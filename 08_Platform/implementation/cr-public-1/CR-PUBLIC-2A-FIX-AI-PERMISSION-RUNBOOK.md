@@ -37,8 +37,12 @@ assumption about that script's text.
    - **P2:** `SELECT public.creator_record_v2_current_ai_permission_version();` → the same value.
    - **P3:** `SELECT permission_version, count(*) FROM public.creator_record_v2_ai_examination_permissions GROUP BY 1;` → the counts
      by version (2026-11-18: 5 grants, 3 under the current version).
-   - **P4:** no Creator Record order paid but not issued. Use the same check as the 2026-11-14 preflight; the ledger has no
-     `needs_reconciliation`/`in_progress` rows.
+   - **P4a** (validated 2026-11-18): no Creator Record v2 order paid but not issued. Expected 0.
+     `SELECT count(*) FROM public.submissions s WHERE s.creator_record_product = 'v2' AND s.payment_status = 'paid' AND NOT EXISTS (SELECT 1 FROM public.creator_record_artifacts a WHERE a.submission_id = s.id AND a.status = 'issued');`
+   - **P4b:** no ledger row in progress or needing attention. Expected 0.
+     `SELECT count(*) FROM public.payment_fulfillments WHERE fulfillment_status NOT IN ('completed', 'not_required');`
+   - Don't use a ledger-only check ("accepted `creator_record` without an issued v2 artifact"). It also matches the V1 record
+     issued on 2026-10-21, which V1 issues as a `rights_packages` row, not a v2 artifact: 1 false positive today.
 4. The new identifier is confirmed to equal the deployed build's.
 
 ## 3. The replacement transaction
@@ -103,10 +107,28 @@ identifier can't be reused in a new version under the new one (existing applicat
 | Terms build rolled back | Run the script with the constants swapped (new → P1 value). The deleted row's actor, reason and time are not restored; the reason records the rollback | Old identifier current; grants made under the new version stop permitting examination |
 | Row deleted without insert (shouldn't happen: one block) | Insert the intended row (with this script's checks, one row expected, so use the P1 values) | Until then nothing is examined (fail closed) |
 
-## 7. Unresolved assumptions
+## 7. Validation against Production (CR-PUBLIC-2A-FINAL, 2026-11-18, read-only as `supabase_read_only_user`)
 
-- **P4's exact query** comes from the 2026-11-14 preflight, which isn't held here. Use the ledger and artifact checks from
-  `CR-PUBLIC-2A-PRODUCTION-UAT-READINESS.md`, or the operator's copy.
+| Item | Production | Consequence for the script |
+|---|---|---|
+| Table owner | `postgres` | The SQL Editor runs as the owner, so it can delete and insert |
+| Row security | enabled, **not forced**, 0 policies | The owner bypasses RLS and sees the row; no application role can |
+| DELETE privilege | `postgres` only (`anon`, `authenticated`, `service_role`: none) | Only an operator can run the procedure |
+| Columns and defaults | `singleton` (default true), `permission_version`, `established_by`, `reason`, `created_at` (default now) | Matches the script's `INSERT` |
+| Constraints | primary key `singleton`; `CHECK (singleton)`; the two identifier CHECKs; `established_by` 1–200; `reason` 1–500 | Same as the migration. The script's reason (`CR-PUBLIC Terms release: <ref>`) fits under 500 |
+| Triggers | `creator_record_v2_ai_permission_authority_guard`, `BEFORE UPDATE`, enabled | The script never updates |
+| Function bodies | the current-version, grant, live-guard and authority-guard functions are **byte-identical** to migration `20261113000000` (MD5 of the deployed source equals the file's, CRLF) | The local PostgreSQL test exercised the same logic Production runs |
+| Current row | `cr-v2-ai-permission-1__privacy-2026-11-09__terms-2026-11-14` | This is `c_expected_current` |
+| P4a / P4b today | 0 / 0 | No pending paid order would be affected |
+
+**Locking:** `SHARE ROW EXCLUSIVE` conflicts with every writer (including another run of the script) and not with reads. The
+grant and guard functions only read the table, so they keep working and see the old row until commit, then the new one. No
+session ever sees no row.
+
+## 8. Unresolved assumptions
+
+- **Transaction behaviour:** the Production SQL Editor running one `DO` block atomically (as all earlier operator scripts
+  assumed). Wrapping it in `BEGIN; … COMMIT;` removes the assumption.
 - **The Production SQL Editor's transaction behaviour** for a single `DO` block is assumed to be atomic, as the earlier operator
   scripts assumed (`archive/invite_pilot_user.sql`). Optionally wrap the block in `BEGIN; … COMMIT;`.
 - **The script is new.** It is not the historical section W script. If the operator finds that script, compare the two before

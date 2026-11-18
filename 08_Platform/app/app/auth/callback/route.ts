@@ -3,14 +3,14 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { sendNewUserSignupEmail } from '@/lib/emails'
 import { notifyConfirmedSignup } from '@/lib/auth/signup-notification'
+import { safeRedirectPath } from '@/lib/auth/safe-redirect'
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
 
-  // Redirect to next destination if provided, otherwise dashboard
-  const next = requestUrl.searchParams.get('next')
-  const destination = next && next.startsWith('/') ? next : '/dashboard'
+  // Redirect to next destination if provided, otherwise dashboard. CR-PUBLIC-2A-FINAL: same-origin, application-relative only.
+  const destination = safeRedirectPath(requestUrl.searchParams.get('next'))
 
   if (code) {
     const supabase = createClient()
