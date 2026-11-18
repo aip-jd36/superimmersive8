@@ -154,42 +154,43 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
       fulfilment: v2FulfilmentView(fulfilmentRow as { fulfillment_status: string | null } | null, !!fulfilmentError),
       paused,
     }))
+    // SI8-APP-UX-REFRESH-1: an issued-document presentation. Same states, messages, wording (customer-wording check),
+    // conditions and delivery route as before; the issued date and record ID line is the existing one, shown under the same
+    // condition (ready and an issued artifact).
+    const badgeTone = v2.download ? 'si8-badge-ok' : v2.badge === V2_DASHBOARD.badge_awaiting_payment ? 'si8-badge-gold' : v2.badge === V2_DASHBOARD.badge_preparing ? '' : 'si8-badge-neutral'
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 mb-6">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+        <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm mb-6 hover:underline underline-offset-4" style={{ color: 'var(--si8-muted)' }}>
           <ArrowLeft className="w-4 h-4" />
           {V2_DASHBOARD.back}
         </Link>
-        <div className="flex items-start justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">{V2_DASHBOARD.heading}</h1>
-            <p className="text-sm text-gray-500 mt-1">{fillReviewText(V2_DASHBOARD.started, { date: formatDate(submission.created_at) })}</p>
+        <section className="si8-panel overflow-hidden" aria-labelledby="cr-record-title">
+          <div className="px-6 sm:px-8 pt-7 pb-6 border-b" style={{ borderColor: 'var(--si8-hair)' }}>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <FileText className="w-6 h-6 shrink-0" style={{ color: 'var(--si8-gold)' }} aria-hidden="true" />
+              <span className={`si8-badge ${badgeTone}`}>{v2.badge}</span>
+            </div>
+            <h1 id="cr-record-title" className="si8-display text-[32px] leading-tight mt-3">{V2_DASHBOARD.heading}</h1>
+            <p className="text-sm mt-1" style={{ color: 'var(--si8-muted)' }}>{fillReviewText(V2_DASHBOARD.started, { date: formatDate(submission.created_at) })}</p>
           </div>
-          <span className="px-3 py-1.5 rounded-full text-sm font-semibold bg-gray-100 text-gray-800">{v2.badge}</span>
-        </div>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="w-5 h-5" />
-              {V2_DASHBOARD.heading}
-            </CardTitle>
-            <CardDescription>
-              {v2.message}
-              {v2.download && issuedArtifact ? ` Issued ${formatDate(issuedArtifact.issued_at)} · Record ID: ${issuedArtifact.record_id}` : ''}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-gray-600">{V2_DASHBOARD.nature}</p>
+          <div className="px-6 sm:px-8 py-6 space-y-5">
+            <p className="text-[16px]" style={{ color: 'var(--si8-deep)' }} role="status">{v2.message}</p>
+            {v2.download && issuedArtifact && (
+              <p className="si8-mono text-[14px] rounded-lg px-4 py-3 break-words" style={{ background: 'hsl(var(--secondary))', color: 'var(--si8-deep)' }}>
+                {v2.download && issuedArtifact ? ` Issued ${formatDate(issuedArtifact.issued_at)} · Record ID: ${issuedArtifact.record_id}` : ''}
+              </p>
+            )}
             {v2.download && (
-              <Button asChild className="w-full sm:w-auto">
+              <Button asChild size="lg" className="w-full sm:w-auto">
                 <a href={deliveryPathFor(params.id)} target="_blank" rel="noopener noreferrer">
                   <Download className="w-4 h-4 mr-2" />
                   {V2_DASHBOARD.download}
                 </a>
               </Button>
             )}
-          </CardContent>
-        </Card>
+            <p className="si8-disclosure">{V2_DASHBOARD.nature}</p>
+          </div>
+        </section>
       </div>
     )
   }

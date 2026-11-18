@@ -1,9 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { formatDate, formatCurrency } from '@/lib/utils'
+import { formatDate } from '@/lib/utils'
 import { v2ListBadge } from '@/lib/creator-record-flow/dashboard'
 import { consentControlState } from '@/lib/creator-record-flow/consent-dashboard'
 import { ConsentWithdrawalControl } from '@/components/creator-record/ConsentWithdrawalControl'
@@ -27,8 +26,6 @@ type Submission = {
 
 async function getSubmissions(userId: string): Promise<Submission[]> {
   try {
-    console.log('🔷 Dashboard: Fetching submissions for user:', userId)
-
     // Use supabaseAdmin directly (server-side, bypasses RLS)
     const { data: submissions, error } = await supabaseAdmin
       .from('submissions')
@@ -41,7 +38,6 @@ async function getSubmissions(userId: string): Promise<Submission[]> {
       return []
     }
 
-    console.log('✅ Dashboard: Fetched submissions:', submissions?.length || 0)
     return submissions || []
   } catch (error) {
     console.error('❌ Dashboard: Exception:', error)
@@ -57,23 +53,15 @@ export default async function DashboardPage() {
 
   if (authError || !user) return null
 
-  console.log('🔍 Dashboard - Auth user ID:', user.id)
-  console.log('🔍 Dashboard - Auth user email:', user.email)
-
   // Check if user is admin using service role (bypasses RLS)
-  const { data: userData, error: userError } = await supabaseAdmin
+  const { data: userData } = await supabaseAdmin
     .from('users')
     .select('is_admin')
     .eq('id', user.id)
     .single()
 
-  console.log('🔍 Dashboard - userData from DB:', userData)
-  console.log('🔍 Dashboard - DB error:', userError)
-  console.log('🔍 Dashboard - is_admin value:', userData?.is_admin)
-
   const isAdmin = userData?.is_admin || false
 
-  console.log('🔍 Dashboard - Final isAdmin:', isAdmin)
 
   // Get user's submissions using service_role (bypasses RLS)
   const submissions = await getSubmissions(user.id)
@@ -85,152 +73,122 @@ export default async function DashboardPage() {
     .eq('user_id', user.id)
   */
 
-  // Get user's licensing deals
-  const { data: deals } = await supabase
-    .from('licensing_deals')
-    .select('*')
-    .eq('creator_id', user.id)
-
-  const approvedCount = submissions.filter((s) => s.status === 'approved').length
-  // CATALOG DISABLED: const catalogCount = optIns?.length || 0
-  const totalEarnings = deals?.reduce((sum, deal) => sum + (deal.creator_payout || 0), 0) || 0
+  // SI8-APP-UX-REFRESH-1: the summary row (Total Submissions, Approved, and Total Earnings from the retired Showcase
+  // licensing_deals) is removed by founder decision. Statuses below keep their existing meanings.
   // CR-V2-MVP-LAUNCH-FOUNDATION-1: Creator Record v2 creators only (anyone else sees no change).
   // CORRECTIONS-1: a v2 submission keeps the withdrawal available even when the consent state cannot be read.
   const consentControl = await consentControlState(user.id, { hasV2Submission: submissions.some((s) => s.creator_record_product === 'v2') })
 
+  // Existing statuses and their text are unchanged; only the colours follow the website theme.
   const getStatusBadge = (status: string) => {
     const styles = {
-      pending: 'bg-gray-100 text-gray-800',
-      under_review: 'bg-blue-100 text-blue-800',
-      approved: 'bg-green-100 text-green-800',
-      rejected: 'bg-red-100 text-red-800',
-      needs_info: 'bg-yellow-100 text-yellow-800',
+      pending: 'si8-badge-neutral',
+      under_review: '',
+      approved: 'si8-badge-ok',
+      rejected: 'si8-badge-alert',
+      needs_info: 'si8-badge-gold',
     }
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status as keyof typeof styles] || styles.pending}`}>
+      <span className={`si8-badge ${styles[status as keyof typeof styles] ?? styles.pending}`}>
         {status.replace('_', ' ').toUpperCase()}
       </span>
     )
   }
+  // Creator Record v2 rows: the existing list badge (PAID / AWAITING PAYMENT / REFUNDED), unchanged; colour only.
+  const v2Badge = (paymentStatus: string | null) => (
+    <span className={`si8-badge ${paymentStatus === 'paid' ? '' : paymentStatus === 'refunded' ? 'si8-badge-neutral' : 'si8-badge-gold'}`}>
+      {v2ListBadge(paymentStatus)}
+    </span>
+  )
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8 flex items-start justify-between">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="mt-2 text-gray-600">Welcome back! Here's an overview of your submissions.</p>
+          <p className="si8-eyebrow mb-2">Your account</p>
+          <h1 className="si8-display text-[34px] leading-tight">Dashboard</h1>
+          <p className="mt-2 text-[15px]" style={{ color: 'var(--si8-muted)' }}>Welcome back! Here&apos;s an overview of your submissions.</p>
         </div>
-        {isAdmin && (
-          <Button variant="outline" asChild>
-            <Link href="/admin">Admin Panel</Link>
-          </Button>
-        )}
+        <div className="flex items-center gap-4">
+          {consentControl.show && (
+            <a href="#account-controls" className="text-sm underline underline-offset-4" style={{ color: 'var(--si8-navy)' }}>Account controls</a>
+          )}
+          {isAdmin && (
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/admin">Admin Panel</Link>
+            </Button>
+          )}
+        </div>
       </div>
 
-      {consentControl.show && <ConsentWithdrawalControl initial={consentControl.initial} />}
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Total Submissions</CardDescription>
-            <CardTitle className="text-3xl">{submissions.length}</CardTitle>
-          </CardHeader>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Approved</CardDescription>
-            <CardTitle className="text-3xl text-green-600">{approvedCount}</CardTitle>
-          </CardHeader>
-        </Card>
-
-        {/* CATALOG DISABLED: Catalog Listings stat card hidden
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Catalog Listings</CardDescription>
-            <CardTitle className="text-3xl text-blue-600">{catalogCount}</CardTitle>
-          </CardHeader>
-        </Card>
-        */}
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Total Earnings</CardDescription>
-            <CardTitle className="text-3xl text-purple-600">
-              {formatCurrency(totalEarnings)}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-      </div>
-
-      {/* Submissions Table */}
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle>Your Submissions</CardTitle>
-              <CardDescription>Track the status of your video submissions</CardDescription>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" asChild>
+      {/* Records and submissions: the primary focus. Complete history, newest first. */}
+      <section className="si8-panel" aria-labelledby="records-title">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-5 sm:px-6 py-5 border-b" style={{ borderColor: 'var(--si8-hair)' }}>
+          <div>
+            <h2 id="records-title" className="si8-display text-[22px]">Your Submissions</h2>
+            <p className="text-sm mt-1" style={{ color: 'var(--si8-muted)' }}>Track the status of your records and submissions</p>
+          </div>
+          {submissions.length > 0 && (
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button variant="outline" size="sm" className="h-auto min-h-9 py-2 whitespace-normal text-center" asChild>
                 <Link href={CREATOR_RECORD_ENTRY.href}>{CREATOR_RECORD_ENTRY.label}</Link>
               </Button>
-              <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white" asChild>
+              {/* The product name must match the /certify purchase page (purchase-claims guard). */}
+              <Button size="sm" className="h-auto min-h-9 py-2 whitespace-normal text-center" asChild>
+                <Link href="/certify">SI8 Commercial Assurance Assessment — $499</Link>
+              </Button>
+            </div>
+          )}
+        </div>
+        {submissions.length === 0 ? (
+          <div className="text-center px-6 py-14">
+            <p className="mb-6" style={{ color: 'var(--si8-muted)' }}>You haven&apos;t submitted any videos yet.</p>
+            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+              <Button variant="outline" size="sm" className="h-auto min-h-9 py-2 whitespace-normal text-center" asChild>
+                <Link href={CREATOR_RECORD_ENTRY.href}>{CREATOR_RECORD_ENTRY.label}</Link>
+              </Button>
+              <Button size="sm" className="h-auto min-h-9 py-2 whitespace-normal text-center" asChild>
                 <Link href="/certify">SI8 Commercial Assurance Assessment — $499</Link>
               </Button>
             </div>
           </div>
-        </CardHeader>
-        <CardContent>
-          {submissions.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500 mb-6">You haven't submitted any videos yet.</p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button variant="outline" asChild>
-                  <Link href={CREATOR_RECORD_ENTRY.href}>{CREATOR_RECORD_ENTRY.label}</Link>
-                </Button>
-                <Button className="bg-amber-600 hover:bg-amber-700 text-white" asChild>
-                  <Link href="/certify">SI8 Commercial Assurance Assessment — $499</Link>
-                </Button>
-              </div>
+        ) : (
+          <div>
+            <div className="hidden md:grid grid-cols-[minmax(0,1fr)_170px_140px_130px] gap-4 px-6 py-3 text-xs font-semibold uppercase" style={{ letterSpacing: '0.08em', color: 'var(--si8-faint)' }}>
+              <span>Title</span><span>Status</span><span>Submitted</span><span className="sr-only">Actions</span>
             </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Film Title</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Status</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Submitted</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {submissions.map((submission) => (
-                    <tr key={submission.id} className="border-b hover:bg-gray-50">
-                      <td className="py-3 px-4 font-medium">{submission.title}</td>
-                      <td className="py-3 px-4">
-                        {submission.creator_record_product === 'v2'
-                          ? <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{v2ListBadge(submission.payment_status)}</span>
-                          : getStatusBadge(submission.status)}
-                      </td>
-                      <td className="py-3 px-4 text-gray-600">
-                        {formatDate(submission.created_at)}
-                      </td>
-                      <td className="py-3 px-4">
-                        <Button variant="outline" size="sm" asChild>
-                          <Link href={`/dashboard/submissions/${submission.id}`}>View Details</Link>
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            <ul>
+              {submissions.map((submission) => (
+                <li key={submission.id} className="border-t px-5 sm:px-6 py-4 md:grid md:grid-cols-[minmax(0,1fr)_170px_140px_130px] md:gap-4 md:items-center" style={{ borderColor: 'var(--si8-hair)' }}>
+                  <div className="font-medium break-words" style={{ color: 'var(--si8-deep)' }}>{submission.title}</div>
+                  <div className="mt-2 md:mt-0">
+                    {submission.creator_record_product === 'v2'
+                      ? v2Badge(submission.payment_status)
+                      : getStatusBadge(submission.status)}
+                  </div>
+                  <div className="mt-1 md:mt-0 text-sm" style={{ color: 'var(--si8-muted)' }}>
+                    <span className="md:hidden">Submitted </span>{formatDate(submission.created_at)}
+                  </div>
+                  <div className="mt-3 md:mt-0 md:text-right">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/dashboard/submissions/${submission.id}`}>View Details</Link>
+                    </Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </section>
+
+      {/* Account controls: quieter, below the records, and linked from the page header. The control itself is unchanged. */}
+      {consentControl.show && (
+        <section id="account-controls" className="mt-10 scroll-mt-6" aria-label="Account controls">
+          <p className="si8-eyebrow mb-3">Account controls</p>
+          {/* The visibility condition is also kept verbatim on the control itself (launch-foundation guard). */}
+          {consentControl.show && <ConsentWithdrawalControl initial={consentControl.initial} />}
+        </section>
+      )}
     </div>
   )
 }

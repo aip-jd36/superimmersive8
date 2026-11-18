@@ -78,3 +78,42 @@
   --input: 214 32% 91%;
   --ring: 221 83% 53%;
 }
+
+/*
+ * SI8-APP-UX-REFRESH-1: the public website's navy, cream and gold look (07_Website/assets/site.css), scoped to the authenticated
+ * dashboard area. Only elements inside `.si8-app` (set by app/dashboard/layout.tsx) read these values; admin, CRC and the Creator
+ * Record creation workflow never render inside it and keep the `:root` theme. Presentation only.
+ */
+.si8-app {
+  --background: 45 33% 95%;        /* #F7F5EF paper */
+  --foreground: 240 3% 11%;        /* #1C1C1E ink */
+  --card: 45 50% 98%;              /* #FDFCF9 raised */
+  --card-foreground: 240 3% 11%;
+  --popover: 45 50% 98%;
+  --popover-foreground: 240 3% 11%;
+  --primary: 215 49% 27%;          /* #233F66 navy */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 43 33% 92%;         /* #f1ede3 sunk */
+  --secondary-foreground: 240 3% 11%;
+  --muted: 43 33% 92%;
+  --muted-foreground: 214 11% 38%; /* #565f6b */
+  --accent: 41 47% 90%;            /* #f1e9d8 gold tint */
+  --accent-foreground: 34 56% 26%;
+  --border: 43 27% 85%;            /* #e3ddce hairline */
+  --input: 43 22% 81%;
+  --ring: 215 49% 27%;
+  --si8-navy: #233F66; --si8-deep: #182C48; --si8-tint: #E9EDF3; --si8-gold: #8a6a2a; --si8-gold-soft: #f1e9d8;
+  --si8-muted: #565f6b; --si8-faint: #7a8089; --si8-hair: #e3ddce; --si8-ok: #2f6b4f; --si8-ok-bg: #e7f0ea;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+.si8-app .si8-display { font-family: var(--font-fraunces), Georgia, 'Times New Roman', serif; font-weight: 500; color: var(--si8-deep); letter-spacing: -0.01em; }
+.si8-app .si8-mono { font-family: var(--font-plex-mono), ui-monospace, Menlo, Consolas, monospace; }
+.si8-app .si8-eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--si8-gold); }
+.si8-app .si8-panel { background: hsl(var(--card)); border: 1px solid var(--si8-hair); border-radius: 12px; }
+.si8-app .si8-badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; letter-spacing: .04em; white-space: nowrap; background: var(--si8-tint); color: var(--si8-deep); }
+.si8-app .si8-badge-ok { background: var(--si8-ok-bg); color: var(--si8-ok); }
+.si8-app .si8-badge-gold { background: var(--si8-gold-soft); color: #6a4a1c; }
+.si8-app .si8-badge-alert { background: #f6e3e1; color: #8a2f25; }
+.si8-app .si8-badge-neutral { background: #eceae3; color: #3c434e; }
+.si8-app .si8-disclosure { background: var(--si8-gold-soft); border-left: 3px solid #c69a4a; border-radius: 8px; padding: 12px 14px; font-size: 13.5px; line-height: 1.5; color: #4a3d22; }

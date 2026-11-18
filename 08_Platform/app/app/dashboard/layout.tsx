@@ -3,6 +3,11 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { CREATOR_RECORD_V1_NEW_SALES } from '@/lib/submissions/build-intake-insert'
 import { Button } from '@/components/ui/button'
+import { Fraunces, IBM_Plex_Mono } from 'next/font/google'
+
+// SI8-APP-UX-REFRESH-1: the public website's display and monospace fonts, loaded for the dashboard area only.
+const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-fraunces', display: 'swap' })
+const plexMono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-plex-mono', display: 'swap' })
 
 export default async function DashboardLayout({
   children,
@@ -29,34 +34,32 @@ export default async function DashboardLayout({
     redirect('/auth/login')
   }
 
+  // SI8-APP-UX-REFRESH-1: `si8-app` scopes the website theme (app/globals.css) to this area. Presentation only.
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#FAFAF7' }}>
+    <div className={`si8-app min-h-screen ${fraunces.variable} ${plexMono.variable}`}>
       {/* Nav */}
-      <nav className="bg-white border-b" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
+      <nav className="border-b" style={{ backgroundColor: 'rgba(247,245,239,0.94)', borderColor: 'var(--si8-hair)' }}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="flex justify-between h-16 items-center gap-4">
 
             {/* Left: logo + links */}
-            <div className="flex items-center gap-8">
-              <Link
-                href="/dashboard"
-                className="font-display text-lg font-bold tracking-tight"
-                style={{ color: '#1a1918', letterSpacing: '-0.02em' }}
-              >
-                SuperImmersive <span style={{ color: '#C8900A' }}>8</span>
+            <div className="flex items-center gap-8 min-w-0">
+              <Link href="/dashboard" className="leading-none shrink-0">
+                <span className="si8-display block text-[19px]">SuperImmersive&nbsp;8</span>
+                <span className="block text-[9.5px] font-semibold uppercase mt-1" style={{ letterSpacing: '0.14em', color: 'var(--si8-faint)' }}>Commercial Assurance</span>
               </Link>
               <div className="hidden md:flex items-center gap-1">
                 <Link
                   href="/dashboard"
                   className="px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-secondary"
-                  style={{ color: '#52504A' }}
+                  style={{ color: 'var(--si8-deep)' }}
                 >
                   Dashboard
                 </Link>
                 <Link
                   href={CREATOR_RECORD_V1_NEW_SALES === 'open' ? '/record' : '/creator-record'}
                   className="px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-secondary"
-                  style={{ color: '#52504A' }}
+                  style={{ color: 'var(--si8-deep)' }}
                 >
                   Submit New
                 </Link>
@@ -69,8 +72,8 @@ export default async function DashboardLayout({
             </div>
 
             {/* Right: user + logout */}
-            <div className="flex items-center gap-4">
-              <span className="text-sm hidden sm:block" style={{ color: '#8C8A82' }}>
+            <div className="flex items-center gap-4 min-w-0">
+              <span className="text-sm hidden sm:block truncate" style={{ color: 'var(--si8-muted)' }}>
                 {userData?.full_name || userData?.name || user.email}
               </span>
               <form action={handleSignOut}>
@@ -79,7 +82,7 @@ export default async function DashboardLayout({
                   size="sm"
                   type="submit"
                   className="text-sm font-medium"
-                  style={{ borderColor: 'rgba(0,0,0,0.12)', color: '#52504A' }}
+                  style={{ color: 'var(--si8-deep)' }}
                 >
                   Logout
                 </Button>

@@ -39,8 +39,8 @@ export function ConsentWithdrawalControl(props: ConsentWithdrawalControlProps) {
   }
 
   return (
-    <section className="mb-8 rounded-lg border bg-white p-6" aria-labelledby="cr-consent-title" data-consent-control>
-      <h2 id="cr-consent-title" className="text-lg font-semibold text-gray-900 mb-2">{V2_CONSENT.title}</h2>
+    <section className="rounded-lg border bg-card p-5" aria-labelledby="cr-consent-title" data-consent-control>
+      <h3 id="cr-consent-title" className="text-base font-semibold text-gray-900 mb-2">{V2_CONSENT.title}</h3>
       {withdrawnAt ? (
         <div role="status" data-consent-withdrawn>
           <p className="text-sm text-gray-800">{V2_CONSENT.withdrawn}</p>
@@ -59,7 +59,7 @@ export function ConsentWithdrawalControl(props: ConsentWithdrawalControlProps) {
             <p className="text-sm text-gray-700 mb-3">{V2_CONSENT.active}</p>
           )}
           {step === 'idle' && (
-            <button type="button" className="rounded-md border px-3 py-1.5 text-sm font-medium bg-white" onClick={() => setStep('confirming')}>
+            <button type="button" className="rounded-md border border-input px-3 py-1.5 text-sm font-medium bg-card hover:bg-secondary" onClick={() => setStep('confirming')}>
               {V2_CONSENT.withdraw}
             </button>
           )}
@@ -67,10 +67,10 @@ export function ConsentWithdrawalControl(props: ConsentWithdrawalControlProps) {
             <div className="rounded-md border p-3" role="alertdialog" aria-labelledby="cr-consent-confirm">
               <p id="cr-consent-confirm" className="text-sm font-medium text-gray-900 mb-2">{V2_CONSENT.confirm_prompt}</p>
               <div className="flex gap-2">
-                <button type="button" className="rounded-md border px-3 py-1.5 text-sm font-medium bg-white disabled:opacity-50" onClick={() => void withdraw()} disabled={step === 'working'}>
+                <button type="button" className="rounded-md border border-input px-3 py-1.5 text-sm font-medium bg-card hover:bg-secondary disabled:opacity-50" onClick={() => void withdraw()} disabled={step === 'working'}>
                   {step === 'working' ? V2_CONSENT.working : V2_CONSENT.confirm}
                 </button>
-                <button type="button" className="rounded-md border px-3 py-1.5 text-sm bg-white disabled:opacity-50" onClick={() => setStep('idle')} disabled={step === 'working'}>
+                <button type="button" className="rounded-md border border-input px-3 py-1.5 text-sm bg-card hover:bg-secondary disabled:opacity-50" onClick={() => setStep('idle')} disabled={step === 'working'}>
                   {V2_CONSENT.cancel}
                 </button>
               </div>
