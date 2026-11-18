@@ -38,7 +38,8 @@ access is released and verified.
 **Contact page:** `?inquiry=` preselects the inquiry type only if it equals an existing option value (`assurance`,
 `enterprise`, `creator_record_access`, `general`); anything else selects `general`. The value is never written into the page.
 
-**Contact form (SI8-WEB-LAUNCH-2).** The page posts JSON to `/api/contact-form` (`07_Website/api/contact-form.js`).
+**Contact form (SI8-WEB-LAUNCH-2).** Live in Production since 2026-11-18 (`CONTACT_FORM_ENABLED=true`; founder-verified, see
+`08_Platform/implementation/si8-web/SI8-WEB-CONTACT-ACTIVATION-CLOSURE-RECORD.md`). The page posts JSON to `/api/contact-form` (`07_Website/api/contact-form.js`).
 - **Server:**
   - off unless the marketing project has `CONTACT_FORM_ENABLED=true` and `RESEND_API_KEY` (503 otherwise);
   - accepts only SI8 origins (plus `CONTACT_FORM_EXTRA_ORIGINS`, for example a preview) and bodies of at most 8 KB;
@@ -62,10 +63,10 @@ access is released and verified.
 - **Contact inquiry preselection and contact form:** see above.
 
 ## Release rule
-`pendingRoutes` lists navigation destinations not built yet (currently `/privacy`, the Website Privacy Notice draft).
-`releaseBlockers` lists conditions a link check cannot see:
-- `website-privacy-notice`: the notice is not approved;
-- `contact-form-production-config`: Production configuration and a real end-to-end delivery are not confirmed.
+`pendingRoutes` lists navigation destinations not built yet (currently none; `/privacy` was published 2026-11-18).
+`releaseBlockers` lists conditions a link check cannot see (currently none). The former `website-privacy-notice` and
+`contact-form-production-config` conditions are resolved: the notice is published and the contact form was verified in
+Production on 2026-11-18 (`08_Platform/implementation/si8-web/SI8-WEB-CONTACT-ACTIVATION-CLOSURE-RECORD.md`).
 
 `--links --release` fails while either list is non-empty. Do not merge to `main` (which deploys to Production) while it fails.
 The founder's publication decisions (tagline, footer, prices, sample placeholder, founder claims, Kit consent, working form)

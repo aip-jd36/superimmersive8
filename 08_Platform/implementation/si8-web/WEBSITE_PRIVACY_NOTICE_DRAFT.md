@@ -1,6 +1,6 @@
 # Website Privacy Notice — DRAFT
 
-**Status: PUBLISHED 2026-11-18 as `website-privacy-2026-11-18`** at www.superimmersive8.com/privacy (source `tools/site-build/pages/privacy.html`, which is authoritative). Published without the optional mailing-list section and the Kit provider line, as the opt-in is off. Blockers 1, 2 and 5 below are resolved (legacy `/sample`, `/api/formspree-to-kit` and `/api/submit` return 410); blocker 3 (contact form in Production) remains with the founder. The rest of this file is the historical draft (SI8-WEB-LAUNCH-2, 2026-11-17).
+**Status: PUBLISHED 2026-11-18 as `website-privacy-2026-11-18`** at www.superimmersive8.com/privacy (source `tools/site-build/pages/privacy.html`, which is authoritative). Published without the optional mailing-list section and the Kit provider line, as the opt-in is off. Blockers 1, 2 and 5 below are resolved (legacy `/sample`, `/api/formspree-to-kit` and `/api/submit` return 410); blocker 3 (contact form in Production) was resolved on 2026-11-18 (`SI8-WEB-CONTACT-ACTIVATION-CLOSURE-RECORD.md`). The rest of this file is the historical draft (SI8-WEB-LAUNCH-2, 2026-11-17).
 
 This draft is not served. `/privacy` on www.superimmersive8.com is not built; it is listed in `pendingRoutes`, and the release
 check fails while it is (`tools/site-build/site.config.json`, blocker `website-privacy-notice`). The footer and contact-page links

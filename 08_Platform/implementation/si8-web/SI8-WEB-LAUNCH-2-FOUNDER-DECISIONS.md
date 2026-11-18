@@ -124,6 +124,10 @@ Founder decision: a pragmatic public launch of Creator Record with the redesigne
 - **Privacy links removed until the Website Privacy Notice is approved:** the contact-page line and the footer "Privacy" link. The
   notice stays an unpublished draft.
 
+> **Resolved 2026-11-18 (SI8-WEB-CONTACT-ACTIVATION, COMPLETE — founder verified):** the Website Privacy Notice is published at
+> `/privacy` and linked from the footer and contact form, and the contact form is live in Production. See
+> `SI8-WEB-CONTACT-ACTIVATION-CLOSURE-RECORD.md` (this folder). The two items below are history.
+
 **Accepted for launch** (`site.config.json` `launchExceptions`):
 - no Website Privacy Notice yet;
 - the contact endpoint stays off until `CONTACT_FORM_ENABLED=true` is set on the marketing-site project. While off, a

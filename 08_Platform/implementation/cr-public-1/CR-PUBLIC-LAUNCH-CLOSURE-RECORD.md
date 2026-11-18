@@ -37,6 +37,9 @@ Respond to actual Production incidents if they occur.
 
 ## Follow-ups (outside this milestone; kept in their own workstreams)
 
+> **Update 2026-11-18:** the Website Privacy Notice, legacy-route retirement and contact-form rows below are closed by
+> SI8-WEB-CONTACT-ACTIVATION (`../si8-web/SI8-WEB-CONTACT-ACTIVATION-CLOSURE-RECORD.md`). This milestone's own status is unchanged.
+
 | Item | Workstream / owner | Where recorded |
 |---|---|---|
 | Governed successor to `CLAIM-RUNWAY-COMMERCIAL-USE-001-v1`: separate the plan the user declared from any plan SI8 verified (Creator Record establishes none). Optionally align the Terms §5 phrase at the next Terms revision | Living Knowledge governance (founder approval) | This record; analysis in the post-launch verification report |
