@@ -125,13 +125,18 @@ const purchase = []
 for (const route of ROUTES) {
   await open(`${BASE}${route}`)
   const hrefs = await ev(`[...document.querySelectorAll('a[href]')].map(a=>a.getAttribute('href'))`)
-  purchase.push(...hrefs.filter((h) => /auth\/signup|signup|register|checkout|stripe\.com|\/pay\b|\/record$|\/certify/i.test(h)).map((h) => `${route}: ${h}`))
+  // CR-PUBLIC-LAUNCH: exactly the approved public sign-up URL is allowed; any other sign-up, checkout or payment link fails.
+  const SIGNUP = 'https://app.superimmersive8.com/auth/signup?next=/creator-record'
+  purchase.push(...hrefs.filter((h) => h !== SIGNUP && /auth\/signup|signup|register|checkout|stripe\.com|\/pay\b|\/record$|\/certify/i.test(h)).map((h) => `${route}: ${h}`))
 }
-check('no link to sign-up, checkout or payment', purchase.length === 0, purchase)
+check('no checkout or payment link; sign-up only via the approved URL', purchase.length === 0, purchase)
+await open(`${BASE}/creator-record`)
+const crCtas = await ev(`[...document.querySelectorAll('a.btn')].filter(a=>a.textContent.trim()==='Create a Creator Record').map(a=>a.getAttribute('href'))`)
+check('Creator Record page: both CTAs read "Create a Creator Record" and go to the public sign-up', crCtas.length === 2 && crCtas.every((h) => h === 'https://app.superimmersive8.com/auth/signup?next=/creator-record'), crCtas)
 
 // 2c. Contact: inquiry preselection is validated; the inactive form sends nothing
 if (ROUTES.includes('/contact')) {
-  const cases = [['assurance', 'assurance'], ['enterprise', 'enterprise'], ['creator_record_access', 'creator_record_access'], ['general', 'general'],
+  const cases = [['assurance', 'assurance'], ['enterprise', 'enterprise'], ['creator_record_access', 'general'], ['general', 'general'],
     ['unknown-value', 'general'], ['', 'general'], ['ASSURANCE', 'general'], ['"><img src=x onerror=window.__si8pwned=1>', 'general']]
   const got = []
   for (const [value, expected] of cases) {
@@ -156,7 +161,7 @@ if (ROUTES.includes('/contact')) {
       required:['contact-name','contact-email','contact-description'].every(id=>document.getElementById(id).required),describedBy:['contact-name','contact-email','contact-description'].every(id=>document.getElementById(id).getAttribute('aria-describedby')===id+'-error'),
       honeypotHidden:hp.tabIndex===-1&&hp.closest('[aria-hidden="true"]')!==null&&hp.getBoundingClientRect().right<0,sendEnabled:!document.querySelector('#contact-card button[type="submit"]').disabled,
       statusLive:document.getElementById('contact-status').getAttribute('aria-live'),optInBox:!!document.getElementById('contact-mailing-list'),privacyLinks:[...document.querySelectorAll('a[href="/privacy"]')].length}})()`)
-  check('contact form: labelled fields, required marks, error links, hidden honeypot, live status, Send enabled, no mailing-list box', structure.isForm && structure.action === '/api/contact-form' && structure.novalidate && structure.labelled && structure.required && structure.describedBy && structure.honeypotHidden && structure.sendEnabled && structure.statusLive === 'polite' && !structure.optInBox && structure.privacyLinks === 2, structure)
+  check('contact form: labelled fields, required marks, error links, hidden honeypot, live status, Send enabled, no mailing-list box', structure.isForm && structure.action === '/api/contact-form' && structure.novalidate && structure.labelled && structure.required && structure.describedBy && structure.honeypotHidden && structure.sendEnabled && structure.statusLive === 'polite' && !structure.optInBox && structure.privacyLinks === 0, structure)
 
   contact.calls.length = 0
   await ev(submit)
@@ -187,7 +192,7 @@ if (ROUTES.includes('/contact')) {
 
   const privacy = { status: (await fetch(`${BASE}/privacy`)).status, footerLinks: 0 }
   await open(`${BASE}/`); privacy.footerLinks = await ev(`document.querySelectorAll('footer a[href="/privacy"]').length`)
-  check('Website Privacy Notice: linked from the footer, not published (draft /privacy not served)', privacy.status === 404 && privacy.footerLinks === 1, privacy)
+  check('Website Privacy Notice: not published and not linked (draft /privacy not served)', privacy.status === 404 && privacy.footerLinks === 0, privacy)
 }
 
 // 3. Local resources load; no JavaScript exceptions

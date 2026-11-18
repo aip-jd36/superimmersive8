@@ -36,7 +36,7 @@ function render(file) {
   const vars = {
     title: esc(meta.title), ogTitle: esc(meta.ogTitle), description: esc(meta.description),
     canonical: meta.route === '/' ? config.origin : config.origin + meta.route,
-    CRC_URL: config.crcUrl, SIGNIN_URL: config.signInUrl,
+    CRC_URL: config.crcUrl, SIGNIN_URL: config.signInUrl, SIGNUP_URL: config.signUpUrl,
     // SI8-WEB-LAUNCH-2: the optional, unticked mailing-list checkbox renders only when explicitly enabled in site.config.json.
     MAILING_LIST_OPTIN: config.contactForm?.mailingListOptIn === true ? partial('mailing-list-optin').replace(/\n$/, '') : '',
     ...Object.fromEntries(Object.entries(config.prices ?? {}).filter(([k]) => !k.startsWith('_'))),

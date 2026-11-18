@@ -112,3 +112,22 @@ record.
 there and are made only when public access is released and verified.
 
 Decisions 1–6 above are unchanged.
+
+## Launch amendment CR-PUBLIC-LAUNCH (2026-11-18)
+
+Founder decision: a pragmatic public launch of Creator Record with the redesigned site.
+
+**Website changes for launch:**
+- **Creator Record buttons:** both read **"Create a Creator Record"** (the frozen label) and go to
+  `https://app.superimmersive8.com/auth/signup?next=/creator-record`. The $29 price is unchanged.
+- **Removed:** the "Creator Record access" inquiry type.
+- **Privacy links removed until the Website Privacy Notice is approved:** the contact-page line and the footer "Privacy" link. The
+  notice stays an unpublished draft.
+
+**Accepted for launch** (`site.config.json` `launchExceptions`):
+- no Website Privacy Notice yet;
+- the contact endpoint stays off until `CONTACT_FORM_ENABLED=true` is set on the marketing-site project. While off, a
+  submission sends nothing and offers email and booking.
+
+**Unchanged:** prices, claims, tagline and the sample placeholder. Checkout happens only inside the app; no website link goes to
+checkout or payment.

@@ -3,34 +3,39 @@
   "outDir": "07_Website",
   "crcUrl": "https://app.superimmersive8.com/crc",
   "signInUrl": "https://app.superimmersive8.com/auth/login",
-  "pendingRoutes": ["/privacy"],
-  "releaseBlockers": [
-    {
-      "id": "website-privacy-notice",
-      "reason": "The Website Privacy Notice is a draft awaiting founder approval (08_Platform/implementation/si8-web/WEBSITE_PRIVACY_NOTICE_DRAFT.md). /privacy is not built. Publish it as an approved page with a version and effective date, then remove this entry and \"/privacy\" from pendingRoutes."
-    },
-    {
-      "id": "contact-form-production-config",
-      "reason": "The contact form works only when the marketing-site Vercel project has CONTACT_FORM_ENABLED=true and a RESEND_API_KEY that can send from noreply@superimmersive8.com. Remove this entry only after that configuration is confirmed and one real enquiry has been delivered end to end."
-    }
-  ],
+  "pendingRoutes": [],
+  "releaseBlockers": [],
   "contactForm": {
     "_note": "mailingListOptIn renders the optional, unticked Kit checkbox. Keep false until its wording and the Kit tag/sequence are approved, and KIT_OPT_IN_ENABLED, KIT_API_SECRET and KIT_OPT_IN_TAG_ID are set; the server ignores the box otherwise.",
     "mailingListOptIn": false
   },
   "prices": {
-    "_note": "Founder-approved for website publication (SI8-WEB-LAUNCH-2). Showing a price opens nothing: public Creator Record self-service is the approved direction (SI8-WEB-LAUNCH-3A) but is not yet released.",
+    "_note": "Founder-approved for website publication (SI8-WEB-LAUNCH-2). Creator Record is public self-service from CR-PUBLIC-LAUNCH (2026-11-18).",
     "PRICE_CR": "$29",
     "PRICE_CA_FROM": "$499",
     "PRICE_CA_QUALIFICATION": "Starting at $499. Final pricing depends on project scope and is confirmed before proceeding."
   },
   "allowedExternal": [
-    "https://app.superimmersive8.com/crc",
     "https://app.superimmersive8.com/auth/login",
+    "https://app.superimmersive8.com/auth/signup?next=/creator-record",
+    "https://app.superimmersive8.com/crc",
     "https://calendly.com/aipenguins/superimmersive8",
     "https://fonts.googleapis.com",
     "https://fonts.gstatic.com",
     "https://www.superimmersive8.com",
     "https://www.superimmersive8.com/og-image.png"
+  ],
+  "signUpUrl": "https://app.superimmersive8.com/auth/signup?next=/creator-record",
+  "launchExceptions": [
+    {
+      "id": "website-privacy-notice",
+      "accepted": "CR-PUBLIC-LAUNCH 2026-11-18 (founder)",
+      "note": "The Website Privacy Notice is still an unapproved draft (08_Platform/implementation/si8-web/WEBSITE_PRIVACY_NOTICE_DRAFT.md). No page links to /privacy until it is approved and published."
+    },
+    {
+      "id": "contact-form-production-config",
+      "accepted": "CR-PUBLIC-LAUNCH 2026-11-18 (founder)",
+      "note": "The contact endpoint stays off unless CONTACT_FORM_ENABLED=true is set on the marketing-site Vercel project. While off, a submission sends nothing and the page offers email and booking instead."
+    }
   ]
 }
