@@ -76,6 +76,22 @@
     {
       "source": "/_versions/:path*",
       "destination": "/api/gone"
+    },
+    {
+      "source": "/sample",
+      "destination": "/api/gone"
+    },
+    {
+      "source": "/sample/:path*",
+      "destination": "/api/gone"
+    },
+    {
+      "source": "/api/formspree-to-kit",
+      "destination": "/api/gone"
+    },
+    {
+      "source": "/api/submit",
+      "destination": "/api/gone"
     }
   ]
 }

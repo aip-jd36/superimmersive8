@@ -71,6 +71,7 @@ if (args.has('--links')) {
         if (!config.allowedExternal.some((a) => href === a || href.startsWith(a + '/') || href.startsWith(a + '?'))) problems.push(`${p.route}: unlisted external ${href}`)
         continue
       }
+      if (href.startsWith('mailto:')) { if (!config.allowedExternal.includes(href)) problems.push(`${p.route}: unlisted mailto ${href}`); continue }
       if (href.startsWith('#')) { if (!p.html.includes(`id="${href.slice(1)}"`)) problems.push(`${p.route}: missing anchor ${href}`); continue }
       const path = href.split(/[?#]/)[0]
       if (known.has(path)) continue

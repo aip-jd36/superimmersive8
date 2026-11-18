@@ -161,7 +161,7 @@ if (ROUTES.includes('/contact')) {
       required:['contact-name','contact-email','contact-description'].every(id=>document.getElementById(id).required),describedBy:['contact-name','contact-email','contact-description'].every(id=>document.getElementById(id).getAttribute('aria-describedby')===id+'-error'),
       honeypotHidden:hp.tabIndex===-1&&hp.closest('[aria-hidden="true"]')!==null&&hp.getBoundingClientRect().right<0,sendEnabled:!document.querySelector('#contact-card button[type="submit"]').disabled,
       statusLive:document.getElementById('contact-status').getAttribute('aria-live'),optInBox:!!document.getElementById('contact-mailing-list'),privacyLinks:[...document.querySelectorAll('a[href="/privacy"]')].length}})()`)
-  check('contact form: labelled fields, required marks, error links, hidden honeypot, live status, Send enabled, no mailing-list box', structure.isForm && structure.action === '/api/contact-form' && structure.novalidate && structure.labelled && structure.required && structure.describedBy && structure.honeypotHidden && structure.sendEnabled && structure.statusLive === 'polite' && !structure.optInBox && structure.privacyLinks === 0, structure)
+  check('contact form: labelled fields, required marks, error links, hidden honeypot, live status, Send enabled, no mailing-list box, Privacy Notice linked', structure.isForm && structure.action === '/api/contact-form' && structure.novalidate && structure.labelled && structure.required && structure.describedBy && structure.honeypotHidden && structure.sendEnabled && structure.statusLive === 'polite' && !structure.optInBox && structure.privacyLinks >= 2, structure)
 
   contact.calls.length = 0
   await ev(submit)
@@ -192,7 +192,7 @@ if (ROUTES.includes('/contact')) {
 
   const privacy = { status: (await fetch(`${BASE}/privacy`)).status, footerLinks: 0 }
   await open(`${BASE}/`); privacy.footerLinks = await ev(`document.querySelectorAll('footer a[href="/privacy"]').length`)
-  check('Website Privacy Notice: not published and not linked (draft /privacy not served)', privacy.status === 404 && privacy.footerLinks === 0, privacy)
+  check('Website Privacy Notice: published at /privacy and linked from the footer', privacy.status === 200 && privacy.footerLinks === 1, privacy)
 }
 
 // 2d. Creator Record sample previews: real images (no placeholders), loaded at phone width after scrolling, labelled, with alt text

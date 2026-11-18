@@ -23,15 +23,11 @@
     "https://fonts.googleapis.com",
     "https://fonts.gstatic.com",
     "https://www.superimmersive8.com",
-    "https://www.superimmersive8.com/og-image.png"
+    "https://www.superimmersive8.com/og-image.png",
+    "mailto:jd@superimmersive8.com"
   ],
   "signUpUrl": "https://app.superimmersive8.com/auth/signup?next=/creator-record",
   "launchExceptions": [
-    {
-      "id": "website-privacy-notice",
-      "accepted": "CR-PUBLIC-LAUNCH 2026-11-18 (founder)",
-      "note": "The Website Privacy Notice is still an unapproved draft (08_Platform/implementation/si8-web/WEBSITE_PRIVACY_NOTICE_DRAFT.md). No page links to /privacy until it is approved and published."
-    },
     {
       "id": "contact-form-production-config",
       "accepted": "CR-PUBLIC-LAUNCH 2026-11-18 (founder)",
