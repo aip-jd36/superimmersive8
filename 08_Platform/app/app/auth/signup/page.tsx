@@ -173,12 +173,8 @@ export default function SignupPage() {
 
       if (authError) throw authError
 
-      // Notify admin of new signup (non-blocking — don't await)
-      fetch('/api/notify-signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fullName: data.fullName, email: data.email, nextPath }),
-      }).catch(() => {}) // silently ignore if notification fails
+      // CR-PUBLIC-2A-FIX: the admin notification is sent server-side from /auth/callback once Supabase confirms the email
+      // (lib/auth/signup-notification.ts). The browser no longer calls a public notification endpoint.
 
       setSuccess(true)
     } catch (err: any) {

@@ -14,30 +14,33 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'jd@superimmersive8.com'
 // superimmersive8.com has SPF/DKIM/DMARC already configured with Resend.
 const CRC_RESULTS_FROM_EMAIL = 'SI8 Commercial Readiness Check <noreply@superimmersive8.com>'
 
+/**
+ * CR-PUBLIC-2A-FIX: called only from `/auth/callback` after Supabase confirmed the account (`lib/auth/signup-notification.ts`).
+ * Every user-controlled value is HTML-escaped; the subject has control characters removed. `productLabel` is a fixed label.
+ */
 export async function sendNewUserSignupEmail(
   fullName: string,
   email: string,
-  nextPath: string
+  productLabel: string
 ) {
-  const productLabel = nextPath === '/certify'
-    ? 'SI8 Certified ($499)'
-    : nextPath === '/record'
-    ? 'Creator Record ($29)'
-    : 'Not specified'
+  const plain = (s: string) => s.replace(/[\u0000-\u001f\u007f]+/g, ' ').trim()
+  const name = escapeHtml(plain(fullName))
+  const address = escapeHtml(plain(email))
+  const label = escapeHtml(plain(productLabel))
 
   try {
     await resend.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,
-      subject: `New signup — ${fullName} (${email})`,
+      subject: `New signup — ${plain(fullName).slice(0, 120)} (${plain(email).slice(0, 254)})`,
       html: `
         <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 560px; margin: 0 auto; padding: 20px; background: #FFFBF5; border: 1px solid #C8900A; border-radius: 8px;">
           <h2 style="color: #C8900A; margin-top: 0;">New Account Created</h2>
           <div style="background: white; padding: 16px 20px; border-radius: 6px; margin: 16px 0;">
-            <p style="margin: 6px 0;"><strong>Name:</strong> ${fullName}</p>
-            <p style="margin: 6px 0;"><strong>Email:</strong> <a href="mailto:${email}" style="color: #C8900A;">${email}</a></p>
-            <p style="margin: 6px 0;"><strong>Signed up for:</strong> ${productLabel}</p>
-            <p style="margin: 6px 0;"><strong>Status:</strong> Email verification pending</p>
+            <p style="margin: 6px 0;"><strong>Name:</strong> ${name}</p>
+            <p style="margin: 6px 0;"><strong>Email:</strong> <a href="mailto:${escapeHtml(encodeURIComponent(plain(email)))}" style="color: #C8900A;">${address}</a></p>
+            <p style="margin: 6px 0;"><strong>Signed up for:</strong> ${label}</p>
+            <p style="margin: 6px 0;"><strong>Status:</strong> Email confirmed</p>
           </div>
           <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #ddd; font-size: 13px; color: #666;">
             <p style="margin: 4px 0;">Signed up: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Taipei', dateStyle: 'full', timeStyle: 'short' })} (Taipei time)</p>
@@ -46,8 +49,8 @@ export async function sendNewUserSignupEmail(
         </div>
       `,
     })
-  } catch (error) {
-    console.error('Error sending new user signup email:', error)
+  } catch {
+    console.error('Error sending new user signup email') // no name or address in logs
   }
 }
 
