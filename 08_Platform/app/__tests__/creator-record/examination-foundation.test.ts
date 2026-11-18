@@ -545,6 +545,8 @@ describe('CR-V2-DOC-2B examination foundation', () => {
       ['lib/creator-record/eval/run-receipt-eval.ts', ['examination/receipt-profile']],
       ['lib/creator-record/evidence/persisted-comparison.ts', ['examination/envelope', 'examination/receipt-reading']],
       // CR-V2-MVP-INTEGRATION-2: the integrated assessment reads a record's projections only through the same exact inversion.
+      // CR-DOC-READER-EXT-1 C: method v2 (inactive) reads the declared category's profile (pure data), never an engine or port.
+      ['lib/creator-record/integrated-assessment/assess-v2.ts', ['examination/category-profile']],
       ['lib/creator-record/integrated-assessment/assess.ts', ['examination/receipt-reading']],
       // CR-V2-DOC-LIVE-1A: the closed v3 contract, which nothing outside tests imports (live-examination.test.ts).
       ['lib/creator-record/live-examination/document-access.ts', ['examination/envelope']],
