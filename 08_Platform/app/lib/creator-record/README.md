@@ -18,7 +18,7 @@
 | Item | Value | Where |
 |---|---|---|
 | New submissions and purchases | `'open'` | `customer-flow/approved-inputs.ts` |
-| Who may use it (CR-PUBLIC-1) | `'invitation'` (invited creators only; `'public'` = any signed-in creator, not authorized) | `lib/creator-record-flow/access-policy.ts` `CREATOR_RECORD_V2_ACCESS`, bound as `hasCreatorRecordAccess` by every production port. Activation: `08_Platform/implementation/cr-public-1/` |
+| Who may use it (CR-PUBLIC-1 / CR-PUBLIC-LAUNCH) | `'public'`: any signed-in creator (founder-authorized public launch, 2026-11-18; `'invitation'` = rollback to invited creators only) | `lib/creator-record-flow/access-policy.ts` `CREATOR_RECORD_V2_ACCESS`, bound as `hasCreatorRecordAccess` by every production port. Activation: `08_Platform/implementation/cr-public-1/` |
 | Issuance | `'enabled'` | `lib/creator-record-artifacts/config.ts` |
 | Generator | `creator-record-v2-pdf-v4` (CR-DESIGN-2D; `-pdf-v1`…`-v3` artifacts stay recognised) | `lib/creator-record-artifacts/renderers.ts` |
 | Issuable record schemas / builders | 7, 8 / 5, 7 | `customer-record/governance-state.ts` (`CURRENT_ISSUANCE_SUPPORT`) |
@@ -47,8 +47,8 @@
 - **Review screen:** the readings-versus-declarations comparison panel and the "Guidance beside your documents" panel were removed (`cddb70fc`, `7892a643`).
 
 **Terms, consent and AI permission.**
-- Terms `terms-2026-11-14` and Privacy Notice `privacy-2026-11-09` (`lib/legal/policies.ts`).
-- Storage-consent and AI-permission identifiers are `<wording>__privacy-2026-11-09__terms-2026-11-14` (`lib/creator-record-flow/authorization-versions.ts`).
+- Terms `terms-2026-11-18` (CR-PUBLIC-LAUNCH: §2 public availability; everything else as `terms-2026-11-14`) and Privacy Notice `privacy-2026-11-09` (`lib/legal/policies.ts`).
+- Storage-consent and AI-permission identifiers are `<wording>__privacy-2026-11-09__terms-2026-11-18` (`lib/creator-record-flow/authorization-versions.ts`).
 - The database accepts an AI-permission grant only for the identifier in `creator_record_v2_ai_permission_authority` (migration `20261113000000`).
 - That row is operator-maintained. Whenever the Terms or Privacy version changes, an operator replaces it by delete-and-insert; in-place updates are refused. Until then, AI examination fails closed.
 - Grants made under an earlier identifier stay as history and no longer permit examination.

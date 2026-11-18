@@ -27,14 +27,22 @@ function packetJson(v: unknown): string {
 describe('the published legal documents are the approved text', () => {
   test.each([
     ['Privacy Notice', PRIVACY_NOTICE, 'privacy-2026-11-09', 'Creator Record Privacy Notice', '5d1da758c484c1710b8f03fb84ed267b1f8589bf78c7f85484fb8eb3788e063e', 42],
-    // CR-V2-MVP-RELEASE-AUTHORIZATION-1: founder-approved §4/§5 revision (Pika removed; document-reading separation).
-    ['Terms of Service', TERMS_OF_SERVICE, 'terms-2026-11-14', 'Creator Record Terms of Service', 'd54e55bb785b4cecdb6dd2b87febb619d48c747bddc272aceaf169b4ad11a8fb', 31, '2026-11-14', 'JD-CR-V2-MVP-RELEASE-AUTHORIZATION-1-20261114 terms'],
+    // CR-PUBLIC-LAUNCH: founder-approved §2 (public availability) on top of the 2026-11-14 text (§4/§5 revision).
+    ['Terms of Service', TERMS_OF_SERVICE, 'terms-2026-11-18', 'Creator Record Terms of Service', 'b4b21b0ac5a2fae0e3d3bd4cbca1881b763f48a62c46db603fdb5c6ea0039d1b', 31, '2026-11-18', 'JD-CR-PUBLIC-LAUNCH-20261118 terms'],
   ])('%s: version, date, approval and every paragraph', (_, doc, version, title, paragraphsSha, count, date = '2026-11-09', ref = REF) => {
     expect(doc).not.toBeNull()
     expect(doc!).toMatchObject({ version, effective_date: date, approval_reference: ref, title })
     expect(doc!.paragraphs).toHaveLength(count)
     expect(sha(doc!.paragraphs.join('\n\n'))).toBe(paragraphsSha)
     expect(doc!.paragraphs.join('\n')).not.toMatch(/\[(CONFIRM|VERIFY|FOUNDER|PENDING)|PUBLICATION GATE/)
+  })
+
+  test('CR-PUBLIC-LAUNCH: the only change from the approved terms-2026-11-14 text is the §2 availability sentence', () => {
+    const NEW = 'Creator Record is available to registered SI8 users, subject to these Terms and applicable eligibility, payment, and service requirements.'
+    const OLD = 'Creator Record is currently available by invitation only.'
+    const joined = TERMS_OF_SERVICE!.paragraphs.join('\n\n')
+    expect(joined.split(NEW)).toHaveLength(2)
+    expect(sha(joined.replace(NEW, OLD))).toBe('d54e55bb785b4cecdb6dd2b87febb619d48c747bddc272aceaf169b4ad11a8fb')
   })
 })
 

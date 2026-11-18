@@ -509,7 +509,7 @@ describe('privacy and terms: infrastructure only, nothing published until approv
   test('the founder-approved documents are published; a missing document still renders "not available yet"', () => {
     // CR-V2-MVP-LEGAL-CONTENT-6 (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109).
     expect(PRIVACY_NOTICE?.approval_reference).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109')
-    expect(TERMS_OF_SERVICE?.approval_reference).toBe('JD-CR-V2-MVP-RELEASE-AUTHORIZATION-1-20261114 terms') // CR-V2-MVP-RELEASE-AUTHORIZATION-1
+    expect(TERMS_OF_SERVICE?.approval_reference).toBe('JD-CR-PUBLIC-LAUNCH-20261118 terms') // CR-V2-MVP-RELEASE-AUTHORIZATION-1
     expect(legalPoliciesApproved()).toBe(true)
     const html = renderToStaticMarkup(<LegalDocumentPage doc={null} fallbackTitle="Privacy notice" />)
     expect(html).toContain('data-legal-unavailable')

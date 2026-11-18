@@ -20,7 +20,7 @@ import {
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
 import { namingCurrentContract } from '@/test-support/questionnaire-approval'
-import { createCreatorRecordAccessCheck, creatorRecordAccessMode } from '@/lib/creator-record-flow/access-policy'
+import { createCreatorRecordAccessCheck } from '@/lib/creator-record-flow/access-policy'
 
 const preparePrepared = namingCurrentContract(prepareAsSent)
 
@@ -144,8 +144,8 @@ describe('pilot controls', () => {
   })
 
   // CR-PUBLIC-1: the access policy, as the production ports bind it.
-  test('CR-PUBLIC-1 default (invitation) policy: an uninvited creator is still refused', async () => {
-    const d = deps({ hasPilotAccess: createCreatorRecordAccessCheck(creatorRecordAccessMode(), async () => false) })
+  test('CR-PUBLIC-1 invitation (rollback) policy: an uninvited creator is still refused', async () => {
+    const d = deps({ hasPilotAccess: createCreatorRecordAccessCheck('invitation', async () => false) })
     expect(await preparePrepared(d, OWNER, { state: state() })).toEqual({ ok: false, status: 403, code: 'not_invited' })
     expect(d.mem.calls.insert).toBe(0)
   })

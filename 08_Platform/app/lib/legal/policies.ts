@@ -82,9 +82,9 @@ export const PRIVACY_NOTICE: ApprovedLegalDocument | null = Object.freeze({
 })
 
 export const TERMS_OF_SERVICE: ApprovedLegalDocument | null = Object.freeze({
-  version: "terms-2026-11-14",
-  effective_date: "2026-11-14",
-  approval_reference: "JD-CR-V2-MVP-RELEASE-AUTHORIZATION-1-20261114 terms",
+  version: "terms-2026-11-18",
+  effective_date: "2026-11-18",
+  approval_reference: "JD-CR-PUBLIC-LAUNCH-20261118 terms",
   title: "Creator Record Terms of Service",
   paragraphs: Object.freeze([
     "These Terms apply to Creator Record, the service at app.superimmersive8.com provided by PMF Strategy Inc., doing business as SuperImmersive 8 (\"SI8\", \"we\" or \"us\"). You agree to these Terms when you confirm them in the Creator Record questionnaire, and they apply to every Creator Record you prepare or buy. The Creator Record Privacy Notice explains how we handle personal information.",
@@ -92,7 +92,7 @@ export const TERMS_OF_SERVICE: ApprovedLegalDocument | null = Object.freeze({
     "A Creator Record is a private PDF that contains what you told SI8 about an AI-assisted video, educational guidance about the published terms of certain AI tool providers and, if you added documents and asked for them to be read, what an automated reading reports each document appears to show.",
     "Creator Record is self-declared and automated. No person at SI8 reviews your video, your answers, your documents or the readings. It is not legal advice, not a clearance, not a decision that your video may be used commercially, and not SI8's human-reviewed Commercial Assurance Assessment.",
     "2. Who can use Creator Record",
-    "Creator Record is currently available by invitation only. You must be at least 18 years old. Individuals and businesses may both buy Creator Records; if you use it for a business, you confirm that you may accept these Terms for it. You are responsible for keeping your sign-in details secure and for activity under your account.",
+    "Creator Record is available to registered SI8 users, subject to these Terms and applicable eligibility, payment, and service requirements. You must be at least 18 years old. Individuals and businesses may both buy Creator Records; if you use it for a business, you confirm that you may accept these Terms for it. You are responsible for keeping your sign-in details secure and for activity under your account.",
     "3. Your answers and documents",
     "You confirm that what you tell SI8 is accurate to the best of your knowledge. Add only documents you are entitled to share, and remove details that are not needed, such as card numbers, home addresses and other people's personal information. SI8 does not check that any document is genuine, complete or current, or that it belongs to you.",
     "4. Automated readings",

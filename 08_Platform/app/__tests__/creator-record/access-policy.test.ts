@@ -29,7 +29,7 @@ jest.mock('@/lib/supabase/admin', () => ({
 import {
   CREATOR_RECORD_V2_ACCESS, createCreatorRecordAccessCheck, creatorRecordAccessMode, resolveCreatorRecordAccessMode,
 } from '@/lib/creator-record-flow/access-policy'
-import { hasCreatorRecordAccess, PILOT_ACCESS_TABLE } from '@/lib/creator-record-flow/pilot-access'
+import { hasCreatorRecordAccess, hasPilotAccess, PILOT_ACCESS_TABLE } from '@/lib/creator-record-flow/pilot-access'
 
 const APP = path.join(__dirname, '..', '..')
 const src = (p: string) => readFileSync(path.join(APP, p), 'utf8').replace(/\r\n/g, '\n')
@@ -49,10 +49,10 @@ describe('mode resolution (fail closed)', () => {
     }
   })
 
-  test('the committed switch is invitation-only (Production today)', () => {
-    expect(CREATOR_RECORD_V2_ACCESS).toBe('invitation')
-    expect(creatorRecordAccessMode()).toBe('invitation')
-    expect(src('lib/creator-record-flow/access-policy.ts')).toMatch(/export const CREATOR_RECORD_V2_ACCESS: string = 'invitation'\n/)
+  test('the committed switch is public (CR-PUBLIC-LAUNCH, founder-authorized)', () => {
+    expect(CREATOR_RECORD_V2_ACCESS).toBe('public')
+    expect(creatorRecordAccessMode()).toBe('public')
+    expect(src('lib/creator-record-flow/access-policy.ts')).toMatch(/export const CREATOR_RECORD_V2_ACCESS: string = 'public'\n/)
   })
 
   test('the switch is a code constant: no environment variable, request, cookie or client input can select it', () => {
@@ -84,9 +84,16 @@ describe('the access check', () => {
     }
   })
 
-  test('the production check, in the default state, reads the invitation table', async () => {
-    expect(await hasCreatorRecordAccess('11111111-1111-4111-8111-111111111111')).toBe(true)
-    expect(await hasCreatorRecordAccess('22222222-2222-4222-8222-222222222222')).toBe(false)
+  test('the production check (public): any signed-in user, without reading the invitation table; never an empty id', async () => {
+    expect(await hasCreatorRecordAccess('22222222-2222-4222-8222-222222222222')).toBe(true)
+    expect(await hasCreatorRecordAccess('')).toBe(false)
+    expect(lookups).toEqual([])
+  })
+
+  test('rollback state (invitation) still reads the invitation table', async () => {
+    const check = createCreatorRecordAccessCheck('invitation', hasPilotAccess)
+    expect(await check('11111111-1111-4111-8111-111111111111')).toBe(true)
+    expect(await check('22222222-2222-4222-8222-222222222222')).toBe(false)
     expect(lookups).toEqual([`${PILOT_ACCESS_TABLE}:11111111-1111-4111-8111-111111111111`, `${PILOT_ACCESS_TABLE}:22222222-2222-4222-8222-222222222222`])
   })
 })

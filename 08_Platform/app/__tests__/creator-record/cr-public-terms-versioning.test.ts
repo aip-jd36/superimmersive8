@@ -14,19 +14,19 @@ import { aiExaminationPermissionVersion, evidenceConsentVersion } from '@/lib/cr
 const DRAFT = path.join(__dirname, '..', '..', '..', 'implementation', 'cr-public-1', 'CR-PUBLIC-1-TERMS-REVISION-DRAFT.md')
 const INVITATION = 'Creator Record is currently available by invitation only.'
 
-describe('the published Terms are unchanged by CR-PUBLIC-1', () => {
-  test('version terms-2026-11-14, §2 still invitation-only, Privacy Notice privacy-2026-11-09', () => {
-    expect(TERMS_OF_SERVICE?.version).toBe('terms-2026-11-14')
+describe('the published Terms (CR-PUBLIC-LAUNCH)', () => {
+  test('version terms-2026-11-18 with the approved public §2; Privacy Notice unchanged at privacy-2026-11-09', () => {
+    expect(TERMS_OF_SERVICE?.version).toBe('terms-2026-11-18')
     expect(TERMS_OF_SERVICE?.paragraphs[4]).toBe('2. Who can use Creator Record')
-    expect(TERMS_OF_SERVICE?.paragraphs[5].startsWith(INVITATION)).toBe(true)
+    expect(TERMS_OF_SERVICE?.paragraphs[5].startsWith('Creator Record is available to registered SI8 users, subject to these Terms and applicable eligibility, payment, and service requirements.')).toBe(true)
+    expect(TERMS_OF_SERVICE?.paragraphs.join('\n')).not.toContain(INVITATION)
     expect(PRIVACY_NOTICE?.version).toBe('privacy-2026-11-09')
-    expect(approvedPolicyVersions()).toEqual({ privacy: 'privacy-2026-11-09', terms: 'terms-2026-11-14' })
+    expect(approvedPolicyVersions()).toEqual({ privacy: 'privacy-2026-11-09', terms: 'terms-2026-11-18' })
   })
 
-  test('the current identifiers embed the published versions', () => {
-    const ai = aiExaminationPermissionVersion()
-    expect(ai).toBe('cr-v2-ai-permission-1__privacy-2026-11-09__terms-2026-11-14')
-    expect(evidenceConsentVersion()).toBe('cr-v2-storage-consent-1__privacy-2026-11-09__terms-2026-11-14')
+  test('the current identifiers embed the published versions (the authority row must name this AI-permission identifier)', () => {
+    expect(aiExaminationPermissionVersion()).toBe('cr-v2-ai-permission-1__privacy-2026-11-09__terms-2026-11-18')
+    expect(evidenceConsentVersion()).toBe('cr-v2-storage-consent-1__privacy-2026-11-09__terms-2026-11-18')
   })
 })
 

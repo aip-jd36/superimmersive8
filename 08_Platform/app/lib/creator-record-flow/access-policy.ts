@@ -25,8 +25,9 @@
 
 export type CreatorRecordAccessMode = 'invitation' | 'public'
 
-/** THE switch. 'invitation' is Production today. Do not change without a separately authorized release. */
-export const CREATOR_RECORD_V2_ACCESS: string = 'invitation'
+/** THE switch. 'public' since the founder-authorized public launch (CR-PUBLIC-LAUNCH, 2026-11-18). 'invitation' restores the
+ * invitation-only gate (rollback). */
+export const CREATOR_RECORD_V2_ACCESS: string = 'public'
 
 /** Fail closed: exactly 'public' is public; anything else, including a missing or malformed value, is 'invitation'. */
 export function resolveCreatorRecordAccessMode(raw: unknown): CreatorRecordAccessMode {

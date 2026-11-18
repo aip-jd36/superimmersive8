@@ -45,7 +45,7 @@ import * as production from '@/lib/creator-record-flow/production'
 import type { FulfillmentSubmission } from '@/lib/payments/repository'
 import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
 import { COMMERCIAL_SUPPORT_UNDER_TEST } from '@/test-support/commercial-support'
-import { createCreatorRecordAccessCheck, creatorRecordAccessMode } from '@/lib/creator-record-flow/access-policy'
+import { createCreatorRecordAccessCheck } from '@/lib/creator-record-flow/access-policy'
 
 const buildCustomerRecord = buildCurrentRecord
 
@@ -179,8 +179,8 @@ describe('startPurchase', () => {
     expect(w.subs.size).toBe(0)
   })
 
-  test('CR-PUBLIC-1 default (invitation) policy refuses an uninvited creator before any binding', async () => {
-    const w = world({ hasPilotAccess: createCreatorRecordAccessCheck(creatorRecordAccessMode(), async () => false) })
+  test('CR-PUBLIC-1 invitation (rollback) policy refuses an uninvited creator before any binding', async () => {
+    const w = world({ hasPilotAccess: createCreatorRecordAccessCheck('invitation', async () => false) })
     const row = w.add(preparedRow())
     expect(await startPurchase(w.deps, OWNER, row.id)).toEqual({ ok: false, status: 403, code: 'not_invited' })
     expect(w.calls.bind).toBe(0)

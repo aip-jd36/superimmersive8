@@ -22,7 +22,7 @@ import {
 } from '@/lib/creator-record/customer-flow/examination'
 import { CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flow/approved-inputs'
 import { LIVE_EXTRACTION_PERMITTED_IN_THIS_BUILD } from '@/lib/creator-record/evidence/config'
-import { createCreatorRecordAccessCheck, creatorRecordAccessMode } from '@/lib/creator-record-flow/access-policy'
+import { createCreatorRecordAccessCheck } from '@/lib/creator-record-flow/access-policy'
 
 jest.mock('@/lib/supabase/admin', () => ({ supabaseAdmin: {} }))
 jest.mock('@/lib/supabase/server', () => ({ createClient: () => ({}) }))
@@ -91,9 +91,9 @@ describe('request: gates, ownership and the unchanged adapter', () => {
     expect(w.calls).toEqual([])
   })
 
-  test('CR-PUBLIC-1: refused under the default (invitation) policy; the public policy (simulated) proceeds past the gate but keeps ownership', async () => {
+  test('CR-PUBLIC-1: refused under the invitation (rollback) policy; the public policy (simulated) proceeds past the gate but keeps ownership', async () => {
     const refused = world()
-    refused.deps.hasPilotAccess = createCreatorRecordAccessCheck(creatorRecordAccessMode(), async () => false)
+    refused.deps.hasPilotAccess = createCreatorRecordAccessCheck('invitation', async () => false)
     expect(await requestCustomerExamination(refused.deps, OWNER, refused.doc.id)).toEqual({ ok: false, status: 403, code: 'not_invited' })
     expect(refused.calls).toEqual([])
 
