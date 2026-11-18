@@ -52,13 +52,13 @@ const productionAiPermission = (version: string): NonNullable<CustomerExaminatio
 
 /** The customer live port: the reviewed production ports, the committed fixture registry and the real executor. No other composition. */
 const productionCustomerLive: NonNullable<CustomerExaminationDeps['live']> = {
-  async examine(userId, documentId) {
+  async examine(userId, documentId, profile) {
     const [{ examineCustomerDocumentLive }, { customerLivePorts }, { DEFAULT_REPLAY_TABLE }] = await Promise.all([
       import('@/lib/creator-record/live-examination/customer'),
       import('@/lib/creator-record-flow/customer-live-production'),
       import('@/lib/creator-record/evidence/replay'),
     ])
-    return examineCustomerDocumentLive({ ports: customerLivePorts, isKnownSyntheticFixture: (sha256) => DEFAULT_REPLAY_TABLE.has(sha256), now: () => new Date() }, userId, documentId)
+    return examineCustomerDocumentLive({ ports: customerLivePorts, isKnownSyntheticFixture: (sha256) => DEFAULT_REPLAY_TABLE.has(sha256), now: () => new Date() }, userId, documentId, profile)
   },
 }
 

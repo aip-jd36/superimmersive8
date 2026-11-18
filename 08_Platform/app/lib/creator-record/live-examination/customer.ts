@@ -70,6 +70,8 @@ export interface CustomerLiveDeps {
   now(): Date
   /** Passed to `loadCustomerLiveExecutor` (environment, adapter seam for tests, deadline). */
   executorOptions?: LoadRealExecutorOptions
+  /** CR-DOC-READER-EXT-2: tests only. Production uses `LIVE_PROFILE_REGISTRY`, which holds the receipt profile alone. */
+  profiles?: typeof LIVE_PROFILE_REGISTRY
 }
 
 export type CustomerLiveResult = {
@@ -81,7 +83,7 @@ export type CustomerLiveResult = {
 
 const PROFILE = { id: 'receipt', version: 1 } as const
 
-export async function examineCustomerDocumentLive(deps: CustomerLiveDeps, ownerUserId: string, documentId: string): Promise<CustomerLiveResult> {
+export async function examineCustomerDocumentLive(deps: CustomerLiveDeps, ownerUserId: string, documentId: string, profile: { id: string; version: number } = PROFILE): Promise<CustomerLiveResult> {
   const disabled = (reason: string): CustomerLiveResult => ({ result: { kind: 'disabled', reason }, reservation_refusal: null, settlement: { status: 'not_reserved' } })
   if (LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD !== true || CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD !== true) return disabled('code_lock')
 
@@ -115,7 +117,7 @@ export async function examineCustomerDocumentLive(deps: CustomerLiveDeps, ownerU
         const bounded = attemptCostBoundUsd(LIVE_EXTRACTION_MODEL, inputTokensPerRequest)
         if (planning === null || bounded === null) return false
         try {
-          reservationId = await deps.ports.reserve(accessLogId, PROFILE.id, inputTokensPerRequest, toMicroUsd(Math.max(planning, bounded)))
+          reservationId = await deps.ports.reserve(accessLogId, profile.id, inputTokensPerRequest, toMicroUsd(Math.max(planning, bounded)))
           return true
         } catch (e) {
           reservationRefusal = e instanceof LivePortError && e.refusal ? e.refusal : 'reservation_unavailable'
@@ -140,8 +142,8 @@ export async function examineCustomerDocumentLive(deps: CustomerLiveDeps, ownerU
   }
 
   const result = await examineLiveAndRecord(
-    { storage, core: { executor: guarded, isKnownSyntheticFixture: deps.isKnownSyntheticFixture, profiles: LIVE_PROFILE_REGISTRY, livePermitted: true, now: deps.now } },
-    { actor_user_id: ownerUserId, document_id: documentId, profile: PROFILE },
+    { storage, core: { executor: guarded, isKnownSyntheticFixture: deps.isKnownSyntheticFixture, profiles: deps.profiles ?? LIVE_PROFILE_REGISTRY, livePermitted: true, now: deps.now } },
+    { actor_user_id: ownerUserId, document_id: documentId, profile: { id: profile.id, version: profile.version } },
   )
 
   if (reservationId === null) return { result, reservation_refusal: reservationRefusal, settlement: { status: 'not_reserved' } }

@@ -438,8 +438,11 @@ describe('boundaries', () => {
       '../evidence/pdf-text-layer',
       '../examination/envelope',
       '../examination/examine-document',
+      '../examination/licence-profile', // CR-DOC-READER-EXT-2: licence-live-profile.ts (inactive, not in LIVE_PROFILE_REGISTRY)
       '../examination/profile',
       '../examination/receipt-profile',
+      '../licence-examination/prompt', // CR-DOC-READER-EXT-2: licence-live-profile.ts, version identities only
+      '../licence-examination/schema', // CR-DOC-READER-EXT-2: licence-live-profile.ts, version identities only
       '../receipt-examination/examine',
       '../receipt-examination/examine.anthropic', // CR-V2-DOC-LIVE-1B: real-executor.ts only, dynamically, behind every lock (checked below)
       '../receipt-examination/prompt',

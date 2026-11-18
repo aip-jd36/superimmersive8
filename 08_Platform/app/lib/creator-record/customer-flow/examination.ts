@@ -31,6 +31,7 @@ import {
   type VerifiedRun,
 } from '../examination/persistence'
 import { RECEIPT_READING_PROFILE } from '../examination/receipt-reading'
+import { profileForCategory } from '../examination/category-profile'
 import { projectVerifiedRun, verifyReferencedRuns, type ExaminationProjection as ReplayExaminationProjection, type ExaminationRunReference, type RunReferenceIntegrity } from '../examination/projection'
 import type { CustomerLiveResult } from '../live-examination/customer'
 import { verifyLiveAttemptRow } from '../live-examination/examine'
@@ -60,7 +61,12 @@ export interface CustomerExaminationDeps {
    * CR-V2-MVP-M2A: the customer live examination (`../live-examination/customer`). Supplied by the production wiring only while both
    * code locks are true; absent, this path is the replay path exactly as before. The database still decides each step.
    */
-  live?: { examine(userId: string, documentId: string): Promise<CustomerLiveResult> }
+  live?: { examine(userId: string, documentId: string, profile?: { id: string; version: number }): Promise<CustomerLiveResult> }
+  /**
+   * CR-DOC-READER-EXT-2: the profiles a routed examination may use. Production never sets it, so only the receipt profile is
+   * active (`ACTIVE_CUSTOMER_PROFILES`); tests may make the inactive licence profile active to exercise the route end to end.
+   */
+  activeProfiles?: readonly { id: string; version: number }[]
   /**
    * CR-V2-MVP-LAUNCH-FOUNDATION-1 (Decision 8Q): the creator's separate permission for AI examination, recorded for the one document
    * before any live examination (`creator_record_v2_grant_ai_examination_permission`). Required whenever `live` is present: a live
@@ -129,18 +135,41 @@ async function owned(deps: CustomerExaminationDeps, userId: string, documentId: 
   return { ok: true, state: doc.state }
 }
 
+/**
+ * CR-DOC-READER-EXT-2: the examination profile for a declared category. No category (every request the current client and HTTP
+ * route make) keeps the legacy receipt profile. A category selects through `profileForCategory`: unknown → 422, not examined
+ * (release, project file, other) → 422, a profile that is not active → 409. Never chosen from the document's content.
+ */
+export function routeExaminationProfile(category: unknown, active?: readonly { id: string; version: number }[]):
+  | { ok: true; profile: { id: string; version: number } }
+  | { ok: false; reason: string; error: CustomerExaminationError } {
+  if (category === undefined) return { ok: true, profile: { id: RECEIPT_READING_PROFILE.id, version: RECEIPT_READING_PROFILE.version } }
+  const s = profileForCategory(category, active)
+  if (s.ok) return { ok: true, profile: s.profile }
+  if (s.reason === 'category_unknown') return { ok: false, reason: s.reason, error: err(422, 'not_examinable') }
+  if (s.reason === 'category_not_examined') return { ok: false, reason: s.reason, error: err(422, 'not_examinable') }
+  return { ok: false, reason: s.reason, error: err(409, 'examination_not_permitted') }
+}
+
 /** Request one examination of the creator's own stored document. Idempotent: the same document and profile converge. */
 export async function requestCustomerExamination(
   deps: CustomerExaminationDeps,
   userId: string,
   documentId: unknown,
-  options: { aiPermission?: string | null } = {},
+  options: { aiPermission?: string | null; category?: unknown } = {},
 ): Promise<{ ok: true; run_id: string; result: 'created' | 'existing' } | CustomerExaminationError> {
   const gated = await gate(deps, userId)
   if (gated) return gated
   const doc = await owned(deps, userId, documentId)
   if (!doc.ok) return doc
   if (doc.state !== 'stored') return err(409, 'not_ready')
+  // CR-DOC-READER-EXT-2: which profile reads this document, from the creator's declared category only. Decided before any
+  // permission is recorded, so a refused category records no grant and reads nothing.
+  const routed = routeExaminationProfile(options.category, deps.activeProfiles)
+  if (!routed.ok) {
+    deps.log?.('creator_record_v2_examination_not_routed', { reason: routed.reason })
+    return routed.error
+  }
   if (deps.live) {
     // Decision 8Q: no AI examination without the creator's explicit permission for THIS document, recorded first. A withdrawal
     // covering the document makes the grant impossible (the database refuses it), so a withdrawn permission is never re-granted.
@@ -155,13 +184,13 @@ export async function requestCustomerExamination(
       if (e.code === 'not_found') return err(404, 'not_found')
       return err(400, 'ai_permission_required')
     }
-    return liveOutcome(deps, await deps.live.examine(userId, documentId as string))
+    return liveOutcome(deps, await deps.live.examine(userId, documentId as string, routed.profile))
   }
 
   const r = await examineAndRecord(deps.adapter, {
     actor_user_id: userId,
     document_id: documentId as string,
-    profile: { id: RECEIPT_READING_PROFILE.id, version: RECEIPT_READING_PROFILE.version },
+    profile: routed.profile,
   })
   switch (r.kind) {
     case 'recorded':
