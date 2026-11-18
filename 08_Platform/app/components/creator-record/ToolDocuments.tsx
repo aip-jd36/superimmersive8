@@ -98,14 +98,14 @@ function DocumentRow({ ctx, attachment, outOfRange = false }: { ctx: DocumentsCo
           </label>
         )}
         {ex.kind !== 'done' && (
-          <button type="button" className="cr-btn cr-btn-ghost cr-btn-sm" aria-describedby={`${id}-name`} onClick={() => void ctx.docs.examine(attachment.document_id)} disabled={ex.kind === 'working' || blockedByPermission}>
+          <button type="button" className="cr-btn cr-btn-ghost cr-btn-sm" aria-describedby={`${id}-name`} onClick={() => void ctx.docs.examine(attachment.document_id, attachment.category)} disabled={ex.kind === 'working' || blockedByPermission}>
             {ex.kind === 'working' ? T.examining : T.examine}
           </button>
         )}
         {ex.kind === 'done' && <p className="cr-muted" role="status">{T.examined}</p>}
         {ex.kind === 'refused' && (
           <p className="cr-error" role="alert">
-            {ex.message}{ex.retry && <> <button type="button" className="cr-link" onClick={() => void ctx.docs.examine(attachment.document_id)} disabled={blockedByPermission}>{T.retry}</button></>}
+            {ex.message}{ex.retry && <> <button type="button" className="cr-link" onClick={() => void ctx.docs.examine(attachment.document_id, attachment.category)} disabled={blockedByPermission}>{T.retry}</button></>}
           </p>
         )}
       </div>

@@ -70,7 +70,10 @@ export interface CustomerLiveDeps {
   now(): Date
   /** Passed to `loadCustomerLiveExecutor` (environment, adapter seam for tests, deadline). */
   executorOptions?: LoadRealExecutorOptions
-  /** CR-DOC-READER-EXT-2: tests only. Production uses `LIVE_PROFILE_REGISTRY`, which holds the receipt profile alone. */
+  /**
+   * CR-DOC-READER-EXT-2/5A: the profiles this examination may run. Absent: `LIVE_PROFILE_REGISTRY` (receipt alone). The production
+   * wiring passes `customerLiveProfileRegistry(licenceReadingEnabled())`, which adds the licence profile only while it is enabled.
+   */
   profiles?: typeof LIVE_PROFILE_REGISTRY
 }
 
@@ -97,7 +100,8 @@ export async function examineCustomerDocumentLive(deps: CustomerLiveDeps, ownerU
 
   let executor: RealLiveExecutor
   try {
-    executor = await loadCustomerLiveExecutor({ document_sha256: record.sha256 }, deps.executorOptions)
+    // CR-DOC-READER-EXT-5A: the executor reads with the requested profile's own contract (receipt unchanged).
+    executor = await loadCustomerLiveExecutor(profile.id === PROFILE.id && profile.version === PROFILE.version ? { document_sha256: record.sha256 } : { document_sha256: record.sha256, profile }, deps.executorOptions)
   } catch (e) {
     return disabled(e instanceof Error ? e.message.replace(/^live_examination_disabled:/, '') : 'executor_unavailable')
   }

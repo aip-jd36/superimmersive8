@@ -31,7 +31,8 @@ import {
   type VerifiedRun,
 } from '../examination/persistence'
 import { RECEIPT_READING_PROFILE } from '../examination/receipt-reading'
-import { profileForCategory } from '../examination/category-profile'
+import { customerProfilesFor, profileForCategory } from '../examination/category-profile'
+import { LICENCE_PROFILE_ID } from '../examination/licence-profile'
 import { projectVerifiedRun, verifyReferencedRuns, type ExaminationProjection as ReplayExaminationProjection, type ExaminationRunReference, type RunReferenceIntegrity } from '../examination/projection'
 import type { CustomerLiveResult } from '../live-examination/customer'
 import { verifyLiveAttemptRow } from '../live-examination/examine'
@@ -150,6 +151,12 @@ export function routeExaminationProfile(category: unknown, active?: readonly { i
   if (s.reason === 'category_not_examined') return { ok: false, reason: s.reason, error: err(422, 'not_examinable') }
   return { ok: false, reason: s.reason, error: err(409, 'examination_not_permitted') }
 }
+
+/** CR-DOC-READER-EXT-5A: the active customer profiles for this build (receipt; plus licence only while licence reading is enabled). */
+export const activeCustomerProfilesFor = customerProfilesFor
+
+/** CR-DOC-READER-EXT-5A: the profile ids whose live attempts a document's projection lists (receipt and licence, whatever the switch). */
+export const PROJECTED_LIVE_PROFILE_IDS: readonly string[] = Object.freeze(['receipt', LICENCE_PROFILE_ID])
 
 /** Request one examination of the creator's own stored document. Idempotent: the same document and profile converge. */
 export async function requestCustomerExamination(

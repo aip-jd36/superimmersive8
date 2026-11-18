@@ -11,9 +11,11 @@
 
 import type { ApprovedInputs, SubmissionsMode } from './service'
 import type { GovernanceSnapshot } from '../customer-record/eligibility'
-import { governanceSnapshotFrom, UNAVAILABLE } from '../customer-record/governance-state'
+import { governanceSnapshotFrom, issuanceSupportFor, UNAVAILABLE } from '../customer-record/governance-state'
 import type { TopicClaims } from '../customer-record/sources'
 import type { PdfTemplateApproval } from '../customer-pdf/templates'
+import { CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION, CUSTOMER_RECORD_SCHEMA } from '../customer-record/record'
+import { templatesRenderLicenceReadings } from './licence-compatibility'
 import { CREATOR_RECORD_GOVERNANCE_AUTHORITY } from '../governed/sources'
 import { CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY } from '../governed/synthetic-test-authority'
 import { resolvePublicationAuthority, selectAuthorityBundle, type PublicationAuthorityBundle } from '../governed/publication-authority'
@@ -30,6 +32,25 @@ import { customerWordingIdentity } from '@/lib/creator-record-flow/customer-word
  * Issuance has its own, separate stop (`CREATOR_RECORD_V2_ISSUANCE`).
  */
 export const CREATOR_RECORD_V2_SUBMISSIONS: SubmissionsMode = 'open'
+
+/**
+ * CR-DOC-READER-EXT-5A — the ONE switch for licence/permission document reading. 'off' (default): the licence profile is not offered,
+ * not in the customer live registry and not issuable, exactly as before. Setting it to 'on' is not enough on its own: licence reading
+ * is enabled only while the selected schema 8 PDF template set can print a licence reading (`licenceReadingEnabled`). Registered
+ * approved v7 cannot, so with v7 selected the switch has no effect. Rollback: set it back to 'off' and deploy (new licence readings
+ * stop; records already holding one are then refused at checkout and issuance until it is on again: fail closed).
+ */
+export const LICENCE_READING_SWITCH = 'off' as 'off' | 'on'
+
+/**
+ * Licence reading is enabled: the switch is on AND the ONE approved schema 8 template set can print a licence reading. Never one
+ * without the other, so a customer can never create a reading the selected PDF cannot render.
+ */
+export function licenceReadingEnabled(switchValue: 'off' | 'on' = LICENCE_READING_SWITCH, bundle: PublicationAuthorityBundle | null = currentPublicationAuthority()): boolean {
+  if (switchValue !== 'on' || !bundle) return false
+  const selected = approvedPdfTemplates(bundle, { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION })
+  return selected.approval !== null && templatesRenderLicenceReadings(selected.templates)
+}
 
 /** CR-V2-MVP-M4B — the bundle this running build may publish from, resolved from the environment now; null = none. */
 export function currentPublicationAuthority(env: Readonly<Record<string, string | undefined>> = process.env): PublicationAuthorityBundle | null {
@@ -115,6 +136,8 @@ export function approvedGovernanceSnapshot(issuanceDate: string, topicClaims: To
     source_text_approvals: sourceTextApprovalsOf(bundle),
     source_text_current_sha256: currentSourceTextDigest(sources, bundle),
     authority_class: bundle.authority_class,
+    // CR-DOC-READER-EXT-5A: the licence reading method is issuable only while licence reading is enabled for this bundle.
+    support: issuanceSupportFor(licenceReadingEnabled(LICENCE_READING_SWITCH, bundle)),
   })
 }
 

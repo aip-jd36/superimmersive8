@@ -1,9 +1,10 @@
 /**
- * CR-DOC-READER-EXT-1 (B) — the licence/permission examination profile. DEFINED, INACTIVE.
+ * CR-DOC-READER-EXT-1 (B) — the licence/permission examination profile. INACTIVE BY DEFAULT.
  *
- * Not in `LIVE_PROFILE_REGISTRY`, not selected by the customer examination path (which still names the receipt profile), and its
- * method is not in any supported-issuance list. A licence reading also cannot be printed in a customer document: the approved
- * templates have no labels for its fields, and the customer document refuses an unlabelled field (fail closed).
+ * CR-DOC-READER-EXT-5A: wired behind ONE switch (`LICENCE_READING_SWITCH`, 'off'). Only while licence reading is enabled
+ * (`licenceReadingEnabled`: the switch on AND the selected schema 8 PDF template set can print a licence reading) is it an active
+ * customer profile, in the customer live registry, and its method issuable. With the registered approved v7 selected it stays off
+ * whatever the switch says: v7 has no labels for its fields, and the customer document refuses an unlabelled field (fail closed).
  *
  * The engine is the receipt engine's generic form (`examineWithContract`): the same byte-sniffed input checks, two-attempt rule
  * and fixed failure reasons, with the licence contract's own non-repairing validator.

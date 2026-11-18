@@ -102,7 +102,7 @@ describe('the examination request body', () => {
   test('the route handler parses the body and passes only the permission to the service', () => {
     const h = src('lib/creator-record-flow/route-handlers.ts')
     expect(h).toMatch(/examinationRequestBody\(request\)/)
-    expect(h).toMatch(/requestCustomerExamination\(deps, userId, documentId, \{ aiPermission: body\.aiPermission \}\)/)
+    expect(h).toMatch(/const routes = deps\.activeProfiles\?\.some\(\(p\) => p\.id === 'licence'\) === true\s+const r = await requestCustomerExamination\(deps, userId, documentId, \{ aiPermission: body\.aiPermission, \.\.\.\(routes && body\.category !== undefined \? \{ category: body\.category \} : \{\}\) \}\)/)
   })
 })
 

@@ -12,8 +12,8 @@
  * replay path above, and nothing live is loaded.
  */
 import { NextResponse } from 'next/server'
-import { CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flow/approved-inputs'
-import { AiPermissionRefusal, examinationProjectionFor, verifyReferencedReadings, type AiPermissionRefusalCode, type CustomerExaminationDeps, type CustomerExaminationError, type ReferencedReading } from '@/lib/creator-record/customer-flow/examination'
+import { CREATOR_RECORD_V2_SUBMISSIONS, licenceReadingEnabled } from '@/lib/creator-record/customer-flow/approved-inputs'
+import { activeCustomerProfilesFor, AiPermissionRefusal, examinationProjectionFor, PROJECTED_LIVE_PROFILE_IDS, verifyReferencedReadings, type AiPermissionRefusalCode, type CustomerExaminationDeps, type CustomerExaminationError, type ReferencedReading } from '@/lib/creator-record/customer-flow/examination'
 import type { FlowDeps } from '@/lib/creator-record/customer-flow/service'
 import { productionExaminationDeps } from '@/lib/creator-record-flow/examination-production'
 import { aiExaminationPermissionVersion } from './authorization-versions'
@@ -53,20 +53,26 @@ const productionAiPermission = (version: string): NonNullable<CustomerExaminatio
 /** The customer live port: the reviewed production ports, the committed fixture registry and the real executor. No other composition. */
 const productionCustomerLive: NonNullable<CustomerExaminationDeps['live']> = {
   async examine(userId, documentId, profile) {
-    const [{ examineCustomerDocumentLive }, { customerLivePorts }, { DEFAULT_REPLAY_TABLE }] = await Promise.all([
+    const [{ examineCustomerDocumentLive }, { customerLivePorts }, { DEFAULT_REPLAY_TABLE }, { customerLiveProfileRegistry }] = await Promise.all([
       import('@/lib/creator-record/live-examination/customer'),
       import('@/lib/creator-record-flow/customer-live-production'),
       import('@/lib/creator-record/evidence/replay'),
+      import('@/lib/creator-record/live-examination/licence-live-profile'),
     ])
-    return examineCustomerDocumentLive({ ports: customerLivePorts, isKnownSyntheticFixture: (sha256) => DEFAULT_REPLAY_TABLE.has(sha256), now: () => new Date() }, userId, documentId, profile)
+    // CR-DOC-READER-EXT-5A: the licence profile is in the registry only while licence reading is enabled (receipt alone otherwise).
+    const profiles = customerLiveProfileRegistry(licenceReadingEnabled())
+    return examineCustomerDocumentLive({ ports: customerLivePorts, isKnownSyntheticFixture: (sha256) => DEFAULT_REPLAY_TABLE.has(sha256), now: () => new Date(), profiles }, userId, documentId, profile)
   },
 }
 
 export function productionCustomerExaminationDeps(): CustomerExaminationDeps {
   // E7: no live examination without a current, policy-bound permission identifier to ask for.
   const permission = aiExaminationPermissionVersion()
+  const licence = licenceReadingEnabled()
   return {
     submissions: CREATOR_RECORD_V2_SUBMISSIONS,
+    // CR-DOC-READER-EXT-5A: the licence profile is active (and the declared category routes) only while licence reading is enabled.
+    activeProfiles: activeCustomerProfilesFor(licence),
     hasPilotAccess: hasCreatorRecordAccess, // CR-PUBLIC-1: the access policy (invitation by default)
     adapter: productionExaminationDeps(),
     log: (event, detail) => console.warn(`[creator-record-v2/examination] ${event}`, detail),
@@ -87,7 +93,14 @@ export const productionExaminationProjections: NonNullable<FlowDeps['examination
       documentId,
       undefined,
       customerLiveEnabledInThisBuild()
-        ? { listAttempts: async (owner, id) => (await import('@/lib/creator-record-flow/customer-live-production')).listCustomerLiveAttempts(owner, id, 'receipt') }
+        ? {
+            // CR-DOC-READER-EXT-5A: receipt and licence attempts both, whatever the switch: a document holding a licence reading then
+            // projects it (and is refused at checkout while licence reading is off) instead of silently looking unread.
+            listAttempts: async (owner, id) => {
+              const { listCustomerLiveAttempts } = await import('@/lib/creator-record-flow/customer-live-production')
+              return (await Promise.all(PROJECTED_LIVE_PROFILE_IDS.map((p) => listCustomerLiveAttempts(owner, id, p)))).flat()
+            },
+          }
         : undefined,
     ),
 }
@@ -132,7 +145,7 @@ export async function emptyRequestBody(request: Request, limit = 64): Promise<bo
  * creator's explicit permission for AI examination of this one document. Nothing else is accepted or read: no grant, nonce,
  * envelope, profile or credential. The version is checked by the examination service against the current permission version.
  */
-export async function examinationRequestBody(request: Request, limit = 256): Promise<{ ok: true; aiPermission: string | null } | { ok: false }> {
+export async function examinationRequestBody(request: Request, limit = 256): Promise<{ ok: true; aiPermission: string | null; category?: string } | { ok: false }> {
   if (!request.body) return { ok: true, aiPermission: null }
   const reader = request.body.getReader()
   const chunks: Uint8Array[] = []
@@ -154,9 +167,12 @@ export async function examinationRequestBody(request: Request, limit = 256): Pro
     if (v === null || typeof v !== 'object' || Array.isArray(v)) return { ok: false }
     const keys = Object.keys(v)
     if (keys.length === 0) return { ok: true, aiPermission: null }
-    if (keys.length === 1 && keys[0] === 'ai_permission' && typeof v.ai_permission === 'string' && v.ai_permission.length >= 1 && v.ai_permission.length <= 120)
-      return { ok: true, aiPermission: v.ai_permission }
-    return { ok: false }
+    // CR-DOC-READER-EXT-5A: `ai_permission` and/or `category`, nothing else. The category's meaning is the router's (closed vocabulary).
+    if (keys.some((k) => k !== 'ai_permission' && k !== 'category')) return { ok: false }
+    const okPermission = !('ai_permission' in v) || (typeof v.ai_permission === 'string' && v.ai_permission.length >= 1 && v.ai_permission.length <= 120)
+    const okCategory = !('category' in v) || (typeof v.category === 'string' && v.category.length >= 1 && v.category.length <= 40)
+    if (!okPermission || !okCategory) return { ok: false }
+    return { ok: true, aiPermission: 'ai_permission' in v ? v.ai_permission : null, ...('category' in v ? { category: v.category } : {}) }
   } catch {
     return { ok: false }
   }

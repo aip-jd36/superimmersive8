@@ -63,6 +63,21 @@ export const CURRENT_ISSUANCE_SUPPORT: IssuanceSupport = Object.freeze({
   ],
 })
 
+/**
+ * CR-DOC-READER-EXT-5A: the licence/permission model-reading method. NOT in `CURRENT_ISSUANCE_SUPPORT`: it is added to the issuance
+ * snapshot only while licence reading is enabled (`licenceReadingEnabled` in `../customer-flow/approved-inputs`: the switch is on AND
+ * the selected schema 8 PDF template set can print a licence reading). Same model and provider as the receipt method.
+ */
+export const LICENCE_EXAMINATION_METHOD: ExaminationMethodIdentity = Object.freeze({
+  origin: 'live_model' as const, provider: 'anthropic', model: 'claude-sonnet-5', profile: { id: 'licence', version: 1, schema: 'licence-extraction-v1', prompt: 'licence-prompt-v1' },
+})
+
+/** The issuance support for this build: `CURRENT_ISSUANCE_SUPPORT`, plus the licence method only when licence reading is enabled. */
+export function issuanceSupportFor(licenceEnabled: boolean): IssuanceSupport {
+  if (!licenceEnabled) return CURRENT_ISSUANCE_SUPPORT
+  return Object.freeze({ ...CURRENT_ISSUANCE_SUPPORT, examination_methods: [...(CURRENT_ISSUANCE_SUPPORT.examination_methods ?? []), LICENCE_EXAMINATION_METHOD] })
+}
+
 export interface CurrentGovernance {
   issuance_date: string
   sources: Available<CreatorRecordSources>

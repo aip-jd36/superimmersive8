@@ -515,7 +515,7 @@ describe('8. every commercial gate stays closed by default', () => {
     expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open')
     expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).approval?.fingerprint).toBe('5d7ccfc8ce824e57f6e904d51f1027b59e43ab250a7f4895b0f804debe1761ab') // v7 (CR-DESIGN-2D)
     expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 7 }).approval?.fingerprint).toBe('a0cd0c248ce270d2826712910aa606579ce429f7923b051d68a0502c5305f476') // v6 (CR-DESIGN-2D)
-    expect(GOV.pdf_template_sets).toHaveLength(5) // v3, v4, v5 (superseded), v6, v7
+    expect(GOV.pdf_template_sets).toHaveLength(6) // v3, v4, v5 (superseded), v6, v7; CR-DOC-READER-EXT-5A: candidate v8 (pending, never selected)
     // The controls module is mocked in this file; the shipped source is read directly.
     const controls = readFileSync(join(process.cwd(), 'lib', 'creator-record', 'live-examination', 'controls.ts'), 'utf8')
     expect(controls).toMatch(/export const LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD(: boolean)? = true/)

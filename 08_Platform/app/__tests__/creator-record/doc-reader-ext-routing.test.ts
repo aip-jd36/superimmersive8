@@ -196,10 +196,14 @@ describe('live core (mock executor)', () => {
 
 describe('Production surfaces unchanged', () => {
   const read = (p: string) => readFileSync(path.join(__dirname, '../..', p), 'utf8')
-  test('the HTTP handler passes no category; the production wiring sets no active profile list or registry', () => {
-    expect(read('lib/creator-record-flow/route-handlers.ts')).toContain('requestCustomerExamination(deps, userId, documentId, { aiPermission: body.aiPermission })')
+  // CR-DOC-READER-EXT-5A: the production wiring is now switch-driven. Its behaviour (off = exactly as before) is proven in
+  // doc-reader-ext-activation.test.ts; this pins the wiring to the one predicate.
+  test('the HTTP handler routes a category only while the licence profile is active; the wiring derives both from licenceReadingEnabled', () => {
+    expect(read('lib/creator-record-flow/route-handlers.ts')).toMatch(/const routes = deps\.activeProfiles\?\.some\(\(p\) => p\.id === 'licence'\) === true/)
     const wiring = read('lib/creator-record-flow/examination-customer.ts')
-    expect(wiring).not.toMatch(/activeProfiles|LICENCE|licence/)
+    expect(wiring).toContain('activeProfiles: activeCustomerProfilesFor(licence)')
+    expect(wiring).toContain('const licence = licenceReadingEnabled()')
+    expect(wiring).toContain('customerLiveProfileRegistry(licenceReadingEnabled())')
     expect(read('lib/creator-record/live-examination/customer.ts')).toContain('profiles: deps.profiles ?? LIVE_PROFILE_REGISTRY')
   })
 })

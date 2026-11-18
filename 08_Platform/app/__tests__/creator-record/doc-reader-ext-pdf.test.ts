@@ -7,7 +7,7 @@ import { approvedPdfTemplates } from '@/lib/creator-record/customer-flow/approve
 import { buildCustomerDocument, CustomerPdfRefusal, type Block } from '@/lib/creator-record/customer-pdf/document-model'
 import { checkTemplates, templateFingerprint } from '@/lib/creator-record/customer-pdf/templates'
 import { CUSTOMER_RECORD_SCHEMA } from '@/lib/creator-record/customer-record/record'
-import { CR_DOC_READER_EXT_2_TEMPLATE_STATUS, V7_NOT_DONE_COMPARISON_LINE, V8_NOT_DONE_COMPARISON_LINE } from '@/test-support/doc-reader-ext-2-template'
+import { candidateTemplateSetV8, CR_DOC_READER_EXT_2_TEMPLATE_STATUS, V7_NOT_DONE_COMPARISON_LINE, V8_NOT_DONE_COMPARISON_LINE } from '@/test-support/doc-reader-ext-2-template'
 import { CREATOR_RECORD_PDF_TEMPLATE_SETS } from '@/lib/creator-record/governed/sources'
 import { ISSUED, licenceRecord, SYNTHETIC_V8, V8 } from '@/test-support/doc-reader-ext-fixture'
 
@@ -36,9 +36,13 @@ describe('candidate template set v8', () => {
     expect(v7s.not_done.lines[4]).toBe(V7_NOT_DONE_COMPARISON_LINE)
     expect({ ...sections, not_done: undefined }).toEqual({ ...v7s, not_done: undefined })
   })
-  test('registered sets are untouched: none carries v2, fingerprints match their approvals, and the live selection is unchanged', () => {
+  // CR-DOC-READER-EXT-5A: v8 is now registered as an INACTIVE candidate (pending); it alone carries v2, and it equals the candidate.
+  test('registered sets: only the pending v8 carries v2 and equals the candidate, fingerprints match, and the live selection is unchanged', () => {
     for (const s of CREATOR_RECORD_PDF_TEMPLATE_SETS as any[]) {
-      expect(s.templates).not.toHaveProperty('integrated_assessment_v2')
+      if (s.approval.version === 8) {
+        expect(s.approval.lifecycle).toBe('pending')
+        expect(s.templates).toEqual(candidateTemplateSetV8().templates)
+      } else expect(s.templates).not.toHaveProperty('integrated_assessment_v2')
       expect(templateFingerprint(s.templates)).toBe(s.approval.fingerprint)
     }
     expect(JSON.stringify(approvedPdfTemplates())).not.toMatch(/integrated_assessment_v2/)

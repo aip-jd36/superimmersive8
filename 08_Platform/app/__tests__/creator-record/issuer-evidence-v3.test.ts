@@ -227,7 +227,10 @@ describe('the v3 profile is inactive for customers', () => {
     expect(refs(/validateReceiptExtractionV3/)).toEqual(['lib/creator-record/examination/receipt-profile.ts', 'lib/creator-record/examination/receipt-reading.ts', 'lib/creator-record/receipt-examination/schema.ts'])
     expect(refs(/RECEIPT_EXTRACTION_SCHEMA_V3\b/)).toEqual(['lib/creator-record/eval/run-receipt-eval.ts', 'lib/creator-record/receipt-examination/examine.anthropic.ts', 'lib/creator-record/receipt-examination/schema.ts'])
     // The app's live callers (evidence/live-caller.ts, live-examination/real-executor.ts) pass no contract, so they still send v2.
-    expect(refs(/readingContract/)).toEqual(['lib/creator-record/eval/run-receipt-eval.ts', 'lib/creator-record/receipt-examination/examine.anthropic.ts'])
+    // CR-DOC-READER-EXT-5A: the real executor names a reading contract for the LICENCE profile only (receipt keeps the caller's default);
+    // the next assertion proves it never names the v3 contract.
+    expect(refs(/readingContract/)).toEqual(['lib/creator-record/eval/run-receipt-eval.ts', 'lib/creator-record/live-examination/real-executor.ts', 'lib/creator-record/receipt-examination/examine.anthropic.ts'])
+    expect(readFileSync(path.join(APP, 'lib/creator-record/live-examination/real-executor.ts'), 'utf8')).not.toMatch(/_V3|receipt-extraction-v3/)
   })
 
   test('the supported issuance methods are unchanged (v2 reading method only)', () => {

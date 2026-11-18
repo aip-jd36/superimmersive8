@@ -14,6 +14,7 @@ import { examineWithContract, type ReceiptModelCaller } from '@/lib/creator-reco
 import { EVIDENCE_CATEGORIES } from '@/lib/creator-record/evidence-intake/vocabulary'
 import { EXAMINATION_LIMITATIONS } from '@/lib/creator-record/examination/envelope'
 import { readFileSync } from 'node:fs'
+import { CURRENT_ISSUANCE_SUPPORT, issuanceSupportFor } from '@/lib/creator-record/customer-record/governance-state'
 import path from 'node:path'
 
 const pdf = (id: string) => new Uint8Array(Buffer.from(`%PDF-1.4\n%synthetic-test:${id}\n%%EOF\n`))
@@ -54,11 +55,11 @@ describe('licence profile: inactive and separate', () => {
     expect([...LIVE_PROFILE_REGISTRY.keys()]).toEqual(['receipt@1'])
     const src = readFileSync(path.join(__dirname, '../../lib/creator-record/live-examination/customer.ts'), 'utf8')
     expect(src).toContain("const PROFILE = { id: 'receipt', version: 1 } as const")
-    expect(src).not.toMatch(/licence/)
   })
-  test('not in the supported issuance reading methods', () => {
-    const gov = readFileSync(path.join(__dirname, '../../lib/creator-record/customer-record/governance-state.ts'), 'utf8')
-    expect(gov).not.toMatch(/'licence'|licence-extraction/)
+  // CR-DOC-READER-EXT-5A: the method is defined, but only `issuanceSupportFor(true)` adds it; the default support list is unchanged.
+  test('not in the default supported issuance reading methods', () => {
+    expect(JSON.stringify(CURRENT_ISSUANCE_SUPPORT)).not.toMatch(/'licence'|"licence"|licence-extraction/)
+    expect(issuanceSupportFor(false)).toBe(CURRENT_ISSUANCE_SUPPORT)
   })
   test('coexists with the receipt profile in a registry, under its own identity', () => {
     const reg = buildProfileRegistry([RECEIPT_PROFILE, LICENCE_PROFILE_INACTIVE])

@@ -534,7 +534,8 @@ describe('CR-V2-DOC-2B examination foundation', () => {
     expect(importers).toEqual([
       // CR-V2-EXAM-INTEGRATION-X3: and the bounded projection, for a prepared record to carry.
       // CR-DOC-READER-EXT-2: the declared category's profile (pure data) routes the request; no engine or port.
-      ['lib/creator-record/customer-flow/examination.ts', ['examination/category-profile', 'examination/persistence', 'examination/projection', 'examination/receipt-reading']],
+      // CR-DOC-READER-EXT-5A: and the licence profile's id (a constant), for the live attempts a document's projection lists.
+      ['lib/creator-record/customer-flow/examination.ts', ['examination/category-profile', 'examination/licence-profile', 'examination/persistence', 'examination/projection', 'examination/receipt-reading']],
       ['lib/creator-record/customer-flow/purchase.ts', ['examination/projection']],
       // CR-V2-MVP-M3A: the customer PDF prints a schema 8 record's projections, reading only the envelope's closed vocabularies.
       ['lib/creator-record/customer-pdf/document-model.ts', ['examination/envelope']],
@@ -556,7 +557,8 @@ describe('CR-V2-DOC-2B examination foundation', () => {
       ['lib/creator-record/live-examination/envelope.ts', ['examination/envelope']],
       ['lib/creator-record/live-examination/examine.ts', ['examination/envelope', 'examination/examine-document', 'examination/examine-document', 'examination/profile', 'examination/profile', 'examination/receipt-profile']],
       // CR-DOC-READER-EXT-2: the inactive live licence profile (mapping only; not in LIVE_PROFILE_REGISTRY).
-      ['lib/creator-record/live-examination/licence-live-profile.ts', ['examination/licence-profile']],
+      // CR-DOC-READER-EXT-5A: and `profileKey` (pure), to key the licence profile in the customer live registry.
+      ['lib/creator-record/live-examination/licence-live-profile.ts', ['examination/licence-profile', 'examination/profile']],
       ['lib/creator-record-flow/examination-production.ts', ['examination/examine-document', 'examination/persistence', 'examination/replay-executor']],
     ])
     for (const f of ['lib/creator-record/customer-flow/purchase.ts', 'lib/creator-record/customer-record/record.ts'])

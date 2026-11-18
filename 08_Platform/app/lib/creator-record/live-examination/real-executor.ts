@@ -21,6 +21,7 @@ import { LIVE_EXTRACTION_API_KEY_ENV, LIVE_EXTRACTION_MODEL, LIVE_REQUEST_TIMEOU
 import type { ProviderFailureKind } from '../receipt-examination/examine.anthropic'
 import type { ReceiptModelCaller, ReceiptModelResponse } from '../receipt-examination/examine'
 import { RECEIPT_EXAMINATION_USER_TEXT } from '../receipt-examination/prompt'
+import { LICENCE_EXTRACTION_SCHEMA_VERSION } from '../licence-examination/schema'
 import { attemptCostBoundUsd, boundLiveInputTokens, CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD, estimatedUsd, INPUT_BOUND, LIVE_BOUNDS, LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD, liveEvaluationEnabled, parseLiveEvaluationAuthorization, unsafeSdkEnvironment, worstCaseAttemptUsd } from './controls'
 import { LiveModelTimeout, MAX_LIVE_ATTEMPTS, type LiveAttemptGuard, type LiveExecutor } from './examine'
 
@@ -43,7 +44,7 @@ export class LiveProviderFailure extends Error {
 const RUN_STOPPING: readonly LiveFailureKind[] = ['auth', 'rejected', 'model_mismatch', 'not_reserved', 'input_over_bound']
 
 export interface LiveAnthropicAdapter {
-  createAnthropicReceiptCaller(options: { model: string; apiKeyEnv: string; timeoutMs: number }): ReceiptModelCaller
+  createAnthropicReceiptCaller(options: { model: string; apiKeyEnv: string; timeoutMs: number; readingContract?: typeof LICENCE_EXTRACTION_SCHEMA_VERSION }): ReceiptModelCaller
   classifyAnthropicFailure(err: unknown): ProviderFailureKind
 }
 
@@ -68,6 +69,16 @@ export interface RealLiveExecutor extends LiveExecutor {
   guard: LiveAttemptGuard
   report(): LiveRunReport
 }
+
+/**
+ * CR-DOC-READER-EXT-5A: the reading contract the executor's caller sends for each live profile (the instructions and the output schema
+ * always travel together, `RECEIPT_CALL_CONTRACTS`). Receipt: the caller's default, so its requests are exactly as before. Any other
+ * profile is refused before the adapter is loaded: a document is never read with another profile's instructions.
+ */
+const EXECUTOR_READING_CONTRACTS: Readonly<Record<string, { readingContract?: typeof LICENCE_EXTRACTION_SCHEMA_VERSION }>> = Object.freeze({
+  'receipt@1': {},
+  'licence@1': { readingContract: LICENCE_EXTRACTION_SCHEMA_VERSION },
+})
 
 export interface LoadRealExecutorOptions {
   env?: Readonly<Record<string, string | undefined>>
@@ -113,11 +124,14 @@ export async function loadRealLiveExecutor(rawAuthorization: unknown, options: L
  * as the evaluation, under the customer path's own code lock as well as the shared one. One attempt; its in-memory ceiling is that
  * attempt's cost at the largest bounded input. The durable per-document and per-creator limits are the database's (`./customer`).
  */
-export async function loadCustomerLiveExecutor(scope: { document_sha256: string }, options: LoadRealExecutorOptions = {}): Promise<RealLiveExecutor> {
+export async function loadCustomerLiveExecutor(scope: { document_sha256: string; profile?: { id: string; version: number } }, options: LoadRealExecutorOptions = {}): Promise<RealLiveExecutor> {
   if (LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD !== true || CUSTOMER_LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD !== true) throw new LiveExaminationDisabled('code_lock')
   const env = options.env ?? process.env
   if (unsafeSdkEnvironment(env, process.env).length > 0) throw new LiveExaminationDisabled('unsafe_sdk_environment')
   if (typeof scope?.document_sha256 !== 'string' || !/^[0-9a-f]{64}$/.test(scope.document_sha256)) throw new LiveExaminationDisabled('authorization_invalid')
+  // CR-DOC-READER-EXT-5A: no profile named = the receipt profile, as before.
+  const key = scope.profile === undefined ? 'receipt@1' : `${scope.profile?.id}@${scope.profile?.version}`
+  if (!Object.prototype.hasOwnProperty.call(EXECUTOR_READING_CONTRACTS, key)) throw new LiveExaminationDisabled('profile_not_supported')
   const ceilingUsd = attemptCostBoundUsd(LIVE_EXTRACTION_MODEL, INPUT_BOUND.max_input_tokens_per_request)
   if (ceilingUsd === null) throw new LiveExaminationDisabled('model_not_priced')
   return buildLiveExecutor({
@@ -126,6 +140,7 @@ export async function loadCustomerLiveExecutor(scope: { document_sha256: string 
     ceilingUsd,
     documentPermitted: (sha256) => sha256 === scope.document_sha256,
     inForce: () => true,
+    reading: EXECUTOR_READING_CONTRACTS[key],
   })
 }
 
@@ -137,6 +152,8 @@ interface ExecutorCore {
   ceilingUsd: number
   documentPermitted(sha256: string): boolean
   inForce(): boolean
+  /** CR-DOC-READER-EXT-5A: the caller's reading contract. Absent (the evaluation entry point): the receipt default. */
+  reading?: { readingContract?: typeof LICENCE_EXTRACTION_SCHEMA_VERSION }
 }
 
 /** The executor itself, shared by both entry points. Each entry point checks its locks and its authority first. */
@@ -149,7 +166,7 @@ async function buildLiveExecutor(core: ExecutorCore): Promise<RealLiveExecutor> 
   const ceiling = core.ceilingUsd
 
   const adapter = await (options.loadAdapter ?? (() => import('../receipt-examination/examine.anthropic') as Promise<LiveAnthropicAdapter>))()
-  const caller = withInstanceBudget(adapter.createAnthropicReceiptCaller({ model, apiKeyEnv: LIVE_EXTRACTION_API_KEY_ENV, timeoutMs: LIVE_REQUEST_TIMEOUT_MS }), maxAttempts * LIVE_BOUNDS.max_requests_per_attempt, { used: 0 })
+  const caller = withInstanceBudget(adapter.createAnthropicReceiptCaller({ model, apiKeyEnv: LIVE_EXTRACTION_API_KEY_ENV, timeoutMs: LIVE_REQUEST_TIMEOUT_MS, ...(core.reading ?? {}) }), maxAttempts * LIVE_BOUNDS.max_requests_per_attempt, { used: 0 })
   const deadlineMs = options.deadlineMs ?? LIVE_REQUEST_TIMEOUT_MS + LIVE_BOUNDS.deadline_margin_ms
 
   let admittedInputTokens = 0

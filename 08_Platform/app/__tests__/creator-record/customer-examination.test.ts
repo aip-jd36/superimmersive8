@@ -237,7 +237,7 @@ describe('route: no client authority, stopped in Production, replay only', () =>
     // CR-V2-MVP-LAUNCH-FOUNDATION-1 (8Q): the body may carry only the creator's AI-examination permission; nothing else is read.
     expect(handler.indexOf('checkCustomerExaminationGate(deps, userId)')).toBeGreaterThan(-1)
     expect(handler.indexOf('checkCustomerExaminationGate(deps, userId)')).toBeLessThan(handler.indexOf('examinationRequestBody(request)'))
-    expect(handler).toMatch(/requestCustomerExamination\(deps, userId, documentId, \{ aiPermission: body\.aiPermission \}\)/)
+    expect(handler).toMatch(/const routes = deps\.activeProfiles\?\.some\(\(p\) => p\.id === 'licence'\) === true\s+const r = await requestCustomerExamination\(deps, userId, documentId, \{ aiPermission: body\.aiPermission, \.\.\.\(routes && body\.category !== undefined \? \{ category: body\.category \} : \{\}\) \}\)/)
     expect(src).toMatch(/handleExaminationRequest\(request, userId, params\.id, productionCustomerExaminationDeps\(\)\)/)
     expect(src).toMatch(/customerExaminationHistory\(productionCustomerExaminationDeps\(\), userId, params\.id\)/)
     // Neither the service nor its wiring touches a grant, the marker or the status function.

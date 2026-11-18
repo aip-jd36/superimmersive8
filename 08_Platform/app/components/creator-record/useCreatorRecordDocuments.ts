@@ -25,7 +25,7 @@ export interface CreatorRecordDocuments {
   reload(): Promise<void>
   upload(file: File): Promise<UploadResult>
   examination: Readonly<Record<string, ExamineState>>
-  examine(documentId: string): Promise<void>
+  examine(documentId: string, category?: string): Promise<void>
 }
 
 const FAILED = PANEL_TEXT.failed
@@ -69,11 +69,14 @@ export function useCreatorRecordDocuments(o: { enabled: boolean; apiBase: string
     }
   }, [apiBase, consentVersion, reload])
 
-  const examine = useCallback(async (id: string) => {
+  // CR-DOC-READER-EXT-5A: the creator's chosen kind of document travels with the request; the server decides what it means (while
+  // licence reading is off it is ignored and the receipt reader is used, as before).
+  const examine = useCallback(async (id: string, category?: string) => {
     setExamination((s) => ({ ...s, [id]: { kind: 'working' } }))
     try {
-      const init: RequestInit = typeof aiPermissionVersion === 'string'
-        ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ai_permission: aiPermissionVersion }) }
+      const payload = { ...(typeof aiPermissionVersion === 'string' ? { ai_permission: aiPermissionVersion } : {}), ...(typeof category === 'string' ? { category } : {}) }
+      const init: RequestInit = Object.keys(payload).length > 0
+        ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) }
         : { method: 'POST' }
       const res = await fetch(`${apiBase}/evidence/${id}/examination`, init)
       const json = await res.json().catch(() => ({}))

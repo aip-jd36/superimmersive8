@@ -47,7 +47,7 @@ export interface AnthropicReceiptCallerOptions {
 export const RECEIPT_CALL_CONTRACTS = {
   [RECEIPT_EXTRACTION_SCHEMA_VERSION]: { system: RECEIPT_EXAMINATION_SYSTEM_PROMPT, schema: RECEIPT_EXTRACTION_SCHEMA },
   [RECEIPT_EXTRACTION_SCHEMA_VERSION_V3]: { system: RECEIPT_EXAMINATION_SYSTEM_PROMPT_V3, schema: RECEIPT_EXTRACTION_SCHEMA_V3 },
-  // CR-DOC-READER-EXT-3: the licence/permission reading (inactive profile). Used only by the licence evaluation runner; no app path.
+  // CR-DOC-READER-EXT-3/5A: the licence/permission reading. The evaluation runner, and the real executor for the licence profile (only while licence reading is enabled).
   [LICENCE_EXTRACTION_SCHEMA_VERSION]: { system: LICENCE_SYSTEM_PROMPT, schema: LICENCE_EXTRACTION_SCHEMA },
 } as const
 export type ReceiptCallContract = keyof typeof RECEIPT_CALL_CONTRACTS
