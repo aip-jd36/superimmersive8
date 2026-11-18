@@ -408,6 +408,8 @@ describe('boundaries', () => {
     // CR-V2-DOC-LIVE-1C-B2B: and the offline synthetic tool, for the live pre-call checks only: the input bound, the price table and the
     // unsafe SDK variables, from `controls`. It reaches no executor, entry point, envelope, engine or mock.
     const synthetic = path.join(process.cwd(), 'lib', 'creator-record', 'eval', 'run-receipt-eval.ts')
+    // CR-DOC-READER-EXT-3: the licence evaluation runner, under exactly the same restriction (controls only).
+    const syntheticLicence = path.join(process.cwd(), 'lib', 'creator-record', 'eval', 'run-licence-eval.ts')
     // CR-V2-MVP-M2A: the customer path, each for its stated purpose only: the route wiring (both locks, then on-demand loading), the
     // customer examination service (the live port and the live projection), the record's examination section (either projection kind),
     // and the customer PDF (the live envelope's closed vocabularies). None names the mock.
@@ -418,11 +420,12 @@ describe('boundaries', () => {
       ['lib', 'creator-record-flow', 'live-offer.ts'],
     ].map((p) => path.join(process.cwd(), ...p))
     const outside = files.filter((f) => !f.startsWith(own)).filter((f) => /live-examination|mock-live-executor/.test(readFileSync(f, 'utf8')))
-    expect(outside.sort()).toEqual([runner, ports, synthetic, ...m2a].sort())
+    expect(outside.sort()).toEqual([runner, ports, synthetic, syntheticLicence, ...m2a].sort())
     for (const f of m2a) expect(readFileSync(f, 'utf8')).not.toMatch(/mock-live-executor|live-examination\/(real-executor|evaluation|document-access)|live-evaluation-runner/)
     const syntheticRefs = Array.from(readFileSync(synthetic, 'utf8').matchAll(/['"]([^'"]*live-examination[^'"]*)['"]/g)).map((m) => m[1])
     expect(syntheticRefs).toEqual(['../live-examination/controls'])
-    expect(readFileSync(synthetic, 'utf8')).not.toMatch(/mock-live-executor|real-executor|live-examination\/(evaluation|examine|envelope|document-access)|live-evaluation-runner/)
+    for (const tool of [synthetic, syntheticLicence]) expect(readFileSync(tool, 'utf8')).not.toMatch(/mock-live-executor|real-executor|live-examination\/(evaluation|examine|envelope|document-access)|live-evaluation-runner/)
+    expect(Array.from(readFileSync(syntheticLicence, 'utf8').matchAll(/['"]([^'"]*live-examination[^'"]*)['"]/g)).map((m) => m[1])).toEqual(['../live-examination/controls'])
     expect(readFileSync(cli, 'utf8')).not.toMatch(/live-examination|mock-live-executor/)
     expect(readFileSync(runner, 'utf8')).not.toMatch(/mock-live-executor|real-executor/)
     expect(readFileSync(ports, 'utf8')).not.toMatch(/mock-live-executor|real-executor/)

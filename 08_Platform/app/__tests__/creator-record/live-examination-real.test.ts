@@ -371,7 +371,8 @@ describe('what stays closed', () => {
 
   test('the adapter has no new importer', () => {
     const importers = files.filter((f) => /receipt-examination\/examine\.anthropic['"]/.test(readFileSync(f, 'utf8'))).map(rel).sort()
-    expect(importers).toEqual(['lib/creator-record/eval/run-receipt-eval.ts', 'lib/creator-record/evidence/live-caller.ts', 'lib/creator-record/live-examination/real-executor.ts'])
+    // CR-DOC-READER-EXT-3: the licence evaluation runner, like the receipt runner (live mode only, behind its refusals).
+    expect(importers).toEqual(['lib/creator-record/eval/run-licence-eval.ts', 'lib/creator-record/eval/run-receipt-eval.ts', 'lib/creator-record/evidence/live-caller.ts', 'lib/creator-record/live-examination/real-executor.ts'])
   })
 
   test('an existing route cannot be opened by this work: the admin route still depends on its own lock', () => {

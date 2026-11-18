@@ -17,6 +17,8 @@ import { RECEIPT_EXAMINATION_SYSTEM_PROMPT, RECEIPT_EXAMINATION_SYSTEM_PROMPT_V3
 import { RECEIPT_EXTRACTION_SCHEMA, RECEIPT_EXTRACTION_SCHEMA_V3, RECEIPT_EXTRACTION_SCHEMA_VERSION } from './schema'
 import { RECEIPT_EXTRACTION_SCHEMA_VERSION_V3 } from './issuer-evidence'
 import type { ReceiptModelCaller, ReceiptModelResponse } from './examine'
+import { LICENCE_SYSTEM_PROMPT } from '../licence-examination/prompt'
+import { LICENCE_EXTRACTION_SCHEMA, LICENCE_EXTRACTION_SCHEMA_VERSION } from '../licence-examination/schema'
 
 export const DEFAULT_RECEIPT_MODEL = 'claude-sonnet-5'
 /** The only endpoint. Set explicitly, so ANTHROPIC_BASE_URL cannot redirect a request. */
@@ -45,6 +47,8 @@ export interface AnthropicReceiptCallerOptions {
 export const RECEIPT_CALL_CONTRACTS = {
   [RECEIPT_EXTRACTION_SCHEMA_VERSION]: { system: RECEIPT_EXAMINATION_SYSTEM_PROMPT, schema: RECEIPT_EXTRACTION_SCHEMA },
   [RECEIPT_EXTRACTION_SCHEMA_VERSION_V3]: { system: RECEIPT_EXAMINATION_SYSTEM_PROMPT_V3, schema: RECEIPT_EXTRACTION_SCHEMA_V3 },
+  // CR-DOC-READER-EXT-3: the licence/permission reading (inactive profile). Used only by the licence evaluation runner; no app path.
+  [LICENCE_EXTRACTION_SCHEMA_VERSION]: { system: LICENCE_SYSTEM_PROMPT, schema: LICENCE_EXTRACTION_SCHEMA },
 } as const
 export type ReceiptCallContract = keyof typeof RECEIPT_CALL_CONTRACTS
 
@@ -63,6 +67,14 @@ export function classifyAnthropicFailure(err: unknown): ProviderFailureKind {
 
 export function resolveReceiptModel(options?: AnthropicReceiptCallerOptions): string {
   return options?.model ?? process.env.CREATOR_RECORD_RECEIPT_MODEL ?? DEFAULT_RECEIPT_MODEL
+}
+
+/**
+ * CR-DOC-READER-EXT-3: the licence/permission caller — the same client, safeguards and single-request rule, with the licence reading
+ * contract (its system prompt and output schema together). Constructing it makes no call.
+ */
+export function createAnthropicLicenceCaller(options?: Omit<AnthropicReceiptCallerOptions, 'readingContract'>): ReceiptModelCaller {
+  return createAnthropicReceiptCaller({ ...options, readingContract: LICENCE_EXTRACTION_SCHEMA_VERSION })
 }
 
 export function createAnthropicReceiptCaller(options?: AnthropicReceiptCallerOptions): ReceiptModelCaller {

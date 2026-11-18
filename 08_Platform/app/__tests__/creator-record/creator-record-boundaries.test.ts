@@ -412,7 +412,8 @@ describe('lib/creator-record boundaries', () => {
       .map((f) => path.relative(APP_ROOT, f).split(path.sep).join('/'))
       .sort()
     // CR-V2-DOC-LIVE-1B adds the disabled real executor, which nothing imports (live-examination-real.test.ts).
-    expect(reachers).toEqual(['lib/creator-record/eval/run-receipt-eval.ts', 'lib/creator-record/evidence/live-caller.ts', 'lib/creator-record/live-examination/real-executor.ts'])
+    // CR-DOC-READER-EXT-3: and the licence evaluation runner, like the receipt runner (live mode only, behind its refusals).
+    expect(reachers).toEqual(['lib/creator-record/eval/run-licence-eval.ts', 'lib/creator-record/eval/run-receipt-eval.ts', 'lib/creator-record/evidence/live-caller.ts', 'lib/creator-record/live-examination/real-executor.ts'])
   })
 
   test('CR-V2-VERTICAL-SLICE-1: the authoritative sources never import the pilot and carry no pilot marker', () => {

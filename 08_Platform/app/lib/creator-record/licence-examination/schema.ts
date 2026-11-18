@@ -68,18 +68,31 @@ export interface LicenceExtraction {
 
 const TOP_LEVEL_KEYS = ['document_kind', 'readability', 'instruction_like_text_present', 'personal_details_present', ...LICENCE_FIELD_NAMES] as const
 
+// CR-DOC-READER-EXT-3: the receipt schema's structured-output conventions — no length keywords (limits are stated in the
+// descriptions and enforced by the validator); 12 union parameters (limit 16).
 const fieldSchema = (description: string) => ({
   type: 'object',
+  description,
   additionalProperties: false,
   properties: {
-    status: { type: 'string', enum: [...LICENCE_FIELD_STATUSES] },
-    value: { type: ['string', 'null'], maxLength: LICENCE_MAX_VALUE_CHARS, description },
-    evidence: { type: ['string', 'null'], maxLength: LICENCE_MAX_EVIDENCE_CHARS },
+    status: {
+      type: 'string',
+      enum: [...LICENCE_FIELD_STATUSES],
+      description: "'present' only if the value is printed in the document. 'not_shown' if the document does not show it. 'unreadable' if the area exists but cannot be read. 'ambiguous' if more than one reading is possible.",
+    },
+    value: {
+      type: ['string', 'null'],
+      description: `Exactly as printed (at most ${LICENCE_MAX_VALUE_CHARS} characters), ONLY when status is 'present'. Otherwise null. Never guess, complete or correct a value. Never a person's name, address, email address, phone number or signature.`,
+    },
+    evidence: {
+      type: ['string', 'null'],
+      description: `A short verbatim excerpt (at most ${LICENCE_MAX_EVIDENCE_CHARS} characters) copied from the document that shows the value. Null when status is not 'present'. Never include a person's contact details.`,
+    },
   },
   required: ['status', 'value', 'evidence'],
-})
+} as const)
 
-/** JSON schema for structured output (used by a future live caller only). */
+/** JSON schema sent through `jsonSchemaOutputFormat()` by the licence reading contract of the live caller. */
 export const LICENCE_EXTRACTION_SCHEMA = {
   type: 'object',
   additionalProperties: false,
