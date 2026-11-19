@@ -58,11 +58,13 @@ describe('proposals: v4/v5 carried verbatim, pending, registered nowhere (clarif
   // proposal files themselves stay as committed (pending), and v4 / v5 stay registered, superseded and unchanged.
   test('Production selects the released v6 / v7 (exactly the proposals), v4 / v5 superseded, generator -pdf-v4', () => {
     for (const schema of [7, 8] as const) {
-      const a = approvedPdfTemplates(undefined, { id: 'si8/creator-record-v2-record', version: schema })
-      expect([a.approval?.version, a.approval?.fingerprint, a.approval?.lifecycle]).toEqual([DESIGN_CUTOVER_VERSIONS[schema], DESIGN_CUTOVER_FINGERPRINTS[schema], 'approved'])
+      // CR-DOC-READER-EXT-9: schema 8 now selects v8; the released v7 stays registered (superseded) with the same content.
+      const a = schema === 7 ? approvedPdfTemplates(undefined, { id: 'si8/creator-record-v2-record', version: schema }) : registeredPdfTemplateSet(8, DESIGN_CUTOVER_VERSIONS[8])
+      expect([a.approval?.version, a.approval?.fingerprint, a.approval?.lifecycle]).toEqual([DESIGN_CUTOVER_VERSIONS[schema], DESIGN_CUTOVER_FINGERPRINTS[schema], schema === 7 ? 'approved' : 'superseded'])
       expect(JSON.stringify(a.templates)).toBe(JSON.stringify(readProposal(schema).templates))
       expect(registeredPdfTemplateSet(schema, CUTOVER_VERSIONS[schema]).approval.lifecycle).toBe('superseded')
     }
+    expect(approvedPdfTemplates(undefined, { id: 'si8/creator-record-v2-record', version: 8 }).approval).toMatchObject({ version: 8, fingerprint: '1d0cb5f3707d210eb4b9576bae6d9be33c1e24a1d5bae260bef6d5adf60c6fbf', lifecycle: 'approved' })
     expect(CREATOR_RECORD_V2_GENERATOR_VERSION).toBe('creator-record-v2-pdf-v4')
   })
   test('the proposed set cannot render without an approval (as pending)', () => {
