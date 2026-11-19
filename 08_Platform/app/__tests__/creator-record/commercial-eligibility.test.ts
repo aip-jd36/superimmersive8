@@ -432,8 +432,8 @@ describe('10: the existing stops are all still in force', () => {
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('enabled')
     // Wording and contract: JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109. Templates (R9): JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110. Issuance stays stopped.
     // CR-V2-MVP-PROVIDER-SCOPE-2: the contract and wording approvals are now the provider-scope-2 versions (T1 v3, MVP tools only).
-    expect(GOV.questionnaire_approval?.review_ref).toBe('JD-SI8-UX-2-R2-20261116')
-    expect(approvedCustomerRecordInputs(GOV).source_text?.approval?.review_ref).toBe('JD-SI8-UX-2-R2-20261116 schema 7')
+    expect(GOV.questionnaire_approval?.review_ref).toBe('JD-CR-DOC-READER-EXT-6E-20261119')
+    expect(approvedCustomerRecordInputs(GOV).source_text?.approval?.review_ref).toBe('JD-CR-DOC-READER-EXT-6E-20261119 schema 7')
     expect(GOV.pdf_template_approval?.review_ref).toBe('JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110 R9')
     expect(approvedPdfTemplates(GOV)).toEqual({ templates: GOV.pdf_templates, approval: GOV.pdf_template_approval })
   })

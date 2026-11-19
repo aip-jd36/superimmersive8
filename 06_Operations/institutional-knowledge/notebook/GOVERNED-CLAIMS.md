@@ -710,6 +710,7 @@ Source references:
   - primary (Official platform authority, Tier 1, directly fetched): iStock Content License Agreement (`istockphoto.com/legal/license-agreement`, "Last Updated: July 2026") -- editorial-use-only definition and near-identical enumerated prohibited-use clause; the single most consistently-verified provider across this research program (3 independent fetches, stable date).
   - secondary (Official platform authority, Tier 2, directly fetched, zh-TW rendering): Adobe Stock License Terms (`stock.adobe.com/license-terms`) -- editorial/commercial distinction, corroborated (not independently primary-re-verified) by two separate `WebSearch` passes surfacing consistent language attributed to Adobe's own help documentation. **Weaker evidence tier than Getty/iStock, disclosed explicitly, not upgraded** -- 5 total direct-fetch attempts against Adobe's own official pages across this research program (Phase 0/1A/1B combined) failed to independently reconfirm this at Tier 1.
   - secondary (Tier 1 for the definitional distinction; Official Secondary, not Verified Primary, for exact restriction wording and clearance-mechanism mechanics): Shutterstock -- the Commercial/Editorial functional definition was directly fetched from Shutterstock's own official contributor-help domain (`submit.shutterstock.com`); the exact prohibited-use enumeration and the precise mechanics of Shutterstock's "Rights and Clearance" (clearance service) vs. "Asset Assurance™" (separate indemnity layer, not itself a clearance mechanism) rest on Shutterstock's own investor-relations press release and blog, located via search, not on the customer-facing License Agreement text itself. **That primary document remains unverified: 0 of 7 attempted direct fetches succeeded across two independent research sessions (Phase 1A, Phase 1B)** -- a confirmed structural access limitation, not an oversight, disclosed here per the explicit PM instruction not to make provenance look stronger than the research established.
+  - re-verification 2026-11-19 (CR-DOC-READER-EXT-6A/6D; record: `08_Platform/implementation/cr-doc-reader-ext-1/04-GOVERNANCE-CORRECTIONS-EXT-6A.md` (EXT-6A/6D addenda)): iStock Content License Agreement "LAST UPDATED: July 2026" (unchanged); Adobe Stock license terms (zh-TW rendering, no visible date); Getty Images Content License Agreement "LAST UPDATED: April 2026" -- REGIONAL SCOPE: `gettyimages.com/eula` serves the regional agreement by visitor location; verified on the Australian (English, `gettyimages.com.au/eula`) and Hong Kong (Chinese, `gettyimages.hk/eula`) agreements, which agree; the US-served agreement was not separately read; Shutterstock Terms of Service "EFFECTIVE DATE: October 5, 2026" (`shutterstock.com/license`, newer than the 2026-08 research; Editorial use "expressly excludes commercial uses such as advertising or merchandising"; no editorial-specific consent path stated). All consistent with the proposition and provider scope. Browser text readings in the founder's session; no new preserved PDF artifact.
 Source authority/type: Official platform authority (synthesized across four independently-researched providers; per-provider tier disclosed above -- Getty/iStock Tier 1, Adobe Tier 2, Shutterstock Tier 1/Official Secondary split)
 Source fact: >
   All four providers researched (Getty, iStock, Adobe Stock, Shutterstock)
@@ -795,7 +796,7 @@ CRC Candidate Statement: >
   whether that was obtained for yours.
 
 Effective date: 2026-08-17
-Last reviewed: 2026-08-27
+Last reviewed: 2026-11-19 (source re-verification, CR-DOC-READER-EXT-6A/6D, for Creator Record publication; no proposition, scope or dependency changed. Prior: 2026-08-27)
 Version lineage: v2 — supersedes: CLAIM-STOCK-EDITORIAL-001-v1 — superseded by: none
 CRC Approver: JD (PM)
 CRC Decision Date: 2026-08-27
@@ -2713,6 +2714,7 @@ Source references:
   - primary (Primary legal/official authority, Class B human-verified rendered-page reading): Pond5 Content License Agreement, Section 7 "Editorial Content", visible revision "2024-01-03" — evidence-captures/pond5/content-license-agreement_20260830T203900+0800_efcac90e.pdf
   - secondary\corroborating (Official platform authority): Pond5 Help Center, "What are the licensing options on Pond5, and how do Individual, Business, and Premium licenses differ?", visible date March 19, 2026 — evidence-captures/pond5/license-options-individual-business-premium_20260830T203900+0800_ca7121b6.pdf
   - secondary\corroborating (first-party current product page): Pond5 Editorial page, captured 2026-08-30 — evidence-captures/pond5/editorial-page_20260830T203900+0800_d2217e81.pdf (corroborating context only — describes a route to contact Pond5 about clearing editorial clips for commercial use; not part of this proposition, per human FGR REVISE decision — see FGR_011)
+  - re-verification 2026-11-19 (CR-DOC-READER-EXT-6D; record: `08_Platform/implementation/cr-doc-reader-ext-1/04-GOVERNANCE-CORRECTIONS-EXT-6A.md` (EXT-6A/6D addenda)): `pond5.com/legal/license` read in the founder's browser; visible "(revised 2024-01-03)" / "v. 2024-01-03" -- unchanged from the 2026-08-30 capture; Section 7 wording matches the proposition (consent "could be by email"). The 2026-08-30 preserved captures above were restored to `main` from `5309b1c1` with unchanged SHA-256.
 Source authority\type: Primary legal/official authority (Content License Agreement Section 7, human-verified by direct review of preserved rendered captures); corroborated by Official platform authority (Help Center) and first-party current product material (Editorial page)
 Source fact: >
   Human-verified source facts (LK-59, against preserved, hashed capture
@@ -2811,7 +2813,7 @@ CRC Candidate Statement: >
   promotions, advertorials, or other commercial productions.
 
 Effective date: 2026-08-30 (evidence capture/review date; underlying Agreement's own visible revision date: 2024-01-03 -- not silently rewritten as 2026, per LK-59's own explicit instruction)
-Last reviewed: 2026-08-30 (CRC Publication Review #11, CPR_011)
+Last reviewed: 2026-11-19 (source re-verification, CR-DOC-READER-EXT-6D, for Creator Record publication; no proposition, scope or dependency changed. Prior: 2026-08-30, CRC Publication Review #11, CPR_011)
 Version lineage: v1 (initial) — supersedes: none — superseded by: none
 CRC Approver: JD (PM)
 CRC Decision Date: 2026-08-30

@@ -166,7 +166,7 @@ describe('pilot controls', () => {
 describe('approved sources only', () => {
   test('the production approved inputs are the founder-approved governance content, and the Production flow stays stopped', async () => {
     // CR-V2-MVP-LEGAL-CONTENT-6: R1-R6 approved (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109). New submissions remain behind their own stop.
-    expect(approvedCustomerRecordInputs().source_text?.approval?.review_ref).toContain('JD-SI8-UX-2-R2-20261116') // SI8-UX-2-R2 (was CR-V2-MVP-PROVIDER-SCOPE-2)
+    expect(approvedCustomerRecordInputs().source_text?.approval?.review_ref).toContain('JD-CR-DOC-READER-EXT-6E-20261119') // SI8-UX-2-R2 (was CR-V2-MVP-PROVIDER-SCOPE-2)
     expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open') // CR-V2-MVP-PROD-UAT-ACTIVATION-1
     const d = deps({ inputs: approvedCustomerRecordInputs, submissions: 'stopped' })
     expect((await preparePrepared(d, OWNER, { state: state() })).ok).toBe(false)

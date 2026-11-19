@@ -16,8 +16,8 @@ import { buildCustomerRecord, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VER
 import type { SourceTextInput } from '@/lib/creator-record/customer-record/sources'
 import { SOURCE_TEXT_CATEGORIES, SOURCE_TEXT_SOURCE_ID, sourceTextContent, sourceTextDigest, type SourceTextApproval } from '@/lib/creator-record/customer-record/source-text'
 import { loadQuestionRegistry } from '@/lib/creator-record/contract/question-registry'
-import { CANDIDATE_DEPENDENCY_LABELS, CANDIDATE_LEDGER_ENTRIES } from '@/lib/creator-record/governed/candidates/cr-doc-reader-ext-1'
-import { CREATOR_RECORD_GOVERNANCE_AUTHORITY as GOV } from '@/lib/creator-record/governed/sources'
+
+import { CREATOR_RECORD_GOVERNANCE_AUTHORITY as GOV, CREATOR_RECORD_PUBLICATION_LEDGER } from '@/lib/creator-record/governed/sources'
 import type { CreatorRecordSources } from '@/lib/creator-record/prototype/build-draft'
 import { TOPIC_CLAIMS_FIXTURE as CLAIMS } from '@/lib/retrieval-engine/topic-claims-fixture'
 import { withQuestionnaireApproval } from '@/test-support/questionnaire-approval'
@@ -31,10 +31,11 @@ const AS_OF = '2026-11-18'
 const ARTLIST = 'CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1'
 const STOCK = 'CLAIM-STOCK-EDITORIAL-001-v2'
 const RUNWAY = 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1'
-const synthetic = (e: PublicationLedgerEntry): PublicationLedgerEntry => ({ ...e, creator_record_eligible: 'Yes', approver: 'SYNTHETIC TEST AUTHORITY (fixture only)', decision_date: AS_OF, refresh_by: '2027-02-18' })
+// CR-DOC-READER-EXT-6E: the four entries are now published in the live ledger; tests use them as is, or replace them.
+const PUBLISHED = CREATOR_RECORD_PUBLICATION_LEDGER.filter((e) => e.entry_id.startsWith('CR-DOC-READER-EXT-1-LEDGER-'))
 const BASE = approvedCustomerRecordInputs(GOV).sources
 const sourcesWith = (entries: readonly PublicationLedgerEntry[]): CreatorRecordSources =>
-  withQuestionnaireApproval({ ...BASE, ledger: [...BASE.ledger, ...entries], dependency_labels: { ...BASE.dependency_labels, ...CANDIDATE_DEPENDENCY_LABELS } })
+  withQuestionnaireApproval({ ...BASE, ledger: [...BASE.ledger.filter((e) => !PUBLISHED.includes(e)), ...entries] })
 const ACKS = (s: CreatorRecordSources): Record<string, string> => Object.fromEntries(s.acknowledgement_ids.map((id) => [id, `Synthetic acknowledgement ${id} (test fixture only).`]))
 function textFor(s: CreatorRecordSources): SourceTextInput {
   const loaded = loadQuestionRegistry(s.registry_input)
@@ -46,7 +47,7 @@ function textFor(s: CreatorRecordSources): SourceTextInput {
   }
   return { approval, acknowledgements: ACKS(s) }
 }
-const SOURCES = sourcesWith(CANDIDATE_LEDGER_ENTRIES.map(synthetic))
+const SOURCES = sourcesWith(PUBLISHED)
 const BASE_ANS = { P1: ['Assessment test video'], P3: ['own_channels'], F1: ['TW'], F2: ['online_worldwide'], L1: ['no'], H1: ['edited'] }
 const state = (materials: Record<string, string[]>) => ({ answers: { ...BASE_ANS, ...materials }, tools: [{ T1: ['runway-gen3'], T3: ['Pro'], T4: ['May 2026'] }], acknowledgements: { A1: true, A2: true } })
 function record(materials: Record<string, string[]>, sources: CreatorRecordSources = SOURCES) {
@@ -110,7 +111,7 @@ describe('method v2: relates documents only where governed', () => {
     expect(dep(assessIntegratedV2(input(rec, [doc()])), ARTLIST, 'which_music_provider').evidence).toBe('evidence_requirement_not_defined')
   })
   test('a dependency without an approved evidence note is not related to documents', () => {
-    const noNotes = CANDIDATE_LEDGER_ENTRIES.map((e) => synthetic({ ...e, evidence_notes: {} }))
+    const noNotes = PUBLISHED.map((e) => ({ ...e, evidence_notes: {} }))
     const r2 = record(MUSIC, sourcesWith(noNotes))
     expect(dep(assessIntegratedV2(input(r2, [doc()])), ARTLIST, 'artlist_license_type_confirmed').evidence).toBe('evidence_requirement_not_defined')
   })
@@ -185,7 +186,7 @@ describe('never satisfied, never sufficient', () => {
     }
   })
   test('the relevance table is a draft over existing governed dependency ids only', () => {
-    expect(DEPENDENCY_RELEVANCE_STATUS).toMatch(/NOT APPROVED/)
+    expect(DEPENDENCY_RELEVANCE_STATUS).toBe('APPROVED — JD-CR-DOC-READER-EXT-6E-20261119') // D4
     const governed = new Set(CLAIMS.flatMap((c) => c.unresolved_project_dependencies))
     for (const id of Object.keys(DRAFT_DEPENDENCY_RELEVANCE)) expect(governed.has(id)).toBe(true)
     expect(DRAFT_DEPENDENCY_RELEVANCE).not.toHaveProperty('which_music_provider')

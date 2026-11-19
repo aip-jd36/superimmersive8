@@ -572,8 +572,9 @@ describe('compatibility', () => {
     expect(g.registry_input.semantic_mappings?.map((m) => m.dependency_id)).toEqual(['which_music_provider', 'which_provider', 'human_contribution_description'])
     expect(Object.keys(g.presentation)).toHaveLength(21)
     // CR-V2-MVP-PROVIDER-SCOPE-1: the Pika baseline is withdrawn (v1 superseded by a v2 'No' entry); only Runway and Higgsfield are current.
-    expect(g.publication_ledger.filter((e) => e.superseded_by === null && e.creator_record_eligible === 'Yes').map((e) => e.claim_id).sort()).toEqual(['CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1'])
-    expect(g.source_text_approval?.review_ref).toBe('JD-SI8-UX-2-R2-20261116 schema 7')
+    // CR-DOC-READER-EXT-6E: + the four D2 entries (music from M1, stock from M3).
+    expect(g.publication_ledger.filter((e) => e.superseded_by === null && e.creator_record_eligible === 'Yes').map((e) => e.claim_id).sort()).toEqual(['CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1', 'CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1', 'CLAIM-MUSIC-EPIDEMIC-TIER-ADVERTISING-001-v1', 'CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1', 'CLAIM-STOCK-EDITORIAL-001-v2', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1'].sort())
+    expect(g.source_text_approval?.review_ref).toBe('JD-CR-DOC-READER-EXT-6E-20261119 schema 7')
     expect(resolvePublicationAuthority({})).toEqual({ ok: true, mode: 'governance' })
     const inputs = approvedCustomerRecordInputs(g)
     const check = checkApprovedSources(inputs.sources, inputs.source_text, CLAIMS, AS_OF, SCHEMA)

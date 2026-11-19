@@ -111,10 +111,16 @@ export const SYNTHETIC_RENDER_APPROVAL: ReadinessRenderApproval = { template_id:
 
 // ── record builders ──
 const ACK = { A1: true, A2: true }
+/**
+ * CR-DOC-READER-EXT-6E: the live ledger as it stood when these readiness baselines were captured, i.e. without the four entries
+ * published by CR-DOC-READER-EXT-6E. These scenarios measure rendering and summary behaviour, not current publication content; the
+ * published entries have their own tests (`doc-reader-ext-publication.test.ts`).
+ */
+export const BASELINE_ERA_LEDGER: readonly PublicationLedgerEntry[] = CREATOR_RECORD_PUBLICATION_LEDGER.filter((e) => !e.entry_id.startsWith('CR-DOC-READER-EXT-1-LEDGER-'))
 const RECORD = (id: string, version = 1) => ({ record_id: id, record_version: version, captured_at: '2026-11-12T00:00:00Z' })
 export function liveRecord(id: string, answers: Record<string, string[]>, tools: Record<string, string[]>[], version = 1) {
   const i = approvedCustomerRecordInputs(GOV as never)
-  const r = buildCustomerRecord({ state: { answers, tools, acknowledgements: ACK } as never, sources: i.sources as never, source_text: i.source_text as never, topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: '2026-11-12', record: RECORD(id, version) })
+  const r = buildCustomerRecord({ state: { answers, tools, acknowledgements: ACK } as never, sources: { ...i.sources, ledger: BASELINE_ERA_LEDGER } as never, source_text: i.source_text as never, topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: '2026-11-12', record: RECORD(id, version) })
   if (!r.ok) throw new Error(JSON.stringify(r).slice(0, 500))
   return r
 }
@@ -150,7 +156,7 @@ export function pilotRecord(id: string, sources: CreatorRecordSources, answers: 
 const PROPOSAL = JSON.parse(readFileSync(join(__dirname, '../lib/creator-record/governed/proposals/CR-V2-LEDGER-4-artlist-standalone.proposal.json'), 'utf8')) as { entry: PublicationLedgerEntry }
 /** TEST ONLY: the Artlist proposal as if approved. The staged proposal itself stays Pending and outside the live ledger. */
 export const ARTLIST_APPROVED_TEST_COPY: PublicationLedgerEntry = { ...PROPOSAL.entry, creator_record_eligible: 'Yes', approver: 'SYNTHETIC TEST APPROVER', decision_date: '2026-11-12', refresh_by: '2027-02-12' }
-const LIVE_PLUS_ARTLIST = [...CREATOR_RECORD_PUBLICATION_LEDGER.filter((e) => !e.superseded_by && e.creator_record_eligible === 'Yes'), ARTLIST_APPROVED_TEST_COPY]
+const LIVE_PLUS_ARTLIST = [...BASELINE_ERA_LEDGER.filter((e) => !e.superseded_by && e.creator_record_eligible === 'Yes'), ARTLIST_APPROVED_TEST_COPY]
 
 const BASE = { P1: ['Synthetic PDF proof video'], P3: ['own_channels'], F1: ['TW'], F2: ['TW'], L1: ['no'], H1: ['edited'] }
 const RUNWAY = { T1: ['runway-gen3'], T3: ['Pro'], T4: ['May 2026'] }

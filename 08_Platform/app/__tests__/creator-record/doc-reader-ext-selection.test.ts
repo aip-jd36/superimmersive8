@@ -32,11 +32,13 @@ const STOCK = 'CLAIM-STOCK-EDITORIAL-001-v2'
 const POND5 = 'CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1'
 const RUNWAY = 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1'
 
-/** The DRAFT candidates under a SYNTHETIC approval (test fixture only). */
-const synthetic = (e: PublicationLedgerEntry): PublicationLedgerEntry => ({ ...e, creator_record_eligible: 'Yes', approver: 'SYNTHETIC TEST AUTHORITY (fixture only)', decision_date: AS_OF, refresh_by: '2027-02-18' })
+/** CR-DOC-READER-EXT-6E: the four entries as PUBLISHED in the live ledger (founder approval JD-CR-DOC-READER-EXT-6E-20261119). */
+const PUBLISHED = CREATOR_RECORD_PUBLICATION_LEDGER.filter((e) => e.entry_id.startsWith('CR-DOC-READER-EXT-1-LEDGER-'))
+const published = (claimId: string) => PUBLISHED.find((e) => e.claim_id === claimId)!
 const BASE = approvedCustomerRecordInputs(GOV).sources
+/** The live sources with exactly `entries` in place of the four published ones (so a test can run with or without them). */
 function sourcesWith(entries: readonly PublicationLedgerEntry[]): CreatorRecordSources {
-  return withQuestionnaireApproval({ ...BASE, ledger: [...BASE.ledger, ...entries], dependency_labels: { ...BASE.dependency_labels, ...CANDIDATE_DEPENDENCY_LABELS } })
+  return withQuestionnaireApproval({ ...BASE, ledger: [...BASE.ledger.filter((e) => !PUBLISHED.includes(e)), ...entries] })
 }
 const ACKS = (s: CreatorRecordSources): Record<string, string> => Object.fromEntries(s.acknowledgement_ids.map((id) => [id, `Synthetic acknowledgement ${id} (test fixture only).`]))
 function textFor(s: CreatorRecordSources): SourceTextInput {
@@ -49,7 +51,7 @@ function textFor(s: CreatorRecordSources): SourceTextInput {
   }
   return { approval, acknowledgements: ACKS(s) }
 }
-const SOURCES = sourcesWith(CANDIDATE_LEDGER_ENTRIES.map(synthetic))
+const SOURCES = sourcesWith(PUBLISHED)
 
 const BASE_ANS = { P1: ['Selection isolation test video'], P3: ['own_channels'], F1: ['TW'], F2: ['online_worldwide'], L1: ['no'], H1: ['edited'] }
 const state = (materials: Record<string, string[]>) => ({ answers: { ...BASE_ANS, ...materials }, tools: [{ T1: ['runway-gen3'], T3: ['Pro'], T4: ['May 2026'] }], acknowledgements: { A1: true, A2: true } })
@@ -67,26 +69,36 @@ const item = (rec: ReturnType<typeof build>, id: string) => rec.guidance.items.f
 const citedQuestions = (rec: ReturnType<typeof build>, id: string) =>
   item(rec, id)!.selection_basis.scopes.flatMap((s) => s.observation_ids).map((o) => (/:(M[13]):/.exec(o) ?? [])[1] ?? o).sort()
 
-describe('candidates stay inactive', () => {
-  test('DRAFT status; every candidate Pending with no approver, so the real contract refuses it', () => {
+// CR-DOC-READER-EXT-6E: formerly "candidates stay inactive". The drafts are historical; the published entries are tested here.
+describe('published entries (D2): exactly the approved drafts, under the founder approval', () => {
+  test('the drafts stay unapproved history; each published entry is its draft plus the approval, nothing else', () => {
     expect(CR_DOC_READER_EXT_1_STATUS).toMatch(/NOT APPROVED, NOT ACTIVE/)
-    expect(CANDIDATE_LEDGER_ENTRIES.map((e) => e.claim_id)).toEqual([...CANDIDATE_CLAIM_IDS])
-    for (const e of CANDIDATE_LEDGER_ENTRIES) {
-      expect(e.creator_record_eligible).toBe('Pending')
-      expect(e.approver).toBeNull()
+    expect(PUBLISHED.map((e) => e.claim_id)).toEqual([...CANDIDATE_CLAIM_IDS])
+    for (const d of CANDIDATE_LEDGER_ENTRIES) {
+      expect(d.creator_record_eligible).toBe('Pending')
+      const e = published(d.claim_id)
+      const { claim_last_verified: _v, creator_record_eligible: _c, approver: _a, decision_date: _d, refresh_by: _r, ...draftRest } = d
+      const { claim_last_verified: _v2, creator_record_eligible: _c2, approver: _a2, decision_date: _d2, refresh_by: _r2, ...pubRest } = e
+      expect(pubRest).toEqual(draftRest)
+      expect(e).toMatchObject({ creator_record_eligible: 'Yes', approver: 'JD, for PMF Strategy Inc. d/b/a SuperImmersive 8', decision_date: '2026-11-19', refresh_by: '2027-02-19', superseded_by: null })
       const claim = CLAIMS.find((c) => c.claim_id === e.claim_id)!
       expect(claim.superseded_by).toBeNull()
       expect(e.claim_last_verified).toBe(claim.last_verified)
-      expect(authorizePublication(CANDIDATE_LEDGER_ENTRIES, claim, AS_OF, { question_ids: ['M1', 'M3'] })).toEqual({ authorized: false, reason: 'not_eligible' })
+      expect(authorizePublication(PUBLISHED, claim, AS_OF, { question_ids: e.selection_questions as string[] })).toEqual({ authorized: true, entry: e })
     }
+    expect(Object.fromEntries(PUBLISHED.map((e) => [e.claim_id, e.claim_last_verified]))).toEqual({ [ARTLIST]: '2026-09-10', [EPIDEMIC]: '2026-09-10', [STOCK]: '2026-11-19', [POND5]: '2026-11-19' })
+    for (const [k, v] of Object.entries(CANDIDATE_DEPENDENCY_LABELS)) expect(BASE.dependency_labels[k]).toBe(v)
   })
-  test('the live ledger carries no candidate and no question-scoped entry', () => {
-    const ids = CREATOR_RECORD_PUBLICATION_LEDGER.map((e) => e.claim_id)
-    for (const c of CANDIDATE_CLAIM_IDS) expect(ids).not.toContain(c)
-    expect(CREATOR_RECORD_PUBLICATION_LEDGER.every((e) => e.selection_questions === undefined)).toBe(true)
+  test('only the four published entries are question-scoped (music from M1, stock from M3)', () => {
+    expect(CREATOR_RECORD_PUBLICATION_LEDGER.filter((e) => e.selection_questions !== undefined)).toEqual(PUBLISHED)
+    expect(Object.fromEntries(PUBLISHED.map((e) => [e.claim_id, e.selection_questions]))).toEqual({ [ARTLIST]: ['M1'], [EPIDEMIC]: ['M1'], [STOCK]: ['M3'], [POND5]: ['M3'] })
+  })
+  test('a published entry is refused once its claim is re-verified after the date the entry records (fail closed)', () => {
+    const claim = { ...CLAIMS.find((c) => c.claim_id === STOCK)!, last_verified: '2026-12-01' }
+    expect(authorizePublication(PUBLISHED, claim, AS_OF, { question_ids: ['M3'] })).toEqual({ authorized: false, reason: 'claim_reverified_since_approval' })
   })
   test('evidence notes never say a dependency is satisfied or that a document is sufficient', () => {
-    for (const e of CANDIDATE_LEDGER_ENTRIES) for (const n of Object.values(e.evidence_notes)) {
+    for (const e of PUBLISHED) for (const n of Object.values(e.evidence_notes)) {
       expect(n).toMatch(/SI8 did not check it/)
       expect(n).toMatch(/It does not confirm/)
       expect(n).not.toMatch(/\b(satisfied|sufficient|verified|confirms that|proves|cleared|clearance)\b/i)
@@ -96,7 +108,7 @@ describe('candidates stay inactive', () => {
 
 describe('authorizePublication: question-scoped entries', () => {
   const claim = CLAIMS.find((c) => c.claim_id === STOCK)!
-  const ledger = [synthetic(CANDIDATE_LEDGER_ENTRIES.find((e) => e.claim_id === STOCK)!)]
+  const ledger = [published(STOCK)]
   test('refused without a selection context, or when no cited question is allowed', () => {
     expect(authorizePublication(ledger, claim, AS_OF)).toEqual({ authorized: false, reason: 'selection_question_not_authorized' })
     expect(authorizePublication(ledger, claim, AS_OF, { question_ids: ['M1'] })).toEqual({ authorized: false, reason: 'selection_question_not_authorized' })
@@ -132,7 +144,7 @@ describe('authorizePublication: question-scoped entries', () => {
   })
 })
 
-describe('music versus stock selection isolation (real record builder, synthetic approval)', () => {
+describe('music versus stock selection isolation (real record builder, published entries)', () => {
   test('stock provider named for music (M1): no stock claim; music provider named for stock (M3): no music claim', () => {
     for (const p of ['getty', 'istock', 'shutterstock', 'adobe-stock', 'pond5']) {
       const ids = claimsOf(build(MUSIC(p)))

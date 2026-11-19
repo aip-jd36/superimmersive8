@@ -232,6 +232,11 @@ function previousInputs(at: 'v1' | 'v2' | 'v3'): ApprovedInputs {
     registry_input: typeof CREATOR_RECORD_REGISTRY_INPUT; presentation: typeof CREATOR_RECORD_PRESENTATION; ledger: typeof CREATOR_RECORD_PUBLICATION_LEDGER
     versions: { registry: string; ledger: string }; questionnaire_approval: Record<string, unknown>
   }
+  // CR-DOC-READER-EXT-6E: every reconstructed approval predates the four D2 ledger entries, the four D3 labels and LEDGER-4.
+  s.ledger = s.ledger.filter((e) => !e.entry_id.startsWith('CR-DOC-READER-EXT-1-LEDGER-'))
+  const labels = (prev.sources as unknown as { dependency_labels: Record<string, string> }).dependency_labels
+  for (const k of ['artlist_license_type_confirmed', 'epidemic_license_tier_confirmed', 'editorial_designation_confirmed', 'separate_authorization_obtained']) delete labels[k]
+  s.versions = { ...s.versions, ledger: 'CR-V2-LAUNCH-LEDGER-3' }
   const authority = 'JD, for PMF Strategy Inc. d/b/a SuperImmersive 8'
   const approval = at === 'v1'
     ? { status: 'approved', approver: authority, decision_date: '2026-11-09', review_ref: CREATOR_RECORD_LAUNCH_APPROVAL_REF }

@@ -1,8 +1,9 @@
 /**
  * CR-DOC-READER-EXT-1 — DRAFT Creator Record publication candidates for Path 1 (music and stock).
  *
- * STATUS: DRAFT — NOT APPROVED, NOT ACTIVE. Nothing here is imported by the governed sources, the approved inputs or any
- * production path. Every entry is `creator_record_eligible: 'Pending'` with no approver, decision date or refresh date, so the
+ * STATUS: HISTORICAL DRAFTS. Approved 2026-11-19 (D1-D3, JD-CR-DOC-READER-EXT-6E-20261119) and published from
+ * `../sources.ts` (CREATOR_RECORD_PUBLICATION_LEDGER, generated from these drafts; a test proves the published wording is identical).
+ * Nothing here is imported by the governed sources, the approved inputs or any production path. Every entry is `creator_record_eligible: 'Pending'` with no approver, decision date or refresh date, so the
  * existing contract refuses it (`not_eligible` / `missing_approval`) even if it were placed in a ledger. Activation needs:
  * founder approval of each entry (explanation, policy, caveats, refresh), approval of the dependency labels through a new Source
  * Text approval, counsel review, and a new ledger version in `governed/sources.ts`.

@@ -38,6 +38,7 @@ describe('draft v2 wording candidate', () => {
     const sets = JSON.stringify(approvedPdfTemplates())
     expect(sets).not.toMatch(/"version":2.*integrated-assessment|How your documents relate/)
     const sources = readFileSync(path.join(__dirname, '../../lib/creator-record/governed/sources.ts'), 'utf8')
-    expect(sources).not.toMatch(/v2-wording-candidate|assess-v2|cr-doc-reader-ext-1/)
+    // CR-DOC-READER-EXT-6E: the published ledger names its source drafts in a comment; nothing is imported from them.
+    expect(sources).not.toMatch(/^import[^\n]*(v2-wording-candidate|assess-v2|cr-doc-reader-ext-1)/m)
   })
 })

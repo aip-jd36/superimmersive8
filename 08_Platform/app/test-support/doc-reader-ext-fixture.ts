@@ -7,12 +7,10 @@ import { createHash } from 'node:crypto'
 import { approvedCustomerRecordInputs, approvedPdfTemplates } from '@/lib/creator-record/customer-flow/approved-inputs'
 import { buildCustomerDocument, CustomerPdfRefusal, type Block } from '@/lib/creator-record/customer-pdf/document-model'
 import { checkTemplates, templateFingerprint, type PdfTemplateApproval } from '@/lib/creator-record/customer-pdf/templates'
-import type { PublicationLedgerEntry } from '@/lib/creator-record/contract/publication-ledger'
 import { buildCustomerRecord, CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION, CUSTOMER_RECORD_SCHEMA, type CustomerRecordDocument } from '@/lib/creator-record/customer-record/record'
 import type { SourceTextInput } from '@/lib/creator-record/customer-record/sources'
 import { SOURCE_TEXT_CATEGORIES, SOURCE_TEXT_SOURCE_ID, sourceTextContent, sourceTextDigest, type SourceTextApproval } from '@/lib/creator-record/customer-record/source-text'
 import { loadQuestionRegistry } from '@/lib/creator-record/contract/question-registry'
-import { CANDIDATE_DEPENDENCY_LABELS, CANDIDATE_LEDGER_ENTRIES } from '@/lib/creator-record/governed/candidates/cr-doc-reader-ext-1'
 import { candidateTemplateSetV8, CR_DOC_READER_EXT_2_TEMPLATE_STATUS, V7_NOT_DONE_COMPARISON_LINE, V8_NOT_DONE_COMPARISON_LINE } from '@/test-support/doc-reader-ext-2-template'
 import { CREATOR_RECORD_GOVERNANCE_AUTHORITY as GOV, CREATOR_RECORD_PDF_TEMPLATE_SETS } from '@/lib/creator-record/governed/sources'
 import { buildReplayTable } from '@/lib/creator-record/evidence/replay'
@@ -31,9 +29,9 @@ export const AS_OF = '2026-11-18'
 const OWNER = '11111111-1111-4111-8111-111111111111'
 const DOC = '33333333-3333-4333-8333-3333333333b1'
 const RUN = '44444444-4444-4444-8444-4444444444b1'
-const synthetic = (e: PublicationLedgerEntry): PublicationLedgerEntry => ({ ...e, creator_record_eligible: 'Yes', approver: 'SYNTHETIC TEST AUTHORITY (fixture only)', decision_date: AS_OF, refresh_by: '2027-02-18' })
 const BASE = approvedCustomerRecordInputs(GOV).sources
-const SOURCES: CreatorRecordSources = withQuestionnaireApproval({ ...BASE, ledger: [...BASE.ledger, ...CANDIDATE_LEDGER_ENTRIES.map(synthetic)], dependency_labels: { ...BASE.dependency_labels, ...CANDIDATE_DEPENDENCY_LABELS } })
+// CR-DOC-READER-EXT-6E: the four entries and their labels are now in the live (approved) ledger and labels, so they are used as is.
+const SOURCES: CreatorRecordSources = withQuestionnaireApproval({ ...BASE })
 const ACKS = (s: CreatorRecordSources): Record<string, string> => Object.fromEntries(s.acknowledgement_ids.map((id) => [id, `Synthetic acknowledgement ${id} (test fixture only).`]))
 function textFor(s: CreatorRecordSources, schemaVersion: number): SourceTextInput {
   const loaded = loadQuestionRegistry(s.registry_input)

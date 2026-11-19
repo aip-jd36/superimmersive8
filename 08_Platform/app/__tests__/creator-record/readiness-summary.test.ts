@@ -283,9 +283,10 @@ describe('Artlist standalone: staged, inactive publication proposal', () => {
     expect(PROPOSAL.entry).toMatchObject({ creator_record_eligible: 'Pending', approver: null, decision_date: null, refresh_by: null })
     expect(authorizePublication([PROPOSAL.entry], claim, '2026-11-12')).toEqual({ authorized: false, reason: 'not_eligible' })
   })
-  test('it is not in the live ledger: the live ledger authorizes no Artlist claim', () => {
-    expect(CREATOR_RECORD_PUBLICATION_LEDGER.some((e) => e.claim_id.includes('ARTLIST'))).toBe(false)
-    for (const c of TOPIC_CLAIMS_FIXTURE.filter((x) => (x.provider_scope ?? []).includes('artlist'))) expect(authorizePublication(CREATOR_RECORD_PUBLICATION_LEDGER, c, '2026-11-12')).toEqual({ authorized: false, reason: 'no_ledger_entry' })
+  // CR-DOC-READER-EXT-6E: CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1 is now published (D2); the staged standalone proposal's own claim is not.
+  test('it is not in the live ledger: the live ledger authorizes no other Artlist claim than the published Social-vs-Pro claim', () => {
+    expect(CREATOR_RECORD_PUBLICATION_LEDGER.some((e) => e.claim_id === 'CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1')).toBe(false)
+    for (const c of TOPIC_CLAIMS_FIXTURE.filter((x) => (x.provider_scope ?? []).includes('artlist') && x.claim_id !== 'CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1')) expect(authorizePublication(CREATOR_RECORD_PUBLICATION_LEDGER, c, '2026-11-12')).toEqual({ authorized: false, reason: 'no_ledger_entry' })
   })
   test('only __tests__ reads the proposals folder, and no application code imports the summary module', () => {
     const root = join(__dirname, '../..')

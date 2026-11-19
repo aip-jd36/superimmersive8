@@ -191,7 +191,8 @@ describe('5. claims without Creator Record publication authorization', () => {
     const current = CREATOR_RECORD_PUBLICATION_LEDGER.filter((e) => e.superseded_by === null)
     const approved = new Set(current.filter((e) => e.creator_record_eligible === 'Yes').map((e) => e.claim_id))
     const withdrawn = new Set(current.filter((e) => e.creator_record_eligible === 'No').map((e) => e.claim_id))
-    expect([...approved].sort()).toEqual(['CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1'])
+    // CR-DOC-READER-EXT-6E: + the four D2 entries.
+    expect([...approved].sort()).toEqual(['CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1', 'CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1', 'CLAIM-MUSIC-EPIDEMIC-TIER-ADVERTISING-001-v1', 'CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1', 'CLAIM-STOCK-EDITORIAL-001-v2', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1'].sort())
     expect([...withdrawn]).toEqual(['CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1'])
     const config = loadFormConfig(pilotSources())
     const { observations } = formToObservations(config, base(), RECORD)
@@ -206,7 +207,7 @@ describe('5. claims without Creator Record publication authorization', () => {
     // T1 v3 carries the provider-scope-2 decision (CR-V2-MVP-PROVIDER-SCOPE-2); every other question the launch approval.
     for (const q of qs) expect([q.q_id, q.approval?.review_ref, /PILOT/i.test(JSON.stringify(q))]).toEqual([q.q_id, q.q_id === 'T1' ? 'JD-CR-V2-MVP-PROVIDER-SCOPE-2-20261111' : 'JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109', false])
     const current = CREATOR_RECORD_PUBLICATION_LEDGER.filter((e) => e.superseded_by === null && e.creator_record_eligible === 'Yes').map((e) => e.claim_id)
-    expect([...current].sort()).toEqual(['CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1'])
+    expect([...current].sort()).toEqual(['CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1', 'CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1', 'CLAIM-MUSIC-EPIDEMIC-TIER-ADVERTISING-001-v1', 'CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1', 'CLAIM-STOCK-EDITORIAL-001-v2', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1'].sort()) // CR-DOC-READER-EXT-6E: + four D2 entries
     const r = buildCreatorRecordDraft({ state: base(), sources: governedSources(), topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: '2026-10-26', record: RECORD })
     if (r.ok) for (const c of r.view.guidance.cards) expect(current).toContain(c.claim_id)
   })

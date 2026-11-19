@@ -6,6 +6,7 @@
  * canonical form, so any change to approved wording, legal text or consent wording fails this test until a new approval is
  * recorded. The packet itself is not in the repository; these digests identify it.
  */
+import { CANDIDATE_DEPENDENCY_LABELS } from '@/lib/creator-record/governed/candidates/cr-doc-reader-ext-1'
 import { createHash } from 'node:crypto'
 import { PRIVACY_NOTICE, TERMS_OF_SERVICE } from '@/lib/legal/policies'
 import * as Governed from '@/lib/creator-record/governed/sources'
@@ -70,7 +71,11 @@ describe('the governed content is the approved R2-R5 wording', () => {
     expect(Governed.CREATOR_RECORD_ACKNOWLEDGEMENTS.A2).toMatch(/I agree to the Creator Record Terms of Service and acknowledge that I have read the Privacy Notice\.$/)
   })
   test('R4 dependency labels and R5 caveats', () => {
-    expect(sha(packetJson({ item: 'R4 launch dependency labels', dependency_labels: Governed.CREATOR_RECORD_DEPENDENCY_LABELS }))).toBe('5ec6e19c9c756f421b10507138a8ff77de3c9d18f3bd91bf50e8ef4cfb808525')
+    // CR-DOC-READER-EXT-6E: the R4 packet labels are unchanged; the four D3 labels are additions (checked separately below).
+    const D3 = ['artlist_license_type_confirmed', 'epidemic_license_tier_confirmed', 'editorial_designation_confirmed', 'separate_authorization_obtained']
+    const r4 = Object.fromEntries(Object.entries(Governed.CREATOR_RECORD_DEPENDENCY_LABELS).filter(([k]) => !D3.includes(k)))
+    expect(sha(packetJson({ item: 'R4 launch dependency labels', dependency_labels: r4 }))).toBe('5ec6e19c9c756f421b10507138a8ff77de3c9d18f3bd91bf50e8ef4cfb808525')
+    expect(Object.fromEntries(D3.map((k) => [k, Governed.CREATOR_RECORD_DEPENDENCY_LABELS[k]]))).toEqual(CANDIDATE_DEPENDENCY_LABELS)
     expect(sha(packetJson({ item: 'R5 caveats', caveats: Governed.CREATOR_RECORD_CAVEATS }))).toBe('fe4538761172a56293f02eaad552de63c60821626dc7dc01365f9e37a44ab7b9')
   })
   test('every launch question carries the founder approval', () => {
@@ -115,7 +120,8 @@ describe('the approved guidance ledger, PDF templates and issuance support', () 
   // version 2 withdrawal entry. Without the withdrawal and with Pika's `superseded_by` cleared, the ledger is the packet again.
   const PIKA_V1 = 'CR-V2-LAUNCH-LEDGER-CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1'
   const PIKA_V2 = `${PIKA_V1}-WITHDRAWN-2`
-  const packetEntries = () => Governed.CREATOR_RECORD_PUBLICATION_LEDGER.filter((e) => e.entry_id !== PIKA_V2).map((e) => (e.entry_id === PIKA_V1 ? { ...e, superseded_by: null } : e))
+  // CR-DOC-READER-EXT-6E: the packet's own entries only (the four D2 entries are later additions with their own approval).
+  const packetEntries = () => Governed.CREATOR_RECORD_PUBLICATION_LEDGER.filter((e) => e.entry_id !== PIKA_V2 && !e.entry_id.startsWith('CR-DOC-READER-EXT-1-LEDGER-')).map((e) => (e.entry_id === PIKA_V1 ? { ...e, superseded_by: null } : e))
   test('R7/R8: the three packet entries are unchanged (approver and decision date recorded at approval)', () => {
     const core = packetEntries().map(({ approver: _a, decision_date: _d, ...rest }) => rest)
     expect(sha(packetJson(core))).toBe('0093152825039253e85314e534bacb259fcf72903d062dd7128cec54873cd28c')
@@ -125,7 +131,7 @@ describe('the approved guidance ledger, PDF templates and issuance support', () 
   })
   test('the Pika baseline entry is withdrawn by a version 2 entry; Runway and Higgsfield stay current', () => {
     const ledger = Governed.CREATOR_RECORD_PUBLICATION_LEDGER
-    expect(ledger).toHaveLength(4)
+    expect(ledger).toHaveLength(8) // CR-DOC-READER-EXT-6E: + four D2 entries
     expect(ledger.find((e) => e.entry_id === PIKA_V1)?.superseded_by).toBe(PIKA_V2)
     expect(ledger.find((e) => e.entry_id === PIKA_V2)).toEqual({
       entry_id: PIKA_V2, version: 2, claim_id: 'CLAIM-PIKA-COMMERCIAL-USE-BASELINE-001-v1', claim_last_verified: '2026-09-06', creator_record_eligible: 'No',
@@ -133,10 +139,10 @@ describe('the approved guidance ledger, PDF templates and issuance support', () 
       decision_date: '2026-11-11', refresh_by: null, superseded_by: null,
     })
     const current = ledger.filter((e) => e.superseded_by === null && e.creator_record_eligible === 'Yes').map((e) => e.claim_id).sort()
-    expect(current).toEqual(['CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1'])
+    expect(current).toEqual(['CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1', 'CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1', 'CLAIM-MUSIC-EPIDEMIC-TIER-ADVERTISING-001-v1', 'CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1', 'CLAIM-STOCK-EDITORIAL-001-v2', 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1'].sort())
   })
   test('the printed guidance set names the approved ledger, never the empty one', () => {
-    expect(Governed.CREATOR_RECORD_VERSIONS).toEqual({ registry: 'CR-V2-LAUNCH-REGISTRY-3', ledger: 'CR-V2-LAUNCH-LEDGER-3' })
+    expect(Governed.CREATOR_RECORD_VERSIONS).toEqual({ registry: 'CR-V2-LAUNCH-REGISTRY-3', ledger: 'CR-V2-LAUNCH-LEDGER-4' }) // CR-DOC-READER-EXT-6E
   })
   test('R9/R10: both template sets carry their approved fingerprints, schemas and references', () => {
     // CR-V2-MVP-APPROVAL-AND-RELEASE-1: v1 and v3 keep their approval record, now superseded; v4 / v5 are registered after them.

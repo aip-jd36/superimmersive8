@@ -119,7 +119,8 @@ describe('determinism, version isolation and test-only material', () => {
     expect(documentModelCanonical(proofOf(READINESS_SCENARIOS[k]()).proof)).toBe(documentModelCanonical(CASES[k].proof))
   })
   test('the Artlist entry is a test copy; the live ledger still has no Artlist entry; approvals are synthetic', () => {
-    expect(CREATOR_RECORD_PUBLICATION_LEDGER.some((e) => e.claim_id.includes('ARTLIST'))).toBe(false)
+    // CR-DOC-READER-EXT-6E: only the Social-vs-Pro Artlist claim is published; the test copy's claim is not.
+    expect(CREATOR_RECORD_PUBLICATION_LEDGER.some((e) => e.claim_id === 'CLAIM-MUSIC-ARTLIST-PROJECT-LICENSE-DURATION-001-v1')).toBe(false)
     expect(ARTLIST_APPROVED_TEST_COPY.approver).toBe('SYNTHETIC TEST APPROVER')
     expect(SYNTHETIC_SUMMARY_APPROVAL.authority).toBe(SYNTHETIC_PROOF_AUTHORITY)
     expect(SYNTHETIC_RENDER_APPROVAL.authority).toBe(SYNTHETIC_PROOF_AUTHORITY)

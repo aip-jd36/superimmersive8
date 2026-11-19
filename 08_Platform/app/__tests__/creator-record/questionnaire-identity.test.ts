@@ -584,10 +584,10 @@ describe('locks: PDF and issuance stay closed for schemas 7 and 8', () => {
     expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(true)
     // CR-V2-MVP-LEGAL-CONTENT-6: customer governance carries the founder-approved content; the stops above stay in force.
     // CR-V2-MVP-PROVIDER-SCOPE-1: provider-scope versions of the contract and wording approvals.
-    expect(GOV.questionnaire_approval?.review_ref).toBe('JD-SI8-UX-2-R2-20261116')
-    expect(GOV.source_text_approval?.review_ref).toBe('JD-SI8-UX-2-R2-20261116 schema 7')
+    expect(GOV.questionnaire_approval?.review_ref).toBe('JD-CR-DOC-READER-EXT-6E-20261119')
+    expect(GOV.source_text_approval?.review_ref).toBe('JD-CR-DOC-READER-EXT-6E-20261119 schema 7')
     expect(GOV.registry_input.questions).toHaveLength(21)
-    expect(currentPublicationAuthority({})?.questionnaire_approval?.review_ref).toBe('JD-SI8-UX-2-R2-20261116')
+    expect(currentPublicationAuthority({})?.questionnaire_approval?.review_ref).toBe('JD-CR-DOC-READER-EXT-6E-20261119')
     expect(approvedGovernanceSnapshot(asOf, CLAIMS, null).authorities.question).toEqual({ status: 'unavailable' })
   })
 

@@ -77,6 +77,9 @@ const PROVIDER_SCOPE_2_APPROVAL: GovernanceApproval = Object.freeze({
 // 6c95569de6093999997c2d17cd64d82b66eae56014c0e4423ae084296bdf45e8. Record: 08_Platform/implementation/si8-ux-2/02-SI8-UX-2-R2-FOUNDER-AUTHORIZATION-RECORD.md.
 export const CREATOR_RECORD_UX2_WORDING_APPROVAL_REF = 'JD-SI8-UX-2-R2-20261116'
 const UX2_DECISION_DATE = '2026-11-16'
+/** CR-DOC-READER-EXT-6E: founder approval of D1-D4 (four Creator Record claims, their entries, labels and relevance mapping). */
+export const CREATOR_RECORD_DOC_READER_EXT_6E_APPROVAL_REF = 'JD-CR-DOC-READER-EXT-6E-20261119'
+const DOC_READER_EXT_6E_DECISION_DATE = '2026-11-19'
 
 /** The only tools a new Creator Record offers (CR-V2-MVP-PROVIDER-SCOPE-2). */
 export const CREATOR_RECORD_MVP_TOOL_IDS: readonly string[] = Object.freeze(['higgsfield', 'runway-gen3'])
@@ -266,6 +269,103 @@ export const CREATOR_RECORD_PUBLICATION_LEDGER: readonly PublicationLedgerEntry[
     "decision_date": "2026-11-10",
     "refresh_by": "2027-02-10",
     "superseded_by": null
+  },
+  // CR-DOC-READER-EXT-6E (JD-CR-DOC-READER-EXT-6E-20261119): D1 scope (exactly these four claims, Creator Record only) and D2 entries,
+  // generated from the reviewed candidates (`./candidates/cr-doc-reader-ext-1`; wording identical, a test proves it). Their evidence notes are
+  // document-scoped (`DOCUMENT_SCOPED_NOTE_ENTRIES`): printed only with a relevant document.
+  {
+    "entry_id": "CR-DOC-READER-EXT-1-LEDGER-CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1",
+    "version": 1,
+    "claim_id": "CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1",
+    "claim_last_verified": "2026-09-10",
+    "creator_record_eligible": "Yes",
+    "explanation": "Artlist’s own terms say its Social licence is for personal content and does not cover client or brand work, paid or promoted videos, or broadcast. Its Pro/Business licence covers client and brand work, paid or promoted videos and commercials; broadcasting under Pro/Business is subject to Artlist’s separate Enterprise or Max Business requirement for agencies, broadcasters and larger companies. This record does not show which Artlist licence your account holds.",
+    "applicability_policy": "requirements_met",
+    "evidence_notes": {
+      "artlist_license_type_confirmed": "A document you added may show an Artlist licence or plan type. If one appears to, it is listed as an automated reading: SI8 did not check it. It does not confirm which licence your account holds, or that it covers your video."
+    },
+    "required_caveats": [
+      "CR-CAV-PROVIDER-OWN-TERMS",
+      "CR-CAV-TERMS-CHANGE"
+    ],
+    "selection_questions": [
+      "M1"
+    ],
+    "approver": "JD, for PMF Strategy Inc. d/b/a SuperImmersive 8",
+    "decision_date": "2026-11-19",
+    "refresh_by": "2027-02-19",
+    "superseded_by": null
+  },
+  {
+    "entry_id": "CR-DOC-READER-EXT-1-LEDGER-CLAIM-MUSIC-EPIDEMIC-TIER-ADVERTISING-001-v1",
+    "version": 1,
+    "claim_id": "CLAIM-MUSIC-EPIDEMIC-TIER-ADVERTISING-001-v1",
+    "claim_last_verified": "2026-09-10",
+    "creator_record_eligible": "Yes",
+    "explanation": "Epidemic Sound’s own terms say its Single-Track Private Tier licence excludes advertisements and other paid-media productions. Its Commercial Tier does not carry that exclusion, but excludes broadcast-type content such as TV adverts. Which applies depends on the tier you hold. This record does not show which tier your account holds, and neither tier on its own clears a project for commercial use.",
+    "applicability_policy": "requirements_met",
+    "evidence_notes": {
+      "epidemic_license_tier_confirmed": "A document you added may show an Epidemic Sound licence tier. If one appears to, it is listed as an automated reading: SI8 did not check it. It does not confirm which tier your account holds, or that it covers your video."
+    },
+    "required_caveats": [
+      "CR-CAV-PROVIDER-OWN-TERMS",
+      "CR-CAV-TERMS-CHANGE"
+    ],
+    "selection_questions": [
+      "M1"
+    ],
+    "approver": "JD, for PMF Strategy Inc. d/b/a SuperImmersive 8",
+    "decision_date": "2026-11-19",
+    "refresh_by": "2027-02-19",
+    "superseded_by": null
+  },
+  {
+    "entry_id": "CR-DOC-READER-EXT-1-LEDGER-CLAIM-STOCK-EDITORIAL-001-v2",
+    "version": 1,
+    "claim_id": "CLAIM-STOCK-EDITORIAL-001-v2",
+    "claim_last_verified": "2026-11-19",
+    "creator_record_eligible": "Yes",
+    "explanation": "Stock services generally license content they mark “Editorial” for descriptive or newsworthy use, not for advertising, promotion, endorsement or merchandise. Some offer a separate way to authorise commercial use of a specific Editorial asset. This record does not show whether your asset is marked Editorial or whether any separate authorisation exists.",
+    "applicability_policy": "requirements_met",
+    "evidence_notes": {
+      "editorial_designation_confirmed": "A document you added may show an Editorial or Commercial marking. If one appears to, it is listed as an automated reading: SI8 did not check it. It does not confirm how your asset is designated.",
+      "separate_authorization_obtained": "A document you added may show a written permission. If one appears to, it is listed as an automated reading: SI8 did not check it. It does not confirm that authorisation was given, or that it covers your use."
+    },
+    "required_caveats": [
+      "CR-CAV-PROVIDER-OWN-TERMS",
+      "CR-CAV-TERMS-CHANGE"
+    ],
+    "selection_questions": [
+      "M3"
+    ],
+    "approver": "JD, for PMF Strategy Inc. d/b/a SuperImmersive 8",
+    "decision_date": "2026-11-19",
+    "refresh_by": "2027-02-19",
+    "superseded_by": null
+  },
+  {
+    "entry_id": "CR-DOC-READER-EXT-1-LEDGER-CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1",
+    "version": 1,
+    "claim_id": "CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1",
+    "claim_last_verified": "2026-11-19",
+    "creator_record_eligible": "Yes",
+    "explanation": "Pond5’s own licence agreement says content it marks Editorial is intended for newsworthy or general-interest use and, without Pond5’s express and specific written consent, may not be used in merchandise, advertising (other than in-context advertising of the production it appears in), endorsements, promotions or other commercial productions. This record does not show whether your asset is marked Editorial or whether Pond5 gave consent.",
+    "applicability_policy": "requirements_met",
+    "evidence_notes": {
+      "editorial_designation_confirmed": "A document you added may show an Editorial or Commercial marking. If one appears to, it is listed as an automated reading: SI8 did not check it. It does not confirm how your asset is designated.",
+      "separate_authorization_obtained": "A document you added may show a written consent. If one appears to, it is listed as an automated reading: SI8 did not check it. It does not confirm that consent was given, or that it covers your use."
+    },
+    "required_caveats": [
+      "CR-CAV-PROVIDER-OWN-TERMS",
+      "CR-CAV-TERMS-CHANGE"
+    ],
+    "selection_questions": [
+      "M3"
+    ],
+    "approver": "JD, for PMF Strategy Inc. d/b/a SuperImmersive 8",
+    "decision_date": "2026-11-19",
+    "refresh_by": "2027-02-19",
+    "superseded_by": null
   }
 ]) as readonly PublicationLedgerEntry[]
 
@@ -296,11 +396,11 @@ export const CREATOR_RECORD_PRESENTATION: CreatorRecordSources['presentation'] =
 
 export const CREATOR_RECORD_ACKNOWLEDGEMENTS: Readonly<Record<string, string>> = Object.freeze({"A1": "I confirm that what I have told SI8 is accurate to the best of my knowledge.", "A2": "I understand that this record contains what I told SI8, general educational guidance and, if an AI model reads a document I add, what that document appears to show. No person at SI8 checks my answers or my documents. It is not legal advice, not a clearance and not SI8’s human-reviewed Commercial Assurance Assessment. I agree to the Creator Record Terms of Service and acknowledge that I have read the Privacy Notice."})
 export const CREATOR_RECORD_CAVEATS: Readonly<Record<string, string>> = Object.freeze({"CR-CAV-PROVIDER-OWN-TERMS": "This describes the provider’s own published terms or policy, as SI8 read them. It is not law and it is not legal advice.", "CR-CAV-TERMS-CHANGE": "Providers change their terms. What SI8 last read may differ from the terms that were in force for your account when you made the video."})
-export const CREATOR_RECORD_DEPENDENCY_LABELS: Readonly<Record<string, string>> = Object.freeze({"human_contribution_description": "A description of your own contribution", "which_music_provider": "Which music service the music came from", "which_provider": "Which stock service the material came from"})
+export const CREATOR_RECORD_DEPENDENCY_LABELS: Readonly<Record<string, string>> = Object.freeze({"artlist_license_type_confirmed": "Which Artlist licence applies", "epidemic_license_tier_confirmed": "Which Epidemic Sound licence tier applies", "editorial_designation_confirmed": "Whether the asset is marked Editorial", "separate_authorization_obtained": "Whether separate written authorisation was obtained", "human_contribution_description": "A description of your own contribution", "which_music_provider": "Which music service the music came from", "which_provider": "Which stock service the material came from"})
 export const CREATOR_RECORD_SECTION_TITLES: Readonly<Record<string, string>> = Object.freeze({"acknowledgements": "Before you continue", "contribution": "Your own contribution", "locations": "Where you are and where it will be shown", "materials": "Material from other sources", "people": "Real people", "project": "Your video", "tools": "The AI tools you used"})
 
 /** Customer-facing versions of the approved registry and ledger. */
-export const CREATOR_RECORD_VERSIONS: Readonly<{ registry: string; ledger: string }> = Object.freeze({ registry: 'CR-V2-LAUNCH-REGISTRY-3', ledger: 'CR-V2-LAUNCH-LEDGER-3' })
+export const CREATOR_RECORD_VERSIONS: Readonly<{ registry: string; ledger: string }> = Object.freeze({ registry: 'CR-V2-LAUNCH-REGISTRY-3', ledger: 'CR-V2-LAUNCH-LEDGER-4' })
 
 /** Maximum number of tool blocks in the approved questionnaire. */
 export const CREATOR_RECORD_MAX_TOOLS = 3
@@ -309,8 +409,8 @@ export const CREATOR_RECORD_MAX_TOOLS = 3
  * Pinned digests, computed by the code from the approved content above and the customer wording set. A mismatch means
  * approved content changed: preparation, checkout and issuance then refuse.
  */
-export const CREATOR_RECORD_SOURCE_TEXT_SHA256 = '8af542da3e6c48c78df8854f78f0da628db22c7035801859913f7b19a427107d'
-export const CREATOR_RECORD_QUESTIONNAIRE_CONTRACT_SHA256 = '6c95569de6093999997c2d17cd64d82b66eae56014c0e4423ae084296bdf45e8'
+export const CREATOR_RECORD_SOURCE_TEXT_SHA256 = 'be8891a83837155227c4d08f0f96de225fe66286a25bdeadb04e2fa3720b51e9'
+export const CREATOR_RECORD_QUESTIONNAIRE_CONTRACT_SHA256 = '53253131df7ad0ac3e0255e4994386cf9b459282bea5cec08331d025c371de81'
 
 const sourceTextApproval = (version: number, recordSchemaVersion: number, reviewRef: string, decisionDate: string = LAUNCH_DECISION_DATE): SourceTextApproval => Object.freeze({
   source_id: 'si8/creator-record-v2-source-text',
@@ -329,26 +429,28 @@ const sourceTextApproval = (version: number, recordSchemaVersion: number, review
  * (schema 8) approved the launch wording with Pika in T1; versions 5 and 6 approved the same wording without it
  * (CR-V2-MVP-PROVIDER-SCOPE-1). Versions 7 (schema 7) and 8 (schema 8) approve T1 v3: only Higgsfield, Runway and "Not sure",
  * and the shortened T1 help text (CR-V2-MVP-PROVIDER-SCOPE-2). Versions 9 (schema 7) and 10 (schema 8) approve the same wording
- * plus the 14 SI8-UX-2 customer strings in the customer wording set (SI8-UX-2-R2); nothing else in the wording changed.
+ * plus the 14 SI8-UX-2 customer strings in the customer wording set (SI8-UX-2-R2); nothing else in the wording changed. Versions 11
+ * (schema 7) and 12 (schema 8) approve the same wording plus the four D3 dependency labels (CR-DOC-READER-EXT-6E).
  */
-export const CREATOR_RECORD_SOURCE_TEXT_APPROVAL: SourceTextApproval | null = sourceTextApproval(9, 7, `${CREATOR_RECORD_UX2_WORDING_APPROVAL_REF} schema 7`, UX2_DECISION_DATE)
+export const CREATOR_RECORD_SOURCE_TEXT_APPROVAL: SourceTextApproval | null = sourceTextApproval(11, 7, `${CREATOR_RECORD_DOC_READER_EXT_6E_APPROVAL_REF} schema 7`, DOC_READER_EXT_6E_DECISION_DATE)
 
 /** CR-V2-SCHEMA8-PATH-1: the distinct approval of the same wording for the examination-bearing record (schema 8). */
-export const CREATOR_RECORD_EXAMINATION_SOURCE_TEXT_APPROVAL: SourceTextApproval | null = sourceTextApproval(10, 8, `${CREATOR_RECORD_UX2_WORDING_APPROVAL_REF} schema 8`, UX2_DECISION_DATE)
+export const CREATOR_RECORD_EXAMINATION_SOURCE_TEXT_APPROVAL: SourceTextApproval | null = sourceTextApproval(12, 8, `${CREATOR_RECORD_DOC_READER_EXT_6E_APPROVAL_REF} schema 8`, DOC_READER_EXT_6E_DECISION_DATE)
 
 /**
  * The approval of the exact questionnaire contract (R1; version 2 = R1 with T1 v2, CR-V2-MVP-PROVIDER-SCOPE-1; version 3 = R1
  * with T1 v3, CR-V2-MVP-PROVIDER-SCOPE-2; version 4 = version 3 under the SI8-UX-2 wording digest, SI8-UX-2-R2: the questions,
- * options, conditions, sections and rules are unchanged, only the wording digest the contract names changed).
+ * options, conditions, sections and rules are unchanged, only the wording digest the contract names changed; version 5 = version
+ * 4 under the CR-DOC-READER-EXT-6E wording digest (four dependency labels added; questions unchanged).
  */
 export const CREATOR_RECORD_QUESTIONNAIRE_APPROVAL: QuestionnaireContractApproval | null = Object.freeze({
   contract_id: 'si8/creator-record-v2-questionnaire-contract',
-  contract_version: 4,
+  contract_version: 5,
   contract_sha256: CREATOR_RECORD_QUESTIONNAIRE_CONTRACT_SHA256,
   lifecycle: 'approved',
   authority: LAUNCH_AUTHORITY,
-  decision_date: UX2_DECISION_DATE,
-  review_ref: CREATOR_RECORD_UX2_WORDING_APPROVAL_REF,
+  decision_date: DOC_READER_EXT_6E_DECISION_DATE,
+  review_ref: CREATOR_RECORD_DOC_READER_EXT_6E_APPROVAL_REF,
 }) as QuestionnaireContractApproval
 
 // CR-V2-MVP-M3: the customer PDF template set and its approval (`../customer-pdf/templates`). Rendering

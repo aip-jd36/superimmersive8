@@ -1,6 +1,6 @@
 /**
- * CR-DOC-READER-EXT-1 (C) — DRAFT governed relevance table: which observation fields of which reading MAY bear on a governed
- * project dependency. STATUS: DRAFT — NOT APPROVED. Governance data, not interpretation: an entry never says a field satisfies a
+ * CR-DOC-READER-EXT-1 (C) — governed relevance table: which observation fields of which reading MAY bear on a governed
+ * project dependency. STATUS: APPROVED (D4, founder, JD-CR-DOC-READER-EXT-6E-20261119). Governance data, not interpretation: an entry never says a field satisfies a
  * dependency or that a document is sufficient evidence of anything. It only names where a relevant printed value could appear.
  *
  * Keys are existing governed dependency ids (`unresolved_project_dependencies` of the candidate claims). Each entry names the
@@ -9,7 +9,7 @@
  * the provider is already declared, and issuer readings are not used to link anything.
  */
 
-export const DEPENDENCY_RELEVANCE_STATUS = 'DRAFT — NOT APPROVED' as const
+export const DEPENDENCY_RELEVANCE_STATUS = 'APPROVED — JD-CR-DOC-READER-EXT-6E-20261119' as const
 
 export interface RelevanceSource {
   /** The profile whose reading this is (must equal the reading's own profile). */

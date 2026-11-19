@@ -14,6 +14,7 @@ import { join, relative, sep } from 'node:path'
 import type { GovernanceApproval } from '@/lib/creator-record/contract/types'
 import { loadQuestionRegistry } from '@/lib/creator-record/contract/question-registry'
 import type { PublicationLedgerEntry } from '@/lib/creator-record/contract/publication-ledger'
+import { BASELINE_ERA_LEDGER } from '@/test-support/readiness-scenarios'
 import { approvedCustomerRecordInputs, approvedPdfTemplates } from '@/lib/creator-record/customer-flow/approved-inputs'
 import { buildCustomerRecord, CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION } from '@/lib/creator-record/customer-record/record'
 import { SOURCE_TEXT_CATEGORIES, SOURCE_TEXT_SOURCE_ID, sourceTextContent, sourceTextDigest } from '@/lib/creator-record/customer-record/source-text'
@@ -100,7 +101,8 @@ const ACK = { A1: true, A2: true }
 const RECORD = (id: string, version = 1) => ({ record_id: id, record_version: version, captured_at: '2026-11-12T00:00:00Z' })
 function live(id: string, answers: Record<string, string[]>, tools: Record<string, string[]>[], version = 1) {
   const i = approvedCustomerRecordInputs(GOV as never)
-  const r = buildCustomerRecord({ state: { answers, tools, acknowledgements: ACK } as never, sources: i.sources as never, source_text: i.source_text as never, topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: '2026-11-12', record: RECORD(id, version) })
+  // CR-DOC-READER-EXT-6E: the ledger as of these scenarios' baselines (`BASELINE_ERA_LEDGER`); published content has its own tests.
+  const r = buildCustomerRecord({ state: { answers, tools, acknowledgements: ACK } as never, sources: { ...i.sources, ledger: BASELINE_ERA_LEDGER } as never, source_text: i.source_text as never, topicClaims: TOPIC_CLAIMS_FIXTURE, as_of: '2026-11-12', record: RECORD(id, version) })
   if (!r.ok) throw new Error(JSON.stringify(r).slice(0, 500))
   return r
 }
@@ -137,7 +139,7 @@ function pilotRecord(id: string, sources: CreatorRecordSources, answers: Record<
 const PROPOSAL = JSON.parse(readFileSync(join(__dirname, '../../lib/creator-record/governed/proposals/CR-V2-LEDGER-4-artlist-standalone.proposal.json'), 'utf8')) as { entry: PublicationLedgerEntry }
 /** The Artlist proposal as if approved — TEST ONLY; the staged proposal itself stays Pending and outside the live ledger. */
 const ARTLIST_APPROVED_COPY: PublicationLedgerEntry = { ...PROPOSAL.entry, creator_record_eligible: 'Yes', approver: 'SYNTHETIC TEST APPROVER', decision_date: '2026-11-12', refresh_by: '2027-02-12' }
-const LIVE_PLUS_ARTLIST = [...CREATOR_RECORD_PUBLICATION_LEDGER.filter((e) => !e.superseded_by && e.creator_record_eligible === 'Yes'), ARTLIST_APPROVED_COPY]
+const LIVE_PLUS_ARTLIST = [...BASELINE_ERA_LEDGER.filter((e) => !e.superseded_by && e.creator_record_eligible === 'Yes'), ARTLIST_APPROVED_COPY]
 
 const BASE = { P1: ['Renderer proof video'], P3: ['own_channels'], F1: ['TW'], F2: ['TW'], L1: ['no'], H1: ['edited'] }
 type Built = { canonical: string; sha256: string }

@@ -103,8 +103,8 @@ describe('approved contracts and digests are unchanged', () => {
       const s = JSON.stringify(r)
       expect(s).toContain(CREATOR_RECORD_QUESTIONNAIRE_CONTRACT_SHA256)
     }
-    expect(CREATOR_RECORD_QUESTIONNAIRE_CONTRACT_SHA256).toBe('6c95569de6093999997c2d17cd64d82b66eae56014c0e4423ae084296bdf45e8')
-    expect(CREATOR_RECORD_SOURCE_TEXT_SHA256).toBe('8af542da3e6c48c78df8854f78f0da628db22c7035801859913f7b19a427107d')
+    expect(CREATOR_RECORD_QUESTIONNAIRE_CONTRACT_SHA256).toBe('53253131df7ad0ac3e0255e4994386cf9b459282bea5cec08331d025c371de81')
+    expect(CREATOR_RECORD_SOURCE_TEXT_SHA256).toBe('be8891a83837155227c4d08f0f96de225fe66286a25bdeadb04e2fa3720b51e9')
     expect(JSON.stringify(checkApprovedSources(inputs.sources, inputs.source_text, TOPIC_CLAIMS_FIXTURE as never, AS_OF, { id: 'si8/creator-record-v2-record', version: 7 }))).toContain(CREATOR_RECORD_SOURCE_TEXT_SHA256)
   })
 

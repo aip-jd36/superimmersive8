@@ -300,7 +300,9 @@ describe('copyright guidance stays inactive', () => {
   test('no ledger entry in either bundle names a copyright claim, and none uses requirements_met', () => {
     for (const b of [CREATOR_RECORD_GOVERNANCE_AUTHORITY, CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY!]) {
       expect(b.publication_ledger.filter((e) => [COPY004, ...US_CLAIMS, TW, CN].includes(e.claim_id))).toEqual([])
-      expect(b.publication_ledger.filter((e) => e.applicability_policy === 'requirements_met')).toEqual([])
+      // CR-DOC-READER-EXT-6E: requirements_met is used only by the four approved D2 entries (music and stock), never by copyright.
+      expect(b.publication_ledger.filter((e) => e.applicability_policy === 'requirements_met').map((e) => e.entry_id).every((id) => id.startsWith('CR-DOC-READER-EXT-1-LEDGER-'))).toBe(true)
+      expect(b.publication_ledger.filter((e) => e.applicability_policy === 'requirements_met').map((e) => e.claim_id).filter((id) => /COPY|COPYRIGHT/.test(id))).toEqual([])
     }
   })
 })

@@ -295,6 +295,8 @@ Nothing in this subsection is approved for implementation. Each item needs **fre
 - Kling and other providers remain outside MVP scope. They stay selectable, as before, and receive no guidance ("SI8 has no published guidance for the tools and services you named").
 - **Deferred until after the MVP:** Pika research (including governance issue G-PIKA-TIME, current plan versus plan at generation), Pika claim updates (including the legacy plan names Standard and Pro), and broader Living Knowledge expansion.
 
+- **Amended 2026-11-19 (D1, founder, `JD-CR-DOC-READER-EXT-6E-20261119`):** the deferral of broader Living Knowledge expansion is lifted for **exactly four** existing governed claims, for Creator Record only: `CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1` and `CLAIM-MUSIC-EPIDEMIC-TIER-ADVERTISING-001-v1` (selected from M1 only), `CLAIM-STOCK-EDITORIAL-001-v2` and `CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1` (selected from M3 only). Their guidance applies to every creator who names Artlist or Epidemic Sound for music, or Getty Images, iStock, Shutterstock, Adobe Stock or Pond5 for stock, with or without documents. No other claim, provider or topic is included; the Pika items above stay deferred. Record: `08_Platform/implementation/cr-doc-reader-ext-1/`.
+
 ### 10.2 Why
 
 - G-PIKA-TIME is unresolved. The governed Pika plan claims are conditioned on the user's *current* plan, the record asks for the plan *while the video was made*, and the official Pika text available on 2026-11-11 does not settle which one governs commercial-use permission (CR-V2-LK-PIKA-TIME-1).

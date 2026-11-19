@@ -405,7 +405,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     provider_scope: ['getty', 'istock', 'shutterstock', 'adobe-stock'],
     tool_scope: null,
     publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
-    last_verified: '2026-08-27',
+    last_verified: '2026-11-19', // CR-DOC-READER-EXT-6D source re-verification (was 2026-08-27); see GOVERNED-CLAIMS.md
     superseded_by: null,
   },
   {
@@ -1011,7 +1011,7 @@ export const TOPIC_CLAIMS_FIXTURE: TopicClaim[] = [
     provider_scope: ['pond5'],
     tool_scope: null,
     publication_scope: 'Reviewer/Commercial Assurance', // CAH-4E: hand-synced from GOVERNED-CLAIMS.md `Publication scope:` line
-    last_verified: '2026-08-30',
+    last_verified: '2026-11-19', // CR-DOC-READER-EXT-6D source re-verification (was 2026-08-30); see GOVERNED-CLAIMS.md
     superseded_by: null,
   },
   {
