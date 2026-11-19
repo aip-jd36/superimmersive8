@@ -7,9 +7,10 @@
  * facing surface (the pre-purchase review, the PDF documents section and the PDF relationship block) shows for a reading of a
  * privacy-projected profile:
  *   - no excerpt at all;
- *   - no value for a free-text statement field (`permission_statement`): only that one was shown;
- *   - every other observation as before: closed classifications (labelled by the template), validated ISO dates, and the bounded,
- *     contact-validated short values (licence or plan type, designation, item).
+ *   - a value only for an ALLOW-LISTED field in a closed format (CR-DOC-READER-EXT-7B): the closed classifications (printed through
+ *     the template's own labels) and the validator-enforced ISO dates. Every other field's value, i.e. every free-text field
+ *     (licence or plan type, designation, item, permission statement) and any field added later, is withheld (fail closed): only
+ *     that the document showed one.
  * The stored reading and the record are unchanged (internal provenance): this is a display projection only, applied in one place per
  * surface through this module. Receipt readings are unchanged (receipts are the creator's own billing documents; their customer view
  * already withholds the issuer).
@@ -18,13 +19,17 @@
 export interface ReadingPrivacyRule {
   /** Excerpts are never shown to the customer. */
   readonly excerpts: 'withheld'
-  /** Fields whose value is never shown to the customer (only that the document showed one). */
-  readonly withheld_values: readonly string[]
+  /** The ONLY fields whose value may be shown: closed formats. Any other field's value is withheld (only that one was shown). */
+  readonly shown_values: readonly string[]
 }
 
 /** Profiles whose readings are privacy-projected for customers, by profile id. */
 export const READING_PRIVACY_RULES: Readonly<Record<string, ReadingPrivacyRule>> = Object.freeze({
-  licence: Object.freeze({ excerpts: 'withheld' as const, withheld_values: Object.freeze(['permission_statement']) }),
+  licence: Object.freeze({
+    excerpts: 'withheld' as const,
+    // Closed classifications (enums, template-labelled) and ISO dates (validator-enforced, `LICENCE_DATE_FIELDS`). Nothing free-text.
+    shown_values: Object.freeze(['document_kind', 'readability', 'instruction_like_text_present', 'personal_details_present', 'issue_date', 'valid_until']),
+  }),
 })
 
 export interface CustomerObservationText {
@@ -40,7 +45,7 @@ export interface CustomerObservationText {
 export function customerObservationText(profileId: string, o: { field: string; status: string; value: string | null; excerpt: string | null }): CustomerObservationText {
   const rule = Object.prototype.hasOwnProperty.call(READING_PRIVACY_RULES, profileId) ? READING_PRIVACY_RULES[profileId] : undefined
   if (!rule) return { value: o.value, excerpt: o.excerpt, value_withheld: false, excerpt_withheld: false }
-  const withholdValue = rule.withheld_values.includes(o.field) && o.value !== null
+  const withholdValue = !rule.shown_values.includes(o.field) && o.value !== null
   return { value: withholdValue ? null : o.value, excerpt: null, value_withheld: withholdValue, excerpt_withheld: o.excerpt !== null }
 }
 

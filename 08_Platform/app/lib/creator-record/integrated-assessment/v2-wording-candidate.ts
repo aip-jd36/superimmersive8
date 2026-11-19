@@ -15,7 +15,7 @@ export const V2_WORDING_CANDIDATE_STATUS = 'DRAFT — NOT APPROVED, NOT REGISTER
 
 export const V2_WORDING_CANDIDATE = Object.freeze({
   // CR-DOC-READER-EXT-6A: heading qualified; intro says what "may be relevant" does and does not mean.
-  heading: 'How your documents may relate to this consideration',
+  heading: 'How your documents may relate to open points in the guidance', // CR-DOC-READER-EXT-7B R1
   intro: 'The documents you added were read automatically, as described above. What follows is how a reading may relate to a point in the guidance. No person at SI8 checked it, and it was not compared with your answers. “May be relevant” means only that a reading may concern this point: it does not settle the point, and SI8 did not decide whether the guidance fits your project.',
   association: 'This document is listed here because of the document type you chose for it. SI8 did not check that it comes from this service, concerns your material or relates to this video.',
   open_dependency: 'This point remains open. A document reading does not settle it, and does not show that you hold the rights or permission you need.',

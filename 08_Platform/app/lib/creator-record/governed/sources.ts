@@ -2876,7 +2876,7 @@ export const CREATOR_RECORD_PDF_TEMPLATE_SETS: readonly { readonly templates: un
       "service_period_end": "Service period end",
       "plan_candidate": "Plan name shown",
       "document_kind": "Kind of document (as read)",
-      "personal_details_present": "Details about a person shown",
+      "personal_details_present": "Details about a person shown (as read)",
       "licence_or_plan_type": "Licence or plan type shown",
       "content_designation": "Designation shown",
       "permission_statement": "Permission statement shown",
@@ -2958,7 +2958,7 @@ export const CREATOR_RECORD_PDF_TEMPLATE_SETS: readonly { readonly templates: un
       "recorded_test_data_not_model_output": "This result replays SI8 test data. No AI model read the file.",
       "observations_not_verified": "No person checked this reading.",
       "no_location_reference": "The reading does not say where on the document each detail appears.",
-      "fields_not_established": "Some details could not be read from the document.",
+      "fields_not_established": "Some details were not shown on the document or could not be read.",
       "single_plan_reading_does_not_exclude_others": "Reading one plan name does not rule out other plans.",
       "multiple_plans_shown": "The document shows more than one plan.",
       "instruction_like_text_present": "The document contains text that looks like instructions to an AI. The reading was instructed to ignore it.",
@@ -2996,7 +2996,7 @@ export const CREATOR_RECORD_PDF_TEMPLATE_SETS: readonly { readonly templates: un
       "mock_test_data_not_model_output": "This result uses SI8 test data. No AI model read the file.",
       "observations_not_verified": "No person checked this reading.",
       "no_location_reference": "The reading does not say where on the document each detail appears.",
-      "fields_not_established": "Some details could not be read from the document.",
+      "fields_not_established": "Some details were not shown on the document or could not be read.",
       "single_plan_reading_does_not_exclude_others": "Reading one plan name does not rule out other plans.",
       "multiple_plans_shown": "The document shows more than one plan.",
       "instruction_like_text_present": "The document contains text that looks like instructions to an AI. The reading was instructed to ignore it.",
@@ -3110,7 +3110,7 @@ export const CREATOR_RECORD_PDF_TEMPLATE_SETS: readonly { readonly templates: un
     "caveats_pointer": "See 'Please note' below."
   },
   "integrated_assessment_v2": {
-    "heading": "How your documents may relate to this consideration",
+    "heading": "How your documents may relate to open points in the guidance",
     "intro": "The documents you added were read automatically, as described above. What follows is how a reading may relate to a point in the guidance. No person at SI8 checked it, and it was not compared with your answers. “May be relevant” means only that a reading may concern this point: it does not settle the point, and SI8 did not decide whether the guidance fits your project.",
     "association": "This document is listed here because of the document type you chose for it. SI8 did not check that it comes from this service, concerns your material or relates to this video.",
     "open_point": "This point remains open. A document reading does not settle it, and does not show that you hold the rights or permission you need.",
@@ -3158,7 +3158,7 @@ export const CREATOR_RECORD_PDF_TEMPLATE_SETS: readonly { readonly templates: un
     "excerpts_withheld": "Text from this document is not reproduced here, because a licence or permission may include details about other people. The document itself has the exact wording."
   }
 }),
-    approval: Object.freeze({ template_id: 'si8/creator-record-v2-pdf-templates', version: 8, fingerprint: '9496eb43c9167454b29cdfa2e1432aa2191abb818c04733c22f5a4402ce4b287', record_schema: { id: 'si8/creator-record-v2-record', version: 8 }, lifecycle: 'pending', authority: '', decision_date: '', review_ref: 'CR-DOC-READER-EXT-2 candidate v8, revised CR-DOC-READER-EXT-6A/6B (wording not approved: D5)' }) as PdfTemplateApproval,
+    approval: Object.freeze({ template_id: 'si8/creator-record-v2-pdf-templates', version: 8, fingerprint: '1d0cb5f3707d210eb4b9576bae6d9be33c1e24a1d5bae260bef6d5adf60c6fbf', record_schema: { id: 'si8/creator-record-v2-record', version: 8 }, lifecycle: 'pending', authority: '', decision_date: '', review_ref: 'CR-DOC-READER-EXT-2 candidate v8, revised CR-DOC-READER-EXT-6A/6B/7B (wording not approved: D5)' }) as PdfTemplateApproval,
   }),
 ])
 

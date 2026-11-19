@@ -7,7 +7,7 @@ import { approvedPdfTemplates } from '@/lib/creator-record/customer-flow/approve
 import { buildCustomerDocument, CustomerPdfRefusal, type Block } from '@/lib/creator-record/customer-pdf/document-model'
 import { checkTemplates, templateFingerprint } from '@/lib/creator-record/customer-pdf/templates'
 import { CUSTOMER_RECORD_SCHEMA } from '@/lib/creator-record/customer-record/record'
-import { candidateTemplateSetV8, CR_DOC_READER_EXT_2_TEMPLATE_STATUS, READING_PRIVACY_TEMPLATE, V7_NOT_DONE_COMPARISON_LINE, V8_NOT_DONE_COMPARISON_LINE } from '@/test-support/doc-reader-ext-2-template'
+import { candidateTemplateSetV8, CR_DOC_READER_EXT_2_TEMPLATE_STATUS, READING_PRIVACY_TEMPLATE, V7_FIELDS_NOT_ESTABLISHED, V8_FIELDS_NOT_ESTABLISHED, V7_NOT_DONE_COMPARISON_LINE, V8_NOT_DONE_COMPARISON_LINE } from '@/test-support/doc-reader-ext-2-template'
 import { CREATOR_RECORD_PDF_TEMPLATE_SETS } from '@/lib/creator-record/governed/sources'
 import { ISSUED, licenceRecord, SYNTHETIC_V8, V8 } from '@/test-support/doc-reader-ext-fixture'
 
@@ -27,9 +27,16 @@ describe('candidate template set v8', () => {
     const v7 = (CREATOR_RECORD_PDF_TEMPLATE_SETS as any[]).find((s) => s.approval.record_schema.version === 8 && s.approval.version === 7)
     expect(V8.base.fingerprint).toBe(v7.approval.fingerprint)
     // CR-DOC-READER-EXT-6B: reading_privacy is a further addition (the two fixed privacy lines).
-    const { version, integrated_assessment_v2, reading_privacy, examination, sections, ...rest } = V8.templates
-    const { version: v7v, examination: v7x, sections: v7s, ...v7rest } = v7.templates
+    const { version, integrated_assessment_v2, reading_privacy, examination, live_examination, sections, ...rest } = V8.templates
+    const { version: v7v, examination: v7x, live_examination: v7l, sections: v7s, ...v7rest } = v7.templates
     expect(rest).toEqual(v7rest)
+    // CR-DOC-READER-EXT-7B R2: the fields_not_established limitation label is revised in both reading types; nothing else in them.
+    expect(examination.limitation_labels.fields_not_established).toBe(V8_FIELDS_NOT_ESTABLISHED)
+    expect(live_examination.limitation_labels.fields_not_established).toBe(V8_FIELDS_NOT_ESTABLISHED)
+    expect(v7x.limitation_labels.fields_not_established).toBe(V7_FIELDS_NOT_ESTABLISHED)
+    expect({ ...live_examination, limitation_labels: { ...live_examination.limitation_labels, fields_not_established: V7_FIELDS_NOT_ESTABLISHED } }).toEqual(v7l)
+    expect(examination.field_labels.personal_details_present).toBe('Details about a person shown (as read)') // R3
+    expect(integrated_assessment_v2.heading).toBe('How your documents may relate to open points in the guidance') // R1
     expect(version).toBe(8)
     expect(integrated_assessment_v2).toBeDefined()
     expect(reading_privacy).toEqual(READING_PRIVACY_TEMPLATE)
@@ -58,14 +65,17 @@ describe('v8 rendering, end to end (synthetic approval)', () => {
     const docs = docTexts(m)
     // What was read (documents section, unchanged mechanism) ...
     // CR-DOC-READER-EXT-6B: the value prints; its excerpt does not (privacy projection), and the fixed line says so.
-    expect(docs).toEqual(expect.arrayContaining(['Licence or plan type shown', 'Pro', 'Yes', READING_PRIVACY_TEMPLATE.excerpts_withheld]))
+    // CR-DOC-READER-EXT-7B R4: free-text values (plan type, item) are withheld too; the closed-format date and classifications print.
+    expect(docs).toEqual(expect.arrayContaining(['Licence or plan type shown', READING_PRIVACY_TEMPLATE.value_withheld, '2026-10-01', 'Yes', READING_PRIVACY_TEMPLATE.excerpts_withheld]))
+    expect(docs).not.toContain('Pro')
+    expect(docs).not.toContain('Synthetic Track 7')
     expect(docs).not.toContain('Licence type: Pro')
     // ... then, separately, how it relates to the governed point.
     const T = V8.templates.integrated_assessment_v2
     const i = docs.indexOf(T.heading)
     expect(i).toBeGreaterThan(docs.indexOf('Licence type: Pro'))
     const v2 = docs.slice(i)
-    expect(v2).toEqual(expect.arrayContaining([T.intro, 'Which Artlist licence applies', T.reading_labels.read, T.status_labels.relevant_observation_unverified, T.reason_labels.field_present, 'Pro', T.association, T.open_point]))
+    expect(v2).toEqual(expect.arrayContaining([T.intro, 'Which Artlist licence applies', T.reading_labels.read, T.status_labels.relevant_observation_unverified, T.reason_labels.field_present, READING_PRIVACY_TEMPLATE.value_withheld, T.association, T.open_point]))
     expect(v2.join(' ')).not.toMatch(/\b(satisfied|sufficient|confirmed|cleared|approved|valid licence)\b/i)
   })
   test('association fails closed when both music and stock are declared: read, but not linked', async () => {

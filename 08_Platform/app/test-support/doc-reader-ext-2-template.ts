@@ -24,11 +24,13 @@ export const CANDIDATE_TEMPLATE_BASE = { schema: 8, version: 7 } as const
 export const CANDIDATE_TEMPLATE_VERSION = 8
 
 export const V7_NOT_DONE_COMPARISON_LINE = 'SI8 did not compare your documents, or their readings, with what you told SI8 or with the guidance.'
+export const V7_FIELDS_NOT_ESTABLISHED = 'Some details could not be read from the document.'
+export const V8_FIELDS_NOT_ESTABLISHED = 'Some details were not shown on the document or could not be read.'
 export const V8_NOT_DONE_COMPARISON_LINE = 'SI8 did not compare your documents, or their readings, with what you told SI8. Where this record links a document to an open point in the guidance, the link does not settle that point.'
 
 export const LICENCE_FIELD_LABELS: Readonly<Record<string, string>> = Object.freeze({
   document_kind: 'Kind of document (as read)',
-  personal_details_present: 'Details about a person shown',
+  personal_details_present: 'Details about a person shown (as read)', // CR-DOC-READER-EXT-7B R3
   licence_or_plan_type: 'Licence or plan type shown',
   content_designation: 'Designation shown',
   permission_statement: 'Permission statement shown',
@@ -106,6 +108,11 @@ export function candidateTemplateSetV8(): CandidateTemplateSet {
   t.sections.not_done.lines[i] = V8_NOT_DONE_COMPARISON_LINE
   t.integrated_assessment_v2 = clone(INTEGRATED_ASSESSMENT_V2_TEMPLATE)
   t.reading_privacy = clone(READING_PRIVACY_TEMPLATE)
+  // CR-DOC-READER-EXT-7B R2: the limitation is reported when a detail was not shown OR could not be read (both reading types).
+  for (const set of [t.examination.limitation_labels, t.live_examination.limitation_labels]) {
+    if (set.fields_not_established !== V7_FIELDS_NOT_ESTABLISHED) throw new Error('v7 fields_not_established label not as expected')
+    set.fields_not_established = V8_FIELDS_NOT_ESTABLISHED
+  }
   return {
     status: CR_DOC_READER_EXT_2_TEMPLATE_STATUS,
     base: { template_id: base[0].approval.template_id, version: base[0].approval.version, fingerprint: base[0].approval.fingerprint },

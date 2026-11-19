@@ -162,3 +162,14 @@ artifacts.
 
 Result: every provider in both claims' scopes is verified against current terms, and none contradicts its proposition or provider
 scope. No provider needs excluding.
+
+## EXT-7B addendum (2026-11-19) — v8 final wording and short-value privacy (pending, not approved)
+
+Internal review (EXT-7A), not legal approval. v8 stays `pending`; fingerprint now `1d0cb5f3707d210eb4b9576bae6d9be33c1e24a1d5bae260bef6d5adf60c6fbf`.
+- R1: the block heading is now "How your documents may relate to open points in the guidance".
+- R2: the `fields_not_established` limitation now reads "Some details were not shown on the document or could not be read." (both reading types, v8 only; v7 unchanged).
+- R3: "Details about a person shown (as read)".
+- R4: the privacy projection is now an ALLOW-LIST (`reading-privacy.ts`). Only the closed classifications and the validator-enforced ISO dates
+  print a value. Every free-text field's value is withheld, and so is any field added later: licence or plan type, designation, item and
+  permission statement. Each prints "Shown in the document; not reproduced here". Tradeoff: a plan or designation value (e.g. "Pro") is no
+  longer printed; the reading still shows that one is present and how it may relate to the open point.

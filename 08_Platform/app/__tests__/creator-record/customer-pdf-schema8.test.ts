@@ -311,7 +311,7 @@ describe('governance', () => {
       [7, 6, 'a0cd0c248ce270d2826712910aa606579ce429f7923b051d68a0502c5305f476', 'approved'],
       [8, 7, '5d7ccfc8ce824e57f6e904d51f1027b59e43ab250a7f4895b0f804debe1761ab', 'approved'],
       // CR-DOC-READER-EXT-5A: candidate v8 registered INACTIVE (pending: never selected, refused by checkTemplates; wording not approved).
-      [8, 8, '9496eb43c9167454b29cdfa2e1432aa2191abb818c04733c22f5a4402ce4b287', 'pending'],
+      [8, 8, '1d0cb5f3707d210eb4b9576bae6d9be33c1e24a1d5bae260bef6d5adf60c6fbf', 'pending'],
     ])
   })
 })

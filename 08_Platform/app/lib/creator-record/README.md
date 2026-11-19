@@ -35,7 +35,7 @@
   - schema 8 → v7, `5d7ccfc8ce824e57f6e904d51f1027b59e43ab250a7f4895b0f804debe1761ab`.
 - v6/v7 are v4/v5 verbatim plus `version`, `navigation` ("What this record contains"; "See 'Please note' below.") and `presentation`: the Institutional Trust presentation contract `si8/creator-record-pdf-presentation` v1, `aa50507b4f76e8168744d88645220735e8b7820577e7be72e19c83dbedc017db` (`customer-pdf/presentation/institutional-trust.ts`, drawn by `InstitutionalTrustPDF.tsx`; hash-pinned fonts in `customer-pdf/fonts/`). Presentation renders are serialised per process with glyph-character priming and a fail-closed 30 s hold (`presentation/render-queue.ts`, `render_queue_hold_expired`).
 - All use the three-level readiness layout (`customer-pdf/readiness-layout.ts`, `ReadingLayoutView.tsx`).
-- v8 (schema 8) is registered `pending` (fingerprint `9496eb43…`) and is never selected; its wording (D5) awaits counsel review.
+- v8 (schema 8) is registered `pending` (fingerprint `1d0cb5f3…`, revised CR-DOC-READER-EXT-7B) and is never selected; its wording (D5) awaits the founder's decision after an internal review (EXT-7A; no external counsel review for D5).
 - v4 (schema 7) and v5 (schema 8) stay registered as `superseded` since CR-DESIGN-2D, as do v1 (schema 7) and v3 (schema 8); for audit only.
 - Issued PDFs are stored bytes and are never re-rendered.
 - Takeover guard (`b6889585`): a pending artifact whose object is missing is re-rendered only by the generator that recorded it; otherwise it is refused and reconciled by hand.

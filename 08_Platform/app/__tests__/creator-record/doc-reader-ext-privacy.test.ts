@@ -5,6 +5,8 @@
  * emails and phone numbers) must not reach the pre-purchase review, the PDF documents section or the PDF relationship block, whatever
  * the reading's own personal-details flag says. The stored record keeps it (internal provenance). Receipts are unchanged.
  */
+import { LICENCE_CLASSIFICATION_VALUES } from '@/lib/creator-record/customer-flow/licence-compatibility'
+import { LICENCE_DATE_FIELDS } from '@/lib/creator-record/licence-examination/schema'
 import { buildCustomerDocument, type Block } from '@/lib/creator-record/customer-pdf/document-model'
 import { examinationViewOf } from '@/lib/creator-record/customer-flow/service'
 import { customerObservationText, READING_PRIVACY_RULES } from '@/lib/creator-record/customer-record/reading-privacy'
@@ -22,7 +24,10 @@ const PLANTED = {
   document_kind: 'permission_or_consent_letter',
   personal_details_present: false,
   permission_statement: { status: 'present', value: `${NAME} grants permission to use the photograph`, evidence: `I, ${NAME} of ${ADDRESS}, grant permission` },
-  licence_or_plan_type: { status: 'present', value: 'Pro', evidence: `Licence type: Pro, licensee ${NAME}` },
+  // CR-DOC-READER-EXT-7B: a name or address planted in EVERY free-text short field too.
+  licence_or_plan_type: { status: 'present', value: `Pro licence for ${NAME}`, evidence: `Licence type: Pro, licensee ${NAME}` },
+  content_designation: { status: 'present', value: `Editorial, ${ADDRESS}`, evidence: `Designation: Editorial (${ADDRESS})` },
+  licensed_item_reference: { status: 'present', value: `Portrait of ${NAME}`, evidence: `Item: Portrait of ${NAME}` },
 }
 const textsOf = (b: Block): string[] => ('text' in b ? [b.text] : 'label' in b ? [b.label, b.value] : [])
 const pdfText = (rec: { canonical: string; sha256: string }) =>
@@ -30,10 +35,14 @@ const pdfText = (rec: { canonical: string; sha256: string }) =>
 const leaks = (texts: string[]) => texts.filter((t) => t.includes('Plantedname') || t.includes('Planted Road'))
 
 describe('the projection rule', () => {
-  test('licence: no excerpt ever; the permission statement withheld; other values kept; independent of the personal-details flag', () => {
-    expect(READING_PRIVACY_RULES.licence.withheld_values).toEqual(['permission_statement'])
-    expect(customerObservationText('licence', { field: 'permission_statement', status: 'present', value: 'x', excerpt: 'y' })).toEqual({ value: null, excerpt: null, value_withheld: true, excerpt_withheld: true })
-    expect(customerObservationText('licence', { field: 'licence_or_plan_type', status: 'present', value: 'Pro', excerpt: 'Licence type: Pro' })).toEqual({ value: 'Pro', excerpt: null, value_withheld: false, excerpt_withheld: true })
+  test('licence: no excerpt ever; only closed-format values shown (classifications, ISO dates); every free-text value withheld; flag-independent', () => {
+    // CR-DOC-READER-EXT-7B: an allow-list, exactly the closed classifications and the validator-enforced date fields.
+    expect([...READING_PRIVACY_RULES.licence.shown_values].sort()).toEqual([...Object.keys(LICENCE_CLASSIFICATION_VALUES), ...LICENCE_DATE_FIELDS].sort())
+    for (const f of ['permission_statement', 'licence_or_plan_type', 'content_designation', 'licensed_item_reference', 'some_future_field']) {
+      expect(customerObservationText('licence', { field: f, status: 'present', value: 'x', excerpt: 'y' })).toEqual({ value: null, excerpt: null, value_withheld: true, excerpt_withheld: true })
+    }
+    expect(customerObservationText('licence', { field: 'issue_date', status: 'present', value: '2026-10-01', excerpt: 'Issued 2026-10-01' })).toEqual({ value: '2026-10-01', excerpt: null, value_withheld: false, excerpt_withheld: true })
+    expect(customerObservationText('licence', { field: 'document_kind', status: 'present', value: 'unknown', excerpt: null })).toEqual({ value: 'unknown', excerpt: null, value_withheld: false, excerpt_withheld: false })
     expect(customerObservationText('licence', { field: 'permission_statement', status: 'not_shown', value: null, excerpt: null })).toEqual({ value: null, excerpt: null, value_withheld: false, excerpt_withheld: false })
   })
   test('receipt readings pass through unchanged', () => {
@@ -57,7 +66,9 @@ describe('every customer surface withholds; the record keeps the reading', () =>
     const rec = await licenceRecord({ M0: ['music'], M1: ['artlist'], M2: ['yes'] }, 'licence', null, PLANTED)
     const t = pdfText(rec)
     expect(leaks(t)).toEqual([])
-    expect(t).toEqual(expect.arrayContaining([READING_PRIVACY_TEMPLATE.value_withheld, READING_PRIVACY_TEMPLATE.excerpts_withheld, 'Pro', 'Synthetic Track 7']))
+    // CR-DOC-READER-EXT-7B: free-text values withheld; the closed-format date and classification still print.
+    expect(t).toEqual(expect.arrayContaining([READING_PRIVACY_TEMPLATE.value_withheld, READING_PRIVACY_TEMPLATE.excerpts_withheld, '2026-10-01', 'Permission or consent letter']))
+    expect(t.filter((x) => x === READING_PRIVACY_TEMPLATE.value_withheld).length).toBeGreaterThanOrEqual(4)
     expect(t).not.toContain('Licence type: Pro')
   })
 
