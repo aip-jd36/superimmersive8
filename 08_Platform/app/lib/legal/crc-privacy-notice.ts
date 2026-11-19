@@ -19,7 +19,7 @@
  * `./policies` (which carries the Creator Record notice and terms text) except for a type. The per-language completeness rule
  * mirrors `legalPageContent()` in `./policies`; `__tests__/legal/crc-privacy-notice.test.ts` checks that the two agree.
  *
- * This notice is separate from the Creator Record Privacy Notice (`./policies`, `privacy-2026-11-09`), which is unchanged.
+ * This notice is separate from the Creator Record Privacy Notice (`./policies`), which it does not change.
  */
 import type { ApprovedLegalDocument } from './policies'
 import { CRC_PRIVACY_NOTICE_PROPOSED } from './crc-privacy-notice-proposed'

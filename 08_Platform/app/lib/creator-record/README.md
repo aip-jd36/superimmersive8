@@ -87,8 +87,8 @@
 - **Review screen:** the readings-versus-declarations comparison panel and the "Guidance beside your documents" panel were removed (`cddb70fc`, `7892a643`).
 
 **Terms, consent and AI permission.**
-- Terms `terms-2026-11-18` (CR-PUBLIC-LAUNCH: §2 public availability; everything else as `terms-2026-11-14`) and Privacy Notice `privacy-2026-11-09` (`lib/legal/policies.ts`).
-- Storage-consent and AI-permission identifiers are `<wording>__privacy-2026-11-09__terms-2026-11-18` (`lib/creator-record-flow/authorization-versions.ts`).
+- Terms `terms-2026-11-19` and Privacy Notice `privacy-2026-11-19`, effective 2026-11-19 (CR-DOC-READER-EXT-8D, approval `JD-CR-DOC-READER-EXT-8C-20261119`, wording digest `0a6fa5dd…`): `terms-2026-11-18` with a generic §5 coverage sentence, and `privacy-2026-11-09` with §§1, 2, 4, 5 on licences, permissions, whole-document sending and no redaction (`lib/legal/policies.ts`; `implementation/cr-doc-reader-ext-1/05-PRIVACY-TERMS-EXT-8B.md`).
+- Storage-consent and AI-permission identifiers are `<wording>__privacy-2026-11-19__terms-2026-11-19` (`lib/creator-record-flow/authorization-versions.ts`); the Production authority row must name `cr-v2-ai-permission-1__privacy-2026-11-19__terms-2026-11-19`. Permissions given under `…__privacy-2026-11-09__terms-2026-11-18` no longer permit readings.
 - The database accepts an AI-permission grant only for the identifier in `creator_record_v2_ai_permission_authority` (migration `20261113000000`).
 - That row is operator-maintained. Whenever the Terms or Privacy version changes, an operator replaces it by delete-and-insert; in-place updates are refused. Until then, AI examination fails closed.
 - Grants made under an earlier identifier stay as history and no longer permit examination.

@@ -542,13 +542,14 @@ describe('8. every commercial gate stays closed by default', () => {
   })
 })
 
-// CR-DOC-READER-EXT-8C — a legal-version change (the EXT-8B candidate Notice and Terms) does not touch stored readings: the
+// CR-DOC-READER-EXT-8C/8D — a legal-version change (simulated: the published Notice and Terms under later versions) does not touch stored readings: the
 // permission identifier the build asks for changes, but the projection and the checkout/issuance re-check read no grant, so a
 // reading made under the earlier permission stays shown and verifiable for its owner, and stays invisible to anyone else.
 describe('stored readings after a legal-version change (CR-DOC-READER-EXT-8C)', () => {
   test('a receipt reading made under the earlier permission is still projected and re-verified, owner-only', async () => {
-    const { candidatePrivacyNotice, candidateTerms } = jest.requireActual('@/test-support/legal-candidates-ext-8b')
-    const docs = { privacy: candidatePrivacyNotice(), terms: candidateTerms() }
+    const { withPolicyVersion } = jest.requireActual('@/test-support/legal-candidates-ext-8b')
+    const { PRIVACY_NOTICE: PN, TERMS_OF_SERVICE: TS } = jest.requireActual('@/lib/legal/policies')
+    const docs = { privacy: withPolicyVersion(PN, 'privacy-2026-12-01'), terms: withPolicyVersion(TS, 'terms-2026-12-01') }
     const before = (jest.requireActual('@/lib/creator-record-flow/authorization-versions') as typeof import('@/lib/creator-record-flow/authorization-versions')).aiExaminationPermissionVersion()
     let mod!: typeof import('@/lib/creator-record/customer-flow/examination')
     let after!: string | null
@@ -560,8 +561,8 @@ describe('stored readings after a legal-version change (CR-DOC-READER-EXT-8C)', 
       after = require('@/lib/creator-record-flow/authorization-versions').aiExaminationPermissionVersion()
       mod = require('@/lib/creator-record/customer-flow/examination')
     })
-    expect(before).toBe('cr-v2-ai-permission-1__privacy-2026-11-09__terms-2026-11-18')
-    expect(after).toBe('cr-v2-ai-permission-1__privacy-2026-11-20__terms-2026-11-20')
+    expect(before).toBe('cr-v2-ai-permission-1__privacy-2026-11-19__terms-2026-11-19')
+    expect(after).toBe('cr-v2-ai-permission-1__privacy-2026-12-01__terms-2026-12-01')
 
     const refs = [{ run_id: ATTEMPT.id, document_id: DOC_ID, envelope_sha256: ATTEMPT.envelope_sha256, kind: 'live' as const, profile_id: 'receipt' }]
     const live = { listAttempts: async (o: string, d: string) => clone(store.attempts.filter((a) => a.user_id === o && a.document_id === d)) }

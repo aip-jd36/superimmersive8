@@ -106,9 +106,9 @@ describe('publication gate', () => {
     expect(LEGAL_PATHS.privacy).toBe('/privacy')
   })
 
-  test('the Creator Record Privacy Notice is unchanged', () => {
-    expect(PRIVACY_NOTICE?.version).toBe('privacy-2026-11-09')
-    expect(PRIVACY_NOTICE?.approval_reference).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109')
+  test('the Creator Record Privacy Notice is its own document (its current version: CR-DOC-READER-EXT-8D)', () => {
+    expect(PRIVACY_NOTICE?.version).toBe('privacy-2026-11-19')
+    expect(PRIVACY_NOTICE?.approval_reference).toBe('JD-CR-DOC-READER-EXT-8C-20261119 privacy')
     expect(PRIVACY_NOTICE?.paragraphs[0]).toContain("It does not cover SI8's marketing website or SI8's other services.")
   })
 
