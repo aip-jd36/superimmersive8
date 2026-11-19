@@ -13,7 +13,14 @@
  * identifier (licence, order or asset reference) is not phone-like (CR-DOC-READER-EXT-9R1, `phoneLike`).
  */
 
-export const LICENCE_EXTRACTION_SCHEMA_VERSION = 'licence-extraction-v1' as const
+/**
+ * v2 (CR-DOC-READER-EXT-9R3): the field descriptions sent to the model no longer contradict the validator. v1 asked for every value
+ * "exactly as printed" while the validator caps a value at 120 characters, so any longer printed statement could only be rejected.
+ * v2: a printed text up to the limit is copied as printed; a longer one is shortened in the document's own words, keeping every
+ * condition and limitation; the excerpt stays a verbatim copy. Dates: value ISO, excerpt as printed. Shape, limits and the
+ * non-repairing validator are unchanged. v1 is retired: no v1 reading was ever stored.
+ */
+export const LICENCE_EXTRACTION_SCHEMA_VERSION = 'licence-extraction-v2' as const
 
 export const LICENCE_DOCUMENT_KINDS = [
   'licence_or_licence_certificate',
@@ -83,11 +90,11 @@ const fieldSchema = (description: string) => ({
     },
     value: {
       type: ['string', 'null'],
-      description: `Exactly as printed (at most ${LICENCE_MAX_VALUE_CHARS} characters), ONLY when status is 'present'. Otherwise null. Never guess, complete or correct a value. Never a person's name, address, email address, phone number or signature.`,
+      description: `Only when status is 'present', else null. At most ${LICENCE_MAX_VALUE_CHARS} characters: as printed, or, if longer, shortened in the document's own words keeping every condition and limitation. Dates YYYY-MM-DD. No person's details.`,
     },
     evidence: {
       type: ['string', 'null'],
-      description: `A short verbatim excerpt (at most ${LICENCE_MAX_EVIDENCE_CHARS} characters) copied from the document that shows the value. Null when status is not 'present'. Never include a person's contact details.`,
+      description: `Only when status is 'present', else null. A verbatim copy (at most ${LICENCE_MAX_EVIDENCE_CHARS} characters) of one continuous part of the document showing the value; a date as printed. No person's details.`,
     },
   },
   required: ['status', 'value', 'evidence'],
@@ -152,41 +159,65 @@ export function containsContactDetails(text: string): boolean {
   return EMAIL.test(text) || phoneLike(text)
 }
 
-function validateField(raw: unknown, isDate: boolean): LicenceField | null {
-  if (!isObj(raw) || !exactKeys(raw, ['status', 'value', 'evidence'])) return null
+/**
+ * CR-DOC-READER-EXT-9R3: the generic cause of a rejection, as a fixed code with the field name only (never any content), so a
+ * rejected reading can be diagnosed from safe telemetry. The rules are exactly the validator's; `validateLicenceExtraction` is null
+ * iff this is non-null.
+ */
+export const LICENCE_VIOLATION_CODES = [
+  'not_an_object', 'top_level_keys', 'document_kind', 'readability', 'flags',
+  'field_shape', 'field_status', 'field_types', 'present_value_missing', 'present_value_too_long', 'present_evidence_missing',
+  'present_evidence_too_long', 'date_not_iso', 'contact_details', 'non_present_carries_text',
+] as const
+export type LicenceViolationCode = (typeof LICENCE_VIOLATION_CODES)[number]
+export interface LicenceViolation { code: LicenceViolationCode; field: LicenceFieldName | null }
+
+function fieldViolation(raw: unknown, isDate: boolean): LicenceViolationCode | null {
+  if (!isObj(raw) || !exactKeys(raw, ['status', 'value', 'evidence'])) return 'field_shape'
   const { status, value, evidence } = raw
-  if (typeof status !== 'string' || !(LICENCE_FIELD_STATUSES as readonly string[]).includes(status)) return null
-  if (value !== null && typeof value !== 'string') return null
-  if (evidence !== null && typeof evidence !== 'string') return null
+  if (typeof status !== 'string' || !(LICENCE_FIELD_STATUSES as readonly string[]).includes(status)) return 'field_status'
+  if ((value !== null && typeof value !== 'string') || (evidence !== null && typeof evidence !== 'string')) return 'field_types'
   if (status === 'present') {
-    if (value === null || value.trim() === '' || value.length > LICENCE_MAX_VALUE_CHARS) return null
-    if (evidence === null || evidence.trim() === '' || evidence.length > LICENCE_MAX_EVIDENCE_CHARS) return null
-    if (isDate && !isIsoCalendarDate(value.trim())) return null
-    if (containsContactDetails(value) || containsContactDetails(evidence)) return null
-    return { status, value: value.trim(), evidence: evidence.trim() }
+    if (value === null || value.trim() === '') return 'present_value_missing'
+    if (value.length > LICENCE_MAX_VALUE_CHARS) return 'present_value_too_long'
+    if (evidence === null || evidence.trim() === '') return 'present_evidence_missing'
+    if (evidence.length > LICENCE_MAX_EVIDENCE_CHARS) return 'present_evidence_too_long'
+    if (isDate && !isIsoCalendarDate(value.trim())) return 'date_not_iso'
+    if (containsContactDetails(value) || containsContactDetails(evidence)) return 'contact_details'
+    return null
   }
   // A non-present status must not carry a value or an excerpt (contradictory, not recoverable).
-  if (value !== null || evidence !== null) return null
-  return { status: status as LicenceFieldStatus, value: null, evidence: null }
+  if (value !== null || evidence !== null) return 'non_present_carries_text'
+  return null
 }
+
+/** The first rule a raw reading breaks, or null when it is valid. */
+export function licenceExtractionViolation(raw: unknown): LicenceViolation | null {
+  if (!isObj(raw)) return { code: 'not_an_object', field: null }
+  if (!exactKeys(raw, TOP_LEVEL_KEYS)) return { code: 'top_level_keys', field: null }
+  if (typeof raw.document_kind !== 'string' || !(LICENCE_DOCUMENT_KINDS as readonly string[]).includes(raw.document_kind)) return { code: 'document_kind', field: null }
+  if (typeof raw.readability !== 'string' || !(LICENCE_READABILITY_VALUES as readonly string[]).includes(raw.readability)) return { code: 'readability', field: null }
+  if (typeof raw.instruction_like_text_present !== 'boolean' || typeof raw.personal_details_present !== 'boolean') return { code: 'flags', field: null }
+  for (const name of LICENCE_FIELD_NAMES) {
+    const code = fieldViolation(raw[name], LICENCE_DATE_FIELDS.includes(name))
+    if (code) return { code, field: name }
+  }
+  return null
+}
+
+const trimmedField = (f: { status: string; value: string | null; evidence: string | null }): LicenceField =>
+  f.status === 'present' ? { status: 'present', value: (f.value as string).trim(), evidence: (f.evidence as string).trim() } : { status: f.status as LicenceFieldStatus, value: null, evidence: null }
 
 /** Strict, non-repairing. Returns null for anything outside the closed schema. */
 export function validateLicenceExtraction(raw: unknown): LicenceExtraction | null {
-  if (!isObj(raw) || !exactKeys(raw, TOP_LEVEL_KEYS)) return null
-  if (typeof raw.document_kind !== 'string' || !(LICENCE_DOCUMENT_KINDS as readonly string[]).includes(raw.document_kind)) return null
-  if (typeof raw.readability !== 'string' || !(LICENCE_READABILITY_VALUES as readonly string[]).includes(raw.readability)) return null
-  if (typeof raw.instruction_like_text_present !== 'boolean' || typeof raw.personal_details_present !== 'boolean') return null
-  const fields: Partial<Record<LicenceFieldName, LicenceField>> = {}
-  for (const name of LICENCE_FIELD_NAMES) {
-    const f = validateField(raw[name], LICENCE_DATE_FIELDS.includes(name))
-    if (!f) return null
-    fields[name] = f
-  }
+  if (licenceExtractionViolation(raw) !== null) return null
+  const r = raw as Record<string, unknown>
+  const fields = Object.fromEntries(LICENCE_FIELD_NAMES.map((n) => [n, trimmedField(r[n] as { status: string; value: string | null; evidence: string | null })])) as Record<LicenceFieldName, LicenceField>
   return {
-    document_kind: raw.document_kind as LicenceDocumentKind,
-    readability: raw.readability as LicenceReadability,
-    instruction_like_text_present: raw.instruction_like_text_present,
-    personal_details_present: raw.personal_details_present,
-    ...(fields as Record<LicenceFieldName, LicenceField>),
+    document_kind: r.document_kind as LicenceDocumentKind,
+    readability: r.readability as LicenceReadability,
+    instruction_like_text_present: r.instruction_like_text_present as boolean,
+    personal_details_present: r.personal_details_present as boolean,
+    ...fields,
   }
 }

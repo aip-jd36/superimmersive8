@@ -6,7 +6,7 @@
  *   # PAID — only with explicit founder authorization of the spend ceiling, and a workspace spend limit on the dedicated key:
  *   CREATOR_RECORD_EXTRACTION_API_KEY=<dedicated evaluation key> npx tsx --tsconfig tsconfig.json lib/creator-record/eval/run-licence-eval.ts \
  *     --mode live --confirm-paid-calls --model claude-sonnet-5 --runs 2 --max-calls <n> --max-usd <approved> \
- *     --input-usd-per-mtok <confirmed> --output-usd-per-mtok <confirmed> [--out <dir>]
+ *     --input-usd-per-mtok <confirmed> --output-usd-per-mtok <confirmed> [--out <dir>] [--spec preregistered|supplement-9r3]
  *
  * Generate the documents first: `python -I lib/creator-record/eval/fixtures/generate_licence_fixtures.py`.
  * dry-run makes no call and prints the plan and the maximum cost. mock replays the ideal outputs through the real engine (no call).
@@ -18,6 +18,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import path from 'node:path'
 import { LIVE_EXTRACTION_API_KEY_ENV, LIVE_EXTRACTION_MODEL, LIVE_REQUEST_TIMEOUT_MS, withInstanceBudget } from '../evidence/live-caller'
 import { LICENCE_READING_CONTRACT } from '../examination/licence-profile'
+import { licenceExtractionViolation } from '../licence-examination/schema'
 import { attemptCostBoundUsd, boundLiveInputTokens, LIVE_BOUNDS, LIVE_MODEL_PRICES, unsafeSdkEnvironment } from '../live-examination/controls'
 import { examineWithContract, MAX_DOCUMENT_BYTES, type ReceiptModelCaller } from '../receipt-examination/examine'
 import { idealOutput, scoreLicenceEval, type LicenceRunResult, type LicenceSpec } from './score-licence'
@@ -25,8 +26,13 @@ import { idealOutput, scoreLicenceEval, type LicenceRunResult, type LicenceSpec 
 const FIXTURES_DIR = path.join(__dirname, 'fixtures')
 export const LICENCE_EVAL_MAX_USD_CEILING = 10
 
-export function loadLicenceSpec(): LicenceSpec {
-  return JSON.parse(readFileSync(path.join(FIXTURES_DIR, 'licence-fixtures.json'), 'utf8')) as LicenceSpec
+/** The pre-registered set, and the CR-DOC-READER-EXT-9R3 supplement (long statements), which is scored and reported separately. */
+export const LICENCE_EVAL_SPECS = { preregistered: 'licence-fixtures.json', 'supplement-9r3': 'licence-fixtures-supplement-9r3.json' } as const
+export type LicenceEvalSpecName = keyof typeof LICENCE_EVAL_SPECS
+
+export function loadLicenceSpec(name: LicenceEvalSpecName = 'preregistered'): LicenceSpec {
+  if (!Object.prototype.hasOwnProperty.call(LICENCE_EVAL_SPECS, name)) throw new Error(`unknown --spec ${name}`)
+  return JSON.parse(readFileSync(path.join(FIXTURES_DIR, LICENCE_EVAL_SPECS[name]), 'utf8')) as LicenceSpec
 }
 function fixtureBytes(id: string, media: 'pdf' | 'png'): Uint8Array {
   const file = path.join(FIXTURES_DIR, 'generated', 'licence', `${id}.${media}`)
@@ -73,7 +79,9 @@ export async function runLicenceEval(spec: LicenceSpec, runs: number, callerFor:
     for (let run = 1; run <= runs; run++) {
       const rec = recording(callerFor(f.fixture_id))
       const o = await examineWithContract(bytesFor(f.fixture_id, f.media), { callModel: rec.wrapped, contract: LICENCE_READING_CONTRACT })
-      results.push({ fixture_id: f.fixture_id, run, outcome: o.status, reason: o.status === 'examined' ? null : o.reason, extraction: o.status === 'examined' ? o.extraction : null, raw_outputs: rec.raw, model_calls: rec.calls() })
+      // CR-DOC-READER-EXT-9R3: a schema-invalid result carries the generic rule it broke (a code and a field name, no content).
+      const violation = o.status !== 'examined' && o.reason === 'schema_invalid' ? licenceExtractionViolation(rec.raw[rec.raw.length - 1]) : null
+      results.push({ fixture_id: f.fixture_id, run, outcome: o.status, reason: o.status === 'examined' ? null : o.reason, extraction: o.status === 'examined' ? o.extraction : null, raw_outputs: rec.raw, model_calls: rec.calls(), violation })
     }
   }
   const noCall: LicenceRunResult[] = []
@@ -120,7 +128,8 @@ function parseArgs(argv: string[]): Record<string, string | boolean> {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2))
-  const spec = loadLicenceSpec()
+  const specName = (typeof args.spec === 'string' ? args.spec : 'preregistered') as LicenceEvalSpecName
+  const spec = loadLicenceSpec(specName)
   const runs = typeof args.runs === 'string' ? Number(args.runs) : 2
   const plan = planLicenceEval(spec, LIVE_EXTRACTION_MODEL, runs)
   const mode = args.mode ?? 'dry-run'
@@ -139,10 +148,10 @@ async function main() {
   const { createAnthropicLicenceCaller } = await import('../receipt-examination/examine.anthropic')
   const caller = withInstanceBudget(createAnthropicLicenceCaller({ model: LIVE_EXTRACTION_MODEL, apiKeyEnv: LIVE_EXTRACTION_API_KEY_ENV, timeoutMs: LIVE_REQUEST_TIMEOUT_MS }), Number(args['max-calls']), { used: 0 })
   const r = await runLicenceEval(spec, runs, () => caller)
-  const report = { mode, model: LIVE_EXTRACTION_MODEL, criteria: r.score, results: r.results, no_call: r.noCall, plan }
+  const report = { mode, spec: spec.spec_version, model: LIVE_EXTRACTION_MODEL, criteria: r.score, results: r.results, no_call: r.noCall, plan }
   if (typeof args.out === 'string') {
     mkdirSync(args.out, { recursive: true })
-    writeFileSync(path.join(args.out, 'licence-eval-report.json'), JSON.stringify(report, null, 1))
+    writeFileSync(path.join(args.out, `licence-eval-report-${specName}.json`), JSON.stringify(report, null, 1))
   }
   console.log(JSON.stringify({ mode, pass: r.score.pass, criteria: r.score.criteria.map((c) => ({ id: c.id, pass: c.pass, value: c.value })) }, null, 1))
   process.exitCode = r.score.pass ? 0 : 1

@@ -50,3 +50,51 @@ Mock mode (ideal outputs through the real engine) passes every criterion; tests 
 A pass shows the reader behaves acceptably on 12 synthetic documents. It does not establish accuracy on real customer documents,
 other providers' formats, scans or handwriting, and it activates nothing: the licence profile stays outside the live registry, issuance
 support and the customer route until a separate activation decision.
+
+## CR-DOC-READER-EXT-9R3 addendum (2026-11-19): contract v2 and evaluation readiness
+
+**Why.** In the EXT-9R2 Production UAT, the first live licence reading (synthetic EXT9-A4; one paid call, $0.0146 settled) was
+rejected whole as `schema_invalid`. Raw model output is not retained, and v1 validation returned only null, so the exact rule broken
+**cannot be established from existing telemetry**. The leading hypothesis is reproduced offline but not confirmed. v1 had four
+contradictions between what the model was told and what the validator accepts:
+
+1. A value had to be "exactly as printed" and at most 120 characters, so a longer printed text (the EXT9-A4 statement is 180) had no
+   valid answer.
+2. A date had to be ISO and also "exactly as printed".
+3. A statement naming a person could not be both verbatim and free of personal details.
+4. Nothing ruled out an empty string for a field that is not present (the validator requires null).
+
+The mock evaluation never exposed (1): the pre-registered documents' longest present statement is 93 characters, and the ideal mock
+output silently cuts values at 120.
+
+**Change (reading contract v2: `licence-extraction-v2` / `licence-prompt-v2`, licence profile 2).**
+
+- Instructions:
+  - a value is copied as printed when it fits;
+  - a longer text is shortened in the document's own words, keeping every condition and limitation and never adding,
+    strengthening or completing anything;
+  - the excerpt stays verbatim;
+  - dates: the value is ISO and the excerpt shows the date as printed;
+  - null, never an empty string, for a field that is not present;
+  - leaving out a person's details is required.
+- Shape, limits (120 / 200), contact-detail rejection and the non-repairing, fail-closed validator are unchanged.
+- `licenceExtractionViolation` reports the rule a rejected reading broke, as a fixed code and field name only (no content). The
+  evaluation runner records it.
+- The v1 profile pin is kept (append-only). No v1 reading was ever stored.
+
+**Supplement.** The pre-registered set cannot exercise the failure. `fixtures/licence-fixtures-supplement-9r3.json` adds 3 synthetic
+documents: a long licence statement with an alphanumeric licence ID; a long permission naming a fictional person; and a word-form
+date with a 260-character terms statement. They are scored by the same criteria and reported separately (`--spec supplement-9r3`).
+The pre-registered set is unchanged.
+
+**Readiness (Phase C), at commit time:**
+
+| Check | Status |
+|---|---|
+| Synthetic documents only | Yes: both specs are fictional and rendered locally |
+| Activates nothing | Yes: the runner calls the caller directly; `LICENCE_READING_SWITCH` stays `off`; no database access |
+| Same path as Production | Yes: `examineWithContract` + `LICENCE_READING_CONTRACT` + `createAnthropicReceiptCaller` (licence contract), pinned `claude-sonnet-5`, dedicated key variable |
+| Call ceiling | The runner refuses unless `--max-calls` covers the plan; the wrapper sends nothing beyond it. Pre-registered at `--runs 1`: 12 attempts, ≤ 24 requests, ≤ $1.58. Supplement at `--runs 1`: 3 attempts, ≤ 6 requests, ≤ $0.40 |
+| Spend accounting | Outside the database reservation ledger (not a customer reading). Bounded by `--max-usd` (refused below the planned maximum; hard ceiling $10), the call wrapper, and the workspace spend limit on the dedicated key |
+| Persistence | Raw outputs are written only to the `--out` directory (private evidence); nothing goes to the database or the repository |
+| **Blocking** | The dedicated `CREATOR_RECORD_EXTRACTION_API_KEY` is not available in this environment. This plan requires explicit founder authorization of the spend ceiling and a workspace spend limit. Pre-registered `--runs 2` needs 48 requests, above the 24-call cap |

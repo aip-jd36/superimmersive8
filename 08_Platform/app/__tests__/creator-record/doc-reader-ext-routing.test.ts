@@ -42,7 +42,7 @@ const LICENCE_OUTPUT = {
   valid_until: { status: 'not_shown', value: null, evidence: null },
 }
 const RECEIPT_FIXTURE = REPLAY_FIXTURES.find((f) => f.fixture_id === 'pdf-kling-pro-monthly')!
-const LICENCE = { id: 'licence', version: 1 }
+const LICENCE = { id: 'licence', version: 2 }
 const RECEIPT = { id: 'receipt', version: 1 }
 
 /** The replay core with in-memory persistence; `output` is the recording replayed for the document. */
@@ -104,7 +104,7 @@ describe('replay route, end to end (real core, in-memory persistence)', () => {
     expect(events).toEqual(['log', 'read', 'record'])
     const env = parseExaminationEnvelope(JSON.parse(recorded[0]))
     expect(env).not.toBeNull()
-    expect(env!.profile).toMatchObject({ id: 'licence', version: 1, schema: 'licence-extraction-v1', prompt: 'licence-prompt-v1' })
+    expect(env!.profile).toMatchObject({ id: 'licence', version: 2, schema: 'licence-extraction-v2', prompt: 'licence-prompt-v2' })
     expect(env!.document).toMatchObject({ document_id: DOC, sha256: SHA })
     expect(env!.observations.every((o) => o.verification === 'not_verified' && o.source.document_sha256 === SHA)).toBe(true)
     expect(env!.observations.find((o) => o.field === 'licence_or_plan_type')).toMatchObject({ value: 'Pro', excerpt: 'Licence type: Pro' })
@@ -188,7 +188,7 @@ describe('live core (mock executor)', () => {
     const r = await examineLiveAndRecord({ storage: s.ports, core: core(profiles) }, { actor_user_id: OWNER, document_id: DOC, profile: LICENCE })
     expect(r).toMatchObject({ kind: 'examined', model_called: true })
     const e = JSON.parse(s.rows[0].envelope_canonical)
-    expect(e.profile).toMatchObject({ id: 'licence', schema: 'licence-extraction-v1' })
+    expect(e.profile).toMatchObject({ id: 'licence', schema: 'licence-extraction-v2' })
     expect(e.execution_origin).toBe('mock_test')
     expect(e.limitations).toEqual(expect.arrayContaining(['mock_test_data_not_model_output', 'observations_not_verified']))
   })

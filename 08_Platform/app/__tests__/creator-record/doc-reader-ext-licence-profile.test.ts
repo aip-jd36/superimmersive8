@@ -63,7 +63,7 @@ describe('licence profile: inactive and separate', () => {
   })
   test('coexists with the receipt profile in a registry, under its own identity', () => {
     const reg = buildProfileRegistry([RECEIPT_PROFILE, LICENCE_PROFILE_INACTIVE])
-    expect([...reg.keys()].sort()).toEqual(['licence@1', 'receipt@1'])
+    expect([...reg.keys()].sort()).toEqual(['licence@2', 'receipt@1'])
   })
   test('pinned output fingerprint over the corpus (append-only)', async () => {
     expect(await fingerprint()).toBe(LICENCE_PROFILE_OUTPUT_FINGERPRINTS[LICENCE_PROFILE_VERSION])
@@ -134,8 +134,8 @@ describe('category → profile selection (defined, not wired)', () => {
     expect(profileForCategory('provider_terms')).toEqual({ ok: true, profile: { id: 'receipt', version: 1 } })
   })
   test('licences and permissions call for the licence profile, reported inactive (never read as a receipt)', () => {
-    for (const c of ['licence', 'permission']) expect(profileForCategory(c)).toEqual({ ok: false, reason: 'profile_inactive', profile: { id: 'licence', version: 1 } })
-    expect(profileForCategory('licence', [{ id: 'licence', version: 1 }])).toEqual({ ok: true, profile: { id: 'licence', version: 1 } })
+    for (const c of ['licence', 'permission']) expect(profileForCategory(c)).toEqual({ ok: false, reason: 'profile_inactive', profile: { id: 'licence', version: 2 } })
+    expect(profileForCategory('licence', [{ id: 'licence', version: 2 }])).toEqual({ ok: true, profile: { id: 'licence', version: 2 } })
   })
   test('releases, project files and other are not examined; unknown categories fail closed', () => {
     for (const c of ['release_or_consent', 'project_file', 'other']) expect(profileForCategory(c)).toEqual({ ok: false, reason: 'category_not_examined' })

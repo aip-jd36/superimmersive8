@@ -4,7 +4,7 @@
  * The pass/fail criteria are fixed BEFORE any paid run (pre-registered below). A run passes only if every criterion passes.
  * Ground truth: `fixtures/licence-fixtures.json` (synthetic documents; their printed text is the grounding source).
  */
-import { containsContactDetails, LICENCE_FIELD_NAMES, type LicenceExtraction } from '../licence-examination/schema'
+import { containsContactDetails, LICENCE_FIELD_NAMES, type LicenceExtraction, type LicenceViolation } from '../licence-examination/schema'
 
 export interface LicenceFieldTruth { status: 'present' | 'not_shown'; accept?: string[]; contains?: string; printed?: string }
 export interface LicenceFixture {
@@ -27,6 +27,8 @@ export interface LicenceRunResult {
   /** Every structured output the model returned, BEFORE validation (privacy is judged on these, not only on what survived). */
   raw_outputs: unknown[]
   model_calls: number
+  /** CR-DOC-READER-EXT-9R3: for a schema-invalid result, the generic rule broken (code and field, no content). Not scored. */
+  violation?: LicenceViolation | null
 }
 
 /** Pre-registered criteria (CR-DOC-READER-EXT-3). Thresholds are part of the evaluation design and change only by a new version. */

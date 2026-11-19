@@ -21,7 +21,8 @@ import type { ExaminationLimitation } from './envelope'
 import type { ExaminationProfile, ProfileObservation, ProfileReading } from './profile'
 
 export const LICENCE_PROFILE_ID = 'licence'
-export const LICENCE_PROFILE_VERSION = 1
+/** 2 (CR-DOC-READER-EXT-9R3): reading contract licence-extraction-v2 / licence-prompt-v2. Version 1 (v1 contract) is retired; its pin is kept. */
+export const LICENCE_PROFILE_VERSION = 2
 
 /**
  * Pinned output fingerprints (append-only; versioning contract in `./profile.ts`). SHA-256 of
@@ -30,6 +31,7 @@ export const LICENCE_PROFILE_VERSION = 1
  */
 export const LICENCE_PROFILE_OUTPUT_FINGERPRINTS: Readonly<Record<number, string>> = {
   1: 'f629d07349542e736c69f7222b32685c4f42e9efd5456bee997639a557216950',
+  2: '57152297e2995ff693c7ff5dba4de3efd102d3094478390dcf01ee75ee187b40',
 }
 
 export const LICENCE_READING_CONTRACT: ReadingContract<LicenceExtraction> = {

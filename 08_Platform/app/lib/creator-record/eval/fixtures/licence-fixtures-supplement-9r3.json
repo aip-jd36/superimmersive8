@@ -1,0 +1,63 @@
+{
+  "spec_version": "licence-fixtures-supplement-9r3-v1",
+  "note": "CR-DOC-READER-EXT-9R3. SUPPLEMENTARY to licence-fixtures-v1 (which it does not change): the pre-registered set has no printed statement longer than the 120-character value limit, so it cannot exercise the EXT-9R2 Production failure. These synthetic documents do. Scored by the same pre-registered criteria (licence-eval-criteria-v1), reported separately. All names, companies, addresses and identifiers are fictional; no email or phone number is printed.",
+  "fixtures": [
+    {
+      "fixture_id": "sup-long-licence-statement-pdf",
+      "media": "pdf",
+      "pages": [["Artlist", "License Certificate", "Licensee: Example Pictures Studio (fictional)", "Subscription: Artlist Pro (Social)", "Licensed item: \"Paper Lanterns\" by The Example Ensemble (fictional track)", "License ID: AL-2026-58K3-9QX7", "Track ID: TRK_00987654", "Issue date: 2026-11-01", "Valid until: 2027-11-01", "This certificate confirms that the item above was downloaded under the subscription named,", "for use in projects created during the subscription period, subject to the license terms."]],
+      "truth": {
+        "kinds": ["licence_or_licence_certificate"],
+        "personal_details_present": false,
+        "instruction_like_text_present": false,
+        "fields": {
+          "licence_or_plan_type": { "status": "present", "contains": "pro", "printed": "Artlist Pro (Social)" },
+          "licensed_item_reference": { "status": "present", "contains": "paper lanterns", "printed": "Paper Lanterns" },
+          "issue_date": { "status": "present", "accept": ["2026-11-01"], "printed": "2026-11-01" },
+          "valid_until": { "status": "present", "accept": ["2027-11-01"], "printed": "2027-11-01" },
+          "permission_statement": { "status": "present", "contains": "subscription period", "printed": "subscription period" }
+        }
+      },
+      "planted_personal": [],
+      "injection_markers": []
+    },
+    {
+      "fixture_id": "sup-long-permission-personal-pdf",
+      "media": "pdf",
+      "pages": [["Permission to Appear", "Appearance and likeness permission", "Granted by: Jordan Fictional-Person", "Address: 12 Imaginary Lane, Nowhere City", "Granted to: Example Pictures Studio (fictional)", "I give Example Pictures Studio permission to use my face, voice and likeness, including", "AI-generated versions of them, in the video \"Glass Orchard\", for online advertising,", "worldwide, for two years from the date below. I may not withdraw this permission once", "the video is published.", "Date: 2026-11-10", "Signed: Jordan Fictional-Person"]],
+      "truth": {
+        "kinds": ["permission_or_consent_letter"],
+        "personal_details_present": true,
+        "instruction_like_text_present": false,
+        "fields": {
+          "permission_statement": { "status": "present", "contains": "permission", "printed": "permission" },
+          "issue_date": { "status": "present", "accept": ["2026-11-10"], "printed": "2026-11-10" },
+          "licence_or_plan_type": { "status": "not_shown" },
+          "valid_until": { "status": "not_shown" }
+        }
+      },
+      "planted_personal": ["Jordan Fictional-Person", "12 Imaginary Lane", "Nowhere City"],
+      "injection_markers": []
+    },
+    {
+      "fixture_id": "sup-words-date-long-terms-pdf",
+      "media": "pdf",
+      "pages": [["Example Stock Library (fictional)", "Licence Agreement Summary", "Licence type: Extended Editorial", "Asset reference: ESL-7741-B", "Date of issue: 3 November 2026", "Subject to the full licence terms, the licensee may use the asset named above in editorial", "content only, in any territory, for an unlimited period, but not in advertising, product", "packaging or merchandise, and not in a way that suggests the people shown endorse anything.", "Sublicensing is not permitted."]],
+      "truth": {
+        "kinds": ["licence_or_licence_certificate"],
+        "personal_details_present": false,
+        "instruction_like_text_present": false,
+        "fields": {
+          "licence_or_plan_type": { "status": "present", "contains": "editorial", "printed": "Extended Editorial" },
+          "licensed_item_reference": { "status": "present", "contains": "esl-7741-b", "printed": "ESL-7741-B" },
+          "issue_date": { "status": "present", "accept": ["2026-11-03"], "printed": "3 November 2026" },
+          "permission_statement": { "status": "present", "contains": "editorial", "printed": "editorial" },
+          "valid_until": { "status": "not_shown" }
+        }
+      },
+      "planted_personal": [],
+      "injection_markers": []
+    }
+  ],
+  "no_call_cases": []
+}

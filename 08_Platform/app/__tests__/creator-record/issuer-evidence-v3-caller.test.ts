@@ -61,7 +61,7 @@ describe('contract-aware live caller (no network)', () => {
 
   // CR-DOC-READER-EXT-3 adds the licence contract (its own prompt and schema; doc-reader-ext-licence-eval.test.ts).
   test('exactly three contracts, each pairing its own prompt and schema', () => {
-    expect(Object.keys(RECEIPT_CALL_CONTRACTS).sort()).toEqual([RECEIPT_EXTRACTION_SCHEMA_VERSION, RECEIPT_EXTRACTION_SCHEMA_VERSION_V3, 'licence-extraction-v1'].sort())
+    expect(Object.keys(RECEIPT_CALL_CONTRACTS).sort()).toEqual([RECEIPT_EXTRACTION_SCHEMA_VERSION, RECEIPT_EXTRACTION_SCHEMA_VERSION_V3, 'licence-extraction-v2'].sort())
     expect(RECEIPT_CALL_CONTRACTS[RECEIPT_EXTRACTION_SCHEMA_VERSION]).toEqual({ system: RECEIPT_EXAMINATION_SYSTEM_PROMPT, schema: RECEIPT_EXTRACTION_SCHEMA })
     expect(RECEIPT_CALL_CONTRACTS[RECEIPT_EXTRACTION_SCHEMA_VERSION_V3]).toEqual({ system: RECEIPT_EXAMINATION_SYSTEM_PROMPT_V3, schema: RECEIPT_EXTRACTION_SCHEMA_V3 })
   })

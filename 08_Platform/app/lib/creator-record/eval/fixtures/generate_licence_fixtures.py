@@ -1,7 +1,8 @@
 """CR-DOC-READER-EXT-3 — render the synthetic licence/permission fixtures (licence-fixtures.json) to PDF or PNG.
 
 Usage (from 08_Platform/app):
-    python -I lib/creator-record/eval/fixtures/generate_licence_fixtures.py
+    python -I lib/creator-record/eval/fixtures/generate_licence_fixtures.py [licence-fixtures-supplement-9r3.json]
+The optional argument names another spec file in this directory (default: the pre-registered licence-fixtures.json).
 Writes lib/creator-record/eval/fixtures/generated/licence/<fixture_id>.<pdf|png> (git-ignored) and prints each file's SHA-256.
 Deterministic text layout; requires PyMuPDF and Pillow. Every person, company, address, email and phone number is fictional.
 """
@@ -54,7 +55,8 @@ def png_bytes(lines: list[str]) -> bytes:
 
 
 def main() -> int:
-    with open(SPEC, encoding='utf-8') as f:
+    spec_path = SPEC if len(sys.argv) < 2 else os.path.join(HERE, os.path.basename(sys.argv[1]))
+    with open(spec_path, encoding='utf-8') as f:
         spec = json.load(f)
     os.makedirs(OUT, exist_ok=True)
     for fx in spec['fixtures']:
