@@ -44,10 +44,7 @@ describe('existing approved template sets keep their original behaviour', () => 
       expect(registeredPdfTemplateSet(v, PRE_CUTOVER_VERSIONS[v]).approval).toMatchObject({ fingerprint: PRE_CUTOVER_FINGERPRINTS[v], lifecycle: 'superseded' })
       const live = approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: v })
       // CR-DESIGN-2D: the selected sets are v6 / v7 (the same reading layout, Institutional Trust presentation); v4 / v5 superseded.
-      // CR-DOC-READER-EXT-9: schema 8 selects v8 (built on v7, same reading layout); v7 stays registered, superseded.
-      const released = v === 7 ? live : registeredPdfTemplateSet(8, DESIGN_CUTOVER_VERSIONS[8])
-      expect(released.approval).toMatchObject({ version: DESIGN_CUTOVER_VERSIONS[v], fingerprint: DESIGN_CUTOVER_FINGERPRINTS[v], lifecycle: v === 7 ? 'approved' : 'superseded' })
-      if (v === 8) expect(live.approval).toMatchObject({ version: 8, fingerprint: '1d0cb5f3707d210eb4b9576bae6d9be33c1e24a1d5bae260bef6d5adf60c6fbf', lifecycle: 'approved' })
+      expect(live.approval).toMatchObject({ version: DESIGN_CUTOVER_VERSIONS[v], fingerprint: DESIGN_CUTOVER_FINGERPRINTS[v], lifecycle: 'approved' })
       expect(registeredPdfTemplateSet(v, CUTOVER_VERSIONS[v]).approval).toMatchObject({ fingerprint: CUTOVER_FINGERPRINTS[v], lifecycle: 'superseded' })
       expect((live.templates as CustomerPdfTemplates).readiness_summary).toBeDefined()
     }

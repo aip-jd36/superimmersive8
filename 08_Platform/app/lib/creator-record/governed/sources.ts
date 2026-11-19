@@ -2624,11 +2624,10 @@ export const CREATOR_RECORD_PDF_TEMPLATE_SETS: readonly { readonly templates: un
     "caveats_pointer": "See 'Please note' below."
   }
 }),
-    approval: Object.freeze({"template_id": "si8/creator-record-v2-pdf-templates", "version": 7, "fingerprint": "5d7ccfc8ce824e57f6e904d51f1027b59e43ab250a7f4895b0f804debe1761ab", "record_schema": {"id": "si8/creator-record-v2-record", "version": 8}, "lifecycle": "superseded", "authority": "Founder, PMF Strategy Inc. d/b/a SuperImmersive 8", "decision_date": "2026-11-16", "review_ref": "CR-DESIGN-2D-RELEASE-AUTHORIZATION-20261116 v7; CR-DESIGN-2B-R2 final review package sha256 547fb2e4b37df5ff1d575cac622262a777ce284493bc727dbaf9edb13ba10487; CR-DESIGN-2C acceptance record at 327a56d9"}) as PdfTemplateApproval,
+    approval: Object.freeze({"template_id": "si8/creator-record-v2-pdf-templates", "version": 7, "fingerprint": "5d7ccfc8ce824e57f6e904d51f1027b59e43ab250a7f4895b0f804debe1761ab", "record_schema": {"id": "si8/creator-record-v2-record", "version": 8}, "lifecycle": "approved", "authority": "Founder, PMF Strategy Inc. d/b/a SuperImmersive 8", "decision_date": "2026-11-16", "review_ref": "CR-DESIGN-2D-RELEASE-AUTHORIZATION-20261116 v7; CR-DESIGN-2B-R2 final review package sha256 547fb2e4b37df5ff1d575cac622262a777ce284493bc727dbaf9edb13ba10487; CR-DESIGN-2C acceptance record at 327a56d9"}) as PdfTemplateApproval,
   }),
   Object.freeze({
-    // CR-DOC-READER-EXT-7C: founder D5 approval of this exact fingerprint recorded below (JD-CR-DOC-READER-EXT-7C-D5-20261119).
-    // CR-DOC-READER-EXT-9: ACTIVE (approved); v7 superseded.
+    // CR-DOC-READER-EXT-7C: founder D5 approval of this exact fingerprint recorded below (JD-CR-DOC-READER-EXT-7C-D5-20261119); still INACTIVE.
     // CR-DOC-READER-EXT-5A: CANDIDATE v8 (schema 8), registered INACTIVE. Lifecycle 'pending': never selected (`approvedPdfTemplates`
     // selects approved sets only) and refused by `checkTemplates`. It is v7 plus licence/permission reading labels, the
     // integrated_assessment_v2 block and one revised not_done line (CR-DOC-READER-EXT-2, `test-support/doc-reader-ext-2-template.ts`,
@@ -3160,7 +3159,7 @@ export const CREATOR_RECORD_PDF_TEMPLATE_SETS: readonly { readonly templates: un
     "excerpts_withheld": "Text from this document is not reproduced here, because a licence or permission may include details about other people. The document itself has the exact wording."
   }
 }),
-    approval: Object.freeze({ template_id: 'si8/creator-record-v2-pdf-templates', version: 8, fingerprint: '1d0cb5f3707d210eb4b9576bae6d9be33c1e24a1d5bae260bef6d5adf60c6fbf', record_schema: { id: 'si8/creator-record-v2-record', version: 8 }, lifecycle: 'approved', authority: 'JD, for PMF Strategy Inc. d/b/a SuperImmersive 8', decision_date: '2026-11-19', review_ref: 'JD-CR-DOC-READER-EXT-7C-D5-20261119: founder D5 approval of this fingerprint after internal good-faith review (EXT-7A/7B; not a legal opinion). Activated by CR-DOC-READER-EXT-9 (founder authorization of controlled Production activation, 2026-11-19): v8 approved, v7 superseded.' }) as PdfTemplateApproval,
+    approval: Object.freeze({ template_id: 'si8/creator-record-v2-pdf-templates', version: 8, fingerprint: '1d0cb5f3707d210eb4b9576bae6d9be33c1e24a1d5bae260bef6d5adf60c6fbf', record_schema: { id: 'si8/creator-record-v2-record', version: 8 }, lifecycle: 'pending', authority: 'JD, for PMF Strategy Inc. d/b/a SuperImmersive 8', decision_date: '2026-11-19', review_ref: 'JD-CR-DOC-READER-EXT-7C-D5-20261119: founder D5 approval of this fingerprint after internal good-faith review (EXT-7A/7B; not a legal opinion). Lifecycle stays pending = NOT ACTIVE until a separate activation (v8 approved, v7 superseded).' }) as PdfTemplateApproval,
   }),
 ])
 

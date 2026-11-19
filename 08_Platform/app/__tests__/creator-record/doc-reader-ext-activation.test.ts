@@ -38,15 +38,6 @@ const APP = path.join(__dirname, '../..')
 const S8 = { id: CUSTOMER_RECORD_SCHEMA, version: 8 }
 const GOV = CREATOR_RECORD_GOVERNANCE_AUTHORITY
 /** The governance bundle as it would be after a v8 approval: v8 approved (synthetic), v7 superseded. */
-/** CR-DOC-READER-EXT-9: the governance bundle as it was before activation: v7 approved and selected, v8 pending. */
-const preActivation = (): PublicationAuthorityBundle => ({
-  ...GOV,
-  pdf_template_sets: (GOV.pdf_template_sets ?? []).map((s) =>
-    s.approval.record_schema.version !== 8 ? s : s.approval.version === 7 ? { ...s, approval: { ...s.approval, lifecycle: 'approved' } } : s.approval.version === 8 ? { ...s, approval: { ...s.approval, lifecycle: 'pending' } } : s,
-  ),
-})
-const v7Set = () => (GOV.pdf_template_sets ?? []).find((s) => s.approval.record_schema.version === 8 && s.approval.version === 7)!
-
 const withV8Approved = (): PublicationAuthorityBundle => ({
   ...GOV,
   pdf_template_sets: (GOV.pdf_template_sets ?? []).map((s) =>
@@ -55,40 +46,37 @@ const withV8Approved = (): PublicationAuthorityBundle => ({
 })
 
 describe('the switch and the PDF compatibility gate', () => {
-  test('CR-DOC-READER-EXT-9: the switch is on in source; off still means disabled whatever the templates', () => {
-    expect(LICENCE_READING_SWITCH).toBe('on')
-    expect(readFileSync(path.join(APP, 'lib/creator-record/customer-flow/approved-inputs.ts'), 'utf8')).toMatch(/export const LICENCE_READING_SWITCH = 'on' as 'off' \| 'on'/)
-    expect(licenceReadingEnabled()).toBe(true)
-    expect(licenceReadingEnabled('off', GOV)).toBe(false)
+  test('the switch is off in source, and off means disabled whatever the templates', () => {
+    expect(LICENCE_READING_SWITCH).toBe('off')
+    expect(readFileSync(path.join(APP, 'lib/creator-record/customer-flow/approved-inputs.ts'), 'utf8')).toMatch(/export const LICENCE_READING_SWITCH = 'off' as 'off' \| 'on'/)
+    expect(licenceReadingEnabled()).toBe(false)
     expect(licenceReadingEnabled('off', withV8Approved())).toBe(false)
   })
 
   test('REGRESSION: licence reading cannot be enabled while the incompatible v7 is the selected schema 8 set', () => {
-    const selected = approvedPdfTemplates(preActivation(), S8)
+    const selected = approvedPdfTemplates(GOV, S8)
     expect(selected.approval?.version).toBe(7)
     expect(templatesRenderLicenceReadings(selected.templates)).toBe(false)
     expect(missingLicenceLabels(selected.templates)).toEqual(expect.arrayContaining(['field:document_kind', 'field:licence_or_plan_type', 'classification:document_kind=licence_or_licence_certificate']))
-    expect(licenceReadingEnabled('on', preActivation())).toBe(false)
+    expect(licenceReadingEnabled('on', GOV)).toBe(false)
   })
 
   test('enabled only with the switch on AND v8 approved and selected; two approved schema 8 sets select nothing (off)', () => {
     expect(licenceReadingEnabled('on', withV8Approved())).toBe(true)
-    const both: PublicationAuthorityBundle = { ...GOV, pdf_template_sets: (preActivation().pdf_template_sets ?? []).map((s) => (s.approval.version === 8 ? { templates: s.templates, approval: SYNTHETIC_V8 } : s)) }
+    const both: PublicationAuthorityBundle = { ...GOV, pdf_template_sets: (GOV.pdf_template_sets ?? []).map((s) => (s.approval.version === 8 ? { templates: s.templates, approval: SYNTHETIC_V8 } : s)) }
     expect(licenceReadingEnabled('on', both)).toBe(false)
     expect(licenceReadingEnabled('on', null)).toBe(false)
   })
 
-  test('CR-DOC-READER-EXT-9: the registered v8 is approved and selected, v7 superseded, and v8 passes the compatibility check', () => {
+  test('the registered v8 candidate is pending (never selected) and passes the compatibility check', () => {
     const v8 = (GOV.pdf_template_sets ?? []).find((s) => s.approval.version === 8)!
-    expect(v8.approval.lifecycle).toBe('approved')
-    expect(v7Set().approval.lifecycle).toBe('superseded')
-    expect(approvedPdfTemplates(GOV, S8).approval?.version).toBe(8)
+    expect(v8.approval.lifecycle).toBe('pending')
     expect(missingLicenceLabels(v8.templates)).toEqual([])
   })
 
   test('the static check agrees with the renderer: v7 refuses a real licence record, v8 renders it', async () => {
     const rec = await licenceRecord({ M0: ['music'], M1: ['artlist'], M2: ['yes'] })
-    const v7 = { templates: v7Set().templates, approval: { ...v7Set().approval, lifecycle: 'approved' as const } } // as when it was selected
+    const v7 = approvedPdfTemplates(GOV, S8)
     let refusal: unknown = null
     try {
       buildCustomerDocument({ canonical: rec.canonical, sha256: rec.sha256, issued: ISSUED, templates: v7.templates, template_approval: v7.approval! })
