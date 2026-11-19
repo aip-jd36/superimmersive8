@@ -1,17 +1,24 @@
 /**
- * CR-DOC-READER-EXT-8B/8C/8D — the approved Privacy Notice and Terms changes, as data. PUBLISHED (CR-DOC-READER-EXT-8D) as
- * `privacy-2026-11-19` / `terms-2026-11-19` in `lib/legal/policies.ts`, founder approval JD-CR-DOC-READER-EXT-8C-20261119 (internal
- * good-faith review, not a legal opinion). Test-support only: no application module imports this file.
+ * CR-DOC-READER-EXT-8B — CANDIDATE Privacy Notice and Terms of Service revisions. STATUS: APPROVED IN PRINCIPLE BY THE FOUNDER (internal
+ * good-faith review, not a legal opinion); NOT PUBLISHED. Kept in test-support (like the proposed PDF template sets): `lib/legal/policies.ts`
+ * says draft wording never goes there, and no application module imports this file.
  *
- * Tests use it to prove that the published text is exactly the previous approved text plus these changes (`revertExt8b` reproduces
- * the previous digests) and to simulate a later legal-version change (`withPolicyVersion`). Changing any entry needs a new approval.
+ * Built from the live documents by exact replacements and insertions only (each target must occur exactly once), so a test can prove
+ * nothing else changed. Publishing means copying the resulting paragraphs into `PRIVACY_NOTICE` / `TERMS_OF_SERVICE` with the final
+ * version identifiers, effective dates and approval references, in one reviewed change, followed by the operator's authority-row
+ * replacement (see `08_Platform/implementation/cr-doc-reader-ext-1/05-PRIVACY-TERMS-EXT-8B.md`).
  */
-import type { ApprovedLegalDocument } from '@/lib/legal/policies'
+import { PRIVACY_NOTICE, TERMS_OF_SERVICE, type ApprovedLegalDocument } from '@/lib/legal/policies'
 
-/** sha256 of JSON.stringify({ privacy: paragraphs, terms: paragraphs }) of the approved, now published, documents. */
+/** Placeholder identifiers; publication sets the real ones (format `LEGAL_VERSION_PATTERN`). */
+export const CANDIDATE_PRIVACY_VERSION = 'privacy-2026-11-20'
+export const CANDIDATE_TERMS_VERSION = 'terms-2026-11-20'
+export const CANDIDATE_APPROVAL_REFERENCE = 'JD-CR-DOC-READER-EXT-8C-20261119: founder wording approval (internal good-faith; not a legal opinion); not published'
+
+/** CR-DOC-READER-EXT-8C: sha256 of JSON.stringify({ privacy: paragraphs, terms: paragraphs }) of the approved candidates. */
 export const APPROVED_CANDIDATE_WORDING_SHA256 = '0a6fa5dd56da9e0611518727464ba7e1e98d66acd386e905c29c7e1e9f103e89'
 
-/** Privacy Notice changes (EXT-8A proposal, §§1, 2, 5). */
+/** Privacy Notice changes (EXT-8A proposal, §§1, 2, 4, 5). */
 export const PRIVACY_REPLACEMENTS: readonly { from: string; to: string }[] = Object.freeze([
   { from: 'optionally add supporting documents such as receipts or invoices,', to: 'optionally add supporting documents such as receipts, invoices, licences or permissions,' },
   {
@@ -24,7 +31,7 @@ export const PRIVACY_REPLACEMENTS: readonly { from: string; to: string }[] = Obj
   },
 ])
 
-/** New paragraphs (§4 and §5), each directly after the paragraph that starts with `after`. */
+/** New paragraphs, each inserted directly after the paragraph that starts with `after`. */
 export const PRIVACY_INSERTIONS: readonly { after: string; text: string }[] = Object.freeze([
   {
     after: 'Adding documents is optional. Add only documents you are entitled to share.',
@@ -36,7 +43,7 @@ export const PRIVACY_INSERTIONS: readonly { after: string; text: string }[] = Ob
   },
 ])
 
-/** Terms §5: the provider-specific coverage sentence replaced by generic wording. */
+/** Terms §5: the outdated provider-specific coverage sentence, replaced by generic wording. */
 export const TERMS_REPLACEMENTS: readonly { from: string; to: string }[] = Object.freeze([
   {
     from: 'Guidance is currently available for Runway and Higgsfield only, and the tools covered may change.',
@@ -48,26 +55,21 @@ export const TERMS_REPLACEMENTS: readonly { from: string; to: string }[] = Objec
 function replaceOnce(paragraphs: string[], from: string, to: string): void {
   const hits = paragraphs.flatMap((p, i) => (p.includes(from) ? [i] : []))
   const count = paragraphs.reduce((n, p) => n + p.split(from).length - 1, 0)
-  if (hits.length !== 1 || count !== 1) throw new Error(`target must occur exactly once: ${from.slice(0, 60)}`)
+  if (hits.length !== 1 || count !== 1) throw new Error(`replacement target must occur exactly once: ${from.slice(0, 60)}`)
   paragraphs[hits[0]] = paragraphs[hits[0]].replace(from, to)
 }
 
-/** The published paragraphs with the EXT-8B changes undone (throws unless each change is present exactly once). */
-export function revertExt8b(kind: 'privacy' | 'terms', published: readonly string[]): string[] {
-  const paragraphs = [...published]
-  if (kind === 'privacy') {
-    for (const ins of PRIVACY_INSERTIONS) {
-      const at = paragraphs.flatMap((p, i) => (p === ins.text ? [i] : []))
-      if (at.length !== 1) throw new Error('inserted paragraph must occur exactly once')
-      paragraphs.splice(at[0], 1)
-    }
+function build(base: ApprovedLegalDocument | null, version: string, replacements: readonly { from: string; to: string }[], insertions: readonly { after: string; text: string }[] = []): ApprovedLegalDocument {
+  if (!base) throw new Error('live document missing')
+  const paragraphs = [...base.paragraphs]
+  for (const r of replacements) replaceOnce(paragraphs, r.from, r.to)
+  for (const ins of insertions) {
+    const at = paragraphs.flatMap((p, i) => (p.startsWith(ins.after) ? [i] : []))
+    if (at.length !== 1) throw new Error(`insertion anchor must occur exactly once: ${ins.after.slice(0, 60)}`)
+    paragraphs.splice(at[0] + 1, 0, ins.text)
   }
-  for (const r of kind === 'privacy' ? PRIVACY_REPLACEMENTS : TERMS_REPLACEMENTS) replaceOnce(paragraphs, r.to, r.from)
-  return paragraphs
+  return Object.freeze({ ...base, version, approval_reference: CANDIDATE_APPROVAL_REFERENCE, paragraphs: Object.freeze(paragraphs) }) as ApprovedLegalDocument
 }
 
-/** A published document with only its version changed: to simulate a later legal-version change. */
-export const withPolicyVersion = (doc: ApprovedLegalDocument | null, version: string): ApprovedLegalDocument => {
-  if (!doc) throw new Error('published document missing')
-  return Object.freeze({ ...doc, version }) as ApprovedLegalDocument
-}
+export const candidatePrivacyNotice = (): ApprovedLegalDocument => build(PRIVACY_NOTICE, CANDIDATE_PRIVACY_VERSION, PRIVACY_REPLACEMENTS, PRIVACY_INSERTIONS)
+export const candidateTerms = (): ApprovedLegalDocument => build(TERMS_OF_SERVICE, CANDIDATE_TERMS_VERSION, TERMS_REPLACEMENTS)

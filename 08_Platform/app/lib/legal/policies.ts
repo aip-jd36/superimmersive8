@@ -28,32 +28,28 @@ export interface ApprovedLegalDocument {
   paragraphs: readonly string[]
 }
 
-// CR-DOC-READER-EXT-8D: founder-approved (JD-CR-DOC-READER-EXT-8C-20261119; internal good-faith review, not a legal opinion). Both
-// documents' paragraphs are the approved EXT-8B/8C wording, verbatim (digest pinned in __tests__/creator-record/legal-ext-8b.test.ts):
-// the previous versions (privacy-2026-11-09, terms-2026-11-18) plus Privacy §§1, 2, 4, 5 and Terms §5. Changing any paragraph, or a
-// version, needs a new approval.
+// CR-V2-MVP-LEGAL-CONTENT-6: founder-approved (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109). Paragraphs are the frozen
+// CR-V2-MVP-LEGAL-CONTENT-5 text, verbatim; changing any of them, or a version, needs a new approval.
 export const PRIVACY_NOTICE: ApprovedLegalDocument | null = Object.freeze({
-  version: "privacy-2026-11-19",
-  effective_date: "2026-11-19",
-  approval_reference: "JD-CR-DOC-READER-EXT-8C-20261119 privacy",
+  version: "privacy-2026-11-09",
+  effective_date: "2026-11-09",
+  approval_reference: "JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109",
   title: "Creator Record Privacy Notice",
   paragraphs: Object.freeze([
     "This Privacy Notice explains how PMF Strategy Inc., doing business as SuperImmersive 8 (\"SI8\", \"we\" or \"us\"), handles personal information in Creator Record, the service at app.superimmersive8.com. It covers your account, the questionnaire, documents you choose to add, automated document readings, payment, your Creator Record and related emails. It does not cover SI8's marketing website or SI8's other services.",
     "1. What Creator Record is",
-    "Creator Record lets you describe an AI-assisted video and how you made it, optionally add supporting documents such as receipts, invoices, licences or permissions, and buy a private PDF record. The record contains what you told us, educational guidance about certain AI tool providers' published terms and, if you ask for it, what an automated reading reports a document appears to show. No person at SI8 checks your answers, your documents or the readings.",
+    "Creator Record lets you describe an AI-assisted video and how you made it, optionally add supporting documents such as receipts or invoices, and buy a private PDF record. The record contains what you told us, educational guidance about certain AI tool providers' published terms and, if you ask for it, what an automated reading reports a document appears to show. No person at SI8 checks your answers, your documents or the readings.",
     "2. Information we collect",
-    "Account: your name, email address and sign-in information.\nDeclarations: your answers to the questionnaire about your video, the tools you used and how you made it, and the confirmations you give in it.\nDocuments: files you choose to add (PDF, PNG or JPEG), with their file name, type, size and a digital fingerprint of the file.\nDocument readings: what an automated reading reports a document appears to show, such as who issued it, the plan, licence or product named, dates, and whether it appears to show details about a person.\nYour record: the versions of your record you prepare, the responses you give to readings, and the PDF issued to you.\nPermissions: the storage consent and AI-reading permissions you give or withdraw, and when.\nPayment: the status of your purchase and payment references. Card details are handled by Stripe; SI8 does not receive your full card number.\nEmails and support: messages we send you and correspondence with us.\nTechnical information: security and access logs, anti-abuse checks and usage analytics.",
+    "Account: your name, email address and sign-in information.\nDeclarations: your answers to the questionnaire about your video, the tools you used and how you made it, and the confirmations you give in it.\nDocuments: files you choose to add (PDF, PNG or JPEG), with their file name, type, size and a digital fingerprint of the file.\nDocument readings: what an automated reading reports a document appears to show, such as who issued it, the plan or product named and dates.\nYour record: the versions of your record you prepare, the responses you give to readings, and the PDF issued to you.\nPermissions: the storage consent and AI-reading permissions you give or withdraw, and when.\nPayment: the status of your purchase and payment references. Card details are handled by Stripe; SI8 does not receive your full card number.\nEmails and support: messages we send you and correspondence with us.\nTechnical information: security and access logs, anti-abuse checks and usage analytics.",
     "3. How we use it",
     "We use this information to run your account and the questionnaire, store the documents you add, read documents when you ask us to, prepare and deliver your record, take payment and handle refunds, respond to you, keep the service secure, keep records of consents, permissions and transactions, and understand how the service is used.",
     "4. Documents you add",
     "Adding documents is optional. Add only documents you are entitled to share. Before you add a document, please remove or cover details that are not needed, such as card numbers, home addresses and other people's personal information.",
-    "A licence or permission may name another person or organisation, such as whoever gave a permission. Add one only if you are entitled to share it with SI8 for this purpose. You may cover details that are not needed to show the licence or permission. SI8 does not remove or redact anything from the file you add.",
     "Documents are stored privately. Authorized SI8 personnel may open a stored document to provide support or operate the service; each time a document is opened through the application, that access is recorded.",
     "Agreeing to storage does not allow SI8 to send a document for automated reading. That needs a separate permission.",
     "5. Automated document reading",
-    "If you ask SI8 to read a document, you will first be asked for permission for that document. SI8 then sends the whole document, as you added it, and SI8's fixed reading instructions to Anthropic, the AI model provider SI8 uses. SI8 does not add your name, email address, account details or answers to that request, but the document itself may contain personal information, including about other people. Anthropic processes these requests under its applicable service terms.",
+    "If you ask SI8 to read a document, you will first be asked for permission for that document. SI8 then sends the document and SI8's fixed reading instructions to Anthropic, the AI model provider SI8 uses. SI8 does not add your name, email address, account details or answers to that request, but the document itself may contain personal information. Anthropic processes these requests under its applicable service terms.",
     "The reading is automated. It may be incomplete or wrong, and no person at SI8 checks it. You can review each reading before you buy a record and mark it as wrong; your response is printed beside the reading but does not change it. A reading is not a legal review, not a check of your licence or plan, and not a decision about whether your video may be used commercially.",
-    "For licences and permissions, the reading is instructed not to copy people's names, addresses, email addresses, phone numbers or signatures, and SI8 rejects any such reading that contains an email address or phone number. Your record does not reproduce text from these documents: it shows what kind of document was read, dates, and whether certain details were shown. This applies to what your record shows; the file you added is unchanged, and the reading SI8 keeps may include details the reading was instructed not to copy.",
     "6. Withdrawing AI-reading permission",
     "You can withdraw permission for automated reading at any time by emailing jd@superimmersive8.com from the email address on your account.",
     "A withdrawal applies to every document you added before you withdrew. After that, none of those documents is read again, none can be used in a new version of a record, and a record that uses one of them cannot be bought or issued. If you have already paid for a record that uses one of them and it has not been issued, it is paused and we will contact you about it. Records already issued are not affected. Withdrawing does not delete documents or readings; you can ask for deletion separately.",
@@ -86,9 +82,9 @@ export const PRIVACY_NOTICE: ApprovedLegalDocument | null = Object.freeze({
 })
 
 export const TERMS_OF_SERVICE: ApprovedLegalDocument | null = Object.freeze({
-  version: "terms-2026-11-19",
-  effective_date: "2026-11-19",
-  approval_reference: "JD-CR-DOC-READER-EXT-8C-20261119 terms",
+  version: "terms-2026-11-18",
+  effective_date: "2026-11-18",
+  approval_reference: "JD-CR-PUBLIC-LAUNCH-20261118 terms",
   title: "Creator Record Terms of Service",
   paragraphs: Object.freeze([
     "These Terms apply to Creator Record, the service at app.superimmersive8.com provided by PMF Strategy Inc., doing business as SuperImmersive 8 (\"SI8\", \"we\" or \"us\"). You agree to these Terms when you confirm them in the Creator Record questionnaire, and they apply to every Creator Record you prepare or buy. The Creator Record Privacy Notice explains how we handle personal information.",
@@ -102,7 +98,7 @@ export const TERMS_OF_SERVICE: ApprovedLegalDocument | null = Object.freeze({
     "4. Automated readings",
     "If you give permission, an AI model reads a document you choose and reports what it appears to show. Readings may be incomplete or wrong, and no person checks them. You can mark a reading as wrong before you buy; your response is printed beside it but does not change it. Readings are not used to select or change the guidance, and they do not change your answers. SI8 does not decide whether a reading matches what you told SI8.",
     "5. Educational guidance",
-    "Guidance is available only for some AI tools and other services named in the questionnaire, and those covered may change. It describes each provider's own published terms as SI8 last read them. Providers change their terms, and the terms that applied to your account when you made your video may differ. Guidance is general, is not a determination about your video, your account or your use, and does not show which plan or licence applied to you. Other tools and services can be listed in your record but receive no guidance; that is not a finding about them.",
+    "Guidance is currently available for Runway and Higgsfield only, and the tools covered may change. It describes each provider's own published terms as SI8 last read them. Providers change their terms, and the terms that applied to your account when you made your video may differ. Guidance is general, is not a determination about your video, your account or your use, and does not show which plan applied to you. Other tools and services can be listed in your record but receive no guidance; that is not a finding about them.",
     "6. Price and payment",
     "A Creator Record costs US$29, paid once through Stripe when you buy it. Promotional codes may reduce the price. You review your record before you pay. Your order is confirmed only after Stripe confirms successful payment. If checkout is interrupted or a charge appears incorrect, contact SI8 so we can investigate.",
     "7. Issuing your record",

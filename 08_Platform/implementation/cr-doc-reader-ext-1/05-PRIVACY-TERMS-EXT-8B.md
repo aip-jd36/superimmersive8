@@ -1,6 +1,6 @@
 # CR-DOC-READER-EXT-8B — Privacy Notice and Terms revision: release readiness
 
-**Status: WORDING APPROVED by the founder 2026-11-19 (`JD-CR-DOC-READER-EXT-8C-20261119`, digest `0a6fa5dd…`; internal good-faith review, not a legal opinion or compliance certification). PUBLISHED by CR-DOC-READER-EXT-8D as `privacy-2026-11-19` / `terms-2026-11-19`, effective 2026-11-19; release record below.**
+**Status: WORDING APPROVED by the founder 2026-11-19 (`JD-CR-DOC-READER-EXT-8C-20261119`, digest `0a6fa5dd…`; internal good-faith review, not a legal opinion or compliance certification). NOT PUBLISHED.**
 The exact candidate text is built in `08_Platform/app/test-support/legal-candidates-ext-8b.ts` from the live documents
 (`privacy-2026-11-09`, `terms-2026-11-18`) by the replacements and insertions below; `__tests__/creator-record/legal-ext-8b.test.ts`
 proves nothing else changes. Storage and AI-permission checkbox wording is unchanged.

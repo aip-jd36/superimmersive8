@@ -110,7 +110,3 @@ never marks a dependency satisfied or a document sufficient. Association is the 
   `terms-2026-11-18`. Effective date and version identifiers are not yet set (placeholders `privacy-2026-11-20` / `terms-2026-11-20`);
   publication, the authority-row replacement and the effective date each need a separate decision
   (`05-PRIVACY-TERMS-EXT-8B.md`).
-- **Publication (CR-DOC-READER-EXT-8D):** authorized by the founder 2026-11-19 under `JD-CR-DOC-READER-EXT-8C-20261119`. Published as
-  `privacy-2026-11-19` / `terms-2026-11-19`, effective 2026-11-19 (the release day), approval references
-  `JD-CR-DOC-READER-EXT-8C-20261119 privacy` / `… terms`. Paragraph digest `0a6fa5dd…f103e89` unchanged from the approval. Release
-  and authority-row transition recorded in `05-PRIVACY-TERMS-EXT-8B.md`.
