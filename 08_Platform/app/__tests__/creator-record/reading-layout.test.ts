@@ -52,9 +52,11 @@ describe('Production issuance is unchanged before activation', () => {
   // CR-V2-MVP-APPROVAL-AND-RELEASE-1: after the cutover v4 / v5 are selected, v1 / v3 stay registered (superseded, unchanged).
   test('the selected sets are v4 / v5 with exactly the proposal content; v1 / v3 stay registered, superseded and unchanged', () => {
     for (const s of [7, 8] as const) {
-      const a = approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: s })
-      // CR-DESIGN-2D: v6 / v7 are selected; v4 / v5 (exactly the proposal content) stay registered, superseded and unchanged.
-      expect([a.approval?.version, a.approval?.fingerprint, a.approval?.lifecycle]).toEqual([DESIGN_CUTOVER_VERSIONS[s], DESIGN_CUTOVER_FINGERPRINTS[s], 'approved'])
+      // CR-DESIGN-2D: v6 / v7 were selected; v4 / v5 (exactly the proposal content) stay registered, superseded and unchanged.
+      // CR-DOC-READER-EXT-9: schema 8 now selects v8; v7 stays registered, superseded.
+      const a = s === 7 ? approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: s }) : registeredPdfTemplateSet(8, DESIGN_CUTOVER_VERSIONS[8])
+      expect([a.approval?.version, a.approval?.fingerprint, a.approval?.lifecycle]).toEqual([DESIGN_CUTOVER_VERSIONS[s], DESIGN_CUTOVER_FINGERPRINTS[s], s === 7 ? 'approved' : 'superseded'])
+      if (s === 8) expect(approvedPdfTemplates(GOV as never, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).approval?.version).toBe(8)
       const v45 = registeredPdfTemplateSet(s, CUTOVER_VERSIONS[s])
       expect([v45.approval.fingerprint, v45.approval.lifecycle]).toEqual([CUTOVER_FINGERPRINTS[s], 'superseded'])
       expect(canonicalJson(v45.templates)).toBe(canonicalJson(PROPOSED[s].templates))

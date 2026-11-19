@@ -309,9 +309,9 @@ describe('governance', () => {
       [7, 4, 'd4ecf3f39487ed43ce6c5e621d988d6525b638c952a8c5ead01e0cc9b8504f7e', 'superseded'],
       [8, 5, 'a27e23cdbc1b12c16330b9518bba210b218bb0e8807e53ac164d6673ec873408', 'superseded'],
       [7, 6, 'a0cd0c248ce270d2826712910aa606579ce429f7923b051d68a0502c5305f476', 'approved'],
-      [8, 7, '5d7ccfc8ce824e57f6e904d51f1027b59e43ab250a7f4895b0f804debe1761ab', 'approved'],
-      // CR-DOC-READER-EXT-5A: candidate v8 registered INACTIVE (pending: never selected, refused by checkTemplates; wording not approved).
-      [8, 8, '1d0cb5f3707d210eb4b9576bae6d9be33c1e24a1d5bae260bef6d5adf60c6fbf', 'pending'],
+      // CR-DOC-READER-EXT-9: v7 superseded; v8 (D5-approved fingerprint) approved and selected for schema 8.
+      [8, 7, '5d7ccfc8ce824e57f6e904d51f1027b59e43ab250a7f4895b0f804debe1761ab', 'superseded'],
+      [8, 8, '1d0cb5f3707d210eb4b9576bae6d9be33c1e24a1d5bae260bef6d5adf60c6fbf', 'approved'],
     ])
   })
 })
