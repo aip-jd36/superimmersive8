@@ -451,8 +451,7 @@ describe('5. unsupported templates → refusal', () => {
     expect(approvedPdfTemplates(SYN_AUTH, { id: 'si8/other', version: 8 })).toEqual({ templates: null, approval: null })
     // CR-V2-MVP-APPROVAL-AND-RELEASE-1: the governed schema 8 selection is v5 (v3 stays registered, superseded).
     // CR-DESIGN-2D: the governed schema 8 selection is v7 (v3 and v5 stay registered, superseded).
-    // CR-DOC-READER-EXT-9: the governed schema 8 selection is v8 (v7 superseded).
-    expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).approval).toMatchObject({ version: 8, lifecycle: 'approved' })
+    expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).approval).toMatchObject({ version: 7, lifecycle: 'approved' })
     expect(approvedPdfTemplates(null, { id: CUSTOMER_RECORD_SCHEMA, version: 8 })).toEqual({ templates: null, approval: null })
   })
 })
@@ -514,9 +513,9 @@ describe('8. every commercial gate stays closed by default', () => {
     expect(CURRENT_ISSUANCE_SUPPORT).toEqual({ record_schemas: [{ id: 'si8/creator-record-v2-record', version: 7 }, { id: 'si8/creator-record-v2-record', version: 8 }], builders: [{ id: 'si8/creator-record-v2-record-builder', version: 5 }, { id: 'si8/creator-record-v2-record-builder', version: 7 }], examination_methods: [{ origin: 'live_model', provider: 'anthropic', model: 'claude-sonnet-5', profile: { id: 'receipt', version: 1, schema: 'receipt-extraction-v2', prompt: 'receipt-prompt-v2' } }] }) // R15 option (a), JD-CR-V2-MVP-APPROVAL-PACKET-1-20261110
     expect(CREATOR_RECORD_V2_ISSUANCE).toBe('enabled') // CR-V2-MVP-PROD-UAT-ACTIVATION-1
     expect(CREATOR_RECORD_V2_SUBMISSIONS).toBe('open')
-    expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).approval?.fingerprint).toBe('1d0cb5f3707d210eb4b9576bae6d9be33c1e24a1d5bae260bef6d5adf60c6fbf') // v8 (CR-DOC-READER-EXT-9; v7 superseded)
+    expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).approval?.fingerprint).toBe('5d7ccfc8ce824e57f6e904d51f1027b59e43ab250a7f4895b0f804debe1761ab') // v7 (CR-DESIGN-2D)
     expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 7 }).approval?.fingerprint).toBe('a0cd0c248ce270d2826712910aa606579ce429f7923b051d68a0502c5305f476') // v6 (CR-DESIGN-2D)
-    expect(GOV.pdf_template_sets).toHaveLength(6) // v3, v4, v5, v7 (superseded), v6 and v8 (approved; CR-DOC-READER-EXT-9)
+    expect(GOV.pdf_template_sets).toHaveLength(6) // v3, v4, v5 (superseded), v6, v7; CR-DOC-READER-EXT-5A: candidate v8 (pending, never selected)
     // The controls module is mocked in this file; the shipped source is read directly.
     const controls = readFileSync(join(process.cwd(), 'lib', 'creator-record', 'live-examination', 'controls.ts'), 'utf8')
     expect(controls).toMatch(/export const LIVE_EXAMINATION_PERMITTED_IN_THIS_BUILD(: boolean)? = true/)
