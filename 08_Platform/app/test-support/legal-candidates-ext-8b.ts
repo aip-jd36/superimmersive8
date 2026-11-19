@@ -24,7 +24,7 @@ export const PRIVACY_REPLACEMENTS: readonly { from: string; to: string }[] = Obj
   },
   {
     from: "If you ask SI8 to read a document, you will first be asked for permission for that document. SI8 then sends the document and SI8's fixed reading instructions to Anthropic, the AI model provider SI8 uses. SI8 does not add your name, email address, account details or answers to that request, but the document itself may contain personal information. Anthropic processes these requests under its applicable service terms.",
-    to: "If you ask SI8 to read a document, you will first be asked for permission for that document. SI8 then sends the whole document, as you added it, and SI8's fixed reading instructions to Anthropic, the AI model provider SI8 uses. SI8 does not add your name, email address, account details or answers to that request, but the document itself may contain personal information, including about other people. The reading is instructed not to copy people's names, addresses, email addresses, phone numbers or signatures, and SI8 rejects any reading that contains an email address or phone number. Anthropic processes these requests under its applicable service terms.",
+    to: "If you ask SI8 to read a document, you will first be asked for permission for that document. SI8 then sends the whole document, as you added it, and SI8's fixed reading instructions to Anthropic, the AI model provider SI8 uses. SI8 does not add your name, email address, account details or answers to that request, but the document itself may contain personal information, including about other people. Anthropic processes these requests under its applicable service terms.",
   },
 ])
 
@@ -36,7 +36,7 @@ export const PRIVACY_INSERTIONS: readonly { after: string; text: string }[] = Ob
   },
   {
     after: 'The reading is automated. It may be incomplete or wrong,',
-    text: 'For licences and permissions, your record does not reproduce text from the document: it shows what kind of document was read, dates, and whether certain details were shown. This applies to what your record shows; the file you added is unchanged, and the reading SI8 keeps may include details the reading was instructed not to copy.',
+    text: 'For licences and permissions, the reading is instructed not to copy people's names, addresses, email addresses, phone numbers or signatures, and SI8 rejects any such reading that contains an email address or phone number. Your record does not reproduce text from these documents: it shows what kind of document was read, dates, and whether certain details were shown. This applies to what your record shows; the file you added is unchanged, and the reading SI8 keeps may include details the reading was instructed not to copy.',
   },
 ])
 

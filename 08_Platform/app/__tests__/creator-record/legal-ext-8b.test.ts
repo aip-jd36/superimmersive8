@@ -54,8 +54,11 @@ describe('the candidate documents', () => {
     const t = P.paragraphs.join('\n')
     expect(t).toContain('sends the whole document, as you added it')
     expect(t).toContain('SI8 does not remove or redact anything from the file you add.')
-    expect(t).toContain('your record does not reproduce text from the document')
-    expect(t).toContain('SI8 rejects any reading that contains an email address or phone number')
+    expect(t).toContain('Your record does not reproduce text from these documents')
+    expect(t).toContain('For licences and permissions, the reading is instructed not to copy')
+    expect(t).toContain('SI8 rejects any such reading that contains an email address or phone number')
+    // The receipt reader has no such instruction or check, so the claim must stay scoped to licences and permissions.
+    expect(t).not.toMatch(/SI8 rejects any reading that/)
     // Unchanged statements the behaviour still matches: retention, deletion, Anthropic as provider.
     expect(t).toContain('we delete each original file 90 days after you add it')
     expect(t).toContain('Anthropic: automated reading of documents you give permission for.')
