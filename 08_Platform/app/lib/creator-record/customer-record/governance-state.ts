@@ -69,7 +69,7 @@ export const CURRENT_ISSUANCE_SUPPORT: IssuanceSupport = Object.freeze({
  * the selected schema 8 PDF template set can print a licence reading). Same model and provider as the receipt method.
  */
 export const LICENCE_EXAMINATION_METHOD: ExaminationMethodIdentity = Object.freeze({
-  origin: 'live_model' as const, provider: 'anthropic', model: 'claude-sonnet-5', profile: { id: 'licence', version: 2, schema: 'licence-extraction-v2', prompt: 'licence-prompt-v2' },
+  origin: 'live_model' as const, provider: 'anthropic', model: 'claude-sonnet-5', profile: { id: 'licence', version: 3, schema: 'licence-extraction-v3', prompt: 'licence-prompt-v2' },
 })
 
 /** The issuance support for this build: `CURRENT_ISSUANCE_SUPPORT`, plus the licence method only when licence reading is enabled. */

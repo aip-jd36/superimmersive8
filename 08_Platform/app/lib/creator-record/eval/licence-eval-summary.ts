@@ -4,15 +4,18 @@
  *   npx tsx --tsconfig tsconfig.json lib/creator-record/eval/licence-eval-summary.ts <report.json> [<report.json> ...]
  *
  * Prints an ALLOW-LIST only: counts, models, stop reasons, tokens and accounted cost, each criterion's id / pass / value / threshold
- * and the fixture-and-run labels its details name, outcome and failure reason per fixture, and violation codes with field names.
+ * and the fixture, run and (fixed schema) field labels its details name, outcome and failure reason per fixture, and violation codes with field names.
  * Never printed: raw model outputs, extracted values, excerpts, criterion detail text (it can quote a planted name), document text or
  * any credential. Exit 1 when a report is missing or a control check fails (limits, model, contract, credential source) or a criterion
  * fails.
  */
 import { existsSync, readFileSync } from 'node:fs'
+import { LICENCE_EXTRACTION_SCHEMA_VERSION, LICENCE_FIELD_NAMES } from '../licence-examination/schema'
+import { LICENCE_PROMPT_VERSION } from '../licence-examination/prompt'
 
 export interface SummaryLimits { max_calls_total: number; max_usd_total: number; model: string; schema: string; prompt: string }
-export const EXT_9R3_LIMITS: SummaryLimits = { max_calls_total: 30, max_usd_total: 2, model: 'claude-sonnet-5', schema: 'licence-extraction-v2', prompt: 'licence-prompt-v2' }
+/** The evaluated contract is the one in this revision (the workflow also checks it against its own pinned names). */
+export const EXT_9R3_LIMITS: SummaryLimits = { max_calls_total: 30, max_usd_total: 2, model: 'claude-sonnet-5', schema: LICENCE_EXTRACTION_SCHEMA_VERSION, prompt: LICENCE_PROMPT_VERSION }
 
 interface Req { response_model: string | null; stop_reason: string | null; input_tokens: number; output_tokens: number }
 interface Result { fixture_id: string; run: number; outcome: string; reason: string | null; model_calls: number; violation?: { code: string; field: string | null } | null; requests?: Req[] }
@@ -30,8 +33,14 @@ const SAFE_WORD = /^[a-z0-9_]{1,64}$/
 /** A fixture id, reason, code or field, printed only when it has the shape of one (never free text). */
 const safe = (s: unknown, re: RegExp = SAFE_WORD) => (typeof s === 'string' && re.test(s) ? s : '<redacted>')
 const tally = (xs: string[]) => Object.entries(xs.reduce<Record<string, number>>((a, x) => ((a[x] = (a[x] ?? 0) + 1), a), {})).map(([k, v]) => `${k} ${v}`).join(', ') || 'none'
-/** Only the `fixture#run` label at the start of a detail line; the rest of the line is never printed. */
-const detailLabels = (detail: string[]) => [...new Set(detail.map((d) => /^([a-z0-9-]{1,80})#(\d{1,3})\b/.exec(d)).filter((m): m is RegExpExecArray => !!m).map((m) => `${m[1]}#${m[2]}`))]
+/**
+ * Only the `fixture#run` label at the start of a detail line, plus its field (CR-DOC-READER-EXT-9R4) when the line names one as
+ * `fixture#run.field:` AND it is a fixed schema field name. The rest of the line (it can quote an extracted value or a planted name)
+ * is never printed.
+ */
+const SCHEMA_FIELDS: ReadonlySet<string> = new Set<string>([...LICENCE_FIELD_NAMES, 'document_kind', 'readability', 'instruction_like_text_present', 'personal_details_present'])
+const detailLabels = (detail: string[]) =>
+  [...new Set(detail.map((d) => /^([a-z0-9-]{1,80})#(\d{1,3})(?:\.([a-z_]{1,40}))?\b/.exec(d)).filter((m): m is RegExpExecArray => !!m).map((m) => `${m[1]}#${m[2]}${m[3] && SCHEMA_FIELDS.has(m[3]) ? `.${m[3]}` : ''}`))]
 
 export function summarize(reports: readonly LicenceLiveReport[], limits: SummaryLimits = EXT_9R3_LIMITS): { lines: string[]; ok: boolean } {
   const lines: string[] = []

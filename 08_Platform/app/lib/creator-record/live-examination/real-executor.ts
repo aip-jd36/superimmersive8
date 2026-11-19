@@ -77,7 +77,7 @@ export interface RealLiveExecutor extends LiveExecutor {
  */
 const EXECUTOR_READING_CONTRACTS: Readonly<Record<string, { readingContract?: typeof LICENCE_EXTRACTION_SCHEMA_VERSION }>> = Object.freeze({
   'receipt@1': {},
-  'licence@2': { readingContract: LICENCE_EXTRACTION_SCHEMA_VERSION },
+  'licence@3': { readingContract: LICENCE_EXTRACTION_SCHEMA_VERSION },
 })
 
 export interface LoadRealExecutorOptions {

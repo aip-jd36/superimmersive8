@@ -67,7 +67,7 @@ describe('raw evidence stays private', () => {
     const req = { response_model: 'claude-sonnet-5', stop_reason: 'end_turn', input_tokens: 5000, output_tokens: 400 }
     return {
       mode: 'live', spec: 'licence-fixtures-supplement-9r3-v1', model: 'claude-sonnet-5', credential_source: 'ANTHROPIC_API_KEY',
-      contract: { schema: 'licence-extraction-v2', prompt: 'licence-prompt-v2' }, limits: { max_calls: 6, max_usd: 0.4 }, api_requests_made: 2,
+      contract: { schema: 'licence-extraction-v3', prompt: 'licence-prompt-v2' }, limits: { max_calls: 6, max_usd: 0.4 }, api_requests_made: 2,
       spend: { requests: 2, input_tokens: 10000, output_tokens: 800, accounted_usd: 0.028 },
       criteria: { criteria_version: 'licence-eval-criteria-v1', pass: false, criteria: [{ id: 'C3a_privacy_leaks', pass: false, value: 1, threshold: 0, detail: ['sup-long-permission-personal-pdf#1: leaked "Jordan Fictional-Person"'] }] },
       results: [
@@ -101,5 +101,18 @@ describe('raw evidence stays private', () => {
   test('a clean passing report passes', () => {
     const r = report({ criteria: { criteria_version: 'licence-eval-criteria-v1', pass: true, criteria: [{ id: 'C5b_unreadable_results', pass: true, value: 0, threshold: 1, detail: [] }] } })
     expect(summarize([r]).ok).toBe(true)
+  })
+  test('the evaluated contract is v3 (an earlier contract fails the run)', () => {
+    expect(summarize([report({ contract: { schema: 'licence-extraction-v2', prompt: 'licence-prompt-v2' } })]).lines.join()).toMatch(/contract differs/)
+  })
+  test('CR-DOC-READER-EXT-9R4: detail labels name the fixed schema field, never the value; other words after the label are dropped', () => {
+    const r = report({
+      criteria: { criteria_version: 'licence-eval-criteria-v1', pass: false, criteria: [
+        { id: 'C1b_inventions', pass: false, value: 2, threshold: 0, detail: ['lic-artlist-pro-pdf#1.permission_statement: INVENTED "Licensed for use in one integrated Project."', 'lic-artlist-pro-pdf#1.jordan_fictional: INVENTED "Jordan Fictional-Person"'] },
+      ] },
+    })
+    const text = summarize([r]).lines.join('\n')
+    expect(text).toContain('C1b_inventions FAIL value 2 threshold 0 (2 detail line(s): lic-artlist-pro-pdf#1.permission_statement, lic-artlist-pro-pdf#1)')
+    for (const p of ['Licensed for use', 'integrated Project', 'jordan_fictional', 'Jordan Fictional-Person', 'INVENTED']) expect(text).not.toContain(p)
   })
 })

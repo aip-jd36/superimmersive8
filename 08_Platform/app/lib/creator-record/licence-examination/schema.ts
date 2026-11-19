@@ -20,7 +20,12 @@
  * condition and limitation; the excerpt stays a verbatim copy. Dates: value ISO, excerpt as printed. Shape, limits and the
  * non-repairing validator are unchanged. v1 is retired: no v1 reading was ever stored.
  */
-export const LICENCE_EXTRACTION_SCHEMA_VERSION = 'licence-extraction-v2' as const
+/**
+ * v3 (CR-DOC-READER-EXT-9R4, founder decision): `permission_statement` value and excerpt limits raised to 500 characters (verbatim).
+ * The EXT-9R3 live evaluation showed the model copies a long printed statement verbatim even when asked to shorten it, and an
+ * excerpt must contain its value, so both limits rise together. Every other field keeps 120 / 200. Validation is otherwise unchanged.
+ */
+export const LICENCE_EXTRACTION_SCHEMA_VERSION = 'licence-extraction-v3' as const
 
 export const LICENCE_DOCUMENT_KINDS = [
   'licence_or_licence_certificate',
@@ -38,8 +43,11 @@ export type LicenceReadability = (typeof LICENCE_READABILITY_VALUES)[number]
 export const LICENCE_FIELD_STATUSES = ['present', 'not_shown', 'unreadable', 'ambiguous'] as const
 export type LicenceFieldStatus = (typeof LICENCE_FIELD_STATUSES)[number]
 
+/** The default limits (every field except `permission_statement`). */
 export const LICENCE_MAX_VALUE_CHARS = 120
 export const LICENCE_MAX_EVIDENCE_CHARS = 200
+/** CR-DOC-READER-EXT-9R4: `permission_statement` only. Customer surfaces never show its value or excerpt (`reading-privacy.ts`). */
+export const LICENCE_PERMISSION_STATEMENT_MAX_CHARS = 500
 
 export interface LicenceField {
   status: LicenceFieldStatus
@@ -78,7 +86,19 @@ const TOP_LEVEL_KEYS = ['document_kind', 'readability', 'instruction_like_text_p
 
 // CR-DOC-READER-EXT-3: the receipt schema's structured-output conventions — no length keywords (limits are stated in the
 // descriptions and enforced by the validator); 12 union parameters (limit 16).
-const fieldSchema = (description: string) => ({
+export interface LicenceFieldLimits { value: number; evidence: number }
+const DEFAULT_LIMITS: LicenceFieldLimits = Object.freeze({ value: LICENCE_MAX_VALUE_CHARS, evidence: LICENCE_MAX_EVIDENCE_CHARS })
+/** The value and excerpt limits per field (the validator and the descriptions sent to the model use the same numbers). */
+export const LICENCE_FIELD_LIMITS: Readonly<Record<LicenceFieldName, LicenceFieldLimits>> = Object.freeze({
+  licence_or_plan_type: DEFAULT_LIMITS,
+  content_designation: DEFAULT_LIMITS,
+  permission_statement: Object.freeze({ value: LICENCE_PERMISSION_STATEMENT_MAX_CHARS, evidence: LICENCE_PERMISSION_STATEMENT_MAX_CHARS }),
+  licensed_item_reference: DEFAULT_LIMITS,
+  issue_date: DEFAULT_LIMITS,
+  valid_until: DEFAULT_LIMITS,
+})
+
+const fieldSchema = (description: string, limits: LicenceFieldLimits = DEFAULT_LIMITS) => ({
   type: 'object',
   description,
   additionalProperties: false,
@@ -90,11 +110,11 @@ const fieldSchema = (description: string) => ({
     },
     value: {
       type: ['string', 'null'],
-      description: `Only when status is 'present', else null. At most ${LICENCE_MAX_VALUE_CHARS} characters: as printed, or, if longer, shortened in the document's own words keeping every condition and limitation. Dates YYYY-MM-DD. No person's details.`,
+      description: `Only when status is 'present', else null. At most ${limits.value} characters: as printed, or, if longer, shortened in the document's own words keeping every condition and limitation. Dates YYYY-MM-DD. No person's details.`,
     },
     evidence: {
       type: ['string', 'null'],
-      description: `Only when status is 'present', else null. A verbatim copy (at most ${LICENCE_MAX_EVIDENCE_CHARS} characters) of one continuous part of the document showing the value; a date as printed. No person's details.`,
+      description: `Only when status is 'present', else null. A verbatim copy (at most ${limits.evidence} characters) of one continuous part of the document showing the value; a date as printed. No person's details.`,
     },
   },
   required: ['status', 'value', 'evidence'],
@@ -111,7 +131,7 @@ export const LICENCE_EXTRACTION_SCHEMA = {
     personal_details_present: { type: 'boolean' },
     licence_or_plan_type: fieldSchema('The licence, plan or tier name as printed (e.g. a plan or licence type). Never a person.'),
     content_designation: fieldSchema('A printed designation of the licensed content, such as "Editorial" or "Commercial", as printed.'),
-    permission_statement: fieldSchema('A short printed statement granting permission or consent, as printed. No names of people.'),
+    permission_statement: fieldSchema('A printed statement granting permission or consent, as printed. No names of people.', LICENCE_FIELD_LIMITS.permission_statement),
     licensed_item_reference: fieldSchema('The printed title or reference of the licensed item (track, clip or asset). Never a person.'),
     issue_date: fieldSchema('The printed issue or order date, ISO YYYY-MM-DD.'),
     valid_until: fieldSchema('A printed end or expiry date, ISO YYYY-MM-DD.'),
@@ -172,16 +192,16 @@ export const LICENCE_VIOLATION_CODES = [
 export type LicenceViolationCode = (typeof LICENCE_VIOLATION_CODES)[number]
 export interface LicenceViolation { code: LicenceViolationCode; field: LicenceFieldName | null }
 
-function fieldViolation(raw: unknown, isDate: boolean): LicenceViolationCode | null {
+function fieldViolation(raw: unknown, isDate: boolean, limits: LicenceFieldLimits): LicenceViolationCode | null {
   if (!isObj(raw) || !exactKeys(raw, ['status', 'value', 'evidence'])) return 'field_shape'
   const { status, value, evidence } = raw
   if (typeof status !== 'string' || !(LICENCE_FIELD_STATUSES as readonly string[]).includes(status)) return 'field_status'
   if ((value !== null && typeof value !== 'string') || (evidence !== null && typeof evidence !== 'string')) return 'field_types'
   if (status === 'present') {
     if (value === null || value.trim() === '') return 'present_value_missing'
-    if (value.length > LICENCE_MAX_VALUE_CHARS) return 'present_value_too_long'
+    if (value.length > limits.value) return 'present_value_too_long'
     if (evidence === null || evidence.trim() === '') return 'present_evidence_missing'
-    if (evidence.length > LICENCE_MAX_EVIDENCE_CHARS) return 'present_evidence_too_long'
+    if (evidence.length > limits.evidence) return 'present_evidence_too_long'
     if (isDate && !isIsoCalendarDate(value.trim())) return 'date_not_iso'
     if (containsContactDetails(value) || containsContactDetails(evidence)) return 'contact_details'
     return null
@@ -199,7 +219,7 @@ export function licenceExtractionViolation(raw: unknown): LicenceViolation | nul
   if (typeof raw.readability !== 'string' || !(LICENCE_READABILITY_VALUES as readonly string[]).includes(raw.readability)) return { code: 'readability', field: null }
   if (typeof raw.instruction_like_text_present !== 'boolean' || typeof raw.personal_details_present !== 'boolean') return { code: 'flags', field: null }
   for (const name of LICENCE_FIELD_NAMES) {
-    const code = fieldViolation(raw[name], LICENCE_DATE_FIELDS.includes(name))
+    const code = fieldViolation(raw[name], LICENCE_DATE_FIELDS.includes(name), LICENCE_FIELD_LIMITS[name])
     if (code) return { code, field: name }
   }
   return null

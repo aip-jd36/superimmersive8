@@ -98,3 +98,26 @@ The pre-registered set is unchanged.
 | Spend accounting | Outside the database reservation ledger (not a customer reading). Bounded by `--max-usd` (refused below the planned maximum; hard ceiling $10), the call wrapper, and the workspace spend limit on the dedicated key |
 | Persistence | Raw outputs are written only to the `--out` directory (private evidence); nothing goes to the database or the repository |
 | **Blocking** | The dedicated `CREATOR_RECORD_EXTRACTION_API_KEY` is not available in this environment. This plan requires explicit founder authorization of the spend ceiling and a workspace spend limit. Pre-registered `--runs 2` needs 48 requests, above the 24-call cap |
+
+## CR-DOC-READER-EXT-9R4 (2026-11-19): permission_statement limits 500 / 500
+
+**EXT-9R3 run 1 (GitHub Actions):**
+- 15 requests, no retries, $0.1978 accounted.
+- **Pre-registered:** 12/12 examined. C1b failed with 1 invention on `lic-artlist-pro-pdf`: a printed text placed in a field the
+  answer key expects empty. C2 grounding passed at 100%, so it was not fabricated. The field was not identifiable, because the
+  public summary dropped it.
+- **Supplement:** 3/3 `schema_invalid present_value_too_long@permission_statement`. The model copies a long printed statement
+  verbatim even when asked to shorten it (prompt-only repair disproved).
+
+**Decision (founder): verbatim, with limits sized for it.**
+- `permission_statement` value and excerpt limits are both 500. The excerpt must contain the value, so raising only the value
+  would recreate the contradiction for any statement from 201 to 500 characters (two of the three supplementary statements:
+  180, 282 and 302).
+- Every other field keeps 120 / 200. Nothing is truncated or repaired.
+- The contact-detail check covers the full text and still rejects the whole reading.
+- Customer surfaces withhold every free-text licence value and every excerpt (EXT-6B), so the limit does not change what a
+  customer sees. The EXT-6A note that cited the 120 cap as exposure-limiting predates that projection.
+- No database or envelope limit depends on these numbers (envelope ≤ 256 KB).
+- Contract: `licence-extraction-v3` (prompt unchanged: `licence-prompt-v2`), licence profile 3. Pins 1 and 2 are kept.
+- The public summary now names the fixed schema field in criterion detail labels (`fixture#run.field`), never the value.
+- The fixtures and the answer key are unchanged.

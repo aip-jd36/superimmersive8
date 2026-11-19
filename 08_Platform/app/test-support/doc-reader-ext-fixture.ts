@@ -71,7 +71,7 @@ async function licenceExamination(output: unknown = LICENCE_OUTPUT) {
         async listRuns() { return [] },
       },
     },
-    { actor_user_id: OWNER, document_id: DOC, profile: { id: 'licence', version: 2 } },
+    { actor_user_id: OWNER, document_id: DOC, profile: { id: 'licence', version: 3 } },
   )
   if (r.kind !== 'recorded') throw new Error(`not recorded: ${r.kind}`)
   const e = r.envelope

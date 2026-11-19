@@ -107,12 +107,12 @@ describe('feature off: everything exactly as before', () => {
     expect(profileForCategory('licence').ok).toBe(false)
   })
   test('feature on adds the licence profile, its live profile and its method, and nothing else', () => {
-    expect(customerProfilesFor(true).map((p) => `${p.id}@${p.version}`)).toEqual(['receipt@1', 'licence@2'])
-    expect([...customerLiveProfileRegistry(true).keys()]).toEqual(['receipt@1', 'licence@2'])
+    expect(customerProfilesFor(true).map((p) => `${p.id}@${p.version}`)).toEqual(['receipt@1', 'licence@3'])
+    expect([...customerLiveProfileRegistry(true).keys()]).toEqual(['receipt@1', 'licence@3'])
     const s = issuanceSupportFor(true)
     expect(s.record_schemas).toBe(CURRENT_ISSUANCE_SUPPORT.record_schemas)
     expect(s.examination_methods).toEqual([...(CURRENT_ISSUANCE_SUPPORT.examination_methods ?? []), LICENCE_EXAMINATION_METHOD])
-    expect(LICENCE_EXAMINATION_METHOD.profile).toEqual({ id: LICENCE_PROFILE_ID, version: 2, schema: 'licence-extraction-v2', prompt: 'licence-prompt-v2' })
+    expect(LICENCE_EXAMINATION_METHOD.profile).toEqual({ id: LICENCE_PROFILE_ID, version: 3, schema: 'licence-extraction-v3', prompt: 'licence-prompt-v2' })
   })
 })
 
@@ -147,8 +147,8 @@ describe('the route: category routing only while the licence profile is active',
   test('feature on, routing decisions: licence/permission → licence; receipts → receipt; unsupported and unknown refused', async () => {
     const { routeExaminationProfile } = jest.requireActual('@/lib/creator-record/customer-flow/examination')
     const active = customerProfilesFor(true)
-    expect(routeExaminationProfile('licence', active)).toMatchObject({ ok: true, profile: { id: 'licence', version: 2 } })
-    expect(routeExaminationProfile('permission', active)).toMatchObject({ ok: true, profile: { id: 'licence', version: 2 } })
+    expect(routeExaminationProfile('licence', active)).toMatchObject({ ok: true, profile: { id: 'licence', version: 3 } })
+    expect(routeExaminationProfile('permission', active)).toMatchObject({ ok: true, profile: { id: 'licence', version: 3 } })
     expect(routeExaminationProfile('billing_receipt', active)).toMatchObject({ ok: true, profile: { id: 'receipt', version: 1 } })
     for (const c of ['release_or_consent', 'project_file', 'other', 'nonsense']) expect(routeExaminationProfile(c, active)).toMatchObject({ ok: false, error: { status: 422, code: 'not_examinable' } })
     expect(routeExaminationProfile(undefined, active)).toMatchObject({ ok: true, profile: { id: 'receipt' } })
@@ -176,11 +176,11 @@ describe('the real executor reads each profile with its own contract', () => {
   })
   test('licence: the licence reading contract', async () => {
     const a = adapter()
-    await loadCustomerLiveExecutor({ document_sha256: sha, profile: { id: 'licence', version: 2 } }, { env, loadAdapter: a.load as never })
-    expect(a.created).toEqual([expect.objectContaining({ readingContract: 'licence-extraction-v2' })])
+    await loadCustomerLiveExecutor({ document_sha256: sha, profile: { id: 'licence', version: 3 } }, { env, loadAdapter: a.load as never })
+    expect(a.created).toEqual([expect.objectContaining({ readingContract: 'licence-extraction-v3' })])
   })
   test('any other profile is refused before the adapter loads', async () => {
-    for (const profile of [{ id: 'licence', version: 3 }, { id: 'release', version: 1 }, { id: 'receipt', version: 3 }]) {
+    for (const profile of [{ id: 'licence', version: 4 }, { id: 'release', version: 1 }, { id: 'receipt', version: 3 }]) {
       const a = adapter()
       await expect(loadCustomerLiveExecutor({ document_sha256: sha, profile }, { env, loadAdapter: a.load as never })).rejects.toThrow('live_examination_disabled:profile_not_supported')
       expect(a.created).toEqual([])
