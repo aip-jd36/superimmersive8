@@ -1,0 +1,182 @@
+name: CR-DOC-READER-EXT-9R3 Licence Reader Evaluation (manual, paid; synthetic fixtures only)
+
+# CR-DOC-READER-EXT-9R3 Phase D — the live evaluation of the licence reading contract v2 (licence-extraction-v2, licence-prompt-v2,
+# licence profile 2): the 12 pre-registered synthetic documents (licence-fixtures-v1) and the 3 supplementary long-statement synthetic
+# documents (licence-fixtures-supplement-9r3-v1), each examined once by the pinned model and scored by licence-eval-criteria-v1.
+# Founder authorization (2026-11-19): at most 30 API requests and $2.00, with the existing ANTHROPIC_API_KEY secret.
+# An extraction evaluation only: it activates nothing. It does not touch the database, the Production deployment, its settings or
+# the licence reading switch (which stays off in the reviewed revision); no customer path is involved.
+#
+#   - Manual only (workflow_dispatch), no inputs: no ref, path, fixture, model, limit or command can be chosen at dispatch. It
+#     never runs on push, pull request or schedule.
+#   - Runs only from the default branch's copy of this file, and checks out exactly the reviewed revision below, which must be part
+#     of main's history. Every third-party action is pinned to a full commit SHA.
+#   - SI8's committed synthetic fixtures only, rendered here; the 12 PDFs must match their committed hashes, and the 3 PNGs their
+#     expected count and dimensions, or the run refuses before any paid call.
+#   - The secret reaches the live step only (credential operating decision, CR_V2_DOC_LIVE_EVALUATION_PROTOCOL.md section 1).
+#   - The reports (which hold raw model outputs) stay in the runner's temporary directory. Nothing is uploaded or cached. The public
+#     log carries only the allow-list summary (lib/creator-record/eval/licence-eval-summary.ts): counts, costs, criteria and
+#     violation codes; no model output, value, excerpt, document text or credential.
+#   - Paid: at most 30 API requests (hard, retries included: 24 + 6), at most $1.98 worst case (limit $2.00). Each run is a
+#     separate approval; do not re-run the job without one.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cr-doc-reader-ext-9r3-licence-evaluation
+  cancel-in-progress: false
+
+env:
+  # The reviewed revision: contract v2 (4aa235fb) + evaluation controls (6ce37fcc) + their tests. Changing it is a reviewed change.
+  REVIEWED_SHA: 04e307d2e53d1a8f1645261441f85e8d2d0246e4
+  MODEL: claude-sonnet-5
+  CONTRACT: licence-extraction-v2
+  PROMPT: licence-prompt-v2
+  PRE_DOCUMENTS: '12'
+  PRE_MAX_CALLS: '24'
+  PRE_MAX_USD: '1.58'
+  SUP_DOCUMENTS: '3'
+  SUP_MAX_CALLS: '6'
+  SUP_MAX_USD: '0.40'
+  TOTAL_MAX_CALLS: '30'
+  TOTAL_MAX_USD: '2.00'
+
+jobs:
+  licence-evaluation:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.repository == 'aip-jd36/superimmersive8'
+    runs-on: ubuntu-latest
+    # 15 documents, at most two 25-second requests each, one after another.
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+        working-directory: 08_Platform/app
+
+    steps:
+      - name: Check out the reviewed revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.REVIEWED_SHA }}
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Verify the reviewed revision
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$REVIEWED_SHA"
+          test -z "$(git status --porcelain)"
+          # The reviewed revision must be part of main. Public repository: an anonymous, history-only fetch; no credential is used.
+          git fetch --quiet --no-tags --filter=blob:none https://github.com/aip-jd36/superimmersive8.git main
+          git merge-base --is-ancestor "$REVIEWED_SHA" FETCH_HEAD
+          # The licence reading switch stays off in this revision (the evaluation does not use it; this guards the attribution).
+          grep -q "^export const LICENCE_READING_SWITCH = 'off' as 'off' | 'on'$" lib/creator-record/customer-flow/approved-inputs.ts
+          echo "Running reviewed revision $REVIEWED_SHA (part of main); licence reading switch off"
+
+      # No dependency cache in this job: nothing restored from a cache another run wrote can reach the step that holds the secret.
+      - name: Set up Node.js 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+
+      - name: Install Node dependencies (lockfile, no install scripts)
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.13'
+
+      - name: Install the fixture generator's dependencies (the versions the PDF pins were made with)
+        run: |
+          python -m pip install --no-cache-dir --only-binary=:all: "pymupdf==1.27.2.3" "pillow==12.2.0"
+          # The PNG fixtures need a TrueType font (the generator refuses Pillow's tiny bitmap default).
+          test -f /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
+
+      - name: Generate the synthetic fixtures (pre-registered and supplement)
+        run: |
+          set -euo pipefail
+          python -I lib/creator-record/eval/fixtures/generate_licence_fixtures.py > "$RUNNER_TEMP/rendered-pre.tsv"
+          python -I lib/creator-record/eval/fixtures/generate_licence_fixtures.py licence-fixtures-supplement-9r3.json > "$RUNNER_TEMP/rendered-sup.tsv"
+
+      - name: Check the rendered documents against the committed pins (before any paid call)
+        run: |
+          set -euo pipefail
+          cat "$RUNNER_TEMP/rendered-pre.tsv" "$RUNNER_TEMP/rendered-sup.tsv" > "$RUNNER_TEMP/rendered.tsv"
+          python -I - "$RUNNER_TEMP/rendered.tsv" <<'PY'
+          import json, sys
+          from PIL import Image
+          d = 'lib/creator-record/eval/fixtures/'
+          pins = json.load(open(d + 'licence-fixtures.document-hashes.json', encoding='utf-8'))
+          specs = [json.load(open(d + f, encoding='utf-8')) for f in ('licence-fixtures.json', 'licence-fixtures-supplement-9r3.json')]
+          fixtures = {f['fixture_id']: f for s in specs for f in s['fixtures']}
+          rendered = [line.split('\t') for line in open(sys.argv[1], encoding='utf-8').read().splitlines()]
+          bad = []
+          seen = set()
+          for fid, ext, size, sha in rendered:
+              seen.add(fid)
+              if ext == 'pdf' and pins['pdf_documents'].get(fid) != sha: bad.append(f'{fid}: pdf hash')
+              if ext == 'png':
+                  if fid not in pins['png_documents']: bad.append(f'{fid}: unexpected png')
+                  lines = fixtures[fid]['pages'][0]
+                  if Image.open(f'{d}generated/licence/{fid}.png').size != (1000, 120 + 44 * len(lines)): bad.append(f'{fid}: png size')
+          if seen != set(pins['pdf_documents']) | set(pins['png_documents']) or len(rendered) != 15: bad.append('document set')
+          if bad:
+              print('PIN CHECK FAILED: ' + ', '.join(bad)); sys.exit(1)
+          print(f"Pin check passed: {len(pins['pdf_documents'])} PDFs match their committed hashes; {len(pins['png_documents'])} PNGs have the expected size.")
+          PY
+
+      - name: Dry run and mock run (no model call)
+        run: |
+          set -euo pipefail
+          npx tsx --tsconfig tsconfig.json lib/creator-record/eval/run-licence-eval.ts --mode dry-run --runs 1 --spec preregistered > "$RUNNER_TEMP/plan-pre.json"
+          npx tsx --tsconfig tsconfig.json lib/creator-record/eval/run-licence-eval.ts --mode dry-run --runs 1 --spec supplement-9r3 > "$RUNNER_TEMP/plan-sup.json"
+          npx tsx --tsconfig tsconfig.json lib/creator-record/eval/run-licence-eval.ts --mode mock --runs 1 --spec preregistered > /dev/null
+          npx tsx --tsconfig tsconfig.json lib/creator-record/eval/run-licence-eval.ts --mode mock --runs 1 --spec supplement-9r3 > /dev/null
+          # The contract the engine will actually use, read from the code (a script file: `tsx -e` with a dynamic import prints nothing).
+          printf '%s\n' "import { LICENCE_READING_CONTRACT } from '$PWD/lib/creator-record/examination/licence-profile'" \
+            "console.log(JSON.stringify({ schema_version: LICENCE_READING_CONTRACT.schema_version, prompt_version: LICENCE_READING_CONTRACT.prompt_version }))" \
+            > "$RUNNER_TEMP/contract-check.ts"
+          npx tsx --tsconfig tsconfig.json "$RUNNER_TEMP/contract-check.ts" > "$RUNNER_TEMP/contract.json"
+          test -s "$RUNNER_TEMP/contract.json"
+          node - "$RUNNER_TEMP" <<'NODE'
+          const fs = require('fs')
+          const dir = process.argv[2]
+          const e = process.env
+          const pre = JSON.parse(fs.readFileSync(`${dir}/plan-pre.json`, 'utf8')).plan
+          const sup = JSON.parse(fs.readFileSync(`${dir}/plan-sup.json`, 'utf8')).plan
+          const c = JSON.parse(fs.readFileSync(`${dir}/contract.json`, 'utf8'))
+          const bad = []
+          if (c.schema_version !== e.CONTRACT || c.prompt_version !== e.PROMPT) bad.push('not the v2 contract')
+          for (const [p, n, calls, usd] of [[pre, e.PRE_DOCUMENTS, e.PRE_MAX_CALLS, e.PRE_MAX_USD], [sup, e.SUP_DOCUMENTS, e.SUP_MAX_CALLS, e.SUP_MAX_USD]]) {
+            if (p.model !== e.MODEL || p.runs !== 1 || p.documents !== Number(n)) bad.push('plan shape')
+            if (p.max_requests !== Number(calls)) bad.push(`plan is not ${calls} requests`)
+            if (!(p.max_cost_usd <= Number(usd))) bad.push(`worst case ${p.max_cost_usd} above ${usd}`)
+          }
+          if (Number(e.PRE_MAX_CALLS) + Number(e.SUP_MAX_CALLS) !== Number(e.TOTAL_MAX_CALLS)) bad.push('call limits do not add up to the total')
+          if (!(Number(e.PRE_MAX_USD) + Number(e.SUP_MAX_USD) <= Number(e.TOTAL_MAX_USD))) bad.push('spend limits above the total')
+          if (bad.length) { console.error('DRY RUN CHECK FAILED: ' + bad.join('; ')); process.exit(1) }
+          console.log(`Dry run check passed: ${pre.documents} + ${sup.documents} synthetic documents, contract ${c.schema_version} / ${c.prompt_version}, at most ${e.TOTAL_MAX_CALLS} requests (${pre.max_requests} + ${sup.max_requests}), worst case $${(pre.max_cost_usd + sup.max_cost_usd).toFixed(4)} (limit $${e.TOTAL_MAX_USD}); mock runs passed; no request made.`)
+          NODE
+
+      - name: Live run (paid, single execution)
+        id: live
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -uo pipefail
+          common=(--mode live --confirm-paid-calls --model "$MODEL" --runs 1 --input-usd-per-mtok 2 --output-usd-per-mtok 10 --out "$RUNNER_TEMP/licence-eval")
+          # The runner prints only per-criterion id / pass / value. Its exit code (criteria failing) is judged by the summary step.
+          npx tsx --tsconfig tsconfig.json lib/creator-record/eval/run-licence-eval.ts "${common[@]}" --spec preregistered --max-calls "$PRE_MAX_CALLS" --max-usd "$PRE_MAX_USD" || true
+          npx tsx --tsconfig tsconfig.json lib/creator-record/eval/run-licence-eval.ts "${common[@]}" --spec supplement-9r3 --max-calls "$SUP_MAX_CALLS" --max-usd "$SUP_MAX_USD" || true
+
+      - name: Public summary (allow-list only)
+        if: always() && steps.live.conclusion != 'skipped'
+        run: |
+          set -euo pipefail
+          npx tsx --tsconfig tsconfig.json lib/creator-record/eval/licence-eval-summary.ts \
+            "$RUNNER_TEMP/licence-eval/licence-eval-report-preregistered.json" \
+            "$RUNNER_TEMP/licence-eval/licence-eval-report-supplement-9r3.json"
