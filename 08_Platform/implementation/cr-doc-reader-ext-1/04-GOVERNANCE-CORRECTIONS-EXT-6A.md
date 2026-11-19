@@ -128,3 +128,22 @@ provider, asset or project association. The v8 association line prints wherever 
 **Source re-verification.** Getty, Shutterstock and Pond5: BLOCKED. Automated fetch returns HTTP 403, and the Claude in Chrome
 extension was not connected in this session, so no browser capture could be made. Their terms are **not** assumed unchanged. Next:
 a human Print-to-PDF capture of each page into the preserved evidence captures, then a review.
+
+## EXT-6C addendum (2026-11-19) — source evidence closure attempt
+
+Read-only. No claim, `last_verified` date or proposition was changed. Browser extension: not connected. Founder captures: none supplied.
+
+| Provider (claim) | Source read | Capture / visible date | Result |
+|---|---|---|---|
+| iStock (`CLAIM-STOCK-EDITORIAL-001-v2`) | `istockphoto.com/legal/license-agreement` (automated, HTTP 200) | 2026-11-19 / "LAST UPDATED: July 2026" (same as recorded) | **Verified.** "You may not use content marked "editorial use only" for any commercial, promotional, advertorial, endorsement, advertising, gambling/betting/gaming uses or merchandising purpose." |
+| Adobe Stock (same) | `stock.adobe.com/license-terms` (zh-TW rendering, as recorded) | 2026-11-19 / none visible | **Verified** (Tier 2, as recorded): editorial-only assets may not be used for advertising, promotion, endorsement, product placement, commercial blogs or merchandise without the copyright owner's prior written consent and additional clearance |
+| Getty Images (same) | `gettyimages.com.au/eula` (automated, HTTP 200). `.com`, `.co.uk`: 403 | 2026-11-19 / "LAST UPDATED: April 2026" | **Verified on Getty's Australian agreement.** §3.7: "Unless explicitly authorised in a Getty Images invoice, sales order confirmation or licence agreement, you may not use content marked "editorial" or "intended for editorial" for any commercial, promotional, advertorial, endorsement, advertising, gambling/betting/gaming uses, or merchandising purpose." The `.com` agreement the claim cites was not readable, and regional agreements can differ |
+| Shutterstock (same) | `shutterstock.com/license`, `/support/…`: 403; old help article: 404; `submit.shutterstock.com/help/en`: 200 (index only, no editorial text) | — | **Not verified** |
+| Pond5 (`CLAIM-POND5-…-CONSENT-001-v1`) | `pond5.com/legal/license`, `pond5.com/help/en/?query=editorial`: 403; `help.pond5.com` redirects to that 403 | — | **Not verified.** Revision 2024-01-03 not re-confirmed |
+
+Evidence-trail finding: the four Pond5 preserved captures and their `MANIFEST.md` that the governed claim cites
+(`evidence-captures/pond5/…`) are not on `main`. They exist only in commit `5309b1c1` on `recovery/pre-territory-main-worktree-2026-09-11`.
+Their text layer is not extractable, and content was confirmed by human review (LK-59).
+
+No inconsistency was found in any source that could be read. Getty and Adobe Stock add detail not in the proposition (Getty: third-party
+approvals and gambling use; Adobe: modification and credit limits). It is narrower than the sources but not contradicted by them.
