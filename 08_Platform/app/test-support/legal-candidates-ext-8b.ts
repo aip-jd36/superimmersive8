@@ -13,7 +13,10 @@ import { PRIVACY_NOTICE, TERMS_OF_SERVICE, type ApprovedLegalDocument } from '@/
 /** Placeholder identifiers; publication sets the real ones (format `LEGAL_VERSION_PATTERN`). */
 export const CANDIDATE_PRIVACY_VERSION = 'privacy-2026-11-20'
 export const CANDIDATE_TERMS_VERSION = 'terms-2026-11-20'
-export const CANDIDATE_APPROVAL_REFERENCE = 'CR-DOC-READER-EXT-8B candidate (approved in principle; not published)'
+export const CANDIDATE_APPROVAL_REFERENCE = 'JD-CR-DOC-READER-EXT-8C-20261119: founder wording approval (internal good-faith; not a legal opinion); not published'
+
+/** CR-DOC-READER-EXT-8C: sha256 of JSON.stringify({ privacy: paragraphs, terms: paragraphs }) of the approved candidates. */
+export const APPROVED_CANDIDATE_WORDING_SHA256 = '0a6fa5dd56da9e0611518727464ba7e1e98d66acd386e905c29c7e1e9f103e89'
 
 /** Privacy Notice changes (EXT-8A proposal, §§1, 2, 4, 5). */
 export const PRIVACY_REPLACEMENTS: readonly { from: string; to: string }[] = Object.freeze([

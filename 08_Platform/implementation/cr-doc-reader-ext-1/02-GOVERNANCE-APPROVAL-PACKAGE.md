@@ -103,3 +103,10 @@ never marks a dependency satisfied or a document sufficient. Association is the 
   designations, item names, permission statements and excerpts are not reproduced in the PDF. It is an internal good-faith decision;
   external counsel was not commissioned and it is not a legal opinion or compliance certification. v8 is NOT active: its lifecycle stays
   `pending` until a separate activation.
+- **Privacy Notice and Terms wording (CR-DOC-READER-EXT-8B/8C):** approved by the founder 2026-11-19 (`JD-CR-DOC-READER-EXT-8C-20261119`): the candidate
+  Privacy Notice (§§1, 2, 4, 5) and Terms §5 wording in `08_Platform/app/test-support/legal-candidates-ext-8b.ts`, wording digest
+  `0a6fa5dd56da9e0611518727464ba7e1e98d66acd386e905c29c7e1e9f103e89` (44 and 31 paragraphs). Storage and AI-permission checkbox wording unchanged. Internal good-faith decision, not a
+  legal opinion or compliance certification. NOT PUBLISHED: `lib/legal/policies.ts` still carries `privacy-2026-11-09` and
+  `terms-2026-11-18`. Effective date and version identifiers are not yet set (placeholders `privacy-2026-11-20` / `terms-2026-11-20`);
+  publication, the authority-row replacement and the effective date each need a separate decision
+  (`05-PRIVACY-TERMS-EXT-8B.md`).

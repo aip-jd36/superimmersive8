@@ -4,7 +4,7 @@
 import { approvedPolicyVersions, legalPoliciesApproved, LEGAL_VERSION_PATTERN, PRIVACY_NOTICE, TERMS_OF_SERVICE } from '@/lib/legal/policies'
 import { AI_EXAMINATION_PERMISSION_APPROVED_WORDING, aiExaminationPermissionVersion, EVIDENCE_CONSENT_APPROVED_WORDING, evidenceConsentVersion } from '@/lib/creator-record-flow/authorization-versions'
 import { customerWordingIdentity } from '@/lib/creator-record-flow/customer-wording'
-import { candidatePrivacyNotice, candidateTerms, CANDIDATE_PRIVACY_VERSION, CANDIDATE_TERMS_VERSION, PRIVACY_INSERTIONS, PRIVACY_REPLACEMENTS, TERMS_REPLACEMENTS } from '@/test-support/legal-candidates-ext-8b'
+import { APPROVED_CANDIDATE_WORDING_SHA256, candidatePrivacyNotice, candidateTerms, CANDIDATE_PRIVACY_VERSION, CANDIDATE_TERMS_VERSION, PRIVACY_INSERTIONS, PRIVACY_REPLACEMENTS, TERMS_REPLACEMENTS } from '@/test-support/legal-candidates-ext-8b'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 
@@ -26,6 +26,11 @@ describe('nothing is published', () => {
 describe('the candidate documents', () => {
   const P = candidatePrivacyNotice()
   const T = candidateTerms()
+  test('the founder-approved wording (CR-DOC-READER-EXT-8C) is exactly what is built', () => {
+    const digest = require('node:crypto').createHash('sha256').update(JSON.stringify({ privacy: P.paragraphs, terms: T.paragraphs })).digest('hex')
+    expect(digest).toBe(APPROVED_CANDIDATE_WORDING_SHA256)
+    expect(digest).toBe('0a6fa5dd56da9e0611518727464ba7e1e98d66acd386e905c29c7e1e9f103e89')
+  })
   test('complete and well-formed (a build with them would publish both)', () => {
     expect(LEGAL_VERSION_PATTERN.test(P.version) && LEGAL_VERSION_PATTERN.test(T.version)).toBe(true)
     expect(legalPoliciesApproved({ privacy: P, terms: T })).toBe(true)

@@ -31,7 +31,7 @@ jest.mock('@/lib/creator-record-artifacts/store', () => ({ artifactGateDecision:
 jest.mock('@/lib/payments/repository', () => ({ hasCreatorRecordPdf: jest.fn(), loadFulfillmentSubmission: jest.fn() }))
 
 import { approvedGovernanceSnapshot, approvedPdfTemplates, CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flow/approved-inputs'
-import { verifyReferencedReadings, type ReferencedReadingPorts } from '@/lib/creator-record/customer-flow/examination'
+import { examinationProjectionFor, verifyReferencedReadings, type ReferencedReadingPorts } from '@/lib/creator-record/customer-flow/examination'
 import { checkV2Checkout, renderV2ForIssuance, startPurchase, V2IssuanceRefusal, type CheckoutSubmission, type PurchaseDeps, type V2IssuanceDeps } from '@/lib/creator-record/customer-flow/purchase'
 import type { PreparedRow } from '@/lib/creator-record/customer-flow/service'
 import { syntheticUatInputs } from '@/lib/creator-record/customer-flow/synthetic-uat'
@@ -539,5 +539,39 @@ describe('8. every commercial gate stays closed by default', () => {
     expect(await startPurchase({ ...p.deps, issuance: 'stopped' }, OWNER, ROW.id)).toEqual({ ok: false, status: 503, code: 'issuance_stopped' })
     expect(await startPurchase({ ...p.deps, submissions: 'stopped' }, OWNER, ROW.id)).toEqual({ ok: false, status: 503, code: 'submissions_stopped' })
     expect(() => rendererForFamily(CREATOR_RECORD_V2_FAMILY, 'stopped')).toThrow(CreatorRecordIssuanceStoppedError)
+  })
+})
+
+// CR-DOC-READER-EXT-8C — a legal-version change (the EXT-8B candidate Notice and Terms) does not touch stored readings: the
+// permission identifier the build asks for changes, but the projection and the checkout/issuance re-check read no grant, so a
+// reading made under the earlier permission stays shown and verifiable for its owner, and stays invisible to anyone else.
+describe('stored readings after a legal-version change (CR-DOC-READER-EXT-8C)', () => {
+  test('a receipt reading made under the earlier permission is still projected and re-verified, owner-only', async () => {
+    const { candidatePrivacyNotice, candidateTerms } = jest.requireActual('@/test-support/legal-candidates-ext-8b')
+    const docs = { privacy: candidatePrivacyNotice(), terms: candidateTerms() }
+    const before = (jest.requireActual('@/lib/creator-record-flow/authorization-versions') as typeof import('@/lib/creator-record-flow/authorization-versions')).aiExaminationPermissionVersion()
+    let mod!: typeof import('@/lib/creator-record/customer-flow/examination')
+    let after!: string | null
+    jest.isolateModules(() => {
+      jest.doMock('@/lib/legal/policies', () => {
+        const actual = jest.requireActual('@/lib/legal/policies')
+        return { ...actual, PRIVACY_NOTICE: docs.privacy, TERMS_OF_SERVICE: docs.terms, legalPoliciesApproved: () => actual.legalPoliciesApproved(docs), approvedPolicyVersions: () => actual.approvedPolicyVersions(docs) }
+      })
+      after = require('@/lib/creator-record-flow/authorization-versions').aiExaminationPermissionVersion()
+      mod = require('@/lib/creator-record/customer-flow/examination')
+    })
+    expect(before).toBe('cr-v2-ai-permission-1__privacy-2026-11-09__terms-2026-11-18')
+    expect(after).toBe('cr-v2-ai-permission-1__privacy-2026-11-20__terms-2026-11-20')
+
+    const refs = [{ run_id: ATTEMPT.id, document_id: DOC_ID, envelope_sha256: ATTEMPT.envelope_sha256, kind: 'live' as const, profile_id: 'receipt' }]
+    const live = { listAttempts: async (o: string, d: string) => clone(store.attempts.filter((a) => a.user_id === o && a.document_id === d)) }
+    const shown = await mod.examinationProjectionFor({ listRuns: async () => [] }, OWNER, DOC_ID, undefined, live)
+    expect(shown.kind).toBe('projection')
+    expect(shown).toEqual(await examinationProjectionFor({ listRuns: async () => [] }, OWNER, DOC_ID, undefined, live))
+    expect(await mod.verifyReferencedReadings(readingPorts(), OWNER, refs)).toEqual({ ok: true })
+    // Existing access controls are unchanged: another creator sees nothing and cannot rely on it.
+    const OTHER = '22222222-2222-4222-8222-222222222222'
+    expect(await mod.examinationProjectionFor({ listRuns: async () => [] }, OTHER, DOC_ID, undefined, live)).toEqual({ kind: 'none' })
+    expect(await mod.verifyReferencedReadings(readingPorts(), OTHER, refs)).toEqual({ ok: false, reason: 'run_missing' })
   })
 })
