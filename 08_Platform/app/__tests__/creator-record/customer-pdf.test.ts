@@ -669,6 +669,8 @@ describe('rendering boundary', () => {
       // CR-DOC-READER-EXT-2: integrated assessment v2 (pure, derived from the verified record) and its closed codes; used only by a set
       // that carries `integrated_assessment_v2` (none is registered).
       '../integrated-assessment/assess-v2', '../integrated-assessment/vocabulary-v2',
+      // CR-DOC-READER-EXT-6A: the governed relevance table (pure data), to print a document-scoped note only with a relevant document.
+      '../integrated-assessment/dependency-relevance',
       // CR-SUM-PDF-B1: the pure bounded readiness summary and its renderer (used only when a template set carries the
       // readiness block; no approved set does). Their own imports are checked below.
       '../readiness-summary/render', '../readiness-summary/summary',
@@ -686,7 +688,8 @@ describe('rendering boundary', () => {
   test('CR-SUM-PDF-B1: the readiness summary modules reach nothing beyond what the document model already reads', () => {
     const SUMMARY = path.join(APP_ROOT, 'lib', 'creator-record', 'readiness-summary')
     const reached = new Set(walk(SUMMARY).flatMap(importsOf))
-    expect(Array.from(reached).sort()).toEqual(['../contract/compose', '../customer-record/record', '../integrated-assessment/assess', '../record-core/canonical', './summary'])
+    // CR-DOC-READER-EXT-6A: plus the governed relevance table (pure data) for document-scoped notes.
+    expect(Array.from(reached).sort()).toEqual(['../contract/compose', '../customer-record/record', '../integrated-assessment/assess', '../integrated-assessment/dependency-relevance', '../record-core/canonical', './summary'])
   })
 
   test('no template set ships with the application (placeholders exist only in tests)', () => {

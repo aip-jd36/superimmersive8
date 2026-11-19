@@ -2821,7 +2821,7 @@ export const CREATOR_RECORD_PDF_TEMPLATE_SETS: readonly { readonly templates: un
         "unknown": "Unknown"
       },
       "personal_details_present": {
-        "true": "Yes (not copied into this record)",
+        "true": "Yes",
         "false": "No"
       }
     },
@@ -3008,8 +3008,8 @@ export const CREATOR_RECORD_PDF_TEMPLATE_SETS: readonly { readonly templates: un
     "caveats_pointer": "See 'Please note' below."
   },
   "integrated_assessment_v2": {
-    "heading": "How your documents relate to this consideration",
-    "intro": "The documents you added were read automatically, as described above. What follows is how a reading may relate to a point in the guidance. No person at SI8 checked it, and it was not compared with your answers.",
+    "heading": "How your documents may relate to this consideration",
+    "intro": "The documents you added were read automatically, as described above. What follows is how a reading may relate to a point in the guidance. No person at SI8 checked it, and it was not compared with your answers. “May be relevant” means only that a reading may concern this point: it does not settle the point, and SI8 did not decide whether the guidance fits your project.",
     "association": "This document is listed here because of the document type you chose for it. SI8 did not check that it comes from this service, concerns your material or relates to this video.",
     "open_point": "This point remains open. A document reading does not settle it, and does not show that you hold the rights or permission you need.",
     "point": "Point",
@@ -3018,7 +3018,7 @@ export const CREATOR_RECORD_PDF_TEMPLATE_SETS: readonly { readonly templates: un
     "document": "Document {n}",
     "reading": "Reading",
     "reading_labels": {
-      "read": "Read by an automated reading",
+      "read": "Read automatically",
       "not_read": "Not read",
       "could_not_read": "Could not be read"
     },
@@ -3052,7 +3052,7 @@ export const CREATOR_RECORD_PDF_TEMPLATE_SETS: readonly { readonly templates: un
     "method": "Integrated assessment method, version {version}."
   }
 }),
-    approval: Object.freeze({ template_id: 'si8/creator-record-v2-pdf-templates', version: 8, fingerprint: '351843de17538f0316c8f2c6c1e3467df96bea7cfbb77e1f02cbb1c919c7ca73', record_schema: { id: 'si8/creator-record-v2-record', version: 8 }, lifecycle: 'pending', authority: '', decision_date: '', review_ref: 'CR-DOC-READER-EXT-2 candidate v8 (wording not approved: D5)' }) as PdfTemplateApproval,
+    approval: Object.freeze({ template_id: 'si8/creator-record-v2-pdf-templates', version: 8, fingerprint: '65cf053851cce49388a38ac16567668de3fc3060567b43862245b31c7551d1fa', record_schema: { id: 'si8/creator-record-v2-record', version: 8 }, lifecycle: 'pending', authority: '', decision_date: '', review_ref: 'CR-DOC-READER-EXT-2 candidate v8, revised CR-DOC-READER-EXT-6A (wording not approved: D5)' }) as PdfTemplateApproval,
   }),
 ])
 

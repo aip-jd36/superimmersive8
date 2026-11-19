@@ -151,7 +151,7 @@ describe('the approved guidance ledger, PDF templates and issuance support', () 
       expect.objectContaining({ version: 6, fingerprint: 'a0cd0c248ce270d2826712910aa606579ce429f7923b051d68a0502c5305f476', record_schema: { id: 'si8/creator-record-v2-record', version: 7 }, lifecycle: 'approved', authority: notBlank, decision_date: '2026-11-16', review_ref: expect.stringMatching(/^CR-DESIGN-2D-RELEASE-AUTHORIZATION-20261116 v6;/) }),
       expect.objectContaining({ version: 7, fingerprint: '5d7ccfc8ce824e57f6e904d51f1027b59e43ab250a7f4895b0f804debe1761ab', record_schema: { id: 'si8/creator-record-v2-record', version: 8 }, lifecycle: 'approved', authority: notBlank, decision_date: '2026-11-16', review_ref: expect.stringMatching(/^CR-DESIGN-2D-RELEASE-AUTHORIZATION-20261116 v7;/) }),
       // CR-DOC-READER-EXT-5A: candidate v8, registered inactive (pending; no authority or date: not approved, never selected).
-      expect.objectContaining({ version: 8, fingerprint: '351843de17538f0316c8f2c6c1e3467df96bea7cfbb77e1f02cbb1c919c7ca73', record_schema: { id: 'si8/creator-record-v2-record', version: 8 }, lifecycle: 'pending', authority: '', decision_date: '' }),
+      expect.objectContaining({ version: 8, fingerprint: '65cf053851cce49388a38ac16567668de3fc3060567b43862245b31c7551d1fa', record_schema: { id: 'si8/creator-record-v2-record', version: 8 }, lifecycle: 'pending', authority: '', decision_date: '' }),
     ])
     expect(sha(JSON.stringify(sortDeep(Governed.CREATOR_RECORD_PDF_TEMPLATES)))).toBe('c5fe2a21ec8a096c6abf7eccf0bd55f3103401e10a26512052e5d2ee15a11c6c')
     expect(sha(JSON.stringify(sortDeep(Governed.CREATOR_RECORD_PDF_TEMPLATE_SETS[0].templates)))).toBe('287de01d8dc365e4e7c62ab0ea25fdce0b824b26e31367560b85b2f9e779c1b5')

@@ -55,7 +55,7 @@ describe('v8 rendering, end to end (synthetic approval)', () => {
     const m = buildCustomerDocument({ canonical: rec.canonical, sha256: rec.sha256, issued: ISSUED, templates: V8.templates, template_approval: SYNTHETIC_V8 })
     const docs = docTexts(m)
     // What was read (documents section, unchanged mechanism) ...
-    expect(docs).toEqual(expect.arrayContaining(['Licence or plan type shown', 'Pro', 'Licence type: Pro', 'Yes (not copied into this record)']))
+    expect(docs).toEqual(expect.arrayContaining(['Licence or plan type shown', 'Pro', 'Licence type: Pro', 'Yes']))
     // ... then, separately, how it relates to the governed point.
     const T = V8.templates.integrated_assessment_v2
     const i = docs.indexOf(T.heading)
@@ -98,5 +98,41 @@ describe('v8 rendering, end to end (synthetic approval)', () => {
     const v1WithReading = { ...V8.templates, integrated_assessment: v3.templates.integrated_assessment }
     const b = { ...SYNTHETIC_V8, fingerprint: templateFingerprint(v1WithReading) }
     expect(() => buildCustomerDocument({ canonical: rec.canonical, sha256: rec.sha256, issued: ISSUED, templates: v1WithReading, template_approval: b })).toThrow(/readiness_layout_refused|integrated assessment with the reading layout/)
+  })
+})
+
+// CR-DOC-READER-EXT-6A — a governed document note prints only when a relevant document is in the record.
+describe('document notes are conditional on a relevant document', () => {
+  const { documentNoteApplies } = jest.requireActual('@/lib/creator-record/integrated-assessment/dependency-relevance')
+  const ARTLIST_NOTE = 'A document you added may show an Artlist licence or plan type.'
+  const render = async (category: string, tool: number | null = null) => {
+    const rec = await licenceRecord({ M0: ['music'], M1: ['artlist'], M2: ['yes'] }, category, tool)
+    return allTexts(buildCustomerDocument({ canonical: rec.canonical, sha256: rec.sha256, issued: ISSUED, templates: V8.templates, template_approval: SYNTHETIC_V8 }))
+  }
+  test('the rule: document-scoped entries only; mapped categories, not linked to an AI tool; other entries unchanged', () => {
+    const { DOCUMENT_SCOPED_NOTE_ENTRIES } = jest.requireActual('@/lib/creator-record/integrated-assessment/dependency-relevance')
+    const { CANDIDATE_LEDGER_ENTRIES } = jest.requireActual('@/lib/creator-record/governed/candidates/cr-doc-reader-ext-1')
+    expect([...DOCUMENT_SCOPED_NOTE_ENTRIES].sort()).toEqual(CANDIDATE_LEDGER_ENTRIES.map((e: { entry_id: string }) => e.entry_id).sort())
+    const A = 'CR-DOC-READER-EXT-1-LEDGER-CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1'
+    const P = 'CR-DOC-READER-EXT-1-LEDGER-CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1'
+    expect(documentNoteApplies(A, 'artlist_license_type_confirmed', [{ category: 'licence', tool_index: null }])).toBe(true)
+    expect(documentNoteApplies(A, 'artlist_license_type_confirmed', [{ category: 'billing_receipt', tool_index: null }])).toBe(true)
+    expect(documentNoteApplies(A, 'artlist_license_type_confirmed', [{ category: 'licence', tool_index: 0 }])).toBe(false)
+    expect(documentNoteApplies(A, 'artlist_license_type_confirmed', [{ category: 'other', tool_index: null }])).toBe(false)
+    expect(documentNoteApplies(A, 'artlist_license_type_confirmed', [])).toBe(false)
+    expect(documentNoteApplies(P, 'editorial_designation_confirmed', [{ category: 'permission', tool_index: null }])).toBe(false)
+    expect(documentNoteApplies(P, 'separate_authorization_obtained', [{ category: 'permission', tool_index: null }])).toBe(true)
+    // A general note (e.g. the pilot Getty entry) prints with or without documents.
+    expect(documentNoteApplies('PILOT-UAT-LEDGER-CLAIM-STOCK-GETTY-EDITORIAL-001-v1', 'editorial_designation_confirmed', [])).toBe(true)
+  })
+  test('with a licence document the note prints; without a relevant one the explanation and open point print without it', async () => {
+    const withDoc = await render('licence')
+    expect(withDoc.some((t) => t.startsWith(ARTLIST_NOTE))).toBe(true)
+    for (const [category, tool] of [['other', null], ['licence', 0]] as const) {
+      const without = await render(category, tool)
+      expect(without.some((t) => t.startsWith(ARTLIST_NOTE))).toBe(false)
+      expect(without).toEqual(expect.arrayContaining(['Which Artlist licence applies']))
+      expect(without.some((t) => t.includes('This record does not show which Artlist licence your account holds.'))).toBe(true)
+    }
   })
 })

@@ -45,7 +45,8 @@ export const LICENCE_CLASSIFICATION_LABELS: Readonly<Record<string, Record<strin
     not_a_licence_or_permission: 'Not a licence or permission',
     unknown: 'Unknown',
   },
-  personal_details_present: { true: 'Yes (not copied into this record)', false: 'No' },
+  // CR-DOC-READER-EXT-6A: no assurance that details were not copied (only emails and phone numbers are blocked by validation).
+  personal_details_present: { true: 'Yes', false: 'No' },
 })
 
 const W = V2_WORDING_CANDIDATE
@@ -59,7 +60,7 @@ export const INTEGRATED_ASSESSMENT_V2_TEMPLATE = Object.freeze({
   no_document: W.no_document,
   document: 'Document {n}',
   reading: 'Reading',
-  reading_labels: { read: 'Read by an automated reading', not_read: 'Not read', could_not_read: 'Could not be read' },
+  reading_labels: { read: 'Read automatically', not_read: 'Not read', could_not_read: 'Could not be read' },
   link: 'How it relates to this point',
   status_labels: { ...W.status_labels },
   reason: 'Why',

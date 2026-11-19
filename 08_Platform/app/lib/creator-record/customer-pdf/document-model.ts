@@ -33,6 +33,7 @@
  */
 
 import { assessIntegrated, type IntegratedAssessment } from '../integrated-assessment/assess'
+import { documentNoteApplies } from '../integrated-assessment/dependency-relevance'
 import { assessIntegratedV2, type IntegratedAssessmentInputV2, type IntegratedAssessmentV2 } from '../integrated-assessment/assess-v2'
 import { CREATOR_RECORD_CONCLUSIONS } from '../contract/compose'
 import { isIsoDate } from '../contract/types'
@@ -709,7 +710,8 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
           row(S.open_items.for_guidance, ref(item), 'template'),
           { kind: 'label', text: S.open_items.what_you_told_us, from: 'template' },
           ...(d.declarations.length > 0 ? d.declarations.map((x): Block => ({ kind: 'bullet', text: x.answer_verbatim, from: 'record' })) : [{ kind: 'bullet', text: S.open_items.nothing_told, from: 'template' } as Block]),
-          ...(d.evidence_note !== null ? [row(S.open_items.evidence_note, d.evidence_note)] : []),
+          // CR-DOC-READER-EXT-6A: a document note prints only when a relevant document is in the record (`documentNoteApplies`).
+          ...(d.evidence_note !== null && documentNoteApplies(item.provenance.publication.entry_id, d.dependency_id, r.documents.items) ? [row(S.open_items.evidence_note, d.evidence_note)] : []),
           row(S.open_items.status, t.dependency_codes.status[d.status], 'template'),
           row(S.open_items.sufficiency, t.dependency_codes.sufficiency[d.sufficiency], 'template'),
         ]),

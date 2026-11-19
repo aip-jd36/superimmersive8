@@ -31,6 +31,31 @@ export const DRAFT_DEPENDENCY_RELEVANCE: DependencyRelevanceTable = Object.freez
   separate_authorization_obtained: { permission: { profile_id: 'licence', fields: ['permission_statement'] }, licence: { profile_id: 'licence', fields: ['permission_statement'] } },
 })
 
+/**
+ * CR-DOC-READER-EXT-6A — the ledger entries whose evidence notes speak about a document the creator added ("A document you added may
+ * show …"): the four CR-DOC-READER-EXT-1 candidates (a test pins this list to them). Other entries' notes are general statements of
+ * what evidence could show a point, and print as before.
+ */
+export const DOCUMENT_SCOPED_NOTE_ENTRIES: ReadonlySet<string> = new Set([
+  'CR-DOC-READER-EXT-1-LEDGER-CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1',
+  'CR-DOC-READER-EXT-1-LEDGER-CLAIM-MUSIC-EPIDEMIC-TIER-ADVERTISING-001-v1',
+  'CR-DOC-READER-EXT-1-LEDGER-CLAIM-STOCK-EDITORIAL-001-v2',
+  'CR-DOC-READER-EXT-1-LEDGER-CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1',
+])
+
+/**
+ * CR-DOC-READER-EXT-6A — whether a dependency row's evidence note is printed. A document-scoped note (an entry above) is printed only
+ * when the record holds at least one document, not linked to an AI tool, of a category this table names for that dependency (the
+ * association rule of method v2). With none, the explanation and the open point print without the note. Every other note prints
+ * as before. Display only: the record keeps the note (method v2 reads it as the governance signal that documents may be relevant).
+ */
+export function documentNoteApplies(entryId: string, dependencyId: string, documents: readonly { category: string; tool_index: number | null }[], table: DependencyRelevanceTable = DRAFT_DEPENDENCY_RELEVANCE): boolean {
+  if (!DOCUMENT_SCOPED_NOTE_ENTRIES.has(entryId)) return true
+  if (!Object.prototype.hasOwnProperty.call(table, dependencyId)) return false
+  const sources = table[dependencyId]
+  return documents.some((d) => d.tool_index === null && Object.prototype.hasOwnProperty.call(sources, d.category))
+}
+
 /** Material questions a document may be associated with by its declared category, and the question whose answer makes a
  * `permission` document ambiguous (brand or client permission, M4). */
 export const MATERIAL_PROVIDER_QUESTIONS = ['M1', 'M3'] as const

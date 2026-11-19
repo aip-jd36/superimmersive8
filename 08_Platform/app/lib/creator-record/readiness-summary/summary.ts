@@ -39,6 +39,7 @@
 import { CREATOR_RECORD_CONCLUSIONS, biRankForStatus, conclusionRank, type CreatorRecordConclusion } from '../contract/compose'
 import { CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION, CUSTOMER_RECORD_SCHEMA_VERSION, isUncertainValue, verifyCustomerRecord, type CustomerRecordV2, type DeclaredAnswer } from '../customer-record/record'
 import { assessIntegrated } from '../integrated-assessment/assess'
+import { documentNoteApplies } from '../integrated-assessment/dependency-relevance'
 import { canonicalJson, sha256Hex } from '../record-core/canonical'
 
 // v2 (CR-PDF-IMPL-1): an answer holding an uncertain value ("Not sure") is never listed as an uncovered subject; it is listed
@@ -361,7 +362,8 @@ export function buildReadinessSummary(input: {
           if (!nonEmpty(x.answer_verbatim)) throw new ReadinessSummaryRefusal('selection_provenance_broken', `${item.claim_id}: dependency ${d.dependency_id}`)
           return x.answer_verbatim
         }),
-        evidence_note: d.evidence_note,
+        // CR-DOC-READER-EXT-6A: the document note only when a relevant document is in the record (`documentNoteApplies`).
+        evidence_note: d.evidence_note !== null && documentNoteApplies(item.provenance.publication.entry_id, d.dependency_id, record.documents.items) ? d.evidence_note : null,
       })
     }
     const consideration: SummaryConsideration = {
