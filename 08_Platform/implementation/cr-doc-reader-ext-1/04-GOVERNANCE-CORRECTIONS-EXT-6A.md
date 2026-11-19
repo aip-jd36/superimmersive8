@@ -147,3 +147,18 @@ Their text layer is not extractable, and content was confirmed by human review (
 
 No inconsistency was found in any source that could be read. Getty and Adobe Stock add detail not in the proposition (Getty: third-party
 approvals and gambling use; Adobe: modification and credit limits). It is narrower than the sources but not contradicted by them.
+
+## EXT-6D addendum (2026-11-19) — browser re-verification (Claude in Chrome, founder's browser)
+
+Pages were read as rendered text in the founder's own Chrome session on 2026-11-19. No sign-in, no form, and no bot check was solved
+by the agent: the Getty Cloudflare check cleared on its own when the page was reloaded. These are text readings, not preserved PDF
+artifacts.
+
+| Provider | URL as served | Visible date | Passage | Result |
+|---|---|---|---|---|
+| Pond5 | `pond5.com/legal/license` | "(revised 2024-01-03)", footer "v. 2024-01-03": unchanged from the 2026-08-30 capture | §7: "For Content which the Item Page states is editorial or for editorial use only … This type of Content is intended to be used only in connection with events or topics that are newsworthy or of general public interest." / "Absent Pond5’s express and specific written (could be by email) consent, Editorial Content may not be used in any Merchandise, advertisement (other than in-context advertising of a Production in which Editorial Content has been incorporated), endorsement, promotion, advertorial, or other commercial Production." | **Verified, unchanged.** Matches the proposition word for word; "(could be by email)" is a detail, not a difference |
+| Shutterstock | `shutterstock.com/license` | "EFFECTIVE DATE: October 5, 2026" (newer than the August research) | "An "editorial use" … shall be a use made for descriptive purposes in a context that is newsworthy or of human interest and expressly excludes commercial uses such as advertising or merchandising." / "YOU MAY NOT: … Use Visual Content designated "Editorial Use Only" (including, but not limited to, Editorial content) for commercial purposes, including for reference, in any advertising, merchandise or other non-editorial contexts." | **Verified.** No editorial-specific consent path is stated (only a general "contact Customer Service"). This is consistent with the claim's "some" providers. Also restricts broadcast/OTT, covers and >500k print runs |
+| Getty Images | `gettyimages.com/eula` redirected to `gettyimages.hk/eula` (zh-HK) | "最後更新：2026 年 4 月" (April 2026) | "未經 Getty Images 事先書面同意並支付額外的授權費用，以下均被禁止" — prohibited without Getty's prior written consent and an additional licence fee: "除非在 Getty Images 發票、銷售訂單確認或授權協議明確授權，否則您不得將標記為「編輯性內容」…用於任何商業、促銷、社論式廣告、背書、廣告、博彩／打賭" — no commercial, promotional, advertorial, endorsement, advertising or gambling use of editorial content unless explicitly authorised in a Getty invoice, sales order confirmation or licence agreement. The zh-HK page text is broken mid-sentence; the English AU page has the full list, including merchandising | **Verified.** `.com` serves the regional agreement by location; the AU (English) and HK (Chinese) agreements, both April 2026, agree |
+
+Result: every provider in both claims' scopes is verified against current terms, and none contradicts its proposition or provider
+scope. No provider needs excluding.
