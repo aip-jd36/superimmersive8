@@ -1,7 +1,7 @@
 name: CR-DOC-READER-EXT-9R3 Licence Reader Evaluation (manual, paid; synthetic fixtures only)
 
-# CR-DOC-READER-EXT-9R3 Phase D — the live evaluation of the licence reading contract v2 (licence-extraction-v2, licence-prompt-v2,
-# licence profile 2): the 12 pre-registered synthetic documents (licence-fixtures-v1) and the 3 supplementary long-statement synthetic
+# CR-DOC-READER-EXT-9R3 Phase D — the live evaluation of the licence reading contract v3 (licence-extraction-v3, licence-prompt-v2,
+# licence profile 3; CR-DOC-READER-EXT-9R4: permission_statement 500 / 500): the 12 pre-registered synthetic documents (licence-fixtures-v1) and the 3 supplementary long-statement synthetic
 # documents (licence-fixtures-supplement-9r3-v1), each examined once by the pinned model and scored by licence-eval-criteria-v1.
 # Founder authorization (2026-11-19): at most 30 API requests and $2.00, with the existing ANTHROPIC_API_KEY secret.
 # An extraction evaluation only: it activates nothing. It does not touch the database, the Production deployment, its settings or
@@ -31,10 +31,10 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # The reviewed revision: contract v2 (4aa235fb) + evaluation controls (6ce37fcc) + their tests. Changing it is a reviewed change.
-  REVIEWED_SHA: 04e307d2e53d1a8f1645261441f85e8d2d0246e4
+  # The reviewed revision: contract v3 (CR-DOC-READER-EXT-9R4, ad43685c) on the EXT-9R3 evaluation controls. Changing it is a reviewed change.
+  REVIEWED_SHA: ad43685ceb0b1beaa43d9b7c385a819c4698a291
   MODEL: claude-sonnet-5
-  CONTRACT: licence-extraction-v2
+  CONTRACT: licence-extraction-v3
   PROMPT: licence-prompt-v2
   PRE_DOCUMENTS: '12'
   PRE_MAX_CALLS: '24'
@@ -150,7 +150,7 @@ jobs:
           const sup = JSON.parse(fs.readFileSync(`${dir}/plan-sup.json`, 'utf8')).plan
           const c = JSON.parse(fs.readFileSync(`${dir}/contract.json`, 'utf8'))
           const bad = []
-          if (c.schema_version !== e.CONTRACT || c.prompt_version !== e.PROMPT) bad.push('not the v2 contract')
+          if (c.schema_version !== e.CONTRACT || c.prompt_version !== e.PROMPT) bad.push('not the pinned contract')
           for (const [p, n, calls, usd] of [[pre, e.PRE_DOCUMENTS, e.PRE_MAX_CALLS, e.PRE_MAX_USD], [sup, e.SUP_DOCUMENTS, e.SUP_MAX_CALLS, e.SUP_MAX_USD]]) {
             if (p.model !== e.MODEL || p.runs !== 1 || p.documents !== Number(n)) bad.push('plan shape')
             if (p.max_requests !== Number(calls)) bad.push(`plan is not ${calls} requests`)

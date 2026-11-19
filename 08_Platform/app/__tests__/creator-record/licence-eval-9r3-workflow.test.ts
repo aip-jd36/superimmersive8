@@ -38,7 +38,7 @@ describe('licence evaluation workflow', () => {
     expect(step(/Check out/).with).toMatchObject({ ref: '${{ env.REVIEWED_SHA }}', 'persist-credentials': false })
     expect(step(/Verify the reviewed revision/).run).toMatch(/git merge-base --is-ancestor "\$REVIEWED_SHA" FETCH_HEAD/)
     const show = (f: string) => execFileSync('git', ['show', `${sha}:08_Platform/app/${f}`], { cwd: REPO, encoding: 'utf8' })
-    expect(show('lib/creator-record/licence-examination/schema.ts')).toContain("LICENCE_EXTRACTION_SCHEMA_VERSION = 'licence-extraction-v2'")
+    expect(show('lib/creator-record/licence-examination/schema.ts')).toContain("LICENCE_EXTRACTION_SCHEMA_VERSION = 'licence-extraction-v3'")
     expect(show('lib/creator-record/licence-examination/prompt.ts')).toContain("LICENCE_PROMPT_VERSION = 'licence-prompt-v2'")
     expect(show('lib/creator-record/eval/run-licence-eval.ts')).toContain('syntheticCredentialEnv')
     expect(show('lib/creator-record/eval/licence-eval-summary.ts')).toContain('export function summarize')
@@ -54,7 +54,7 @@ describe('licence evaluation workflow', () => {
   })
 
   test('limits: 24 + 6 = 30 requests; $1.58 + $0.40 within $2.00; pinned model and prices; one run per document', () => {
-    expect(wf.env).toMatchObject({ MODEL: 'claude-sonnet-5', CONTRACT: 'licence-extraction-v2', PROMPT: 'licence-prompt-v2', PRE_MAX_CALLS: '24', SUP_MAX_CALLS: '6', TOTAL_MAX_CALLS: '30', PRE_MAX_USD: '1.58', SUP_MAX_USD: '0.40', TOTAL_MAX_USD: '2.00' })
+    expect(wf.env).toMatchObject({ MODEL: 'claude-sonnet-5', CONTRACT: 'licence-extraction-v3', PROMPT: 'licence-prompt-v2', PRE_MAX_CALLS: '24', SUP_MAX_CALLS: '6', TOTAL_MAX_CALLS: '30', PRE_MAX_USD: '1.58', SUP_MAX_USD: '0.40', TOTAL_MAX_USD: '2.00' })
     const live = step(/Live run/).run!
     expect(live).toMatch(/--runs 1 --input-usd-per-mtok 2 --output-usd-per-mtok 10/)
     expect(live).toMatch(/--spec preregistered --max-calls "\$PRE_MAX_CALLS" --max-usd "\$PRE_MAX_USD"/)
