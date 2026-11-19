@@ -7,7 +7,7 @@ import { approvedPdfTemplates } from '@/lib/creator-record/customer-flow/approve
 import { buildCustomerDocument, CustomerPdfRefusal, type Block } from '@/lib/creator-record/customer-pdf/document-model'
 import { checkTemplates, templateFingerprint } from '@/lib/creator-record/customer-pdf/templates'
 import { CUSTOMER_RECORD_SCHEMA } from '@/lib/creator-record/customer-record/record'
-import { candidateTemplateSetV8, CR_DOC_READER_EXT_2_TEMPLATE_STATUS, V7_NOT_DONE_COMPARISON_LINE, V8_NOT_DONE_COMPARISON_LINE } from '@/test-support/doc-reader-ext-2-template'
+import { candidateTemplateSetV8, CR_DOC_READER_EXT_2_TEMPLATE_STATUS, READING_PRIVACY_TEMPLATE, V7_NOT_DONE_COMPARISON_LINE, V8_NOT_DONE_COMPARISON_LINE } from '@/test-support/doc-reader-ext-2-template'
 import { CREATOR_RECORD_PDF_TEMPLATE_SETS } from '@/lib/creator-record/governed/sources'
 import { ISSUED, licenceRecord, SYNTHETIC_V8, V8 } from '@/test-support/doc-reader-ext-fixture'
 
@@ -26,11 +26,13 @@ describe('candidate template set v8', () => {
   test('built from the approved v7 set by additions plus exactly one revised line', () => {
     const v7 = (CREATOR_RECORD_PDF_TEMPLATE_SETS as any[]).find((s) => s.approval.record_schema.version === 8 && s.approval.version === 7)
     expect(V8.base.fingerprint).toBe(v7.approval.fingerprint)
-    const { version, integrated_assessment_v2, examination, sections, ...rest } = V8.templates
+    // CR-DOC-READER-EXT-6B: reading_privacy is a further addition (the two fixed privacy lines).
+    const { version, integrated_assessment_v2, reading_privacy, examination, sections, ...rest } = V8.templates
     const { version: v7v, examination: v7x, sections: v7s, ...v7rest } = v7.templates
     expect(rest).toEqual(v7rest)
     expect(version).toBe(8)
     expect(integrated_assessment_v2).toBeDefined()
+    expect(reading_privacy).toEqual(READING_PRIVACY_TEMPLATE)
     for (const [k, v] of Object.entries(v7x.field_labels)) expect(examination.field_labels[k]).toBe(v)
     expect(sections.not_done.lines[4]).toBe(V8_NOT_DONE_COMPARISON_LINE)
     expect(v7s.not_done.lines[4]).toBe(V7_NOT_DONE_COMPARISON_LINE)
@@ -55,7 +57,9 @@ describe('v8 rendering, end to end (synthetic approval)', () => {
     const m = buildCustomerDocument({ canonical: rec.canonical, sha256: rec.sha256, issued: ISSUED, templates: V8.templates, template_approval: SYNTHETIC_V8 })
     const docs = docTexts(m)
     // What was read (documents section, unchanged mechanism) ...
-    expect(docs).toEqual(expect.arrayContaining(['Licence or plan type shown', 'Pro', 'Licence type: Pro', 'Yes']))
+    // CR-DOC-READER-EXT-6B: the value prints; its excerpt does not (privacy projection), and the fixed line says so.
+    expect(docs).toEqual(expect.arrayContaining(['Licence or plan type shown', 'Pro', 'Yes', READING_PRIVACY_TEMPLATE.excerpts_withheld]))
+    expect(docs).not.toContain('Licence type: Pro')
     // ... then, separately, how it relates to the governed point.
     const T = V8.templates.integrated_assessment_v2
     const i = docs.indexOf(T.heading)

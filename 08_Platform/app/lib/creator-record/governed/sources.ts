@@ -3050,9 +3050,13 @@ export const CREATOR_RECORD_PDF_TEMPLATE_SETS: readonly { readonly templates: un
     "excerpt": "Excerpt",
     "your_response": "Your response",
     "method": "Integrated assessment method, version {version}."
+  },
+  "reading_privacy": {
+    "value_withheld": "Shown in the document; not reproduced here",
+    "excerpts_withheld": "Text from this document is not reproduced here, because a licence or permission may include details about other people. The document itself has the exact wording."
   }
 }),
-    approval: Object.freeze({ template_id: 'si8/creator-record-v2-pdf-templates', version: 8, fingerprint: '65cf053851cce49388a38ac16567668de3fc3060567b43862245b31c7551d1fa', record_schema: { id: 'si8/creator-record-v2-record', version: 8 }, lifecycle: 'pending', authority: '', decision_date: '', review_ref: 'CR-DOC-READER-EXT-2 candidate v8, revised CR-DOC-READER-EXT-6A (wording not approved: D5)' }) as PdfTemplateApproval,
+    approval: Object.freeze({ template_id: 'si8/creator-record-v2-pdf-templates', version: 8, fingerprint: '9496eb43c9167454b29cdfa2e1432aa2191abb818c04733c22f5a4402ce4b287', record_schema: { id: 'si8/creator-record-v2-record', version: 8 }, lifecycle: 'pending', authority: '', decision_date: '', review_ref: 'CR-DOC-READER-EXT-2 candidate v8, revised CR-DOC-READER-EXT-6A/6B (wording not approved: D5)' }) as PdfTemplateApproval,
   }),
 ])
 

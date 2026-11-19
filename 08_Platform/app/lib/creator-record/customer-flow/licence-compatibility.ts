@@ -29,7 +29,7 @@ const has = (o: unknown, k: string): boolean => typeof o === 'object' && o !== n
 
 /** The labels a set is missing for a licence reading. Empty: the set can print one. */
 export function missingLicenceLabels(templates: unknown): string[] {
-  const t = templates as { examination?: Record<string, any>; live_examination?: Record<string, any> } | null
+  const t = templates as { examination?: Record<string, any>; live_examination?: Record<string, any>; reading_privacy?: Record<string, any> } | null
   const x = t?.examination
   const live = t?.live_examination
   if (!x || !live) return ['examination_section']
@@ -40,6 +40,8 @@ export function missingLicenceLabels(templates: unknown): string[] {
   }
   for (const s of LICENCE_FIELD_STATUSES) if (!has(x.reading_labels, s)) out.push(`reading:${s}`)
   for (const l of LICENCE_POSSIBLE_LIMITATIONS) if (!has(live.limitation_labels, l)) out.push(`limitation:${l}`)
+  // CR-DOC-READER-EXT-6B: the privacy projection's fixed lines (a licence reading cannot be shown without them).
+  for (const k of ['value_withheld', 'excerpts_withheld']) if (!has(t?.reading_privacy, k)) out.push(`reading_privacy:${k}`)
   return out
 }
 

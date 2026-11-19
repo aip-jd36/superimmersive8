@@ -49,6 +49,12 @@ export const LICENCE_CLASSIFICATION_LABELS: Readonly<Record<string, Record<strin
   personal_details_present: { true: 'Yes', false: 'No' },
 })
 
+/** CR-DOC-READER-EXT-6B: printed in place of what a licence/permission reading does not show (customer privacy projection). */
+export const READING_PRIVACY_TEMPLATE = Object.freeze({
+  value_withheld: 'Shown in the document; not reproduced here',
+  excerpts_withheld: 'Text from this document is not reproduced here, because a licence or permission may include details about other people. The document itself has the exact wording.',
+})
+
 const W = V2_WORDING_CANDIDATE
 export const INTEGRATED_ASSESSMENT_V2_TEMPLATE = Object.freeze({
   heading: W.heading,
@@ -99,6 +105,7 @@ export function candidateTemplateSetV8(): CandidateTemplateSet {
   if (i !== 4) throw new Error('v7 not_done comparison line not where expected')
   t.sections.not_done.lines[i] = V8_NOT_DONE_COMPARISON_LINE
   t.integrated_assessment_v2 = clone(INTEGRATED_ASSESSMENT_V2_TEMPLATE)
+  t.reading_privacy = clone(READING_PRIVACY_TEMPLATE)
   return {
     status: CR_DOC_READER_EXT_2_TEMPLATE_STATUS,
     base: { template_id: base[0].approval.template_id, version: base[0].approval.version, fingerprint: base[0].approval.fingerprint },

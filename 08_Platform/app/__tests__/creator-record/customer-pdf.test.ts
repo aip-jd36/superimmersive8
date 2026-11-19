@@ -671,6 +671,8 @@ describe('rendering boundary', () => {
       '../integrated-assessment/assess-v2', '../integrated-assessment/vocabulary-v2',
       // CR-DOC-READER-EXT-6A: the governed relevance table (pure data), to print a document-scoped note only with a relevant document.
       '../integrated-assessment/dependency-relevance',
+      // CR-DOC-READER-EXT-6B: the pure customer privacy projection of readings (withholds excerpts and statement text).
+      '../customer-record/reading-privacy',
       // CR-SUM-PDF-B1: the pure bounded readiness summary and its renderer (used only when a template set carries the
       // readiness block; no approved set does). Their own imports are checked below.
       '../readiness-summary/render', '../readiness-summary/summary',

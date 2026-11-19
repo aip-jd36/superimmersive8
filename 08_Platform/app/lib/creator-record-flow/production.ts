@@ -11,7 +11,7 @@ import { randomUUID } from 'node:crypto'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { TOPIC_CLAIMS_FIXTURE } from '@/lib/retrieval-engine/topic-claims-fixture'
 import type { FlowDeps, NewPreparedRow, PreparedRow, PreparedStore } from '@/lib/creator-record/customer-flow/service'
-import { approvedCustomerRecordInputs, approvedGovernanceSnapshot, approvedPdfTemplates, CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flow/approved-inputs'
+import { approvedCustomerRecordInputs, approvedGovernanceSnapshot, approvedPdfTemplates, approvedReadingPrivacyText, CREATOR_RECORD_V2_SUBMISSIONS } from '@/lib/creator-record/customer-flow/approved-inputs'
 import { legalPoliciesApproved } from '@/lib/legal/policies'
 import { authorizeV2Issuance, purchaseOfferable, renderV2ForIssuance, type BindReason, type CheckoutSubmission, type PurchaseDeps, type V2IssuanceDeps } from '@/lib/creator-record/customer-flow/purchase'
 import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/config'
@@ -123,6 +123,8 @@ export function productionFlowDeps(): FlowDeps {
     examinations: productionExaminationProjections,
     // CR-V2-SCHEMA8-PATH-1 (E2): whether the page may offer payment; the same pure conditions the purchase steps check (display only).
     purchaseOfferable: (row) => purchaseOfferable(productionPurchaseDeps(), row),
+    // CR-DOC-READER-EXT-6B: the selected schema 8 set's fixed privacy lines (absent from v7: no licence reading exists while v7 is selected).
+    readingPrivacyText: () => approvedReadingPrivacyText(),
   }
 }
 

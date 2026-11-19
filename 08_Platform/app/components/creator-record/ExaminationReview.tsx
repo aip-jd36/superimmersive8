@@ -93,6 +93,8 @@ export function ExaminationReview({ view, busy, onRespond, textMode }: Examinati
               })}
             </tbody>
           </table>
+          {/* CR-DOC-READER-EXT-6B: a privacy-projected reading's fixed line (from the selected PDF template set), excerpts not shown. */}
+          {d.privacy_notice && <p className="text-xs mt-1" style={{ color: MUTED }}>{d.privacy_notice}</p>}
           <h4 className="text-sm font-semibold mt-3" style={{ color: INK }}>{EXAM_TEXT.limitations_title}</h4>
           <ul className="list-disc pl-5 text-sm" style={{ color: MUTED }} data-limitations>
             {d.limitations.map((l) => <li key={l}>{limitationText(l)}</li>)}

@@ -34,6 +34,7 @@
 
 import { assessIntegrated, type IntegratedAssessment } from '../integrated-assessment/assess'
 import { documentNoteApplies } from '../integrated-assessment/dependency-relevance'
+import { customerObservationText, isPrivacyProjected } from '../customer-record/reading-privacy'
 import { assessIntegratedV2, type IntegratedAssessmentInputV2, type IntegratedAssessmentV2 } from '../integrated-assessment/assess-v2'
 import { CREATOR_RECORD_CONCLUSIONS } from '../contract/compose'
 import { isIsoDate } from '../contract/types'
@@ -360,6 +361,11 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
   const tpl = (text: string): Block => ({ kind: 'paragraph', text, from: 'template' })
   const heading = (text: string): Block => ({ kind: 'heading', text, from: 'template' })
   const row = (label: string, value: string, value_from: TextOrigin = 'record'): Block => ({ kind: 'row', label, label_from: 'template', value, value_from })
+  // CR-DOC-READER-EXT-6B: the fixed lines a privacy-projected reading prints instead of withheld text. A set without them refuses.
+  const privacyLines = (profileId: string) => {
+    if (!t.reading_privacy) throw new CustomerPdfRefusal('templates_reading_privacy_missing', profileId)
+    return t.reading_privacy
+  }
   const count = (p: { one: string; other: string }, n: number) => fill(n === 1 ? p.one : p.other, { n })
   const S = t.sections
   const examinationBearing = r.documents.policy === 'inventory_with_examination'
@@ -479,7 +485,7 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
         if (q.requirement.kind !== 'dependency' || (q.evidence !== 'documents_considered' && q.evidence !== 'no_linked_document')) continue
         out.push(q.requirement.label !== null ? row(IA2.point, q.requirement.label, 'record') : row(IA2.point, IA2.unlabelled_point, 'template'))
         if (q.evidence === 'no_linked_document') out.push(tpl(IA2.no_document))
-        for (const d of q.documents as { document_id: string; status: string; reason: string; observed: { value: string; excerpt: string | null } | null; responses: string[] }[]) {
+        for (const d of q.documents as { document_id: string; status: string; reason: string; observed: { value: string; excerpt: string | null; observation_ids: string[] } | null; responses: string[] }[]) {
           const n = docNumber.get(d.document_id)
           const doc = docById.get(d.document_id)
           if (n === undefined || !doc) throw new CustomerPdfRefusal('record_unsupported', `integrated assessment v2 document ${d.document_id}`)
@@ -489,8 +495,13 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
           out.push(row(IA2.reading, IA2.reading_labels[reading], 'template'))
           out.push(row(IA2.link, IA2.status_labels[d.status as keyof typeof IA2.status_labels], 'template'), row(IA2.reason, IA2.reason_labels[d.reason as keyof typeof IA2.reason_labels], 'template'))
           if (d.observed) {
-            out.push(row(IA2.appears_to_show, d.observed.value))
-            if (d.observed.excerpt !== null) out.push(row(IA2.excerpt, d.observed.excerpt))
+            // CR-DOC-READER-EXT-6B: the same customer privacy projection as the documents section.
+            const profileId = e === 'not_examined' ? '' : e.envelope.profile.id
+            const fieldOf = e === 'not_examined' ? undefined : e.envelope.observations.find((o) => o.observation_id === d.observed!.observation_ids[0])?.field
+            if (fieldOf === undefined) throw new CustomerPdfRefusal('record_unsupported', `integrated assessment v2 observation ${d.document_id}`)
+            const shown = customerObservationText(profileId, { field: fieldOf, status: 'present', value: d.observed.value, excerpt: d.observed.excerpt })
+            out.push(row(IA2.appears_to_show, shown.value_withheld ? privacyLines(profileId).value_withheld : d.observed.value, shown.value_withheld ? 'template' : 'record'))
+            if (shown.excerpt !== null) out.push(row(IA2.excerpt, shown.excerpt))
             out.push(tpl(IA2.association))
           }
           for (const code of d.responses) out.push(row(IA2.your_response, t.examination!.response_labels[code as keyof NonNullable<typeof t.examination>['response_labels']], 'template'))
@@ -546,17 +557,22 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
       for (const o of shown) {
         const field = labelled(X.field_labels, o.field, 'observation_field_unlabelled')
         // A value is printed only where the examination reports it present; otherwise the reading status is printed instead.
+        // CR-DOC-READER-EXT-6B: through the customer privacy projection (a withheld statement prints a fixed line; no excerpt).
+        const shown = customerObservationText(env.profile.id, o)
         const value: [string, TextOrigin] = o.status !== 'present' || o.value === null
           ? [X.reading_labels[o.status], 'template']
           : o.basis === 'examiner_classification'
             ? [labelled(Object.prototype.hasOwnProperty.call(X.classification_labels, o.field) ? X.classification_labels[o.field] : {}, o.value, 'classification_unlabelled'), 'template']
-            : [o.value, 'record']
+            : shown.value_withheld
+              ? [privacyLines(env.profile.id).value_withheld, 'template']
+              : [o.value, 'record']
         blocks.push({ kind: 'row', label: field, label_from: 'template', value: value[0], value_from: value[1] })
         if (o.qualifier !== null) blocks.push(row(X.qualifier, labelled(X.qualifier_labels, o.qualifier, 'observation_qualifier_unlabelled'), 'template'))
         blocks.push(row(X.basis, X.basis_labels[o.basis], 'template'))
-        if (o.excerpt !== null) blocks.push(row(X.excerpt, o.excerpt))
+        if (shown.excerpt !== null) blocks.push(row(X.excerpt, shown.excerpt))
         blocks.push(...responseRows(responses.filter((x) => x.target.kind === 'observation' && x.target.run_id === e.run_id && x.target.observation_id === o.observation_id)))
       }
+      if (isPrivacyProjected(env.profile.id)) blocks.push(tpl(privacyLines(env.profile.id).excerpts_withheld))
       blocks.push(...responseRows(comparisonResponses))
       const limitationLabel = (l: string) => (isLive(e) ? live!.limitation_labels[l] : X.limitation_labels[l as (typeof EXAMINATION_LIMITATIONS)[number]])
       blocks.push({ kind: 'label', text: X.limitations_heading, from: 'template' }, ...env.limitations.map((l): Block => ({ kind: 'bullet', text: limitationLabel(l), from: 'template' })))
@@ -617,8 +633,13 @@ function compose(r: RecordView, issued: CustomerDocumentInput['issued'], t: Cust
         if (n === undefined) throw new CustomerPdfRefusal('record_unsupported', `integrated assessment document ${d.document_id}`)
         blocks.push(row(fill(IA.document, { n }), IA.status_labels[d.status], 'template'), row(IA.reason, IA.reason_labels[d.reason], 'template'))
         if (d.observed) {
-          blocks.push(row(IA.appears_to_show, d.observed.value))
-          if (d.observed.excerpt !== null) blocks.push(row(IA.excerpt, d.observed.excerpt))
+          // CR-DOC-READER-EXT-6B: the customer privacy projection (identity for receipt readings, which are what method v1 reads).
+          const ex = r.documents.items.find((x) => x.document_id === d.document_id)?.examination
+          const env1 = ex && ex !== 'not_examined' ? ex.envelope : null
+          const field1 = env1?.observations.find((o) => (d.observed as { observation_ids?: string[] }).observation_ids?.[0] === o.observation_id)?.field ?? ''
+          const shown = customerObservationText(env1?.profile.id ?? '', { field: field1, status: 'present', value: d.observed.value, excerpt: d.observed.excerpt })
+          blocks.push(row(IA.appears_to_show, shown.value_withheld ? privacyLines(env1!.profile.id).value_withheld : d.observed.value, shown.value_withheld ? 'template' : 'record'))
+          if (shown.excerpt !== null) blocks.push(row(IA.excerpt, shown.excerpt))
         }
         for (const code of d.responses) blocks.push(row(IA.your_response, t.examination!.response_labels[code], 'template'))
       }

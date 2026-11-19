@@ -173,6 +173,12 @@ const templateSpec = obj({
    * still refuses v1. Only a set that also carries `readiness_summary` may carry it (checked by the document model). Every v2
    * status and reason needs an exact label; there is no label meaning satisfied, sufficient or matched.
    */
+  /**
+   * CR-DOC-READER-EXT-6B: the two fixed lines printed in place of what a privacy-projected reading (`../customer-record/reading-privacy`)
+   * does not show: `value_withheld` replaces a withheld statement's value; `excerpts_withheld` is printed once per such document.
+   * Optional: required to render a licence reading (`missingLicenceLabels`), absent from every set approved before it.
+   */
+  reading_privacy: opt(obj({ value_withheld: str, excerpts_withheld: str })),
   integrated_assessment_v2: opt(obj({
     heading: str, intro: str, association: str, open_point: str, point: str, unlabelled_point: str, no_document: str,
     document: str, reading: str, reading_labels: exactLabels(['read', 'not_read', 'could_not_read']),

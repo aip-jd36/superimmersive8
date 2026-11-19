@@ -52,6 +52,7 @@ import { checkApprovedSources, type SourceTextInput, type TopicClaims } from '..
 import { parseEvidenceReferences } from '../evidence-intake/contract'
 import { carryForwardCandidates, CREATOR_RESPONSE_CODES, type CreatorResponseInput, type CustomerRecordExaminationInput } from '../customer-record/examination-section'
 import { guidanceWithDocuments, type GuidanceWithDocuments } from './guidance-with-documents'
+import { customerObservationText, isPrivacyProjected } from '../customer-record/reading-privacy'
 import type { DocumentProjection } from './examination'
 import { isSyntheticRecordAuthority, type SyntheticUatPorts } from './synthetic-uat'
 import { resolveEvidenceReferences, type EvidenceStore } from '../evidence-intake/service'
@@ -121,6 +122,11 @@ export interface FlowDeps {
    * steps decide. Absent → never offered.
    */
   purchaseOfferable?(row: PreparedRow): boolean
+  /**
+   * CR-DOC-READER-EXT-6B: the fixed lines the selected schema 8 PDF template set prints in place of what a privacy-projected reading
+   * does not show (`reading_privacy`). Absent or null: a withheld value is shown as nothing (never the value).
+   */
+  readingPrivacyText?(): { value_withheld: string; excerpts_withheld: string } | null
 }
 
 export interface PreparedView {
@@ -166,6 +172,8 @@ export interface ExaminationView {
     outcome: { status: string; reason: string | null }
     observations: { observation_id: string; field: string; qualifier: string | null; basis: string; status: string; value: string | null; excerpt: string | null; verification: 'not_verified' }[]
     limitations: string[]
+    /** CR-DOC-READER-EXT-6B: present only for a privacy-projected reading: the fixed line saying excerpts are not shown. */
+    privacy_notice?: string
   }[]
   comparisons: { tool_index: number; document_id: string; run_id: string; declared: { tool_id: string | null; plan: string | null }; provider: { result: string; reason: string }; plan: { result: string; reason: string } }[]
   responses: { target: CreatorResponseInput['target']; code: CreatorResponseInput['code']; given_in_version: number }[]
@@ -224,7 +232,7 @@ function offerable(deps: Pick<FlowDeps, 'purchaseOfferable'>, row: PreparedRow):
   }
 }
 
-function viewOf(deps: Pick<FlowDeps, 'purchaseOfferable'>, row: PreparedRow, record: CustomerRecordV2): PreparedView {
+function viewOf(deps: Pick<FlowDeps, 'purchaseOfferable' | 'readingPrivacyText'>, row: PreparedRow, record: CustomerRecordV2): PreparedView {
   const contract = record.sources.questionnaire_contract
   return {
     id: row.id,
@@ -243,12 +251,12 @@ function viewOf(deps: Pick<FlowDeps, 'purchaseOfferable'>, row: PreparedRow, rec
     documents: record.documents.items.map((d) => ({ document_id: d.document_id, file_name: d.file_name, media_type: d.media_type, byte_size: d.byte_size, sha256: d.sha256, category: d.category, tool_index: d.tool_index })),
     guidance_items: record.guidance.items.length,
     purchasable: offerable(deps, row),
-    ...(isExaminationBearing(record) ? { examination: examinationViewOf(record) } : {}),
+    ...(isExaminationBearing(record) ? { examination: examinationViewOf(record, deps.readingPrivacyText?.() ?? null) } : {}),
   }
 }
 
 /** CR-V2-EXAM-INTEGRATION-X3: the examination-bearing parts of a verified record, as recorded (no interpretation). */
-function examinationViewOf(record: CustomerRecordV2): ExaminationView {
+export function examinationViewOf(record: CustomerRecordV2, privacyText: { value_withheld: string; excerpts_withheld: string } | null): ExaminationView {
   const documents: ExaminationView['documents'] = []
   for (const d of record.documents.items) {
     if (typeof d.examination !== 'object' || d.examination === null) continue
@@ -258,8 +266,11 @@ function examinationViewOf(record: CustomerRecordV2): ExaminationView {
       run_id: d.examination.run_id,
       verification: d.examination.verification,
       outcome: { status: e.outcome.status, reason: e.outcome.reason },
-      observations: e.observations.map((o) => ({ observation_id: o.observation_id, field: o.field, qualifier: o.qualifier, basis: o.basis, status: o.status, value: o.value, excerpt: o.excerpt, verification: o.verification })),
+      // CR-DOC-READER-EXT-6B: through the customer privacy projection: no excerpt, and a withheld statement's value replaced by the
+      // template's fixed line (or nothing). The record itself is unchanged. Receipt readings pass through unchanged.
+      observations: e.observations.map((o) => { const shown = customerObservationText(e.profile.id, o); return { observation_id: o.observation_id, field: o.field, qualifier: o.qualifier, basis: o.basis, status: o.status, value: shown.value_withheld ? (privacyText?.value_withheld ?? null) : shown.value, excerpt: shown.excerpt, verification: o.verification } }),
       limitations: [...e.limitations],
+      ...(isPrivacyProjected(e.profile.id) && privacyText ? { privacy_notice: privacyText.excerpts_withheld } : {}),
     })
   }
   const comparisons = record.comparison.policy === 'derived_per_version' ? record.comparison.items : []

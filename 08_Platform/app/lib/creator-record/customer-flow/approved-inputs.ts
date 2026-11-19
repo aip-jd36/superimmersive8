@@ -42,6 +42,12 @@ export const CREATOR_RECORD_V2_SUBMISSIONS: SubmissionsMode = 'open'
  */
 export const LICENCE_READING_SWITCH = 'off' as 'off' | 'on'
 
+/** CR-DOC-READER-EXT-6B: the selected schema 8 set's privacy lines (`reading_privacy`), or null (v7 has none). */
+export function approvedReadingPrivacyText(bundle: PublicationAuthorityBundle | null = currentPublicationAuthority()): { value_withheld: string; excerpts_withheld: string } | null {
+  const t = approvedPdfTemplates(bundle, { id: CUSTOMER_RECORD_SCHEMA, version: CUSTOMER_RECORD_EXAMINATION_SCHEMA_VERSION }).templates as { reading_privacy?: { value_withheld: string; excerpts_withheld: string } } | null
+  return t?.reading_privacy ?? null
+}
+
 /**
  * Licence reading is enabled: the switch is on AND the ONE approved schema 8 template set can print a licence reading. Never one
  * without the other, so a customer can never create a reading the selected PDF cannot render.

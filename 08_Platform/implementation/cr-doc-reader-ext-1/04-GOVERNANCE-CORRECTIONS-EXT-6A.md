@@ -92,3 +92,39 @@ Approving D1, D3 or D4 changes nothing customers see until a separate code chang
 - D3 labels appear only on rows of a published claim (D2). Shipping them changes the Source Text digest, so records prepared but
   not yet bought would need preparing again: ship D3 together with D2.
 - D4 is used only by the v8 block (v8 pending) and by the document-scoped note rule, which affects only the unpublished D2 entries.
+
+## EXT-6B addendum (2026-11-19) — privacy projection, final readiness
+
+**Customer-visible projections of the four document notes.** Customers see evidence notes only in the PDF: the open-items section and
+the readiness summary inside it. Both apply `documentNoteApplies`. The admin prototype and legacy UAT draft view
+(`DraftRecordView`) are not customer surfaces. The relevance rule uses the creator's declared document type only and never states a
+provider, asset or project association. The v8 association line prints wherever a reading is related to a point.
+
+**Privacy-safe projection (implemented, inert while licence reading is off).**
+- `lib/creator-record/customer-record/reading-privacy.ts`. For licence and permission readings, by default and whatever the
+  personal-details flag says:
+  - no excerpt is shown anywhere;
+  - the `permission_statement` value is replaced by a fixed line;
+  - closed classifications, validated ISO dates and the bounded, contact-validated short values (licence or plan type,
+    designation, item) are kept.
+- Applied on every customer surface:
+  - the pre-purchase review, server-side (`examinationViewOf`), so the browser never receives the withheld text;
+  - the PDF documents section;
+  - the PDF v2 relationship block;
+  - the receipt-era v1 block (no-op for receipts).
+- The stored reading and the record are unchanged (internal provenance). Extraction validation, consent and withdrawal are
+  unchanged. Receipt readings are unchanged.
+- The fixed lines come from the PDF template set (`reading_privacy`), not from the customer wording set. A new review-page string
+  would change the approved customer wording identity and refuse Production checkout. `missingLicenceLabels` requires them, so
+  licence reading cannot be enabled without them. With no such set, a withheld value shows as nothing.
+- Residual risk, disclosed: a name inside a short value (for example "Item: portrait of …") is still shown. Values are capped at 120
+  characters and contact-validated only.
+
+**v8 additions (pending; fingerprint now `9496eb43c9167454b29cdfa2e1432aa2191abb818c04733c22f5a4402ce4b287`).**
+- `reading_privacy.value_withheld`: "Shown in the document; not reproduced here"
+- `reading_privacy.excerpts_withheld`: "Text from this document is not reproduced here, because a licence or permission may include
+  details about other people. The document itself has the exact wording."
+
+**Source re-verification.** Getty, Shutterstock and Pond5: BLOCKED. Automated fetch returns HTTP 403, and the Claude in Chrome
+extension was not connected in this session, so no browser capture could be made. Their terms are **not** assumed unchanged. Next:
+a human Print-to-PDF capture of each page into the preserved evidence captures, then a review.

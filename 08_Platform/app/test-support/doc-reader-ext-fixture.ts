@@ -46,7 +46,7 @@ function textFor(s: CreatorRecordSources, schemaVersion: number): SourceTextInpu
   return { approval, acknowledgements: ACKS(s) }
 }
 
-const LICENCE_OUTPUT = {
+export const LICENCE_OUTPUT = {
   document_kind: 'licence_or_licence_certificate', readability: 'legible', instruction_like_text_present: false, personal_details_present: true,
   licence_or_plan_type: { status: 'present', value: 'Pro', evidence: 'Licence type: Pro' },
   content_designation: { status: 'not_shown', value: null, evidence: null },
@@ -59,8 +59,8 @@ const BYTES = new Uint8Array(Buffer.from('%PDF-1.4\n%synthetic-test:licence-pdf\
 const SHA = createHash('sha256').update(BYTES).digest('hex')
 
 /** The licence document read through the real replay core and persisted as a row, then projected exactly as issuance does. */
-async function licenceExamination() {
-  const table = buildReplayTable([{ fixture_id: 'synthetic-licence-pdf', sha256: SHA, media_type: 'application/pdf', parsed_output: LICENCE_OUTPUT }])
+async function licenceExamination(output: unknown = LICENCE_OUTPUT) {
+  const table = buildReplayTable([{ fixture_id: 'synthetic-licence-pdf', sha256: SHA, media_type: 'application/pdf', parsed_output: output }])
   let text = ''
   const r = await examineAndRecord(
     {
@@ -91,7 +91,7 @@ async function licenceExamination() {
   return p.projection
 }
 
-export async function licenceRecord(materials: Record<string, string[]>, category = 'licence', tool_index: number | null = null) {
+export async function licenceRecord(materials: Record<string, string[]>, category = 'licence', tool_index: number | null = null, output: unknown = LICENCE_OUTPUT) {
   const document: CustomerRecordDocument = { document_id: DOC, sha256: SHA, media_type: 'application/pdf', byte_size: BYTES.length, file_name: 'synthetic-licence.pdf', category: category as CustomerRecordDocument['category'], tool_index }
   const b = buildCustomerRecord({
     state: { answers: { P1: ['Synthetic licence test video'], P3: ['own_channels'], F1: ['TW'], F2: ['online_worldwide'], L1: ['no'], H1: ['edited'], ...materials }, tools: [{ T1: ['runway-gen3'], T3: ['Pro'], T4: ['May 2026'] }], acknowledgements: { A1: true, A2: true } } as never,
@@ -101,7 +101,7 @@ export async function licenceRecord(materials: Record<string, string[]>, categor
     as_of: AS_OF,
     record: { record_id: 'PREP-doc-reader-ext-2', record_version: 1, captured_at: `${AS_OF}T09:00:00.000Z` },
     documents: [document],
-    examinations: [{ document_id: DOC, projection: await licenceExamination() }],
+    examinations: [{ document_id: DOC, projection: await licenceExamination(output) }],
     responses: [],
   } as never)
   if (!b.ok) throw new Error(JSON.stringify(b).slice(0, 500))
