@@ -10,23 +10,25 @@ import { readFileSync } from 'fs'
 import path from 'path'
 import { TERMS_OF_SERVICE, PRIVACY_NOTICE, approvedPolicyVersions } from '@/lib/legal/policies'
 import { aiExaminationPermissionVersion, evidenceConsentVersion } from '@/lib/creator-record-flow/authorization-versions'
+import { revertExt8b } from '@/test-support/legal-candidates-ext-8b'
 
 const DRAFT = path.join(__dirname, '..', '..', '..', 'implementation', 'cr-public-1', 'CR-PUBLIC-1-TERMS-REVISION-DRAFT.md')
 const INVITATION = 'Creator Record is currently available by invitation only.'
 
 describe('the published Terms (CR-PUBLIC-LAUNCH)', () => {
-  test('version terms-2026-11-18 with the approved public §2; Privacy Notice unchanged at privacy-2026-11-09', () => {
-    expect(TERMS_OF_SERVICE?.version).toBe('terms-2026-11-18')
+  // CR-DOC-READER-EXT-8D: the current versions are terms-2026-11-19 / privacy-2026-11-19 (Terms §5 and Privacy §§1, 2, 4, 5); §2 unchanged.
+  test('the current Terms keep the approved public §2; versions privacy-2026-11-19 / terms-2026-11-19', () => {
+    expect(TERMS_OF_SERVICE?.version).toBe('terms-2026-11-19')
     expect(TERMS_OF_SERVICE?.paragraphs[4]).toBe('2. Who can use Creator Record')
     expect(TERMS_OF_SERVICE?.paragraphs[5].startsWith('Creator Record is available to registered SI8 users, subject to these Terms and applicable eligibility, payment, and service requirements.')).toBe(true)
     expect(TERMS_OF_SERVICE?.paragraphs.join('\n')).not.toContain(INVITATION)
-    expect(PRIVACY_NOTICE?.version).toBe('privacy-2026-11-09')
-    expect(approvedPolicyVersions()).toEqual({ privacy: 'privacy-2026-11-09', terms: 'terms-2026-11-18' })
+    expect(PRIVACY_NOTICE?.version).toBe('privacy-2026-11-19')
+    expect(approvedPolicyVersions()).toEqual({ privacy: 'privacy-2026-11-19', terms: 'terms-2026-11-19' })
   })
 
   test('the current identifiers embed the published versions (the authority row must name this AI-permission identifier)', () => {
-    expect(aiExaminationPermissionVersion()).toBe('cr-v2-ai-permission-1__privacy-2026-11-09__terms-2026-11-18')
-    expect(evidenceConsentVersion()).toBe('cr-v2-storage-consent-1__privacy-2026-11-09__terms-2026-11-18')
+    expect(aiExaminationPermissionVersion()).toBe('cr-v2-ai-permission-1__privacy-2026-11-19__terms-2026-11-19')
+    expect(evidenceConsentVersion()).toBe('cr-v2-storage-consent-1__privacy-2026-11-19__terms-2026-11-19')
   })
 })
 
@@ -52,7 +54,8 @@ describe('the founder-review draft', () => {
     // CR-PUBLIC-2A: the founder-approved §2 sentence, verbatim
     expect(d).toContain('Creator Record is available to registered SI8 users, subject to these Terms and applicable eligibility, payment, and service requirements.')
     // every other published paragraph is carried over verbatim
-    for (const [i, p] of (TERMS_OF_SERVICE?.paragraphs ?? []).entries()) {
+    // ... as published at terms-2026-11-18 (the draft predates the CR-DOC-READER-EXT-8D §5 change).
+    for (const [i, p] of revertExt8b('terms', TERMS_OF_SERVICE?.paragraphs ?? []).entries()) {
       if (i === 5) continue
       for (const line of p.split('\n')) expect({ i, found: d.includes(line) }).toEqual({ i, found: true })
     }

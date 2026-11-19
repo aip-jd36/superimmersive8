@@ -507,9 +507,9 @@ describe('dashboard: paid orders awaiting a person, and paused records', () => {
 describe('privacy and terms: infrastructure only, nothing published until approved', () => {
   const complete: ApprovedLegalDocument = { version: 'privacy-test-1', effective_date: '2026-12-01', approval_reference: 'ref', title: 'Privacy notice', paragraphs: ['Text.'] }
   test('the founder-approved documents are published; a missing document still renders "not available yet"', () => {
-    // CR-V2-MVP-LEGAL-CONTENT-6 (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109).
-    expect(PRIVACY_NOTICE?.approval_reference).toBe('JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109')
-    expect(TERMS_OF_SERVICE?.approval_reference).toBe('JD-CR-PUBLIC-LAUNCH-20261118 terms') // CR-V2-MVP-RELEASE-AUTHORIZATION-1
+    // CR-V2-MVP-LEGAL-CONTENT-6, revised by CR-DOC-READER-EXT-8D (JD-CR-DOC-READER-EXT-8C-20261119).
+    expect(PRIVACY_NOTICE?.approval_reference).toBe('JD-CR-DOC-READER-EXT-8C-20261119 privacy')
+    expect(TERMS_OF_SERVICE?.approval_reference).toBe('JD-CR-DOC-READER-EXT-8C-20261119 terms')
     expect(legalPoliciesApproved()).toBe(true)
     const html = renderToStaticMarkup(<LegalDocumentPage doc={null} fallbackTitle="Privacy notice" />)
     expect(html).toContain('data-legal-unavailable')

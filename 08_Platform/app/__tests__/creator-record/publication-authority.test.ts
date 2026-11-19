@@ -527,10 +527,10 @@ describe('CR-V2-MVP-PROD-PREP-1: no unapproved or stale content reaches a prepar
   test('published legal documents: bound consent identifiers, but still no real-document intake and no live reading (separate locks)', () => {
     // CR-V2-MVP-LEGAL-CONTENT-6: the founder-approved Privacy Notice and Terms are published.
     expect(legalPoliciesApproved()).toBe(true)
-    expect(approvedPolicyVersions()).toEqual({ privacy: 'privacy-2026-11-09', terms: 'terms-2026-11-18' })
+    expect(approvedPolicyVersions()).toEqual({ privacy: 'privacy-2026-11-19', terms: 'terms-2026-11-19' })
     expect(customerLiveOffered()).toBe(true) // CR-V2-MVP-PROD-UAT-ACTIVATION-1: both live locks ship true; a reading still needs the database enablement row and an invitation
-    expect(evidenceConsentVersion()).toBe('cr-v2-storage-consent-1__privacy-2026-11-09__terms-2026-11-18')
-    expect(aiExaminationPermissionVersion()).toBe('cr-v2-ai-permission-1__privacy-2026-11-09__terms-2026-11-18')
+    expect(evidenceConsentVersion()).toBe('cr-v2-storage-consent-1__privacy-2026-11-19__terms-2026-11-19')
+    expect(aiExaminationPermissionVersion()).toBe('cr-v2-ai-permission-1__privacy-2026-11-19__terms-2026-11-19')
     expect(EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED).toBe(true)
     const read = (f: string) => readFileSync(join(process.cwd(), f), 'utf8')
     expect(read('lib/creator-record-flow/evidence-production.ts')).toMatch(/realDocumentsPermitted: EVIDENCE_INTAKE_REAL_DOCUMENTS_PERMITTED && legalPoliciesApproved\(\)/)

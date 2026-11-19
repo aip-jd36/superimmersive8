@@ -9,6 +9,7 @@
 import { CANDIDATE_DEPENDENCY_LABELS } from '@/lib/creator-record/governed/candidates/cr-doc-reader-ext-1'
 import { createHash } from 'node:crypto'
 import { PRIVACY_NOTICE, TERMS_OF_SERVICE } from '@/lib/legal/policies'
+import { revertExt8b } from '@/test-support/legal-candidates-ext-8b'
 import * as Governed from '@/lib/creator-record/governed/sources'
 import { CUSTOMER_WORDING_SOURCES, customerWordingIdentity } from '@/lib/creator-record-flow/customer-wording'
 import { EXAM_LIVE_TEXT, EXAM_TEXT } from '@/lib/creator-record-flow/examination-ui'
@@ -27,9 +28,9 @@ function packetJson(v: unknown): string {
 
 describe('the published legal documents are the approved text', () => {
   test.each([
-    ['Privacy Notice', PRIVACY_NOTICE, 'privacy-2026-11-09', 'Creator Record Privacy Notice', '5d1da758c484c1710b8f03fb84ed267b1f8589bf78c7f85484fb8eb3788e063e', 42],
-    // CR-PUBLIC-LAUNCH: founder-approved §2 (public availability) on top of the 2026-11-14 text (§4/§5 revision).
-    ['Terms of Service', TERMS_OF_SERVICE, 'terms-2026-11-18', 'Creator Record Terms of Service', 'b4b21b0ac5a2fae0e3d3bd4cbca1881b763f48a62c46db603fdb5c6ea0039d1b', 31, '2026-11-18', 'JD-CR-PUBLIC-LAUNCH-20261118 terms'],
+    // CR-DOC-READER-EXT-8D: the EXT-8B/8C-approved revision (JD-CR-DOC-READER-EXT-8C-20261119) of privacy-2026-11-09 and terms-2026-11-18.
+    ['Privacy Notice', PRIVACY_NOTICE, 'privacy-2026-11-19', 'Creator Record Privacy Notice', '88f91a5783ab89f10beb93ae7e8e77fb09a8b90f4cfb4ae6433326e9d5bee3b0', 44, '2026-11-19', 'JD-CR-DOC-READER-EXT-8C-20261119 privacy'],
+    ['Terms of Service', TERMS_OF_SERVICE, 'terms-2026-11-19', 'Creator Record Terms of Service', '94a06c4eba4a6206a37629663e679b3b071fdb7b5c270085118498ef084f47d7', 31, '2026-11-19', 'JD-CR-DOC-READER-EXT-8C-20261119 terms'],
   ])('%s: version, date, approval and every paragraph', (_, doc, version, title, paragraphsSha, count, date = '2026-11-09', ref = REF) => {
     expect(doc).not.toBeNull()
     expect(doc!).toMatchObject({ version, effective_date: date, approval_reference: ref, title })
@@ -38,10 +39,17 @@ describe('the published legal documents are the approved text', () => {
     expect(doc!.paragraphs.join('\n')).not.toMatch(/\[(CONFIRM|VERIFY|FOUNDER|PENDING)|PUBLICATION GATE/)
   })
 
+  test('CR-DOC-READER-EXT-8D: undoing exactly the approved EXT-8B changes reproduces the previous approved texts', () => {
+    // privacy-2026-11-09 (JD-CR-V2-MVP-LEGAL-CONTENT-5-20261109, 42 paragraphs) and terms-2026-11-18 (JD-CR-PUBLIC-LAUNCH-20261118).
+    expect(sha(revertExt8b('privacy', PRIVACY_NOTICE!.paragraphs).join('\n\n'))).toBe('5d1da758c484c1710b8f03fb84ed267b1f8589bf78c7f85484fb8eb3788e063e')
+    expect(revertExt8b('privacy', PRIVACY_NOTICE!.paragraphs)).toHaveLength(42)
+    expect(sha(revertExt8b('terms', TERMS_OF_SERVICE!.paragraphs).join('\n\n'))).toBe('b4b21b0ac5a2fae0e3d3bd4cbca1881b763f48a62c46db603fdb5c6ea0039d1b')
+  })
+
   test('CR-PUBLIC-LAUNCH: the only change from the approved terms-2026-11-14 text is the §2 availability sentence', () => {
     const NEW = 'Creator Record is available to registered SI8 users, subject to these Terms and applicable eligibility, payment, and service requirements.'
     const OLD = 'Creator Record is currently available by invitation only.'
-    const joined = TERMS_OF_SERVICE!.paragraphs.join('\n\n')
+    const joined = revertExt8b('terms', TERMS_OF_SERVICE!.paragraphs).join('\n\n') // as at terms-2026-11-18
     expect(joined.split(NEW)).toHaveLength(2)
     expect(sha(joined.replace(NEW, OLD))).toBe('d54e55bb785b4cecdb6dd2b87febb619d48c747bddc272aceaf169b4ad11a8fb')
   })

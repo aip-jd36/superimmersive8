@@ -1,94 +1,66 @@
 /**
- * CR-DOC-READER-EXT-8B — the candidate Privacy Notice and Terms revisions, and what publishing them would do. Nothing is published.
+ * CR-DOC-READER-EXT-8D — the published Privacy Notice and Terms are exactly the EXT-8B/8C-approved wording
+ * (JD-CR-DOC-READER-EXT-8C-20261119), and what the publication does to consent.
  */
-import { approvedPolicyVersions, legalPoliciesApproved, LEGAL_VERSION_PATTERN, PRIVACY_NOTICE, TERMS_OF_SERVICE } from '@/lib/legal/policies'
-import { AI_EXAMINATION_PERMISSION_APPROVED_WORDING, aiExaminationPermissionVersion, EVIDENCE_CONSENT_APPROVED_WORDING, evidenceConsentVersion } from '@/lib/creator-record-flow/authorization-versions'
-import { customerWordingIdentity } from '@/lib/creator-record-flow/customer-wording'
-import { APPROVED_CANDIDATE_WORDING_SHA256, candidatePrivacyNotice, candidateTerms, CANDIDATE_PRIVACY_VERSION, CANDIDATE_TERMS_VERSION, PRIVACY_INSERTIONS, PRIVACY_REPLACEMENTS, TERMS_REPLACEMENTS } from '@/test-support/legal-candidates-ext-8b'
+import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
+import { approvedPolicyVersions, legalPoliciesApproved, PRIVACY_NOTICE, TERMS_OF_SERVICE } from '@/lib/legal/policies'
+import { AI_EXAMINATION_PERMISSION_APPROVED_WORDING, aiExaminationPermissionVersion, EVIDENCE_CONSENT_APPROVED_WORDING, evidenceConsentVersion } from '@/lib/creator-record-flow/authorization-versions'
+import { customerWordingIdentity } from '@/lib/creator-record-flow/customer-wording'
+import { APPROVED_CANDIDATE_WORDING_SHA256, PRIVACY_INSERTIONS, PRIVACY_REPLACEMENTS, TERMS_REPLACEMENTS, withPolicyVersion } from '@/test-support/legal-candidates-ext-8b'
 
 const APP = path.join(__dirname, '../..')
-const LIVE_AI = 'cr-v2-ai-permission-1__privacy-2026-11-09__terms-2026-11-18'
-const LIVE_STORAGE = 'cr-v2-storage-consent-1__privacy-2026-11-09__terms-2026-11-18'
+const PREVIOUS_AI = 'cr-v2-ai-permission-1__privacy-2026-11-09__terms-2026-11-18'
+const PREVIOUS_STORAGE = 'cr-v2-storage-consent-1__privacy-2026-11-09__terms-2026-11-18'
+const P = PRIVACY_NOTICE!
+const T = TERMS_OF_SERVICE!
 
-describe('nothing is published', () => {
-  test('the live documents and identifiers are unchanged', () => {
-    expect([PRIVACY_NOTICE?.version, TERMS_OF_SERVICE?.version]).toEqual(['privacy-2026-11-09', 'terms-2026-11-18'])
-    expect([aiExaminationPermissionVersion(), evidenceConsentVersion()]).toEqual([LIVE_AI, LIVE_STORAGE])
+describe('the published documents', () => {
+  test('versions, effective date and approval reference', () => {
+    expect(P).toMatchObject({ version: 'privacy-2026-11-19', effective_date: '2026-11-19', approval_reference: 'JD-CR-DOC-READER-EXT-8C-20261119 privacy' })
+    expect(T).toMatchObject({ version: 'terms-2026-11-19', effective_date: '2026-11-19', approval_reference: 'JD-CR-DOC-READER-EXT-8C-20261119 terms' })
+    expect(legalPoliciesApproved()).toBe(true)
   })
-  test('no application module imports the candidate', () => {
+  test('the paragraphs are exactly the founder-approved wording (digest)', () => {
+    const digest = createHash('sha256').update(JSON.stringify({ privacy: P.paragraphs, terms: T.paragraphs })).digest('hex')
+    expect(digest).toBe(APPROVED_CANDIDATE_WORDING_SHA256)
+    expect(digest).toBe('0a6fa5dd56da9e0611518727464ba7e1e98d66acd386e905c29c7e1e9f103e89')
+  })
+  test('each approved change is present; inserted paragraphs follow their anchors', () => {
+    for (const r of PRIVACY_REPLACEMENTS) expect(P.paragraphs.filter((p) => p.includes(r.to))).toHaveLength(1)
+    for (const i of PRIVACY_INSERTIONS) expect(P.paragraphs[P.paragraphs.findIndex((p) => p.startsWith(i.after)) + 1]).toBe(i.text)
+    for (const r of TERMS_REPLACEMENTS) expect(T.paragraphs.filter((p) => p.includes(r.to))).toHaveLength(1)
+  })
+  test('the Terms coverage paragraph names no provider; the reading statements stay scoped to licences and permissions', () => {
+    const coverage = T.paragraphs.find((p) => p.startsWith('Guidance is available only for some AI tools'))!
+    expect(coverage).not.toMatch(/Runway|Higgsfield|Artlist|Epidemic|Getty|iStock|Shutterstock|Adobe|Pond5|Kling|Pika/)
+    const t = P.paragraphs.join('\n')
+    expect(t).toContain('For licences and permissions, the reading is instructed not to copy')
+    expect(t).not.toMatch(/SI8 rejects any reading that/) // the receipt reader has no such check
+  })
+  test('the candidate module is test-support only', () => {
     const walk = (d: string): string[] => require('node:fs').readdirSync(d, { withFileTypes: true }).flatMap((e: { name: string; isDirectory(): boolean }) => (e.isDirectory() ? (['node_modules', '.next'].includes(e.name) ? [] : walk(path.join(d, e.name))) : /\.(ts|tsx)$/.test(e.name) ? [path.join(d, e.name)] : []))
     for (const f of [...walk(path.join(APP, 'lib')), ...walk(path.join(APP, 'app')), ...walk(path.join(APP, 'components'))]) expect(readFileSync(f, 'utf8')).not.toMatch(/legal-candidates-ext-8b/)
   })
 })
 
-describe('the candidate documents', () => {
-  const P = candidatePrivacyNotice()
-  const T = candidateTerms()
-  test('the founder-approved wording (CR-DOC-READER-EXT-8C) is exactly what is built', () => {
-    const digest = require('node:crypto').createHash('sha256').update(JSON.stringify({ privacy: P.paragraphs, terms: T.paragraphs })).digest('hex')
-    expect(digest).toBe(APPROVED_CANDIDATE_WORDING_SHA256)
-    expect(digest).toBe('0a6fa5dd56da9e0611518727464ba7e1e98d66acd386e905c29c7e1e9f103e89')
+describe('what the publication does to consent', () => {
+  test('new permissions and consents name the new versions; the previous identifiers (receipts included) no longer match', () => {
+    expect(approvedPolicyVersions()).toEqual({ privacy: 'privacy-2026-11-19', terms: 'terms-2026-11-19' })
+    expect(aiExaminationPermissionVersion()).toBe('cr-v2-ai-permission-1__privacy-2026-11-19__terms-2026-11-19')
+    expect(evidenceConsentVersion()).toBe('cr-v2-storage-consent-1__privacy-2026-11-19__terms-2026-11-19')
+    expect(aiExaminationPermissionVersion()).not.toBe(PREVIOUS_AI)
+    expect(evidenceConsentVersion()).not.toBe(PREVIOUS_STORAGE)
   })
-  test('complete and well-formed (a build with them would publish both)', () => {
-    expect(LEGAL_VERSION_PATTERN.test(P.version) && LEGAL_VERSION_PATTERN.test(T.version)).toBe(true)
-    expect(legalPoliciesApproved({ privacy: P, terms: T })).toBe(true)
-    expect(approvedPolicyVersions({ privacy: P, terms: T })).toEqual({ privacy: CANDIDATE_PRIVACY_VERSION, terms: CANDIDATE_TERMS_VERSION })
-  })
-  test('Privacy Notice: exactly the three replacements and two new paragraphs; nothing else changed', () => {
-    const live = PRIVACY_NOTICE!.paragraphs
-    expect(P.paragraphs.length).toBe(live.length + PRIVACY_INSERTIONS.length)
-    const inserted = new Set(PRIVACY_INSERTIONS.map((i) => i.text))
-    const kept = P.paragraphs.filter((p) => !inserted.has(p))
-    expect(kept.length).toBe(live.length)
-    const changed = kept.flatMap((p, i) => (p !== live[i] ? [i] : []))
-    expect(changed.length).toBe(PRIVACY_REPLACEMENTS.length)
-    for (const r of PRIVACY_REPLACEMENTS) expect(kept.some((p) => p.includes(r.to))).toBe(true)
-    for (const i of PRIVACY_INSERTIONS) expect(P.paragraphs[P.paragraphs.findIndex((p) => p.startsWith(i.after)) + 1]).toBe(i.text)
-  })
-  test('Terms: only the §5 coverage paragraph changes, and it names no provider', () => {
-    const live = TERMS_OF_SERVICE!.paragraphs
-    const changed = T.paragraphs.flatMap((p, i) => (p !== live[i] ? [i] : []))
-    expect(changed.length).toBe(1)
-    const para = T.paragraphs[changed[0]]
-    for (const r of TERMS_REPLACEMENTS) expect(para).toContain(r.to)
-    expect(para).not.toMatch(/Runway|Higgsfield|Artlist|Epidemic|Getty|iStock|Shutterstock|Adobe|Pond5|Kling|Pika/)
-  })
-  test('accuracy: the new wording states what the code does (whole file sent; no redaction; text not reproduced; emails/phones rejected)', () => {
-    const t = P.paragraphs.join('\n')
-    expect(t).toContain('sends the whole document, as you added it')
-    expect(t).toContain('SI8 does not remove or redact anything from the file you add.')
-    expect(t).toContain('Your record does not reproduce text from these documents')
-    expect(t).toContain('For licences and permissions, the reading is instructed not to copy')
-    expect(t).toContain('SI8 rejects any such reading that contains an email address or phone number')
-    // The receipt reader has no such instruction or check, so the claim must stay scoped to licences and permissions.
-    expect(t).not.toMatch(/SI8 rejects any reading that/)
-    // Unchanged statements the behaviour still matches: retention, deletion, Anthropic as provider.
-    expect(t).toContain('we delete each original file 90 days after you add it')
-    expect(t).toContain('Anthropic: automated reading of documents you give permission for.')
-  })
-})
-
-describe('what publishing would do to consent', () => {
-  const versions = { privacy: CANDIDATE_PRIVACY_VERSION, terms: CANDIDATE_TERMS_VERSION }
-  test('new permissions and consents name the new versions; every earlier identifier (receipts included) stops matching', () => {
-    const ai = aiExaminationPermissionVersion(versions)
-    const storage = evidenceConsentVersion(versions)
-    expect(ai).toBe('cr-v2-ai-permission-1__privacy-2026-11-20__terms-2026-11-20')
-    expect(storage).toBe('cr-v2-storage-consent-1__privacy-2026-11-20__terms-2026-11-20')
-    expect((ai as string).length).toBeLessThanOrEqual(120)
-    expect(ai).not.toBe(LIVE_AI)
-    expect(storage).not.toBe(LIVE_STORAGE)
-  })
-  test('the unchanged checkbox wording keeps its approved fingerprint (the wording ids and their digest are untouched)', () => {
+  test('the unchanged checkbox wording keeps its approved fingerprint', () => {
     expect(AI_EXAMINATION_PERMISSION_APPROVED_WORDING?.id).toBe('cr-v2-ai-permission-1')
     expect(EVIDENCE_CONSENT_APPROVED_WORDING?.id).toBe('cr-v2-storage-consent-1')
     expect(customerWordingIdentity().sha256).toBe(AI_EXAMINATION_PERMISSION_APPROVED_WORDING?.customer_wording_sha256)
     expect(customerWordingIdentity().sha256).toBe('d9ab1ccb43e8e983c997d9a80e12aae208f90123a4c3ea02b9cc780c1b2ff070')
   })
-  test('prepared versions are not made stale by the policy change alone: governance checks pass unchanged with the candidates published', () => {
-    const docs = { privacy: candidatePrivacyNotice(), terms: candidateTerms() }
+  test('prepared versions are not made stale by a legal-version change alone: governance checks pass unchanged under a later version', () => {
+    const docs = { privacy: withPolicyVersion(PRIVACY_NOTICE, 'privacy-2026-12-01'), terms: withPolicyVersion(TERMS_OF_SERVICE, 'terms-2026-12-01') }
     jest.isolateModules(() => {
       jest.doMock('@/lib/legal/policies', () => {
         const actual = jest.requireActual('@/lib/legal/policies')
@@ -100,14 +72,14 @@ describe('what publishing would do to consent', () => {
       const { TOPIC_CLAIMS_FIXTURE } = require('@/lib/retrieval-engine/topic-claims-fixture')
       const { aiExaminationPermissionVersion: ai } = require('@/lib/creator-record-flow/authorization-versions')
       const { customerWordingIdentity: cwi } = require('@/lib/creator-record-flow/customer-wording')
-      expect(ai()).toBe('cr-v2-ai-permission-1__privacy-2026-11-20__terms-2026-11-20')
+      expect(ai()).toBe('cr-v2-ai-permission-1__privacy-2026-12-01__terms-2026-12-01')
       const inputs = approvedCustomerRecordInputs(GOV)
       for (const [v, st] of [[7, inputs.source_text], [8, inputs.source_text_examination]] as const) {
-        const r = checkApprovedSources(inputs.sources, st ?? null, TOPIC_CLAIMS_FIXTURE, '2026-11-20', { id: 'si8/creator-record-v2-record', version: v })
+        const r = checkApprovedSources(inputs.sources, st ?? null, TOPIC_CLAIMS_FIXTURE, '2026-12-01', { id: 'si8/creator-record-v2-record', version: v })
         expect(r.ok).toBe(true)
         expect(JSON.stringify(r)).toContain(CREATOR_RECORD_QUESTIONNAIRE_CONTRACT_SHA256)
       }
-      expect(JSON.stringify(checkApprovedSources(inputs.sources, inputs.source_text, TOPIC_CLAIMS_FIXTURE, '2026-11-20', { id: 'si8/creator-record-v2-record', version: 7 }))).toContain(CREATOR_RECORD_SOURCE_TEXT_SHA256)
+      expect(JSON.stringify(checkApprovedSources(inputs.sources, inputs.source_text, TOPIC_CLAIMS_FIXTURE, '2026-12-01', { id: 'si8/creator-record-v2-record', version: 7 }))).toContain(CREATOR_RECORD_SOURCE_TEXT_SHA256)
       expect(cwi().sha256).toBe('d9ab1ccb43e8e983c997d9a80e12aae208f90123a4c3ea02b9cc780c1b2ff070')
     })
   })
