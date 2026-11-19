@@ -75,3 +75,79 @@ Deploy-first and swap-first give the same gap; deploy-first is kept because it m
 - Whole originals go to Anthropic and are kept 90–104 days (plus holds and backups); Anthropic's own retention terms apply (organisation settings not verified here).
 - The stored reading may contain a name (only emails and phones are enforced); internal only, never shown.
 - Receipt readings have no personal-details instruction or email/phone check (receipts are the creator's own billing documents); the Notice therefore scopes those statements to licences and permissions only.
+
+## Release record and closure (CR-DOC-READER-EXT-8D): CLOSED / PRODUCTION RELEASED, 2026-11-19
+
+The Privacy Notice and consent publication gate is **COMPLETE** (founder internal good-faith review; not a legal opinion or compliance
+certification; external counsel not commissioned). D5 stays approved with PDF v8 inactive (`pending`); licence reading stays OFF.
+
+**Live:** `privacy-2026-11-19` / `terms-2026-11-19`, effective 2026-11-19, approval references `JD-CR-DOC-READER-EXT-8C-20261119 privacy` /
+`… terms`. Paragraph digest `0a6fa5dd56da9e0611518727464ba7e1e98d66acd386e905c29c7e1e9f103e89` (the founder's authorization quoted its last
+36 characters); per-document digests `88f91a57…` (44 paragraphs) and `94a06c4e…` (31); undoing exactly the approved changes reproduces the
+previous approved digests `5d1da758…` and `b4b21b0a…`. Checkbox wording and its fingerprint (`d9ab1ccb…`) unchanged.
+
+**Preflight (read-only, both attempts):** one authority row with the previous value; no reading in the preceding 30 minutes; no
+paid-but-unissued order (two 2026-10-21 rows without an issued artifact are a rejected-payment anomaly and a completed earlier-path PDF, not
+open orders); licence switch `off`; v8 `pending`.
+
+**Timeline (UTC, 2026-11-19):**
+
+| Time | Event |
+|---|---|
+| 07:53:19 | Push `4ed085e1 → cdc022f1` (EXT-7B, 7C, 8B ×3, 8C, publication); fast-forward |
+| 07:56:11 | New versions live. Authority-row swap attempted from the engineering session: refused (`cannot execute DELETE in a read-only transaction`); nothing changed |
+| 07:56:53 | Documented rollback: push of the revert `dd97e89f` |
+| 07:59:34 | Previous versions live again; old row matches; all three Vercel projects success |
+| 08:13:41 | Re-release: push `dd97e89f → b7300593` (revert of the rollback; tree identical to `cdc022f1`) |
+| 08:15:48 | New versions live |
+| 08:17:19 | Founder ran the guarded migration in the Supabase SQL Editor; one row, new value |
+
+**Interruptions** (AI reading unavailable, receipts included; fail closed; no reading attempts and no new grants in either window):
+07:56:11–07:59:34 (about 3½ minutes) and 08:15:48–08:17:19 (about 91 seconds).
+
+**Verification after the swap:**
+- exactly one authority row: `cr-v2-ai-permission-1__privacy-2026-11-19__terms-2026-11-19`;
+- `/privacy` and `/terms` serve the new versions; Vercel `si8-creator-portal`, `superimmersive8`, `superimmersive8-crm` success for `b7300593`;
+- new permission grant accepted: a rolled-back probe (founder, SQL Editor) of `creator_record_v2_grant_ai_examination_permission` for an
+  internal UAT document under the new identifier returned `granted`; afterwards grants were unchanged (5 total, 0 under the new identifier);
+- stored readings preserved: 4 examined readings, unchanged.
+
+**Manual Supabase SQL requirement:** the Supabase access available to engineering sessions is read-only. Authority-row replacements,
+migrations and grant probes are prepared as guarded SQL and run by the founder in the SQL Editor, ready before the push so the mismatch window
+stays short.
+
+**Migration run (2026-11-19 08:17:19 UTC):**
+
+```sql
+BEGIN;
+LOCK TABLE public.creator_record_v2_ai_permission_authority IN ACCESS EXCLUSIVE MODE;
+DO $$
+DECLARE
+  v_old  constant text := 'cr-v2-ai-permission-1__privacy-2026-11-09__terms-2026-11-18';
+  v_new  constant text := 'cr-v2-ai-permission-1__privacy-2026-11-19__terms-2026-11-19';
+  v_rows int;
+  v_cur  text;
+BEGIN
+  SELECT count(*), max(permission_version) INTO v_rows, v_cur FROM public.creator_record_v2_ai_permission_authority;
+  IF v_rows <> 1 OR v_cur IS DISTINCT FROM v_old THEN
+    RAISE EXCEPTION 'EXT-8D guard: expected exactly one row %, found % row(s), value %', v_old, v_rows, v_cur;
+  END IF;
+  DELETE FROM public.creator_record_v2_ai_permission_authority WHERE permission_version = v_old;
+  INSERT INTO public.creator_record_v2_ai_permission_authority (permission_version, established_by, reason)
+  VALUES (v_new, 'JD (PMF Strategy Inc. d/b/a SuperImmersive 8)',
+          'CR-DOC-READER-EXT-8D Privacy Notice and Terms release: JD-CR-DOC-READER-EXT-8C-20261119');
+  SELECT count(*), max(permission_version) INTO v_rows, v_cur FROM public.creator_record_v2_ai_permission_authority;
+  IF v_rows <> 1 OR v_cur IS DISTINCT FROM v_new THEN
+    RAISE EXCEPTION 'EXT-8D guard: replacement check failed (% row(s), value %)', v_rows, v_cur;
+  END IF;
+END $$;
+COMMIT;
+```
+
+**Rollback** (not used after the swap): Vercel instant rollback to the `dd97e89f` deployment (or push a revert of `b7300593`), then the same
+script with `v_old` / `v_new` exchanged and reason `CR-DOC-READER-EXT-8D rollback to privacy-2026-11-09 / terms-2026-11-18`, run only once
+`/privacy` shows `privacy-2026-11-09`.
+
+**Remaining licence-reading activation gates:** confirmation of the Production Anthropic spending limit; licence-reader activation (v8
+`approved` with v7 `superseded`, `LICENCE_READING_SWITCH` on, redeploy); the synthetic-document Production UAT. Each needs its own
+authorization.

@@ -10,7 +10,7 @@
 - `08_Platform/implementation/cr-design-2c/` (CR-DESIGN-2C/2D, 2026-11-16): the Institutional Trust customer PDF. `04-CR-DESIGN-2D-RELEASE-AUTHORIZATION-RECORD.md` holds the founder authorization, release identities, Production UAT and closure; `01-ACCEPTANCE-RECORD.md` the accepted implementation; `03-CR-DESIGN-2D-RELEASE-PLAN.md` the release and rollback plan.
 
 **Baseline.**
-- Production runs `34f16731` (CR-DOC-READER-EXT-6E, deployed 2026-11-19; see "EXT-6E closure" below). The previous application deploy was `24db05de` (CR-DOC-READER-EXT-5B: document-reader extension integrated with licence reading off, 2026-11-19); reverting `34f16731` restores it.
+- Production runs `b7300593` (CR-DOC-READER-EXT-8D: Privacy Notice and Terms 2026-11-19, deployed 2026-11-19; see "EXT-8D closure" below). Before it: `dd97e89f`, whose legal documents and application behaviour match `4ed085e1`/`34f16731` (CR-DOC-READER-EXT-6E); rolling back to it also needs the previous authority row restored (`05-PRIVACY-TERMS-EXT-8B.md`). Earlier: `34f16731` (CR-DOC-READER-EXT-6E, deployed 2026-11-19; see "EXT-6E closure" below). The application deploy before that was `24db05de` (CR-DOC-READER-EXT-5B: document-reader extension integrated with licence reading off, 2026-11-19); reverting `34f16731` restores it.
 - The current PDF templates came from the CR-DESIGN-2D release `f97429a4` (released 2026-11-16, closed 2026-11-16 after Production UAT). Build B `0bec2dee` was the MVP release (2026-11-14). Later documentation-only commits do not change the application.
 - Rollback targets for CR-DESIGN-2D: the D1 pause `59f3ee26`, or the pre-release `4c88a8a4` (application identical to Build B). The rollback floor stays Build A `60b1d84d`. Never deploy a build without the takeover guard (`334d8d9f`, `678add4d` or earlier).
 
@@ -47,8 +47,8 @@
 - Accepted consequence (founder): the 12 prepared versions not yet bought became stale (refused at checkout; creators re-enter their answers). At deployment, counts were unchanged and the 10 issued artifacts were untouched (deployment report).
 - Open, and not part of this closure:
   - EXT-6F: signed-in Production guidance UAT (Artlist, Shutterstock, Pond5). This is a validation task, not a blocker to the closure. *(Closed 2026-11-19; see "EXT-6F closure" below.)*
-  - D5: PDF v8 wording approval after counsel review.
-  - Privacy Notice and consent amendments after counsel review.
+  - D5: PDF v8 wording approval after counsel review. *(Approved 2026-11-19 after internal review; v8 still inactive.)*
+  - Privacy Notice and consent amendments after counsel review. *(COMPLETE 2026-11-19 after internal review; see "EXT-8D closure".)*
   - Confirmation of the Production Anthropic spending limit.
   - Licence-reader activation and the synthetic-document Production UAT.
 
@@ -73,9 +73,18 @@
   - Synthetic UAT artifacts must be excluded from commercial reporting explicitly (by record ID) until automatic exclusion is verified.
 - Licence-reading activation gates, still open:
   - ~~D5: PDF v8 wording approval~~: approved by the founder 2026-11-19 (`JD-CR-DOC-READER-EXT-7C-D5-20261119`, internal review; v8 still inactive).
-  - Privacy Notice and consent amendments after counsel review.
+  - ~~Privacy Notice and consent amendments~~: **COMPLETE** 2026-11-19, published as `privacy-2026-11-19` / `terms-2026-11-19` (`JD-CR-DOC-READER-EXT-8C-20261119`, internal good-faith review; external counsel not commissioned; checkbox wording unchanged). See "EXT-8D closure".
   - Confirmation of the Production Anthropic spending limit.
   - Licence-reader activation and the synthetic-document Production UAT.
+
+**EXT-8D closure: CLOSED / PRODUCTION RELEASED, 2026-11-19.** Privacy Notice `privacy-2026-11-19` and Terms `terms-2026-11-19` are live (approval `JD-CR-DOC-READER-EXT-8C-20261119`, internal good-faith review, not a legal opinion; paragraph digest `0a6fa5dd…f103e89`). Full record: `08_Platform/implementation/cr-doc-reader-ext-1/05-PRIVACY-TERMS-EXT-8B.md`.
+- Release: `b7300593` (fast-forward from the rollback `dd97e89f`; tree identical to the reviewed `cdc022f1`). Vercel: all three projects reported success. Live from 08:15:48 UTC.
+- Authority row: replaced by the founder in the Supabase SQL Editor (guarded single-transaction migration) at 08:17:19 UTC. Exactly one row: `cr-v2-ai-permission-1__privacy-2026-11-19__terms-2026-11-19`.
+- Verified: `/privacy` and `/terms` show the new versions; a new grant is accepted (rolled-back probe on an internal UAT document returned `granted`; nothing saved); the 4 stored readings remain; grant count unchanged (5).
+- Interruptions (AI reading unavailable, receipts included; fail closed; no reading attempts in either window): first attempt `cdc022f1` 07:56:11–07:59:34 UTC (about 3½ minutes), ended by the documented rollback `dd97e89f`; re-release 08:15:48–08:17:19 UTC (about 91 seconds).
+- **Manual SQL requirement:** the Supabase access available to engineering sessions is read-only. Every Production write (authority-row swaps, migrations, grant probes) is prepared as guarded SQL and run by the founder in the SQL Editor; have it ready before pushing, to keep the mismatch window short.
+- Consequence (by design): every AI-reading permission given under `…__privacy-2026-11-09__terms-2026-11-18`, receipts included, no longer permits new readings; creators are asked again per document. Prepared and issued records are unaffected.
+- The EXT-7B/7C/8B/8C commits reached `main` in the same push: inert (licence reading off, PDF v8 `pending`).
 
 **D10: readings, declarations and guidance stay independent.**
 - Guidance is selected from declarations alone. Documents and readings are never a guidance input (`customer-record/record.ts`).
@@ -90,7 +99,7 @@
 - Terms `terms-2026-11-19` and Privacy Notice `privacy-2026-11-19`, effective 2026-11-19 (CR-DOC-READER-EXT-8D, approval `JD-CR-DOC-READER-EXT-8C-20261119`, wording digest `0a6fa5dd…`): `terms-2026-11-18` with a generic §5 coverage sentence, and `privacy-2026-11-09` with §§1, 2, 4, 5 on licences, permissions, whole-document sending and no redaction (`lib/legal/policies.ts`; `implementation/cr-doc-reader-ext-1/05-PRIVACY-TERMS-EXT-8B.md`).
 - Storage-consent and AI-permission identifiers are `<wording>__privacy-2026-11-19__terms-2026-11-19` (`lib/creator-record-flow/authorization-versions.ts`); the Production authority row must name `cr-v2-ai-permission-1__privacy-2026-11-19__terms-2026-11-19`. Permissions given under `…__privacy-2026-11-09__terms-2026-11-18` no longer permit readings.
 - The database accepts an AI-permission grant only for the identifier in `creator_record_v2_ai_permission_authority` (migration `20261113000000`).
-- That row is operator-maintained. Whenever the Terms or Privacy version changes, an operator replaces it by delete-and-insert; in-place updates are refused. Until then, AI examination fails closed.
+- That row is operator-maintained. Whenever the Terms or Privacy version changes, an operator replaces it by delete-and-insert; in-place updates are refused. Until then, AI examination fails closed. Engineering sessions have read-only Supabase access: the founder runs the guarded swap in the SQL Editor (EXT-8D migration and rollback SQL: `implementation/cr-doc-reader-ext-1/05-PRIVACY-TERMS-EXT-8B.md`).
 - Grants made under an earlier identifier stay as history and no longer permit examination.
 
 ## Origin: receipt examination feasibility spike (PRODUCT-A-MVP-SPIKE-1A)
