@@ -9,7 +9,8 @@
  *
  * Privacy: the schema has NO field for a person's name, address, email, phone number or signature. The model reports only
  * whether such details appear (`personal_details_present`). A response whose values or excerpts contain an email address or a
- * phone-like number is rejected whole (`schema_invalid`): the validator never repairs or redacts.
+ * phone-like number is rejected whole (`schema_invalid`): the validator never repairs or redacts. A letter-led document
+ * identifier (licence, order or asset reference) is not phone-like (CR-DOC-READER-EXT-9R1, `phoneLike`).
  */
 
 export const LICENCE_EXTRACTION_SCHEMA_VERSION = 'licence-extraction-v1' as const
@@ -121,9 +122,34 @@ function isIsoCalendarDate(v: string): boolean {
 }
 /** Contact details of a person. Their presence rejects the whole response; nothing is redacted or repaired. */
 const EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/
-const PHONE = /(?:\+?\d[\d\s().-]{6,}\d)/
+const PHONE = /(?:\+?\d[\d\s().-]{6,}\d)/g
+/** A word that marks a token as contact information even when it also contains letters. */
+const CONTACT_WORD = /tel|phone|fax|mob|cell|whats|sms|call/i
+
+/**
+ * CR-DOC-READER-EXT-9R1: a phone-like digit run is a DOCUMENT IDENTIFIER (a licence, order, asset or track reference such as
+ * `AL-2026-0000-0000`, `INV-2026-00012345` or `TRK_00987654`) only when it lies wholly inside one whitespace-free token that starts
+ * with a letter and contains no contact word. Anything else stays phone-like and rejects: a run spanning whitespace, a token that
+ * does not start with a letter (`#12345678`, `0912-345-678`, `+1`), or a token naming a contact channel (`Tel555-123-4567`). Fail
+ * closed: a purely numeric order number cannot be told from a phone number by its shape, so it is still rejected.
+ */
+function phoneLike(text: string): boolean {
+  const t = text.replace(/\b\d{4}-\d{2}-\d{2}\b/g, '')
+  for (const m of t.matchAll(PHONE)) {
+    if (/\s/.test(m[0])) return true
+    let start = m.index ?? 0
+    let end = start + m[0].length
+    while (start > 0 && !/\s/.test(t[start - 1])) start -= 1
+    while (end < t.length && !/\s/.test(t[end])) end += 1
+    // Surrounding quotes, brackets and trailing punctuation are not part of the identifier: `(TRK_00987654),` → `TRK_00987654`.
+    const token = t.slice(start, end).replace(/^["'([{]+/, '').replace(/["')\]},;:.]+$/, '')
+    if (!/^[A-Za-z]/.test(token) || CONTACT_WORD.test(token)) return true
+  }
+  return false
+}
+
 export function containsContactDetails(text: string): boolean {
-  return EMAIL.test(text) || PHONE.test(text.replace(/\b\d{4}-\d{2}-\d{2}\b/g, ''))
+  return EMAIL.test(text) || phoneLike(text)
 }
 
 function validateField(raw: unknown, isDate: boolean): LicenceField | null {
