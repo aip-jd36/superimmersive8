@@ -1,5 +1,7 @@
 # CR-DOC-READER-EXT-1 — Path 1 local implementation record
 
+> **Update 2026-11-19:** D1–D4 were approved and deployed to Production (CR-DOC-READER-EXT-6E, `34f16731`, ledger `CR-V2-LAUNCH-LEDGER-4`). The current state is in `08_Platform/app/lib/creator-record/README.md` ("Current state"). Licence reading remains off and PDF v8 pending. The status below is kept as history.
+
 **Status: IMPLEMENTED LOCALLY, INACTIVE.** Branch `work/cr-doc-reader-ext-1`, not pushed or deployed. No claim is activated, no
 paid evaluation was run and no Production record was issued. Founder authorization: "CR-DOC-READER-EXT-1 — Bounded Local
 Implementation" (2026-11-18): Path 1 (document-informed assessment after governed composition) for four candidate claims.

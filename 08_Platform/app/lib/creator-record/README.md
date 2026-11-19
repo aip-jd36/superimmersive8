@@ -1,6 +1,6 @@
 # lib/creator-record — Creator Record v2
 
-## Current state: MVP released and closed; Institutional Trust PDF released (read this first)
+## Current state: MVP released and closed; Institutional Trust PDF released; EXT-6E guidance published (read this first)
 
 **This section governs.** Every later section is a milestone note written at the time of that milestone and kept as history. Where a later section says something is "empty", "stopped", "not approved", "locked", "local only" or "not wired", that describes its own milestone, not the code today.
 
@@ -10,7 +10,8 @@
 - `08_Platform/implementation/cr-design-2c/` (CR-DESIGN-2C/2D, 2026-11-16): the Institutional Trust customer PDF. `04-CR-DESIGN-2D-RELEASE-AUTHORIZATION-RECORD.md` holds the founder authorization, release identities, Production UAT and closure; `01-ACCEPTANCE-RECORD.md` the accepted implementation; `03-CR-DESIGN-2D-RELEASE-PLAN.md` the release and rollback plan.
 
 **Baseline.**
-- Production runs the CR-DESIGN-2D release `f97429a4` (released 2026-11-16, closed 2026-11-16 after Production UAT). Build B `0bec2dee` was the MVP release (2026-11-14). Later documentation-only commits do not change the application.
+- Production runs `34f16731` (CR-DOC-READER-EXT-6E, deployed 2026-11-19; see "EXT-6E closure" below). The previous application deploy was `24db05de` (CR-DOC-READER-EXT-5B: document-reader extension integrated with licence reading off, 2026-11-19); reverting `34f16731` restores it.
+- The current PDF templates came from the CR-DESIGN-2D release `f97429a4` (released 2026-11-16, closed 2026-11-16 after Production UAT). Build B `0bec2dee` was the MVP release (2026-11-14). Later documentation-only commits do not change the application.
 - Rollback targets for CR-DESIGN-2D: the D1 pause `59f3ee26`, or the pre-release `4c88a8a4` (application identical to Build B). The rollback floor stays Build A `60b1d84d`. Never deploy a build without the takeover guard (`334d8d9f`, `678add4d` or earlier).
 
 **Switches and identities:**
@@ -23,8 +24,9 @@
 | Generator | `creator-record-v2-pdf-v4` (CR-DESIGN-2D; `-pdf-v1`…`-v3` artifacts stay recognised) | `lib/creator-record-artifacts/renderers.ts` |
 | Issuable record schemas / builders | 7, 8 / 5, 7 | `customer-record/governance-state.ts` (`CURRENT_ISSUANCE_SUPPORT`) |
 | Issuable reading method | `live_model`, anthropic `claude-sonnet-5`, profile `receipt` v1 (`receipt-extraction-v2` / `receipt-prompt-v2`) | same |
-| Registry / ledger | `CR-V2-LAUNCH-REGISTRY-3` / `CR-V2-LAUNCH-LEDGER-3` | `governed/sources.ts` |
-| Published guidance | Runway and Higgsfield only. The Pika entry is withdrawn (LEDGER-3); Artlist is excluded | same |
+| Registry / ledger | `CR-V2-LAUNCH-REGISTRY-3` / `CR-V2-LAUNCH-LEDGER-4` (EXT-6E) | `governed/sources.ts` |
+| Published guidance | Runway and Higgsfield; since EXT-6E also `CLAIM-MUSIC-ARTLIST-SOCIAL-VS-PRO-001-v1` and `CLAIM-MUSIC-EPIDEMIC-TIER-ADVERTISING-001-v1` (selected from M1 only), `CLAIM-STOCK-EDITORIAL-001-v2` and `CLAIM-POND5-EDITORIAL-COMMERCIAL-USE-CONSENT-001-v1` (from M3 only). The Pika entry is withdrawn (LEDGER-3); the staged Artlist project-licence-duration proposal is not published | same |
+| Licence/permission reading | Off: `LICENCE_READING_SWITCH = 'off'`. It is enabled only with the switch on AND a selected schema 8 PDF set that can print a licence reading (v7 cannot) | `customer-flow/approved-inputs.ts` |
 | Customer live examination | Enabled: both live-examination locks are `true` (`live-examination/controls.ts`), and real documents are accepted (`evidence-intake/contract.ts`). The admin prototype's own live path stays locked (`evidence/config.ts`) | |
 
 **PDF templates.**
@@ -33,9 +35,22 @@
   - schema 8 → v7, `5d7ccfc8ce824e57f6e904d51f1027b59e43ab250a7f4895b0f804debe1761ab`.
 - v6/v7 are v4/v5 verbatim plus `version`, `navigation` ("What this record contains"; "See 'Please note' below.") and `presentation`: the Institutional Trust presentation contract `si8/creator-record-pdf-presentation` v1, `aa50507b4f76e8168744d88645220735e8b7820577e7be72e19c83dbedc017db` (`customer-pdf/presentation/institutional-trust.ts`, drawn by `InstitutionalTrustPDF.tsx`; hash-pinned fonts in `customer-pdf/fonts/`). Presentation renders are serialised per process with glyph-character priming and a fail-closed 30 s hold (`presentation/render-queue.ts`, `render_queue_hold_expired`).
 - All use the three-level readiness layout (`customer-pdf/readiness-layout.ts`, `ReadingLayoutView.tsx`).
+- v8 (schema 8) is registered `pending` (fingerprint `9496eb43…`) and is never selected; its wording (D5) awaits counsel review.
 - v4 (schema 7) and v5 (schema 8) stay registered as `superseded` since CR-DESIGN-2D, as do v1 (schema 7) and v3 (schema 8); for audit only.
 - Issued PDFs are stored bytes and are never re-rendered.
 - Takeover guard (`b6889585`): a pending artifact whose object is missing is re-rendered only by the generator that recorded it; otherwise it is refused and reconciled by hand.
+
+**EXT-6E closure: CLOSED / DEPLOYED TO PRODUCTION, 2026-11-19.**
+- Deployment commit `34f16731` (fast-forward from `24db05de`). Vercel: `superimmersive8-crm`, `superimmersive8` and `si8-creator-portal` all reported success (05:00:58, 05:01:14, 05:02:38 UTC; deployment report).
+- D1–D4 approved (founder, `JD-CR-DOC-READER-EXT-6E-20261119`) and published: the four claims above under `CR-V2-LAUNCH-LEDGER-4`, the four D3 dependency labels (Source Text approvals v11/v12, questionnaire contract v5), and the D4 relevance mapping. Their document notes print only with a relevant document.
+- Stock Editorial and Pond5 re-verified 2026-11-19; Artlist and Epidemic Sound keep 2026-09-10. Refresh by 2027-02-19. Record: `08_Platform/implementation/cr-doc-reader-ext-1/`.
+- Accepted consequence (founder): the 12 prepared versions not yet bought became stale (refused at checkout; creators re-enter their answers). At deployment, counts were unchanged and the 10 issued artifacts were untouched (deployment report).
+- Open, and not part of this closure:
+  - EXT-6F: signed-in Production guidance UAT (Artlist, Shutterstock, Pond5). This is a validation task, not a blocker to the closure.
+  - D5: PDF v8 wording approval after counsel review.
+  - Privacy Notice and consent amendments after counsel review.
+  - Confirmation of the Production Anthropic spending limit.
+  - Licence-reader activation and the synthetic-document Production UAT.
 
 **D10: readings, declarations and guidance stay independent.**
 - Guidance is selected from declarations alone. Documents and readings are never a guidance input (`customer-record/record.ts`).
