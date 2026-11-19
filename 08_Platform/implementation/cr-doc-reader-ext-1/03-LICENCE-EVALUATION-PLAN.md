@@ -160,3 +160,32 @@ keeps `separate_authorization_obtained` at `relevant_observation_unverified`, st
 - From the public summary, its only failing detail is the adjudicated field, and C2 (grounding) passed at 100%.
 - It cannot be confirmed from the summary that the reported value contains "integrated project" (it can only be text printed on
   the document).
+
+## CR-DOC-READER-EXT-9R5: CLOSED — QUALIFIED (founder decision, 2026-11-20)
+
+**Engineering closure:**
+- Qualified closure.
+- The adjudication `b8b97e51` was pushed to `main`.
+- Licence reading stays off; PDF v8 stays pending (fingerprint `1d0cb5f3…6fbf` unchanged).
+
+**Historical results (not rewritten):**
+
+| Run | Contract | Result under the pre-registered key |
+|---|---|---|
+| #1 | `licence-extraction-v2` | **FAIL**: supplement 3/3 `present_value_too_long`; pre-registered C1b = 1 |
+| #2 | `licence-extraction-v3` | **FAIL**: pre-registered C1b = 1 (`lic-artlist-pro-pdf#1.permission_statement`); every other criterion and the whole supplement PASS |
+
+**Adjudication:**
+- `licence-truth-corrections-v1` (separate, versioned, pinned to the spec) accepts that one field as a defensible reading.
+- It does not establish separate authorization or commercial clearance.
+- **Run #2 was not mechanically re-scored under the adjudicated key**: its raw outputs were not retained (the report stays in the
+  runner's temporary directory, by design).
+- The qualified acceptance rests on the public summary:
+  - the only failing detail is the adjudicated field;
+  - grounding (C2) is 100%.
+- The summary cannot show that the value contained "integrated project".
+
+**Not closed by EXT-9R5:**
+- the controlled Production UAT (licence reading reactivation on contract v3, PDF v8, synthetic A3/B2-style cases), which needs a
+  separate founder authorization;
+- the workflow still scores against the pre-registered key only.
