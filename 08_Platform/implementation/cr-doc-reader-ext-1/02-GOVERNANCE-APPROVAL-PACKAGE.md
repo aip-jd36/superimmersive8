@@ -93,3 +93,13 @@ never marks a dependency satisfied or a document sufficient. Association is the 
 | D4 | Approve the relevance mapping | Founder (governance) |
 | D5 | Approve the v8 wording and the template set; confirm the v2 placement relaxes CR-PDF-DECISION-1 for v8 only | Founder; counsel review |
 | — | Separately, later: paid licence-profile evaluation, a live licence model caller, registration and activation | Founder |
+
+## Decision record (added later; the package above is unchanged)
+
+- **D1–D4:** approved by the founder 2026-11-19 (`JD-CR-DOC-READER-EXT-6E-20261119`) and published (CR-DOC-READER-EXT-6E).
+- **D5:** approved by the founder 2026-11-19 (`JD-CR-DOC-READER-EXT-7C-D5-20261119`) for template set v8, fingerprint
+  `1d0cb5f3707d210eb4b9576bae6d9be33c1e24a1d5bae260bef6d5adf60c6fbf`. This covers the R1–R3 wording, the R4 allow-list suppression and the
+  document-reading presentation and relationship block (CR-DOC-READER-EXT-7A/7B), and accepts that free-text licence tiers,
+  designations, item names, permission statements and excerpts are not reproduced in the PDF. It is an internal good-faith decision;
+  external counsel was not commissioned and it is not a legal opinion or compliance certification. v8 is NOT active: its lifecycle stays
+  `pending` until a separate activation.

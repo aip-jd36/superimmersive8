@@ -150,3 +150,19 @@ describe('document notes are conditional on a relevant document', () => {
     }
   })
 })
+
+// CR-DOC-READER-EXT-7C — the founder's D5 approval is recorded on v8 without activating it.
+describe('D5 approval recorded, v8 still inactive', () => {
+  const { checkTemplates: check } = jest.requireActual('@/lib/creator-record/customer-pdf/templates')
+  const v8 = () => (CREATOR_RECORD_PDF_TEMPLATE_SETS as any[]).find((s) => s.approval.version === 8)
+  test('the approval names the approved fingerprint exactly, and the templates still hash to it', () => {
+    expect(v8().approval).toMatchObject({ fingerprint: '1d0cb5f3707d210eb4b9576bae6d9be33c1e24a1d5bae260bef6d5adf60c6fbf', lifecycle: 'pending', decision_date: '2026-11-19' })
+    expect(v8().approval.review_ref).toMatch(/^JD-CR-DOC-READER-EXT-7C-D5-20261119:/)
+    expect(templateFingerprint(v8().templates)).toBe('1d0cb5f3707d210eb4b9576bae6d9be33c1e24a1d5bae260bef6d5adf60c6fbf')
+    expect(v8().templates).toEqual(candidateTemplateSetV8().templates)
+  })
+  test('not active: schema 8 still selects v7, and the renderer refuses v8 while it is pending', () => {
+    expect(approvedPdfTemplates(undefined, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).approval?.version).toBe(7)
+    expect(() => check(v8().templates, v8().approval)).toThrow()
+  })
+})

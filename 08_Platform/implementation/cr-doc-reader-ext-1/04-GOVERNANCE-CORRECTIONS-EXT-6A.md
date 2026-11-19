@@ -173,3 +173,9 @@ Internal review (EXT-7A), not legal approval. v8 stays `pending`; fingerprint no
   print a value. Every free-text field's value is withheld, and so is any field added later: licence or plan type, designation, item and
   permission statement. Each prints "Shown in the document; not reproduced here". Tradeoff: a plan or designation value (e.g. "Pro") is no
   longer printed; the reading still shows that one is present and how it may relate to the open point.
+
+## EXT-7C addendum (2026-11-19) — D5 approval recorded, v8 inactive
+
+Founder D5 approval `JD-CR-DOC-READER-EXT-7C-D5-20261119` is recorded on the registered v8 approval (authority, decision date, review
+ref); the fingerprint `1d0cb5f3…6fbf` is unchanged and verified. The lifecycle stays `pending`, because `approved` is what selects a set and
+exactly one approved set per schema is allowed; v7 remains selected. Activation is a separate decision.
