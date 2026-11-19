@@ -1,6 +1,6 @@
 # lib/creator-record — Creator Record v2
 
-## Current state: MVP released and closed; Institutional Trust PDF released; EXT-6E guidance published (read this first)
+## Current state: MVP released and closed; Institutional Trust PDF released; EXT-6E guidance published and UAT-passed (read this first)
 
 **This section governs.** Every later section is a milestone note written at the time of that milestone and kept as history. Where a later section says something is "empty", "stopped", "not approved", "locked", "local only" or "not wired", that describes its own milestone, not the code today.
 
@@ -46,7 +46,32 @@
 - Stock Editorial and Pond5 re-verified 2026-11-19; Artlist and Epidemic Sound keep 2026-09-10. Refresh by 2027-02-19. Record: `08_Platform/implementation/cr-doc-reader-ext-1/`.
 - Accepted consequence (founder): the 12 prepared versions not yet bought became stale (refused at checkout; creators re-enter their answers). At deployment, counts were unchanged and the 10 issued artifacts were untouched (deployment report).
 - Open, and not part of this closure:
-  - EXT-6F: signed-in Production guidance UAT (Artlist, Shutterstock, Pond5). This is a validation task, not a blocker to the closure.
+  - EXT-6F: signed-in Production guidance UAT (Artlist, Shutterstock, Pond5). This is a validation task, not a blocker to the closure. *(Closed 2026-11-19; see "EXT-6F closure" below.)*
+  - D5: PDF v8 wording approval after counsel review.
+  - Privacy Notice and consent amendments after counsel review.
+  - Confirmation of the Production Anthropic spending limit.
+  - Licence-reader activation and the synthetic-document Production UAT.
+
+**EXT-6F closure: CLOSED / PRODUCTION UAT PASSED, 2026-11-19.** Founder accepted all three results. This covers the governed guidance only; it does not show that AI licence/permission document reading works (that reading stays off).
+- Method: signed-in Production customer flow (Claude in Chrome), synthetic answers, no documents, Runway as the tool; each record issued through the established UAT comp-code process (COMP-JD2, 100% off, total due NT$0.00, no card requested); PDFs inspected after download.
+- Synthetic UAT artifacts (exclude from customer and commercial reporting by record ID):
+  - `CR-2026-7269ED27`: "SI8 UAT EXT-6F-A2 Artlist (synthetic test, not a real video)", PASS.
+  - `CR-2026-3F7BB5FF`: "SI8 UAT EXT-6F-B Shutterstock (synthetic test, not a real video)", PASS.
+  - `CR-2026-94404A61`: "SI8 UAT EXT-6F-C Pond5 (synthetic test, not a real video)", PASS.
+  - Also created: version A, "SI8 UAT EXT-6F-A Artlist (synthetic test, not a real video)", confirmed but unpaid (superseded by A2 because it could not be reopened).
+- Validated in the issued PDFs (guidance set `CR-V2-LAUNCH-LEDGER-4`, wording v11):
+  - provider-scoped guidance: the Artlist claim from the music answer; Stock Editorial for Shutterstock; the Pond5 claim for Pond5;
+  - open points shown with their approved labels as Open / Not assessed (Artlist: "Which Artlist licence applies"; stock: "Whether the asset is marked Editorial", "Whether separate written authorisation was obtained");
+  - the evidence-only stock points stay unresolved ("You did not tell us about this."), and the questionnaire asks nothing about how an asset is marked or authorised;
+  - no document note without documents ("You did not add any documents.");
+  - no fabricated licence tier, authorisation or commercial-clearance conclusion ("NOT A CLEARANCE"; "SI8 did not decide whether your video may be used commercially.");
+  - exactly two considerations per record (Runway and the provider), with no duplicate or unrelated guidance.
+- Expected behaviour, not a defect: Pond5 shows the Pond5 claim only, not the generic Stock Editorial guidance, because that claim's approved provider scope is Getty, iStock, Shutterstock and Adobe Stock. Likewise the Pond5 claim lists no "which stock service" open point (it has none in governance).
+- Non-blocking follow-ups (not scheduled):
+  - Intermittent first-attempt Stripe comp-code error: "Something went wrong, please try again" on the first Apply (records B and C); the second Apply worked.
+  - A confirmed but unpaid version cannot be reopened in the customer flow (the Creator Record page always opens a fresh form, and the dashboard lists submissions only).
+  - Synthetic UAT artifacts must be excluded from commercial reporting explicitly (by record ID) until automatic exclusion is verified.
+- Licence-reading activation gates, still open:
   - D5: PDF v8 wording approval after counsel review.
   - Privacy Notice and consent amendments after counsel review.
   - Confirmation of the Production Anthropic spending limit.
