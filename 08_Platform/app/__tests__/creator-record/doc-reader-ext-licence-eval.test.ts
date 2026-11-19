@@ -119,15 +119,17 @@ describe('pre-registered criteria', () => {
 
 describe('live runner safeguards (refusals only; nothing is called)', () => {
   const plan: LicenceEvalPlan = { model: 'claude-sonnet-5', runs: 2, documents: 12, attempts: 24, max_requests: 48, max_cost_usd: 3.1521, per_document: [] }
-  const good = { 'confirm-paid-calls': true, model: 'claude-sonnet-5', 'input-usd-per-mtok': '2', 'output-usd-per-mtok': '10', 'max-usd': '5', 'max-calls': '48' } as Record<string, string | boolean>
+  const good = { 'confirm-paid-calls': true, model: 'claude-sonnet-5', 'input-usd-per-mtok': '2', 'output-usd-per-mtok': '10', 'max-usd': '5', 'max-calls': '48', out: require('node:path').join(require('node:os').tmpdir(), 'licence-eval-test') } as Record<string, string | boolean>
   const env = { [LIVE_EXTRACTION_API_KEY_ENV]: 'k' }
   test('all safeguards present: no refusal', () => expect(liveRefusals(good, plan, env)).toEqual([]))
+  test('the shared key alone is accepted for this synthetic runner (CR-DOC-READER-EXT-9R3)', () => expect(liveRefusals(good, plan, { ANTHROPIC_API_KEY: 'x' })).toEqual([]))
   test.each([
     ['no confirmation', { ...good, 'confirm-paid-calls': false }, env, /confirm-paid-calls/],
     ['another model', { ...good, model: 'claude-opus-5-5' }, env, /pinned/],
     ['unconfirmed prices', { ...good, 'input-usd-per-mtok': '1' }, env, /price/],
-    ['no dedicated key', good, {}, /dedicated key/],
-    ['the shared key present', good, { ...env, ANTHROPIC_API_KEY: 'x' }, /only the dedicated key/],
+    // CR-DOC-READER-EXT-9R3: the synthetic-key reuse rule (dedicated key, else ANTHROPIC_API_KEY); neither is refused.
+    ['no key at all', good, {}, /no Anthropic key/],
+    ['no output directory (the report holds raw outputs)', (() => { const { out: _o, ...g } = good; return g })(), env, /--out is required/],
     ['a redirecting SDK variable', good, { ...env, ANTHROPIC_BASE_URL: 'https://example.test' }, /ANTHROPIC_BASE_URL/],
     ['a ceiling below the plan', { ...good, 'max-usd': '3' }, env, /cover the planned maximum/],
     ['a ceiling above 10', { ...good, 'max-usd': '11' }, env, /ceiling/],
