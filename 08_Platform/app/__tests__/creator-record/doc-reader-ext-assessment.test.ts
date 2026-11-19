@@ -138,6 +138,19 @@ describe('fail closed', () => {
     const permission = doc({ category: 'permission', examination: reading('licence', 'run-3', [cls('document_kind', 'permission_or_consent_letter'), { field: 'permission_statement', value: 'Permission granted' }]) })
     expect(evidenceOf(assessIntegratedV2(input(rec, [permission])), STOCK, 'separate_authorization_obtained')).toEqual(['relevant_observation_unverified:field_present'])
   })
+  test('CR-DOC-READER-EXT-9R5A: a licence whose own grant of use was read as a permission statement stays possible relevance only; the separate-authorisation point stays open and unverified', () => {
+    const rec = record(STOCKS)
+    const licence = doc({ examination: reading('licence', 'run-9r5a', [cls('document_kind', 'licence_or_licence_certificate'), cls('readability', 'legible'), { field: 'permission_statement', value: 'Licensed for use in one integrated Project.' }]) })
+    const a = assessIntegratedV2(input(rec, [licence]))
+    const r = dep(a, STOCK, 'separate_authorization_obtained')
+    expect(r.standing).toBe('open')
+    const d = (r.documents as any[])[0]
+    expect(d).toMatchObject({ status: 'relevant_observation_unverified', reason: 'field_present', category: 'licence' })
+    expect(d.observed).toMatchObject({ verification: 'not_verified', association_basis: 'creator_declared_category' })
+    // The item's conclusion is v1's, unchanged by the reading.
+    const v1 = assessIntegrated(input(rec, [licence]) as unknown as IntegratedAssessmentInput)
+    expect(a.items.find((i) => i.claim_id === STOCK)!.conclusion).toBe(v1.items.find((i) => i.claim_id === STOCK)!.conclusion)
+  })
   test('a document linked to an AI tool is not associated with a material dependency', () => {
     expect(evidenceOf(assessIntegratedV2(input(record(MUSIC), [doc({ tool_index: 0 })])), ARTLIST, 'artlist_license_type_confirmed')).toEqual(['cannot_establish:linked_to_tool'])
   })

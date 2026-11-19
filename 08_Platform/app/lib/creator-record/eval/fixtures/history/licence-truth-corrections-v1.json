@@ -1,0 +1,18 @@
+{
+ "corrections_version": "licence-truth-corrections-v1",
+ "base_spec_version": "licence-fixtures-v1",
+ "base_spec_sha256": "0d1c26b0cdaddafdb4400a946fb8ed77793b3ee36f15832317ebf3df197b2170",
+ "policy": "CR-DOC-READER-EXT-9R5A. Additive, versioned adjudications beside the pre-registered spec, which is unchanged. Results are scored under the original truth and, separately and labelled, under this adjudicated truth; earlier results are never rewritten. An adjudication concerns what a document appears to show only: it never establishes that any authorization was given, that a licence covers a use, or commercial clearance.",
+ "corrections": [
+  {
+   "fixture_id": "lic-artlist-pro-pdf",
+   "field": "permission_statement",
+   "kind": "accept_printed_text_as_present",
+   "from_status": "not_shown",
+   "accept_contains": "integrated project",
+   "printed": "Licensed for use in one integrated Project.",
+   "adjudicated": "JD, for PMF Strategy Inc. d/b/a SuperImmersive 8 (founder decision CR-DOC-READER-EXT-9R5A, Option A, 2026-11-20)",
+   "rationale": "Under the unchanged extraction contract (licence-extraction-v3: permission_statement = 'a printed statement granting permission or consent, as printed') and the approved D4 relevance table (JD-CR-DOC-READER-EXT-6E-20261119, which maps permission_statement of licence documents as well as permission documents), the printed grant of use 'Licensed for use in one integrated Project.' is a defensible permission_statement reading. The original expectation (not_shown) also stays acceptable. The value was grounded in the document in both EXT-9R3 runs (C2 100%). Interpretation remains downstream and fail closed: this does not establish separate authorization or commercial clearance."
+  }
+ ]
+}

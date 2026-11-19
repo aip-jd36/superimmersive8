@@ -6,7 +6,12 @@
  */
 import { containsContactDetails, LICENCE_FIELD_NAMES, type LicenceExtraction, type LicenceViolation } from '../licence-examination/schema'
 
-export interface LicenceFieldTruth { status: 'present' | 'not_shown'; accept?: string[]; contains?: string; printed?: string }
+/**
+ * `optional` (CR-DOC-READER-EXT-9R5A) appears only in an ADJUDICATED spec (`./licence-truth-corrections.ts`), never in a fixture
+ * file: `not_shown` is accepted, and `present` is accepted only when the value contains `contains`; any other present value is an
+ * invention. It is not counted as an expected field (C1a).
+ */
+export interface LicenceFieldTruth { status: 'present' | 'not_shown' | 'optional'; accept?: string[]; contains?: string; printed?: string }
 export interface LicenceFixture {
   fixture_id: string
   media: 'pdf' | 'png'
@@ -75,6 +80,11 @@ export function scoreLicenceEval(spec: LicenceSpec, results: readonly LicenceRun
         const ok = !!got && got.status === 'present' && got.value !== null && (t.accept ? t.accept.map(norm).includes(norm(got.value)) : t.contains ? norm(got.value).includes(norm(t.contains)) : false)
         if (ok) correct += 1
         else c1.push(`${r.fixture_id}#${r.run}.${field}: ${got ? `${got.status} ${JSON.stringify(got.value)}` : 'no reading'}`)
+      } else if (t.status === 'optional') {
+        if (got && got.status === 'present' && !(got.value !== null && t.contains && norm(got.value).includes(norm(t.contains)))) {
+          inventions += 1
+          c1.push(`${r.fixture_id}#${r.run}.${field}: NOT THE ADJUDICATED TEXT ${JSON.stringify(got.value)}`)
+        }
       } else if (got && got.status === 'present') {
         inventions += 1
         c1.push(`${r.fixture_id}#${r.run}.${field}: INVENTED ${JSON.stringify(got.value)}`)

@@ -121,3 +121,42 @@ The pre-registered set is unchanged.
 - Contract: `licence-extraction-v3` (prompt unchanged: `licence-prompt-v2`), licence profile 3. Pins 1 and 2 are kept.
 - The public summary now names the fixed schema field in criterion detail labels (`fixture#run.field`), never the value.
 - The fixtures and the answer key are unchanged.
+
+## CR-DOC-READER-EXT-9R5A (2026-11-20): governed adjudication of the Artlist C1b item
+
+**EXT-9R3 run 2** (GitHub Actions, contract `licence-extraction-v3` at `ad43685c`):
+- 15/15 examined, no schema violations, no retries; 15 requests, $0.198376 accounted.
+- Supplement (3): every criterion passes.
+- Pre-registered (12): every criterion passes except **C1b = 1**, `lic-artlist-pro-pdf#1.permission_statement`.
+- Under the pre-registered key this result **remains FAIL** and is not rewritten.
+
+**Founder decision (Option A):**
+- The extraction contract is unchanged.
+- The printed grant of use "Licensed for use in one integrated Project." is a defensible `permission_statement` reading:
+  - the field is defined as "a printed statement granting permission or consent";
+  - the approved D4 relevance table maps `permission_statement` of licence documents as well as permission documents.
+- Narrowing the field was rejected for three reasons:
+  - it would need the model to decide what a licence permits, which the prompt forbids;
+  - it could drop legitimate commercial-use licence evidence for `separate_authorization_obtained`;
+  - it would require a D4 revision.
+- The supplementary answer key is unchanged.
+
+**Mechanism:** `eval/licence-truth-corrections.ts` with `fixtures/history/licence-truth-corrections-v1.json`. It is the licence
+counterpart of the receipt precedent (`truth-corrections.ts`):
+- it lives beside the spec and is pinned to the spec's SHA-256 (line endings normalised);
+- inputs are never mutated;
+- results are scored under the original key and, separately and labelled, under the adjudicated key.
+
+The one correction marks the field `optional`, bound to the printed text:
+- `not_shown` is accepted;
+- `present` is accepted only when the value contains "integrated project";
+- any other present value, and every other field and fixture, is scored exactly as before.
+
+It concerns what the document appears to show. It does not establish separate authorization or commercial clearance. Method v2
+keeps `separate_authorization_obtained` at `relevant_observation_unverified`, standing `open` (test-enforced).
+
+**Qualified acceptance of run 2:**
+- The raw report was not retained, so run 2 cannot be re-scored mechanically under the adjudicated key.
+- From the public summary, its only failing detail is the adjudicated field, and C2 (grounding) passed at 100%.
+- It cannot be confirmed from the summary that the reported value contains "integrated project" (it can only be text printed on
+  the document).
