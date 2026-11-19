@@ -1,0 +1,23 @@
+{
+ "note": "CR-DOC-READER-EXT-9R3. SHA-256 of the licence evaluation PDF fixtures as rendered by generate_licence_fixtures.py with pymupdf==1.27.2.3 (deterministic: built-in Helvetica, no metadata, no document id). PNG fixtures are not pinned: their font is platform-dependent (Arial locally, DejaVu Sans on GitHub runners); the workflow checks their count and dimensions instead.",
+ "pymupdf": "1.27.2.3",
+ "pdf_documents": {
+  "lic-artlist-pro-pdf": "af30c83958e1e6a001a9a33376817d4bbeb01b4b4e3e6726d0c3891674f97cc4",
+  "lic-epidemic-commercial-pdf": "836cc3dc4ae9b7b89a6c15455f86ca36d9317ba4214019c118594a2e3b54fdfd",
+  "lic-stock-editorial-pdf": "a7c555b2febe6157fb0c5545bb69292072ec0296e9a05fcee51159c293c4777e",
+  "perm-pond5-consent-pdf": "51a933bdd0ca6fd75d84c307241bebebc468d26adc77710f6f07ad2f4589ea56",
+  "lic-licensee-personal-pdf": "d832b8028e37b963b04ea9773057240ea5e0d1e013c7db9314488142198f53e9",
+  "lic-no-type-pdf": "41156a85015805361bbedf3dd99fd29c3759a54dcfd6d32a16a0b18bfd07c697",
+  "not-licence-coffee-receipt-pdf": "919a588206d7efa9704c528a73ab4a82002f35af9286c102a3004dae50570d99",
+  "inject-artlist-pdf": "6bc90df33cea100fd8f2735ee760995242ea73c58f72adbb78f349ccf3f7ea57",
+  "lic-two-page-pdf": "76c7fdd3eab3ab008d799cb08e66f34b6b695856d0a3d4b583a4e681c7502b4a",
+  "sup-long-licence-statement-pdf": "eff5515634ecbac1af28e1e39321cbc8e8fe3835a390fb628732a854ac193496",
+  "sup-long-permission-personal-pdf": "ec94ce105182563d385cc597fb52f092c06d0bbdb782b1d5ef4a0b72b4904043",
+  "sup-words-date-long-terms-pdf": "468a163e5f98bdab23b8b655e62dadc8dc299ad9522701f754cf0a2d00763f67"
+ },
+ "png_documents": [
+  "inject-permission-png",
+  "lic-artlist-social-png",
+  "perm-brand-letter-personal-png"
+ ]
+}

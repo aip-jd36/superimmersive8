@@ -37,14 +37,24 @@ def pdf_bytes(pages: list[list[str]]) -> bytes:
     return data
 
 
+# CR-DOC-READER-EXT-9R3: Arial where present (the local renders, unchanged); otherwise DejaVu Sans (GitHub's Ubuntu runners). Never
+# Pillow's tiny bitmap default, which made a PNG fixture barely legible to the model without saying so: no TrueType font = refuse.
+PNG_FONT_CANDIDATES = ['arial.ttf', 'DejaVuSans.ttf', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf']
+
+
+def png_fonts():
+    for name in PNG_FONT_CANDIDATES:
+        try:
+            return ImageFont.truetype(name, 26), ImageFont.truetype(name, 36)
+        except OSError:
+            continue
+    raise SystemExit('no TrueType font for the PNG fixtures (need Arial or DejaVu Sans); refusing to render a barely legible image')
+
+
 def png_bytes(lines: list[str]) -> bytes:
     img = Image.new('RGB', (1000, 120 + 44 * len(lines)), 'white')
     d = ImageDraw.Draw(img)
-    try:
-        font = ImageFont.truetype('arial.ttf', 26)
-        title = ImageFont.truetype('arial.ttf', 36)
-    except OSError:
-        font = title = ImageFont.load_default()
+    font, title = png_fonts()
     y = 40
     for i, line in enumerate(lines):
         d.text((50, y), line, fill='black', font=title if i == 0 else font)

@@ -10,18 +10,26 @@
  *
  * Generate the documents first: `python -I lib/creator-record/eval/fixtures/generate_licence_fixtures.py`.
  * dry-run makes no call and prints the plan and the maximum cost. mock replays the ideal outputs through the real engine (no call).
- * live refuses unless: --confirm-paid-calls; the pinned model; prices equal the code's price table; the dedicated key (and only it);
+ * live refuses unless: --confirm-paid-calls; the pinned model; prices equal the code's price table; an Anthropic key (below);
  * no SDK environment variable that could redirect or log a request; --max-usd covers the planned maximum and is at most 10;
  * --max-calls covers the planned requests. The call budget is enforced by the caller wrapper: nothing beyond it is sent.
+ *
+ * CR-DOC-READER-EXT-9R3: the credential follows the synthetic-key reuse rule of the receipt evaluation tool (CR-V2-SYNTHETIC-KEY-REUSE-1,
+ * the founder's credential operating decision of 2026-11-12 in CR_V2_DOC_LIVE_EVALUATION_PROTOCOL.md): the dedicated
+ * `CREATOR_RECORD_EXTRACTION_API_KEY` when set, otherwise `ANTHROPIC_API_KEY`. This runner reads only SI8's committed synthetic
+ * fixtures. Only the variable's NAME is used or reported. The app's live path is unchanged: it reads the dedicated key only.
+ * A live report (which holds raw model outputs) is written only outside the repository.
  */
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import path from 'node:path'
-import { LIVE_EXTRACTION_API_KEY_ENV, LIVE_EXTRACTION_MODEL, LIVE_REQUEST_TIMEOUT_MS, withInstanceBudget } from '../evidence/live-caller'
+import { LIVE_EXTRACTION_MODEL, LIVE_REQUEST_TIMEOUT_MS, withInstanceBudget } from '../evidence/live-caller'
 import { LICENCE_READING_CONTRACT } from '../examination/licence-profile'
 import { licenceExtractionViolation } from '../licence-examination/schema'
 import { attemptCostBoundUsd, boundLiveInputTokens, LIVE_BOUNDS, LIVE_MODEL_PRICES, unsafeSdkEnvironment } from '../live-examination/controls'
 import { examineWithContract, MAX_DOCUMENT_BYTES, type ReceiptModelCaller } from '../receipt-examination/examine'
 import { idealOutput, scoreLicenceEval, type LicenceRunResult, type LicenceSpec } from './score-licence'
+import { insideRepository, SYNTHETIC_CREDENTIAL_SOURCES, syntheticCredentialEnv } from './run-receipt-eval'
+import { insideGitWorkTree } from './v3-fixture-sets'
 
 const FIXTURES_DIR = path.join(__dirname, 'fixtures')
 export const LICENCE_EVAL_MAX_USD_CEILING = 10
@@ -60,17 +68,32 @@ export function planLicenceEval(spec: LicenceSpec, model: string, runs: number):
   return { model, runs, documents: per.length, attempts, max_requests: attempts * LIVE_BOUNDS.max_requests_per_attempt, max_cost_usd: Math.round(per.reduce((s, p) => s + p.attempt_max_usd, 0) * runs * 10000) / 10000, per_document: per }
 }
 
-/** Wraps a caller to record every structured output (before validation) and the call count, per attempt. */
+/** Request metadata only (no content): which model answered, why it stopped, and the tokens the provider reported. */
+export interface LicenceRequestRecord { response_model: string | null; stop_reason: string | null; input_tokens: number; output_tokens: number }
+
+/** Wraps a caller to record every structured output (before validation), the call count and request metadata, per attempt. */
 function recording(caller: ReceiptModelCaller) {
   const raw: unknown[] = []
+  const requests: LicenceRequestRecord[] = []
   let calls = 0
   const wrapped: ReceiptModelCaller = async (req) => {
     calls += 1
     const res = await caller(req)
     raw.push((res as { parsed_output?: unknown }).parsed_output ?? null)
+    const r = res as { model?: unknown; stop_reason?: unknown; usage?: { input_tokens?: number; output_tokens?: number } }
+    requests.push({ response_model: typeof r.model === 'string' ? r.model : null, stop_reason: typeof r.stop_reason === 'string' ? r.stop_reason : null, input_tokens: r.usage?.input_tokens ?? 0, output_tokens: r.usage?.output_tokens ?? 0 })
     return res
   }
-  return { wrapped, raw, calls: () => calls }
+  return { wrapped, raw, requests, calls: () => calls }
+}
+
+/** Spend accounted from the provider-reported tokens at the code's price table (an estimate; billed usage is in the Anthropic account). */
+export function accountedSpend(model: string, results: readonly { requests?: readonly LicenceRequestRecord[] }[]) {
+  const reqs = results.flatMap((r) => r.requests ?? [])
+  const input = reqs.reduce((a, q) => a + q.input_tokens, 0)
+  const output = reqs.reduce((a, q) => a + q.output_tokens, 0)
+  const p = LIVE_MODEL_PRICES[model]
+  return { requests: reqs.length, input_tokens: input, output_tokens: output, accounted_usd: p ? Math.round(((input * p.input + output * p.output) / 1_000_000) * 1e6) / 1e6 : null }
 }
 
 export async function runLicenceEval(spec: LicenceSpec, runs: number, callerFor: (fixtureId: string) => ReceiptModelCaller, bytesFor: (id: string, media: 'pdf' | 'png') => Uint8Array = fixtureBytes) {
@@ -81,7 +104,7 @@ export async function runLicenceEval(spec: LicenceSpec, runs: number, callerFor:
       const o = await examineWithContract(bytesFor(f.fixture_id, f.media), { callModel: rec.wrapped, contract: LICENCE_READING_CONTRACT })
       // CR-DOC-READER-EXT-9R3: a schema-invalid result carries the generic rule it broke (a code and a field name, no content).
       const violation = o.status !== 'examined' && o.reason === 'schema_invalid' ? licenceExtractionViolation(rec.raw[rec.raw.length - 1]) : null
-      results.push({ fixture_id: f.fixture_id, run, outcome: o.status, reason: o.status === 'examined' ? null : o.reason, extraction: o.status === 'examined' ? o.extraction : null, raw_outputs: rec.raw, model_calls: rec.calls(), violation })
+      results.push({ fixture_id: f.fixture_id, run, outcome: o.status, reason: o.status === 'examined' ? null : o.reason, extraction: o.status === 'examined' ? o.extraction : null, raw_outputs: rec.raw, model_calls: rec.calls(), violation, requests: rec.requests })
     }
   }
   const noCall: LicenceRunResult[] = []
@@ -106,8 +129,9 @@ export function liveRefusals(args: Record<string, string | boolean>, plan: Licen
   if (args.model !== LIVE_EXTRACTION_MODEL) out.push(`--model must be the pinned ${LIVE_EXTRACTION_MODEL}`)
   const p = LIVE_MODEL_PRICES[LIVE_EXTRACTION_MODEL]
   if (num('input-usd-per-mtok') !== p.input || num('output-usd-per-mtok') !== p.output) out.push('prices must equal the code price table (confirm the live page first)')
-  if (!env[LIVE_EXTRACTION_API_KEY_ENV]) out.push(`${LIVE_EXTRACTION_API_KEY_ENV} (the dedicated key) is not set`)
-  if (env.ANTHROPIC_API_KEY) out.push('ANTHROPIC_API_KEY is set: only the dedicated key may be present')
+  if (!syntheticCredentialEnv(env)) out.push(`no Anthropic key in the process environment: ${SYNTHETIC_CREDENTIAL_SOURCES.join(' or ')}`)
+  if (typeof args.out !== 'string') out.push('--out is required (the live report holds raw model outputs)')
+  else if (insideRepository(args.out) || insideGitWorkTree(args.out)) out.push('--out must be outside the repository and any git working tree')
   for (const k of unsafeSdkEnvironment(env)) out.push(`${k} is set`)
   const maxUsd = num('max-usd')
   if (!(maxUsd >= plan.max_cost_usd)) out.push(`--max-usd must cover the planned maximum ${plan.max_cost_usd}`)
@@ -146,9 +170,16 @@ async function main() {
     return void (process.exitCode = 2)
   }
   const { createAnthropicLicenceCaller } = await import('../receipt-examination/examine.anthropic')
-  const caller = withInstanceBudget(createAnthropicLicenceCaller({ model: LIVE_EXTRACTION_MODEL, apiKeyEnv: LIVE_EXTRACTION_API_KEY_ENV, timeoutMs: LIVE_REQUEST_TIMEOUT_MS }), Number(args['max-calls']), { used: 0 })
+  const credentialSource = syntheticCredentialEnv(process.env)!
+  const budget = { used: 0 }
+  const caller = withInstanceBudget(createAnthropicLicenceCaller({ model: LIVE_EXTRACTION_MODEL, apiKeyEnv: credentialSource, timeoutMs: LIVE_REQUEST_TIMEOUT_MS }), Number(args['max-calls']), budget)
   const r = await runLicenceEval(spec, runs, () => caller)
-  const report = { mode, spec: spec.spec_version, model: LIVE_EXTRACTION_MODEL, criteria: r.score, results: r.results, no_call: r.noCall, plan }
+  const report = {
+    mode, spec: spec.spec_version, model: LIVE_EXTRACTION_MODEL, credential_source: credentialSource,
+    contract: { schema: LICENCE_READING_CONTRACT.schema_version, prompt: LICENCE_READING_CONTRACT.prompt_version },
+    limits: { max_calls: Number(args['max-calls']), max_usd: Number(args['max-usd']) }, api_requests_made: budget.used,
+    spend: accountedSpend(LIVE_EXTRACTION_MODEL, r.results), criteria: r.score, results: r.results, no_call: r.noCall, plan,
+  }
   if (typeof args.out === 'string') {
     mkdirSync(args.out, { recursive: true })
     writeFileSync(path.join(args.out, `licence-eval-report-${specName}.json`), JSON.stringify(report, null, 1))

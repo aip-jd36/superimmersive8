@@ -29,6 +29,8 @@ export interface LicenceRunResult {
   model_calls: number
   /** CR-DOC-READER-EXT-9R3: for a schema-invalid result, the generic rule broken (code and field, no content). Not scored. */
   violation?: LicenceViolation | null
+  /** CR-DOC-READER-EXT-9R3: request metadata (model, stop reason, reported tokens; no content). Not scored. */
+  requests?: { response_model: string | null; stop_reason: string | null; input_tokens: number; output_tokens: number }[]
 }
 
 /** Pre-registered criteria (CR-DOC-READER-EXT-3). Thresholds are part of the evaluation design and change only by a new version. */
