@@ -92,7 +92,8 @@ export function candidateTemplateSetV8(): CandidateTemplateSet {
   const base = (CREATOR_RECORD_PDF_TEMPLATE_SETS as readonly { templates: any; approval: PdfTemplateApproval }[]).filter(
     (s) => s.approval.record_schema?.version === CANDIDATE_TEMPLATE_BASE.schema && s.approval.version === CANDIDATE_TEMPLATE_BASE.version,
   )
-  if (base.length !== 1 || base[0].approval.lifecycle !== 'approved') throw new Error('candidate template base: registered approved schema 8 v7 not found')
+  // CR-DOC-READER-EXT-10D: v7 is superseded once v8 is active; its frozen content is still the base.
+  if (base.length !== 1 || !['approved', 'superseded'].includes(base[0].approval.lifecycle)) throw new Error('candidate template base: registered approved schema 8 v7 not found')
   const t = clone(base[0].templates)
   t.version = CANDIDATE_TEMPLATE_VERSION
   for (const [k, v] of Object.entries(LICENCE_FIELD_LABELS)) {

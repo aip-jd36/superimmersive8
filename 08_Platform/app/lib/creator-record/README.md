@@ -30,12 +30,12 @@
 | Customer live examination | Enabled: both live-examination locks are `true` (`live-examination/controls.ts`), and real documents are accepted (`evidence-intake/contract.ts`). The admin prototype's own live path stays locked (`evidence/config.ts`) | |
 
 **PDF templates.**
-- `approvedPdfTemplates` selects exactly one `approved` set per schema (CR-DESIGN-2D, 2026-11-16):
-  - schema 7 → v6, `a0cd0c248ce270d2826712910aa606579ce429f7923b051d68a0502c5305f476`;
-  - schema 8 → v7, `5d7ccfc8ce824e57f6e904d51f1027b59e43ab250a7f4895b0f804debe1761ab`.
+- `approvedPdfTemplates` selects exactly one `approved` set per schema:
+  - schema 7 → v6, `a0cd0c248ce270d2826712910aa606579ce429f7923b051d68a0502c5305f476` (CR-DESIGN-2D, 2026-11-16);
+  - schema 8 → v8, `1d0cb5f3707d210eb4b9576bae6d9be33c1e24a1d5bae260bef6d5adf60c6fbf` (CR-DOC-READER-EXT-10D; v7 `5d7ccfc8…61ab` superseded).
 - v6/v7 are v4/v5 verbatim plus `version`, `navigation` ("What this record contains"; "See 'Please note' below.") and `presentation`: the Institutional Trust presentation contract `si8/creator-record-pdf-presentation` v1, `aa50507b4f76e8168744d88645220735e8b7820577e7be72e19c83dbedc017db` (`customer-pdf/presentation/institutional-trust.ts`, drawn by `InstitutionalTrustPDF.tsx`; hash-pinned fonts in `customer-pdf/fonts/`). Presentation renders are serialised per process with glyph-character priming and a fail-closed 30 s hold (`presentation/render-queue.ts`, `render_queue_hold_expired`).
 - All use the three-level readiness layout (`customer-pdf/readiness-layout.ts`, `ReadingLayoutView.tsx`).
-- v8 (schema 8, fingerprint `1d0cb5f3707d210eb4b9576bae6d9be33c1e24a1d5bae260bef6d5adf60c6fbf`) carries the founder's **D5 approval** (`JD-CR-DOC-READER-EXT-7C-D5-20261119`, 2026-11-19), an internal good-faith wording decision (EXT-7A/7B) that is not a legal opinion or compliance certification. It stays `pending`: never selected, refused by the renderer. Activation is a separate step (v8 `approved` and v7 `superseded` in one change, together with the licence switch); `approvedPdfTemplates` selects exactly one approved set per schema.
+- v8 (schema 8, fingerprint `1d0cb5f3707d210eb4b9576bae6d9be33c1e24a1d5bae260bef6d5adf60c6fbf`) carries the founder's **D5 approval** (`JD-CR-DOC-READER-EXT-7C-D5-20261119`, 2026-11-19), an internal good-faith wording decision (EXT-7A/7B) that is not a legal opinion or compliance certification. CR-DOC-READER-EXT-10D activates it on its own: v8 `approved` and v7 `superseded` in one change, templates and fingerprint unchanged. Licence reading is a separate change (`LICENCE_READING_SWITCH`, still `off`; admin-gated per creator, CR-DOC-READER-EXT-10B).
 - v4 (schema 7) and v5 (schema 8) stay registered as `superseded` since CR-DESIGN-2D, as do v1 (schema 7) and v3 (schema 8); for audit only.
 - Issued PDFs are stored bytes and are never re-rendered.
 - Takeover guard (`b6889585`): a pending artifact whose object is missing is re-rendered only by the generator that recorded it; otherwise it is refused and reconciled by hand.

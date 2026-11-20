@@ -46,15 +46,16 @@ describe('candidate template set v8', () => {
     expect({ ...sections, not_done: undefined }).toEqual({ ...v7s, not_done: undefined })
   })
   // CR-DOC-READER-EXT-5A: v8 is now registered as an INACTIVE candidate (pending); it alone carries v2, and it equals the candidate.
-  test('registered sets: only the pending v8 carries v2 and equals the candidate, fingerprints match, and the live selection is unchanged', () => {
+  test('registered sets: only v8 (approved and selected since CR-DOC-READER-EXT-10D) carries v2 and equals the candidate; fingerprints match', () => {
     for (const s of CREATOR_RECORD_PDF_TEMPLATE_SETS as any[]) {
       if (s.approval.version === 8) {
-        expect(s.approval.lifecycle).toBe('pending')
+        expect(s.approval.lifecycle).toBe('approved')
         expect(s.templates).toEqual(candidateTemplateSetV8().templates)
       } else expect(s.templates).not.toHaveProperty('integrated_assessment_v2')
       expect(templateFingerprint(s.templates)).toBe(s.approval.fingerprint)
     }
-    expect(JSON.stringify(approvedPdfTemplates())).not.toMatch(/integrated_assessment_v2/)
+    expect(JSON.stringify(approvedPdfTemplates())).not.toMatch(/integrated_assessment_v2/) // schema 7 (v6)
+    expect(approvedPdfTemplates(undefined, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).approval?.version).toBe(8)
   })
 })
 
@@ -156,13 +157,16 @@ describe('D5 approval recorded, v8 still inactive', () => {
   const { checkTemplates: check } = jest.requireActual('@/lib/creator-record/customer-pdf/templates')
   const v8 = () => (CREATOR_RECORD_PDF_TEMPLATE_SETS as any[]).find((s) => s.approval.version === 8)
   test('the approval names the approved fingerprint exactly, and the templates still hash to it', () => {
-    expect(v8().approval).toMatchObject({ fingerprint: '1d0cb5f3707d210eb4b9576bae6d9be33c1e24a1d5bae260bef6d5adf60c6fbf', lifecycle: 'pending', decision_date: '2026-11-19' })
+    expect(v8().approval).toMatchObject({ fingerprint: '1d0cb5f3707d210eb4b9576bae6d9be33c1e24a1d5bae260bef6d5adf60c6fbf', lifecycle: 'approved', decision_date: '2026-11-19' })
     expect(v8().approval.review_ref).toMatch(/^JD-CR-DOC-READER-EXT-7C-D5-20261119:/)
     expect(templateFingerprint(v8().templates)).toBe('1d0cb5f3707d210eb4b9576bae6d9be33c1e24a1d5bae260bef6d5adf60c6fbf')
     expect(v8().templates).toEqual(candidateTemplateSetV8().templates)
   })
-  test('not active: schema 8 still selects v7, and the renderer refuses v8 while it is pending', () => {
-    expect(approvedPdfTemplates(undefined, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).approval?.version).toBe(7)
-    expect(() => check(v8().templates, v8().approval)).toThrow()
+  test('CR-DOC-READER-EXT-10D: active: schema 8 selects v8; the renderer accepts it approved and would refuse it pending', () => {
+    expect(approvedPdfTemplates(undefined, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).approval?.version).toBe(8)
+    expect(v8().approval.review_ref).toMatch(/Activated by CR-DOC-READER-EXT-10D/)
+    const S8 = { id: CUSTOMER_RECORD_SCHEMA, version: 8 }
+    expect(check(v8().templates, v8().approval, S8).ok).toBe(true)
+    expect(check(v8().templates, { ...v8().approval, lifecycle: 'pending' }, S8).ok).toBe(false)
   })
 })

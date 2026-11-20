@@ -5,6 +5,7 @@
  * emails and phone numbers) must not reach the pre-purchase review, the PDF documents section or the PDF relationship block, whatever
  * the reading's own personal-details flag says. The stored record keeps it (internal provenance). Receipts are unchanged.
  */
+import { registeredPdfTemplateSet } from '@/test-support/registered-template-sets'
 import { LICENCE_CLASSIFICATION_VALUES } from '@/lib/creator-record/customer-flow/licence-compatibility'
 import { LICENCE_DATE_FIELDS } from '@/lib/creator-record/licence-examination/schema'
 import { buildCustomerDocument, type Block } from '@/lib/creator-record/customer-pdf/document-model'
@@ -50,7 +51,9 @@ describe('the projection rule', () => {
     expect(customerObservationText('receipt', o)).toEqual({ value: 'Standard', excerpt: 'Plan: Standard', value_withheld: false, excerpt_withheld: false })
   })
   test('a licence reading cannot be enabled with a set lacking the privacy lines (v7 lacks them; v8 has them)', () => {
-    expect(missingLicenceLabels(approvedPdfTemplates(undefined, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).templates)).toEqual(expect.arrayContaining(['reading_privacy:value_withheld', 'reading_privacy:excerpts_withheld']))
+    // CR-DOC-READER-EXT-10D: v8 is now the selected set; v7 (registered, superseded) still lacks the lines.
+    expect(missingLicenceLabels(approvedPdfTemplates(undefined, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).templates)).toEqual([])
+    expect(missingLicenceLabels(registeredPdfTemplateSet(8, 7).templates)).toEqual(expect.arrayContaining(['reading_privacy:value_withheld', 'reading_privacy:excerpts_withheld']))
     expect(missingLicenceLabels(V8.templates)).toEqual([])
   })
 })

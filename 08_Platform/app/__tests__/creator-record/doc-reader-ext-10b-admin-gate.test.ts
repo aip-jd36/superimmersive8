@@ -71,13 +71,20 @@ const withV8Approved = (): PublicationAuthorityBundle => ({
     s.approval.record_schema.version !== 8 ? s : s.approval.version === 7 ? { ...s, approval: { ...s.approval, lifecycle: 'superseded' } } : s.approval.version === 8 ? { templates: s.templates, approval: SYNTHETIC_V8 } : s,
   ),
 })
+/** CR-DOC-READER-EXT-10D: the bundle as it was before v8 activation (v7 approved and selected, v8 pending). */
+const withV7Selected = (): PublicationAuthorityBundle => ({
+  ...GOV,
+  pdf_template_sets: (GOV.pdf_template_sets ?? []).map((s) =>
+    s.approval.record_schema.version !== 8 ? s : s.approval.version === 7 ? { ...s, approval: { ...s.approval, lifecycle: 'approved' } } : s.approval.version === 8 ? { ...s, approval: { ...s.approval, lifecycle: 'pending' } } : s,
+  ),
+})
 
 // ── 1. The per-creator gate ──────────────────────────────────────────────────────────────────────────────────────
 
 describe('1. licenceReadingEnabledFor: switch AND PDF set AND admin; fail closed', () => {
-  test('this build: the switch is off and v7 is selected, so nobody is entitled and nothing is looked up', async () => {
+  test('this build: v8 is selected (CR-DOC-READER-EXT-10D) but the switch is off, so nobody is entitled and nothing is looked up', async () => {
     expect(LICENCE_READING_SWITCH).toBe('off')
-    expect(approvedPdfTemplates(GOV, S8).approval?.version).toBe(7)
+    expect(approvedPdfTemplates(GOV, S8).approval?.version).toBe(8)
     const isAdmin = jest.fn(async () => true)
     expect(await licenceReadingEnabledFor(OWNER, isAdmin)).toBe(false)
     expect(isAdmin).not.toHaveBeenCalled()
@@ -87,7 +94,7 @@ describe('1. licenceReadingEnabledFor: switch AND PDF set AND admin; fail closed
     ['off', 'v7', true, false], ['off', 'v8', true, false], ['on', 'v7', true, false],
     ['on', 'v8', false, false], ['on', 'v8', true, true],
   ] as const)('switch %s, PDF %s, admin %s → %s', async (sw, pdf, admin, expected) => {
-    const bundle = pdf === 'v8' ? withV8Approved() : GOV
+    const bundle = pdf === 'v8' ? withV8Approved() : withV7Selected()
     const isAdmin = jest.fn(async () => admin)
     expect(await licenceReadingEnabledFor(OWNER, isAdmin, () => licenceReadingEnabled(sw, bundle))).toBe(expected)
     // The admin lookup happens only once the build-wide conditions hold.

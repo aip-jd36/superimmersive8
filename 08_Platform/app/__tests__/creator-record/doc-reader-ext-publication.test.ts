@@ -90,12 +90,13 @@ describe('the PDF Production selects (no documents)', () => {
 })
 
 describe('nothing else is activated', () => {
-  test('licence reading off; schema 8 still selects v7 and schema 7 v6; v8 pending', () => {
+  test('CR-DOC-READER-EXT-10D: licence reading off; schema 8 selects v8 and schema 7 v6; v7 superseded', () => {
     expect(LICENCE_READING_SWITCH).toBe('off')
     expect(licenceReadingEnabled()).toBe(false)
-    expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).approval?.version).toBe(7)
+    expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).approval?.version).toBe(8)
     expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 7 }).approval?.version).toBe(6)
-    expect(GOV.pdf_template_sets?.find((s) => s.approval.version === 8)?.approval.lifecycle).toBe('pending')
+    expect(GOV.pdf_template_sets?.find((s) => s.approval.version === 8)?.approval.lifecycle).toBe('approved')
+    expect(GOV.pdf_template_sets?.find((s) => s.approval.record_schema.version === 8 && s.approval.version === 7)?.approval.lifecycle).toBe('superseded')
   })
   test('the earlier entries are unchanged and Runway guidance is identical with and without the music answer', () => {
     const r1 = item(record({ M0: ['none'] }), 'CLAIM-RUNWAY-COMMERCIAL-USE-001-v1')
