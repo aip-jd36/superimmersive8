@@ -4,6 +4,19 @@ Per-tool facts about commercial-use terms. This is a research aid for reviewers,
 
 Schema and update discipline: `08_Platform/prds/PRD_LIVING_NOTEBOOK.md` § Platform Rights Matrix.
 
+> **Freeze notice (2026-11-20).** Decision of the SI8 operator (JD), 2026-11-20, recorded under task LK-MATRIX-FREEZE-OPEN8-1.
+>
+> - **No new rows and no new claims** are added to this Matrix or to its runtime mirror (`08_Platform/app/lib/retrieval-engine/matrix-fixture.ts`). New tool or platform knowledge is governed as Living Knowledge claims in `GOVERNED-CLAIMS.md`.
+> - **Existing CRC-eligible Matrix claims stay in operation** until each is replaced by governed Living Knowledge. This notice changes no claim, no `CRC-Eligible` value and no runtime behaviour.
+> - **Each replacement is its own governed act:** current evidence capture (`EVIDENCE-CAPTURE-SOP.md`), Formal Governance Review and Adoption, CRC Publication Review including the coexistence check in `CRC-PUBLICATION-POLICY.md`, and regression testing, with the Matrix claim retired no later than its successor is published (precedent: `governance-reviews/FGR_014_KLING_MATRIX_RETIREMENT_AUTHORIZATION_2026-09-02.md`).
+> - **No automatic migration or promotion.** Matrix wording is not carried into a governed claim because it exists here.
+> - **Historical records are preserved.** Retired rows and claims stay in this file with their dated retirement notes.
+> - **Eventual retirement of the Matrix as a CRC knowledge source is the objective.** Removing it from the runtime is not authorized by this notice.
+>
+> Not changed by this notice: the existing authority to correct, narrow, withdraw or retire an existing Matrix claim, and this file's use as a reviewer research aid. The `openai-sora` claim stays in this file as a historical record with `CRC-Eligible: Pending`: it will not be approved for CRC publication through this Matrix, and any future Sora coverage is governed as Living Knowledge in `GOVERNED-CLAIMS.md`.
+>
+> Source monitoring: Matrix claims are not mapped in the Living Knowledge source monitor; CRC-eligible Matrix claims are listed there as "CRC-reachable, not monitored" (`08_Platform/prds/PRD_LK_SOURCE_MONITORING_v0.2.md`, OPEN-8, FR-21a).
+
 ---
 
 ### Runway
