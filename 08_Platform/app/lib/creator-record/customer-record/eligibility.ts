@@ -93,6 +93,8 @@ export const INELIGIBILITY_CODES = [
   'reference_missing', 'version_not_current', 'lifecycle_pending', 'lifecycle_withdrawn', 'lifecycle_superseded', 'lifecycle_retired', 'validity_lapsed', 'contract_not_recorded', 'synthetic_record',
   // CR-V2-MVP-M4A: a model reading whose method is not commercially supported; a recorded-replay (synthetic) reading.
   'examination_method_not_supported', 'synthetic_examination',
+  // CR-DOC-READER-EXT-10B: a document's declared category and the kind of its reading disagree (`examinationCategoryMismatch`).
+  'examination_category_mismatch',
 ] as const
 export type IneligibilityCode = (typeof INELIGIBILITY_CODES)[number]
 export const CONFLICT_CODES = ['reference_ambiguous', 'content_changed_under_version', 'governance_conflict'] as const
@@ -227,8 +229,36 @@ function examinationExclusions(record: CustomerRecordV2, state: GovernanceSnapsh
     } else if (state?.authority_class !== 'synthetic_test') {
       out.push({ code: 'synthetic_examination', kind: 'examination_method', id: 'fixture_replay', version: d.document_id })
     }
+    const mismatch = examinationCategoryMismatch(d.category, e)
+    if (mismatch) out.push({ code: 'examination_category_mismatch', kind: 'examination_method', id: d.document_id, version: mismatch })
   }
   return out
+}
+
+/**
+ * CR-DOC-READER-EXT-10B — the category–reading compatibility rule. A reading belongs to the document; the category belongs to the
+ * record's attachment and can be changed after the reading was made. The record is sold and issued only when they agree:
+ *   - a document declared Licence or Permission (a category that calls for the licence profile) may carry only a licence reading;
+ *   - a licence reading may only be carried by a document declared Licence or Permission.
+ * Every other category keeps today's behaviour (a receipt reading is accepted). A document WITHOUT a reading is never affected, so
+ * a Licence or Permission document needs no reading. A reading whose profile cannot be read counts as not a licence reading (fail
+ * closed). Nothing is changed or removed: the record is refused at checkout and issuance, and the stored reading stays as it is.
+ * Returns the reading's profile id (or 'unknown') when they disagree, else null.
+ */
+/**
+ * CR-DOC-READER-EXT-10B: the declared categories that call for the licence reader, and its profile id. Kept here (this module imports no
+ * examination code: its boundary); `doc-reader-ext-10b-admin-gate.test.ts` proves they equal `CATEGORY_PROFILES` / `LICENCE_PROFILE_ID`.
+ */
+export const LICENCE_READING_CATEGORIES: readonly string[] = Object.freeze(['licence', 'permission'])
+export const LICENCE_READING_PROFILE_ID = 'licence'
+
+export function examinationCategoryMismatch(category: unknown, examination: unknown): string | null {
+  if (!examination || typeof examination !== 'object') return null
+  const profile = (examination as { envelope?: { profile?: { id?: unknown } } }).envelope?.profile?.id
+  const readingIsLicence = profile === LICENCE_READING_PROFILE_ID
+  const categoryCallsForLicence = typeof category === 'string' && LICENCE_READING_CATEGORIES.includes(category)
+  if (readingIsLicence === categoryCallsForLicence) return null
+  return typeof profile === 'string' ? profile : 'unknown'
 }
 
 function wellFormed(e: unknown, kind: AuthorityKind): e is AuthorityState {

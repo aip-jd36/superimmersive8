@@ -58,6 +58,29 @@ export function licenceReadingEnabled(switchValue: 'off' | 'on' = LICENCE_READIN
   return selected.approval !== null && templatesRenderLicenceReadings(selected.templates)
 }
 
+/**
+ * CR-DOC-READER-EXT-10B — licence reading for ONE creator (controlled UAT; not an entitlement framework). All three must hold:
+ *   1. the switch is on and 2. the selected schema 8 PDF set can print a licence reading (`licenceReadingEnabled`, unchanged);
+ *   3. the creator is an admin by a fresh server-side lookup (`isAdmin`: `public.users.is_admin`, read with the service role; no API
+ *      role can write that column).
+ * Fail closed: a missing or malformed user id, a lookup that throws, or any answer other than exactly `true` is false. While licence
+ * reading is not enabled for this build nothing is looked up, so with the switch off this changes nothing for anyone.
+ * Callers pass the AUTHENTICATED user at examination and the server-bound record OWNER at checkout and issuance, never a client value.
+ */
+export async function licenceReadingEnabledFor(
+  userId: unknown,
+  isAdmin: (userId: string) => Promise<boolean>,
+  enabled: () => boolean = () => licenceReadingEnabled(),
+): Promise<boolean> {
+  if (!enabled()) return false
+  if (typeof userId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId)) return false
+  try {
+    return (await isAdmin(userId)) === true
+  } catch {
+    return false
+  }
+}
+
 /** CR-V2-MVP-M4B — the bundle this running build may publish from, resolved from the environment now; null = none. */
 export function currentPublicationAuthority(env: Readonly<Record<string, string | undefined>> = process.env): PublicationAuthorityBundle | null {
   const bundle = selectAuthorityBundle(resolvePublicationAuthority(env), { governance: CREATOR_RECORD_GOVERNANCE_AUTHORITY, synthetic_test: CREATOR_RECORD_SYNTHETIC_TEST_AUTHORITY })
@@ -132,7 +155,13 @@ function sourceTextApprovalsOf(bundle: PublicationAuthorityBundle) {
  * empty every reference is unknown, so nothing is eligible. With no bundle, every source is unavailable
  * (indeterminate: refused).
  */
-export function approvedGovernanceSnapshot(issuanceDate: string, topicClaims: TopicClaims, bundle: PublicationAuthorityBundle | null = currentPublicationAuthority()): GovernanceSnapshot {
+export function approvedGovernanceSnapshot(
+  issuanceDate: string,
+  topicClaims: TopicClaims,
+  bundle: PublicationAuthorityBundle | null = currentPublicationAuthority(),
+  /** CR-DOC-READER-EXT-10B: the record owner's `licenceReadingEnabledFor` result. Absent or false: the licence method is not supported. */
+  owner: { licenceEntitled?: boolean } = {},
+): GovernanceSnapshot {
   if (!bundle) return governanceSnapshotFrom({ issuance_date: issuanceDate, sources: UNAVAILABLE, topicClaims, source_text_approvals: UNAVAILABLE })
   const sources = approvedCustomerRecordInputs(bundle).sources
   return governanceSnapshotFrom({
@@ -143,7 +172,8 @@ export function approvedGovernanceSnapshot(issuanceDate: string, topicClaims: To
     source_text_current_sha256: currentSourceTextDigest(sources, bundle),
     authority_class: bundle.authority_class,
     // CR-DOC-READER-EXT-5A: the licence reading method is issuable only while licence reading is enabled for this bundle.
-    support: issuanceSupportFor(licenceReadingEnabled(LICENCE_READING_SWITCH, bundle)),
+    // CR-DOC-READER-EXT-10B: AND for this record's owner (both, never one without the other).
+    support: issuanceSupportFor(owner.licenceEntitled === true && licenceReadingEnabled(LICENCE_READING_SWITCH, bundle)),
   })
 }
 

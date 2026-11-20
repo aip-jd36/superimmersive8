@@ -4,7 +4,8 @@
  *   - ONE default-off switch; licence reading is enabled only with the switch on AND a selected schema 8 template set that can print
  *     a licence reading. Registered approved v7 cannot (regression: licence reading cannot be enabled with v7).
  *   - The static compatibility check agrees with the renderer (v7 refuses a real licence record; v8 renders it).
- *   - Feature off: active profiles, customer live registry and issuance support are exactly as before; the route ignores the category.
+ *   - Feature off: active profiles, customer live registry and issuance support are exactly as before; the route ignores the category
+ *     except Licence/Permission, which is refused (CR-DOC-READER-EXT-10B).
  *   - Feature on: category routing (licence → licence profile; unsupported and unknown categories refused before anything is read).
  *   - The real executor reads each profile with its own reading contract; receipt requests are unchanged; other profiles refused.
  */
@@ -134,9 +135,16 @@ describe('the route: category routing only while the licence profile is active',
     expect(await examinationRequestBody(post())).toEqual({ ok: true, aiPermission: null })
   })
 
-  test('feature off: the declared category is ignored (receipt reader, as before)', async () => {
-    await handleExaminationRequest(post({ category: 'licence' }), ID, ID, deps(false))
+  test('feature off: a receipt-type or unexamined category is ignored (receipt reader, as before)', async () => {
+    await handleExaminationRequest(post({ category: 'other' }), ID, ID, deps(false))
     expect(requestSpy.mock.calls[0][3]).toEqual({ aiPermission: null })
+  })
+
+  test('CR-DOC-READER-EXT-10B, feature off: a Licence or Permission request is passed on so it is refused, never read as a receipt', async () => {
+    await handleExaminationRequest(post({ category: 'licence' }), ID, ID, deps(false))
+    expect(requestSpy.mock.calls[0][3]).toEqual({ aiPermission: null, category: 'licence' })
+    const { routeExaminationProfile } = jest.requireActual('@/lib/creator-record/customer-flow/examination')
+    expect(routeExaminationProfile('licence', customerProfilesFor(false))).toMatchObject({ ok: false, error: { status: 409, code: 'examination_not_permitted' } })
   })
 
   test('feature on: the declared category is passed to the router', async () => {

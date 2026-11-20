@@ -26,6 +26,7 @@ jest.mock('@/lib/creator-record/customer-flow/examination', () => ({
   CUSTOMER_VISIBLE_BOUNDARIES: [],
   examinationProjectionFor: async () => ({ kind: 'none' }),
   checkCustomerExaminationGate: async () => null,
+  examinationCategoryForRouting: () => undefined,
   requestCustomerExamination: async (_d: unknown, userId: string, arg: unknown) => ((calls.push({ fn: 'examine', userId, arg })), { ok: true, run_id: 'r', result: 'created' }),
   customerExaminationHistory: async (_d: unknown, userId: string, arg: unknown) => ((calls.push({ fn: 'history', userId, arg })), { ok: true, runs: [] }),
 }))

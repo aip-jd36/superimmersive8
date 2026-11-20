@@ -111,7 +111,7 @@ describe('enforcement points: one policy, no bypass', () => {
     for (const f of ['lib/creator-record/customer-flow/service.ts', 'lib/creator-record/customer-flow/purchase.ts', 'lib/creator-record/evidence-intake/service.ts', 'lib/creator-record/customer-flow/examination.ts']) {
       expect({ f, n: (src(f).match(/await deps\.hasPilotAccess\(userId\)/g) ?? []).length }).toEqual({ f, n: 1 })
     }
-    expect(src('app/creator-record/page.tsx')).toMatch(/const deps = productionFlowDeps\(\)[\s\S]*await deps\.hasPilotAccess\(userId\)/)
+    expect(src('app/creator-record/page.tsx')).toMatch(/const deps = await productionFlowDepsFor\(userId\)[\s\S]*await deps\.hasPilotAccess\(userId\)/)
   })
 
   test('no route, page or component reads the invitation table or the policy directly', () => {

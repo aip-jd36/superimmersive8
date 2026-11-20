@@ -66,7 +66,14 @@ export interface PurchaseDeps {
   boundTo(submissionId: string): Promise<PreparedRow | null>
   /** `create_creator_record_v2_submission`: atomic, idempotent. */
   bind(p: { preparedId: string; userId: string; sha256: string }): Promise<{ submissionId: string | null; reason: BindReason }>
-  governance(issuanceDate: string): GovernanceSnapshot
+  /** CR-DOC-READER-EXT-10B: `owner.licenceEntitled` is the record owner's licence-reading entitlement (absent: not entitled). */
+  governance(issuanceDate: string, owner?: { licenceEntitled?: boolean }): GovernanceSnapshot
+  /**
+   * CR-DOC-READER-EXT-10B: whether licence reading is enabled for the record OWNER (`licenceReadingEnabledFor`, bound in production to
+   * a fresh admin lookup). Called with the server-bound owner (`row.user_id`) only. Absent, throwing or anything but `true`: false, so
+   * the snapshot does not support the licence reading method (fail closed).
+   */
+  licenceEntitled?(ownerUserId: string): Promise<boolean>
   now(): Date
   log?(event: string, detail: Record<string, unknown>): void
   /**
@@ -132,6 +139,16 @@ type WithoutOk<T> = T extends unknown ? Omit<T, 'ok'> : never
 const err = (e: WithoutOk<PurchaseError>): PurchaseError => ({ ok: false, ...e }) as PurchaseError
 
 /** E4: true only when the port exists and says both policies are published. Any throw is false. */
+/** CR-DOC-READER-EXT-10B: the owner's licence-reading entitlement, fail closed (no port, a throw or a non-`true` answer is false). */
+async function ownerLicenceEntitled(deps: { licenceEntitled?(ownerUserId: string): Promise<boolean> }, ownerUserId: string): Promise<boolean> {
+  if (typeof deps.licenceEntitled !== 'function') return false
+  try {
+    return (await deps.licenceEntitled(ownerUserId)) === true
+  } catch {
+    return false
+  }
+}
+
 function policiesPublished(deps: Pick<PurchaseDeps, 'legalPoliciesApproved'>): boolean {
   try {
     return typeof deps.legalPoliciesApproved === 'function' && deps.legalPoliciesApproved() === true
@@ -203,7 +220,8 @@ async function purchasable(deps: PurchaseDeps, userId: string, row: PreparedRow 
     deps.log?.('creator_record_v2_examination_unavailable', { prepared_id: row.id, reason: runs.reason })
     return err({ status: 409, code: 'evidence_unavailable' })
   }
-  const eligibility = evaluateIssuanceEligibility(row.canonical, row.sha256, deps.governance(today(deps.now())))
+  // CR-DOC-READER-EXT-10B: the licence reading method is supported only for an entitled record owner (server-bound `row.user_id`).
+  const eligibility = evaluateIssuanceEligibility(row.canonical, row.sha256, deps.governance(today(deps.now()), { licenceEntitled: await ownerLicenceEntitled(deps, row.user_id) }))
   const refused = eligibilityError(eligibility)
   if (refused) {
     deps.log?.('creator_record_v2_purchase_refused', { prepared_id: row.id, decision: eligibility.decision })
@@ -228,6 +246,8 @@ async function purchasable(deps: PurchaseDeps, userId: string, row: PreparedRow 
 export function purchaseOfferable(
   deps: Pick<PurchaseDeps, 'issuance' | 'submissions' | 'legalPoliciesApproved' | 'governance' | 'templates' | 'now'>,
   row: PreparedRow,
+  /** CR-DOC-READER-EXT-10B: the owner's licence-reading entitlement, resolved by the caller for `row.user_id` (default false). */
+  owner: { licenceEntitled?: boolean } = {},
 ): boolean {
   try {
     if (deps.issuance !== 'enabled' || deps.submissions !== 'open' || !policiesPublished(deps)) return false
@@ -235,7 +255,7 @@ export function purchaseOfferable(
     const record = verifiedRecord(row)
     if (!record) return false
     const on = today(deps.now())
-    if (evaluateIssuanceEligibility(row.canonical, row.sha256, deps.governance(on)).decision !== 'eligible') return false
+    if (evaluateIssuanceEligibility(row.canonical, row.sha256, deps.governance(on, { licenceEntitled: owner.licenceEntitled === true })).decision !== 'eligible') return false
     return renderable(deps.templates, row, record, on)
   } catch {
     return false
@@ -321,7 +341,13 @@ export class V2IssuanceRefusal extends Error {
 export interface V2IssuanceDeps {
   boundTo(submissionId: string): Promise<PreparedRow | null>
   latestVersion(draftId: string): Promise<PreparedRow | null>
-  governance(issuanceDate: string): GovernanceSnapshot
+  governance(issuanceDate: string, owner?: { licenceEntitled?: boolean }): GovernanceSnapshot
+  /**
+   * CR-DOC-READER-EXT-10B: whether licence reading is enabled for the record OWNER (`licenceReadingEnabledFor`, bound in production to
+   * a fresh admin lookup). Called with the server-bound owner (`row.user_id`) only. Absent, throwing or anything but `true`: false, so
+   * the snapshot does not support the licence reading method (fail closed).
+   */
+  licenceEntitled?(ownerUserId: string): Promise<boolean>
   /** CR-V2-MVP-M4A: the approved template set for the record's own schema. */
   templates: TemplatesForSchema
   /** Renders exactly the given record (the customer PDF builder re-verifies it and the templates). */
@@ -348,7 +374,8 @@ export async function authorizeV2Issuance(deps: V2IssuanceDeps, sub: CheckoutSub
   if (!held.ok) throw new V2IssuanceRefusal(held.reason === 'consent_withdrawn' ? 'consent_withdrawn' : 'evidence_unavailable')
   // CR-V2-EXAM-INTEGRATION-X0: and every referenced examination run still verifies.
   if (!(await examinationsHeld(deps.examinationsIntact?.bind(deps), row.user_id, record)).ok) throw new V2IssuanceRefusal('evidence_unavailable')
-  const eligibility = evaluateIssuanceEligibility(row.canonical, row.sha256, deps.governance(today(issuedAt)))
+  // CR-DOC-READER-EXT-10B: for the bound record's owner (`row.user_id`, already checked equal to the submission's user).
+  const eligibility = evaluateIssuanceEligibility(row.canonical, row.sha256, deps.governance(today(issuedAt), { licenceEntitled: await ownerLicenceEntitled(deps, row.user_id) }))
   if (eligibility.decision === 'invalid_record') throw new V2IssuanceRefusal('record_integrity')
   if (eligibility.decision === 'ineligible') throw new V2IssuanceRefusal('governance_ineligible')
   if (eligibility.decision !== 'eligible') throw new V2IssuanceRefusal('governance_indeterminate')

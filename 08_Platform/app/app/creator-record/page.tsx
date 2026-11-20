@@ -21,7 +21,7 @@ import { CUSTOMER_RECORD_SCHEMA, CUSTOMER_RECORD_SCHEMA_VERSION, CUSTOMER_RECORD
 import { aiExaminationPermissionVersion, evidenceConsentVersion } from '@/lib/creator-record-flow/authorization-versions'
 import { legalPoliciesApproved } from '@/lib/legal/policies'
 import { customerLiveOffered } from '@/lib/creator-record-flow/live-offer'
-import { productionFlowDeps } from '@/lib/creator-record-flow/production'
+import { productionFlowDepsFor } from '@/lib/creator-record-flow/production'
 import { sessionUserId } from '@/lib/creator-record-flow/http'
 import { PAGE_TEXT } from '@/lib/creator-record-flow/wording'
 import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/config'
@@ -48,7 +48,7 @@ export default async function CreatorRecordPage() {
   const userId = await sessionUserId()
   if (!userId) redirect('/auth/login')
 
-  const deps = productionFlowDeps()
+  const deps = await productionFlowDepsFor(userId)
   if (deps.submissions !== 'open') return <Unavailable message="Creator Record is not taking new submissions right now." />
   if (!(await deps.hasPilotAccess(userId))) return <Unavailable message="Creator Record is currently available by invitation only." />
 

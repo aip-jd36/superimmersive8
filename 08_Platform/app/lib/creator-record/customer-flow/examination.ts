@@ -31,7 +31,7 @@ import {
   type VerifiedRun,
 } from '../examination/persistence'
 import { RECEIPT_READING_PROFILE } from '../examination/receipt-reading'
-import { customerProfilesFor, profileForCategory } from '../examination/category-profile'
+import { CATEGORY_PROFILES, customerProfilesFor, profileForCategory } from '../examination/category-profile'
 import { LICENCE_PROFILE_ID } from '../examination/licence-profile'
 import { projectVerifiedRun, verifyReferencedRuns, type ExaminationProjection as ReplayExaminationProjection, type ExaminationRunReference, type RunReferenceIntegrity } from '../examination/projection'
 import type { CustomerLiveResult } from '../live-examination/customer'
@@ -150,6 +150,22 @@ export function routeExaminationProfile(category: unknown, active?: readonly { i
   if (s.reason === 'category_unknown') return { ok: false, reason: s.reason, error: err(422, 'not_examinable') }
   if (s.reason === 'category_not_examined') return { ok: false, reason: s.reason, error: err(422, 'not_examinable') }
   return { ok: false, reason: s.reason, error: err(409, 'examination_not_permitted') }
+}
+
+/**
+ * CR-DOC-READER-EXT-10B — which declared category, if any, the examination request routes on.
+ *   - licence profile active for this creator: the declared category, as before (CR-DOC-READER-EXT-5A);
+ *   - otherwise a category that CALLS FOR the licence profile (Licence, Permission) is still passed on, so selection reports the
+ *     profile as inactive and the request is refused (`examination_not_permitted`) before any permission, reservation or model call.
+ *     A licence or permission is never read by the receipt reader;
+ *   - otherwise the category is ignored and the receipt reader is used, exactly as before (receipt, provider terms, release,
+ *     project file, other, an unknown value or none).
+ * Uses only the creator's declared category, never the document's content.
+ */
+export function examinationCategoryForRouting(category: unknown, active?: readonly { id: string; version: number }[]): unknown {
+  if (active?.some((p) => p.id === LICENCE_PROFILE_ID) === true) return category
+  if (typeof category === 'string' && Object.prototype.hasOwnProperty.call(CATEGORY_PROFILES, category) && CATEGORY_PROFILES[category as keyof typeof CATEGORY_PROFILES]?.id === LICENCE_PROFILE_ID) return category
+  return undefined
 }
 
 /** CR-DOC-READER-EXT-5A: the active customer profiles for this build (receipt; plus licence only while licence reading is enabled). */

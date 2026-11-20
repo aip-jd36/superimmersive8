@@ -198,12 +198,13 @@ describe('Production surfaces unchanged', () => {
   const read = (p: string) => readFileSync(path.join(__dirname, '../..', p), 'utf8')
   // CR-DOC-READER-EXT-5A: the production wiring is now switch-driven. Its behaviour (off = exactly as before) is proven in
   // doc-reader-ext-activation.test.ts; this pins the wiring to the one predicate.
-  test('the HTTP handler routes a category only while the licence profile is active; the wiring derives both from licenceReadingEnabled', () => {
-    expect(read('lib/creator-record-flow/route-handlers.ts')).toMatch(/const routes = deps\.activeProfiles\?\.some\(\(p\) => p\.id === 'licence'\) === true/)
+  // CR-DOC-READER-EXT-10B: per creator (admin-gated), and a Licence/Permission request is refused rather than read as a receipt.
+  test('the HTTP handler routes on examinationCategoryForRouting; the wiring derives both from the per-creator value and licenceReadingEnabled', () => {
+    expect(read('lib/creator-record-flow/route-handlers.ts')).toMatch(/const category = examinationCategoryForRouting\(body\.category, deps\.activeProfiles\)/)
     const wiring = read('lib/creator-record-flow/examination-customer.ts')
     expect(wiring).toContain('activeProfiles: activeCustomerProfilesFor(licence)')
-    expect(wiring).toContain('const licence = licenceReadingEnabled()')
-    expect(wiring).toContain('customerLiveProfileRegistry(licenceReadingEnabled())')
+    expect(wiring).toContain('const licence = licenceEntitled === true && licenceReadingEnabled()')
+    expect(wiring).toContain('customerLiveProfileRegistry(licence && licenceReadingEnabled())')
     expect(read('lib/creator-record/live-examination/customer.ts')).toContain('profiles: deps.profiles ?? LIVE_PROFILE_REGISTRY')
   })
 })

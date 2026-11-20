@@ -3,7 +3,7 @@
  * has already authenticated `userId` and chooses the dependencies; nothing here reads an identity or a mode from the request.
  */
 import { NextResponse } from 'next/server'
-import { checkCustomerExaminationGate, requestCustomerExamination, type CustomerExaminationDeps } from '@/lib/creator-record/customer-flow/examination'
+import { checkCustomerExaminationGate, examinationCategoryForRouting, requestCustomerExamination, type CustomerExaminationDeps } from '@/lib/creator-record/customer-flow/examination'
 import { preparePrepared, type FlowDeps } from '@/lib/creator-record/customer-flow/service'
 import { EVIDENCE_MAX_REQUEST_BYTES } from '@/lib/creator-record/evidence-intake/contract'
 import { checkEvidenceGate, uploadEvidence, type EvidenceDeps } from '@/lib/creator-record/evidence-intake/service'
@@ -66,10 +66,10 @@ export async function handleExaminationRequest(request: Request, userId: string,
   if (gated) return examinationError(gated)
   const body = await examinationRequestBody(request)
   if (!body.ok) return examinationError({ status: 400, code: 'invalid_request' })
-  // CR-DOC-READER-EXT-5A: the declared category routes only while the licence profile is active (licence reading enabled). Otherwise
-  // it is ignored and every document is read by the receipt reader, exactly as before.
-  // ('licence' = LICENCE_PROFILE_ID; a test pins the two together.)
-  const routes = deps.activeProfiles?.some((p) => p.id === 'licence') === true
-  const r = await requestCustomerExamination(deps, userId, documentId, { aiPermission: body.aiPermission, ...(routes && body.category !== undefined ? { category: body.category } : {}) })
+  // CR-DOC-READER-EXT-5A / 10B: the declared category routes while the licence profile is active for this creator. Otherwise a
+  // Licence or Permission request is refused (never read as a receipt), and any other category is ignored and the document is read
+  // by the receipt reader, exactly as before (`examinationCategoryForRouting`).
+  const category = examinationCategoryForRouting(body.category, deps.activeProfiles)
+  const r = await requestCustomerExamination(deps, userId, documentId, { aiPermission: body.aiPermission, ...(category !== undefined ? { category } : {}) })
   return r.ok ? NextResponse.json({ examination: { run_id: r.run_id, result: r.result } }, { status: 200, headers: NO_STORE }) : examinationError(r)
 }

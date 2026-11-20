@@ -51,7 +51,7 @@ const productionAiPermission = (version: string): NonNullable<CustomerExaminatio
 })
 
 /** The customer live port: the reviewed production ports, the committed fixture registry and the real executor. No other composition. */
-const productionCustomerLive: NonNullable<CustomerExaminationDeps['live']> = {
+const productionCustomerLive = (licence: boolean): NonNullable<CustomerExaminationDeps['live']> => ({
   async examine(userId, documentId, profile) {
     const [{ examineCustomerDocumentLive }, { customerLivePorts }, { DEFAULT_REPLAY_TABLE }, { customerLiveProfileRegistry }] = await Promise.all([
       import('@/lib/creator-record/live-examination/customer'),
@@ -60,15 +60,21 @@ const productionCustomerLive: NonNullable<CustomerExaminationDeps['live']> = {
       import('@/lib/creator-record/live-examination/licence-live-profile'),
     ])
     // CR-DOC-READER-EXT-5A: the licence profile is in the registry only while licence reading is enabled (receipt alone otherwise).
-    const profiles = customerLiveProfileRegistry(licenceReadingEnabled())
+    // CR-DOC-READER-EXT-10B: for THIS request's creator (the same value as `activeProfiles`), re-checked against the build here.
+    const profiles = customerLiveProfileRegistry(licence && licenceReadingEnabled())
     return examineCustomerDocumentLive({ ports: customerLivePorts, isKnownSyntheticFixture: (sha256) => DEFAULT_REPLAY_TABLE.has(sha256), now: () => new Date(), profiles }, userId, documentId, profile)
   },
-}
+})
 
-export function productionCustomerExaminationDeps(): CustomerExaminationDeps {
+/**
+ * CR-DOC-READER-EXT-10B: `licenceEntitled` is `productionLicenceReadingEnabledFor(<authenticated user>)` (`./licence-entitlement`),
+ * resolved by the route for the session user these deps serve. Absent or false (the default): receipt reading only, exactly as before,
+ * and an explicit Licence or Permission request is refused (`examinationCategoryForRouting`).
+ */
+export function productionCustomerExaminationDeps(licenceEntitled = false): CustomerExaminationDeps {
   // E7: no live examination without a current, policy-bound permission identifier to ask for.
   const permission = aiExaminationPermissionVersion()
-  const licence = licenceReadingEnabled()
+  const licence = licenceEntitled === true && licenceReadingEnabled()
   return {
     submissions: CREATOR_RECORD_V2_SUBMISSIONS,
     // CR-DOC-READER-EXT-5A: the licence profile is active (and the declared category routes) only while licence reading is enabled.
@@ -77,7 +83,7 @@ export function productionCustomerExaminationDeps(): CustomerExaminationDeps {
     adapter: productionExaminationDeps(),
     log: (event, detail) => console.warn(`[creator-record-v2/examination] ${event}`, detail),
     now: () => new Date(),
-    ...(customerLiveOffered() && permission !== null ? { live: productionCustomerLive, aiPermission: productionAiPermission(permission) } : {}),
+    ...(customerLiveOffered() && permission !== null ? { live: productionCustomerLive(licence), aiPermission: productionAiPermission(permission) } : {}),
   }
 }
 

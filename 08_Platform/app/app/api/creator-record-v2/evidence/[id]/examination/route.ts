@@ -13,6 +13,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { customerExaminationHistory } from '@/lib/creator-record/customer-flow/examination'
 import { examinationError, productionCustomerExaminationDeps } from '@/lib/creator-record-flow/examination-customer'
 import { handleExaminationRequest } from '@/lib/creator-record-flow/route-handlers'
+import { productionLicenceReadingEnabledFor } from '@/lib/creator-record-flow/licence-entitlement'
 import { internalError, NO_STORE, sessionUserId, unauthorized } from '@/lib/creator-record-flow/http'
 
 export const dynamic = 'force-dynamic'
@@ -22,7 +23,8 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   const userId = await sessionUserId()
   if (!userId) return unauthorized()
   try {
-    return await handleExaminationRequest(request, userId, params.id, productionCustomerExaminationDeps())
+    // CR-DOC-READER-EXT-10B: licence reading only for the authenticated creator when they are an admin (fresh lookup; fail closed).
+    return await handleExaminationRequest(request, userId, params.id, productionCustomerExaminationDeps(await productionLicenceReadingEnabledFor(userId)))
   } catch (err) {
     console.error('[creator-record-v2/examination] request failed', { error: err instanceof Error ? err.message : 'unknown' })
     return internalError()

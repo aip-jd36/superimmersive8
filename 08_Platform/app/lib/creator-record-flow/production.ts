@@ -18,6 +18,7 @@ import { CREATOR_RECORD_V2_ISSUANCE } from '@/lib/creator-record-artifacts/confi
 import { hasCreatorRecordAccess, hasPilotAccess, PILOT_ACCESS_TABLE } from './pilot-access'
 import { evidenceObjects, evidenceStore } from './evidence-production'
 import { productionExaminationProjections, productionReadingsIntact } from '@/lib/creator-record-flow/examination-customer'
+import { productionLicenceReadingEnabledFor } from '@/lib/creator-record-flow/licence-entitlement'
 import { verifyEvidenceIntact, type EvidenceIntegrity } from '@/lib/creator-record/evidence-intake/service'
 
 type EvidenceItems = readonly { document_id: string; sha256: string; byte_size: number }[]
@@ -107,7 +108,12 @@ export async function bindPreparedToSubmission(p: { preparedId: string; userId: 
 }
 
 
-export function productionFlowDeps(): FlowDeps {
+/**
+ * CR-DOC-READER-EXT-10B: `licenceEntitledUserId` is the authenticated user these deps serve, passed ONLY when
+ * `productionLicenceReadingEnabledFor(<that user>)` is true. It affects the display-only payment offer, and only for a version that
+ * user owns; every purchase and issuance step re-resolves the owner's entitlement itself.
+ */
+export function productionFlowDeps(options: { licenceEntitledUserId?: string } = {}): FlowDeps {
   return {
     submissions: CREATOR_RECORD_V2_SUBMISSIONS,
     hasPilotAccess: hasCreatorRecordAccess, // CR-PUBLIC-1: the access policy (invitation by default)
@@ -122,10 +128,15 @@ export function productionFlowDeps(): FlowDeps {
     // CR-V2-EXAM-INTEGRATION-X3: the persisted, re-verified projection of an owned document's run (only when asked).
     examinations: productionExaminationProjections,
     // CR-V2-SCHEMA8-PATH-1 (E2): whether the page may offer payment; the same pure conditions the purchase steps check (display only).
-    purchaseOfferable: (row) => purchaseOfferable(productionPurchaseDeps(), row),
+    purchaseOfferable: (row) => purchaseOfferable(productionPurchaseDeps(), row, { licenceEntitled: typeof options.licenceEntitledUserId === 'string' && row.user_id === options.licenceEntitledUserId }),
     // CR-DOC-READER-EXT-6B: the selected schema 8 set's fixed privacy lines (absent from v7: no licence reading exists while v7 is selected).
     readingPrivacyText: () => approvedReadingPrivacyText(),
   }
+}
+
+/** CR-DOC-READER-EXT-10B: `productionFlowDeps` for an authenticated user, with that user's licence-reading entitlement resolved now. */
+export async function productionFlowDepsFor(userId: string): Promise<FlowDeps> {
+  return productionFlowDeps((await productionLicenceReadingEnabledFor(userId)) ? { licenceEntitledUserId: userId } : {})
 }
 
 /** CR-V2-MVP-M3: purchase ports (bind + checkout preconditions). */
@@ -138,7 +149,9 @@ export function productionPurchaseDeps(): PurchaseDeps {
     latestVersion: (draftId) => preparedStore.latestVersion(draftId),
     boundTo: preparedBoundTo,
     bind: bindPreparedToSubmission,
-    governance: (date) => approvedGovernanceSnapshot(date, TOPIC_CLAIMS_FIXTURE),
+    governance: (date, owner) => approvedGovernanceSnapshot(date, TOPIC_CLAIMS_FIXTURE, undefined, owner),
+    // CR-DOC-READER-EXT-10B: the record owner's licence-reading entitlement (fresh admin lookup; fail closed).
+    licenceEntitled: productionLicenceReadingEnabledFor,
     now: () => new Date(),
     log: (event, detail) => console.warn(event, detail),
     evidenceIntact,
@@ -155,7 +168,9 @@ export function productionV2IssuanceDeps(): V2IssuanceDeps {
   return {
     boundTo: preparedBoundTo,
     latestVersion: (draftId) => preparedStore.latestVersion(draftId),
-    governance: (date) => approvedGovernanceSnapshot(date, TOPIC_CLAIMS_FIXTURE),
+    governance: (date, owner) => approvedGovernanceSnapshot(date, TOPIC_CLAIMS_FIXTURE, undefined, owner),
+    // CR-DOC-READER-EXT-10B: the record owner's licence-reading entitlement (fresh admin lookup; fail closed).
+    licenceEntitled: productionLicenceReadingEnabledFor,
     // CR-V2-MVP-M4A: the one approved template set for the record's own schema.
     templates: (schema) => approvedPdfTemplates(undefined, schema),
     // Loaded on first render only.

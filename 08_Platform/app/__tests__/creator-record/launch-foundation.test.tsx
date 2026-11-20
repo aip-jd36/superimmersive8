@@ -102,7 +102,7 @@ describe('the examination request body', () => {
   test('the route handler parses the body and passes only the permission to the service', () => {
     const h = src('lib/creator-record-flow/route-handlers.ts')
     expect(h).toMatch(/examinationRequestBody\(request\)/)
-    expect(h).toMatch(/const routes = deps\.activeProfiles\?\.some\(\(p\) => p\.id === 'licence'\) === true\s+const r = await requestCustomerExamination\(deps, userId, documentId, \{ aiPermission: body\.aiPermission, \.\.\.\(routes && body\.category !== undefined \? \{ category: body\.category \} : \{\}\) \}\)/)
+    expect(h).toMatch(/const category = examinationCategoryForRouting\(body\.category, deps\.activeProfiles\)\s+const r = await requestCustomerExamination\(deps, userId, documentId, \{ aiPermission: body\.aiPermission, \.\.\.\(category !== undefined \? \{ category \} : \{\}\) \}\)/)
   })
 })
 
@@ -132,7 +132,7 @@ describe('the browser asks separately for AI permission, only when live examinat
     const page = src('app/creator-record/page.tsx')
     // CR-V2-SCHEMA8-PATH-1 (E7): the permission asked for is the current one, bound to the approved policy versions.
     expect(page).toMatch(/const aiPermissionVersion = customerLiveOffered\(\) \? aiExaminationPermissionVersion\(\) : null/)
-    expect(src('lib/creator-record-flow/examination-customer.ts')).toMatch(/customerLiveOffered\(\) && permission !== null \? \{ live: productionCustomerLive, aiPermission: productionAiPermission\(permission\) \}/)
+    expect(src('lib/creator-record-flow/examination-customer.ts')).toMatch(/customerLiveOffered\(\) && permission !== null \? \{ live: productionCustomerLive\(licence\), aiPermission: productionAiPermission\(permission\) \}/)
   })
 })
 

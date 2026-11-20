@@ -9,7 +9,7 @@ const calls: { fn: string; userId: string; arg: unknown }[] = []
 jest.mock('@/lib/supabase/server', () => ({
   createClient: () => ({ auth: { getUser: async () => (session.userId ? { data: { user: { id: session.userId } }, error: null } : { data: { user: null }, error: { message: 'no session' } }) } }),
 }))
-jest.mock('@/lib/creator-record-flow/production', () => ({ productionFlowDeps: () => ({}) }))
+jest.mock('@/lib/creator-record-flow/production', () => ({ productionFlowDeps: () => ({}), productionFlowDepsFor: async () => ({}) }))
 jest.mock('@/lib/creator-record/customer-flow/service', () => {
   const view = { id: 'v', draft_id: 'd', version: 1, status: 'prepared', record_ref: 'PREP-v', created_at: 'x', reviewed_at: null, form_state: {}, declarations: { answers: [], acknowledgements: [] }, guidance_items: 0 }
   const record = (fn: string) => async (_deps: unknown, userId: string, arg: unknown) => ((calls.push({ fn, userId, arg })), { ok: true, view })
