@@ -1,13 +1,13 @@
 # Living Knowledge Source Monitoring & Refresh
 ## Product Requirements Document v0.2
 
-**Status:** DRAFT — not approved. No part of this document authorizes implementation.
+**Status:** APPROVED for Phase A by the SI8 operator (JD), 2026-11-20. Milestones M0 to M3 are binding. Milestones M4 to M6 are provisional and each needs separate authorization. See "Approval record" below. Phase B is not authorized.
 **Version:** 0.2 (supersedes the unpublished v0.1 draft of the same date; v0.1 was never committed)
 **Date:** 2026-11-20
 **Owner:** JD / SI8
-**Milestones that produced this draft:** LK-SOURCE-MONITOR-PRD-1 (v0.1), LK-SOURCE-MONITOR-PRD-2 (critical review, v0.2), LK-SOURCE-MONITOR-PRD-3 (v0.2 revised: OPEN-7 operator decision recorded; impact-closure disposition added; OPEN-3 updated with repository findings; OPEN-9 added), LK-MATRIX-FREEZE-OPEN8-1 (v0.2 revised: OPEN-8 operator decision recorded; Legacy Matrix excluded from the mapping; FR-21a, AC-2a and AC-5a added)
-**Baseline inspected:** `origin/main` = `8690e9a7`
-**Implementation status:** Phase A not started. Phase B not authorized.
+**Milestones that produced this draft:** LK-SOURCE-MONITOR-PRD-1 (v0.1), LK-SOURCE-MONITOR-PRD-2 (critical review, v0.2), LK-SOURCE-MONITOR-PRD-3 (v0.2 revised: OPEN-7 operator decision recorded; impact-closure disposition added; OPEN-3 updated with repository findings; OPEN-9 added), LK-MATRIX-FREEZE-OPEN8-1 (v0.2 revised: OPEN-8 operator decision recorded; Legacy Matrix excluded from the mapping; FR-21a, AC-2a and AC-5a added), LK-SOURCE-MONITOR-FOUNDATION-1 (v0.2 approved: approval recorded; OPEN-3 corrected; M1 contract decisions recorded in §12.2; M1 implemented offline)
+**Baseline inspected:** `origin/main` = `8690e9a7` for the OBSERVED statements; approval and M1 work were done against `origin/main` = `bb6c709a`
+**Implementation status:** M1 (offline registry and mapping contract) implemented in `tools/lk-source-registry/`, awaiting acceptance. M2 to M6 not started. Phase B not authorized.
 **Related:**
 - `08_Platform/prds/PRD_LIVING_KNOWLEDGE_SOURCE_INPUTS_v0.1.md` (directional parent; "Source B — Automated Source Monitoring", §15, §16, §18)
 - `08_Platform/implementation/LK_PHASE1_TECHNICAL_DESIGN.md` §11, §17–20, §25 and `LK_PHASE1_TECHNICAL_DESIGN_v2.md` §12, §14 (the approved Phase E automation proof)
@@ -19,10 +19,25 @@
 
 **How to read this document.** Statements are labelled:
 - **OBSERVED** — verified in the repository at `8690e9a7`.
-- **PROPOSED** — a requirement of this draft, not yet approved.
+- **PROPOSED** — a requirement written by this document. Since the approval of 2026-11-20, a PROPOSED requirement that belongs to M0 to M3 is approved and binding; one that belongs to M4 to M6 is provisional (see "Approval record").
 - **OPEN** — a decision that belongs to a human and has not been made.
 
-Nothing labelled PROPOSED or OPEN is a PM decision.
+Nothing labelled OPEN is a PM decision. The approval does not decide any OPEN item.
+
+### Approval record
+
+| | |
+|---|---|
+| Approver | The SI8 operator (JD) |
+| Date | 2026-11-20 |
+| Recorded under | LK-SOURCE-MONITOR-FOUNDATION-1 |
+| Approved | The Phase A architecture described in this document |
+| Binding | Milestones M0 to M3 and the requirements and acceptance criteria they must meet |
+| Provisional | Milestones M4 to M6. Their text may change, and none may start without separate authorization |
+| Authorized now | M1 engineering only, offline: no retrieval, no schedule, no alerts, no model calls, no Production change |
+| Not approved | Phase B; any OPEN item; any pending governance review (including `FGR_030`, `FGR_031`, `CPR_037`, `CPR_038`); any change to a governed claim, its eligibility or its publication |
+
+This record is the sign-off for M0. Approval of this document is not approval of any claim, source or baseline. Source Monitoring is an observational system: it is not an authority for claim validity, commercial clearance, adoption, publication or any CRC conclusion.
 
 ### Changes from v0.1
 
@@ -149,7 +164,7 @@ All items in this section are **OBSERVED**.
 
 | Phase | Scope | Status |
 |---|---|---|
-| **A — Source Monitoring** | Registry, identity checks, snapshots, deterministic change detection, source-to-claim mapping, outcomes, alerts, audit history. Six-source pilot. No model calls. | PROPOSED; first implementation |
+| **A — Source Monitoring** | Registry, identity checks, snapshots, deterministic change detection, source-to-claim mapping, outcomes, alerts, audit history. Six-source pilot. No model calls. | Approved 2026-11-20; M0 to M3 binding, M4 to M6 provisional |
 | **B — AI-assisted Refresh** | Interpreting observed changes and drafting proposals for human governance. | Future; **not authorized** |
 
 ### 4.1 Phase A in one paragraph
@@ -207,11 +222,11 @@ All requirements are **PROPOSED**.
 - **FR-18** The mapping is a list of relationships, each naming one source and one governed Living Knowledge claim ID. Legacy Matrix rows and claims are not part of the mapping: no Matrix identifier is recorded in the registry or in any relationship (OPEN-8, decided 2026-11-20). A source may have many claims and a claim may have many sources.
 - **FR-19** Each relationship records the basis for it (where in the repository the dependence is evidenced), the named human who confirmed it, and the date.
 - **FR-20** Validation cross-checks the mapping against evidence that does not come from the registry itself:
-  - every claim ID named in a relationship exists in the ledger, with its current lifecycle;
+  - every claim ID named in a relationship exists in the governed ledger (`GOVERNED-CLAIMS.md`), which is the authority for claim identity and lifecycle. The runtime claim fixture is read for consistency, scope and exposure, and is never an alternative authority (§12.2);
   - for a provider or tool source, every runtime claim whose `tool_scope` or `provider_scope` names that provider or tool is either mapped to one of that provider's registered sources or listed as an exclusion with a reason;
   - every claim ID named in the evidence manifest that an entry points to is either mapped or listed as an exclusion with a reason;
   - every Creator Record ledger entry whose claim is mapped is reported with that claim.
-- **FR-21** A coverage report lists, on every run, the CRC-eligible claims that no registered source covers. This list is expected to be long during the pilot. It is information, not a failure.
+- **FR-21** A coverage report lists, on every run, the CRC-eligible claims that no registered source covers. In M1, which has no runs, the offline validation command produces this report. This list is expected to be long during the pilot. It is information, not a failure.
 - **FR-21a** The same report lists, in a separate section, every Legacy Matrix claim that is CRC-eligible and therefore still reachable in CRC, with its claim identifier, its row identifier and the row's last-verified date. The section is labelled "CRC-reachable, not monitored". The list is read from the Matrix runtime fixture on each run, never maintained by hand and never written back. It is an observation only: it does not validate a claim, does not say a claim is stale or current, and is not a governance decision. It is temporary and shrinks as Matrix claims are retired; an empty list is reported as empty, not omitted.
 - **FR-22** The monitor states the limits of the mapping wherever it reports dependent claims: "confirmed by <name> on <date>; other dependencies may exist". It never describes the mapping as complete.
 - **FR-23** For a non-`UNCHANGED` outcome, the report lists each mapped claim with its lifecycle, CRC eligibility and whether a Creator Record ledger entry depends on it. These values are read, never written.
@@ -279,6 +294,7 @@ All **PROPOSED**. Field names are illustrative; the implementation design fixes 
 | `min_extracted_length` | Floor below which extraction is suspect |
 | `version_locator` | Optional rule for finding the stated version or date |
 | `evidence_tier` | The SOP §4 class this source normally yields |
+| `scope` | The stable tool or provider identity the source covers, where one applies: the identifier governed claims use in `tool_scope` or `provider_scope`, or an explicit "none". Never inferred from a URL or a name (§12.2) |
 | `applicability_scope_note` | Plan, tier or product the source covers, as free text |
 | `cadence_class` | Resolved to an interval by configuration (OPEN-1) |
 | `baseline` | Pointer and hashes of the last accepted snapshot, the extraction-rule version it was accepted under, the named accepter and the date; empty until first acceptance |
@@ -382,11 +398,11 @@ Standing flags persist across runs. A later `FETCH_FAILED` does not clear `open_
 | 3 | Runway Terms of Use | Provider terms | `automated_http` | Fetched successfully on 2026-10-26; redirects `runwayml.com` → `runway.com`, which exercises the registered-redirect rule; Creator Record tool |
 | 4 | Higgsfield Terms of Use Agreement | Provider terms | `automated_http` | Fetched successfully on 2026-10-26; raw bytes vary between fetches; changed on 2026-10-23; Creator Record tool |
 | 5 | New York General Business Law §396-b | Statute | `automated_http` | Captured on 2026-09-10; low expected change; exercises the slow cadence |
-| 6 | One known-blocked source (Kling terms or Pond5 licence) | Provider or licence terms | `human_capture` | Exercises the human-capture path without attempting to defeat a block |
+| 6 | Kling AI Terms of Service (known blocked) | Provider terms | `human_capture` | Exercises the human-capture path without attempting to defeat a block |
 
 Notes:
-- Baselines for sources 3 and 4 depend on OPEN-3. The registry entries and mapping can be built before that is resolved; their baselines stay empty until it is.
-- The choice between Kling and Pond5 for source 6 is the operator's.
+- Which snapshot becomes the first baseline for sources 3 and 4 is part of OPEN-3. The registry entries and mapping are built first; their baselines stay empty until a named human accepts one.
+- Source 6 is Kling (operator decision, 2026-11-20).
 - No pilot source requires new claim research.
 
 ---
@@ -508,7 +524,7 @@ Creator Record refuses a claim whose `last_verified` differs from the value its 
 |---|---|---|---|---|---|
 | OPEN-1 Cadence and alert ownership | | | | ✔ | |
 | OPEN-2 CRC stale-claim policy | | | | | ✔ |
-| OPEN-3 Runway/Higgsfield v2 status and baselines | | | ✔ (for sources 3 and 4) | | |
+| OPEN-3 Runway/Higgsfield v2 status and baselines | | | ✔ baseline snapshot choice only, for sources 3 and 4. The pending reviews do not block baseline capture | | |
 | OPEN-4 Public or private snapshot storage | | | ✔ | | |
 | OPEN-5 Existing monitor and cutover | | | | ✔ | |
 | OPEN-6 Automated retrieval restrictions | | | ✔ | | |
@@ -529,14 +545,16 @@ The directional PRD says cadence should follow source volatility and gives no va
 The 2026-10-26 manifests cite `FGR_030`, `FGR_031`, `CPR_037` and `CPR_038`.
 
 **OBSERVED (2026-11-20, read-only):**
-- All four files exist only as untracked files in one local worktree (`si8-product-a-spike-1a`, branch `work/product-a-mvp-spike-1a`). They are on no branch or remote ref. Under SOP §12 they are not durably preserved.
+- All four files are preserved, unchanged, in one local commit (`2c7e3580`) on the local branch `preserve/lk-pending-governance-runway-higgsfield-2026-11-20`. That branch has not been pushed: the drafts have no remote backup and are on no remote ref. They also remain as untracked files in the worktree `si8-product-a-spike-1a`. Preserving them was not an approval.
 - Each is headed "PM decision: PENDING" and "DRAFT — PENDING". None is approved.
 - The baseline at `8690e9a7` represents only `CLAIM-RUNWAY-COMMERCIAL-USE-001-v1` and `CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1`, in the ledger, the runtime fixture and the Creator Record ledger. No v2 exists on any ref.
 - Committed evidence (`evidence-captures/runway/MANIFEST.md`) shows a public Runway Enterprise Services Terms document dated June 1, 2026. The v1 Runway claim describes Enterprise terms as "non-public, customer-specific". That phrase is contradicted by the committed capture.
 - Both captured Terms state "Last updated October 23, 2026". The v1 claims cite May 11, 2026 (Runway) and July 26, 2026 (Higgsfield). The Higgsfield v1 entry names a change to that date as its own refresh trigger.
 - The manifests record that the commercial-use passages each claim quotes match the captured text verbatim, and that no full earlier copy exists, so changes elsewhere cannot be ruled out.
 
-**Still needed:** a PM decision on the four pending reviews, and which snapshot is the accepted baseline for each source. Under this draft the first baseline for each source would be accepted with one impact item per v1 claim, each `open` with outcome `governance_action_required` and a reference to the pending review, until that review is decided. Whether the v1 claims should change is a governance matter outside this PRD. This decision is not needed for M1, which uses empty baselines.
+**Still needed:** a PM decision on the four pending reviews, and which snapshot is the accepted baseline for each source.
+
+The pending reviews do not by themselves block an initial source-baseline capture. A first baseline for each source may be accepted while they are pending. It is then accepted with one impact item per v1 claim, each `open` with outcome `governance_action_required` and a reference to the pending review. Those items stay open until that review is decided, and nothing in the monitor may represent a pending review, or a claim it proposes, as approved (FR-31a). Only the choice of baseline snapshot is needed before M4. Whether the v1 claims should change is a governance matter outside this PRD. None of this is needed for M1, which uses empty baselines.
 
 **OPEN-4 — Provider snapshots in a public repository.**
 Evidence captures and monitor archives are already committed to a public repository, including full provider terms. Needed: whether to continue, whether to store hashes and diffs publicly with raw snapshots held privately, and any retention limit. FR-15 requires the raw baseline snapshot to be readable where the monitor runs, which constrains the private option.
@@ -563,24 +581,24 @@ Because Matrix claims stay reachable in CRC until each is replaced, the coverage
 ### 11.3 Dependencies
 
 - The pilot mapping is built by a human reading the ledger and manifests; the cross-checks in FR-20 support that reading and do not replace it.
-- Baselines for Runway and Higgsfield need OPEN-3.
+- Baselines for Runway and Higgsfield need the baseline snapshot choice in OPEN-3, not the review decisions.
 - FR-15 needs raw baseline snapshots available to the job (OPEN-4).
 
 ---
 
 ## 12. Implementation milestones and release gates
 
-**PROPOSED.** No milestone starts without explicit authorization. Each milestone is deliverable alone.
+M0 to M3 are approved and binding (2026-11-20). M4 to M6 are provisional. No milestone starts without explicit authorization; approval of this document authorizes M1 only. Each milestone is deliverable alone.
 
 | Milestone | Content | Needs first | Gate to pass before the next |
 |---|---|---|---|
-| **M0 — PRD approval** | This document approved (OPEN-7 decided 2026-11-20) | — | A named approver signs off |
-| **M1 — Registry and mapping contract** | Registry schema; relationship list; six entries with empty baselines; validation; independent cross-checks; coverage report; local fixtures and tests. **No retrieval, no schedule, no alerts, no model calls, no Production change.** | M0 (OPEN-8 decided 2026-11-20) | AC-1 to AC-7 pass, including AC-2a and AC-5a; a named human confirms the mapping for each pilot source |
+| **M0 — PRD approval** | This document approved (OPEN-7 decided 2026-11-20) | — | Passed 2026-11-20: the SI8 operator (JD) approved; the sign-off is the "Approval record" at the top of this document |
+| **M1 — Registry and mapping contract** | Registry schema; relationship list; six entries with empty baselines; validation; independent cross-checks; coverage report; local fixtures and tests. **No retrieval, no schedule, no alerts, no model calls, no Production change.** | M0 (OPEN-8 decided 2026-11-20). Authorized 2026-11-20 | AC-1 to AC-7 pass, including AC-2a and AC-5a; a named human confirms the mapping for each pilot source |
 | **M2 — Observation core on fixtures** | Retrieval logic, registered-redirect rule, extraction, comparison, result model, acceptance and impact records, alert logic; fixtures only, no network | M1 | AC-8 to AC-20 pass |
 | **M3 — Boundary proofs** | Static checks, run-time path check, job permission definition | M2 | AC-21 to AC-23 pass |
-| **M4 — Manual dry runs** | Operator-triggered runs against real sources; no schedule; first baselines accepted | M3; OPEN-3, OPEN-4, OPEN-6, OPEN-9 | Operator reviews each outcome and confirms it is correct |
-| **M5 — Scheduled pilot** | Schedule and alerts on; UAT scenarios 1–6 | M4; OPEN-1, OPEN-5 | All UAT scenarios pass |
-| **M6 — Pilot review** | Review after a fixed period | M5 | See §12.1 |
+| **M4 — Manual dry runs** (provisional) | Operator-triggered runs against real sources; no schedule; first baselines accepted | M3; OPEN-3, OPEN-4, OPEN-6, OPEN-9 | Operator reviews each outcome and confirms it is correct |
+| **M5 — Scheduled pilot** (provisional) | Schedule and alerts on; UAT scenarios 1–6 | M4; OPEN-1, OPEN-5 | All UAT scenarios pass |
+| **M6 — Pilot review** (provisional) | Review after a fixed period | M5 | See §12.1 |
 
 ### 12.1 Evidence needed to expand beyond the pilot
 
@@ -592,6 +610,19 @@ Because Matrix claims stay reachable in CRC until each is replaced, the coverage
 - Operator effort per week is acceptable to the operator.
 
 Expansion to more sources is a separate decision. Phase B is a separate decision again and additionally requires OPEN-2 resolved.
+
+### 12.2 M1 implementation contract (operator directions, 2026-11-20)
+
+These directions settle points the requirements left to the implementation. They bind M1.
+
+- **Sixth pilot source:** Kling.
+- **Claim identity and lifecycle:** the governed ledger is authoritative. The runtime claim fixture is used for consistency checks, scope and exposure only. The ledger is read by the same narrow extraction the existing fixture-consistency guard uses (claim headings and each entry's own `Lifecycle:` line); no general prose parser is built. Anything that cannot be read exactly fails validation.
+- **Lifecycle handling:** a relationship may name only a claim that is `Adopted` in the ledger. A disagreement between the ledger and the runtime fixture about a mapped claim's lifecycle fails validation.
+- **Source scope:** a provider or licence source carries a stable tool or provider identity (`scope`, §6.1). A relationship from a scoped source is valid only where the governed claim names the same identity. Scope is never inferred from a URL or a provider name. There is no domain-specific orchestration.
+- **Human confirmation:** a relationship or exclusion without a named confirmer and date is recorded as proposed. It is reported as awaiting confirmation and the registry is not valid until a named human confirms it. The tool never records a confirmation itself.
+- **Exclusions:** an exclusion may name a claim ID that is not in the ledger, for example a proposed successor named in an evidence manifest while its review is pending. Such an ID can never be mapped.
+- **Format and location:** a standalone tool under `tools/lk-source-registry/`, outside the Production application's import graph, with a JSON registry. It reads repository files and writes none.
+- **Offline validation:** the M1 validation command produces the coverage and consistency report. Real baselines stay empty. Baseline-version mismatch is tested with synthetic fixtures. No source is fetched.
 
 ---
 
@@ -624,4 +655,4 @@ Expansion to more sources is a separate decision. Phase B is a separate decision
 - Scheduled jobs in the repository's existing automation continue to be available.
 - Pilot sources 3–5 remain fetchable by plain HTTP. If not, they move to `human_capture` and the pilot still holds.
 - The six-source pilot is small enough that a hand-built mapping is practical.
-- Nothing in this draft has been approved.
+- The approval of 2026-11-20 covers what the "Approval record" lists and nothing else. OPEN-1, OPEN-2, OPEN-3, OPEN-4, OPEN-5, OPEN-6 and OPEN-9 remain open.
