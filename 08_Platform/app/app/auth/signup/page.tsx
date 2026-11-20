@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import Link from 'next/link'
 import { Turnstile } from '@marsidev/react-turnstile'
 import { CREATOR_RECORD_V1_NEW_SALES } from '@/lib/submissions/build-intake-insert'
+import { SignupProductContext, SIGNUP_COPY } from '@/components/auth/SignupProductContext'
 
 const signupSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -21,105 +22,6 @@ const signupSchema = z.object({
 })
 
 type SignupForm = z.infer<typeof signupSchema>
-
-function ProductContext({ nextPath }: { nextPath: string }) {
-  if (nextPath === '/record') {
-    return (
-      <div style={{
-        background: '#FFFBF5',
-        border: '1px solid #C8900A',
-        borderRadius: '8px',
-        padding: '16px 20px',
-        marginBottom: '24px',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-          <span style={{
-            background: '#1a1918',
-            color: '#aaa',
-            fontSize: '10px',
-            fontWeight: 700,
-            letterSpacing: '1px',
-            padding: '3px 8px',
-            borderRadius: '3px',
-            textTransform: 'uppercase',
-          }}>Pre-Commercial Record</span>
-          <span style={{ color: '#C8900A', fontWeight: 700, fontSize: '15px' }}>Creator Record — $29</span>
-        </div>
-        <p style={{ color: '#5a3e00', fontSize: '13px', margin: 0, lineHeight: 1.5 }}>
-          Self-attested Chain of Title documentation. You fill out the form — SI8 generates and files your PDF with a permanent record ID. Instant automated delivery.
-        </p>
-        <p style={{ color: '#999', fontSize: '12px', margin: '8px 0 0', fontStyle: 'italic' }}>
-          Not accepted by brand legal teams or E&amp;O underwriters for commercial use.
-        </p>
-      </div>
-    )
-  }
-
-  if (nextPath === '/certify') {
-    return (
-      <div style={{
-        background: '#FFFBF5',
-        border: '1px solid #C8900A',
-        borderRadius: '8px',
-        padding: '16px 20px',
-        marginBottom: '24px',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-          <span style={{
-            background: '#C8900A',
-            color: '#fff',
-            fontSize: '10px',
-            fontWeight: 700,
-            letterSpacing: '1px',
-            padding: '3px 8px',
-            borderRadius: '3px',
-            textTransform: 'uppercase',
-          }}>SI8 Certified</span>
-          <span style={{ color: '#C8900A', fontWeight: 700, fontSize: '15px' }}>SI8 Certified — $499</span>
-        </div>
-        <p style={{ color: '#5a3e00', fontSize: '13px', margin: 0, lineHeight: 1.5 }}>
-          90-minute human review. SI8 issues a Chain of Title document stamped <strong>SI8 VERIFIED · COMMERCIAL AUDIT PASSED</strong> — accepted by brand legal teams and E&amp;O underwriters for commercial campaigns.
-        </p>
-        <p style={{ color: '#888', fontSize: '12px', margin: '8px 0 0' }}>
-          Used to unlock $5K–$50K brand campaigns. 3–5 day turnaround.
-        </p>
-      </div>
-    )
-  }
-
-  // No next param — lite tier comparison
-  return (
-    <div style={{
-      background: '#FFFBF5',
-      border: '1px solid #e8d5a3',
-      borderRadius: '8px',
-      padding: '16px 18px',
-      marginBottom: '24px',
-    }}>
-      <p style={{ color: '#8C7A4A', fontSize: '11px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', margin: '0 0 12px' }}>
-        Choose your tier after signing up
-      </p>
-      <div style={{ display: 'flex', gap: '12px' }}>
-        <div style={{ flex: 1, borderRight: '1px solid #e8d5a3', paddingRight: '12px' }}>
-          <div style={{ color: '#C8900A', fontWeight: 700, fontSize: '13px', marginBottom: '6px' }}>Creator Record — $29</div>
-          <div style={{ color: '#6b6458', fontSize: '12px', lineHeight: 1.6 }}>
-            ✓ Instant automated delivery<br />
-            ✓ Chain of Title on file<br />
-            ✗ Not for commercial campaigns
-          </div>
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ color: '#C8900A', fontWeight: 700, fontSize: '13px', marginBottom: '6px' }}>SI8 Certified — $499</div>
-          <div style={{ color: '#6b6458', fontSize: '12px', lineHeight: 1.6 }}>
-            ✓ 90-min human review<br />
-            ✓ Accepted by brand legal & E&O<br />
-            ✓ Unlocks $5K–$50K campaigns
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 export default function SignupPage() {
   const router = useRouter()
@@ -206,15 +108,12 @@ export default function SignupPage() {
 
   const pageTitle = nextPath === '/certify'
     ? 'Create your account to get started'
-    : nextPath === '/record'
-    ? 'Create your account to get started'
     : 'Create your account'
 
+  // SI8-SIGNUP-COPY-1: '/record' never reaches here while v1 sales are retired (see the redirect above).
   const pageDescription = nextPath === '/certify'
-    ? 'You\'ll be taken to the SI8 Certified submission form after signing up.'
-    : nextPath === '/record'
-    ? 'You\'ll be taken to the Creator Record form after signing up.'
-    : 'Join SI8 to submit your AI video for Chain of Title documentation.'
+    ? SIGNUP_COPY.subtitle.certify
+    : SIGNUP_COPY.subtitle.generic
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -224,7 +123,7 @@ export default function SignupPage() {
           <CardDescription>{pageDescription}</CardDescription>
         </CardHeader>
         <CardContent>
-          <ProductContext nextPath={nextPath} />
+          <SignupProductContext nextPath={nextPath} />
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
