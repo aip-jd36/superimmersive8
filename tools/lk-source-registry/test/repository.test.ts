@@ -78,6 +78,10 @@ test('the validation command reports and exits non-zero while confirmation is pe
   assert.match(report, /## CRC-reachable, not monitored \(Legacy Matrix\)/)
   assert.match(report, /## CRC-eligible governed claims with no registered source/)
   assert.equal(exitCode, /Verdict: VALID$/m.test(report) ? 0 : 2)
+  // No confirmation has been recorded, so the committed registry is not VALID.
+  assert.equal(registry.relationships.every((r) => r.confirmed_by === null && r.confirmed_on === null), true)
+  assert.equal(registry.exclusions.every((x) => x.confirmed_by === null && x.confirmed_on === null), true)
+  assert.equal(exitCode, 2)
 })
 
 test('an unreadable registry file is INVALID', async () => {

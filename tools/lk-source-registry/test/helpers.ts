@@ -8,6 +8,7 @@ import type { Evidence, Exclusion, Registry, Relationship, SourceEntry } from '.
 
 export const LEDGER = 'synthetic/LEDGER.md'
 export const MANIFEST = 'synthetic/alpha/MANIFEST.md'
+export const REVIEW_DOC = 'synthetic/reviews/PENDING_REVIEW.md'
 
 export function source(over: Partial<SourceEntry> = {}): SourceEntry {
   return {
@@ -39,11 +40,11 @@ export function statute(over: Partial<SourceEntry> = {}): SourceEntry {
 }
 
 export function rel(source_id: string, claim_ref: string, over: Partial<Relationship> = {}): Relationship {
-  return { source_id, claim_ref, basis_path: LEDGER, basis_note: 'Named as the primary source in the ledger entry.', confirmed_by: 'Test Reviewer', confirmed_on: '2026-01-15', ...over }
+  return { source_id, claim_ref, basis_path: LEDGER, basis_note: 'Named as the primary source in the ledger entry.', source_identity: 'address_in_ledger', confirmed_by: 'Test Reviewer', confirmed_on: '2026-01-15', ...over }
 }
 
 export function exc(source_id: string, claim_ref: string, over: Partial<Exclusion> = {}): Exclusion {
-  return { source_id, claim_ref, reason: 'Named for comparison only.', confirmed_by: 'Test Reviewer', confirmed_on: '2026-01-15', ...over }
+  return { source_id, claim_ref, category: 'not_a_dependency', reason: 'Named for comparison only.', evidence_path: null, confirmed_by: 'Test Reviewer', confirmed_on: '2026-01-15', ...over }
 }
 
 export function registry(over: Partial<Registry> = {}): Registry {
@@ -60,6 +61,15 @@ export function evidence(over: Partial<Evidence> = {}): Evidence {
       ['CLAIM-GAMMA-RULE-001-v1', 'Adopted'],
       ['CLAIM-OLD-RULE-001-v1', 'Deprecated'],
       ['CLAIM-LEDGER-ONLY-001-v1', 'Adopted'],
+    ]),
+    ledgerSourceAddresses: new Map([
+      ['CLAIM-ALPHA-USE-001-v1', ['alpha.example/terms']],
+      ['CLAIM-ALPHA-USE-002-v1', ['alpha.example/pricing', 'alpha.example/terms']],
+      ['CLAIM-BETA-USE-001-v1', ['beta.example/terms']],
+      ['CLAIM-GAMMA-RULE-001-v1', ['law.example/gamma', 'law.example/guidance']],
+      ['CLAIM-OLD-RULE-001-v1', ['law.example/gamma']],
+      ['CLAIM-LEDGER-ONLY-001-v1', ['alpha.example/terms']],
+      ['CLAIM-DELTA-STOCK-001-v1', ['alpha.example/terms']],
     ]),
     runtime: [
       { claim_id: 'CLAIM-ALPHA-USE-001-v1', lifecycle: 'Adopted', crc_eligible: 'Yes', tool_scope: ['alpha'], provider_scope: null },

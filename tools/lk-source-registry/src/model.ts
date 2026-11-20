@@ -36,6 +36,27 @@ export const SCOPED_SOURCE_CLASSES: readonly SourceClass[] = ['provider_terms', 
 export const LEDGER_LIFECYCLES = ['Adopted', 'Deprecated', 'Candidate'] as const
 export type LedgerLifecycle = (typeof LEDGER_LIFECYCLES)[number]
 
+/**
+ * How a relationship's source is tied to the authority the claim cites.
+ *  address_in_ledger  the source's registered address appears, as an address, in the claim's own
+ *                     "Source references" in the ledger. Checked mechanically. An address match is
+ *                     not proof that two documents are the same document.
+ *  attested           not mechanically checkable. The named confirmer attests it, and basis_note
+ *                     must explain why. Reported as attested, never as verified.
+ */
+export const SOURCE_IDENTITY_BASES = ['address_in_ledger', 'attested'] as const
+
+/**
+ * Why a claim is excluded from a source's mapping.
+ *  depends_on_unregistered_source  a real dependency of the claim on an authority that is not a
+ *                                  registered source. The claim stays uncovered and is reported so.
+ *  not_a_dependency                the claim is named near this source but does not depend on it.
+ *  not_in_ledger                   the identifier is not a governed claim (for example a proposed
+ *                                  successor in a pending review). It can never be mapped.
+ */
+export const EXCLUSION_CATEGORIES = ['depends_on_unregistered_source', 'not_a_dependency', 'not_in_ledger'] as const
+export type ExclusionCategory = (typeof EXCLUSION_CATEGORIES)[number]
+
 export interface SourceScope {
   kind: ScopeKind
   /** Runtime tool or provider identifier, exactly as governed claims name it. null when kind is 'none'. */
@@ -84,6 +105,7 @@ export interface Relationship {
   /** Repository path where the dependence is evidenced. */
   basis_path: string
   basis_note: string
+  source_identity: (typeof SOURCE_IDENTITY_BASES)[number]
   /** Named human. null means the relationship is proposed and not yet confirmed. */
   confirmed_by: string | null
   confirmed_on: string | null
@@ -92,7 +114,10 @@ export interface Relationship {
 export interface Exclusion {
   source_id: string
   claim_ref: string
+  category: ExclusionCategory
   reason: string
+  /** Repository file that names an identifier absent from the ledger. null means the source's own evidence manifest. */
+  evidence_path: string | null
   confirmed_by: string | null
   confirmed_on: string | null
 }
@@ -134,7 +159,9 @@ export interface Evidence {
   runtime: RuntimeClaim[]
   matrix: MatrixRowEvidence[]
   creatorRecord: CreatorRecordEntry[]
-  /** Manifest path to the claim IDs it names. null when the file does not exist. */
+  /** Claim ID to the addresses written in that claim's own "Source references" in the ledger, normalised. */
+  ledgerSourceAddresses: Map<string, string[]>
+  /** Repository file (evidence manifest or exclusion evidence) to the claim IDs it names. null when the file does not exist. */
   manifests: Map<string, string[] | null>
   /** Repository-relative paths that exist. */
   existingPaths: Set<string>
@@ -144,8 +171,13 @@ export interface Evidence {
 
 // ── Results ────────────────────────────────────────────────────────────────
 
-/** 'error' fails validation. 'pending' means a named human has not yet confirmed. */
-export type Severity = 'error' | 'pending'
+/**
+ * 'error'   fails validation.
+ * 'review'  a recorded relationship can no longer be relied on and a human must review it. It is not
+ *           an active mapping and must not be used for any claim-impact conclusion.
+ * 'pending' a named human has not yet confirmed the entry.
+ */
+export type Severity = 'error' | 'review' | 'pending'
 
 export interface Issue {
   severity: Severity
@@ -154,9 +186,11 @@ export interface Issue {
   message: string
 }
 
-export type Verdict = 'VALID' | 'VALID_PENDING_CONFIRMATION' | 'INVALID'
+export type Verdict = 'VALID' | 'VALID_PENDING_CONFIRMATION' | 'REVIEW_REQUIRED' | 'INVALID'
 
 export interface ValidationResult {
   verdict: Verdict
   issues: Issue[]
+  /** "source_id -> claim_ref" for every relationship flagged for review. These are not active mappings. */
+  underReview: string[]
 }

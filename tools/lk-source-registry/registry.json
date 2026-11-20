@@ -11,16 +11,22 @@
       "expected_final_url": "https://www.copyright.gov/ai/",
       "identity_markers": [],
       "retrieval_method": "automated_http",
-      "extraction_rule": { "id": "html-text", "version": 1 },
+      "extraction_rule": {
+        "id": "html-text",
+        "version": 1
+      },
       "min_extracted_length": null,
       "version_locator": null,
       "evidence_tier": "A",
       "applicability_scope_note": "Index page for the Copyright Office AI report series and registration guidance. United States (federal).",
       "cadence_class": "regulator_guidance",
-      "scope": { "kind": "none", "id": null },
+      "scope": {
+        "kind": "none",
+        "id": null
+      },
       "baseline": null,
       "evidence_manifest": null,
-      "notes": "Already observed by the existing monitor (tools/lk-source-monitor) under the same identifier."
+      "notes": "Already observed by the existing monitor (tools/lk-source-monitor) under the same identifier. Watch-only in the pilot: no governed claim is mapped to this source. Observing it does not detect a change inside any document it links to."
     },
     {
       "source_id": "federal-register-copyright-office",
@@ -32,16 +38,22 @@
       "expected_final_url": "https://www.federalregister.gov/api/v1/documents.json?conditions%5Bagencies%5D%5B%5D=copyright-office-library-of-congress&order=newest&per_page=10",
       "identity_markers": [],
       "retrieval_method": "automated_api",
-      "extraction_rule": { "id": "json-feed", "version": 1 },
+      "extraction_rule": {
+        "id": "json-feed",
+        "version": 1
+      },
       "min_extracted_length": null,
       "version_locator": null,
       "evidence_tier": "A",
       "applicability_scope_note": "Newest ten Federal Register documents for the Copyright Office / Library of Congress agency. United States (federal).",
       "cadence_class": "official_feed",
-      "scope": { "kind": "none", "id": null },
+      "scope": {
+        "kind": "none",
+        "id": null
+      },
       "baseline": null,
       "evidence_manifest": null,
-      "notes": "Already observed by the existing monitor (tools/lk-source-monitor) under the same identifier. No API key is required."
+      "notes": "Already observed by the existing monitor (tools/lk-source-monitor) under the same identifier. No API key is required. Watch-only in the pilot: no governed claim is mapped to this source. Observing it does not detect a change inside any document it links to."
     },
     {
       "source_id": "runway-terms-of-use",
@@ -53,13 +65,19 @@
       "expected_final_url": "https://runway.com/terms-of-use",
       "identity_markers": [],
       "retrieval_method": "automated_http",
-      "extraction_rule": { "id": "html-text", "version": 1 },
+      "extraction_rule": {
+        "id": "html-text",
+        "version": 1
+      },
       "min_extracted_length": null,
       "version_locator": null,
       "evidence_tier": "A",
       "applicability_scope_note": "Runway individual and team plans. Enterprise is governed by a separate document that this entry does not cover.",
       "cadence_class": "provider_terms",
-      "scope": { "kind": "tool", "id": "runway-gen3" },
+      "scope": {
+        "kind": "tool",
+        "id": "runway-gen3"
+      },
       "baseline": null,
       "evidence_manifest": "06_Operations/institutional-knowledge/notebook/evidence-captures/runway/MANIFEST.md",
       "notes": "The evidence manifest records that runwayml.com redirects to runway.com. The registered location is the runway.com address; no redirect step is registered."
@@ -74,13 +92,19 @@
       "expected_final_url": "https://higgsfield.ai/terms-of-use-agreement",
       "identity_markers": [],
       "retrieval_method": "automated_http",
-      "extraction_rule": { "id": "html-text", "version": 1 },
+      "extraction_rule": {
+        "id": "html-text",
+        "version": 1
+      },
       "min_extracted_length": null,
       "version_locator": null,
       "evidence_tier": "A",
       "applicability_scope_note": "Higgsfield self-serve plans under the public Terms of Use Agreement.",
       "cadence_class": "provider_terms",
-      "scope": { "kind": "tool", "id": "higgsfield" },
+      "scope": {
+        "kind": "tool",
+        "id": "higgsfield"
+      },
       "baseline": null,
       "evidence_manifest": "06_Operations/institutional-knowledge/notebook/evidence-captures/higgsfield/MANIFEST.md",
       "notes": "The evidence manifest records two fetches with different raw bytes and identical extracted text."
@@ -95,13 +119,19 @@
       "expected_final_url": "https://www.nysenate.gov/legislation/laws/GBS/396-B",
       "identity_markers": [],
       "retrieval_method": "automated_http",
-      "extraction_rule": { "id": "html-text", "version": 1 },
+      "extraction_rule": {
+        "id": "html-text",
+        "version": 1
+      },
       "min_extracted_length": null,
       "version_locator": null,
       "evidence_tier": "A",
       "applicability_scope_note": "New York State statute text as published by the State Senate.",
       "cadence_class": "statute_or_regulation",
-      "scope": { "kind": "none", "id": null },
+      "scope": {
+        "kind": "none",
+        "id": null
+      },
       "baseline": null,
       "evidence_manifest": "06_Operations/institutional-knowledge/notebook/evidence-captures/ny-general-business-law/MANIFEST.md",
       "notes": ""
@@ -122,7 +152,10 @@
       "evidence_tier": "B",
       "applicability_scope_note": "Kling AI Terms of Service, commercial-use provisions.",
       "cadence_class": "human_capture",
-      "scope": { "kind": "tool", "id": "kling" },
+      "scope": {
+        "kind": "tool",
+        "id": "kling"
+      },
       "baseline": null,
       "evidence_manifest": null,
       "notes": "Known blocked source: the ledger records HTTP 446 on direct fetch. Captured by a human under the Evidence Capture SOP and never fetched automatically. No evidence-captures folder exists for Kling."
@@ -130,34 +163,11 @@
   ],
   "relationships": [
     {
-      "source_id": "uscoai-ai-page",
-      "claim_ref": "CLAIM-COPY-001-v1",
-      "basis_path": "06_Operations/institutional-knowledge/notebook/GOVERNED-CLAIMS.md",
-      "basis_note": "Source references cite the Copyright Office Part 2 Copyrightability report, published under copyright.gov/ai/. This page is the index of that report series, so the dependence is indirect.",
-      "confirmed_by": null,
-      "confirmed_on": null
-    },
-    {
-      "source_id": "uscoai-ai-page",
-      "claim_ref": "CLAIM-COPY-002-v1",
-      "basis_path": "06_Operations/institutional-knowledge/notebook/GOVERNED-CLAIMS.md",
-      "basis_note": "Source references cite the Copyright Office Part 2 Copyrightability report, published under copyright.gov/ai/. This page is the index of that report series, so the dependence is indirect.",
-      "confirmed_by": null,
-      "confirmed_on": null
-    },
-    {
-      "source_id": "uscoai-ai-page",
-      "claim_ref": "CLAIM-COPY-003-v1",
-      "basis_path": "06_Operations/institutional-knowledge/notebook/GOVERNED-CLAIMS.md",
-      "basis_note": "Source references cite the Copyright Office Part 2 Copyrightability report, published under copyright.gov/ai/. This page is the index of that report series, so the dependence is indirect.",
-      "confirmed_by": null,
-      "confirmed_on": null
-    },
-    {
       "source_id": "runway-terms-of-use",
       "claim_ref": "CLAIM-RUNWAY-COMMERCIAL-USE-001-v1",
       "basis_path": "06_Operations/institutional-knowledge/notebook/GOVERNED-CLAIMS.md",
       "basis_note": "Source references name the Runway Terms of Use (runway.com/terms-of-use), sections 4.4 and 5, as the primary source.",
+      "source_identity": "address_in_ledger",
       "confirmed_by": null,
       "confirmed_on": null
     },
@@ -166,6 +176,7 @@
       "claim_ref": "CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1",
       "basis_path": "06_Operations/institutional-knowledge/notebook/GOVERNED-CLAIMS.md",
       "basis_note": "Source references name the Higgsfield Terms of Use Agreement (higgsfield.ai/terms-of-use-agreement) as the primary source.",
+      "source_identity": "address_in_ledger",
       "confirmed_by": null,
       "confirmed_on": null
     },
@@ -174,6 +185,7 @@
       "claim_ref": "CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1",
       "basis_path": "06_Operations/institutional-knowledge/notebook/GOVERNED-CLAIMS.md",
       "basis_note": "The claim states a disclosure rule of New York General Business Law section 396-b.",
+      "source_identity": "address_in_ledger",
       "confirmed_by": null,
       "confirmed_on": null
     },
@@ -182,14 +194,7 @@
       "claim_ref": "CLAIM-KLING-COMMERCIAL-USE-BASELINE-001-v1",
       "basis_path": "06_Operations/institutional-knowledge/notebook/GOVERNED-CLAIMS.md",
       "basis_note": "Source references name the Kling AI Terms of Service (kling.ai/docs/user-policy), section 4.6, as the primary source.",
-      "confirmed_by": null,
-      "confirmed_on": null
-    },
-    {
-      "source_id": "kling-terms-of-service",
-      "claim_ref": "CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1",
-      "basis_path": "06_Operations/institutional-knowledge/notebook/GOVERNED-CLAIMS.md",
-      "basis_note": "Source references name the Kling AI Terms of Service (kling.ai/docs/user-policy) as the primary source.",
+      "source_identity": "address_in_ledger",
       "confirmed_by": null,
       "confirmed_on": null
     }
@@ -198,21 +203,36 @@
     {
       "source_id": "ny-gbl-396-b",
       "claim_ref": "CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1",
+      "category": "not_a_dependency",
       "reason": "Named in the evidence manifest only as the claim governed by a different statute (New York Civil Rights Law sections 50, 50-f and 51). The manifest states that the two authorities do not overlap.",
+      "evidence_path": null,
       "confirmed_by": null,
       "confirmed_on": null
     },
     {
       "source_id": "runway-terms-of-use",
       "claim_ref": "CLAIM-RUNWAY-COMMERCIAL-USE-001-v2",
+      "category": "not_in_ledger",
       "reason": "Named in the evidence manifest as a proposed successor. It is not in the ledger: the review that proposes it (FGR_030) is a PENDING draft. Not treated as an existing claim.",
+      "evidence_path": null,
       "confirmed_by": null,
       "confirmed_on": null
     },
     {
       "source_id": "higgsfield-terms-of-use-agreement",
       "claim_ref": "CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v2",
+      "category": "not_in_ledger",
       "reason": "Named in the evidence manifest as a proposed successor. It is not in the ledger: the review that proposes it (FGR_031) is a PENDING draft. Not treated as an existing claim.",
+      "evidence_path": null,
+      "confirmed_by": null,
+      "confirmed_on": null
+    },
+    {
+      "source_id": "kling-terms-of-service",
+      "claim_ref": "CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1",
+      "category": "depends_on_unregistered_source",
+      "reason": "The ledger cites the Kling AI Terms of Paid Service (kling.ai/docs/payment-policy) as this claim's primary source. That is a different document from the registered Terms of Service and is not a pilot source. The claim is not monitored.",
+      "evidence_path": null,
       "confirmed_by": null,
       "confirmed_on": null
     }

@@ -8,7 +8,7 @@ import { test } from 'node:test'
 import { claimIdsInText, readLedgerText } from '../src/evidence.ts'
 import { governedNotCovered, matrixNotMonitored, MATRIX_SECTION_NOTE, MATRIX_SECTION_TITLE, renderReport } from '../src/report.ts'
 import { validateRegistry } from '../src/validate.ts'
-import { evidence, exc, registry, rel, source, statute } from './helpers.ts'
+import { evidence, exc, registry, rel, REVIEW_DOC, source, statute } from './helpers.ts'
 
 function report(reg = registry(), ev = evidence()): string {
   return renderReport(reg, ev, validateRegistry(reg, ev))
@@ -77,21 +77,22 @@ test('AC-6: both directions of a many-to-many mapping are reported, with exposur
   const reg = registry({
     sources: [source(), statute(), statute({ source_id: 'gamma-guidance', source_class: 'regulator_guidance', canonical_url: 'https://law.example/guidance', expected_final_url: 'https://law.example/guidance' })],
     relationships: [rel('alpha-terms', 'CLAIM-ALPHA-USE-001-v1'), rel('alpha-terms', 'CLAIM-ALPHA-USE-002-v1'), rel('gamma-statute', 'CLAIM-GAMMA-RULE-001-v1'), rel('gamma-guidance', 'CLAIM-GAMMA-RULE-001-v1')],
-    exclusions: [exc('gamma-statute', 'CLAIM-NEVER-ADOPTED-001-v2')],
+    exclusions: [exc('gamma-statute', 'CLAIM-NEVER-ADOPTED-001-v2', { category: 'not_in_ledger', evidence_path: REVIEW_DOC })],
   })
+  ev.manifests.set(REVIEW_DOC, ['CLAIM-NEVER-ADOPTED-001-v2'])
   const text = report(reg, ev)
   const block = (id: string) => text.split(`### ${id}\n`)[1].split('\n### ')[0]
   assert.match(block('alpha-terms'), /CLAIM-ALPHA-USE-001-v1 \| ledger lifecycle: Adopted \| CRC-eligible: Yes \| Creator Record ledger entries: CR-ENTRY-1 \(eligible: Yes, refresh by: 2027-01-01\)/)
   assert.match(block('alpha-terms'), /CLAIM-ALPHA-USE-002-v1 \| ledger lifecycle: Adopted \| CRC-eligible: Pending \| Creator Record ledger entries: none/)
   assert.match(block('gamma-statute'), /CLAIM-GAMMA-RULE-001-v1/)
   assert.match(block('gamma-guidance'), /CLAIM-GAMMA-RULE-001-v1/)
-  assert.match(block('gamma-statute'), /excluded: CLAIM-NEVER-ADOPTED-001-v2 \(not in the ledger\)/)
+  assert.match(block('gamma-statute'), /excluded: CLAIM-NEVER-ADOPTED-001-v2 \| not a governed claim: the identifier is not in the ledger and is not approved/)
   assert.match(block('alpha-terms'), /baseline: none accepted/)
 })
 
 test('a source with no relationship says so', () => {
   const reg = registry({ sources: [source(), statute()] })
-  assert.match(report(reg), /No dependent claim is on record for this source/)
+  assert.match(report(reg), /Watch-only: no dependent claim is on record for this source\. Observing it does not detect a change inside any document it links to\./)
 })
 
 // ── Narrow readers ─────────────────────────────────────────────────────────

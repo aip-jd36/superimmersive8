@@ -5,9 +5,9 @@
 **Version:** 0.2 (supersedes the unpublished v0.1 draft of the same date; v0.1 was never committed)
 **Date:** 2026-11-20
 **Owner:** JD / SI8
-**Milestones that produced this draft:** LK-SOURCE-MONITOR-PRD-1 (v0.1), LK-SOURCE-MONITOR-PRD-2 (critical review, v0.2), LK-SOURCE-MONITOR-PRD-3 (v0.2 revised: OPEN-7 operator decision recorded; impact-closure disposition added; OPEN-3 updated with repository findings; OPEN-9 added), LK-MATRIX-FREEZE-OPEN8-1 (v0.2 revised: OPEN-8 operator decision recorded; Legacy Matrix excluded from the mapping; FR-21a, AC-2a and AC-5a added), LK-SOURCE-MONITOR-FOUNDATION-1 (v0.2 approved: approval recorded; OPEN-3 corrected; M1 contract decisions recorded in §12.2; M1 implemented offline)
+**Milestones that produced this draft:** LK-SOURCE-MONITOR-PRD-1 (v0.1), LK-SOURCE-MONITOR-PRD-2 (critical review, v0.2), LK-SOURCE-MONITOR-PRD-3 (v0.2 revised: OPEN-7 operator decision recorded; impact-closure disposition added; OPEN-3 updated with repository findings; OPEN-9 added), LK-MATRIX-FREEZE-OPEN8-1 (v0.2 revised: OPEN-8 operator decision recorded; Legacy Matrix excluded from the mapping; FR-21a, AC-2a and AC-5a added), LK-SOURCE-MONITOR-FOUNDATION-1 (v0.2 approved: approval recorded; OPEN-3 corrected; M1 contract decisions recorded in §12.2; M1 implemented offline), LK-SOURCE-MONITOR-M1-CORRECTIONS-1 (pilot mapping corrected; lifecycle, exclusion and source-identity contracts in §12.2; attribution in §12.2 corrected; OPEN-10 added)
 **Baseline inspected:** `origin/main` = `8690e9a7` for the OBSERVED statements; approval and M1 work were done against `origin/main` = `bb6c709a`
-**Implementation status:** M1 (offline registry and mapping contract) implemented in `tools/lk-source-registry/`, awaiting acceptance. M2 to M6 not started. Phase B not authorized.
+**Implementation status:** M1 (offline registry and mapping contract) implemented in `tools/lk-source-registry/` and corrected in LK-SOURCE-MONITOR-M1-CORRECTIONS-1. No mapping has been confirmed by a human; the M1 gate is not passed. M2 to M6 not started. Phase B not authorized.
 **Related:**
 - `08_Platform/prds/PRD_LIVING_KNOWLEDGE_SOURCE_INPUTS_v0.1.md` (directional parent; "Source B — Automated Source Monitoring", §15, §16, §18)
 - `08_Platform/implementation/LK_PHASE1_TECHNICAL_DESIGN.md` §11, §17–20, §25 and `LK_PHASE1_TECHNICAL_DESIGN_v2.md` §12, §14 (the approved Phase E automation proof)
@@ -307,9 +307,10 @@ All **PROPOSED**. Field names are illustrative; the implementation design fixes 
 |---|---|
 | `source_id`, `claim_ref` | One source, one governed Living Knowledge claim ID. Matrix identifiers are not valid here (OPEN-8) |
 | `basis` | Where the dependence is evidenced (ledger entry, manifest, governance review) |
+| `source_identity` | How the source is tied to the authority the claim cites: `address_in_ledger` (checked) or `attested` (§12.2 C.3) |
 | `confirmed_by`, `confirmed_on` | Named human and date |
 
-Exclusions (a claim that an independent check suggests but a human has ruled out) use the same shape with a reason.
+Exclusions (a claim that an independent check suggests but a human has ruled out) use the same shape with a reason and a category, and, for an identifier outside the ledger, the evidence record that names it (§12.2 C.2).
 
 ### 6.3 Observation, acceptance and impact records
 
@@ -393,8 +394,8 @@ Standing flags persist across runs. A later `FETCH_FAILED` does not clear `open_
 
 | # | Source | Class | Method | Why |
 |---|---|---|---|---|
-| 1 | U.S. Copyright Office AI page | Regulator guidance | `automated_http` | Already monitored; continuity |
-| 2 | Federal Register, Copyright Office documents | Official feed | `automated_api` | Already monitored; structured input |
+| 1 | U.S. Copyright Office AI page | Regulator guidance | `automated_http` | Already monitored; continuity. Watch-only: no claim is mapped to it (§12.2 C.4) |
+| 2 | Federal Register, Copyright Office documents | Official feed | `automated_api` | Already monitored; structured input. Watch-only: no claim is mapped to it |
 | 3 | Runway Terms of Use | Provider terms | `automated_http` | Fetched successfully on 2026-10-26; redirects `runwayml.com` → `runway.com`, which exercises the registered-redirect rule; Creator Record tool |
 | 4 | Higgsfield Terms of Use Agreement | Provider terms | `automated_http` | Fetched successfully on 2026-10-26; raw bytes vary between fetches; changed on 2026-10-23; Creator Record tool |
 | 5 | New York General Business Law §396-b | Statute | `automated_http` | Captured on 2026-09-10; low expected change; exercises the slow cadence |
@@ -416,6 +417,9 @@ All **PROPOSED**. Criteria are grouped by the milestone that must meet them (§1
 - **AC-1** Registry validation passes for all six entries and fails, with a clear reason, for each malformed-entry fixture (bad URL scheme, missing final URL, unknown class, unknown method, rule version not matching the baseline).
 - **AC-2** Every relationship names an existing governed claim, a basis, a confirmer and a date.
 - **AC-2a** A relationship or exclusion whose `claim_ref` is a Matrix row or Matrix claim identifier fails validation with a clear reason.
+- **AC-2b** A relationship marked `address_in_ledger` fails validation when the source's registered address is not among the addresses in the claim's own Source references. Fixtures prove this for a different document of the same provider and for an index page above a cited document.
+- **AC-2c** An exclusion naming an identifier that is not in the ledger fails validation unless an existing evidence record names that exact identifier. An exclusion's category must agree with the ledger.
+- **AC-2d** A relationship whose claim is `Deprecated` is reported for review, is not counted as coverage, and does not make the registry `INVALID`. A relationship to an unknown or unapproved claim fails validation.
 - **AC-3** The scope cross-check (FR-20) reports zero unexplained claims for the pilot's provider and tool sources: each is mapped or excluded with a reason.
 - **AC-4** The manifest cross-check reports zero unexplained claim IDs for entries that point to a manifest.
 - **AC-5** The coverage report lists CRC-eligible claims with no registered source, and its wording states the limits in FR-22.
@@ -531,6 +535,7 @@ Creator Record refuses a claim whose `last_verified` differs from the value its 
 | OPEN-7 Authority for baseline acceptance and item closure | DECIDED 2026-11-20 | | | | |
 | OPEN-8 Legacy Matrix mapping | | DECIDED 2026-11-20 | | | |
 | OPEN-9 Where a no-action disposition is recorded | | | ✔ | | |
+| OPEN-10 Run behaviour when the registry awaits confirmation or review | | Before M2 (not needed for M1) | | | |
 
 ### 11.2 Open decisions
 
@@ -574,6 +579,9 @@ The named SI8 operator performs monitoring operations, baseline acceptance and i
 SOP §7 directs that, until a structured field exists, what was re-confirmed is recorded in prose on the claim's own ledger entry. FR-31 proposes that a `no_governance_action_required` disposition in the monitor's audit history is that structured record. Needed: whether such a disposition must also be noted on the ledger entry. A ledger note is a governed-file edit by a human, and if it changes the claim's `last_verified` it triggers Creator Record re-approval (§10.4).
 *Suggested default, not approved:* the disposition record suffices for a change that does not touch the passages a claim rests on; a ledger note is made only when a human re-verifies the claim's source passages and intends to record that.
 
+**OPEN-10 — Run behaviour when the registry is neither valid nor invalid.**
+FR-3 says an invalid registry stops the run and no source is observed. M1 has two further states: `VALID_PENDING_CONFIRMATION` (an entry is not yet confirmed) and `REVIEW_REQUIRED` (a mapped claim has been deprecated). FR-3 does not say whether a run may proceed in either state. The intent recorded in §12.2 C.1 is that a routine lifecycle change should not disable observation of unrelated sources, and that a relationship under review is never used for a claim-impact conclusion. Needed before M2: whether observation proceeds in each state, and how a run reports a source whose mapping is unconfirmed or under review. FR-3 is unchanged until this is decided. M1 has no runs and is not affected.
+
 **OPEN-8 — Legacy Matrix mapping. DECIDED (SI8 operator, 2026-11-20).**
 The source-to-claim mapping covers governed Living Knowledge claims only. No Matrix row or claim identifier, and no Matrix relationship, is added to the monitoring registry. The reason is the operator's separate decision of the same date to freeze the Legacy Matrix pending retirement, recorded in `06_Operations/institutional-knowledge/notebook/PLATFORM-RIGHTS-MATRIX.md` ("Freeze notice").
 Because Matrix claims stay reachable in CRC until each is replaced, the coverage report lists every CRC-eligible Matrix claim as "CRC-reachable, not monitored" (FR-21a, AC-5a). That list is visibility, not monitoring: a change to a source behind a listed claim is not detected by this monitor. See FR-18, FR-20, §6.2, AC-2 and AC-2a.
@@ -611,18 +619,50 @@ M0 to M3 are approved and binding (2026-11-20). M4 to M6 are provisional. No mil
 
 Expansion to more sources is a separate decision. Phase B is a separate decision again and additionally requires OPEN-2 resolved.
 
-### 12.2 M1 implementation contract (operator directions, 2026-11-20)
+### 12.2 M1 implementation contract
 
-These directions settle points the requirements left to the implementation. They bind M1.
+This section settles points the requirements left to the implementation. It binds M1. Each item says where it comes from, so that an implementation choice is never read as an operator decision.
+
+**A. Operator directions (LK-SOURCE-MONITOR-FOUNDATION-1, 2026-11-20)**
 
 - **Sixth pilot source:** Kling.
-- **Claim identity and lifecycle:** the governed ledger is authoritative. The runtime claim fixture is used for consistency checks, scope and exposure only. The ledger is read by the same narrow extraction the existing fixture-consistency guard uses (claim headings and each entry's own `Lifecycle:` line); no general prose parser is built. Anything that cannot be read exactly fails validation.
-- **Lifecycle handling:** a relationship may name only a claim that is `Adopted` in the ledger. A disagreement between the ledger and the runtime fixture about a mapped claim's lifecycle fails validation.
-- **Source scope:** a provider or licence source carries a stable tool or provider identity (`scope`, §6.1). A relationship from a scoped source is valid only where the governed claim names the same identity. Scope is never inferred from a URL or a provider name. There is no domain-specific orchestration.
-- **Human confirmation:** a relationship or exclusion without a named confirmer and date is recorded as proposed. It is reported as awaiting confirmation and the registry is not valid until a named human confirms it. The tool never records a confirmation itself.
-- **Exclusions:** an exclusion may name a claim ID that is not in the ledger, for example a proposed successor named in an evidence manifest while its review is pending. Such an ID can never be mapped.
-- **Format and location:** a standalone tool under `tools/lk-source-registry/`, outside the Production application's import graph, with a JSON registry. It reads repository files and writes none.
+- **Claim identity and lifecycle authority:** the governed ledger is authoritative. The runtime claim fixture may be used for consistency checks and is not an alternative governance authority. No general-purpose prose parser is built.
+- **Source scope:** each monitored source has a stable provider or tool identity where applicable (`scope`, §6.1). Mapping validation checks source scope against governed claim scope. Scope is not inferred from URLs or provider names. There is no domain-specific orchestration.
+- **Format and location:** the smallest maintainable standalone format, outside the Production application's import graph.
 - **Offline validation:** the M1 validation command produces the coverage and consistency report. Real baselines stay empty. Baseline-version mismatch is tested with synthetic fixtures. No source is fetched.
+
+**B. Implementation interpretations made by the implementing CLI in LK-SOURCE-MONITOR-FOUNDATION-1 (not operator decisions when made)**
+
+The first version of this section listed these under "operator directions". That attribution was wrong and is corrected here.
+
+- *Lifecycle:* M1 first rejected every mapped claim that was not `Adopted`, as a validation error. **Replaced** by the rule in C.1.
+- *Exclusions of identifiers outside the ledger:* M1 first accepted any well-formed identifier. **Replaced** by the rule in C.2.
+- *Human confirmation:* a relationship or exclusion without a named confirmer and date is recorded as proposed; the registry verdict is then `VALID_PENDING_CONFIRMATION`, never `VALID`; the tool never records a confirmation itself. **Retained** under LK-SOURCE-MONITOR-M1-CORRECTIONS-1, which requires this state until a human confirms.
+- *Other choices:* a JSON registry under `tools/lk-source-registry/`, run with the application's existing `tsx` dev dependency; the ledger read by the same narrow extraction the existing fixture-consistency guard uses (claim headings and each entry's own `Lifecycle:` line), with anything unreadable failing validation; a relationship from a scoped source to a claim with no runtime representation fails because its scope cannot be checked; CRC eligibility in the coverage report is read from the runtime fixture, because that is what CRC serves. These remain implementation choices and may be changed by a later decision.
+
+**C. Decisions authorized in LK-SOURCE-MONITOR-M1-CORRECTIONS-1 (operator, 2026-11-20)**
+
+1. **Lifecycle.**
+   - An `Adopted` governed claim may have an active source relationship.
+   - A relationship whose claim has become `Deprecated` (including by supersession) is flagged for review. It is not an active mapping, it is not counted as coverage, and it must not be used for any claim-impact conclusion until a human re-points it to a successor or removes it. It does not make the registry `INVALID`; the verdict is `REVIEW_REQUIRED`.
+   - A claim that is not approved (`Candidate`, or any state other than `Adopted` or `Deprecated`) cannot be mapped. An unknown claim ID fails validation. A disagreement between the ledger and the runtime fixture about a mapped claim's lifecycle fails validation.
+   - FR-3 is not changed. See OPEN-10 for what is still undecided.
+2. **Exclusions.** Every exclusion states a category:
+   - `not_a_dependency`: the claim is in the ledger and does not depend on this source.
+   - `depends_on_unregistered_source`: the claim is in the ledger and depends on an authority that is not a registered source. It is reported as an uncovered dependency and is not monitored.
+   - `not_in_ledger`: the identifier is not a governed claim. It is accepted only where the source's evidence manifest, or another existing repository evidence record named on the exclusion, names that exact identifier. It can never be mapped and is reported as not approved.
+   - An exclusion is never coverage, never evidence that a claim is approved, valid or monitored, and is always printed in the report.
+3. **Source identity.** Every relationship states how its source is tied to the authority the claim cites:
+   - `address_in_ledger`: the source's registered address appears, as a complete address, in the claim's own "Source references" in the ledger. Checked mechanically; a failed check is a validation error. An index page does not match a document published beneath it. An address match is not proof that two documents are the same document, and the report says so.
+   - `attested`: the tie cannot be checked mechanically. The named confirmer attests it and the basis note explains why. It is reported as attested, never as verified.
+   - Only addresses are read from the ledger. No citation, title or section reference is parsed, nothing is fetched and no model is used.
+4. **Pilot registry corrections.** The three relationships from the Copyright Office AI page to `CLAIM-COPY-001-v1`, `-002-v1` and `-003-v1` are removed: those claims cite the Part 2 report, not the index page. The relationship from the Kling Terms of Service to `CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1` is removed: that claim cites the Kling Terms of Paid Service, which is not a pilot source; it is recorded as an uncovered dependency. The Copyright Office page and the Federal Register feed stay in the pilot as watch-only sources with no mapped claim. Watching an index page does not establish detection of a change inside a document it links to.
+
+**D. Still awaiting a human**
+
+- **Mapping confirmation.** No relationship or exclusion has been confirmed. The M1 gate is not passed.
+- **OPEN-10** (below), before M2.
+- Every other OPEN item, unchanged.
 
 ---
 
@@ -655,4 +695,4 @@ These directions settle points the requirements left to the implementation. They
 - Scheduled jobs in the repository's existing automation continue to be available.
 - Pilot sources 3–5 remain fetchable by plain HTTP. If not, they move to `human_capture` and the pilot still holds.
 - The six-source pilot is small enough that a hand-built mapping is practical.
-- The approval of 2026-11-20 covers what the "Approval record" lists and nothing else. OPEN-1, OPEN-2, OPEN-3, OPEN-4, OPEN-5, OPEN-6 and OPEN-9 remain open.
+- The approval of 2026-11-20 covers what the "Approval record" lists and nothing else. OPEN-1, OPEN-2, OPEN-3, OPEN-4, OPEN-5, OPEN-6, OPEN-9 and OPEN-10 remain open.

@@ -108,9 +108,13 @@ test('AC-2: an unconfirmed relationship is pending, never VALID; a half-filled c
   }
 })
 
-test('lifecycle: a Deprecated claim cannot be mapped', () => {
-  const r = validateRegistry(registry({ sources: [source(), statute()], relationships: [rel('alpha-terms', 'CLAIM-ALPHA-USE-001-v1'), rel('gamma-statute', 'CLAIM-OLD-RULE-001-v1')] }), evidence())
+test('lifecycle: a Candidate claim cannot be mapped', () => {
+  const ev = evidence()
+  ev.ledger.set('CLAIM-GAMMA-RULE-001-v1', 'Candidate')
+  ev.runtime[2].lifecycle = 'Candidate'
+  const r = validateRegistry(registry({ sources: [source(), statute()], relationships: [rel('alpha-terms', 'CLAIM-ALPHA-USE-001-v1'), rel('gamma-statute', 'CLAIM-GAMMA-RULE-001-v1')] }), ev)
   assert.ok(codes(r).includes('claim_not_adopted'))
+  assert.equal(r.verdict, 'INVALID')
 })
 
 test('lifecycle: ledger and runtime fixture disagreeing is an error, and the ledger value is the one reported', () => {
@@ -205,7 +209,7 @@ test('AC-4: every claim ID named in the manifest is mapped or excluded', () => {
   const unexplained = validateRegistry(registry({ sources: [s] }), ev)
   assert.match(unexplained.issues.find((i) => i.code === 'manifest_claim_unexplained')!.message, /CLAIM-ALPHA-USE-001-v2/)
   // A proposed claim that is not in the ledger can be excluded with a reason; it can never be mapped.
-  assert.equal(validateRegistry(registry({ sources: [s], exclusions: [exc('alpha-terms', 'CLAIM-ALPHA-USE-001-v2', { reason: 'Proposed in a pending review; not in the ledger.' })] }), ev).verdict, 'VALID')
+  assert.equal(validateRegistry(registry({ sources: [s], exclusions: [exc('alpha-terms', 'CLAIM-ALPHA-USE-001-v2', { category: 'not_in_ledger', reason: 'Proposed in a pending review; not in the ledger.' })] }), ev).verdict, 'VALID')
   assert.ok(codes(validateRegistry(registry({ sources: [s], relationships: [rel('alpha-terms', 'CLAIM-ALPHA-USE-001-v1'), rel('alpha-terms', 'CLAIM-ALPHA-USE-001-v2')] }), ev)).includes('claim_unknown'))
 })
 

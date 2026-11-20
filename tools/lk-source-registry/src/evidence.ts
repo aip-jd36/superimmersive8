@@ -29,6 +29,36 @@ const CREATOR_RECORD_MODULE = '08_Platform/app/lib/creator-record/governed/sourc
 
 const CLAIM_ID_IN_TEXT = /CLAIM-[A-Za-z0-9-]+-v[0-9]+/g
 
+/**
+ * Addresses written in one text block, normalised (see normaliseAddress in validate.ts). An address is
+ * a host with a path, written with or without a scheme. This reads addresses only: it does not read
+ * citations, titles or section numbers, and a truncated address (ending in "...") is not an address.
+ */
+export function addressesInText(text: string): string[] {
+  const out = new Set<string>()
+  for (const m of text.matchAll(/(?:https?:\/\/)?(?:www\.)?[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+\/[^\s`'"<>()\[\],;]*/g)) {
+    let a = m[0]
+    if (a.endsWith('...')) continue
+    a = a.replace(/[.:]+$/, '')
+    out.add(a.replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/\/+$/, '').toLowerCase())
+  }
+  return [...out].sort()
+}
+
+/** Claim ID to the addresses in that entry's own "Source references" block. Exported for tests. */
+export function readLedgerSourceAddresses(markdown: string): Map<string, string[]> {
+  const out = new Map<string, string[]>()
+  const outsideFences = markdown.replace(/```[\s\S]*?```/g, '')
+  for (const section of outsideFences.split(/(?=^### CLAIM-)/m).filter((s) => s.startsWith('### CLAIM-'))) {
+    const id = section.match(/^### (CLAIM-[A-Za-z0-9-]+)\s*$/m)?.[1]
+    if (!id || out.has(id)) continue
+    // The block runs from the "Source references:" line to the next line that starts a new field.
+    const block = section.match(/^Source references:[^\n]*\n((?:[ \t]+[^\n]*\n?|[ \t]*\n)*)/m)?.[1] ?? ''
+    out.set(id, addressesInText(block))
+  }
+  return out
+}
+
 /** Claim ID to lifecycle, from ledger text. Exported for tests. */
 export function readLedgerText(markdown: string, problems: string[]): Map<string, string> {
   const out = new Map<string, string>()
@@ -80,8 +110,11 @@ export async function loadEvidence(registry: unknown): Promise<Evidence> {
   const problems: string[] = []
 
   let ledger = new Map<string, string>()
+  let ledgerSourceAddresses = new Map<string, string[]>()
   try {
-    ledger = readLedgerText(fs.readFileSync(path.join(REPO_ROOT, LEDGER_PATH), 'utf8'), problems)
+    const text = fs.readFileSync(path.join(REPO_ROOT, LEDGER_PATH), 'utf8')
+    ledger = readLedgerText(text, problems)
+    ledgerSourceAddresses = readLedgerSourceAddresses(text)
   } catch {
     problems.push(`ledger: ${LEDGER_PATH} could not be read`)
   }
@@ -111,9 +144,12 @@ export async function loadEvidence(registry: unknown): Promise<Evidence> {
   const manifests = new Map<string, string[] | null>()
   const existingPaths = new Set<string>()
   const reg = (typeof registry === 'object' && registry !== null ? registry : {}) as Partial<Registry>
-  for (const s of Array.isArray(reg.sources) ? reg.sources : []) {
-    const rel = s?.evidence_manifest
-    if (typeof rel !== 'string') continue
+  const evidenceFiles = [
+    ...(Array.isArray(reg.sources) ? reg.sources : []).map((s) => s?.evidence_manifest),
+    ...(Array.isArray(reg.exclusions) ? reg.exclusions : []).map((x) => x?.evidence_path),
+  ]
+  for (const rel of evidenceFiles) {
+    if (typeof rel !== 'string' || manifests.has(rel)) continue
     const abs = safeRepoPath(rel)
     manifests.set(rel, abs && fs.existsSync(abs) && fs.statSync(abs).isFile() ? claimIdsInText(fs.readFileSync(abs, 'utf8')) : null)
   }
@@ -122,5 +158,5 @@ export async function loadEvidence(registry: unknown): Promise<Evidence> {
     if (abs && fs.existsSync(abs)) existingPaths.add(r.basis_path)
   }
 
-  return { ledger, runtime, matrix, creatorRecord, manifests, existingPaths, problems }
+  return { ledger, ledgerSourceAddresses, runtime, matrix, creatorRecord, manifests, existingPaths, problems }
 }

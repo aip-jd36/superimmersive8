@@ -12,7 +12,7 @@
  */
 
 import {
-  EVIDENCE_TIERS, LEDGER_LIFECYCLES, RETRIEVAL_METHODS, SCHEMA_VERSION, SCOPE_KINDS, SCOPED_SOURCE_CLASSES, SOURCE_CLASSES,
+  EVIDENCE_TIERS, EXCLUSION_CATEGORIES, LEDGER_LIFECYCLES, SOURCE_IDENTITY_BASES, RETRIEVAL_METHODS, SCHEMA_VERSION, SCOPE_KINDS, SCOPED_SOURCE_CLASSES, SOURCE_CLASSES,
   type Evidence, type Issue, type Registry, type RuntimeClaim, type SourceEntry, type ValidationResult,
 } from './model.ts'
 
@@ -26,8 +26,8 @@ const SOURCE_KEYS = [
   'retrieval_method', 'extraction_rule', 'min_extracted_length', 'version_locator', 'evidence_tier', 'applicability_scope_note',
   'cadence_class', 'scope', 'baseline', 'evidence_manifest', 'notes',
 ]
-const RELATIONSHIP_KEYS = ['source_id', 'claim_ref', 'basis_path', 'basis_note', 'confirmed_by', 'confirmed_on']
-const EXCLUSION_KEYS = ['source_id', 'claim_ref', 'reason', 'confirmed_by', 'confirmed_on']
+const RELATIONSHIP_KEYS = ['source_id', 'claim_ref', 'basis_path', 'basis_note', 'source_identity', 'confirmed_by', 'confirmed_on']
+const EXCLUSION_KEYS = ['source_id', 'claim_ref', 'category', 'reason', 'evidence_path', 'confirmed_by', 'confirmed_on']
 const BASELINE_KEYS = ['snapshot', 'raw_sha256', 'extracted_sha256', 'extraction_rule_version', 'accepted_by', 'accepted_on']
 const REGISTRY_KEYS = ['schema_version', 'sources', 'relationships', 'exclusions']
 
@@ -68,6 +68,17 @@ function keyProblems(o: Obj, allowed: string[]): string[] {
   return out
 }
 
+/**
+ * A written address reduced to a comparable form: no scheme, no leading "www.", lower case, no
+ * trailing slash. Two addresses are the same only when these forms are equal in full, so an index
+ * page never matches a document published beneath it.
+ */
+export function normaliseAddress(written: string): string {
+  return written.trim().replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/\/+$/, '').toLowerCase()
+}
+
+export const relationshipKey = (sourceId: string, claimRef: string) => `${sourceId} -> ${claimRef}`
+
 function scopeNames(c: RuntimeClaim, kind: string): string[] {
   return (kind === 'tool' ? c.tool_scope : c.provider_scope) ?? []
 }
@@ -76,9 +87,12 @@ export function validateRegistry(input: unknown, ev: Evidence): ValidationResult
   const issues: Issue[] = []
   const err = (code: string, where: string, message: string) => issues.push({ severity: 'error', code, where, message })
   const pend = (code: string, where: string, message: string) => issues.push({ severity: 'pending', code, where, message })
+  const underReview: string[] = []
+  const has = (sev: string) => issues.some((i) => i.severity === sev)
   const finish = (): ValidationResult => ({
-    verdict: issues.some((i) => i.severity === 'error') ? 'INVALID' : issues.length > 0 ? 'VALID_PENDING_CONFIRMATION' : 'VALID',
+    verdict: has('error') ? 'INVALID' : has('review') ? 'REVIEW_REQUIRED' : has('pending') ? 'VALID_PENDING_CONFIRMATION' : 'VALID',
     issues,
+    underReview,
   })
 
   for (const p of ev.problems) err('evidence_unreadable', 'repository evidence', p)
@@ -222,8 +236,27 @@ export function validateRegistry(input: unknown, ev: Evidence): ValidationResult
     if (ledgerLifecycle === undefined) {
       err('claim_unknown', where, `${ref} is not in GOVERNED-CLAIMS.md`)
     } else {
-      if (ledgerLifecycle !== 'Adopted') err('claim_not_adopted', where, `${ref} is ${ledgerLifecycle} in the ledger; only Adopted claims are mapped`)
+      if (ledgerLifecycle === 'Deprecated') {
+        // A routine lifecycle change. The relationship is flagged, is no longer an active mapping, and
+        // must not be used for a claim-impact conclusion. It does not make the registry INVALID.
+        issues.push({ severity: 'review', code: 'relationship_claim_deprecated', where, message: `${ref} is Deprecated in the ledger; this relationship is not an active mapping and must be reviewed (re-pointed to a successor, or removed)` })
+        if (typeof raw.source_id === 'string') underReview.push(relationshipKey(raw.source_id, ref))
+      } else if (ledgerLifecycle !== 'Adopted') {
+        // Candidate or any other state: an unapproved claim never gains standing through the registry.
+        err('claim_not_adopted', where, `${ref} is ${ledgerLifecycle} in the ledger; a claim that has not been Adopted cannot be mapped`)
+      }
       if (rt && rt.lifecycle !== ledgerLifecycle) err('lifecycle_mismatch', where, `${ref} is ${ledgerLifecycle} in the ledger and ${rt.lifecycle} in the runtime fixture`)
+    }
+
+    // Source identity: is the registered source the authority this claim cites?
+    if (!(SOURCE_IDENTITY_BASES as readonly string[]).includes(raw.source_identity as string)) {
+      err('source_identity_invalid', where, 'source_identity must be address_in_ledger or attested')
+    } else if (raw.source_identity === 'address_in_ledger' && src && ledgerLifecycle !== undefined) {
+      const cited = ev.ledgerSourceAddresses.get(ref) ?? []
+      const registered = [src.canonical_url, src.expected_final_url].filter((u): u is string => typeof u === 'string').map(normaliseAddress)
+      if (!registered.some((a) => cited.includes(a))) {
+        err('source_not_cited', where, `the registered address of ${src.source_id} is not among the addresses in ${ref}'s Source references (${cited.length ? cited.join(', ') : 'none found'}). The claim may cite a different document`)
+      }
     }
 
     // Scope: a scoped source may only be mapped to claims that name the same tool or provider.
@@ -246,9 +279,24 @@ export function validateRegistry(input: unknown, ev: Evidence): ValidationResult
     const src = typeof raw.source_id === 'string' ? sources.get(raw.source_id) : undefined
     if (!src) err('source_unknown', where, 'source_id does not name a valid registered source')
     if (!nonEmpty(raw.reason)) err('exclusion_reason_missing', where, 'an exclusion must state its reason')
+    if (raw.evidence_path !== null && !nonEmpty(raw.evidence_path)) err('exclusion_malformed', where, 'evidence_path must be null or a repository path')
+    const category = raw.category
+    if (!(EXCLUSION_CATEGORIES as readonly string[]).includes(category as string)) err('exclusion_category_invalid', where, `category must be one of ${EXCLUSION_CATEGORIES.join(', ')}`)
     checkConfirmation(raw, where, 'exclusion')
-    // An excluded ID need not be in the ledger: a manifest may name a proposed claim that was never adopted.
     if (!checkRefShape(raw.claim_ref, where) || !src) return
+    const inLedger = ev.ledger.has(raw.claim_ref)
+    if (category === 'not_in_ledger') {
+      // An identifier that is not a governed claim must be traceable to an existing evidence record that
+      // names it. This rejects typing errors and identifiers nobody has written down anywhere.
+      if (inLedger) err('exclusion_category_mismatch', where, `${raw.claim_ref} is in the ledger; it cannot be excluded as not_in_ledger`)
+      const where_named = nonEmpty(raw.evidence_path) ? raw.evidence_path : src.evidence_manifest
+      const named = nonEmpty(where_named) ? ev.manifests.get(where_named) : undefined
+      if (!named || !named.includes(raw.claim_ref)) {
+        err('exclusion_unsupported', where, `${raw.claim_ref} is not in the ledger and is not named in ${nonEmpty(where_named) ? where_named : 'any evidence record (the source has no manifest and no evidence_path is given)'}`)
+      }
+    } else if (!inLedger && (category === 'depends_on_unregistered_source' || category === 'not_a_dependency')) {
+      err('claim_unknown', where, `${raw.claim_ref} is not in GOVERNED-CLAIMS.md; only the not_in_ledger category may name an identifier outside the ledger`)
+    }
     const key = pair(src.source_id, raw.claim_ref)
     if (excluded.has(key)) err('exclusion_duplicate', where, 'the same exclusion is listed more than once')
     if (mapped.has(key)) err('mapped_and_excluded', where, 'the same source and claim are both mapped and excluded')

@@ -5,7 +5,7 @@
  *   npx tsx ../../tools/lk-source-registry/src/cli.ts [path/to/registry.json]
  *
  * Prints the validation and coverage report to standard output.
- * Exit code: 0 VALID, 2 VALID_PENDING_CONFIRMATION, 1 INVALID.
+ * Exit code: 0 VALID, 2 VALID_PENDING_CONFIRMATION, 3 REVIEW_REQUIRED, 1 INVALID.
  * Reads repository files only. No network, no model, no writes.
  */
 
@@ -31,7 +31,8 @@ export async function run(registryPath: string): Promise<{ report: string; exitC
   if (readProblem) evidence.problems.push(readProblem)
   const result = validateRegistry(registry, evidence)
   const report = renderReport(result.verdict === 'INVALID' ? null : (registry as Registry), evidence, result)
-  return { report, exitCode: result.verdict === 'VALID' ? 0 : result.verdict === 'INVALID' ? 1 : 2 }
+  const exitCode = { VALID: 0, INVALID: 1, VALID_PENDING_CONFIRMATION: 2, REVIEW_REQUIRED: 3 }[result.verdict]
+  return { report, exitCode }
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
