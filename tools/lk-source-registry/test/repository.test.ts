@@ -47,11 +47,25 @@ test('the pilot registry has no validation error against the repository (AC-1, A
   assert.deepEqual(ev.problems, [])
   const result = validateRegistry(registry, ev)
   assert.deepEqual(result.issues.filter((i) => i.severity === 'error'), [])
-  // Every remaining item is a relationship or exclusion a named human has not yet confirmed.
+  assert.deepEqual(result.issues, [])
+  assert.equal(result.verdict, 'VALID')
+})
+
+test('every entry carries the operator confirmation of 2026-11-20, and without it the registry is only pending', async () => {
+  const entries = [...registry.relationships, ...registry.exclusions]
+  assert.equal(registry.relationships.length, 4)
+  assert.equal(registry.exclusions.length, 4)
+  for (const e of entries) {
+    assert.equal(e.confirmed_by, 'JD (SI8 operator)')
+    assert.equal(e.confirmed_on, '2026-11-20')
+  }
+  // The same registry with the confirmations taken away is not VALID: the verdict rests on the recorded confirmation alone.
+  const strip = <T extends { confirmed_by: string | null; confirmed_on: string | null }>(e: T): T => ({ ...e, confirmed_by: null, confirmed_on: null })
+  const unconfirmed: Registry = { ...registry, relationships: registry.relationships.map(strip), exclusions: registry.exclusions.map(strip) }
+  const result = validateRegistry(unconfirmed, await loadEvidence(unconfirmed))
+  assert.equal(result.verdict, 'VALID_PENDING_CONFIRMATION')
+  assert.equal(result.issues.length, 8)
   for (const i of result.issues) assert.match(i.code, /^(relationship|exclusion)_unconfirmed$/)
-  const unconfirmed = registry.relationships.filter((r) => r.confirmed_by === null).length + registry.exclusions.filter((x) => x.confirmed_by === null).length
-  assert.equal(result.issues.length, unconfirmed)
-  assert.equal(result.verdict, unconfirmed === 0 ? 'VALID' : 'VALID_PENDING_CONFIRMATION')
 })
 
 test('no relationship or exclusion names a pending or unadopted claim as existing', async () => {
@@ -72,16 +86,14 @@ test('the Matrix section matches the Matrix fixture and names no Matrix identifi
   for (const r of [...registry.relationships, ...registry.exclusions]) assert.equal(matrixIds.has(r.claim_ref), false, r.claim_ref)
 })
 
-test('the validation command reports and exits non-zero while confirmation is pending', async () => {
+test('the validation command reports VALID and exits 0 for the confirmed registry', async () => {
   const { report, exitCode } = await run(DEFAULT_REGISTRY)
-  assert.match(report, /^Verdict: (VALID|VALID_PENDING_CONFIRMATION)$/m)
+  assert.match(report, /^Verdict: VALID$/m)
+  assert.match(report, /confirmed by JD \(SI8 operator\) on 2026-11-20; other dependencies may exist/)
+  assert.doesNotMatch(report, /NOT CONFIRMED/)
   assert.match(report, /## CRC-reachable, not monitored \(Legacy Matrix\)/)
   assert.match(report, /## CRC-eligible governed claims with no registered source/)
-  assert.equal(exitCode, /Verdict: VALID$/m.test(report) ? 0 : 2)
-  // No confirmation has been recorded, so the committed registry is not VALID.
-  assert.equal(registry.relationships.every((r) => r.confirmed_by === null && r.confirmed_on === null), true)
-  assert.equal(registry.exclusions.every((x) => x.confirmed_by === null && x.confirmed_on === null), true)
-  assert.equal(exitCode, 2)
+  assert.equal(exitCode, 0)
 })
 
 test('an unreadable registry file is INVALID', async () => {

@@ -5,9 +5,9 @@
 **Version:** 0.2 (supersedes the unpublished v0.1 draft of the same date; v0.1 was never committed)
 **Date:** 2026-11-20
 **Owner:** JD / SI8
-**Milestones that produced this draft:** LK-SOURCE-MONITOR-PRD-1 (v0.1), LK-SOURCE-MONITOR-PRD-2 (critical review, v0.2), LK-SOURCE-MONITOR-PRD-3 (v0.2 revised: OPEN-7 operator decision recorded; impact-closure disposition added; OPEN-3 updated with repository findings; OPEN-9 added), LK-MATRIX-FREEZE-OPEN8-1 (v0.2 revised: OPEN-8 operator decision recorded; Legacy Matrix excluded from the mapping; FR-21a, AC-2a and AC-5a added), LK-SOURCE-MONITOR-FOUNDATION-1 (v0.2 approved: approval recorded; OPEN-3 corrected; M1 contract decisions recorded in §12.2; M1 implemented offline), LK-SOURCE-MONITOR-M1-CORRECTIONS-1 (pilot mapping corrected; lifecycle, exclusion and source-identity contracts in §12.2; attribution in §12.2 corrected; OPEN-10 added)
+**Milestones that produced this draft:** LK-SOURCE-MONITOR-PRD-1 (v0.1), LK-SOURCE-MONITOR-PRD-2 (critical review, v0.2), LK-SOURCE-MONITOR-PRD-3 (v0.2 revised: OPEN-7 operator decision recorded; impact-closure disposition added; OPEN-3 updated with repository findings; OPEN-9 added), LK-MATRIX-FREEZE-OPEN8-1 (v0.2 revised: OPEN-8 operator decision recorded; Legacy Matrix excluded from the mapping; FR-21a, AC-2a and AC-5a added), LK-SOURCE-MONITOR-FOUNDATION-1 (v0.2 approved: approval recorded; OPEN-3 corrected; M1 contract decisions recorded in §12.2; M1 implemented offline), LK-SOURCE-MONITOR-M1-CORRECTIONS-1 (pilot mapping corrected; lifecycle, exclusion and source-identity contracts in §12.2; attribution in §12.2 corrected; OPEN-10 added), LK-SOURCE-MONITOR-M1-CLOSE-1 (operator confirmation of the pilot mapping recorded; M1 gate passed)
 **Baseline inspected:** `origin/main` = `8690e9a7` for the OBSERVED statements; approval and M1 work were done against `origin/main` = `bb6c709a`
-**Implementation status:** M1 (offline registry and mapping contract) implemented in `tools/lk-source-registry/` and corrected in LK-SOURCE-MONITOR-M1-CORRECTIONS-1. No mapping has been confirmed by a human; the M1 gate is not passed. M2 to M6 not started. Phase B not authorized.
+**Implementation status:** M1 (offline registry and mapping contract) implemented in `tools/lk-source-registry/` and corrected in LK-SOURCE-MONITOR-M1-CORRECTIONS-1. The pilot mapping was confirmed by the SI8 operator on 2026-11-20 (LK-SOURCE-MONITOR-M1-CLOSE-1); the M1 gate is passed (§12.2 D). M2 to M6 not started. Phase B not authorized.
 **Related:**
 - `08_Platform/prds/PRD_LIVING_KNOWLEDGE_SOURCE_INPUTS_v0.1.md` (directional parent; "Source B — Automated Source Monitoring", §15, §16, §18)
 - `08_Platform/implementation/LK_PHASE1_TECHNICAL_DESIGN.md` §11, §17–20, §25 and `LK_PHASE1_TECHNICAL_DESIGN_v2.md` §12, §14 (the approved Phase E automation proof)
@@ -601,7 +601,7 @@ M0 to M3 are approved and binding (2026-11-20). M4 to M6 are provisional. No mil
 | Milestone | Content | Needs first | Gate to pass before the next |
 |---|---|---|---|
 | **M0 — PRD approval** | This document approved (OPEN-7 decided 2026-11-20) | — | Passed 2026-11-20: the SI8 operator (JD) approved; the sign-off is the "Approval record" at the top of this document |
-| **M1 — Registry and mapping contract** | Registry schema; relationship list; six entries with empty baselines; validation; independent cross-checks; coverage report; local fixtures and tests. **No retrieval, no schedule, no alerts, no model calls, no Production change.** | M0 (OPEN-8 decided 2026-11-20). Authorized 2026-11-20 | AC-1 to AC-7 pass, including AC-2a and AC-5a; a named human confirms the mapping for each pilot source |
+| **M1 — Registry and mapping contract** | Registry schema; relationship list; six entries with empty baselines; validation; independent cross-checks; coverage report; local fixtures and tests. **No retrieval, no schedule, no alerts, no model calls, no Production change.** | M0 (OPEN-8 decided 2026-11-20). Authorized 2026-11-20 | AC-1 to AC-7 pass, including AC-2a and AC-5a; a named human confirms the mapping for each pilot source. Passed 2026-11-20 (§12.2 D) |
 | **M2 — Observation core on fixtures** | Retrieval logic, registered-redirect rule, extraction, comparison, result model, acceptance and impact records, alert logic; fixtures only, no network | M1 | AC-8 to AC-20 pass |
 | **M3 — Boundary proofs** | Static checks, run-time path check, job permission definition | M2 | AC-21 to AC-23 pass |
 | **M4 — Manual dry runs** (provisional) | Operator-triggered runs against real sources; no schedule; first baselines accepted | M3; OPEN-3, OPEN-4, OPEN-6, OPEN-9 | Operator reviews each outcome and confirms it is correct |
@@ -658,9 +658,30 @@ The first version of this section listed these under "operator directions". That
    - Only addresses are read from the ledger. No citation, title or section reference is parsed, nothing is fetched and no model is used.
 4. **Pilot registry corrections.** The three relationships from the Copyright Office AI page to `CLAIM-COPY-001-v1`, `-002-v1` and `-003-v1` are removed: those claims cite the Part 2 report, not the index page. The relationship from the Kling Terms of Service to `CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1` is removed: that claim cites the Kling Terms of Paid Service, which is not a pilot source; it is recorded as an uncovered dependency. The Copyright Office page and the Federal Register feed stay in the pilot as watch-only sources with no mapped claim. Watching an index page does not establish detection of a change inside a document it links to.
 
-**D. Still awaiting a human**
+**D. M1 gate: operator confirmation (LK-SOURCE-MONITOR-M1-CLOSE-1, 2026-11-20)**
 
-- **Mapping confirmation.** No relationship or exclusion has been confirmed. The M1 gate is not passed.
+On 2026-11-20 the SI8 operator (JD) confirmed the corrected pilot registry: four relationships and four exclusions, across the six pilot sources. The confirmation is recorded on each entry in `tools/lk-source-registry/registry.json`. With AC-1 to AC-7 passing, the M1 gate is passed.
+
+| Confirmed relationship | |
+|---|---|
+| `runway-terms-of-use` | `CLAIM-RUNWAY-COMMERCIAL-USE-001-v1` |
+| `higgsfield-terms-of-use-agreement` | `CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v1` |
+| `ny-gbl-396-b` | `CLAIM-NY-SYNTHETIC-PERFORMER-DISCLOSURE-001-v1` |
+| `kling-terms-of-service` | `CLAIM-KLING-COMMERCIAL-USE-BASELINE-001-v1` |
+
+| Confirmed exclusion | Kind |
+|---|---|
+| `CLAIM-RUNWAY-COMMERCIAL-USE-001-v2` | Not in the governed ledger; proposed by a pending review |
+| `CLAIM-HIGGSFIELD-COMMERCIAL-USE-001-v2` | Not in the governed ledger; proposed by a pending review |
+| `CLAIM-LIKENESS-NY-CONSENT-REQUIREMENT-001-v1` | Not a dependency of the registered statute; governed by a different statute |
+| `CLAIM-KLING-COMMERCIAL-USE-MEMBER-001-v1` | Unmonitored dependency: it depends on the Kling Terms of Paid Service, which is not a registered source |
+
+What the confirmation covers: the accuracy of the source-to-claim mapping and of the documented exclusions and unmonitored dependencies, for the M1 pilot baseline only. Its basis is the entry-by-entry audit and corrections reports, which set each entry beside the claim's Source references in the ledger; it does not record that the operator read the source documents themselves.
+
+What it does not cover: the validity of any claim or any current commercial-use conclusion; the pending Runway and Higgsfield reviews; live source retrieval or monitoring; M2 or any later milestone; OPEN-10; publication, deployment or any remote push.
+
+**E. Still awaiting a human**
+
 - **OPEN-10** (below), before M2.
 - Every other OPEN item, unchanged.
 

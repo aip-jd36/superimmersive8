@@ -168,8 +168,8 @@
       "basis_path": "06_Operations/institutional-knowledge/notebook/GOVERNED-CLAIMS.md",
       "basis_note": "Source references name the Runway Terms of Use (runway.com/terms-of-use), sections 4.4 and 5, as the primary source.",
       "source_identity": "address_in_ledger",
-      "confirmed_by": null,
-      "confirmed_on": null
+      "confirmed_by": "JD (SI8 operator)",
+      "confirmed_on": "2026-11-20"
     },
     {
       "source_id": "higgsfield-terms-of-use-agreement",
@@ -177,8 +177,8 @@
       "basis_path": "06_Operations/institutional-knowledge/notebook/GOVERNED-CLAIMS.md",
       "basis_note": "Source references name the Higgsfield Terms of Use Agreement (higgsfield.ai/terms-of-use-agreement) as the primary source.",
       "source_identity": "address_in_ledger",
-      "confirmed_by": null,
-      "confirmed_on": null
+      "confirmed_by": "JD (SI8 operator)",
+      "confirmed_on": "2026-11-20"
     },
     {
       "source_id": "ny-gbl-396-b",
@@ -186,8 +186,8 @@
       "basis_path": "06_Operations/institutional-knowledge/notebook/GOVERNED-CLAIMS.md",
       "basis_note": "The claim states a disclosure rule of New York General Business Law section 396-b.",
       "source_identity": "address_in_ledger",
-      "confirmed_by": null,
-      "confirmed_on": null
+      "confirmed_by": "JD (SI8 operator)",
+      "confirmed_on": "2026-11-20"
     },
     {
       "source_id": "kling-terms-of-service",
@@ -195,8 +195,8 @@
       "basis_path": "06_Operations/institutional-knowledge/notebook/GOVERNED-CLAIMS.md",
       "basis_note": "Source references name the Kling AI Terms of Service (kling.ai/docs/user-policy), section 4.6, as the primary source.",
       "source_identity": "address_in_ledger",
-      "confirmed_by": null,
-      "confirmed_on": null
+      "confirmed_by": "JD (SI8 operator)",
+      "confirmed_on": "2026-11-20"
     }
   ],
   "exclusions": [
@@ -206,8 +206,8 @@
       "category": "not_a_dependency",
       "reason": "Named in the evidence manifest only as the claim governed by a different statute (New York Civil Rights Law sections 50, 50-f and 51). The manifest states that the two authorities do not overlap.",
       "evidence_path": null,
-      "confirmed_by": null,
-      "confirmed_on": null
+      "confirmed_by": "JD (SI8 operator)",
+      "confirmed_on": "2026-11-20"
     },
     {
       "source_id": "runway-terms-of-use",
@@ -215,8 +215,8 @@
       "category": "not_in_ledger",
       "reason": "Named in the evidence manifest as a proposed successor. It is not in the ledger: the review that proposes it (FGR_030) is a PENDING draft. Not treated as an existing claim.",
       "evidence_path": null,
-      "confirmed_by": null,
-      "confirmed_on": null
+      "confirmed_by": "JD (SI8 operator)",
+      "confirmed_on": "2026-11-20"
     },
     {
       "source_id": "higgsfield-terms-of-use-agreement",
@@ -224,8 +224,8 @@
       "category": "not_in_ledger",
       "reason": "Named in the evidence manifest as a proposed successor. It is not in the ledger: the review that proposes it (FGR_031) is a PENDING draft. Not treated as an existing claim.",
       "evidence_path": null,
-      "confirmed_by": null,
-      "confirmed_on": null
+      "confirmed_by": "JD (SI8 operator)",
+      "confirmed_on": "2026-11-20"
     },
     {
       "source_id": "kling-terms-of-service",
@@ -233,8 +233,8 @@
       "category": "depends_on_unregistered_source",
       "reason": "The ledger cites the Kling AI Terms of Paid Service (kling.ai/docs/payment-policy) as this claim's primary source. That is a different document from the registered Terms of Service and is not a pilot source. The claim is not monitored.",
       "evidence_path": null,
-      "confirmed_by": null,
-      "confirmed_on": null
+      "confirmed_by": "JD (SI8 operator)",
+      "confirmed_on": "2026-11-20"
     }
   ]
 }

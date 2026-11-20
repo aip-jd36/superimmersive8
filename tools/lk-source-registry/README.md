@@ -4,7 +4,7 @@ Offline registry of monitored sources and the mapping from each source to the go
 
 Contract: `08_Platform/prds/PRD_LK_SOURCE_MONITORING_v0.2.md` (M1: §5.1 FR-1 to FR-4, FR-8, FR-17 to FR-23, §6.1, §6.2, §9.1, §12.2).
 
-**Status:** no relationship or exclusion has been confirmed by a human. The registry verdict is `VALID_PENDING_CONFIRMATION` and the M1 gate is not passed.
+**Status:** the four relationships and four exclusions were confirmed by the SI8 operator on 2026-11-20. The registry verdict is `VALID` and the M1 gate is passed. See "What the confirmation covers".
 
 ## What this is, and is not
 
@@ -19,7 +19,7 @@ Contract: `08_Platform/prds/PRD_LK_SOURCE_MONITORING_v0.2.md` (M1: §5.1 FR-1 to
 
 | File | Purpose |
 |---|---|
-| `registry.json` | The six pilot sources, four proposed relationships and four proposed exclusions. All baselines are empty |
+| `registry.json` | The six pilot sources, four confirmed relationships and four confirmed exclusions. All baselines are empty |
 | `src/model.ts` | Types and closed sets |
 | `src/validate.ts` | Validation. Pure: no file or network access |
 | `src/evidence.ts` | Read-only loader for the repository records validation is checked against |
@@ -63,11 +63,19 @@ Whether a scheduled run may proceed when the verdict is `VALID_PENDING_CONFIRMAT
 
 A watch-only source has no mapped claim. Observing an index page or a feed does not detect a change inside a document it links to. `CLAIM-COPY-001/002/003-v1` cite a report published under the Copyright Office AI page; they are not mapped to that page and remain uncovered.
 
-## Confirming the mapping
+## What the confirmation covers
 
-Every relationship and exclusion in `registry.json` has `confirmed_by: null` and `confirmed_on: null`. They are proposals, not confirmations.
+On 2026-11-20 the SI8 operator (JD) confirmed the eight entries above, recorded under LK-SOURCE-MONITOR-M1-CLOSE-1. Each entry carries `confirmed_by: "JD (SI8 operator)"` and `confirmed_on: "2026-11-20"`.
 
-M1's gate requires a named human to confirm the mapping for each pilot source. To confirm an entry, that person reviews it against the claim's "Source references" in the ledger and sets `confirmed_by` to their name and `confirmed_on` to the date, as a reviewed repository change. The tool never fills these in. An entry the reviewer disagrees with is corrected or removed, not confirmed.
+- **It confirms:** that each of the four relationships names the right source for its claim, and that the four exclusions are correctly recorded, for the M1 pilot baseline only.
+- **Its basis:** the entry-by-entry audit (LK-SOURCE-MONITOR-MAPPING-AUDIT-1) and the corrections report (LK-SOURCE-MONITOR-M1-CORRECTIONS-1), which set each entry beside the claim's "Source references" in the ledger. It does not record that the operator read the source documents themselves.
+- **It does not confirm:** that any claim is valid or that its commercial-use conclusion is current; either pending Runway or Higgsfield review; live retrieval or monitoring; M2 or later work; or OPEN-10.
+
+The `confirmed_by` and `confirmed_on` fields hold only a name and a date. These limits are recorded here and in the PRD (§12.2 D), not in the registry.
+
+## Changing the mapping
+
+A new or changed relationship or exclusion is entered with `confirmed_by: null` and `confirmed_on: null`. The verdict then drops to `VALID_PENDING_CONFIRMATION` until a named human reviews the entry against the claim's "Source references" in the ledger and sets both fields, as a reviewed repository change. The tool never fills these in. An entry the reviewer disagrees with is corrected or removed, not confirmed.
 
 ## What validation checks
 

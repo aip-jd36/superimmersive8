@@ -236,11 +236,11 @@ test('pilot: the two index sources are watch-only and say what that does not est
   }
 })
 
-test('pilot: coverage counts follow from the fixtures, and nothing is confirmed', async () => {
+test('pilot: coverage counts follow from the fixtures', async () => {
   const ev = await loadEvidence(real)
   const result = validateRegistry(real, ev)
-  assert.equal(result.verdict, 'VALID_PENDING_CONFIRMATION')
-  assert.equal(result.issues.length, real.relationships.length + real.exclusions.length)
+  assert.equal(result.verdict, 'VALID')
+  assert.deepEqual(result.issues, [])
   const reachable = ev.runtime.filter((c) => c.lifecycle === 'Adopted' && c.crc_eligible === 'Yes').map((c) => c.claim_id)
   const uncovered = governedNotCovered(real, ev, result.underReview)
   assert.equal(uncovered.length, reachable.length - real.relationships.length)
