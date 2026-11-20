@@ -82,12 +82,16 @@ const withV7Selected = (): PublicationAuthorityBundle => ({
 // ── 1. The per-creator gate ──────────────────────────────────────────────────────────────────────────────────────
 
 describe('1. licenceReadingEnabledFor: switch AND PDF set AND admin; fail closed', () => {
-  test('this build: v8 is selected (CR-DOC-READER-EXT-10D) but the switch is off, so nobody is entitled and nothing is looked up', async () => {
-    expect(LICENCE_READING_SWITCH).toBe('off')
+  test('CR-DOC-READER-EXT-11: this build (switch on, v8 selected): only the fresh admin answer decides, and it fails closed', async () => {
+    expect(LICENCE_READING_SWITCH).toBe('on')
     expect(approvedPdfTemplates(GOV, S8).approval?.version).toBe(8)
-    const isAdmin = jest.fn(async () => true)
-    expect(await licenceReadingEnabledFor(OWNER, isAdmin)).toBe(false)
-    expect(isAdmin).not.toHaveBeenCalled()
+    expect(licenceReadingEnabled()).toBe(true)
+    const admin = jest.fn(async () => true)
+    expect(await licenceReadingEnabledFor(OWNER, admin)).toBe(true)
+    expect(admin).toHaveBeenCalledTimes(1)
+    expect(await licenceReadingEnabledFor(OWNER, async () => false)).toBe(false)
+    expect(await licenceReadingEnabledFor(OWNER, async () => { throw new Error('db down') })).toBe(false)
+    expect(await licenceReadingEnabledFor(undefined, admin)).toBe(false)
   })
 
   test.each([
@@ -115,10 +119,12 @@ describe('1. licenceReadingEnabledFor: switch AND PDF set AND admin; fail closed
 
   test('the governance snapshot adds the licence method only for an entitled owner AND an enabled build (never one alone)', () => {
     const methods = (s: ReturnType<typeof approvedGovernanceSnapshot>) => s.examination_methods ?? []
-    // This build is not enabled: even an entitled owner gets the unchanged support.
-    expect(methods(approvedGovernanceSnapshot(AS_OF, CLAIMS, GOV, { licenceEntitled: true }))).toEqual(CURRENT_ISSUANCE_SUPPORT.examination_methods)
-    expect(methods(approvedGovernanceSnapshot(AS_OF, CLAIMS, withV8Approved(), { licenceEntitled: true }))).toEqual(CURRENT_ISSUANCE_SUPPORT.examination_methods)
+    // CR-DOC-READER-EXT-11: this build is enabled, so an entitled owner gets the licence method; nobody else does.
+    expect(methods(approvedGovernanceSnapshot(AS_OF, CLAIMS, GOV, { licenceEntitled: true }))).toEqual([...(CURRENT_ISSUANCE_SUPPORT.examination_methods ?? []), LICENCE_EXAMINATION_METHOD])
+    expect(methods(approvedGovernanceSnapshot(AS_OF, CLAIMS, GOV, { licenceEntitled: false }))).toEqual(CURRENT_ISSUANCE_SUPPORT.examination_methods)
     expect(methods(approvedGovernanceSnapshot(AS_OF, CLAIMS, GOV))).toEqual(CURRENT_ISSUANCE_SUPPORT.examination_methods)
+    // The PDF gate still decides: with the v7 set selected, even an entitled owner gets the unchanged support.
+    expect(methods(approvedGovernanceSnapshot(AS_OF, CLAIMS, withV7Selected(), { licenceEntitled: true }))).toEqual(CURRENT_ISSUANCE_SUPPORT.examination_methods)
     expect(src('lib/creator-record/customer-flow/approved-inputs.ts')).toMatch(/issuanceSupportFor\(owner\.licenceEntitled === true && licenceReadingEnabled\(LICENCE_READING_SWITCH, bundle\)\)/)
   })
 })
@@ -155,9 +161,18 @@ describe('1b. the production binding: a fresh service-role read of public.users.
     expect(await licenceReadingEnabledFor(OWNER, isAdminUser, () => true)).toBe(false)
   })
 
-  test('in this build (licence reading off) the production check never touches the database', async () => {
-    lookup({ data: { is_admin: true }, error: null })
+  test('CR-DOC-READER-EXT-11: in this build (licence reading on) the production check is the fresh is_admin read, fail closed', async () => {
+    const calls = lookup({ data: { is_admin: true }, error: null })
+    expect(await productionLicenceReadingEnabledFor(OWNER)).toBe(true)
+    expect(calls).toEqual([['from', 'users'], ['select', 'is_admin'], ['eq', 'id', OWNER]])
+    lookup({ data: { is_admin: false }, error: null })
     expect(await productionLicenceReadingEnabledFor(OWNER)).toBe(false)
+    lookup({ data: null, error: null })
+    expect(await productionLicenceReadingEnabledFor(OWNER)).toBe(false)
+    lookup({ data: null, error: { code: '57014' } })
+    expect(await productionLicenceReadingEnabledFor(OWNER)).toBe(false)
+    fromSpy.mockReset()
+    expect(await productionLicenceReadingEnabledFor('not-a-uuid')).toBe(false)
     expect(fromSpy).not.toHaveBeenCalled()
   })
 })

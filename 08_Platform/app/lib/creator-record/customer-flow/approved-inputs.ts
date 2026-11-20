@@ -40,7 +40,7 @@ export const CREATOR_RECORD_V2_SUBMISSIONS: SubmissionsMode = 'open'
  * approved v7 cannot, so with v7 selected the switch has no effect. Rollback: set it back to 'off' and deploy (new licence readings
  * stop; records already holding one are then refused at checkout and issuance until it is on again: fail closed).
  */
-export const LICENCE_READING_SWITCH = 'off' as 'off' | 'on'
+export const LICENCE_READING_SWITCH = 'on' as 'off' | 'on' // CR-DOC-READER-EXT-11: admin-only activation (per-creator gate, EXT-10B)
 
 /** CR-DOC-READER-EXT-6B: the selected schema 8 set's privacy lines (`reading_privacy`), or null (v7 has none). */
 export function approvedReadingPrivacyText(bundle: PublicationAuthorityBundle | null = currentPublicationAuthority()): { value_withheld: string; excerpts_withheld: string } | null {

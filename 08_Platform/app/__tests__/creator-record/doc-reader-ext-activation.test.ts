@@ -55,10 +55,10 @@ const preActivation = (): PublicationAuthorityBundle => ({
 const v7Set = () => (GOV.pdf_template_sets ?? []).find((s) => s.approval.record_schema.version === 8 && s.approval.version === 7)!
 
 describe('the switch and the PDF compatibility gate', () => {
-  test('the switch is off in source, and off means disabled whatever the templates', () => {
-    expect(LICENCE_READING_SWITCH).toBe('off')
-    expect(readFileSync(path.join(APP, 'lib/creator-record/customer-flow/approved-inputs.ts'), 'utf8')).toMatch(/export const LICENCE_READING_SWITCH = 'off' as 'off' \| 'on'/)
-    expect(licenceReadingEnabled()).toBe(false)
+  test('CR-DOC-READER-EXT-11: the switch is on in source; off still means disabled whatever the templates', () => {
+    expect(LICENCE_READING_SWITCH).toBe('on')
+    expect(readFileSync(path.join(APP, 'lib/creator-record/customer-flow/approved-inputs.ts'), 'utf8')).toMatch(/export const LICENCE_READING_SWITCH = 'on' as 'off' \| 'on'/)
+    expect(licenceReadingEnabled('off', GOV)).toBe(false)
     expect(licenceReadingEnabled('off', withV8Approved())).toBe(false)
   })
 
@@ -71,11 +71,11 @@ describe('the switch and the PDF compatibility gate', () => {
     expect(licenceReadingEnabled('on', preActivation())).toBe(false)
   })
 
-  test('CR-DOC-READER-EXT-10D: with v8 active, the switch alone decides; it is off in source, so licence reading stays disabled', () => {
-    expect(LICENCE_READING_SWITCH).toBe('off')
-    expect(licenceReadingEnabled()).toBe(false)
+  test('CR-DOC-READER-EXT-11: with v8 active and the switch on, the build is enabled (each creator is still admin-gated, EXT-10B)', () => {
+    expect(LICENCE_READING_SWITCH).toBe('on')
+    expect(licenceReadingEnabled()).toBe(true)
     expect(licenceReadingEnabled('off', GOV)).toBe(false)
-    expect(licenceReadingEnabled('on', GOV)).toBe(true) // what a separate switch change would do (admin-gated per creator)
+    expect(licenceReadingEnabled('on', GOV)).toBe(true)
   })
 
   test('enabled only with the switch on AND v8 approved and selected; two approved schema 8 sets select nothing (off)', () => {

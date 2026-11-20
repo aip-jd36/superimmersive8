@@ -90,9 +90,9 @@ describe('the PDF Production selects (no documents)', () => {
 })
 
 describe('nothing else is activated', () => {
-  test('CR-DOC-READER-EXT-10D: licence reading off; schema 8 selects v8 and schema 7 v6; v7 superseded', () => {
-    expect(LICENCE_READING_SWITCH).toBe('off')
-    expect(licenceReadingEnabled()).toBe(false)
+  test('CR-DOC-READER-EXT-11: licence reading on (admin-gated per creator); schema 8 selects v8 and schema 7 v6; v7 superseded', () => {
+    expect(LICENCE_READING_SWITCH).toBe('on')
+    expect(licenceReadingEnabled()).toBe(true)
     expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 8 }).approval?.version).toBe(8)
     expect(approvedPdfTemplates(GOV, { id: CUSTOMER_RECORD_SCHEMA, version: 7 }).approval?.version).toBe(6)
     expect(GOV.pdf_template_sets?.find((s) => s.approval.version === 8)?.approval.lifecycle).toBe('approved')
